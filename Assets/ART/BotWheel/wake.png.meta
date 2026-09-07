@@ -63,7 +63,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -141,12 +141,12 @@ TextureImporter:
       name: wake_0
       rect:
         serializedVersion: 2
-        x: 14
+        x: 0
         y: 104
-        width: 16
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 117
+        height: 26
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -163,12 +163,12 @@ TextureImporter:
       name: wake_1
       rect:
         serializedVersion: 2
-        x: 14
-        y: 79
-        width: 23
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 78
+        width: 117
+        height: 26
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -185,12 +185,12 @@ TextureImporter:
       name: wake_2
       rect:
         serializedVersion: 2
-        x: 14
+        x: 0
         y: 52
-        width: 22
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 117
+        height: 26
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -207,12 +207,12 @@ TextureImporter:
       name: wake_3
       rect:
         serializedVersion: 2
-        x: 14
+        x: 0
         y: 26
-        width: 22
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 117
+        height: 26
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -229,12 +229,12 @@ TextureImporter:
       name: wake_4
       rect:
         serializedVersion: 2
-        x: 14
+        x: 0
         y: 0
-        width: 22
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 117
+        height: 26
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

@@ -10,7 +10,6 @@ public class DamagePopup : MonoBehaviour
 
     public static DamagePopup Create(Vector3 position, int damageAmount, bool isCritical = false, bool isPlayer = false)
     {
-        // Tao GameObject tu dong voi TextMesh de khong can keo tha Prefab
         GameObject popupObj = new GameObject("DamagePopup");
         popupObj.transform.position = position + new Vector3(Random.Range(-0.3f, 0.3f), 0.7f, 0);
 
@@ -19,28 +18,26 @@ public class DamagePopup : MonoBehaviour
         tm.alignment = TextAlignment.Center;
         tm.anchor = TextAnchor.MiddleCenter;
 
-        // Font size & Mau sac
         if (isPlayer)
         {
-            tm.color = new Color(1f, 0.2f, 0.2f); // Mau do tuoi khi Player bi danh
+            tm.color = new Color(1f, 0.2f, 0.2f);
             tm.fontSize = 32;
-            tm.characterSize = 0.07f;
+            tm.characterSize = 0.075f;
         }
         else if (isCritical)
         {
-            tm.color = new Color(1f, 0.85f, 0.1f); // Mau vang cam chi mang
+            tm.color = new Color(1f, 0.85f, 0.1f);
             tm.fontSize = 38;
             tm.characterSize = 0.085f;
             tm.text = damageAmount + "!";
         }
         else
         {
-            tm.color = Color.white; // Mau trang sat thuong thuong
+            tm.color = Color.white;
             tm.fontSize = 28;
             tm.characterSize = 0.065f;
         }
 
-        // Sap xep lop hien thi de chu khong bi che boi Map
         MeshRenderer mr = popupObj.GetComponent<MeshRenderer>();
         if (mr != null)
         {
@@ -51,6 +48,31 @@ public class DamagePopup : MonoBehaviour
         DamagePopup popup = popupObj.AddComponent<DamagePopup>();
         popup.Setup(tm.color);
 
+        return popup;
+    }
+
+    public static DamagePopup CreateText(Vector3 position, string text, Color color)
+    {
+        GameObject popupObj = new GameObject("TextPopup");
+        popupObj.transform.position = position + new Vector3(Random.Range(-0.2f, 0.2f), 0.7f, 0);
+
+        TextMesh tm = popupObj.AddComponent<TextMesh>();
+        tm.text = text;
+        tm.alignment = TextAlignment.Center;
+        tm.anchor = TextAnchor.MiddleCenter;
+        tm.color = color;
+        tm.fontSize = 32;
+        tm.characterSize = 0.075f;
+
+        MeshRenderer mr = popupObj.GetComponent<MeshRenderer>();
+        if (mr != null)
+        {
+            mr.sortingLayerName = "Entities";
+            mr.sortingOrder = 999;
+        }
+
+        DamagePopup popup = popupObj.AddComponent<DamagePopup>();
+        popup.Setup(color);
         return popup;
     }
 
@@ -69,7 +91,6 @@ public class DamagePopup : MonoBehaviour
         disappearTimer -= Time.deltaTime;
         if (disappearTimer < 0)
         {
-            // Mo dan chu roi bien mat
             float fadeSpeed = 3f;
             textColor.a -= fadeSpeed * Time.deltaTime;
             if (textMesh != null) textMesh.color = textColor;

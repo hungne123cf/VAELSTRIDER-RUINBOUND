@@ -47,6 +47,7 @@ public class DummyEnemy : MonoBehaviour, IDamageable
     private void Die()
     {
         Debug.Log($"<color=red>[DUMMY DIED]</color> {gameObject.name} da bi tieu diet hoan toan!");
+        AethelShard.SpawnShards(transform.position, Random.Range(2, 4));
         Destroy(gameObject);
     }
 }

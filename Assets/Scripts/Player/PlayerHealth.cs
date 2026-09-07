@@ -25,11 +25,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         currentHealth -= damage;
         Debug.Log($"<color=orange>[PLAYER HURT]</color> Ban bi quai danh trung! Mat {damage} HP. Con lai: {currentHealth}/{maxHealth}");
 
-        // Rung man hinh nhe
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.12f, 0.15f);
 
-        // Chop do
         if (spriteRenderer != null)
         {
             StopAllCoroutines();
@@ -42,10 +40,35 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         }
     }
 
+    public bool Heal(int amount)
+    {
+        if (isDead || currentHealth >= maxHealth) return false;
+
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        Debug.Log($"<color=green>[PLAYER HEAL]</color> Hoi {amount} HP! Mau hien tai: {currentHealth}/{maxHealth}");
+
+        if (spriteRenderer != null)
+        {
+            StartCoroutine(FlashColorRoutine(new Color(0.3f, 1f, 0.4f)));
+        }
+
+        DamagePopup.CreateText(transform.position, $"+{amount} HP", new Color(0.2f, 1f, 0.35f));
+        return true;
+    }
+
+    public bool IsFullHealth() => currentHealth >= maxHealth;
+
     private IEnumerator FlashRedRoutine()
     {
         spriteRenderer.color = Color.red;
         yield return new WaitForSeconds(0.1f);
+        spriteRenderer.color = originalColor;
+    }
+
+    private IEnumerator FlashColorRoutine(Color color)
+    {
+        spriteRenderer.color = color;
+        yield return new WaitForSeconds(0.18f);
         spriteRenderer.color = originalColor;
     }
 
