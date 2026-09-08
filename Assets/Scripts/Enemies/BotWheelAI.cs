@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
@@ -10,10 +11,17 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     public bool IsBoss => isBoss;
 
     [Header("Enemy Stats")]
-    [SerializeField] private int maxHealth = 60;
+    [SerializeField] private int maxHealth = 130; // Quai thuong mau trau hon (130 HP)
     [SerializeField] private float moveSpeed = 3.2f;
     [SerializeField] private int attackDamage = 15;
     [SerializeField] private float attackCooldown = 1.8f;
+
+    [Header("Boss 3 Health Bars")]
+    public int totalBossPhases = 3;
+    private int currentBossPhase = 3;
+    public int CurrentBossPhase => currentBossPhase;
+    private int phaseMaxHealth = 450;
+    private bool isTransitioningPhase = false;
 
     [Header("AI Ranges")]
     [SerializeField] private float detectionRange = 7.5f;
@@ -53,59 +61,48 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         if (animator == null) animator = gameObject.AddComponent<Animator>();
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
-        rb.freezeRotation = true;
         rb.gravityScale = 0f;
+        rb.freezeRotation = true;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        // Auto-load projectile sprite if not assigned
         if (runtimeBulletSprite == null)
         {
-            runtimeBulletSprite = Resources.Load<Sprite>("Combat/enemy_projectile");
-#if UNITY_EDITOR
-            if (runtimeBulletSprite == null)
+            Texture2D tex = new Texture2D(16, 16);
+            for (int x = 0; x < 16; x++)
             {
-                runtimeBulletSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Combat/enemy_projectile.png");
+                for (int y = 0; y < 16; y++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(7.5f, 7.5f));
+                    tex.SetPixel(x, y, dist < 7f ? new Color(1f, 0.35f, 0.1f, 1f) : Color.clear);
+                }
             }
-#endif
+            tex.Apply();
+            runtimeBulletSprite = Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16);
         }
     }
 
     void Start()
     {
         FindPlayerTarget();
-        IgnorePlayerCollision();
-    }
-
-    private void IgnorePlayerCollision()
-    {
-        if (player == null) FindPlayerTarget();
-        if (player != null)
-        {
-            var pCols = player.GetComponentsInChildren<Collider2D>();
-            var myCols = GetComponentsInChildren<Collider2D>();
-            foreach (var pCol in pCols)
-            {
-                foreach (var mCol in myCols)
-                {
-                    if (pCol != null && mCol != null)
-                    {
-                        Physics2D.IgnoreCollision(pCol, mCol, true);
-                    }
-                }
-            }
-        }
     }
 
     private void FindPlayerTarget()
     {
-        var p = FindAnyObjectByType<PlayerController>();
-        if (p != null) player = p.transform;
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+        }
     }
 
     void Update()
     {
         if (isDead) return;
 
-        if (attackCooldownTimer > 0) attackCooldownTimer -= Time.deltaTime;
+        if (attackCooldownTimer > 0)
+        {
+            attackCooldownTimer -= Time.deltaTime;
+        }
 
         if (player == null)
         {
@@ -114,7 +111,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             return;
         }
 
-        if (isKnockedBack) return;
+        if (isKnockedBack || isTransitioningPhase) return;
 
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
@@ -170,7 +167,6 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     private void AttackPlayer()
     {
         attackCooldownTimer = attackCooldown;
-        Debug.Log($"<color=red>[BOT WHEEL SHOOT]</color> Quai vat ban dan vao nguoi choi!");
 
         if (animator != null && animator.runtimeAnimatorController != null)
         {
@@ -187,12 +183,9 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
     private IEnumerator SpawnBulletRoutine(Vector2 dir)
     {
-        // Cho dung thoi diem phat hoa cua nong sung trong animation
         yield return new WaitForSeconds(0.12f);
-
         if (isDead) yield break;
 
-        // Tinh vi tri nong sung dua vao huong quay
         bool facingLeft = spriteRenderer != null && spriteRenderer.flipX;
         float botCenterX = facingLeft ? 1.14f : -1.14f;
         float gunOffset = facingLeft ? -0.45f : 0.45f;
@@ -207,7 +200,6 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         }
         else
         {
-            // Tu tao vien dan bay ngay lap tuc
             CreateRuntimeBullet(spawnPos, dir);
         }
     }
@@ -220,7 +212,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         var sr = bullet.AddComponent<SpriteRenderer>();
         sr.sprite = runtimeBulletSprite;
-        sr.sortingOrder = 5500; // tren nen map
+        sr.sortingOrder = 5500;
 
         var col = bullet.AddComponent<CircleCollider2D>();
         col.isTrigger = true;
@@ -236,10 +228,9 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage)
     {
-        if (isDead) return;
+        if (isDead || isTransitioningPhase) return;
 
         currentHealth -= damage;
-        Debug.Log($"<color=yellow>[BOT WHEEL HIT]</color> Quai nhan {damage} DMG! Mau con: {currentHealth}/{maxHealth}");
 
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.12f, 0.2f);
@@ -249,7 +240,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             animator.SetTrigger(HurtHash);
         }
 
-        if (player != null)
+        if (player != null && !isBoss)
         {
             Vector2 knockbackDir = ((Vector2)transform.position - (Vector2)player.position).normalized;
             StartCoroutine(KnockbackRoutine(knockbackDir));
@@ -260,10 +251,76 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             StartCoroutine(FlashRedRoutine());
         }
 
+        if (isBoss)
+        {
+            BossHealthBarUI.Instance?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+        }
+
         if (currentHealth <= 0)
         {
-            Die();
+            if (isBoss && currentBossPhase > 1)
+            {
+                StartCoroutine(BossPhaseTransitionRoutine());
+            }
+            else
+            {
+                if (isBoss)
+                {
+                    BossHealthBarUI.Instance?.HideBoss();
+                }
+                Die();
+            }
         }
+    }
+
+    private IEnumerator BossPhaseTransitionRoutine()
+    {
+        isTransitioningPhase = true;
+        currentBossPhase--;
+        currentHealth = phaseMaxHealth;
+
+        rb.linearVelocity = Vector2.zero;
+
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.45f, 0.55f);
+
+        SoundManager.EnsureInstance()?.PlayPortalSpawn();
+
+        string phaseTitle = currentBossPhase == 2 
+            ? "PHASE II: HƯ KHÔNG THỨC TỈNH!" 
+            : "FINAL PHASE: CUỒNG NỘ HUYẾT NGUYỆT!";
+        Color titleColor = currentBossPhase == 2 
+            ? new Color(0.85f, 0.45f, 1f) 
+            : new Color(1f, 0.2f, 0.2f);
+
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, phaseTitle, titleColor);
+
+        // Đổi màu hào quang Boss
+        if (spriteRenderer != null)
+        {
+            originalColor = currentBossPhase == 2 
+                ? new Color(0.9f, 0.4f, 1f) 
+                : new Color(1f, 0.25f, 0.25f);
+            spriteRenderer.color = originalColor;
+        }
+
+        // Tăng tốc và sức mạnh
+        moveSpeed *= 1.25f;
+        attackDamage += 8;
+        attackCooldown *= 0.8f;
+
+        // Đẩy lùi người chơi ra xa nhẹ
+        if (player != null)
+        {
+            Vector2 pushDir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+            var playerRb = player.GetComponent<Rigidbody2D>();
+            if (playerRb != null) playerRb.AddForce(pushDir * 8f, ForceMode2D.Impulse);
+        }
+
+        BossHealthBarUI.Instance?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+
+        yield return new WaitForSeconds(1.2f);
+        isTransitioningPhase = false;
     }
 
     private IEnumerator KnockbackRoutine(Vector2 dir)
@@ -298,7 +355,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         if (isBoss)
         {
-            AethelShard.SpawnShards(transform.position, Random.Range(12, 18));
+            AethelShard.SpawnShards(transform.position, Random.Range(18, 26));
         }
         else
         {
@@ -315,18 +372,37 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     {
         isBoss = true;
         transform.localScale = transform.localScale * scaleMultiplier;
-        maxHealth *= hpMultiplier;
-        currentHealth = maxHealth;
+
+        // Hệ thống 3 thanh máu: Mỗi thanh 450 HP (Tổng 1350 HP)
+        totalBossPhases = 3;
+        currentBossPhase = 3;
+        phaseMaxHealth = 450;
+        currentHealth = phaseMaxHealth;
+
         attackDamage *= damageMultiplier;
-        moveSpeed *= 0.85f;
-        projectileSpeed *= 1.25f; // Dan Boss bay nhanh hon!
-        attackRange = 6.5f;
+        moveSpeed *= 0.95f;
+        projectileSpeed *= 1.25f;
+        attackRange = 7.0f;
 
         if (spriteRenderer != null)
         {
             spriteRenderer.color = new Color(1f, 0.4f, 0.4f);
             originalColor = spriteRenderer.color;
         }
+
+        // Tự động gắn bộ 25 skill Gigapack
+        if (GetComponent<BossGigapackSkills>() == null)
+        {
+            gameObject.AddComponent<BossGigapackSkills>();
+        }
+
+        // Tự động kích hoạt thanh máu Boss 3 lớp
+        string scene = SceneManager.GetActiveScene().name;
+        string bName = scene.Contains("Map2") || scene.Contains("Valley")
+            ? "✦ VALENTHUS • HỘ VỆ THẦN THỤ ✦"
+            : "✦ TITAN CRUSHER • CỖ MÁY TÀN TÍCH ✦";
+
+        BossHealthBarUI.EnsureInstance()?.ShowBoss(this, bName);
     }
 
     private void OnDrawGizmosSelected()

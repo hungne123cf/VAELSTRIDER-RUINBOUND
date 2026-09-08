@@ -14,9 +14,12 @@ public class PlayerInventory : MonoBehaviour
 
     void Awake()
     {
-        // Load saved shards and potions from PlayerPrefs
-        aethelShards = PlayerPrefs.GetInt("Saved_AethelShards", aethelShards);
-        healthPotions = PlayerPrefs.GetInt("Saved_HealthPotions", healthPotions);
+        // Load saved shards and potions from PlayerPrefs (dong bo ca Save_ va Saved_)
+        int defaultShards = PlayerPrefs.GetInt("Saved_AethelShards", aethelShards);
+        aethelShards = PlayerPrefs.GetInt("Save_AethelShards", defaultShards);
+
+        int defaultPotions = PlayerPrefs.GetInt("Saved_HealthPotions", healthPotions);
+        healthPotions = PlayerPrefs.GetInt("Save_HealthPotions", defaultPotions);
     }
 
     void Start()
@@ -91,9 +94,22 @@ public class PlayerInventory : MonoBehaviour
 
     private void SaveData()
     {
+        // Luu dong bo ca 2 key de dam bao MainMenu, Shop, Ingame va Upgrade deu nhat quan
+        PlayerPrefs.SetInt("Save_AethelShards", aethelShards);
         PlayerPrefs.SetInt("Saved_AethelShards", aethelShards);
+        PlayerPrefs.SetInt("Save_HealthPotions", healthPotions);
         PlayerPrefs.SetInt("Saved_HealthPotions", healthPotions);
         PlayerPrefs.Save();
+    }
+
+    public void ResetInventory(int shards = 0, int potions = 0)
+    {
+        aethelShards = shards;
+        healthPotions = potions;
+        SaveData();
+        OnShardsChanged?.Invoke(aethelShards);
+        OnPotionsChanged?.Invoke(healthPotions);
+        Debug.Log($"<color=red>[INVENTORY RESET]</color> Toan bo Shards va Binh Mau da ve {shards} shards, {potions} potions!");
     }
 
     public int GetPotions() => healthPotions;

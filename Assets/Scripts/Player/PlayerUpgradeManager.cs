@@ -205,35 +205,54 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     public static void ResetEntireGameProgress()
     {
-        // 1. Reset Aethel Shards
+        // 1. Reset Aethel Shards (dong bo ca Save_ va Saved_)
         PlayerPrefs.SetInt("Save_AethelShards", 0);
+        PlayerPrefs.SetInt("Saved_AethelShards", 0);
 
-        // 2. Reset Health Potions ve 3 binh mac dinh
-        PlayerPrefs.SetInt("Save_HealthPotions", 3);
+        // 2. Reset Health Potions ve 0
+        PlayerPrefs.SetInt("Save_HealthPotions", 0);
+        PlayerPrefs.SetInt("Saved_HealthPotions", 0);
 
-        // 3. Xoa mo linh hon roi Dark Souls
+        // 3. Reset mau da luu
+        PlayerPrefs.DeleteKey("Saved_CurrentHealth");
+
+        // 4. Xoa mo linh hon roi Dark Souls
+        PlayerPrefs.SetInt("Has_Lost_Shards", 0);
+        PlayerPrefs.SetInt("Lost_Shards_Amount", 0);
+        PlayerPrefs.DeleteKey("Lost_Shards_X");
+        PlayerPrefs.DeleteKey("Lost_Shards_Y");
+        PlayerPrefs.DeleteKey("Lost_Shards_Scene");
         PlayerPrefs.DeleteKey("Save_LostShards");
         PlayerPrefs.DeleteKey("Save_DeathPosX");
         PlayerPrefs.DeleteKey("Save_DeathPosY");
         PlayerPrefs.DeleteKey("Save_DeathPosZ");
         PlayerPrefs.DeleteKey("Save_DeathScene");
 
-        // 4. Reset toan bo 4 nhanh nang cap Den Tho
+        // 5. Reset toan bo 4 nhanh nang cap Den Tho (30 cap)
         PlayerPrefs.SetInt("Upgrade_Attack_Level", 0);
         PlayerPrefs.SetInt("Upgrade_Health_Level", 0);
         PlayerPrefs.SetInt("Upgrade_Agility_Level", 0);
         PlayerPrefs.SetInt("Upgrade_Ultimate_Level", 0);
 
-        // 5. Khoa lai Maid va chon Vaelstrider mac dinh
+        // 6. Khoa lai Maid va chon Vaelstrider mac dinh
         PlayerPrefs.SetInt("Char_Unlocked_Maid", 0);
         PlayerPrefs.SetString("Selected_Character_ID", "Vaelstrider");
 
         PlayerPrefs.Save();
 
+        // 7. Cap nhat tuc thi neu dang trong gameplay run
+        PlayerInventory inv = UnityEngine.Object.FindAnyObjectByType<PlayerInventory>();
+        if (inv != null)
+        {
+            inv.ResetInventory(0, 0);
+        }
+
         if (Instance != null)
         {
             Instance.ApplyAllUpgrades();
         }
+
+        Debug.Log("<color=red>[HARDCORE RESET]</color> Toan bo tien trinh game (Shards, Potions, Upgrades, Maid) da duoc reset ve con so 0!");
     }
 
     public static PlayerUpgradeManager EnsureInstance()

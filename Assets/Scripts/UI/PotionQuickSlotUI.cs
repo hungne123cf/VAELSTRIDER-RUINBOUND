@@ -310,7 +310,7 @@ public class PotionQuickSlotUI : MonoBehaviour
         badgeRect.anchorMax = new Vector2(1, 0);
         badgeRect.pivot = new Vector2(1, 0);
         badgeRect.anchoredPosition = new Vector2(-4, 4);
-        badgeRect.sizeDelta = new Vector2(40, 24);
+        badgeRect.sizeDelta = new Vector2(65, 24);
 
         var tmp = badgeObj.AddComponent<TextMeshProUGUI>();
         tmp.text = "x0";
@@ -318,6 +318,7 @@ public class PotionQuickSlotUI : MonoBehaviour
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
         tmp.alignment = TextAlignmentOptions.BottomRight;
+        tmp.enableWordWrapping = false;
         tmp.raycastTarget = false;
 
         Instance = btnObj.AddComponent<PotionQuickSlotUI>();

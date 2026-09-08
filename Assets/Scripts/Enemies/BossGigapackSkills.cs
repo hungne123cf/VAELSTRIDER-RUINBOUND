@@ -260,10 +260,10 @@ public class BossGigapackSkills : MonoBehaviour
         {
 #if UNITY_EDITOR
             string assetPath = "Assets" + file.Substring(Application.dataPath.Length).Replace('\\', '/');
-            Sprite sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
-            if (sp != null)
+            Sprite editorSp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+            if (editorSp != null)
             {
-                sprites.Add(sp);
+                sprites.Add(editorSp);
                 continue;
             }
 #endif
@@ -272,8 +272,8 @@ public class BossGigapackSkills : MonoBehaviour
             tex.filterMode = FilterMode.Point;
             if (tex.LoadImage(bytes))
             {
-                Sprite sp = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
-                sprites.Add(sp);
+                Sprite runtimeSp = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
+                sprites.Add(runtimeSp);
             }
         }
 
