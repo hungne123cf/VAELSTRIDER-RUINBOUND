@@ -2,14 +2,24 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// Giao diện Bàn Thờ Nâng Cấp Cổ Đại & Bảng Tra Cứu Chiêu Thức (Attack, Dash, Ulti).
+/// Tích hợp 2 Tab chuyển đổi mượt mà, căn chỉnh lề chuẩn xác không bị tràn viền.
+/// </summary>
 public class ShrineUpgradeUI : MonoBehaviour
 {
     private static ShrineUpgradeUI instance;
 
-    [Header("UI Elements")]
-    private CanvasGroup canvasGroup;
-    private TextMeshProUGUI shardsCounterText;
+    [Header("UI Tabs")]
+    private GameObject tabUpgradesContent;
+    private GameObject tabSkillsContent;
+    private Button btnTabUpgrades;
+    private Button btnTabSkills;
+    private Image imgTabUpgrades;
+    private Image imgTabSkills;
 
+    [Header("Upgrade UI References")]
+    private TextMeshProUGUI shardsCounterText;
     private GameObject[] cardObjects = new GameObject[4];
     private TextMeshProUGUI[] titleTexts = new TextMeshProUGUI[4];
     private TextMeshProUGUI[] levelTexts = new TextMeshProUGUI[4];
@@ -18,12 +28,10 @@ public class ShrineUpgradeUI : MonoBehaviour
     private TextMeshProUGUI[] costTexts = new TextMeshProUGUI[4];
     private Button[] upgradeButtons = new Button[4];
 
+    private CanvasGroup canvasGroup;
     private bool isOpen = false;
 
-    void OnDestroy()
-    {
-        if (instance == this) instance = null;
-    }
+    public static ShrineUpgradeUI Instance => instance;
 
     void Awake()
     {
@@ -32,66 +40,57 @@ public class ShrineUpgradeUI : MonoBehaviour
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
     }
 
-    void Start()
-    {
-        Close();
-        if (PlayerUpgradeManager.Instance != null)
-        {
-            PlayerUpgradeManager.Instance.OnUpgradesChanged += RefreshUI;
-        }
-
-        var inv = FindAnyObjectByType<PlayerInventory>();
-        if (inv != null)
-        {
-            inv.OnShardsChanged += (s) => RefreshUI();
-        }
-    }
-
-    void Update()
-    {
-        if (isOpen && (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.E)))
-        {
-            Close();
-        }
-    }
-
-    public bool IsOpen() => isOpen;
-
     public void Open()
     {
         isOpen = true;
         gameObject.SetActive(true);
-        canvasGroup.alpha = 1f;
-        canvasGroup.blocksRaycasts = true;
-        canvasGroup.interactable = true;
-
-        var pc = FindAnyObjectByType<PlayerController>();
-        if (pc != null) pc.SetCanMove(false);
-
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
+        }
+        SwitchTab(isUpgrades: true);
         RefreshUI();
     }
 
     public void Close()
     {
         isOpen = false;
-        canvasGroup.alpha = 0f;
-        canvasGroup.blocksRaycasts = false;
-        canvasGroup.interactable = false;
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 0f;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+        }
         gameObject.SetActive(false);
+    }
 
-        var pc = FindAnyObjectByType<PlayerController>();
-        if (pc != null) pc.SetCanMove(true);
+    public bool IsOpen() => isOpen;
+
+    public void SwitchTab(bool isUpgrades)
+    {
+        if (tabUpgradesContent != null) tabUpgradesContent.SetActive(isUpgrades);
+        if (tabSkillsContent != null) tabSkillsContent.SetActive(!isUpgrades);
+
+        Color activeTabColor = new Color(0.18f, 0.42f, 0.65f, 1f);
+        Color inactiveTabColor = new Color(0.12f, 0.16f, 0.22f, 0.85f);
+
+        if (imgTabUpgrades != null) imgTabUpgrades.color = isUpgrades ? activeTabColor : inactiveTabColor;
+        if (imgTabSkills != null) imgTabSkills.color = !isUpgrades ? activeTabColor : inactiveTabColor;
     }
 
     public void RefreshUI()
     {
         var mgr = PlayerUpgradeManager.EnsureInstance();
-        var inv = FindAnyObjectByType<PlayerInventory>();
-        int curShards = inv != null ? inv.GetShards() : 0;
+        if (mgr == null) return;
+
+        bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
 
         if (shardsCounterText != null)
         {
-            shardsCounterText.text = "MẢNH CỔ TỰ (AETHEL SHARDS): <color=#55FFFF>" + curShards + "</color> <color=#00FFFF>◆</color>";
+            string label = isVi ? "MẢNH CỔ TỰ (AETHEL SHARDS)" : "AETHEL SHARDS";
+            shardsCounterText.text = $"{label}: {mgr.CurrentShards} ✦";
         }
 
         for (int i = 0; i < 4; i++)
@@ -101,32 +100,37 @@ public class ShrineUpgradeUI : MonoBehaviour
             int cost = mgr.GetCost(type);
 
             if (titleTexts[i] != null) titleTexts[i].text = mgr.GetTitle(type);
+
             if (levelTexts[i] != null)
             {
-                levelTexts[i].text = lvl >= PlayerUpgradeManager.MAX_LEVEL 
-                    ? "<color=#FFD700>CẤP TỐI ĐA (MAX)</color>" 
-                    : "CẤP ĐỘ: <color=#55FFFF>" + lvl + " / " + PlayerUpgradeManager.MAX_LEVEL + "</color>";
+                if (lvl >= PlayerUpgradeManager.MAX_LEVEL)
+                {
+                    levelTexts[i].text = isVi ? "CẤP TỐI ĐA (MAX)" : "MAX LEVEL";
+                    levelTexts[i].color = new Color(1f, 0.85f, 0.2f);
+                }
+                else
+                {
+                    levelTexts[i].text = (isVi ? "CẤP ĐỘ: " : "LEVEL: ") + $"{lvl} / {PlayerUpgradeManager.MAX_LEVEL}";
+                    levelTexts[i].color = new Color(0.4f, 0.9f, 1f);
+                }
             }
 
-            if (descTexts[i] != null)
-            {
-                descTexts[i].text = "Hiện tại: <color=#DDDDDD>" + (lvl == 0 ? "Chưa mở khóa" : mgr.GetDescription(type, lvl)) + "</color>";
-            }
-
+            if (descTexts[i] != null) descTexts[i].text = mgr.GetDescription(type, lvl);
             if (bonusTexts[i] != null)
             {
-                bonusTexts[i].text = "Kế tiếp: <color=#77FF77>" + mgr.GetNextBonusDescription(type) + "</color>";
+                bonusTexts[i].text = mgr.GetNextBonusDescription(type);
+                bonusTexts[i].color = (lvl >= PlayerUpgradeManager.MAX_LEVEL) ? new Color(0.55f, 0.85f, 0.55f) : new Color(0.45f, 1f, 0.65f);
             }
 
             if (costTexts[i] != null)
             {
                 if (lvl >= PlayerUpgradeManager.MAX_LEVEL)
                 {
-                    costTexts[i].text = "TỐI ĐA (MAX)";
+                    costTexts[i].text = isVi ? "TỐI ĐA" : "MAX";
                 }
                 else
                 {
-                    costTexts[i].text = "NÂNG CẤP (" + cost + " ◆)";
+                    costTexts[i].text = (isVi ? "NÂNG CẤP (" : "UPGRADE (") + cost + " ✦)";
                 }
             }
 
@@ -157,7 +161,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             if (instance != null) return instance;
         }
 
-        // Create Panel
+        // 1. Full-screen backdrop
         GameObject panelObj = new GameObject("ShrineUpgradePanel");
         panelObj.transform.SetParent(canvas.transform, false);
 
@@ -167,19 +171,26 @@ public class ShrineUpgradeUI : MonoBehaviour
         rt.sizeDelta = Vector2.zero;
 
         Image panelBg = panelObj.AddComponent<Image>();
-        panelBg.color = new Color(0.04f, 0.05f, 0.09f, 0.90f);
+        panelBg.color = new Color(0.02f, 0.03f, 0.06f, 0.88f);
 
         instance = panelObj.AddComponent<ShrineUpgradeUI>();
 
-        // Center Container
+        // 2. Center Dialog Box (Width 980, Height 620)
         GameObject boxObj = new GameObject("DialogBox");
         boxObj.transform.SetParent(panelObj.transform, false);
         RectTransform boxRt = boxObj.AddComponent<RectTransform>();
         boxRt.anchorMin = new Vector2(0.5f, 0.5f);
         boxRt.anchorMax = new Vector2(0.5f, 0.5f);
-        boxRt.sizeDelta = new Vector2(900, 560);
+        boxRt.pivot = new Vector2(0.5f, 0.5f);
+        boxRt.anchoredPosition = Vector2.zero;
+        boxRt.sizeDelta = new Vector2(980, 620);
+
         Image boxBg = boxObj.AddComponent<Image>();
-        boxBg.color = new Color(0.09f, 0.12f, 0.18f, 0.98f);
+        boxBg.color = new Color(0.08f, 0.11f, 0.17f, 0.98f);
+
+        Outline boxOutline = boxObj.AddComponent<Outline>();
+        boxOutline.effectColor = new Color(0.25f, 0.65f, 0.95f, 0.85f);
+        boxOutline.effectDistance = new Vector2(2f, -2f);
 
         // Header Title
         GameObject titleObj = new GameObject("HeaderTitle");
@@ -187,11 +198,12 @@ public class ShrineUpgradeUI : MonoBehaviour
         RectTransform tRt = titleObj.AddComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0.5f, 1f);
         tRt.anchorMax = new Vector2(0.5f, 1f);
-        tRt.anchoredPosition = new Vector2(0, -35);
-        tRt.sizeDelta = new Vector2(760, 45);
+        tRt.pivot = new Vector2(0.5f, 1f);
+        tRt.anchoredPosition = new Vector2(0, -22);
+        tRt.sizeDelta = new Vector2(760, 36);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = "✦ BÀN THỜ NÂNG CẤP CỔ ĐẠI ✦";
-        titleTmp.fontSize = 25;
+        titleTmp.fontSize = 24;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.alignment = TextAlignmentOptions.Center;
         titleTmp.color = new Color(0.35f, 0.95f, 1f, 1f);
@@ -202,13 +214,14 @@ public class ShrineUpgradeUI : MonoBehaviour
         RectTransform sRt = shardObj.AddComponent<RectTransform>();
         sRt.anchorMin = new Vector2(0.5f, 1f);
         sRt.anchorMax = new Vector2(0.5f, 1f);
-        sRt.anchoredPosition = new Vector2(0, -75);
-        sRt.sizeDelta = new Vector2(650, 30);
+        sRt.pivot = new Vector2(0.5f, 1f);
+        sRt.anchoredPosition = new Vector2(0, -60);
+        sRt.sizeDelta = new Vector2(650, 26);
         instance.shardsCounterText = shardObj.AddComponent<TextMeshProUGUI>();
-        instance.shardsCounterText.fontSize = 17;
+        instance.shardsCounterText.fontSize = 16;
         instance.shardsCounterText.fontStyle = FontStyles.Bold;
         instance.shardsCounterText.alignment = TextAlignmentOptions.Center;
-        instance.shardsCounterText.color = new Color(1f, 0.9f, 0.4f, 1f);
+        instance.shardsCounterText.color = new Color(1f, 0.88f, 0.35f, 1f);
 
         // Close Button [X]
         GameObject closeBtnObj = new GameObject("Btn_Close");
@@ -216,10 +229,11 @@ public class ShrineUpgradeUI : MonoBehaviour
         RectTransform cRt = closeBtnObj.AddComponent<RectTransform>();
         cRt.anchorMin = new Vector2(1f, 1f);
         cRt.anchorMax = new Vector2(1f, 1f);
-        cRt.anchoredPosition = new Vector2(-25, -25);
-        cRt.sizeDelta = new Vector2(40, 40);
+        cRt.pivot = new Vector2(1f, 1f);
+        cRt.anchoredPosition = new Vector2(-18, -18);
+        cRt.sizeDelta = new Vector2(38, 38);
         Image cBg = closeBtnObj.AddComponent<Image>();
-        cBg.color = new Color(0.55f, 0.16f, 0.16f, 1f);
+        cBg.color = new Color(0.65f, 0.16f, 0.16f, 1f);
         Button closeBtn = closeBtnObj.AddComponent<Button>();
         closeBtn.onClick.AddListener(() => instance.Close());
 
@@ -227,7 +241,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         cTxtObj.transform.SetParent(closeBtnObj.transform, false);
         var cTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
         cTmp.text = "✕";
-        cTmp.fontSize = 22;
+        cTmp.fontSize = 20;
         cTmp.alignment = TextAlignmentOptions.Center;
         cTmp.color = Color.white;
         RectTransform cTxtRt = cTxtObj.GetComponent<RectTransform>();
@@ -235,9 +249,80 @@ public class ShrineUpgradeUI : MonoBehaviour
         cTxtRt.anchorMax = Vector2.one;
         cTxtRt.sizeDelta = Vector2.zero;
 
-        // 4 Upgrade Cards (Vertical Layout)
-        float startY = -140f;
-        float spacingY = 92f;
+        // 3. TOP TAB BUTTONS (NÂNG CẤP vs CHIÊU THỨC)
+        GameObject tabGroupObj = new GameObject("TabGroup");
+        tabGroupObj.transform.SetParent(boxObj.transform, false);
+        RectTransform tabRt = tabGroupObj.AddComponent<RectTransform>();
+        tabRt.anchorMin = new Vector2(0.5f, 1f);
+        tabRt.anchorMax = new Vector2(0.5f, 1f);
+        tabRt.pivot = new Vector2(0.5f, 1f);
+        tabRt.anchoredPosition = new Vector2(0, -96);
+        tabRt.sizeDelta = new Vector2(920, 38);
+
+        // Tab 1: Nâng cấp
+        GameObject tab1Obj = new GameObject("Tab_Upgrades");
+        tab1Obj.transform.SetParent(tabGroupObj.transform, false);
+        RectTransform t1Rt = tab1Obj.AddComponent<RectTransform>();
+        t1Rt.anchorMin = new Vector2(0.5f, 0.5f);
+        t1Rt.anchorMax = new Vector2(0.5f, 0.5f);
+        t1Rt.pivot = new Vector2(0.5f, 0.5f);
+        t1Rt.anchoredPosition = new Vector2(-225, 0);
+        t1Rt.sizeDelta = new Vector2(430, 36);
+        instance.imgTabUpgrades = tab1Obj.AddComponent<Image>();
+        instance.btnTabUpgrades = tab1Obj.AddComponent<Button>();
+        instance.btnTabUpgrades.onClick.AddListener(() => instance.SwitchTab(true));
+
+        GameObject t1TxtObj = new GameObject("Text");
+        t1TxtObj.transform.SetParent(tab1Obj.transform, false);
+        var t1Tmp = t1TxtObj.AddComponent<TextMeshProUGUI>();
+        t1Tmp.text = "⚔️ NÂNG CẤP CHỈ SỐ SỨC MẠNH";
+        t1Tmp.fontSize = 15;
+        t1Tmp.fontStyle = FontStyles.Bold;
+        t1Tmp.alignment = TextAlignmentOptions.Center;
+        t1Tmp.color = Color.white;
+        RectTransform t1TxtRt = t1TxtObj.GetComponent<RectTransform>();
+        t1TxtRt.anchorMin = Vector2.zero;
+        t1TxtRt.anchorMax = Vector2.one;
+        t1TxtRt.sizeDelta = Vector2.zero;
+
+        // Tab 2: Chiêu thức
+        GameObject tab2Obj = new GameObject("Tab_Skills");
+        tab2Obj.transform.SetParent(tabGroupObj.transform, false);
+        RectTransform t2Rt = tab2Obj.AddComponent<RectTransform>();
+        t2Rt.anchorMin = new Vector2(0.5f, 0.5f);
+        t2Rt.anchorMax = new Vector2(0.5f, 0.5f);
+        t2Rt.pivot = new Vector2(0.5f, 0.5f);
+        t2Rt.anchoredPosition = new Vector2(225, 0);
+        t2Rt.sizeDelta = new Vector2(430, 36);
+        instance.imgTabSkills = tab2Obj.AddComponent<Image>();
+        instance.btnTabSkills = tab2Obj.AddComponent<Button>();
+        instance.btnTabSkills.onClick.AddListener(() => instance.SwitchTab(false));
+
+        GameObject t2TxtObj = new GameObject("Text");
+        t2TxtObj.transform.SetParent(tab2Obj.transform, false);
+        var t2Tmp = t2TxtObj.AddComponent<TextMeshProUGUI>();
+        t2Tmp.text = "📜 BẢNG MÔ TẢ CHIÊU THỨC (ATTACK / DASH / ULTI)";
+        t2Tmp.fontSize = 15;
+        t2Tmp.fontStyle = FontStyles.Bold;
+        t2Tmp.alignment = TextAlignmentOptions.Center;
+        t2Tmp.color = Color.white;
+        RectTransform t2TxtRt = t2TxtObj.GetComponent<RectTransform>();
+        t2TxtRt.anchorMin = Vector2.zero;
+        t2TxtRt.anchorMax = Vector2.one;
+        t2TxtRt.sizeDelta = Vector2.zero;
+
+        // 4. TAB 1 CONTENT: 4 NÂNG CẤP
+        instance.tabUpgradesContent = new GameObject("UpgradesContent");
+        instance.tabUpgradesContent.transform.SetParent(boxObj.transform, false);
+        RectTransform upgContentRt = instance.tabUpgradesContent.AddComponent<RectTransform>();
+        upgContentRt.anchorMin = new Vector2(0.5f, 0f);
+        upgContentRt.anchorMax = new Vector2(0.5f, 1f);
+        upgContentRt.pivot = new Vector2(0.5f, 0.5f);
+        upgContentRt.sizeDelta = new Vector2(920, 0);
+        upgContentRt.anchoredPosition = new Vector2(0, -65);
+
+        float startY = -90f;
+        float spacingY = 100f;
 
         for (int i = 0; i < 4; i++)
         {
@@ -245,24 +330,26 @@ public class ShrineUpgradeUI : MonoBehaviour
             var type = (PlayerUpgradeManager.UpgradeType)i;
 
             GameObject rowObj = new GameObject("UpgradeCard_" + i);
-            rowObj.transform.SetParent(boxObj.transform, false);
+            rowObj.transform.SetParent(instance.tabUpgradesContent.transform, false);
             RectTransform rowRt = rowObj.AddComponent<RectTransform>();
             rowRt.anchorMin = new Vector2(0.5f, 1f);
             rowRt.anchorMax = new Vector2(0.5f, 1f);
+            rowRt.pivot = new Vector2(0.5f, 1f);
             rowRt.anchoredPosition = new Vector2(0, startY - (i * spacingY));
-            rowRt.sizeDelta = new Vector2(840, 80);
+            rowRt.sizeDelta = new Vector2(920, 88);
 
             Image rowBg = rowObj.AddComponent<Image>();
-            rowBg.color = new Color(0.13f, 0.17f, 0.25f, 0.90f);
+            rowBg.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
             instance.cardObjects[i] = rowObj;
 
-            // Title (Width 360, single line, no wrapping)
+            // Title (CĂN LỀ TRÁI CỐ ĐỊNH pivot = 0, 0.5f) -> KHÔNG BAO GIỜ BỊ LỒI RA NGOÀI
             GameObject tObj = new GameObject("Title");
             tObj.transform.SetParent(rowObj.transform, false);
             RectTransform rowTRt = tObj.AddComponent<RectTransform>();
-            rowTRt.anchorMin = new Vector2(0, 0.5f);
-            rowTRt.anchorMax = new Vector2(0, 0.5f);
-            rowTRt.anchoredPosition = new Vector2(22, 17);
+            rowTRt.anchorMin = new Vector2(0f, 0.5f);
+            rowTRt.anchorMax = new Vector2(0f, 0.5f);
+            rowTRt.pivot = new Vector2(0f, 0.5f);
+            rowTRt.anchoredPosition = new Vector2(25, 20);
             rowTRt.sizeDelta = new Vector2(360, 26);
             instance.titleTexts[i] = tObj.AddComponent<TextMeshProUGUI>();
             instance.titleTexts[i].fontSize = 16;
@@ -270,52 +357,56 @@ public class ShrineUpgradeUI : MonoBehaviour
             instance.titleTexts[i].color = new Color(0.92f, 0.96f, 1f);
             instance.titleTexts[i].enableWordWrapping = false;
 
-            // Level Text (Width 220, position 400)
+            // Current Stats (CĂN LỀ TRÁI pivot = 0, 0.5f)
+            GameObject dObj = new GameObject("Desc");
+            dObj.transform.SetParent(rowObj.transform, false);
+            RectTransform dRt = dObj.AddComponent<RectTransform>();
+            dRt.anchorMin = new Vector2(0f, 0.5f);
+            dRt.anchorMax = new Vector2(0f, 0.5f);
+            dRt.pivot = new Vector2(0f, 0.5f);
+            dRt.anchoredPosition = new Vector2(25, -18);
+            dRt.sizeDelta = new Vector2(360, 24);
+            instance.descTexts[i] = dObj.AddComponent<TextMeshProUGUI>();
+            instance.descTexts[i].fontSize = 13;
+            instance.descTexts[i].color = new Color(0.78f, 0.84f, 0.94f);
+            instance.descTexts[i].enableWordWrapping = false;
+
+            // Level Text (Cột giữa)
             GameObject lObj = new GameObject("Level");
             lObj.transform.SetParent(rowObj.transform, false);
             RectTransform lRt = lObj.AddComponent<RectTransform>();
-            lRt.anchorMin = new Vector2(0, 0.5f);
-            lRt.anchorMax = new Vector2(0, 0.5f);
-            lRt.anchoredPosition = new Vector2(400, 17);
-            lRt.sizeDelta = new Vector2(220, 26);
+            lRt.anchorMin = new Vector2(0f, 0.5f);
+            lRt.anchorMax = new Vector2(0f, 0.5f);
+            lRt.pivot = new Vector2(0f, 0.5f);
+            lRt.anchoredPosition = new Vector2(405, 20);
+            lRt.sizeDelta = new Vector2(240, 26);
             instance.levelTexts[i] = lObj.AddComponent<TextMeshProUGUI>();
             instance.levelTexts[i].fontSize = 15;
             instance.levelTexts[i].fontStyle = FontStyles.Bold;
             instance.levelTexts[i].enableWordWrapping = false;
 
-            // Current Stats (Width 360, position y = -17)
-            GameObject dObj = new GameObject("Desc");
-            dObj.transform.SetParent(rowObj.transform, false);
-            RectTransform dRt = dObj.AddComponent<RectTransform>();
-            dRt.anchorMin = new Vector2(0, 0.5f);
-            dRt.anchorMax = new Vector2(0, 0.5f);
-            dRt.anchoredPosition = new Vector2(22, -17);
-            dRt.sizeDelta = new Vector2(360, 24);
-            instance.descTexts[i] = dObj.AddComponent<TextMeshProUGUI>();
-            instance.descTexts[i].fontSize = 13;
-            instance.descTexts[i].color = new Color(0.78f, 0.82f, 0.92f);
-            instance.descTexts[i].enableWordWrapping = false;
-
-            // Next Bonus (Width 230, position 400, y = -17)
+            // Next Bonus (Cột giữa bên dưới)
             GameObject bObj = new GameObject("Bonus");
             bObj.transform.SetParent(rowObj.transform, false);
             RectTransform bRt = bObj.AddComponent<RectTransform>();
-            bRt.anchorMin = new Vector2(0, 0.5f);
-            bRt.anchorMax = new Vector2(0, 0.5f);
-            bRt.anchoredPosition = new Vector2(400, -17);
-            bRt.sizeDelta = new Vector2(240, 24);
+            bRt.anchorMin = new Vector2(0f, 0.5f);
+            bRt.anchorMax = new Vector2(0f, 0.5f);
+            bRt.pivot = new Vector2(0f, 0.5f);
+            bRt.anchoredPosition = new Vector2(405, -18);
+            bRt.sizeDelta = new Vector2(260, 24);
             instance.bonusTexts[i] = bObj.AddComponent<TextMeshProUGUI>();
             instance.bonusTexts[i].fontSize = 13;
             instance.bonusTexts[i].enableWordWrapping = false;
 
-            // Upgrade Button (Width 175, height 54, position -105)
+            // Upgrade Button (Cột phải)
             GameObject uBtnObj = new GameObject("Btn_Upgrade");
             uBtnObj.transform.SetParent(rowObj.transform, false);
             RectTransform uBtnRt = uBtnObj.AddComponent<RectTransform>();
             uBtnRt.anchorMin = new Vector2(1f, 0.5f);
             uBtnRt.anchorMax = new Vector2(1f, 0.5f);
-            uBtnRt.anchoredPosition = new Vector2(-105, 0);
-            uBtnRt.sizeDelta = new Vector2(175, 54);
+            uBtnRt.pivot = new Vector2(1f, 0.5f);
+            uBtnRt.anchoredPosition = new Vector2(-22, 0);
+            uBtnRt.sizeDelta = new Vector2(190, 56);
 
             Image uBtnBg = uBtnObj.AddComponent<Image>();
             uBtnBg.color = new Color(0.18f, 0.48f, 0.36f, 1f);
@@ -346,8 +437,97 @@ public class ShrineUpgradeUI : MonoBehaviour
             instance.costTexts[i] = cTmpTmp;
         }
 
+        // 5. TAB 2 CONTENT: BẢNG MÔ TẢ CHI TIẾT CHIÊU THỨC (ATTACK, DASH, ULTI)
+        instance.tabSkillsContent = new GameObject("SkillsContent");
+        instance.tabSkillsContent.transform.SetParent(boxObj.transform, false);
+        RectTransform skillsContentRt = instance.tabSkillsContent.AddComponent<RectTransform>();
+        skillsContentRt.anchorMin = new Vector2(0.5f, 0f);
+        skillsContentRt.anchorMax = new Vector2(0.5f, 1f);
+        skillsContentRt.pivot = new Vector2(0.5f, 0.5f);
+        skillsContentRt.sizeDelta = new Vector2(920, 0);
+        skillsContentRt.anchoredPosition = new Vector2(0, -65);
+
+        BuildSkillDescriptionCard(
+            parent: instance.tabSkillsContent.transform,
+            yPos: -85f,
+            height: 125f,
+            title: "⚔️ ĐÒN ĐÁNH THƯỜNG (BASIC ATTACK) [Phím J / Chuột Trái]",
+            visualDesc: "✦ <color=#FFE266>Hình thức:</color> Vung kiếm chém liên hoàn 2 đòn (Combo 1 chém quét ngang, Combo 2 chém bổ chí mạng đẩy lùi nhẹ).",
+            damageDesc: "✦ <color=#66FF99>Sát thương:</color> Combo 1: <b>15 DMG</b> | Combo 2: <b>25 DMG (Crit x1.67)</b>. Tầm đánh quạt bán kính 1.35m.",
+            upgradeDesc: "✦ <color=#66CCFF>Khi nâng cấp Kiếm Tàn Tích:</color> Tăng vĩnh viễn <b>+6 Sát thương mỗi cấp</b> cho mọi đòn chém (Cấp Max: +60 DMG)."
+        );
+
+        BuildSkillDescriptionCard(
+            parent: instance.tabSkillsContent.transform,
+            yPos: -220f,
+            height: 125f,
+            title: "💨 LƯỚT BÓNG MA (SHADOW DASH) [Phím Space / Nút Lướt]",
+            visualDesc: "✦ <color=#FFE266>Hình thức:</color> Tốc biến lướt nhanh theo hướng chỉ định, để lại chuỗi tàn ảnh bóng ma mờ ảo. <b>Miễn nhiễm sát thương (Bất tử 0.2s)</b>.",
+            damageDesc: "✦ <color=#66FF99>Thông số:</color> Tốc độ lướt cực đại <b>12 m/s</b> (gấp 2.4 lần tốc độ chạy cơ bản). Hồi chiêu cơ bản: <b>0.8 giây</b>.",
+            upgradeDesc: "✦ <color=#66CCFF>Khi nâng cấp Thoát Thân Bóng Ma:</color> Giảm hồi chiêu <b>-0.06s/cấp</b> (Tối đa còn <b>0.35s</b>) và tăng tốc độ chạy thường."
+        );
+
+        BuildSkillDescriptionCard(
+            parent: instance.tabSkillsContent.transform,
+            yPos: -355f,
+            height: 145f,
+            title: "⚡ CHIÊU CUỐI TUYỆT KỸ (ULTIMATE SKILL) [Phím F / Nút Chiêu]",
+            visualDesc: "✦ <color=#FFE266>Hình thức:</color> Ngưng đọng thời gian (Slow-mo 0.05x), camera zoom cận cảnh điện ảnh, <b>mắt bừng sáng rực lửa (Eye Flare)</b> cùng câu thoại thức tỉnh!",
+            damageDesc: "✦ <color=#66FF99>Sát thương:</color> <b>Vaelstrider:</b> Bão Kiếm 4 đợt hút quái & nổ tung diện rộng (<b>115+ DMG</b>). <b>Maid:</b> Sóng chém trăng khuyết <b>9999 DMG</b> diệt sạch quái thường, 250 DMG & Stun 2.5s Boss!",
+            upgradeDesc: "✦ <color=#66CCFF>Khi nâng cấp Cơn Bão Cổ Đại:</color> Giảm hồi chiêu từ <b>12s xuống còn 7s</b> và cộng dồn thêm <b>+150 DMG nổ kết liễu</b> (Tổng DMG đạt 265+)."
+        );
+
         instance.Close();
-        Debug.Log("<color=cyan>[SHRINE UI]</color> Đã tạo giao diện Bàn Thờ Nâng Cấp tinh chỉnh đẹp mắt!");
+        Debug.Log("<color=cyan>[SHRINE UI]</color> Đã tạo giao diện Bàn Thờ Nâng Cấp & Bảng Tra Cứu Chiêu Thức hoàn chỉnh!");
         return instance;
+    }
+
+    private static void BuildSkillDescriptionCard(Transform parent, float yPos, float height, string title, string visualDesc, string damageDesc, string upgradeDesc)
+    {
+        GameObject card = new GameObject("SkillCard");
+        card.transform.SetParent(parent, false);
+        RectTransform rt = card.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 1f);
+        rt.anchorMax = new Vector2(0.5f, 1f);
+        rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0, yPos);
+        rt.sizeDelta = new Vector2(920, height);
+
+        Image bg = card.AddComponent<Image>();
+        bg.color = new Color(0.10f, 0.14f, 0.22f, 0.95f);
+
+        Outline outline = card.AddComponent<Outline>();
+        outline.effectColor = new Color(0.25f, 0.55f, 0.85f, 0.6f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        // Header Title
+        GameObject tObj = new GameObject("Title");
+        tObj.transform.SetParent(card.transform, false);
+        RectTransform tRt = tObj.AddComponent<RectTransform>();
+        tRt.anchorMin = new Vector2(0f, 1f);
+        tRt.anchorMax = new Vector2(1f, 1f);
+        tRt.pivot = new Vector2(0f, 1f);
+        tRt.anchoredPosition = new Vector2(18, -10);
+        tRt.sizeDelta = new Vector2(-36, 26);
+        var titleTmp = tObj.AddComponent<TextMeshProUGUI>();
+        titleTmp.text = title;
+        titleTmp.fontSize = 15;
+        titleTmp.fontStyle = FontStyles.Bold;
+        titleTmp.color = new Color(1f, 0.88f, 0.35f, 1f);
+
+        // Content (Visual, Damage, Upgrade)
+        GameObject cObj = new GameObject("Content");
+        cObj.transform.SetParent(card.transform, false);
+        RectTransform cRt = cObj.AddComponent<RectTransform>();
+        cRt.anchorMin = new Vector2(0f, 0f);
+        cRt.anchorMax = new Vector2(1f, 1f);
+        cRt.pivot = new Vector2(0f, 1f);
+        cRt.anchoredPosition = new Vector2(18, -36);
+        cRt.sizeDelta = new Vector2(-36, -42);
+        var contentTmp = cObj.AddComponent<TextMeshProUGUI>();
+        contentTmp.text = $"{visualDesc}\n{damageDesc}\n{upgradeDesc}";
+        contentTmp.fontSize = 13;
+        contentTmp.lineSpacing = 16;
+        contentTmp.color = new Color(0.88f, 0.92f, 0.98f, 1f);
     }
 }

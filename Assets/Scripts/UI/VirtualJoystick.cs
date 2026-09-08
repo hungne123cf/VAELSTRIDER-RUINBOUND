@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
@@ -17,6 +18,43 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     {
         if (containerRect == null) containerRect = GetComponent<RectTransform>();
         if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
+        EnsureRoundedSprites();
+    }
+
+    private void EnsureRoundedSprites()
+    {
+        // 1. Đảm bảo Joystick Background là hình tròn bo viền mượt
+        Image bgImg = GetComponent<Image>();
+        if (bgImg != null)
+        {
+            Sprite baseSprite = Resources.Load<Sprite>("UI/joystick_base");
+#if UNITY_EDITOR
+            if (baseSprite == null) baseSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/joystick_base.png");
+#endif
+            if (baseSprite != null)
+            {
+                bgImg.sprite = baseSprite;
+                bgImg.color = Color.white;
+            }
+        }
+
+        // 2. Đảm bảo Joystick Handle (núm điều khiển) là hình tròn pha lê 3D thay vì khối vuông trắng
+        if (handleRect != null)
+        {
+            Image handleImg = handleRect.GetComponent<Image>();
+            if (handleImg != null)
+            {
+                Sprite handleSprite = Resources.Load<Sprite>("UI/joystick_handle");
+#if UNITY_EDITOR
+                if (handleSprite == null) handleSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/joystick_handle.png");
+#endif
+                if (handleSprite != null)
+                {
+                    handleImg.sprite = handleSprite;
+                    handleImg.color = Color.white;
+                }
+            }
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)

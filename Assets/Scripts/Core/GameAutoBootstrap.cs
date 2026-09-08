@@ -28,15 +28,34 @@ public class GameAutoBootstrap : MonoBehaviour
 
     public static void BootstrapAll()
     {
+        Time.timeScale = 1.0f; // Dam bao thoi gian luon chay binh thuong khi vao map
         string currentScene = SceneManager.GetActiveScene().name;
+        if (currentScene == "LoginScene")
+        {
+            SoundManager.EnsureInstance();
+            LoginManager.EnsureInstance();
+            Debug.Log("<color=cyan>[BOOTSTRAP]</color> Dang o LoginScene. Khoi tao Sound va Login UI.");
+            return;
+        }
+        if (currentScene == "MainMenuScene")
+        {
+            SoundManager.EnsureInstance();
+            MainMenuManager.EnsureInstance();
+            Debug.Log("<color=cyan>[BOOTSTRAP]</color> Dang o MainMenuScene. Khoi tao Sound va MainMenu UI.");
+            return;
+        }
         if (currentScene == "Map2_ValleyRuin")
         {
-            // Dang o Map 2: Giu nguyen dia hinh thung lung Map 2, chi khoi tao UI va Upgrade
+            // Dang o Map 2: Giu nguyen dia hinh thung lung Map 2, khoi tao UI, Upgrade va Ancient Shrine Tru Da Phat Sang
             PotionQuickSlotUI.EnsureUIExists();
             EnsureSpecialSkillButton();
+            SettingsUI.EnsureSettingsButtonExists();
             PlayerUpgradeManager.EnsureInstance();
             ShrineUpgradeUI.EnsureUIExists();
-            Debug.Log("<color=green>[BOOTSTRAP]</color> Dang o Map 2 (Valley Ruin)! Giu nguyen toan bo dia hinh Map 2.");
+            EnsureAncientShrine(new Vector3(-5.5f, 2.8f, 0f));
+            LostShardsGrave.EnsureSpawnGrave();
+            ApplySelectedCharacterToPlayer();
+            Debug.Log("<color=green>[BOOTSTRAP]</color> Dang o Map 2 (Valley Ruin)! Da khoi tao Ancient Shrine Tru Da Phat Sang va UI.");
             return;
         }
 
@@ -48,6 +67,9 @@ public class GameAutoBootstrap : MonoBehaviour
 
         // 2. Khoi tao nut Tuyet Ky Ruin Whirlwind tren Canvas
         EnsureSpecialSkillButton();
+
+        // 2b. Khoi tao nut Settings tren Canvas (cho ca Map 1 va Map 2)
+        SettingsUI.EnsureSettingsButtonExists();
 
         // 3. Khoi tao He thong 3 dot quai + Boss Titan Wheel (WaveSpawner)
         EnsureWaveSpawner();
@@ -67,6 +89,12 @@ public class GameAutoBootstrap : MonoBehaviour
         // 8. Dam bao Player Upgrade Manager va UI
         PlayerUpgradeManager.EnsureInstance();
         ShrineUpgradeUI.EnsureUIExists();
+
+        // 9. Co che Dark Souls: Kiem tra va tai sinh Vung Hon (Lost Shards Grave) tai vi tri tu tran cu
+        LostShardsGrave.EnsureSpawnGrave();
+
+        // 10. Ap dung Nhan Vat da chon (Vaelstrider / Maid) va Tuyet Ky Quet Tan Ke Yeu
+        ApplySelectedCharacterToPlayer();
 
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
     }
@@ -251,28 +279,160 @@ public class GameAutoBootstrap : MonoBehaviour
         return chest;
     }
 
-    public static AncientShrine EnsureAncientShrine()
+    public static AncientShrine EnsureAncientShrine(Vector3? customPos = null)
     {
         var shrine = Object.FindAnyObjectByType<AncientShrine>();
-        if (shrine != null) return shrine;
-
-        Vector3 spawnPos = new Vector3(-3.2f, 1.6f, 0f);
-        var player = Object.FindAnyObjectByType<PlayerController>();
-        if (player != null)
+        if (shrine != null)
         {
-            spawnPos = player.transform.position + new Vector3(-3.2f, 1.6f, 0f);
+            shrine.EnsurePillarVisuals();
+            return shrine;
+        }
+
+        Vector3 spawnPos = customPos.HasValue ? customPos.Value : new Vector3(-3.2f, 1.6f, 0f);
+        if (!customPos.HasValue)
+        {
+            var player = Object.FindAnyObjectByType<PlayerController>();
+            if (player != null)
+            {
+                spawnPos = player.transform.position + new Vector3(-3.2f, 1.6f, 0f);
+            }
         }
 
         shrine = AncientShrine.SpawnShrine(spawnPos);
         PlayerUpgradeManager.EnsureInstance();
         ShrineUpgradeUI.EnsureUIExists();
 
-        Debug.Log("<color=green>[BOOTSTRAP]</color> Da tao Ancient Shrine va UI Nang Cap!");
+        Debug.Log("<color=green>[BOOTSTRAP]</color> Da tao Ancient Shrine (Tru Da Phat Sang) tai: " + spawnPos);
         return shrine;
     }
 
     public static DungeonLightingManager EnsureDungeonLighting()
     {
         return DungeonLightingManager.EnsureInstance();
+    }
+
+    public static void CleanUpGameplayUI()
+    {
+        string[] uiNames = new string[] {
+            "Btn_Special", "PotionQuickSlot", "WaveBanner", "PlayerHealthBar",
+            "LostShardsGrave", "TreasureChest_Crypt", "DungeonBarriers", "DungeonTorches"
+        };
+        foreach (var name in uiNames)
+        {
+            var obj = GameObject.Find(name);
+            if (obj != null) Object.Destroy(obj);
+        }
+    }
+
+    public static void ApplySelectedCharacterToPlayer()
+    {
+        var player = Object.FindAnyObjectByType<PlayerController>();
+        if (player == null) return;
+
+        CharacterManager.EnsureInstance();
+        string selectedChar = CharacterManager.Instance.GetSelectedCharacterId();
+
+        EnsurePlayerColliderAndCombat(player, selectedChar);
+        if (selectedChar == CharacterManager.CHAR_MAID)
+        {
+            player.transform.localScale = Vector3.one; // Chuan kich co 32x32 bang voi Player dau tien
+            var anim = player.GetComponent<Animator>();
+#if UNITY_EDITOR
+            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Maid/Maid.controller");
+            if (controller != null && anim != null)
+            {
+                anim.runtimeAnimatorController = controller;
+            }
+#endif
+            if (player.GetComponent<SweepTheWeakSkill>() == null)
+            {
+                player.gameObject.AddComponent<SweepTheWeakSkill>();
+            }
+
+            var btnSpecial = GameObject.Find("Btn_Special");
+            if (btnSpecial != null)
+            {
+                var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = "SWEEP" + "\n" + "(F)";
+            }
+
+            Debug.Log("<color=magenta>[CHARACTER]</color> Da ap dung nhan vat MAID CHIEN BINH voi tuyet ky Quet Tan Ke Yeu!");
+        }
+        else
+        {
+            player.transform.localScale = Vector3.one;
+            var anim = player.GetComponent<Animator>();
+#if UNITY_EDITOR
+            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Player/idle_down_0.controller");
+            if (controller != null && anim != null)
+            {
+                anim.runtimeAnimatorController = controller;
+            }
+#endif
+            var sweep = player.GetComponent<SweepTheWeakSkill>();
+            if (sweep != null) Object.Destroy(sweep);
+
+            var btnSpecial = GameObject.Find("Btn_Special");
+            if (btnSpecial != null)
+            {
+                var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = "WHIRL WIND" + "\n" + "(F)";
+            }
+        }
+    }
+    public static void EnsurePlayerColliderAndCombat(PlayerController player, string selectedChar = "")
+    {
+        if (player == null) return;
+
+        if (string.IsNullOrEmpty(selectedChar))
+        {
+            CharacterManager.EnsureInstance();
+            selectedChar = CharacterManager.Instance.GetSelectedCharacterId();
+        }
+
+        var box = player.GetComponent<BoxCollider2D>();
+        var rb = player.GetComponent<Rigidbody2D>();
+        var sr = player.GetComponent<SpriteRenderer>();
+
+        if (sr != null)
+        {
+            sr.sortingLayerName = "Default";
+            sr.sortingOrder = 5000;
+        }
+
+        if (rb != null)
+        {
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        }
+
+        var tPoint = player.transform.Find("AttackPoint");
+
+        if (selectedChar == CharacterManager.CHAR_MAID)
+        {
+            // Maid: pivot (0.5, 0.5), chan o y=-0.45, dau o y=+0.45
+            if (box != null)
+            {
+                box.offset = new Vector2(0f, -0.05f);
+                box.size = new Vector2(0.55f, 0.8f);
+            }
+            if (tPoint != null)
+            {
+                tPoint.localPosition = new Vector3(0f, 0.05f, 0f);
+            }
+        }
+        else
+        {
+            // Adventurer (Player 1): sprite 96x80, pivot (0.5, 0), chan o y=0.72, dau o y=1.94
+            if (box != null)
+            {
+                box.offset = new Vector2(0f, 1.25f);
+                box.size = new Vector2(0.55f, 1.05f);
+            }
+            if (tPoint != null)
+            {
+                tPoint.localPosition = new Vector3(0f, 1.2f, 0f);
+            }
+        }
     }
 }

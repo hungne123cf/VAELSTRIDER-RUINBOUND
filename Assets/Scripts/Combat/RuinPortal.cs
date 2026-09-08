@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 [RequireComponent(typeof(CircleCollider2D), typeof(SpriteRenderer))]
@@ -13,6 +14,7 @@ public class RuinPortal : MonoBehaviour
     private Vector3 baseScale;
     private bool isActivated = false;
     private bool isPlayerEntering = false;
+    private bool isFinalRealm = false;
 
     void Awake()
     {
@@ -37,6 +39,15 @@ public class RuinPortal : MonoBehaviour
         }
 
         spriteRenderer.sortingOrder = 4900;
+
+        string sceneName = SceneManager.GetActiveScene().name;
+        isFinalRealm = sceneName.Contains("Map2") || sceneName.Contains("Valley");
+
+        if (isFinalRealm)
+        {
+            spriteRenderer.color = new Color(1f, 0.96f, 0.75f, 1f);
+            HeavenlyPortalFX.Attach(gameObject);
+        }
     }
 
     void OnEnable()
@@ -54,7 +65,6 @@ public class RuinPortal : MonoBehaviour
         var spawner = Object.FindAnyObjectByType<WaveSpawner>();
         if (spawner != null && !isActivated)
         {
-            // Giu GameObject luon Active de khong bi ngat event, chi an hien thi
             if (spriteRenderer != null) spriteRenderer.enabled = false;
             if (circleCollider != null) circleCollider.enabled = false;
             transform.localScale = Vector3.zero;
@@ -77,6 +87,13 @@ public class RuinPortal : MonoBehaviour
         isActivated = true;
         if (spriteRenderer != null) spriteRenderer.enabled = true;
         if (circleCollider != null) circleCollider.enabled = true;
+
+        if (isFinalRealm)
+        {
+            spriteRenderer.color = new Color(1f, 0.96f, 0.75f, 1f);
+            HeavenlyPortalFX.Attach(gameObject);
+        }
+
         StartCoroutine(AppearRoutine());
     }
 
@@ -85,10 +102,18 @@ public class RuinPortal : MonoBehaviour
         transform.localScale = Vector3.zero;
 
         var cam = Object.FindAnyObjectByType<CameraFollow>();
-        if (cam != null) cam.Shake(0.2f, 0.35f);
+        if (cam != null) cam.Shake(0.25f, 0.4f);
 
-        DamagePopup.CreateText(transform.position, "PORTAL OPENED!", new Color(0.85f, 0.45f, 1f));
-        SoundManager.EnsureInstance()?.PlayPortalSpawn();
+        if (isFinalRealm)
+        {
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "HEAVENLY GATE OPENED!", new Color(1f, 0.95f, 0.4f));
+            SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
+        }
+        else
+        {
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.2f, "PORTAL OPENED!", new Color(0.85f, 0.45f, 1f));
+            SoundManager.EnsureInstance()?.PlayPortalSpawn();
+        }
 
         float t = 0;
         while (t < 0.6f)
@@ -130,14 +155,14 @@ public class RuinPortal : MonoBehaviour
         if (rb != null) rb.linearVelocity = Vector2.zero;
 
         var cam = Object.FindAnyObjectByType<CameraFollow>();
-        if (cam != null) cam.Shake(0.25f, 0.3f);
+        if (cam != null) cam.Shake(0.35f, 0.4f);
 
         Vector3 startPos = playerTransform.position;
         Vector3 portalCenter = transform.position + Vector3.up * 0.4f;
         Vector3 startScale = playerTransform.localScale;
 
         float t = 0;
-        float duration = 0.8f;
+        float duration = 0.9f;
         while (t < duration)
         {
             t += Time.deltaTime;
@@ -147,13 +172,21 @@ public class RuinPortal : MonoBehaviour
             yield return null;
         }
 
-        if (VictoryUI.Instance != null)
+        if (isFinalRealm)
         {
-            VictoryUI.Instance.ShowVictoryScreen();
+            SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
+            EndingCreditsUI.ShowEnding();
         }
         else
         {
-            VictoryUI.CreateRuntimeVictoryUI();
+            if (VictoryUI.Instance != null)
+            {
+                VictoryUI.Instance.ShowVictoryScreen();
+            }
+            else
+            {
+                VictoryUI.CreateRuntimeVictoryUI();
+            }
         }
     }
 
@@ -172,6 +205,13 @@ public class RuinPortal : MonoBehaviour
 #endif
         sr.sprite = portalSprite;
         sr.sortingOrder = 4900;
+
+        string activeScene = SceneManager.GetActiveScene().name;
+        if (activeScene.Contains("Map2") || activeScene.Contains("Valley"))
+        {
+            sr.color = new Color(1f, 0.96f, 0.75f, 1f);
+            HeavenlyPortalFX.Attach(portalObj);
+        }
 
         var col = portalObj.AddComponent<CircleCollider2D>();
         col.isTrigger = true;

@@ -87,8 +87,9 @@ public class TreasureChest : MonoBehaviour, IDamageable
 
         Vector3 dropPos = transform.position + Vector3.up * 0.4f;
 
-        // 1. Roi binh mau
-        for (int i = 0; i < potionCount; i++)
+        // 1. Roi binh mau ngau nhien tu 0 den 2 binh
+        int droppedPotions = Random.Range(0, 3); // 0, 1 hoac 2 binh
+        for (int i = 0; i < droppedPotions; i++)
         {
             HealthPotion.Spawn(dropPos, 35);
         }

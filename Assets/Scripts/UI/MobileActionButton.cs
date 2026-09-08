@@ -24,6 +24,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     {
         originalScale = transform.localScale;
         EnsureTargets();
+        EnsureRoundedSprites();
 
         if (cooldownOverlay == null)
         {
@@ -78,6 +79,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         if (buttonType == ButtonType.Skill)
         {
             EnsureTargets();
+        EnsureRoundedSprites();
             if (playerCombat != null)
             {
                 float norm = playerCombat.GetSkillCooldownNormalized();
@@ -123,6 +125,49 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
     }
 
+    private void EnsureRoundedSprites()
+    {
+        Image btnImg = GetComponent<Image>();
+        if (btnImg != null)
+        {
+            btnImg.color = Color.white; // Loại bỏ màu xám m_Color 0.6f làm xỉn nút
+
+            Sprite roundSprite = null;
+#if UNITY_EDITOR
+            if (buttonType == ButtonType.Attack)
+            {
+                roundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/atk.png");
+            }
+            else if (buttonType == ButtonType.Dash)
+            {
+                roundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/dash.png");
+            }
+            else if (buttonType == ButtonType.Skill)
+            {
+                roundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/ulti.png");
+            }
+#endif
+            if (roundSprite != null)
+            {
+                btnImg.sprite = roundSprite;
+            }
+        }
+
+        Transform iconT = transform.Find("SkillIcon");
+        if (iconT != null)
+        {
+            Image iconImg = iconT.GetComponent<Image>();
+            if (iconImg != null)
+            {
+                iconImg.color = Color.white;
+#if UNITY_EDITOR
+                Sprite ultiSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/ulti.png");
+                if (ultiSprite != null) iconImg.sprite = ultiSprite;
+#endif
+            }
+        }
+    }
+
     private void EnsureTargets()
     {
         if (playerCombat == null) playerCombat = FindAnyObjectByType<PlayerCombat>();
@@ -144,6 +189,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     private void ExecuteAction()
     {
         EnsureTargets();
+        EnsureRoundedSprites();
 
         if (buttonType == ButtonType.Attack)
         {

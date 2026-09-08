@@ -35,6 +35,21 @@ public class PotionQuickSlotUI : MonoBehaviour
 
         parentCanvas = GetComponentInParent<Canvas>();
 
+                // Bo tròn khung nút bình máu
+        Image bgImg = GetComponent<Image>();
+        if (bgImg != null)
+        {
+            Sprite slotSprite = Resources.Load<Sprite>("UI/potion_slot_circle");
+#if UNITY_EDITOR
+            if (slotSprite == null) slotSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/potion_slot_circle.png");
+#endif
+            if (slotSprite != null)
+            {
+                bgImg.sprite = slotSprite;
+                bgImg.color = Color.white;
+            }
+        }
+
         if (potionButton != null)
         {
             potionButton.onClick.RemoveAllListeners();
@@ -121,12 +136,42 @@ public class PotionQuickSlotUI : MonoBehaviour
             if (count > 0)
             {
                 canvasGroup.alpha = 1f;
-                if (potionButton != null) potionButton.interactable = true;
+                        // Bo tròn khung nút bình máu
+        Image bgImg = GetComponent<Image>();
+        if (bgImg != null)
+        {
+            Sprite slotSprite = Resources.Load<Sprite>("UI/potion_slot_circle");
+#if UNITY_EDITOR
+            if (slotSprite == null) slotSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/potion_slot_circle.png");
+#endif
+            if (slotSprite != null)
+            {
+                bgImg.sprite = slotSprite;
+                bgImg.color = Color.white;
+            }
+        }
+
+        if (potionButton != null) potionButton.interactable = true;
             }
             else
             {
                 canvasGroup.alpha = 0.5f;
-                if (potionButton != null) potionButton.interactable = true; // van de click de bao no potions
+                        // Bo tròn khung nút bình máu
+        Image bgImg = GetComponent<Image>();
+        if (bgImg != null)
+        {
+            Sprite slotSprite = Resources.Load<Sprite>("UI/potion_slot_circle");
+#if UNITY_EDITOR
+            if (slotSprite == null) slotSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/potion_slot_circle.png");
+#endif
+            if (slotSprite != null)
+            {
+                bgImg.sprite = slotSprite;
+                bgImg.color = Color.white;
+            }
+        }
+
+        if (potionButton != null) potionButton.interactable = true; // van de click de bao no potions
             }
         }
     }
@@ -236,7 +281,12 @@ public class PotionQuickSlotUI : MonoBehaviour
         rect.sizeDelta = new Vector2(75, 75);
 
         Image bgImage = btnObj.AddComponent<Image>();
-        bgImage.color = new Color(0.15f, 0.12f, 0.22f, 0.92f);
+        Sprite potSlotSprite = Resources.Load<Sprite>("UI/potion_slot_circle");
+#if UNITY_EDITOR
+        if (potSlotSprite == null) potSlotSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/potion_slot_circle.png");
+#endif
+        if (potSlotSprite != null) bgImage.sprite = potSlotSprite;
+        bgImage.color = Color.white;
 
         Button button = btnObj.AddComponent<Button>();
 

@@ -5,16 +5,16 @@ public class PlayerCombat : MonoBehaviour
 {
     [Header("Attack Settings")]
     [SerializeField] private Transform attackPoint;
-    [SerializeField] private float attackRadius = 1.0f;
-    [SerializeField] private float attackOffsetDistance = 0.9f;
-    [SerializeField] private Vector2 bodyCenterOffset = new Vector2(0f, 1.0f);
+    [SerializeField] private float attackRadius = 1.35f;
+    [SerializeField] private float attackOffsetDistance = 1.3f;
+    [SerializeField] private Vector2 bodyCenterOffset = new Vector2(0f, 0.1f);
     [SerializeField] private LayerMask enemyLayers;
-    [SerializeField] private int attack1Damage = 20;
-    [SerializeField] private int attack2Damage = 35;
+    [SerializeField] private int attack1Damage = 5;
+    [SerializeField] private int attack2Damage = 8;
     [SerializeField] private float comboResetTime = 0.9f;
 
     [Header("Special Skill - Ruin Whirlwind")]
-    [SerializeField] private float skillCooldown = 6.0f;
+    [SerializeField] private float skillCooldown = 30.0f;
     [SerializeField] private float skillRadius = 2.8f;
     [SerializeField] private float skillKnockbackForce = 11.5f;
 
@@ -48,6 +48,8 @@ public class PlayerCombat : MonoBehaviour
         animator = GetComponent<Animator>();
         playerController = GetComponent<PlayerController>();
         playerHealth = GetComponent<PlayerHealth>();
+
+        AutoAlignCombat();
 
         if (attackPoint == null)
         {
@@ -160,9 +162,17 @@ public class PlayerCombat : MonoBehaviour
     public bool PerformSpecialSkill()
     {
         if (skillCooldownTimer > 0f || isUltiActive) return false;
-        float effectiveCooldown = Mathf.Max(2.5f, skillCooldown - ultiCooldownReduction);
+        float effectiveCooldown = Mathf.Max(5.0f, skillCooldown - ultiCooldownReduction);
         skillCooldownTimer = effectiveCooldown;
         lastSpecialSkillFrame = Time.frameCount;
+
+        // Kích hoạt Quét Tan Kẻ Yếu nếu nhân vật là Maid
+        var sweepSkill = GetComponent<SweepTheWeakSkill>();
+        if (sweepSkill != null)
+        {
+            StartCoroutine(sweepSkill.ExecuteSkillRoutine());
+            return true;
+        }
 
         StartCoroutine(CinematicSpecialSkillRoutine());
         return true;
@@ -175,30 +185,42 @@ public class PlayerCombat : MonoBehaviour
         if (playerController != null) playerController.SetCanMove(false);
 
         var cam = FindAnyObjectByType<CameraFollow>();
-
-        // ====================================================
-        // GIAI ĐOẠN 1: CUTSCENE ZOOM-IN & NGƯNG ĐỌNG THỜI GIAN
-        // ====================================================
         float originalTimeScale = Time.timeScale;
-        Time.timeScale = 0.05f; // Ngưng đọng thời gian (Hit-stop / Cinematic slow-mo)
 
-        // Camera zoom cận cảnh vào người chơi
-        if (cam != null) cam.SetCinematicZoom(2.8f);
+        try
+        {
+            // ====================================================
+            // GIAI ĐOẠN 1: CUTSCENE ZOOM-IN & NGƯNG ĐỌNG THỜI GIAN
+            // ====================================================
+            Time.timeScale = 0.05f; // Ngưng đọng thời gian (Hit-stop / Cinematic slow-mo)
 
-        // Phát âm thanh thức tỉnh sức mạnh thần bí
-        SoundManager.EnsureInstance()?.PlayPortalSpawn();
+            // Camera zoom cận cảnh vào người chơi
+            if (cam != null) cam.SetCinematicZoom(2.8f);
 
-        // Bật Cutscene UI: 2 vệt đen điện ảnh + Câu thoại ngầu lòi
-        var cutsceneUI = UltiCinematicUI.EnsureInstance();
-        if (cutsceneUI != null) cutsceneUI.ShowCutscene(1.0f);
+            // Phát âm thanh thức tỉnh sức mạnh thần bí
+            SoundManager.EnsureInstance()?.PlayPortalSpawn();
 
-        // Chờ 0.75 giây thời gian thực (Realtime)
+            // Bật Hiệu Ứng Ánh Mắt Rực Lửa (Eye Flare VFX) trên mặt nhân vật
+            var eyeFlare = GetComponent<EyeFlareFX>();
+            if (eyeFlare == null) eyeFlare = gameObject.AddComponent<EyeFlareFX>();
+            eyeFlare.TriggerEyeFlare(1.0f, isMaid: false);
+
+            // Bật Cutscene UI: 2 vệt đen điện ảnh + Dải ánh mắt anime + Câu thoại ngầu lòi
+            var cutsceneUI = UltiCinematicUI.EnsureInstance();
+            if (cutsceneUI != null) cutsceneUI.ShowCutscene(1.0f, isMaid: false);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("[ULTI] Error in cinematic phase: " + ex);
+        }
+
+        // Chờ 1.0 giây thời gian thực (Realtime)
         yield return new WaitForSecondsRealtime(1.0f);
 
         // ====================================================
         // GIAI ĐOẠN 2: THỜI GIAN TRỞ LẠI & BÙNG NỔ BÃO LỐC
         // ====================================================
-        Time.timeScale = originalTimeScale;
+        Time.timeScale = 1.0f; // Luôn đảm bảo khôi phục thời gian bình thường!
         if (cam != null)
         {
             cam.ResetZoom();
@@ -311,4 +333,57 @@ public class PlayerCombat : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position + new Vector3(bodyCenterOffset.x, bodyCenterOffset.y, 0), skillRadius);
     }
+
+    public void AutoAlignCombat()
+    {
+        var sr = GetComponent<SpriteRenderer>();
+        bool isAdventurer = (sr != null && sr.sprite != null && (sr.sprite.rect.height >= 60 || sr.sprite.name.ToLower().Contains("idle") || sr.sprite.name.ToLower().Contains("adventurer")));
+        if (isAdventurer)
+        {
+            bodyCenterOffset = new Vector2(0f, 1.25f);
+            attackOffsetDistance = 0.85f;
+            attackRadius = 1.15f;
+        }
+        else
+        {
+            bodyCenterOffset = new Vector2(0f, 0.05f);
+            attackOffsetDistance = 0.65f;
+            attackRadius = 0.95f;
+        }
+
+        if (attackPoint != null)
+        {
+            UpdateAttackPointPosition();
+        }
+    }
+
+    private void EnsureAttackPoint()
+    {
+        if (attackPoint == null)
+        {
+            Transform existing = transform.Find("AttackPoint");
+            if (existing != null)
+            {
+                attackPoint = existing;
+            }
+            else if (Application.isPlaying)
+            {
+                GameObject point = new GameObject("AttackPoint");
+                point.transform.SetParent(transform, false);
+                attackPoint = point.transform;
+            }
+        }
+
+        if (attackPoint != null)
+        {
+            UpdateAttackPointPosition();
+        }
+    }
+
+#if UNITY_EDITOR
+    void OnValidate()
+    {
+        AutoAlignCombat();
+    }
+#endif
 }

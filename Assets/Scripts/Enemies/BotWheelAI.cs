@@ -6,7 +6,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 {
     public static event System.Action<BotWheelAI> OnEnemyDied;
 
-    [SerializeField] private bool isBoss = false;
+    [SerializeField] public bool isBoss = false;
+    public bool IsBoss => isBoss;
 
     [Header("Enemy Stats")]
     [SerializeField] private int maxHealth = 60;
@@ -33,6 +34,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
     private Animator animator;
+    private Collider2D enemyCol;
 
     // Animator Parameter Hashes
     private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
@@ -44,6 +46,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     {
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
+        enemyCol = GetComponent<Collider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
@@ -133,8 +136,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             Vector2 aimDir = ((Vector2)player.position - (Vector2)transform.position).normalized;
             if (spriteRenderer != null)
             {
-                if (aimDir.x > 0.05f) spriteRenderer.flipX = false;
-                else if (aimDir.x < -0.05f) spriteRenderer.flipX = true;
+                if (aimDir.x > 0.05f) SetFacing(false);
+                else if (aimDir.x < -0.05f) SetFacing(true);
             }
 
             if (attackCooldownTimer <= 0)
@@ -151,8 +154,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         if (spriteRenderer != null)
         {
-            if (dir.x > 0.05f) spriteRenderer.flipX = false;
-            else if (dir.x < -0.05f) spriteRenderer.flipX = true;
+            if (dir.x > 0.05f) SetFacing(false);
+            else if (dir.x < -0.05f) SetFacing(true);
         }
     }
 
@@ -191,7 +194,9 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         // Tinh vi tri nong sung dua vao huong quay
         bool facingLeft = spriteRenderer != null && spriteRenderer.flipX;
-        Vector3 muzzleOffset = new Vector3(facingLeft ? -0.45f : 0.45f, 0.35f, 0f);
+        float botCenterX = facingLeft ? 1.14f : -1.14f;
+        float gunOffset = facingLeft ? -0.45f : 0.45f;
+        Vector3 muzzleOffset = new Vector3(botCenterX + gunOffset, 0.35f, 0f);
         Vector3 spawnPos = transform.position + muzzleOffset;
 
         if (projectilePrefab != null)
@@ -331,5 +336,27 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+
+    private void SetFacing(bool faceLeft)
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.flipX = faceLeft;
+        }
+
+        if (enemyCol == null) enemyCol = GetComponent<Collider2D>();
+        if (enemyCol is CapsuleCollider2D cap)
+        {
+            float absX = Mathf.Abs(cap.offset.x);
+            if (absX < 0.1f) absX = 1.14f;
+            cap.offset = new Vector2(faceLeft ? absX : -absX, cap.offset.y);
+        }
+        else if (enemyCol is BoxCollider2D box)
+        {
+            float absX = Mathf.Abs(box.offset.x);
+            if (absX < 0.1f) absX = 1.14f;
+            box.offset = new Vector2(faceLeft ? absX : -absX, box.offset.y);
+        }
     }
 }

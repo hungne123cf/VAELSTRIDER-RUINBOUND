@@ -116,11 +116,12 @@ public class DungeonRoomManager : MonoBehaviour
         var waveUI = FindAnyObjectByType<WaveUI>();
         if (waveUI != null)
         {
-            if (room.roomType == DungeonRoom.RoomType.TitanSanctum)
+                        if (room.roomType == DungeonRoom.RoomType.TitanSanctum)
             {
-                waveUI.ShowBanner("✦ REALM PURIFIED! ✦", "Stepping into the Ruin Portal...");
-                // Spawn Victory Portal in Boss Room
-                RuinPortal.SpawnPortal(room.roomCenter);
+                bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
+                waveUI.ShowBanner(isVi ? "KHU VUC DA DUOC QUET SACH!" : "REALM PURIFIED!", isVi ? "Cong co tich da mo o phia tren!" : "The Ruin Portal has opened ahead!");
+                // Spawn Victory Portal cach vi tri trung tam 2.5m ve phia tren va co tre 1.5s de tranh de len nguoi choi
+                StartCoroutine(SpawnBossPortalDelayed(room.roomCenter + new Vector3(0f, 2.5f, 0f), 1.5f));
             }
             else
             {
@@ -140,5 +141,10 @@ public class DungeonRoomManager : MonoBehaviour
         }
 
         return currentRoom.roomCenter;
+    }
+    private IEnumerator SpawnBossPortalDelayed(Vector3 pos, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        RuinPortal.SpawnPortal(pos);
     }
 }

@@ -29,6 +29,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         private bool isDead = false;
     public bool isInvulnerable = false;
 
+    public static Vector3 LastDeathPosition { get; private set; }
+    public static string LastDeathScene { get; private set; }
+
     void Awake()
     {
         baseMaxHealth = maxHealth;
@@ -109,6 +112,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (isDead || isInvulnerable) return;
         isDead = true;
         currentHealth = 0;
+        LastDeathPosition = transform.position;
+        LastDeathScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         PlayerPrefs.SetInt("Saved_CurrentHealth", maxHealth);
         PlayerPrefs.Save();
         Debug.Log("<color=red>[PLAYER DIED]</color> Nhan vat guc nga! Phat animation quy xuong chet...");
@@ -189,4 +194,82 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     public int GetCurrentHealth() => currentHealth;
     public int GetMaxHealth() => maxHealth;
+
+    public void Revive()
+    {
+        isDead = false;
+        currentHealth = maxHealth;
+        PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+        PlayerPrefs.Save();
+
+        // 1. Bat lai dieu khien & tan cong
+        var pc = GetComponent<PlayerController>();
+        if (pc != null) pc.enabled = true;
+
+        var combat = GetComponent<PlayerCombat>();
+        if (combat != null) combat.enabled = true;
+
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.bodyType = RigidbodyType2D.Dynamic;
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        var col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = true;
+
+        var anim = GetComponent<Animator>();
+        if (anim != null) anim.enabled = true;
+
+        transform.rotation = Quaternion.identity;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.white;
+        }
+
+        // 2. Tao song xung kich hat vang quai xung quanh ra xa de tranh bi hoi dong
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 3.5f);
+        foreach (var hit in hitColliders)
+        {
+            if (hit.gameObject != gameObject && hit.attachedRigidbody != null)
+            {
+                Vector2 pushDir = (hit.transform.position - transform.position).normalized;
+                if (pushDir == Vector2.zero) pushDir = Vector2.up;
+                hit.attachedRigidbody.AddForce(pushDir * 12f, ForceMode2D.Impulse);
+            }
+        }
+
+        // 3. Bat khien bat tu tam thoi trong 2.5 giay
+        StopAllCoroutines();
+        StartCoroutine(ReviveInvulnerabilityRoutine());
+
+        // 4. Hieu ung am thanh
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayShardPickup();
+        }
+
+        Debug.Log("<color=green>[PLAYER REVIVED]</color> Chien binh da duoc hoi sinh thanh cong voi 100% HP va khien bao ve tam thoi!");
+    }
+
+    private IEnumerator ReviveInvulnerabilityRoutine()
+    {
+        isInvulnerable = true;
+        float duration = 2.5f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = new Color(1f, 1f, 1f, (Mathf.PingPong(elapsed * 8f, 1f) > 0.4f) ? 0.35f : 1f);
+            }
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (spriteRenderer != null) spriteRenderer.color = Color.white;
+        isInvulnerable = false;
+    }
 }

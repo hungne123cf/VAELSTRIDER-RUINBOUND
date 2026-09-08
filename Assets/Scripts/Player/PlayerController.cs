@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float dashSpeed = 12f;
     [SerializeField] private float dashDuration = 0.2f;
-    [SerializeField] private float dashCooldown = 0.8f;
+    [SerializeField] private float dashCooldown = 5.0f;
 
     private Rigidbody2D rb;
     private Animator animator;
@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
         private bool isMobileInputActive = false;
     private bool canMove = true;
     private float baseMoveSpeed = 5f;
-    private float baseDashCooldown = 0.8f;
+    private float baseDashCooldown = 5.0f;
     private float bonusSpeed = 0f;
     private float dashCooldownReduction = 0f;
 
@@ -29,7 +29,7 @@ public class PlayerController : MonoBehaviour
         bonusSpeed = speedBonus;
         dashCooldownReduction = dashCdReduction;
         moveSpeed = baseMoveSpeed + bonusSpeed;
-        dashCooldown = Mathf.Max(0.35f, baseDashCooldown - dashCooldownReduction);
+        dashCooldown = Mathf.Max(1.0f, baseDashCooldown - dashCooldownReduction);
     }
 
     // Animator Hashes
@@ -40,10 +40,16 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        }
         animator = GetComponent<Animator>();
         baseMoveSpeed = moveSpeed;
         baseDashCooldown = dashCooldown;
         if (GetComponent<DashGhostTrail>() == null) gameObject.AddComponent<DashGhostTrail>();
+        AutoAlignCollider();
 
         // Khong de Player va Enemy day nhau (loai bo vat ly va cham day nhau gay kho chiu)
         int playerLayer = gameObject.layer;
@@ -162,4 +168,33 @@ public class PlayerController : MonoBehaviour
 
     public Vector2 GetFacingDirection() => lastFacingDirection;
     public bool IsDashing() => isDashing;
+
+    public void AutoAlignCollider()
+    {
+        var box = GetComponent<BoxCollider2D>();
+        var sr = GetComponent<SpriteRenderer>();
+        if (box == null || sr == null || sr.sprite == null) return;
+
+        bool isAdventurer = (sr.sprite.rect.height >= 60 || sr.sprite.name.ToLower().Contains("idle") || sr.sprite.name.ToLower().Contains("adventurer"));
+        if (isAdventurer)
+        {
+            box.offset = new Vector2(0f, 1.25f);
+            box.size = new Vector2(0.55f, 1.05f);
+        }
+        else
+        {
+            box.offset = new Vector2(0f, -0.05f);
+            box.size = new Vector2(0.55f, 0.8f);
+        }
+
+        var combat = GetComponent<PlayerCombat>();
+        if (combat != null) combat.AutoAlignCombat();
+    }
+
+#if UNITY_EDITOR
+    void OnValidate()
+    {
+        AutoAlignCollider();
+    }
+#endif
 }

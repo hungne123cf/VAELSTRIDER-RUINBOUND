@@ -29,7 +29,7 @@ public class DungeonMapBuilder : MonoBehaviour
 
         if (groundTm == null || wallsTm == null)
         {
-            Debug.LogError("[MAP BUILDER] Không tìm thấy Tilemap Ground hoặc Walls trong Scene!");
+            Debug.LogWarning("[MAP BUILDER] Bỏ qua vì không tìm thấy Tilemap Ground hoặc Walls trong Scene hiện tại.");
             return;
         }
 
@@ -84,13 +84,13 @@ public class DungeonMapBuilder : MonoBehaviour
             groundTm.SetTile(new Vector3Int(pos.x, pos.y, 0), floorTile);
         }
 
-        // Tính toán vành tường kín (Wall Perimeter)
+        // Tính toán vành tường kín dày 2-3 ô (Wall Perimeter) ngăn hoàn toàn việc đi xuyên tường
         HashSet<Vector2Int> wallSet = new HashSet<Vector2Int>();
         foreach (var pos in floorSet)
         {
-            for (int dx = -1; dx <= 1; dx++)
+            for (int dx = -2; dx <= 2; dx++)
             {
-                for (int dy = -1; dy <= 1; dy++)
+                for (int dy = -2; dy <= 2; dy++)
                 {
                     Vector2Int neighbor = new Vector2Int(pos.x + dx, pos.y + dy);
                     if (!floorSet.Contains(neighbor))
@@ -109,6 +109,32 @@ public class DungeonMapBuilder : MonoBehaviour
 
         groundTm.RefreshAllTiles();
         wallsTm.RefreshAllTiles();
+
+        // Cấu hình Sorting Layer và Collider vững chắc cho Walls & Ground
+        var wallRend = wallsTm.GetComponent<TilemapRenderer>();
+        if (wallRend != null)
+        {
+            wallRend.sortingLayerName = "Default";
+            wallRend.sortingOrder = 2;
+        }
+
+        var groundRend = groundTm.GetComponent<TilemapRenderer>();
+        if (groundRend != null)
+        {
+            groundRend.sortingLayerName = "Default";
+            groundRend.sortingOrder = -10;
+        }
+
+        // Đảm bảo TilemapCollider2D tạo box collider đặc cho từng ô gạch tường, không dùng outline rỗng
+        var wallCol = wallsTm.GetComponent<TilemapCollider2D>();
+        if (wallCol == null) wallCol = wallsTm.gameObject.AddComponent<TilemapCollider2D>();
+        wallCol.compositeOperation = Collider2D.CompositeOperation.None;
+
+        var compCol = wallsTm.GetComponent<CompositeCollider2D>();
+        if (compCol != null)
+        {
+            Object.DestroyImmediate(compCol);
+        }
 
         // 5. Tạo Cửa Phong Ấn (RoomBarriers)
         Transform barriersRoot = GetOrCreateRoot("DungeonBarriers");

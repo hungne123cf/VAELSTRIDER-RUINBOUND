@@ -13,7 +13,7 @@ public class PlayerUpgradeManager : MonoBehaviour
         Ultimate
     }
 
-    public const int MAX_LEVEL = 10;
+    public const int MAX_LEVEL = 30;
 
     public event Action OnUpgradesChanged;
 
@@ -46,6 +46,20 @@ public class PlayerUpgradeManager : MonoBehaviour
         if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
     }
 
+        public int CurrentShards
+    {
+        get
+        {
+            if (inventory == null) inventory = FindAnyObjectByType<PlayerInventory>();
+            return inventory != null ? inventory.GetShards() : 0;
+        }
+    }
+
+    public int GetUpgradeLevel(UpgradeType type) => GetLevel(type);
+    public int GetUpgradeCost(UpgradeType type) => GetCost(type);
+    public string GetUpgradeName(UpgradeType type) => GetTitle(type);
+    public string GetCurrentEffectDescription(UpgradeType type) => GetDescription(type, GetLevel(type));
+
     public int GetLevel(UpgradeType type)
     {
         return PlayerPrefs.GetInt("Upgrade_" + type.ToString() + "_Level", 0);
@@ -54,20 +68,20 @@ public class PlayerUpgradeManager : MonoBehaviour
     public int GetCost(UpgradeType type)
     {
         int level = GetLevel(type);
-        if (level >= MAX_LEVEL) return -1; // Max level reached
+        if (level >= MAX_LEVEL) return -1; // Max level 30
 
         switch (type)
         {
             case UpgradeType.Attack:
-                return (level + 1) * 6; // 6, 12, 18, 24, 30, 36...
+                return 4 + level * 5; // 4, 9, 14, ..., 149 shards
             case UpgradeType.Health:
-                return (level + 1) * 5; // 5, 10, 15, 20, 25, 30...
+                return 3 + level * 4; // 3, 7, 11, ..., 119 shards
             case UpgradeType.Agility:
-                return (level + 1) * 5; // 5, 10, 15, 20, 25, 30...
+                return 3 + level * 4; // 3, 7, 11, ..., 119 shards
             case UpgradeType.Ultimate:
-                return (level + 1) * 8; // 8, 16, 24, 32, 40, 48...
+                return 5 + level * 6; // 5, 11, 17, ..., 179 shards
             default:
-                return 10;
+                return 5 + level * 5;
         }
     }
 
@@ -88,13 +102,13 @@ public class PlayerUpgradeManager : MonoBehaviour
         switch (type)
         {
             case UpgradeType.Attack:
-                return "+" + (level * 6) + " Sát thương (+ATK)";
+                return "+" + (level * 2) + " Sát thương (+ATK)";
             case UpgradeType.Health:
-                return "+" + (level * 30) + " Máu tối đa (+Max HP)";
+                return "+" + (level * 15) + " Máu tối đa (+Max HP)";
             case UpgradeType.Agility:
-                return "+" + (level * 0.35f).ToString("F1") + " Tốc độ | -" + (level * 0.06f).ToString("F2") + "s Dash";
+                return "+" + (level * 0.08f).ToString("F2") + " Tốc độ | -" + (level * 0.05f).ToString("F2") + "s Dash";
             case UpgradeType.Ultimate:
-                return "-" + (level * 0.5f).ToString("F1") + "s Hồi Ulti | +" + (level * 15) + " Dmg";
+                return "-" + (level * 0.6f).ToString("F1") + "s Hồi Ulti | +" + (level * 8) + " Dmg";
             default:
                 return "";
         }
@@ -103,14 +117,14 @@ public class PlayerUpgradeManager : MonoBehaviour
     public string GetNextBonusDescription(UpgradeType type)
     {
         int level = GetLevel(type);
-        if (level >= MAX_LEVEL) return "ĐÃ ĐẠT CẤP TỐI ĐA";
+        if (level >= MAX_LEVEL) return "ĐÃ ĐẠT CẤP TỐI ĐA (30)";
 
         switch (type)
         {
-            case UpgradeType.Attack: return "+6 Sát thương chém";
-            case UpgradeType.Health: return "+30 Máu tối đa & Hồi máu";
-            case UpgradeType.Agility: return "+0.35 Tốc chạy & -0.06s Dash";
-            case UpgradeType.Ultimate: return "-0.5s Hồi chiêu & +15 Dmg";
+            case UpgradeType.Attack: return "+2 Sát thương chém";
+            case UpgradeType.Health: return "+15 Máu tối đa & Hồi máu";
+            case UpgradeType.Agility: return "+0.08 Tốc chạy & -0.05s Dash";
+            case UpgradeType.Ultimate: return "-0.6s Hồi chiêu & +8 Dmg";
             default: return "";
         }
     }
@@ -153,17 +167,17 @@ public class PlayerUpgradeManager : MonoBehaviour
     {
         FindPlayerComponents();
 
-        // 1. Attack Bonus
+        // 1. Attack Bonus (+2 per level up to +60 at LV 30)
         int atkLevel = GetLevel(UpgradeType.Attack);
-        int bonusAtk = atkLevel * 6;
+        int bonusAtk = atkLevel * 2;
         if (playerCombat != null)
         {
             playerCombat.ApplyUpgradeBonus(bonusAtk, GetUltiCooldownReduction(), GetUltiDamageBonus());
         }
 
-        // 2. Health Bonus (+30 HP per level)
+        // 2. Health Bonus (+15 HP per level up to +450 HP at LV 30)
         int hpLevel = GetLevel(UpgradeType.Health);
-        int bonusHp = hpLevel * 30;
+        int bonusHp = hpLevel * 15;
         if (playerHealth != null)
         {
             playerHealth.ApplyUpgradeBonus(bonusHp);
@@ -171,8 +185,8 @@ public class PlayerUpgradeManager : MonoBehaviour
 
         // 3. Agility Bonus
         int agiLevel = GetLevel(UpgradeType.Agility);
-        float bonusSpeed = agiLevel * 0.35f;
-        float bonusDashCd = agiLevel * 0.06f;
+        float bonusSpeed = agiLevel * 0.08f;
+        float bonusDashCd = agiLevel * 0.05f;
         if (playerController != null)
         {
             playerController.ApplyUpgradeBonus(bonusSpeed, bonusDashCd);
@@ -181,12 +195,45 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     public float GetUltiCooldownReduction()
     {
-        return GetLevel(UpgradeType.Ultimate) * 0.5f;
+        return GetLevel(UpgradeType.Ultimate) * 0.6f;
     }
 
     public int GetUltiDamageBonus()
     {
-        return GetLevel(UpgradeType.Ultimate) * 15;
+        return GetLevel(UpgradeType.Ultimate) * 8;
+    }
+
+    public static void ResetEntireGameProgress()
+    {
+        // 1. Reset Aethel Shards
+        PlayerPrefs.SetInt("Save_AethelShards", 0);
+
+        // 2. Reset Health Potions ve 3 binh mac dinh
+        PlayerPrefs.SetInt("Save_HealthPotions", 3);
+
+        // 3. Xoa mo linh hon roi Dark Souls
+        PlayerPrefs.DeleteKey("Save_LostShards");
+        PlayerPrefs.DeleteKey("Save_DeathPosX");
+        PlayerPrefs.DeleteKey("Save_DeathPosY");
+        PlayerPrefs.DeleteKey("Save_DeathPosZ");
+        PlayerPrefs.DeleteKey("Save_DeathScene");
+
+        // 4. Reset toan bo 4 nhanh nang cap Den Tho
+        PlayerPrefs.SetInt("Upgrade_Attack_Level", 0);
+        PlayerPrefs.SetInt("Upgrade_Health_Level", 0);
+        PlayerPrefs.SetInt("Upgrade_Agility_Level", 0);
+        PlayerPrefs.SetInt("Upgrade_Ultimate_Level", 0);
+
+        // 5. Khoa lai Maid va chon Vaelstrider mac dinh
+        PlayerPrefs.SetInt("Char_Unlocked_Maid", 0);
+        PlayerPrefs.SetString("Selected_Character_ID", "Vaelstrider");
+
+        PlayerPrefs.Save();
+
+        if (Instance != null)
+        {
+            Instance.ApplyAllUpgrades();
+        }
     }
 
     public static PlayerUpgradeManager EnsureInstance()
