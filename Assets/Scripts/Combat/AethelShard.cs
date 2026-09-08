@@ -89,6 +89,7 @@ public class AethelShard : MonoBehaviour
                 if (playerInventory != null)
                 {
                     playerInventory.AddShards(shardValue);
+                SoundManager.EnsureInstance()?.PlayShardPickup();
                 }
                 Destroy(gameObject);
             }

@@ -1,0 +1,159 @@
+using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using System.Collections;
+
+public class RoomBarrier : MonoBehaviour
+{
+    [SerializeField] private bool isLocked = false;
+    [SerializeField] private bool isVertical = true;
+    [SerializeField] private float size = 3f;
+
+    private BoxCollider2D boxCollider;
+    private SpriteRenderer spriteRenderer;
+    private Light2D barrierLight;
+
+    void Awake()
+    {
+        EnsureComponents();
+        UpdateColliderSize();
+        ApplyStateInstant(isLocked);
+    }
+
+    private void EnsureComponents()
+    {
+        if (boxCollider == null) boxCollider = GetComponent<BoxCollider2D>();
+        if (boxCollider == null) boxCollider = gameObject.AddComponent<BoxCollider2D>();
+
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (barrierLight == null) barrierLight = GetComponent<Light2D>();
+    }
+
+    private void UpdateColliderSize()
+    {
+        EnsureComponents();
+        if (boxCollider != null)
+        {
+            if (isVertical)
+            {
+                boxCollider.size = new Vector2(0.8f, size);
+                boxCollider.offset = Vector2.zero;
+            }
+            else
+            {
+                boxCollider.size = new Vector2(size, 0.8f);
+                boxCollider.offset = Vector2.zero;
+            }
+        }
+    }
+
+    public void Setup(bool vertical, float length)
+    {
+        EnsureComponents();
+        isVertical = vertical;
+        size = length;
+        UpdateColliderSize();
+    }
+
+    public void Lock()
+    {
+        if (isLocked) return;
+        isLocked = true;
+        gameObject.SetActive(true);
+        boxCollider.enabled = true;
+
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+        StartCoroutine(FadeBarrier(0f, 0.85f, 0.3f));
+    }
+
+    public void Unlock()
+    {
+        if (!isLocked) return;
+        isLocked = false;
+        boxCollider.enabled = false;
+
+        SoundManager.EnsureInstance()?.PlayShardPickup();
+        StartCoroutine(FadeBarrier(0.85f, 0f, 0.5f));
+    }
+
+    private void ApplyStateInstant(bool locked)
+    {
+        EnsureComponents();
+        isLocked = locked;
+        if (boxCollider != null) boxCollider.enabled = locked;
+        if (spriteRenderer != null)
+        {
+            Color c = spriteRenderer.color;
+            c.a = locked ? 0.85f : 0f;
+            spriteRenderer.color = c;
+        }
+        if (barrierLight != null)
+        {
+            barrierLight.enabled = locked;
+        }
+    }
+
+    private IEnumerator FadeBarrier(float fromAlpha, float toAlpha, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float a = Mathf.Lerp(fromAlpha, toAlpha, elapsed / duration);
+            if (spriteRenderer != null)
+            {
+                Color c = spriteRenderer.color;
+                c.a = a;
+                spriteRenderer.color = c;
+            }
+            if (barrierLight != null)
+            {
+                barrierLight.intensity = Mathf.Lerp(0f, 1.6f, toAlpha > 0f ? a : (1f - a));
+                barrierLight.enabled = barrierLight.intensity > 0.05f;
+            }
+            yield return null;
+        }
+
+        if (toAlpha <= 0f)
+        {
+            if (barrierLight != null) barrierLight.enabled = false;
+        }
+    }
+
+    public static RoomBarrier Create(Vector3 position, bool vertical, float length, string name = "RoomBarrier")
+    {
+        GameObject go = new GameObject(name);
+        go.transform.position = position;
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        // Simple procedural colored texture for the glowing barrier
+        Texture2D tex = new Texture2D(32, 32);
+        Color runeColor = new Color(0.2f, 0.85f, 1f, 0.9f);
+        for (int y = 0; y < 32; y++)
+        {
+            for (int x = 0; x < 32; x++)
+            {
+                bool isBorder = (x == 0 || x == 31 || y == 0 || y == 31);
+                tex.SetPixel(x, y, isBorder ? Color.white : runeColor);
+            }
+        }
+        tex.Apply();
+        sr.sprite = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 32);
+        sr.sortingLayerName = "Entities";
+        sr.sortingOrder = 4500;
+        sr.drawMode = SpriteDrawMode.Sliced;
+        sr.size = vertical ? new Vector2(0.7f, length) : new Vector2(length, 0.7f);
+
+        var light = go.AddComponent<Light2D>();
+        light.lightType = Light2D.LightType.Point;
+        light.color = new Color(0.2f, 0.8f, 1f, 1f);
+        light.intensity = 1.6f;
+        light.pointLightInnerRadius = 0.5f;
+        light.pointLightOuterRadius = length * 1.2f;
+
+        var barrier = go.AddComponent<RoomBarrier>();
+        barrier.Setup(vertical, length);
+        barrier.ApplyStateInstant(false); // start unlocked
+
+        return barrier;
+    }
+}

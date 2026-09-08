@@ -12,11 +12,13 @@ public class WaveSpawner : MonoBehaviour
 
     [Header("Wave Settings")]
     [SerializeField] private int totalWaves = 3;
+    [SerializeField] private bool roomTriggeredMode = true;
 
     private int currentWave = 0;
     private int aliveEnemies = 0;
     private bool waveInProgress = false;
     private bool allWavesCleared = false;
+    private System.Action currentRoomClearedCallback;
 
     // Events
     public static event System.Action<int, int, string> OnWaveStarted;
@@ -25,14 +27,12 @@ public class WaveSpawner : MonoBehaviour
 
     void Awake()
     {
-        // Auto-find template enemy in Scene if enemyPrefab not manually assigned
         if (enemyPrefab == null)
         {
             var bot = FindAnyObjectByType<BotWheelAI>();
             if (bot != null)
             {
                 enemyPrefab = bot.gameObject;
-                // Temporarily deactivate template in scene so spawner manages spawns cleanly
                 bot.gameObject.SetActive(false);
             }
         }
@@ -50,7 +50,17 @@ public class WaveSpawner : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(StartFirstWaveRoutine());
+        // Neu co DungeonRoomManager thi khong tu dong khoi dong Wave ngay tai cho ma cho nguoi choi buoc vao phong
+        var roomMgr = FindAnyObjectByType<DungeonRoomManager>();
+        if (roomMgr != null)
+        {
+            roomTriggeredMode = true;
+            Debug.Log("<color=cyan>[WAVE SPAWNER]</color> Kích hoạt chế độ điều phối theo phòng DungeonRoom!");
+        }
+        else
+        {
+            StartCoroutine(StartFirstWaveRoutine());
+        }
     }
 
     private IEnumerator StartFirstWaveRoutine()
@@ -59,15 +69,78 @@ public class WaveSpawner : MonoBehaviour
         StartNextWave();
     }
 
+    public void SpawnRoomEnemies(List<Vector3> spawnPositions, bool isBoss, System.Action onCleared)
+    {
+        currentRoomClearedCallback = onCleared;
+        aliveEnemies = spawnPositions.Count;
+        waveInProgress = true;
+
+        currentWave++;
+        string title = isBoss ? "BOSS INCOMING: TITAN WHEEL!" : $"WAVE {currentWave} / {totalWaves}";
+        OnWaveStarted?.Invoke(currentWave, totalWaves, title);
+
+        StartCoroutine(SpawnRoomEnemiesRoutine(spawnPositions, isBoss));
+    }
+
+    private IEnumerator SpawnRoomEnemiesRoutine(List<Vector3> spawnPositions, bool isBoss)
+    {
+        for (int i = 0; i < spawnPositions.Count; i++)
+        {
+            Vector3 spawnPos = spawnPositions[i];
+            if (enemyPrefab != null)
+            {
+                GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+                newEnemy.SetActive(true);
+
+                // Bo qua va cham vat ly day nhau giua nguoi choi va quai
+                var player = FindAnyObjectByType<PlayerController>();
+                if (player != null)
+                {
+                    var pCols = player.GetComponentsInChildren<Collider2D>();
+                    var eCols = newEnemy.GetComponentsInChildren<Collider2D>();
+                    foreach (var pCol in pCols)
+                    {
+                        foreach (var eCol in eCols)
+                        {
+                            if (pCol != null && eCol != null)
+                                Physics2D.IgnoreCollision(pCol, eCol, true);
+                        }
+                    }
+                }
+
+                if (isBoss)
+                {
+                    var ai = newEnemy.GetComponent<BotWheelAI>();
+                    if (ai != null)
+                    {
+                        ai.SetupBoss(1.85f, 3, 2);
+                    }
+                }
+            }
+
+            yield return new WaitForSeconds(0.35f);
+        }
+    }
+
     private void HandleEnemyDied(BotWheelAI enemy)
     {
         aliveEnemies--;
-        Debug.Log($"<color=green>[SPAWNER]</color> Enemy defeated! Remaining in wave: {aliveEnemies}");
+        Debug.Log($"<color=green>[SPAWNER]</color> Quái vật bị hạ gục! Còn lại trong phòng: {aliveEnemies}");
 
         if (aliveEnemies <= 0 && waveInProgress)
         {
             waveInProgress = false;
-            StartCoroutine(WaveCompletedRoutine());
+
+            if (currentRoomClearedCallback != null)
+            {
+                var cb = currentRoomClearedCallback;
+                currentRoomClearedCallback = null;
+                cb.Invoke();
+            }
+            else
+            {
+                StartCoroutine(WaveCompletedRoutine());
+            }
         }
     }
 
@@ -86,8 +159,24 @@ public class WaveSpawner : MonoBehaviour
             OnWaveMessage?.Invoke("VICTORY!\nRUINS PURIFIED!");
             OnAllWavesCleared?.Invoke();
 
-            // Reward victory with a burst of Aethel Shards
             AethelShard.SpawnShards(transform.position, 15);
+            StartCoroutine(SpawnVictoryPortalRoutine());
+        }
+    }
+
+    private IEnumerator SpawnVictoryPortalRoutine()
+    {
+        yield return new WaitForSeconds(1.8f);
+
+        var existingPortal = Object.FindAnyObjectByType<RuinPortal>(FindObjectsInactive.Include);
+        if (existingPortal != null)
+        {
+            existingPortal.gameObject.SetActive(true);
+            existingPortal.ActivatePortal();
+        }
+        else
+        {
+            RuinPortal.SpawnPortal(transform.position);
         }
     }
 
@@ -113,7 +202,7 @@ public class WaveSpawner : MonoBehaviour
 
         if (wave == 1) countToSpawn = 2;
         else if (wave == 2) countToSpawn = 4;
-        else if (isBossWave) countToSpawn = 1; // 1 Giant Titan Mini-Boss
+        else if (isBossWave) countToSpawn = 1;
 
         aliveEnemies = countToSpawn;
 
@@ -126,7 +215,21 @@ public class WaveSpawner : MonoBehaviour
                 GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
                 newEnemy.SetActive(true);
 
-                // If Boss Wave -> buff into Titan Boss
+                var player = FindAnyObjectByType<PlayerController>();
+                if (player != null)
+                {
+                    var pCols = player.GetComponentsInChildren<Collider2D>();
+                    var eCols = newEnemy.GetComponentsInChildren<Collider2D>();
+                    foreach (var pCol in pCols)
+                    {
+                        foreach (var eCol in eCols)
+                        {
+                            if (pCol != null && eCol != null)
+                                Physics2D.IgnoreCollision(pCol, eCol, true);
+                        }
+                    }
+                }
+
                 if (isBossWave)
                 {
                     var ai = newEnemy.GetComponent<BotWheelAI>();
@@ -150,11 +253,5 @@ public class WaveSpawner : MonoBehaviour
 
         Vector2 randomCircle = Random.insideUnitCircle.normalized * Random.Range(3f, spawnRadius);
         return transform.position + new Vector3(randomCircle.x, randomCircle.y, 0);
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(transform.position, spawnRadius);
     }
 }

@@ -19,11 +19,11 @@ public class RuinPortal : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         circleCollider = GetComponent<CircleCollider2D>();
         baseScale = transform.localScale;
+        if (baseScale == Vector3.zero) baseScale = Vector3.one;
 
         circleCollider.isTrigger = true;
         circleCollider.radius = 0.85f;
 
-        // Auto load sprite if null
         if (spriteRenderer.sprite == null)
         {
             var sp = Resources.Load<Sprite>("Environment/ruin_portal");
@@ -36,7 +36,7 @@ public class RuinPortal : MonoBehaviour
             spriteRenderer.sprite = sp;
         }
 
-        spriteRenderer.sortingOrder = 4900; // Tren san, duoi Player
+        spriteRenderer.sortingOrder = 4900;
     }
 
     void OnEnable()
@@ -51,36 +51,32 @@ public class RuinPortal : MonoBehaviour
 
     void Start()
     {
-        // Neu xuat hien tu dau (chua co wave spawner), kich hoat luon
         var spawner = Object.FindAnyObjectByType<WaveSpawner>();
-        if (spawner == null)
+        if (spawner != null && !isActivated)
         {
-            ActivatePortal();
-        }
-        else
-        {
-            // An di, cho den khi Wave 3 hoan tat moi bung ra
-            gameObject.SetActive(false);
+            // Giu GameObject luon Active de khong bi ngat event, chi an hien thi
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
+            if (circleCollider != null) circleCollider.enabled = false;
+            transform.localScale = Vector3.zero;
         }
     }
 
     private void HandleAllWavesCleared()
     {
-        gameObject.SetActive(true);
         StartCoroutine(SpawnPortalRoutine());
     }
 
     private IEnumerator SpawnPortalRoutine()
     {
-        // Cho 2s de tinh the va quai rot het
-        yield return new WaitForSeconds(2.0f);
-
+        yield return new WaitForSeconds(1.8f);
         ActivatePortal();
     }
 
     public void ActivatePortal()
     {
         isActivated = true;
+        if (spriteRenderer != null) spriteRenderer.enabled = true;
+        if (circleCollider != null) circleCollider.enabled = true;
         StartCoroutine(AppearRoutine());
     }
 
@@ -91,7 +87,8 @@ public class RuinPortal : MonoBehaviour
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.2f, 0.35f);
 
-        DamagePopup.CreateText(transform.position, "PORTAL OPENED!", new Color(0.8f, 0.4f, 1f));
+        DamagePopup.CreateText(transform.position, "PORTAL OPENED!", new Color(0.85f, 0.45f, 1f));
+        SoundManager.EnsureInstance()?.PlayPortalSpawn();
 
         float t = 0;
         while (t < 0.6f)
@@ -108,7 +105,6 @@ public class RuinPortal : MonoBehaviour
     {
         if (!isActivated || isPlayerEntering) return;
 
-        // Hieu ung dap xung nhe nhang (Portal breathing)
         float pulse = Mathf.Sin(Time.time * pulseSpeed) * pulseAmount;
         transform.localScale = baseScale * (1f + pulse);
     }
@@ -127,7 +123,6 @@ public class RuinPortal : MonoBehaviour
     {
         isPlayerEntering = true;
 
-        // Vo hieu hoa dieu khien cua nguoi choi
         var controller = playerTransform.GetComponent<PlayerController>();
         if (controller != null) controller.enabled = false;
 
@@ -137,7 +132,6 @@ public class RuinPortal : MonoBehaviour
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.25f, 0.3f);
 
-        // Nguoi choi bi hut vao tam cong va thu nho bien mat
         Vector3 startPos = playerTransform.position;
         Vector3 portalCenter = transform.position + Vector3.up * 0.4f;
         Vector3 startScale = playerTransform.localScale;
@@ -153,10 +147,38 @@ public class RuinPortal : MonoBehaviour
             yield return null;
         }
 
-        // Hien thi man hinh chien thang!
         if (VictoryUI.Instance != null)
         {
             VictoryUI.Instance.ShowVictoryScreen();
         }
+        else
+        {
+            VictoryUI.CreateRuntimeVictoryUI();
+        }
+    }
+
+    public static RuinPortal SpawnPortal(Vector3 pos)
+    {
+        GameObject portalObj = new GameObject("RuinPortal");
+        portalObj.transform.position = pos;
+
+        var sr = portalObj.AddComponent<SpriteRenderer>();
+        var portalSprite = Resources.Load<Sprite>("Environment/ruin_portal");
+#if UNITY_EDITOR
+        if (portalSprite == null)
+        {
+            portalSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Environment/ruin_portal.png");
+        }
+#endif
+        sr.sprite = portalSprite;
+        sr.sortingOrder = 4900;
+
+        var col = portalObj.AddComponent<CircleCollider2D>();
+        col.isTrigger = true;
+        col.radius = 0.85f;
+
+        var portal = portalObj.AddComponent<RuinPortal>();
+        portal.ActivatePortal();
+        return portal;
     }
 }

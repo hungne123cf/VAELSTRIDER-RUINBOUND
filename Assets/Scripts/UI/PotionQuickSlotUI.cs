@@ -15,7 +15,7 @@ public class PotionQuickSlotUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI tmpCountText;
     [SerializeField] private CanvasGroup canvasGroup;
 
-    [Header("Key Shortcut for PC (Nút 1 hoặc Q)")]
+    [Header("Key Shortcut for PC (Nút 1, Q, H, E)")]
     [SerializeField] private KeyCode useKey = KeyCode.Alpha1;
     [SerializeField] private KeyCode secondaryKey = KeyCode.Q;
 
@@ -37,6 +37,7 @@ public class PotionQuickSlotUI : MonoBehaviour
 
         if (potionButton != null)
         {
+            potionButton.onClick.RemoveAllListeners();
             potionButton.onClick.AddListener(OnPotionButtonClicked);
         }
     }
@@ -85,7 +86,7 @@ public class PotionQuickSlotUI : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(useKey) || Input.GetKeyDown(secondaryKey))
+        if (Input.GetKeyDown(useKey) || Input.GetKeyDown(secondaryKey) || Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.E))
         {
             OnPotionButtonClicked();
         }
@@ -124,8 +125,8 @@ public class PotionQuickSlotUI : MonoBehaviour
             }
             else
             {
-                canvasGroup.alpha = 0.45f;
-                if (potionButton != null) potionButton.interactable = false;
+                canvasGroup.alpha = 0.5f;
+                if (potionButton != null) potionButton.interactable = true; // van de click de bao no potions
             }
         }
     }
@@ -150,7 +151,6 @@ public class PotionQuickSlotUI : MonoBehaviour
             startScreenPos = transform.position;
         }
 
-        // Tao vat the bay tren Canvas
         GameObject flyObj = new GameObject("FlyingPotionFX");
         flyObj.transform.SetParent(parentCanvas.transform, false);
 
@@ -179,17 +179,14 @@ public class PotionQuickSlotUI : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
-            // Smooth ease in-out
             float easeT = Mathf.SmoothStep(0f, 1f, t);
 
-            // Quadratic Bezier Arc bay cong len tren roi ha vao slot
             Vector3 pos = (1 - easeT) * (1 - easeT) * startScreenPos +
                           2 * (1 - easeT) * easeT * midPoint +
                           easeT * easeT * targetScreenPos;
 
             rect.position = pos;
 
-            // Scale phong to nhe luc bat dau roi thu nho khi lao vao slot
             float scale = Mathf.Lerp(1.35f, 0.65f, easeT);
             rect.localScale = Vector3.one * scale;
 
@@ -198,10 +195,7 @@ public class PotionQuickSlotUI : MonoBehaviour
 
         Destroy(flyObj);
 
-        // Hieu ung dap vao slot
         StartCoroutine(PunchScaleRoutine());
-
-        // Cap nhat du lieu
         onComplete?.Invoke();
     }
 
@@ -213,5 +207,70 @@ public class PotionQuickSlotUI : MonoBehaviour
         transform.localScale = orig * 0.9f;
         yield return new WaitForSeconds(0.06f);
         transform.localScale = orig;
+    }
+
+    public static PotionQuickSlotUI EnsureUIExists()
+    {
+        if (Instance != null) return Instance;
+
+        Canvas canvas = FindAnyObjectByType<Canvas>();
+        if (canvas == null) return null;
+
+        Transform existing = canvas.transform.Find("Btn_Potion");
+        if (existing != null)
+        {
+            Instance = existing.GetComponent<PotionQuickSlotUI>();
+            if (Instance == null) Instance = existing.gameObject.AddComponent<PotionQuickSlotUI>();
+            return Instance;
+        }
+
+        // Tu dong tao nut tren Canvas
+        GameObject btnObj = new GameObject("Btn_Potion");
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        RectTransform rect = btnObj.AddComponent<RectTransform>();
+        rect.anchorMin = new Vector2(1, 0);
+        rect.anchorMax = new Vector2(1, 0);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = new Vector2(-220, 360);
+        rect.sizeDelta = new Vector2(75, 75);
+
+        Image bgImage = btnObj.AddComponent<Image>();
+        bgImage.color = new Color(0.15f, 0.12f, 0.22f, 0.92f);
+
+        Button button = btnObj.AddComponent<Button>();
+
+        GameObject iconObj = new GameObject("PotionIcon");
+        iconObj.transform.SetParent(btnObj.transform, false);
+        RectTransform iconRect = iconObj.AddComponent<RectTransform>();
+        iconRect.sizeDelta = new Vector2(50, 50);
+        iconRect.anchoredPosition = new Vector2(0, 3);
+        Image iconImage = iconObj.AddComponent<Image>();
+        Sprite potSprite = Resources.Load<Sprite>("Items/health_potion");
+#if UNITY_EDITOR
+        if (potSprite == null) potSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/health_potion.png");
+#endif
+        if (potSprite != null) iconImage.sprite = potSprite;
+        iconImage.raycastTarget = false;
+
+        GameObject badgeObj = new GameObject("AmountText");
+        badgeObj.transform.SetParent(btnObj.transform, false);
+        RectTransform badgeRect = badgeObj.AddComponent<RectTransform>();
+        badgeRect.anchorMin = new Vector2(1, 0);
+        badgeRect.anchorMax = new Vector2(1, 0);
+        badgeRect.pivot = new Vector2(1, 0);
+        badgeRect.anchoredPosition = new Vector2(-4, 4);
+        badgeRect.sizeDelta = new Vector2(40, 24);
+
+        var tmp = badgeObj.AddComponent<TextMeshProUGUI>();
+        tmp.text = "x0";
+        tmp.fontSize = 18;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = Color.white;
+        tmp.alignment = TextAlignmentOptions.BottomRight;
+        tmp.raycastTarget = false;
+
+        Instance = btnObj.AddComponent<PotionQuickSlotUI>();
+        return Instance;
     }
 }

@@ -17,7 +17,20 @@ public class PlayerController : MonoBehaviour
     private bool isDashing = false;
     private float dashTimer = 0f;
     private float dashCooldownTimer = 0f;
-    private bool isMobileInputActive = false;
+        private bool isMobileInputActive = false;
+    private bool canMove = true;
+    private float baseMoveSpeed = 5f;
+    private float baseDashCooldown = 0.8f;
+    private float bonusSpeed = 0f;
+    private float dashCooldownReduction = 0f;
+
+    public void ApplyUpgradeBonus(float speedBonus, float dashCdReduction)
+    {
+        bonusSpeed = speedBonus;
+        dashCooldownReduction = dashCdReduction;
+        moveSpeed = baseMoveSpeed + bonusSpeed;
+        dashCooldown = Mathf.Max(0.35f, baseDashCooldown - dashCooldownReduction);
+    }
 
     // Animator Hashes
     private static readonly int MoveXHash = Animator.StringToHash("MoveX");
@@ -28,6 +41,17 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        baseMoveSpeed = moveSpeed;
+        baseDashCooldown = dashCooldown;
+        if (GetComponent<DashGhostTrail>() == null) gameObject.AddComponent<DashGhostTrail>();
+
+        // Khong de Player va Enemy day nhau (loai bo vat ly va cham day nhau gay kho chiu)
+        int playerLayer = gameObject.layer;
+        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        if (playerLayer >= 0 && enemyLayer >= 0)
+        {
+            Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, true);
+        }
     }
 
     void Update()
@@ -67,11 +91,23 @@ public class PlayerController : MonoBehaviour
             PerformDash();
         }
 
+        // Bam 1, Q, H, E de uong binh mau
+        if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.H))
+        {
+            var inv = GetComponent<PlayerInventory>();
+            if (inv != null) inv.UsePotion();
+        }
+
         UpdateAnimations();
     }
 
     void FixedUpdate()
     {
+        if (!canMove)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
         if (isDashing)
         {
             rb.linearVelocity = lastFacingDirection * dashSpeed;
@@ -79,6 +115,16 @@ public class PlayerController : MonoBehaviour
         else
         {
             rb.linearVelocity = moveInput * moveSpeed;
+        }
+    }
+
+    public void SetCanMove(bool enable)
+    {
+        canMove = enable;
+        if (!enable)
+        {
+            moveInput = Vector2.zero;
+            if (rb != null) rb.linearVelocity = Vector2.zero;
         }
     }
 

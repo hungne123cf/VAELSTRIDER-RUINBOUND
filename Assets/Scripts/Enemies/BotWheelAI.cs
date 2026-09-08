@@ -69,6 +69,27 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     void Start()
     {
         FindPlayerTarget();
+        IgnorePlayerCollision();
+    }
+
+    private void IgnorePlayerCollision()
+    {
+        if (player == null) FindPlayerTarget();
+        if (player != null)
+        {
+            var pCols = player.GetComponentsInChildren<Collider2D>();
+            var myCols = GetComponentsInChildren<Collider2D>();
+            foreach (var pCol in pCols)
+            {
+                foreach (var mCol in myCols)
+                {
+                    if (pCol != null && mCol != null)
+                    {
+                        Physics2D.IgnoreCollision(pCol, mCol, true);
+                    }
+                }
+            }
+        }
     }
 
     private void FindPlayerTarget()
@@ -157,6 +178,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         {
             Vector2 shootDir = ((Vector2)player.position + Vector2.up * 0.4f - (Vector2)transform.position).normalized;
             StartCoroutine(SpawnBulletRoutine(shootDir));
+            SoundManager.EnsureInstance()?.PlayEnemyShoot();
         }
     }
 
@@ -264,6 +286,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         {
             animator.SetTrigger(DieHash);
         }
+        if (isBoss) SoundManager.EnsureInstance()?.PlayBossDeath();
+        else SoundManager.EnsureInstance()?.PlayHitImpact();
 
         OnEnemyDied?.Invoke(this);
 

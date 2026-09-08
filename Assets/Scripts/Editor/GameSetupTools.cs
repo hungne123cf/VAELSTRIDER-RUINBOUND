@@ -5,6 +5,15 @@ using TMPro;
 
 public static class GameSetupTools
 {
+    [MenuItem("Vaelstrider/Build Multi-Room Dungeon Now", false, 1)]
+    public static void BuildDungeonMenuItem()
+    {
+        DungeonMapBuilder.BuildDungeon();
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+        UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
+        Debug.Log("<color=green>[VAELSTRIDER TOOLS]</color> Đã tạo và lưu Bản Đồ Đa Phòng vào Scene thành công!");
+    }
+
     [MenuItem("Vaelstrider/Spawn Treasure Chest in Room")]
     [MenuItem("GameObject/Vaelstrider/Treasure Chest", false, 10)]
     public static void SpawnTreasureChest()
@@ -342,5 +351,170 @@ public static class GameSetupTools
         tmp.raycastTarget = false;
 
         return btn;
+    }
+
+    [MenuItem("Vaelstrider/UI/Align Top Left Health Bar Above Shards")]
+    public static void AlignHealthBarTopLeft()
+    {
+        var healthBar = GameObject.Find("PlayerHealthBar");
+        if (healthBar == null)
+        {
+            var hpUI = Object.FindAnyObjectByType<HealthBarUI>();
+            if (hpUI != null) healthBar = hpUI.gameObject;
+        }
+
+        if (healthBar != null)
+        {
+            RectTransform rt = healthBar.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                Undo.RecordObject(rt, "Align Health Bar Top Left");
+                rt.anchorMin = new Vector2(0f, 1f);
+                rt.anchorMax = new Vector2(0f, 1f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = new Vector2(130f, -28f);
+                rt.sizeDelta = new Vector2(220f, 22f);
+
+                Transform bg = rt.Find("Background");
+                if (bg != null)
+                {
+                    RectTransform bgRt = bg.GetComponent<RectTransform>();
+                    if (bgRt != null)
+                    {
+                        bgRt.anchorMin = Vector2.zero;
+                        bgRt.anchorMax = Vector2.one;
+                        bgRt.sizeDelta = Vector2.zero;
+                        bgRt.anchoredPosition = Vector2.zero;
+                    }
+                    Image bgImg = bg.GetComponent<Image>();
+                    if (bgImg != null)
+                    {
+                        bgImg.color = new Color(0.12f, 0.12f, 0.14f, 0.92f);
+                    }
+                }
+
+                Transform fillArea = rt.Find("Fill Area");
+                if (fillArea != null)
+                {
+                    RectTransform faRt = fillArea.GetComponent<RectTransform>();
+                    if (faRt != null)
+                    {
+                        faRt.anchorMin = Vector2.zero;
+                        faRt.anchorMax = Vector2.one;
+                        faRt.sizeDelta = Vector2.zero;
+                        faRt.anchoredPosition = Vector2.zero;
+                    }
+                }
+
+                Transform fill = (fillArea != null) ? fillArea.Find("Fill") : null;
+                if (fill != null)
+                {
+                    Image fillImg = fill.GetComponent<Image>();
+                    if (fillImg != null)
+                    {
+                        fillImg.color = new Color(0.92f, 0.18f, 0.22f, 1f);
+                    }
+                }
+
+                EditorUtility.SetDirty(healthBar);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(healthBar.scene);
+                Debug.Log("<color=green>[UI]</color> Health Bar positioned at Top-Left directly above blue Aethel Shard counter!");
+            }
+        }
+    }
+
+    [MenuItem("Vaelstrider/RESTORE EVERYTHING (Chest, Waves, Boss, Potions, Portal, UI)", false, 0)]
+    
+    [MenuItem("Vaelstrider/UI/Setup Special Skill Button")]
+    [MenuItem("GameObject/Vaelstrider/Special Skill Button", false, 12)]
+    public static void SetupSpecialSkillButton()
+    {
+        var btn = GameAutoBootstrap.EnsureSpecialSkillButton();
+        if (btn != null)
+        {
+            Selection.activeGameObject = btn;
+            Undo.RegisterCreatedObjectUndo(btn, "Setup Special Skill Button");
+            Debug.Log("<color=green>[VAELSTRIDER]</color> Đã tạo nút Tuyệt Kỹ Ruin Whirlwind trên Canvas!");
+        }
+    }
+
+    public static void RestoreEverything()
+    {
+        Selection.activeGameObject = null;
+        // 1. Potion Quick Slot
+        SetupPotionQuickSlot();
+
+        // 1b. Special Skill Button
+        SetupSpecialSkillButton();
+
+        // 2. Treasure Chest
+        var chest = Object.FindAnyObjectByType<TreasureChest>();
+        if (chest == null)
+        {
+            SpawnTreasureChest();
+        }
+
+        // 3. WaveSpawner
+        var spawner = Object.FindAnyObjectByType<WaveSpawner>();
+        if (spawner == null)
+        {
+            GameObject spawnerObj = new GameObject("WaveSpawner");
+            spawnerObj.transform.position = Vector3.zero;
+            spawner = spawnerObj.AddComponent<WaveSpawner>();
+            Undo.RegisterCreatedObjectUndo(spawnerObj, "Create WaveSpawner");
+        }
+
+        // 4. WaveUI
+        var waveUI = Object.FindAnyObjectByType<WaveUI>();
+        if (waveUI == null)
+        {
+            Canvas canvas = Object.FindAnyObjectByType<Canvas>();
+            if (canvas != null)
+            {
+                GameObject bannerObj = new GameObject("WaveBanner");
+                bannerObj.transform.SetParent(canvas.transform, false);
+
+                RectTransform rt = bannerObj.AddComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.5f, 1f);
+                rt.anchorMax = new Vector2(0.5f, 1f);
+                rt.pivot = new Vector2(0.5f, 1f);
+                rt.anchoredPosition = new Vector2(0f, -80f);
+                rt.sizeDelta = new Vector2(600f, 60f);
+
+                CanvasGroup cg = bannerObj.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+
+                GameObject textObj = new GameObject("WaveText");
+                textObj.transform.SetParent(bannerObj.transform, false);
+                RectTransform txtRt = textObj.AddComponent<RectTransform>();
+                txtRt.anchorMin = Vector2.zero;
+                txtRt.anchorMax = Vector2.one;
+                txtRt.sizeDelta = Vector2.zero;
+                txtRt.anchoredPosition = Vector2.zero;
+
+                var tmp = textObj.AddComponent<TextMeshProUGUI>();
+                tmp.text = "WAVE 1 / 3";
+                tmp.fontSize = 28;
+                tmp.fontStyle = FontStyles.Bold;
+                tmp.color = new Color(1f, 0.85f, 0.3f);
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.raycastTarget = false;
+
+                bannerObj.AddComponent<WaveUI>();
+                Undo.RegisterCreatedObjectUndo(bannerObj, "Create WaveUI");
+            }
+        }
+
+        // 5. Victory Portal & UI
+        SetupVictoryPortalAndUI();
+
+        // 6. Align Health Bar
+        AlignHealthBarTopLeft();
+
+        var activeScene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(activeScene);
+        UnityEditor.SceneManagement.EditorSceneManager.SaveScene(activeScene);
+
+        Debug.Log("<color=green>[VAELSTRIDER]</color> Đã khôi phục và LƯU TRỰC TIẾP toàn bộ Rương, 3 Wave quái, Boss, Bình Máu, Cổng & UI vào Scene!");
     }
 }

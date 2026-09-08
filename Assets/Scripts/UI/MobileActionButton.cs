@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    public enum ButtonType { Attack, Dash }
+    public enum ButtonType { Attack, Dash, Skill }
     [Header("Loại nút")]
     [SerializeField] private ButtonType buttonType = ButtonType.Attack;
 
@@ -12,29 +13,114 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     [SerializeField] private PlayerCombat playerCombat;
     [SerializeField] private PlayerController playerController;
 
+    [Header("Hiển thị Cooldown (Dành cho Skill)")]
+    [SerializeField] private Image cooldownOverlay;
+    [SerializeField] private TextMeshProUGUI cooldownText;
+    [SerializeField] private Text legacyCooldownText;
+
     private Vector3 originalScale;
 
     void Awake()
     {
         originalScale = transform.localScale;
         EnsureTargets();
+
+        if (cooldownOverlay == null)
+        {
+            Transform cdT = transform.Find("CooldownOverlay");
+            if (cdT != null) cooldownOverlay = cdT.GetComponent<Image>();
+        }
+
+        if (cooldownText == null)
+        {
+            Transform txtT = transform.Find("CooldownText");
+            if (txtT != null)
+            {
+                cooldownText = txtT.GetComponent<TextMeshProUGUI>();
+                if (legacyCooldownText == null) legacyCooldownText = txtT.GetComponent<Text>();
+            }
+        }
+
+        // Đảm bảo GameObject luôn Active, chỉ dùng component.enabled để ẩn/hiện
+        if (cooldownOverlay != null)
+        {
+            if (!cooldownOverlay.gameObject.activeSelf)
+                cooldownOverlay.gameObject.SetActive(true);
+            cooldownOverlay.enabled = false;
+        }
+
+        if (cooldownText != null)
+        {
+            if (!cooldownText.gameObject.activeSelf)
+                cooldownText.gameObject.SetActive(true);
+            cooldownText.enabled = false;
+        }
+
+        if (legacyCooldownText != null)
+        {
+            if (!legacyCooldownText.gameObject.activeSelf)
+                legacyCooldownText.gameObject.SetActive(true);
+            legacyCooldownText.enabled = false;
+        }
     }
 
     void Start()
     {
-        // Kiểm tra xem nút có thành phần nhận cảm ứng (Graphic) không
         Graphic graphic = GetComponent<Graphic>();
-        if (graphic == null)
+        if (graphic != null && !graphic.raycastTarget)
         {
-            Debug.LogError($"[LỖI UI] Nút '{gameObject.name}' KHÔNG CÓ component Image! Unity không thể nhận cảm ứng nếu thiếu Image.");
-        }
-        else if (!graphic.raycastTarget)
-        {
-            Debug.LogWarning($"[CẢNH BÁO UI] Nút '{gameObject.name}' bị tắt Raycast Target! Tự động bật lại.");
             graphic.raycastTarget = true;
         }
+    }
 
-        Debug.Log($"<color=white>[NÚT SẴN SÀNG]</color> {gameObject.name} cấu hình là: <b>{buttonType}</b>");
+    void Update()
+    {
+        if (buttonType == ButtonType.Skill)
+        {
+            EnsureTargets();
+            if (playerCombat != null)
+            {
+                float norm = playerCombat.GetSkillCooldownNormalized();
+                float rem = playerCombat.GetSkillCooldownRemaining();
+
+                bool onCooldown = (rem > 0.05f);
+
+                if (cooldownOverlay != null)
+                {
+                    cooldownOverlay.fillAmount = norm;
+                    cooldownOverlay.enabled = onCooldown;
+                }
+
+                if (onCooldown)
+                {
+                    string timeStr = (rem >= 1f) ? Mathf.CeilToInt(rem).ToString() : rem.ToString("F1");
+                    
+                    if (cooldownText != null)
+                    {
+                        cooldownText.text = timeStr;
+                        cooldownText.enabled = true;
+                    }
+
+                    if (legacyCooldownText != null)
+                    {
+                        legacyCooldownText.text = timeStr;
+                        legacyCooldownText.enabled = true;
+                    }
+                }
+                else
+                {
+                    if (cooldownText != null)
+                    {
+                        cooldownText.enabled = false;
+                    }
+
+                    if (legacyCooldownText != null)
+                    {
+                        legacyCooldownText.enabled = false;
+                    }
+                }
+            }
+        }
     }
 
     private void EnsureTargets()
@@ -43,14 +129,10 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
     }
 
-    // Sự kiện khi chạm / bấm chuột xuống
+    // Nhấn xuống lập tức kích hoạt hành động ngay tức khắc (chuẩn game hành động mobile)
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log($"<color=yellow>[BẤM NÚT THÀNH CÔNG]</color> Đã nhấn vào nút: <b>{gameObject.name}</b> (Chức năng: {buttonType})");
-
-        // Hiệu ứng nhún nút
         transform.localScale = originalScale * 0.85f;
-
         ExecuteAction();
     }
 
@@ -67,25 +149,59 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             if (playerCombat != null)
             {
-                Debug.Log("<color=cyan>[COMBAT]</color> Kích hoạt đòn chém từ nút UI!");
                 playerCombat.PerformAttack();
-            }
-            else
-            {
-                Debug.LogError("[LỖI] Nút Attack không tìm thấy PlayerCombat trên nhân vật Player! Hãy kéo Player vào ô Player Combat.");
             }
         }
         else if (buttonType == ButtonType.Dash)
         {
             if (playerController != null)
             {
-                Debug.Log("<color=cyan>[DASH]</color> Kích hoạt lướt né từ nút UI!");
                 playerController.PerformDash();
             }
-            else
+        }
+        else if (buttonType == ButtonType.Skill)
+        {
+            if (playerCombat != null)
             {
-                Debug.LogError("[LỖI] Nút Dash không tìm thấy PlayerController trên nhân vật Player!");
+                if (playerCombat.IsSkillReady())
+                {
+                    playerCombat.PerformSpecialSkill();
+                }
+                else
+                {
+                    StartCoroutine(ShakeButtonRoutine());
+                }
             }
+        }
+    }
+
+    private System.Collections.IEnumerator ShakeButtonRoutine()
+    {
+        Vector3 origPos = transform.localPosition;
+        float elapsed = 0f;
+        while (elapsed < 0.15f)
+        {
+            elapsed += Time.deltaTime;
+            float x = origPos.x + Random.Range(-4f, 4f);
+            transform.localPosition = new Vector3(x, origPos.y, origPos.z);
+            yield return null;
+        }
+        transform.localPosition = origPos;
+    }
+
+    public void SetCooldownComponents(Image overlay, TextMeshProUGUI text)
+    {
+        cooldownOverlay = overlay;
+        cooldownText = text;
+        if (cooldownOverlay != null)
+        {
+            if (!cooldownOverlay.gameObject.activeSelf) cooldownOverlay.gameObject.SetActive(true);
+            cooldownOverlay.enabled = false;
+        }
+        if (cooldownText != null)
+        {
+            if (!cooldownText.gameObject.activeSelf) cooldownText.gameObject.SetActive(true);
+            cooldownText.enabled = false;
         }
     }
 }

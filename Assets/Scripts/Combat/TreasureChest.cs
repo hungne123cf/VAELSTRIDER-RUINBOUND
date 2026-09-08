@@ -22,16 +22,22 @@ public class TreasureChest : MonoBehaviour, IDamageable
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
 
-#if UNITY_EDITOR
         if (closedSprite == null)
         {
-            closedSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/chest_closed.png");
+            closedSprite = Resources.Load<Sprite>("Items/chest_closed");
+#if UNITY_EDITOR
+            if (closedSprite == null)
+                closedSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/chest_closed.png");
+#endif
         }
         if (openSprite == null)
         {
-            openSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/chest_open.png");
-        }
+            openSprite = Resources.Load<Sprite>("Items/chest_open");
+#if UNITY_EDITOR
+            if (openSprite == null)
+                openSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/chest_open.png");
 #endif
+        }
         if (closedSprite != null && spriteRenderer.sprite == null)
         {
             spriteRenderer.sprite = closedSprite;
@@ -66,6 +72,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
     {
         if (isOpened) return;
         isOpened = true;
+        SoundManager.EnsureInstance()?.PlayChestOpen();
         Debug.Log("<color=yellow>[CHEST OPENED]</color> Ban da mo Ruong Kho Bau!");
 
         if (openSprite != null)
@@ -101,5 +108,27 @@ public class TreasureChest : MonoBehaviour, IDamageable
         transform.localScale = orig * 0.95f;
         yield return new WaitForSeconds(0.06f);
         transform.localScale = orig;
+    }
+
+    public static TreasureChest SpawnChest(Vector3 pos)
+    {
+        GameObject chestObj = new GameObject("TreasureChest");
+        chestObj.transform.position = pos;
+
+        var sr = chestObj.AddComponent<SpriteRenderer>();
+        var sprite = Resources.Load<Sprite>("Items/chest_closed");
+#if UNITY_EDITOR
+        if (sprite == null) sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/chest_closed.png");
+#endif
+        sr.sprite = sprite;
+        sr.sortingOrder = 5000;
+
+        var col = chestObj.AddComponent<BoxCollider2D>();
+        col.size = new Vector2(0.85f, 0.7f);
+        col.offset = new Vector2(0f, 0.35f);
+        col.isTrigger = true;
+
+        var comp = chestObj.AddComponent<TreasureChest>();
+        return comp;
     }
 }

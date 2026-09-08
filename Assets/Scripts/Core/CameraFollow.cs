@@ -12,11 +12,18 @@ public class CameraFollow : MonoBehaviour
     [Header("Khoảng cách nhìn")]
     [SerializeField] private Vector3 offset = new Vector3(0, 0, -10f);
 
+    private Camera cam;
+    private float defaultOrthoSize = 5f;
+    private float targetOrthoSize = 5f;
+    private float zoomVelocity = 0f;
     private Vector3 velocity = Vector3.zero;
 
     void Awake()
     {
-        // Tự động tìm Player nếu chưa kéo thả thủ công
+        cam = GetComponent<Camera>();
+        if (cam != null) defaultOrthoSize = cam.orthographicSize;
+        targetOrthoSize = defaultOrthoSize;
+
         if (target == null)
         {
             var player = GameObject.FindWithTag("Player");
@@ -31,19 +38,30 @@ public class CameraFollow : MonoBehaviour
 
     void LateUpdate()
     {
+        // Smooth Zoom hỗ trợ cả Unscaled Time (khi ngưng đọng thời gian Ulti)
+        if (cam != null && Mathf.Abs(cam.orthographicSize - targetOrthoSize) > 0.005f)
+        {
+            cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, targetOrthoSize, ref zoomVelocity, 0.12f, Mathf.Infinity, Time.unscaledDeltaTime);
+        }
+
         if (target == null) return;
 
-        // Điểm đích mà Camera cần đến
         Vector3 desiredPosition = target.position + offset;
-
-        // Di chuyển mượt mà tới mục tiêu bằng thuật toán SmoothDamp (chuẩn 60 FPS mobile)
-        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothSpeed);
+        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothSpeed, Mathf.Infinity, Time.unscaledDeltaTime);
     }
 
-    // Hàm gọi rung màn hình khi chém trúng quái (Screen Shake)
+    public void SetCinematicZoom(float orthoSize)
+    {
+        targetOrthoSize = orthoSize;
+    }
+
+    public void ResetZoom()
+    {
+        targetOrthoSize = defaultOrthoSize;
+    }
+
     public void Shake(float duration = 0.15f, float magnitude = 0.2f)
     {
-        StopAllCoroutines();
         StartCoroutine(ShakeRoutine(duration, magnitude));
     }
 
@@ -59,7 +77,7 @@ public class CameraFollow : MonoBehaviour
 
             transform.position = new Vector3(transform.position.x + x, transform.position.y + y, originalPos.z);
 
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
     }

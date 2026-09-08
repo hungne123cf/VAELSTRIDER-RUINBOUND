@@ -5,30 +5,60 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 {
     [Header("Player Stats")]
     [SerializeField] private int maxHealth = 100;
+    private Sprite[] deathSprites;
     private int currentHealth;
+    private int baseMaxHealth = 100;
+    private int bonusMaxHealth = 0;
+
+    public void ApplyUpgradeBonus(int bonusHp)
+    {
+        int oldBonus = bonusMaxHealth;
+        bonusMaxHealth = bonusHp;
+        maxHealth = baseMaxHealth + bonusMaxHealth;
+        int diff = bonusMaxHealth - oldBonus;
+        if (diff > 0)
+        {
+            currentHealth = Mathf.Min(currentHealth + diff, maxHealth);
+            PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+            PlayerPrefs.Save();
+        }
+    }
 
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
-    private bool isDead = false;
+        private bool isDead = false;
+    public bool isInvulnerable = false;
 
     void Awake()
     {
-        currentHealth = maxHealth;
+        baseMaxHealth = maxHealth;
+        int savedHp = PlayerPrefs.GetInt("Saved_CurrentHealth", maxHealth);
+        if (savedHp <= 0) savedHp = maxHealth;
+        currentHealth = Mathf.Min(savedHp, maxHealth);
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
+
+        // Auto-load death sprites from Resources/Player/player_death if not set
+        if (deathSprites == null || deathSprites.Length == 0)
+        {
+            deathSprites = Resources.LoadAll<Sprite>("Player/player_death");
+        }
     }
 
     public void TakeDamage(int damage)
     {
-        if (isDead) return;
+        if (isDead || isInvulnerable) return;
 
         currentHealth -= damage;
+        PlayerPrefs.SetInt("Saved_CurrentHealth", Mathf.Max(0, currentHealth));
+        PlayerPrefs.Save();
+        SoundManager.EnsureInstance()?.PlayPlayerHurt();
         Debug.Log($"<color=orange>[PLAYER HURT]</color> Ban bi quai danh trung! Mat {damage} HP. Con lai: {currentHealth}/{maxHealth}");
 
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.12f, 0.15f);
 
-        if (spriteRenderer != null)
+        if (spriteRenderer != null && currentHealth > 0)
         {
             StopAllCoroutines();
             StartCoroutine(FlashRedRoutine());
@@ -45,6 +75,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (isDead || currentHealth >= maxHealth) return false;
 
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+        PlayerPrefs.Save();
         Debug.Log($"<color=green>[PLAYER HEAL]</color> Hoi {amount} HP! Mau hien tai: {currentHealth}/{maxHealth}");
 
         if (spriteRenderer != null)
@@ -62,20 +94,97 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         spriteRenderer.color = Color.red;
         yield return new WaitForSeconds(0.1f);
-        spriteRenderer.color = originalColor;
+        if (!isDead && spriteRenderer != null) spriteRenderer.color = originalColor;
     }
 
     private IEnumerator FlashColorRoutine(Color color)
     {
         spriteRenderer.color = color;
         yield return new WaitForSeconds(0.18f);
-        spriteRenderer.color = originalColor;
+        if (!isDead && spriteRenderer != null) spriteRenderer.color = originalColor;
     }
 
     private void Die()
     {
+        if (isDead || isInvulnerable) return;
         isDead = true;
-        Debug.Log("<color=red>[PLAYER DIED]</color> Ban da bi quai ha guc!");
+        currentHealth = 0;
+        PlayerPrefs.SetInt("Saved_CurrentHealth", maxHealth);
+        PlayerPrefs.Save();
+        Debug.Log("<color=red>[PLAYER DIED]</color> Nhan vat guc nga! Phat animation quy xuong chet...");
+
+        StopAllCoroutines();
+
+        // 1. Vo hieu hoa dieu khien & tan cong
+        var pc = GetComponent<PlayerController>();
+        if (pc != null) pc.enabled = false;
+
+        var combat = GetComponent<PlayerCombat>();
+        if (combat != null) combat.enabled = false;
+
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.bodyType = RigidbodyType2D.Kinematic;
+        }
+
+        // Vo hieu hoa Animator de tranh lap lai animation Run / Idle
+        var anim = GetComponent<Animator>();
+        if (anim != null) anim.enabled = false;
+
+        // Vo hieu hoa Collider de khong con va cham nua
+        var col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
+        // 2. Rung manh camera
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.35f, 0.45f);
+
+        // 3. Giu dung goc nhan vat (khong xoay 90 do) & phat animation quy xuong
+        transform.rotation = Quaternion.identity;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.white;
+        }
+
+        StartCoroutine(PlayKneelingDeathRoutine());
+    }
+
+    private IEnumerator PlayKneelingDeathRoutine()
+    {
+        // Load fallback neu chua co
+        if (deathSprites == null || deathSprites.Length == 0)
+        {
+            deathSprites = Resources.LoadAll<Sprite>("Player/player_death");
+        }
+
+        if (deathSprites != null && deathSprites.Length > 0)
+        {
+            float frameTime = 0.12f;
+            for (int i = 0; i < deathSprites.Length; i++)
+            {
+                if (spriteRenderer != null && deathSprites[i] != null)
+                {
+                    spriteRenderer.sprite = deathSprites[i];
+                }
+                yield return new WaitForSeconds(frameTime);
+            }
+        }
+        else
+        {
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = new Color(0.6f, 0.6f, 0.6f, 0.85f);
+            }
+            yield return new WaitForSeconds(0.6f);
+        }
+
+        // Cho them 0.4s trong tu the quy guc dep mat truoc khi hien man hinh YOU DIED
+        yield return new WaitForSeconds(0.4f);
+
+        // 4. Hien thi man hinh YOU DIED
+        GameOverUI.Show();
     }
 
     public int GetCurrentHealth() => currentHealth;

@@ -44,7 +44,14 @@ public class WaveUI : MonoBehaviour
         ShowBanner(message, 2.5f);
     }
 
-    private void ShowBanner(string content, float duration)
+    
+    public void ShowBanner(string title, string subtitle, float duration = 2.5f)
+    {
+        string full = string.IsNullOrEmpty(subtitle) ? title : $"{title}\n<size=70%>{subtitle}</size>";
+        ShowBanner(full, duration);
+    }
+
+    public void ShowBanner(string content, float duration = 2.5f)
     {
         if (legacyWaveText != null) legacyWaveText.text = content;
         if (tmpWaveText != null) tmpWaveText.text = content;
