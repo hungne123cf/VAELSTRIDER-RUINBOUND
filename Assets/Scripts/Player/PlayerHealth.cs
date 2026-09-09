@@ -166,14 +166,14 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         if (deathSprites != null && deathSprites.Length > 0)
         {
-            float frameTime = 0.12f;
+            float frameTime = 0.10f;
             for (int i = 0; i < deathSprites.Length; i++)
             {
                 if (spriteRenderer != null && deathSprites[i] != null)
                 {
                     spriteRenderer.sprite = deathSprites[i];
                 }
-                yield return new WaitForSeconds(frameTime);
+                yield return new WaitForSecondsRealtime(frameTime);
             }
         }
         else
@@ -182,13 +182,14 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             {
                 spriteRenderer.color = new Color(0.6f, 0.6f, 0.6f, 0.85f);
             }
-            yield return new WaitForSeconds(0.6f);
+            yield return new WaitForSecondsRealtime(0.4f);
         }
 
-        // Cho them 0.4s trong tu the quy guc dep mat truoc khi hien man hinh YOU DIED
-        yield return new WaitForSeconds(0.4f);
+        // Nghi 0.2s truoc khi bung man hinh GameOver
+        yield return new WaitForSecondsRealtime(0.2f);
 
         // 4. Hien thi man hinh YOU DIED
+        Debug.Log("<color=red>[GAMEOVER]</color> Goi GameOverUI.Show()...");
         GameOverUI.Show();
     }
 

@@ -25,6 +25,8 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+        public void SetMusicVolume(float val) => MusicVolume = val;
+    public void SetSFXVolume(float val) => SFXVolume = val;
     public static SoundManager Instance { get; private set; }
 
     [Header("Audio Clips")]
@@ -37,6 +39,7 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip portalSpawnClip;
     [SerializeField] private AudioClip playerHurtClip;
     [SerializeField] private AudioClip bossDeathClip;
+    [SerializeField] private AudioClip bossWarningClip;
     [SerializeField] private AudioClip dungeonAmbienceClip;
     [SerializeField] private AudioClip coastalAmbienceClip;
 
@@ -140,6 +143,7 @@ public class SoundManager : MonoBehaviour
             if (eyeGlintClip == null) eyeGlintClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(sfxPath + "eye_glint.wav");
         if (playerHurtClip == null) playerHurtClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(sfxPath + "player_hurt.wav");
         if (bossDeathClip == null) bossDeathClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(sfxPath + "boss_death.wav");
+        if (bossWarningClip == null) bossWarningClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(sfxPath + "boss_warning.wav");
         if (dungeonAmbienceClip == null) dungeonAmbienceClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(musicPath + "dungeon_ambience.wav");
         if (coastalAmbienceClip == null) coastalAmbienceClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(musicPath + "coastal_forest_ambience.wav");
 
@@ -287,6 +291,22 @@ public class SoundManager : MonoBehaviour
     public void PlayBossDeath()
     {
         PlaySFX(bossDeathClip, 1.25f, 0.05f);
+    }
+
+    public void PlayBossWarning()
+    {
+        if (bossWarningClip != null)
+            PlaySFX(bossWarningClip, 1.35f, 0.01f);
+        else
+            PlayEyeFlareGlint();
+    }
+
+    public void PlayMenuHover()
+    {
+        if (shardPickupClip != null)
+        {
+            PlaySFX(shardPickupClip, 0.45f, 0.05f);
+        }
     }
 
     public static SoundManager EnsureInstance()

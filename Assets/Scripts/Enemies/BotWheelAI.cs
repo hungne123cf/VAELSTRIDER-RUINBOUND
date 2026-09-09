@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class BotWheelAI : MonoBehaviour, IDamageable
@@ -23,6 +24,15 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     private int phaseMaxHealth = 450;
     private bool isTransitioningPhase = false;
 
+    [Header("Boss Clone & Teleport Mechanics")]
+    [SerializeField] public bool isClone = false;
+    [SerializeField] private BotWheelAI mainBoss;
+    private Vector3 initialSpawnPosition;
+    private bool isPurpleRingActive = false;
+    public bool IsPurpleRingActive => isPurpleRingActive;
+    private float purpleRingTimer = 14f;
+    private List<BotWheelAI> activeClones = new List<BotWheelAI>();
+
     [Header("AI Ranges")]
     [SerializeField] private float detectionRange = 7.5f;
     [SerializeField] private float attackRange = 5.2f; // Tam ban dan tam xa
@@ -35,6 +45,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     private int currentHealth;
     private float attackCooldownTimer = 0f;
     private bool isDead = false;
+    public bool IsDead => isDead;
     private bool isKnockedBack = false;
 
     private Transform player;
@@ -53,6 +64,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     void Awake()
     {
         currentHealth = maxHealth;
+        initialSpawnPosition = transform.position;
         rb = GetComponent<Rigidbody2D>();
         enemyCol = GetComponent<Collider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -65,25 +77,56 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
+        // Dam bao tam ban va phat hien luon du tam tam xa
+        if (attackRange < 4.5f) attackRange = 5.2f;
+        if (detectionRange < 7.5f) detectionRange = 8.5f;
+
         if (runtimeBulletSprite == null)
         {
-            Texture2D tex = new Texture2D(16, 16);
-            for (int x = 0; x < 16; x++)
+#if UNITY_EDITOR
+            runtimeBulletSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Combat/enemy_projectile.png");
+#endif
+            if (runtimeBulletSprite == null)
             {
-                for (int y = 0; y < 16; y++)
+                // Tao vien dan nang luong mau tim toa sang ruc ro
+                int texSize = 16;
+                Texture2D tex = new Texture2D(texSize, texSize, TextureFormat.RGBA32, false);
+                tex.filterMode = FilterMode.Bilinear;
+                float center = 7.5f;
+                for (int x = 0; x < texSize; x++)
                 {
-                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(7.5f, 7.5f));
-                    tex.SetPixel(x, y, dist < 7f ? new Color(1f, 0.35f, 0.1f, 1f) : Color.clear);
+                    for (int y = 0; y < texSize; y++)
+                    {
+                        float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                        if (dist < 2.5f)
+                            tex.SetPixel(x, y, new Color(0.96f, 0.88f, 1f, 1f)); // Loi trang tim sang
+                        else if (dist < 4.8f)
+                            tex.SetPixel(x, y, new Color(0.72f, 0.22f, 0.98f, 1f)); // Vang tim neon ruc ro
+                        else if (dist < 6.8f)
+                            tex.SetPixel(x, y, new Color(0.49f, 0.08f, 0.82f, 0.8f)); // Hao quang tim dam
+                        else if (dist < 7.8f)
+                            tex.SetPixel(x, y, new Color(0.35f, 0.04f, 0.65f, 0.35f)); // Vien ngoai mo
+                        else
+                            tex.SetPixel(x, y, Color.clear);
+                    }
                 }
+                tex.Apply();
+                runtimeBulletSprite = Sprite.Create(tex, new Rect(0, 0, texSize, texSize), new Vector2(0.5f, 0.5f), 32);
             }
-            tex.Apply();
-            runtimeBulletSprite = Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16);
         }
     }
 
     void Start()
     {
         FindPlayerTarget();
+        if (isBoss && !isClone)
+        {
+            string scene = SceneManager.GetActiveScene().name;
+            string bName = scene.Contains("Map2") || scene.Contains("Valley")
+                ? "✦ VALENTHUS • HỘ VỆ THẦN THỤ ✦"
+                : "✦ TITAN CRUSHER • CỖ MÁY TÀN TÍCH ✦";
+            BossHealthBarUI.EnsureInstance()?.ShowBoss(this, bName);
+        }
     }
 
     private void FindPlayerTarget()
@@ -104,6 +147,17 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             attackCooldownTimer -= Time.deltaTime;
         }
 
+        // Đòn ma trận đạn tím dịch chuyển trung tâm định kỳ cho Boss chính ở Phase 2 & 1
+        if (isBoss && !isClone && currentBossPhase <= 2 && !isTransitioningPhase && !isPurpleRingActive)
+        {
+            purpleRingTimer -= Time.deltaTime;
+            if (purpleRingTimer <= 0)
+            {
+                purpleRingTimer = Random.Range(14f, 18f);
+                StartCoroutine(PurpleBulletRingTeleportRoutine());
+            }
+        }
+
         if (player == null)
         {
             FindPlayerTarget();
@@ -111,7 +165,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             return;
         }
 
-        if (isKnockedBack || isTransitioningPhase) return;
+        if (isKnockedBack || isTransitioningPhase || isPurpleRingActive) return;
 
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
@@ -186,21 +240,32 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(0.12f);
         if (isDead) yield break;
 
+        // Tính toán vị trí đầu nòng súng BotWheel chính xác trên sprite
+        // Sprite có pivot ở chân (0.5, 0), chiều rộng 117 pixel, ptu 32
+        // Nòng súng trên sprite kết thúc tại x=32, y=10 (Unity y=15)
+        // Khi quay phải (flipX == false): đầu nòng súng ở -0.80f * scaleX
+        // Khi quay trái (flipX == true): đầu nòng súng ở +0.80f * scaleX
         bool facingLeft = spriteRenderer != null && spriteRenderer.flipX;
-        float botCenterX = facingLeft ? 1.14f : -1.14f;
-        float gunOffset = facingLeft ? -0.45f : 0.45f;
-        Vector3 muzzleOffset = new Vector3(botCenterX + gunOffset, 0.35f, 0f);
-        Vector3 spawnPos = transform.position + muzzleOffset;
+        float muzzleX = (facingLeft ? 0.80f : -0.80f) * transform.localScale.x;
+        float muzzleY = 0.45f * transform.localScale.y;
+        Vector3 muzzlePos = transform.position + new Vector3(muzzleX, muzzleY, 0f);
 
-        if (projectilePrefab != null)
+        // Đạn xuất phát sát ngay đầu nòng súng hướng về phía mục tiêu
+        Vector3 spawnBase = muzzlePos + (Vector3)(dir.normalized * (0.06f * (isBoss ? 1.4f : 1.0f)));
+
+        if (isBoss)
         {
-            GameObject bulletObj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
-            var proj = bulletObj.GetComponent<EnemyProjectile>();
-            if (proj != null) proj.Initialize(dir, attackDamage, projectileSpeed);
+            // Boss bắn tia 3 viên đạn năng lượng tím bay tỏa hình quạt về phía người chơi
+            float[] angles = new float[] { -15f, 0f, 15f };
+            foreach (float angle in angles)
+            {
+                Vector2 spreadDir = Quaternion.Euler(0, 0, angle) * dir;
+                CreateRuntimeBullet(spawnBase, spreadDir);
+            }
         }
         else
         {
-            CreateRuntimeBullet(spawnPos, dir);
+            CreateRuntimeBullet(spawnBase, dir);
         }
     }
 
@@ -208,7 +273,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     {
         GameObject bullet = new GameObject("Enemy_EnergyBullet");
         bullet.transform.position = spawnPos;
-        if (isBoss) bullet.transform.localScale = Vector3.one * 1.5f;
+        // Kich thuoc sieu gon, nho hon dau cua Player nhung ro rang, bay dep mat
+        bullet.transform.localScale = isBoss ? Vector3.one * 0.48f : Vector3.one * 0.38f;
 
         var sr = bullet.AddComponent<SpriteRenderer>();
         sr.sprite = runtimeBulletSprite;
@@ -216,7 +282,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         var col = bullet.AddComponent<CircleCollider2D>();
         col.isTrigger = true;
-        col.radius = 0.22f;
+        col.radius = 0.12f;
 
         var rbBullet = bullet.AddComponent<Rigidbody2D>();
         rbBullet.gravityScale = 0f;
@@ -229,6 +295,25 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     public void TakeDamage(int damage)
     {
         if (isDead || isTransitioningPhase) return;
+
+        // KHI LÀ PHÂN THÂN: Sài chung 1 thanh máu duy nhất với Trùm chính!
+        if (isClone && mainBoss != null)
+        {
+            if (animator != null && animator.runtimeAnimatorController != null)
+            {
+                animator.SetTrigger(HurtHash);
+            }
+            if (spriteRenderer != null)
+            {
+                StartCoroutine(FlashRedRoutine());
+            }
+            var c = FindAnyObjectByType<CameraFollow>();
+            if (c != null) c.Shake(0.12f, 0.2f);
+
+            // Chuyển toàn bộ sát thương sang thanh máu của Trùm chính
+            mainBoss.TakeDamage(damage);
+            return;
+        }
 
         currentHealth -= damage;
 
@@ -251,22 +336,35 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             StartCoroutine(FlashRedRoutine());
         }
 
-        if (isBoss)
+        if (isBoss && !isClone)
         {
-            BossHealthBarUI.Instance?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+            var bossUI = BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance();
+            if (bossUI != null)
+            {
+                if (!bossUI.IsVisible)
+                {
+                    string scene = SceneManager.GetActiveScene().name;
+                    string bName = scene.Contains("Map2") || scene.Contains("Valley")
+                        ? "✦ VALENTHUS • HỘ VỆ THẦN THỤ ✦"
+                        : "✦ TITAN CRUSHER • CỖ MÁY TÀN TÍCH ✦";
+                    bossUI.ShowBoss(this, bName);
+                }
+                bossUI.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+            }
         }
 
         if (currentHealth <= 0)
         {
-            if (isBoss && currentBossPhase > 1)
+            if (isBoss && !isClone && currentBossPhase > 1)
             {
                 StartCoroutine(BossPhaseTransitionRoutine());
             }
             else
             {
-                if (isBoss)
+                if (isBoss && !isClone)
                 {
-                    BossHealthBarUI.Instance?.HideBoss();
+                    var bossUI = BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance();
+                    bossUI?.HideBoss();
                 }
                 Die();
             }
@@ -288,25 +386,25 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         string phaseTitle = currentBossPhase == 2 
             ? "PHASE II: HƯ KHÔNG THỨC TỈNH!" 
-            : "FINAL PHASE: CUỒNG NỘ HUYẾT NGUYỆT!";
+            : "FINAL PHASE: CUỒNG NỘ TAM THỂ!";
         Color titleColor = currentBossPhase == 2 
             ? new Color(0.85f, 0.45f, 1f) 
             : new Color(1f, 0.2f, 0.2f);
 
         DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, phaseTitle, titleColor);
 
-        // Đổi màu hào quang Boss
+        // Đổi màu hào quang Boss (Phase 2: Tím hư không, Phase 1: Đỏ huyết nguyệt)
         if (spriteRenderer != null)
         {
             originalColor = currentBossPhase == 2 
                 ? new Color(0.9f, 0.4f, 1f) 
-                : new Color(1f, 0.25f, 0.25f);
+                : new Color(1f, 0.15f, 0.15f);
             spriteRenderer.color = originalColor;
         }
 
         // Tăng tốc và sức mạnh
         moveSpeed *= 1.25f;
-        attackDamage += 8;
+        attackDamage += 6;
         attackCooldown *= 0.8f;
 
         // Đẩy lùi người chơi ra xa nhẹ
@@ -317,9 +415,28 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             if (playerRb != null) playerRb.AddForce(pushDir * 8f, ForceMode2D.Impulse);
         }
 
-        BossHealthBarUI.Instance?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+        var bossUI = BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance();
+        bossUI?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
 
-        yield return new WaitForSeconds(1.2f);
+        yield return new WaitForSeconds(1.0f);
+
+        if (currentBossPhase == 2)
+        {
+            // Mất thanh máu đầu tiên: Ngay lập tức tạo vòng tròn đạn tím 3 giây và dịch chuyển về tâm
+            yield return StartCoroutine(PurpleBulletRingTeleportRoutine());
+        }
+        else if (currentBossPhase == 1)
+        {
+            // Mất thanh máu thứ 2 (bước vào thanh máu cuối cùng):
+            // Boss điên loạn cực độ (tăng tốc độ chạy, bắn nhanh gấp bội) và phân thân thành 3 con 3 màu khác nhau
+            moveSpeed *= 1.35f;
+            attackDamage += 8;
+            attackCooldown *= 0.55f;
+            projectileSpeed *= 1.25f;
+
+            SpawnBossClones();
+        }
+
         isTransitioningPhase = false;
     }
 
@@ -342,22 +459,41 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
-        Debug.Log($"<color=green>[BOT WHEEL DESTROYED]</color> Quai vat da bi tieu diet!");
+        Debug.Log($"<color=green>[BOT WHEEL DESTROYED]</color> {(isClone ? "Phân thân" : "Quái vật")} đã bị tiêu diệt!");
 
         if (animator != null && animator.runtimeAnimatorController != null)
         {
             animator.SetTrigger(DieHash);
         }
-        if (isBoss) SoundManager.EnsureInstance()?.PlayBossDeath();
+        if (isBoss && !isClone) SoundManager.EnsureInstance()?.PlayBossDeath();
         else SoundManager.EnsureInstance()?.PlayHitImpact();
 
-        OnEnemyDied?.Invoke(this);
-
+        // Xóa sạch toàn bộ vòng đỏ cảnh báo và hiệu ứng chiêu còn sót lại
         if (isBoss)
+        {
+            BossGigapackSkills.ClearAllWarningZonesAndEffects();
+        }
+
+        if (!isClone)
+        {
+            OnEnemyDied?.Invoke(this);
+
+            // Tiêu diệt toàn bộ phân thân còn lại khi trùm thật bị tiêu diệt
+            foreach (var clone in activeClones)
+            {
+                if (clone != null && !clone.isDead)
+                {
+                    clone.Die();
+                }
+            }
+            activeClones.Clear();
+        }
+
+        if (isBoss && !isClone)
         {
             AethelShard.SpawnShards(transform.position, Random.Range(18, 26));
         }
-        else
+        else if (!isClone)
         {
             AethelShard.SpawnShards(transform.position, Random.Range(3, 6));
         }
@@ -371,6 +507,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     public void SetupBoss(float scaleMultiplier = 1.75f, int hpMultiplier = 3, int damageMultiplier = 2)
     {
         isBoss = true;
+        initialSpawnPosition = transform.position;
         transform.localScale = transform.localScale * scaleMultiplier;
 
         // Hệ thống 3 thanh máu: Mỗi thanh 450 HP (Tổng 1350 HP)
@@ -383,6 +520,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         moveSpeed *= 0.95f;
         projectileSpeed *= 1.25f;
         attackRange = 7.0f;
+        detectionRange = 12.0f;
 
         if (spriteRenderer != null)
         {
@@ -403,6 +541,224 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             : "✦ TITAN CRUSHER • CỖ MÁY TÀN TÍCH ✦";
 
         BossHealthBarUI.EnsureInstance()?.ShowBoss(this, bName);
+    }
+
+    // =========================================================================
+    // CHIÊU THỨC MA TRẬN ĐẠN TÍM (PHASE 2 & 1)
+    // 1. Boss đứng im 1 giây
+    // 2. Các viên đạn tím kết tinh xung quanh boss (boss là TÂM bánh xe, đạn là VÀNH)
+    // 3. Sau 3 giây kết tinh, các viên đạn bắn bung tỏa 360 độ ra ngoài
+    // =========================================================================
+    public Vector3 GetBossVisualCenter()
+    {
+        if (enemyCol == null) enemyCol = GetComponent<Collider2D>();
+        if (enemyCol != null)
+        {
+            return enemyCol.bounds.center;
+        }
+
+        bool facingLeft = spriteRenderer != null && spriteRenderer.flipX;
+        float absScaleX = Mathf.Abs(transform.localScale.x);
+        float absScaleY = Mathf.Abs(transform.localScale.y);
+        float offsetX = (facingLeft ? 1.136f : -1.136f) * absScaleX;
+        float offsetY = 0.35f * absScaleY;
+
+        return transform.position + new Vector3(offsetX, offsetY, 0f);
+    }
+
+    private IEnumerator PurpleBulletRingTeleportRoutine()
+    {
+        isPurpleRingActive = true;
+        rb.linearVelocity = Vector2.zero;
+        SetMoving(false);
+        rb.constraints = RigidbodyConstraints2D.FreezeAll;
+
+        // Hiển thị thông báo chiêu thức ngay trên đầu tâm thật của Boss
+        Vector3 initialCenter = GetBossVisualCenter();
+        Vector3 popupPos = initialCenter + Vector3.up * (1.1f * Mathf.Abs(transform.localScale.y));
+        DamagePopup.CreateText(popupPos, "✦ MA TRẬN HƯ KHÔNG ✦", new Color(0.85f, 0.35f, 1f));
+        SoundManager.EnsureInstance()?.PlayPortalSpawn();
+
+        // 1. BOSS ĐỨNG IM 1 GIÂY
+        float preWait = 0f;
+        while (preWait < 1.0f)
+        {
+            if (isDead)
+            {
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+                isPurpleRingActive = false;
+                yield break;
+            }
+            preWait += Time.deltaTime;
+            rb.linearVelocity = Vector2.zero;
+            yield return null;
+        }
+
+        // 2. CÁC VIÊN ĐẠN TÍM BẮT ĐẦU KẾT TINH XUNG QUANH TÂM NGƯỜI BOSS
+        // Boss nằm chính xác ở tâm vòng tròn như tâm bánh xe đạp!
+        int bulletCount = 18;
+        float ringRadius = 1.85f;
+        List<GameObject> ringBullets = new List<GameObject>();
+
+        Vector3 bossCenter = GetBossVisualCenter();
+
+        for (int i = 0; i < bulletCount; i++)
+        {
+            float angle = (i * (360f / bulletCount)) * Mathf.Deg2Rad;
+            Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * ringRadius;
+            GameObject b = CreateOrbitBullet(bossCenter + offset);
+            ringBullets.Add(b);
+        }
+
+        float duration = 3.0f;
+        float elapsed = 0f;
+
+        // 3. VÒNG ĐẠN XOAY QUANH BOSS TRONG 3 GIÂY
+        // Boss tuyệt đối đứng im ở tâm, không được di chuyển cho đến khi đạn được bắn đi!
+        while (elapsed < duration)
+        {
+            if (isDead)
+            {
+                foreach (var b in ringBullets) if (b != null) Destroy(b);
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+                isPurpleRingActive = false;
+                yield break;
+            }
+
+            elapsed += Time.deltaTime;
+            rb.linearVelocity = Vector2.zero;
+
+            bossCenter = GetBossVisualCenter();
+
+            float baseAngle = elapsed * 190f;
+            for (int i = 0; i < ringBullets.Count; i++)
+            {
+                if (ringBullets[i] != null)
+                {
+                    float angle = (i * (360f / bulletCount) + baseAngle) * Mathf.Deg2Rad;
+                    Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * ringRadius;
+                    ringBullets[i].transform.position = bossCenter + offset;
+                }
+            }
+
+            yield return null;
+        }
+
+        if (isDead)
+        {
+            foreach (var b in ringBullets) if (b != null) Destroy(b);
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            isPurpleRingActive = false;
+            yield break;
+        }
+
+        // 4. HẾT 3 GIÂY: BẮN CÁC VIÊN ĐẠN ĐÓ RA NGOÀI 360 ĐỘ TỪ TÂM BOSS!
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.35f, 0.45f);
+
+        SoundManager.EnsureInstance()?.PlayEnemyShoot();
+
+        bossCenter = GetBossVisualCenter();
+        for (int i = 0; i < ringBullets.Count; i++)
+        {
+            if (ringBullets[i] != null)
+            {
+                Vector2 outwardDir = ((Vector2)ringBullets[i].transform.position - (Vector2)bossCenter).normalized;
+                if (outwardDir == Vector2.zero)
+                {
+                    float angle = (i * (360f / bulletCount)) * Mathf.Deg2Rad;
+                    outwardDir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                }
+
+                var proj = ringBullets[i].AddComponent<EnemyProjectile>();
+                proj.Initialize(outwardDir, attackDamage + 3, projectileSpeed * 1.35f);
+            }
+        }
+
+        yield return new WaitForSeconds(0.2f);
+        // Khôi phục constraints và cho phép boss di chuyển lại sau khi bắn
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        isPurpleRingActive = false;
+    }
+
+    private GameObject CreateOrbitBullet(Vector3 spawnPos)
+    {
+        GameObject bullet = new GameObject("Boss_EnergyBullet_Orbit");
+        bullet.transform.position = spawnPos;
+        bullet.transform.localScale = Vector3.one * 0.48f;
+
+        var sr = bullet.AddComponent<SpriteRenderer>();
+        sr.sprite = runtimeBulletSprite;
+        sr.sortingOrder = 5500;
+
+        var col = bullet.AddComponent<CircleCollider2D>();
+        col.isTrigger = true;
+        col.radius = 0.12f;
+
+        var rbBullet = bullet.AddComponent<Rigidbody2D>();
+        rbBullet.gravityScale = 0f;
+        rbBullet.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+        return bullet;
+    }
+
+    // =========================================================================
+    // HỆ THỐNG PHÂN THÂN 3 BOSS (3 MÀU KHÁC NHAU) Ở THANH MÁU CUỐI CÙNG
+    // =========================================================================
+    private void SpawnBossClones()
+    {
+        foreach (var old in activeClones)
+        {
+            if (old != null && !old.isDead) Destroy(old.gameObject);
+        }
+        activeClones.Clear();
+
+        DamagePopup.CreateText(transform.position + Vector3.up * 2.2f, "✦ TAM THỂ PHÂN THÂN ✦", new Color(1f, 0.3f, 0.3f));
+        SoundManager.EnsureInstance()?.PlayPortalSpawn();
+
+        // 1. Trùm chính: Màu Đỏ Huyết Nguyệt (Blood Crimson)
+        if (spriteRenderer != null)
+        {
+            originalColor = new Color(1f, 0.15f, 0.15f);
+            spriteRenderer.color = originalColor;
+        }
+
+        // 2. Phân thân 1: Màu Tím Hư Không (Void Violet)
+        CreateBossClone(new Vector3(-2.8f, 0.5f, 0f), new Color(0.72f, 0.22f, 1f), "✦ PHÂN THÂN HƯ KHÔNG ✦");
+
+        // 3. Phân thân 2: Màu Lam Lôi Đình (Storm Cyan)
+        CreateBossClone(new Vector3(2.8f, -0.5f, 0f), new Color(0.12f, 0.85f, 1f), "✦ PHÂN THÂN LÔI ĐÌNH ✦");
+    }
+
+    private void CreateBossClone(Vector3 offset, Color cloneColor, string cloneTitle)
+    {
+        GameObject cloneObj = Instantiate(gameObject, transform.position + offset, Quaternion.identity);
+        cloneObj.name = $"BossClone_{activeClones.Count + 1}";
+
+        var cloneAI = cloneObj.GetComponent<BotWheelAI>();
+        if (cloneAI != null)
+        {
+            cloneAI.isBoss = true;
+            cloneAI.isClone = true;
+            cloneAI.mainBoss = this; // Sài chung 1 thanh máu với Trùm chính!
+            cloneAI.totalBossPhases = 1;
+            cloneAI.currentBossPhase = 1;
+            cloneAI.maxHealth = phaseMaxHealth;
+            cloneAI.phaseMaxHealth = phaseMaxHealth;
+            cloneAI.currentHealth = currentHealth;
+            cloneAI.moveSpeed = moveSpeed * 1.05f;
+            cloneAI.attackCooldown = 1.35f;
+            cloneAI.attackDamage = attackDamage;
+            cloneAI.originalColor = cloneColor;
+            if (cloneAI.spriteRenderer != null) cloneAI.spriteRenderer.color = cloneColor;
+            cloneAI.isTransitioningPhase = false;
+            cloneAI.isPurpleRingActive = false;
+            cloneAI.activeClones = new List<BotWheelAI>();
+
+            activeClones.Add(cloneAI);
+        }
+
+        DamagePopup.CreateText(transform.position + offset + Vector3.up * 1.8f, cloneTitle, cloneColor);
     }
 
     private void OnDrawGizmosSelected()

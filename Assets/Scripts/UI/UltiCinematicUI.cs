@@ -355,7 +355,7 @@ public class UltiCinematicUI : MonoBehaviour
             scaler.matchWidthOrHeight = 0.5f;
 
             canvasObj.AddComponent<GraphicRaycaster>();
-            Object.DontDestroyOnLoad(canvasObj);
+            // Object.DontDestroyOnLoad(canvasObj); -- removed to prevent persistent canvas blocking UI on reset
         }
         else
         {

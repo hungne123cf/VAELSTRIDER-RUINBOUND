@@ -45,35 +45,47 @@ public class AncientShrine : MonoBehaviour
             if (playerTransform == null) return;
         }
 
-        float dist = Vector2.Distance(transform.position, playerTransform.position);
-        bool inRange = dist <= interactRadius;
+        // Tinh khoang cach toi tam cua tru da (tru da cao khoang 2.5m nen tam o y + 0.8m)
+        Vector2 shrineCenter = (Vector2)transform.position + new Vector2(0f, 0.8f);
+        float dist = Vector2.Distance(shrineCenter, playerTransform.position);
+        float effectiveRadius = Mathf.Max(interactRadius, 4.2f);
+        bool inRange = dist <= effectiveRadius;
+        isPlayerInRange = inRange;
 
-        if (inRange != isPlayerInRange)
+        // Kiem tra truc tiep tu ShrineUpgradeUI xem Menu co dang mo hay khong
+        bool menuOpen = ShrineUpgradeUI.Instance != null && ShrineUpgradeUI.Instance.IsOpen();
+        bool shouldShow = inRange && !menuOpen;
+
+        // Luon cap nhat trang thai hien thi cua Open Badge va World Prompt moi khung hinh
+        if (openBadgeObj != null && openBadgeObj.activeSelf != shouldShow)
         {
-            isPlayerInRange = inRange;
-            if (worldPromptObj != null) worldPromptObj.SetActive(inRange && !isMenuOpen);
-            UpdateMobileInteractButton(inRange && !isMenuOpen);
+            openBadgeObj.SetActive(shouldShow);
         }
-
-        // Floating & breathing animation for the "OPEN" badge on top of the pillar
-        if (openBadgeObj != null && openBadgeRt != null)
+        if (worldPromptObj != null && worldPromptObj.activeSelf != shouldShow)
         {
-            float bobbing = Mathf.Sin(Time.time * 3.2f) * 0.10f;
+            worldPromptObj.SetActive(shouldShow);
+        }
+        UpdateMobileInteractButton(shouldShow);
+
+        // Hieu ung bay bong, nhap nhay vien sang cho badge "OPEN"
+        if (openBadgeObj != null && openBadgeObj.activeSelf && openBadgeRt != null)
+        {
+            float bobbing = Mathf.Sin(Time.time * 3.2f) * 0.12f;
             openBadgeObj.transform.localPosition = new Vector3(0f, promptOffset.y + bobbing, 0f);
 
-            float targetScale = isPlayerInRange ? 0.015f : 0.012f;
-            openBadgeRt.localScale = Vector3.Lerp(openBadgeRt.localScale, Vector3.one * targetScale, Time.deltaTime * 8f);
+            float targetScale = 0.015f;
+            openBadgeRt.localScale = Vector3.Lerp(openBadgeRt.localScale, Vector3.one * targetScale, Time.deltaTime * 10f);
 
             if (openBadgeOutline != null)
             {
                 float alpha = (Mathf.Sin(Time.time * 4f) + 1f) * 0.5f;
-                Color baseCol = isPlayerInRange ? new Color(0.35f, 0.95f, 1f, 1f) : new Color(0.25f, 0.75f, 0.85f, 0.7f);
+                Color baseCol = new Color(0.35f, 0.95f, 1f, 1f);
                 openBadgeOutline.effectColor = new Color(baseCol.r, baseCol.g, baseCol.b, Mathf.Lerp(0.5f, 1f, alpha));
             }
         }
 
-        // PC Key [E] to interact
-        if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
+        // Phim [E] de tuong tac tren PC
+        if (inRange && Input.GetKeyDown(KeyCode.E))
         {
             ToggleShrineMenu();
         }
@@ -100,7 +112,8 @@ public class AncientShrine : MonoBehaviour
         Canvas badgeCanvas = openBadgeObj.AddComponent<Canvas>();
         badgeCanvas.renderMode = RenderMode.WorldSpace;
         badgeCanvas.sortingLayerName = "UI";
-        badgeCanvas.sortingOrder = 50;
+        badgeCanvas.worldCamera = Camera.main;
+        badgeCanvas.sortingOrder = 500;
 
         var cs = openBadgeObj.AddComponent<CanvasScaler>();
         cs.dynamicPixelsPerUnit = 100;
@@ -140,9 +153,11 @@ public class AncientShrine : MonoBehaviour
 
         // BoxCollider2D de bat ca su kien Touch / Click truc tiep trong the gioi 2D
         BoxCollider2D col = openBadgeObj.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(2.2f, 0.9f);
+        col.size = new Vector2(160f, 60f);
         var clicker = openBadgeObj.AddComponent<ShrineBadgeClicker>();
         clicker.shrine = this;
+
+        openBadgeObj.SetActive(false);
     }
 
     private void CreateWorldPrompt()
@@ -165,13 +180,6 @@ public class AncientShrine : MonoBehaviour
 
     public void OnBadgeClicked()
     {
-        // Cho phep bam o khoang cach linh hoat den 4.5m tren mobile
-        if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) > 4.5f)
-        {
-            Debug.Log("<color=yellow>[SHRINE]</color> Hay tien lai gan tru da de mo nang cap!");
-            return;
-        }
-
         ToggleShrineMenu();
     }
 
@@ -180,18 +188,20 @@ public class AncientShrine : MonoBehaviour
         var ui = ShrineUpgradeUI.EnsureUIExists();
         if (ui == null) return;
 
-        isMenuOpen = !ui.IsOpen();
-        if (isMenuOpen)
-        {
-            ui.Open();
-        }
-        else
+        if (ui.IsOpen())
         {
             ui.Close();
         }
+        else
+        {
+            ui.Open();
+        }
 
-        if (worldPromptObj != null) worldPromptObj.SetActive(isPlayerInRange && !isMenuOpen);
-        UpdateMobileInteractButton(isPlayerInRange && !isMenuOpen);
+        bool menuOpen = ui.IsOpen();
+        bool shouldShow = isPlayerInRange && !menuOpen;
+        if (openBadgeObj != null) openBadgeObj.SetActive(shouldShow);
+        if (worldPromptObj != null) worldPromptObj.SetActive(shouldShow);
+        UpdateMobileInteractButton(shouldShow);
     }
 
     public void OnMobileInteractClicked()
@@ -215,7 +225,7 @@ public class AncientShrine : MonoBehaviour
     {
         if (mobileInteractBtn != null) return mobileInteractBtn;
 
-        Canvas canvas = FindAnyObjectByType<Canvas>();
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
         if (canvas == null) return null;
 
         Transform existing = canvas.transform.Find("Btn_Interact");
@@ -225,22 +235,24 @@ public class AncientShrine : MonoBehaviour
             return mobileInteractBtn;
         }
 
-        mobileInteractBtn = new GameObject("Btn_Interact");
+        mobileInteractBtn = new GameObject("Btn_Interact", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        mobileInteractBtn.layer = 5;
         mobileInteractBtn.transform.SetParent(canvas.transform, false);
 
-        RectTransform rt = mobileInteractBtn.AddComponent<RectTransform>();
+        RectTransform rt = mobileInteractBtn.GetComponent<RectTransform>();
         rt.anchorMin = new Vector2(1, 0);
         rt.anchorMax = new Vector2(1, 0);
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = new Vector2(-470, 180);
         rt.sizeDelta = new Vector2(90, 90);
 
-        Image bg = mobileInteractBtn.AddComponent<Image>();
+        Image bg = mobileInteractBtn.GetComponent<Image>();
         bg.color = new Color(0.12f, 0.28f, 0.35f, 0.92f);
 
-        GameObject txtObj = new GameObject("Label");
+        GameObject txtObj = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer));
+        txtObj.layer = 5;
         txtObj.transform.SetParent(mobileInteractBtn.transform, false);
-        RectTransform txtRt = txtObj.AddComponent<RectTransform>();
+        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
         txtRt.anchorMin = Vector2.zero;
         txtRt.anchorMax = Vector2.one;
         txtRt.sizeDelta = Vector2.zero;
@@ -253,7 +265,8 @@ public class AncientShrine : MonoBehaviour
         tmp.color = new Color(0.3f, 0.95f, 1f, 1f);
         tmp.raycastTarget = false;
 
-        Button btn = mobileInteractBtn.AddComponent<Button>();
+        Button btn = mobileInteractBtn.GetComponent<Button>();
+        btn.targetGraphic = bg;
         btn.onClick.AddListener(() =>
         {
             var shrine = FindAnyObjectByType<AncientShrine>();

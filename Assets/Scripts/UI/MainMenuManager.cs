@@ -42,6 +42,7 @@ public class MainMenuManager : MonoBehaviour
 
     void Awake()
     {
+        Time.timeScale = 1.0f;
         if (Instance == null) Instance = this;
         else if (Instance != this) { Destroy(gameObject); return; }
     }

@@ -1,3 +1,4 @@
+using UnityEngine.EventSystems;
 using UnityEngine;
 using System.Collections;
 
@@ -10,7 +11,7 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Vector2 bodyCenterOffset = new Vector2(0f, 0.1f);
     [SerializeField] private LayerMask enemyLayers;
     [SerializeField] private int attack1Damage = 5;
-    [SerializeField] private int attack2Damage = 8;
+    [SerializeField] private int attack2Damage = 5;
     [SerializeField] private float comboResetTime = 0.9f;
 
     [Header("Special Skill - Ruin Whirlwind")]
@@ -48,6 +49,11 @@ public class PlayerCombat : MonoBehaviour
         animator = GetComponent<Animator>();
         playerController = GetComponent<PlayerController>();
         playerHealth = GetComponent<PlayerHealth>();
+
+        // Bat buoc ap dung chi so can ban Hardcore chuan
+        attack1Damage = 5;
+        attack2Damage = 5;
+        skillCooldown = 30.0f;
 
         AutoAlignCombat();
 
@@ -90,9 +96,16 @@ public class PlayerCombat : MonoBehaviour
         // Danh thuong (Chuot trai hoac phim J)
         if (Time.frameCount != lastSpecialSkillFrame && !isUltiActive)
         {
-            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.J))
+            if (Input.GetKeyDown(KeyCode.J))
             {
                 PerformAttack();
+            }
+            else if (Input.GetMouseButtonDown(0))
+            {
+                if (!IsPointerOverUI())
+                {
+                    PerformAttack();
+                }
             }
         }
 
@@ -316,6 +329,30 @@ public class PlayerCombat : MonoBehaviour
     public float GetSkillCooldownNormalized() => (skillCooldown > 0f) ? Mathf.Clamp01(skillCooldownTimer / skillCooldown) : 0f;
     public float GetSkillCooldownRemaining() => Mathf.Max(0f, skillCooldownTimer);
     public bool IsSkillReady() => skillCooldownTimer <= 0f && !isUltiActive;
+
+    
+    public void BlockAttackThisFrame()
+    {
+        lastSpecialSkillFrame = Time.frameCount;
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            Touch touch = Input.GetTouch(i);
+            if (touch.phase == TouchPhase.Began && EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private void OnDrawGizmos()
     {

@@ -54,28 +54,31 @@ public class GameOverUI : MonoBehaviour
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Reset luot hoi sinh khi load map moi hoac choi lai
         RespawnsUsedInCurrentMap = 0;
     }
 
     public static void Show()
     {
+        Time.timeScale = 1.0f; // Dam bao khong bi ket thoi gian
+        EnsureUIExists();
+
         if (Instance != null)
         {
             Instance.TriggerShow();
         }
         else
         {
-            CreateRuntimeGameOverUI();
+            Debug.LogError("<color=red>[GAMEOVER UI]</color> Khong the khoi tao GameOverUI!");
         }
     }
 
     public void TriggerShow()
     {
-        if (isShown) return;
-        isShown = true;
-
+        gameObject.SetActive(true);
+        transform.SetAsLastSibling();
         UpdateButtonsAndTexts();
+
+        StopAllCoroutines();
         StartCoroutine(FadeInRoutine());
     }
 
@@ -115,8 +118,8 @@ public class GameOverUI : MonoBehaviour
         {
             bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
             respawnStatusText.text = canRespawn 
-                ? (isVi ? "- Ban con 1 lan hoi sinh trong ban do nay -" : "- You have 1 respawn left for this realm -")
-                : (isVi ? "- Da het luot hoi sinh cho map nay (Toi da: 1/1) -" : "- Out of respawns for this map (Max: 1/1) -");
+                ? (isVi ? "— Bạn còn 1 lần hồi sinh trong bản đồ này —" : "— You have 1 respawn left for this realm —")
+                : (isVi ? "— Đã hết lượt hồi sinh cho map này (Tối đa: 1/1) —" : "— Out of respawns for this map (Max: 1/1) —");
             respawnStatusText.color = canRespawn ? new Color(0.3f, 0.95f, 0.65f) : new Color(0.95f, 0.45f, 0.45f);
         }
 
@@ -131,7 +134,7 @@ public class GameOverUI : MonoBehaviour
             restartBtnText.text = LocalizationManager.Get("GAMEOVER_RESTART_MAP");
         }
 
-        // 3. Nut Ve trang dang nhap
+        // 3. Nut Thoat ve trang dang nhap
         if (exitButton != null)
         {
             exitButton.onClick.RemoveAllListeners();
@@ -145,16 +148,15 @@ public class GameOverUI : MonoBehaviour
 
     private IEnumerator FadeInRoutine()
     {
-        yield return new WaitForSeconds(0.4f);
-
+        isShown = true;
         canvasGroup.blocksRaycasts = true;
         canvasGroup.interactable = true;
 
         float t = 0f;
-        while (t < 0.6f)
+        while (t < 0.35f)
         {
             t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(0f, 1f, t / 0.6f);
+            canvasGroup.alpha = Mathf.Lerp(0f, 1f, t / 0.35f);
             yield return null;
         }
         canvasGroup.alpha = 1f;
@@ -166,10 +168,10 @@ public class GameOverUI : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
 
         float t = 0f;
-        while (t < 0.4f)
+        while (t < 0.25f)
         {
             t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(1f, 0f, t / 0.4f);
+            canvasGroup.alpha = Mathf.Lerp(1f, 0f, t / 0.25f);
             yield return null;
         }
         canvasGroup.alpha = 0f;
@@ -194,7 +196,7 @@ public class GameOverUI : MonoBehaviour
         StartCoroutine(FadeOutRoutine(() =>
         {
             Time.timeScale = 1f;
-            var playerHealth = Object.FindAnyObjectByType<PlayerHealth>();
+            var playerHealth = UnityEngine.Object.FindAnyObjectByType<PlayerHealth>();
             if (playerHealth != null)
             {
                 playerHealth.Revive();
@@ -203,23 +205,20 @@ public class GameOverUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Choi lai tu dau map: Reset luot hoi sinh va load lai scene
+    /// Choi lai tu dau map
     /// </summary>
     public void OnRestartMapClicked()
     {
         RespawnsUsedInCurrentMap = 0;
         Time.timeScale = 1f;
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySwordSlash();
 
-        // CO CHE DARK SOULS: Nguoi choi chet khong hoi sinh ma chon Choi lai tu dau,
-        // toan bo so Shards dang mang theo se bi danh roi tai vi tri tu tran!
-        var inv = Object.FindAnyObjectByType<PlayerInventory>();
+        var inv = UnityEngine.Object.FindAnyObjectByType<PlayerInventory>();
         if (inv != null)
         {
             inv.DropAllShardsOnDeath(PlayerHealth.LastDeathPosition, SceneManager.GetActiveScene().name);
         }
 
-        Debug.Log("<color=cyan>[RESTART MAP]</color> Choi lai tu dau map! Toan bo tien da roi tai vi tri guc nga.");
+        Debug.Log("<color=cyan>[RESTART MAP]</color> Choi lai tu dau map!");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -230,10 +229,8 @@ public class GameOverUI : MonoBehaviour
     {
         RespawnsUsedInCurrentMap = 0;
         Time.timeScale = 1f;
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySwordSlash();
 
-        // CO CHE DARK SOULS: Danh roi tien tai vi tri chet truoc khi thoat
-        var inv = Object.FindAnyObjectByType<PlayerInventory>();
+        var inv = UnityEngine.Object.FindAnyObjectByType<PlayerInventory>();
         if (inv != null)
         {
             inv.DropAllShardsOnDeath(PlayerHealth.LastDeathPosition, SceneManager.GetActiveScene().name);
@@ -243,113 +240,141 @@ public class GameOverUI : MonoBehaviour
         SceneManager.LoadScene("LoginScene");
     }
 
-    public static void CreateRuntimeGameOverUI()
+    public static GameOverUI EnsureUIExists()
     {
-        Canvas canvas = Object.FindAnyObjectByType<Canvas>();
-        if (canvas == null) return;
+        if (Instance != null) return Instance;
 
-        Transform existing = canvas.transform.Find("GameOverPanel");
+        Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (rootCanvas == null) return null;
+
+        Transform existing = rootCanvas.transform.Find("GameOverPanel");
         if (existing != null)
         {
-            var go = existing.GetComponent<GameOverUI>();
-            if (go != null) { go.TriggerShow(); return; }
+            Instance = existing.GetComponent<GameOverUI>();
+            if (Instance != null) return Instance;
         }
 
-        GameObject panelObj = new GameObject("GameOverPanel");
-        panelObj.transform.SetParent(canvas.transform, false);
+        // Tao Container UI Panel
+        GameObject panelObj = new GameObject("GameOverPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(CanvasGroup));
+        panelObj.layer = 5;
+        panelObj.transform.SetParent(rootCanvas.transform, false);
 
-        RectTransform panelRect = panelObj.AddComponent<RectTransform>();
+        RectTransform panelRect = panelObj.GetComponent<RectTransform>();
         panelRect.anchorMin = Vector2.zero;
         panelRect.anchorMax = Vector2.one;
         panelRect.offsetMin = Vector2.zero;
         panelRect.offsetMax = Vector2.zero;
 
-        Image panelBg = panelObj.AddComponent<Image>();
-        panelBg.color = new Color(0.08f, 0.02f, 0.02f, 0.94f); // Dark red death vignette
+        Image panelBg = panelObj.GetComponent<Image>();
+        panelBg.color = new Color(0.06f, 0.02f, 0.02f, 0.94f); // Dark death vignette
 
-        CanvasGroup cg = panelObj.AddComponent<CanvasGroup>();
-        var gameOverComp = panelObj.AddComponent<GameOverUI>();
-        gameOverComp.canvasGroup = cg;
+        // Overriding canvas de dam bao luon o tren cung
+        Canvas panelCanvas = panelObj.AddComponent<Canvas>();
+        panelCanvas.overrideSorting = true;
+        panelCanvas.sortingOrder = 9999;
+        panelObj.AddComponent<GraphicRaycaster>();
+
+        CanvasGroup cg = panelObj.GetComponent<CanvasGroup>();
+        cg.alpha = 0f;
+        cg.interactable = false;
+        cg.blocksRaycasts = false;
+
+        Instance = panelObj.AddComponent<GameOverUI>();
+        Instance.canvasGroup = cg;
 
         // Center Card Box
-        GameObject boxObj = new GameObject("CenterBox");
+        GameObject boxObj = new GameObject("CenterBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        boxObj.layer = 5;
         boxObj.transform.SetParent(panelObj.transform, false);
-        RectTransform boxRect = boxObj.AddComponent<RectTransform>();
-        boxRect.sizeDelta = new Vector2(600, 480);
-        Image boxBg = boxObj.AddComponent<Image>();
-        boxBg.color = new Color(0.11f, 0.12f, 0.18f, 0.98f);
+        RectTransform boxRect = boxObj.GetComponent<RectTransform>();
+        boxRect.sizeDelta = new Vector2(620, 500);
+        boxRect.anchoredPosition = Vector2.zero;
+
+        Image boxBg = boxObj.GetComponent<Image>();
+        boxBg.color = new Color(0.10f, 0.11f, 0.16f, 0.98f);
         var outline = boxObj.AddComponent<Outline>();
-        outline.effectColor = new Color(0.6f, 0.15f, 0.15f, 0.8f);
-        outline.effectDistance = new Vector2(2f, -2f);
+        outline.effectColor = new Color(0.7f, 0.18f, 0.2f, 0.9f);
+        outline.effectDistance = new Vector2(2.5f, -2.5f);
 
         // Title: YOU DIED
-        GameObject titleObj = new GameObject("Title");
+        GameObject titleObj = new GameObject("Title", typeof(RectTransform));
+        titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
-        RectTransform titleRect = titleObj.AddComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, 185);
-        titleRect.sizeDelta = new Vector2(560, 60);
+        RectTransform titleRect = titleObj.GetComponent<RectTransform>();
+        titleRect.anchoredPosition = new Vector2(0, 190);
+        titleRect.sizeDelta = new Vector2(580, 60);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = "YOU DIED";
-        titleTmp.fontSize = 48;
+        titleTmp.fontSize = 46;
         titleTmp.fontStyle = FontStyles.Bold;
-        titleTmp.color = new Color(0.95f, 0.2f, 0.2f);
+        titleTmp.color = new Color(0.95f, 0.22f, 0.25f);
         titleTmp.alignment = TextAlignmentOptions.Center;
-        gameOverComp.titleText = titleTmp;
+        Instance.titleText = titleTmp;
 
         // Subtitle
-        GameObject subObj = new GameObject("Subtitle");
+        GameObject subObj = new GameObject("Subtitle", typeof(RectTransform));
+        subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
-        RectTransform subRect = subObj.AddComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 130);
-        subRect.sizeDelta = new Vector2(540, 35);
+        RectTransform subRect = subObj.GetComponent<RectTransform>();
+        subRect.anchoredPosition = new Vector2(0, 135);
+        subRect.sizeDelta = new Vector2(560, 35);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         subTmp.text = "Chuyen hanh trinh cua ban da tam dung...";
         subTmp.fontSize = 17;
-        subTmp.color = new Color(0.85f, 0.75f, 0.75f);
+        subTmp.color = new Color(0.85f, 0.75f, 0.78f);
         subTmp.alignment = TextAlignmentOptions.Center;
-        gameOverComp.subtitleText = subTmp;
+        Instance.subtitleText = subTmp;
 
         // Respawn Status Indicator
-        GameObject statusObj = new GameObject("RespawnStatus");
+        GameObject statusObj = new GameObject("RespawnStatus", typeof(RectTransform));
+        statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
-        RectTransform statusRect = statusObj.AddComponent<RectTransform>();
+        RectTransform statusRect = statusObj.GetComponent<RectTransform>();
         statusRect.anchoredPosition = new Vector2(0, 85);
-        statusRect.sizeDelta = new Vector2(540, 30);
+        statusRect.sizeDelta = new Vector2(560, 32);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
         statusTmp.fontSize = 15;
         statusTmp.fontStyle = FontStyles.Bold;
         statusTmp.alignment = TextAlignmentOptions.Center;
-        gameOverComp.respawnStatusText = statusTmp;
+        Instance.respawnStatusText = statusTmp;
 
-        // 1. Button: RESPAWN (HOI SINH TAI CHO)
-        gameOverComp.respawnButton = CreateButton(boxObj.transform, "Btn_Respawn", "HOI SINH TAI CHO (1/1)", new Vector2(0, 20), new Vector2(480, 52), new Color(0.18f, 0.65f, 0.45f), 19, out gameOverComp.respawnBtnText);
+        // 1. Button: RESPAWN
+        Instance.respawnButton = CreateButton(boxObj.transform, "Btn_Respawn", "HỒI SINH TẠI CHỖ (1/1)", new Vector2(0, 18), new Vector2(500, 54), new Color(0.18f, 0.65f, 0.45f), 20, out Instance.respawnBtnText);
 
-        // 2. Button: RESTART MAP (CHOI LAI TU DAU MAP)
-        gameOverComp.restartButton = CreateButton(boxObj.transform, "Btn_RestartMap", "CHOI LAI TU DAU", new Vector2(0, -45), new Vector2(480, 52), new Color(0.85f, 0.45f, 0.15f), 19, out gameOverComp.restartBtnText);
+        // 2. Button: RESTART MAP
+        Instance.restartButton = CreateButton(boxObj.transform, "Btn_RestartMap", "CHƠI LẠI TỪ ĐẦU", new Vector2(0, -50), new Vector2(500, 54), new Color(0.85f, 0.45f, 0.15f), 20, out Instance.restartBtnText);
 
-        // 3. Button: EXIT TO LOGIN (VE TRANG DANG NHAP)
-        gameOverComp.exitButton = CreateButton(boxObj.transform, "Btn_ExitLogin", "VE TRANG DANG NHAP", new Vector2(0, -110), new Vector2(480, 48), new Color(0.65f, 0.22f, 0.22f), 17, out gameOverComp.exitBtnText);
+        // 3. Button: EXIT TO LOGIN
+        Instance.exitButton = CreateButton(boxObj.transform, "Btn_ExitLogin", "VỀ TRANG ĐĂNG NHẬP", new Vector2(0, -118), new Vector2(500, 50), new Color(0.65f, 0.22f, 0.25f), 18, out Instance.exitBtnText);
 
-        gameOverComp.TriggerShow();
+        return Instance;
     }
 
     private static Button CreateButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, float fontSize, out TextMeshProUGUI btnTxt)
     {
-        GameObject obj = new GameObject(name);
+        GameObject obj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        obj.layer = 5;
         obj.transform.SetParent(parent, false);
-        var rt = obj.AddComponent<RectTransform>();
+
+        var rt = obj.GetComponent<RectTransform>();
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
-        var img = obj.AddComponent<Image>();
-        img.color = bgColor;
-        var btn = obj.AddComponent<Button>();
 
-        GameObject txtObj = new GameObject("Text");
+        var img = obj.GetComponent<Image>();
+        img.color = bgColor;
+
+        var btn = obj.GetComponent<Button>();
+        btn.targetGraphic = img;
+
+        GameObject txtObj = new GameObject("Text", typeof(RectTransform));
+        txtObj.layer = 5;
         txtObj.transform.SetParent(obj.transform, false);
-        var tRt = txtObj.AddComponent<RectTransform>();
+
+        var tRt = txtObj.GetComponent<RectTransform>();
         tRt.anchorMin = Vector2.zero;
         tRt.anchorMax = Vector2.one;
         tRt.sizeDelta = Vector2.zero;
+
         btnTxt = txtObj.AddComponent<TextMeshProUGUI>();
         btnTxt.text = text;
         btnTxt.fontSize = fontSize;

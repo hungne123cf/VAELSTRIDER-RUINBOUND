@@ -28,37 +28,74 @@ public class BossHealthBarUI : MonoBehaviour
     private Coroutine ghostRoutine;
     private bool isVisible = false;
 
+    public bool IsVisible => isVisible;
+
     void Awake()
     {
         Instance = this;
+        if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
+        if (panelRt == null) panelRt = GetComponent<RectTransform>();
     }
 
     public static BossHealthBarUI EnsureInstance()
     {
-        if (Instance != null) return Instance;
-
-        Canvas canvas = Object.FindAnyObjectByType<Canvas>();
-        if (canvas == null)
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (canvas == null || !canvas.gameObject.activeInHierarchy)
         {
-            GameObject cObj = new GameObject("BossCanvas");
-            canvas = cObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 9000;
-            var scaler = cObj.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            cObj.AddComponent<GraphicRaycaster>();
+            GameObject cObj = GameObject.Find("BossCanvas");
+            if (cObj != null && cObj.GetComponent<Canvas>() != null && cObj.activeInHierarchy)
+            {
+                canvas = cObj.GetComponent<Canvas>();
+            }
+            else
+            {
+                if (cObj == null) cObj = new GameObject("BossCanvas");
+                cObj.SetActive(true);
+                canvas = cObj.GetComponent<Canvas>() ?? cObj.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvas.sortingOrder = 9000;
+                var scaler = cObj.GetComponent<CanvasScaler>() ?? cObj.AddComponent<CanvasScaler>();
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920, 1080);
+                if (cObj.GetComponent<GraphicRaycaster>() == null) cObj.AddComponent<GraphicRaycaster>();
+            }
+        }
+
+        if (Instance != null)
+        {
+            if (!Instance.gameObject.activeSelf) Instance.gameObject.SetActive(true);
+            if (!Instance.gameObject.activeInHierarchy && canvas != null)
+            {
+                Instance.transform.SetParent(canvas.transform, false);
+                Instance.gameObject.SetActive(true);
+            }
+            return Instance;
+        }
+
+        BossHealthBarUI existingUI = Object.FindAnyObjectByType<BossHealthBarUI>(FindObjectsInactive.Include);
+        if (existingUI != null)
+        {
+            existingUI.gameObject.SetActive(true);
+            if (!existingUI.gameObject.activeInHierarchy && canvas != null)
+            {
+                existingUI.transform.SetParent(canvas.transform, false);
+                existingUI.gameObject.SetActive(true);
+            }
+            Instance = existingUI;
+            return Instance;
         }
 
         Transform existing = canvas.transform.Find("BossHealthBarPanel");
         if (existing != null)
         {
+            existing.gameObject.SetActive(true);
             Instance = existing.GetComponent<BossHealthBarUI>();
-            return Instance;
+            if (Instance != null) return Instance;
         }
 
         GameObject root = new GameObject("BossHealthBarPanel");
         root.transform.SetParent(canvas.transform, false);
+        root.SetActive(true);
 
         RectTransform rootRt = root.AddComponent<RectTransform>();
         rootRt.anchorMin = new Vector2(0.5f, 1f);
@@ -193,6 +230,17 @@ public class BossHealthBarUI : MonoBehaviour
 
     public void ShowBoss(BotWheelAI boss, string name)
     {
+        if (!gameObject.activeSelf) gameObject.SetActive(true);
+        if (!gameObject.activeInHierarchy)
+        {
+            Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+            if (canvas != null && canvas.gameObject.activeInHierarchy)
+            {
+                transform.SetParent(canvas.transform, false);
+            }
+            gameObject.SetActive(true);
+        }
+
         currentBoss = boss;
         if (bossNameText != null) bossNameText.text = name;
 
@@ -200,13 +248,33 @@ public class BossHealthBarUI : MonoBehaviour
         if (ghostSlider != null) ghostSlider.value = 1f;
         UpdatePhaseDisplay(3);
 
-        StopAllCoroutines();
-        StartCoroutine(FadeInRoutine());
+        if (gameObject.activeInHierarchy)
+        {
+            StopAllCoroutines();
+            StartCoroutine(FadeInRoutine());
+        }
+        else
+        {
+            isVisible = true;
+            if (canvasGroup != null) canvasGroup.alpha = 1f;
+        }
     }
 
     public void UpdateHealth(int currentHp, int maxHp, int phase)
     {
         if (maxHp <= 0) return;
+
+        if (!gameObject.activeSelf) gameObject.SetActive(true);
+        if (!gameObject.activeInHierarchy)
+        {
+            Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+            if (canvas != null && canvas.gameObject.activeInHierarchy)
+            {
+                transform.SetParent(canvas.transform, false);
+            }
+            gameObject.SetActive(true);
+        }
+
         float norm = Mathf.Clamp01((float)currentHp / maxHp);
 
         if (healthSlider != null) healthSlider.value = norm;
@@ -214,8 +282,15 @@ public class BossHealthBarUI : MonoBehaviour
 
         UpdatePhaseDisplay(phase);
 
-        if (ghostRoutine != null) StopCoroutine(ghostRoutine);
-        ghostRoutine = StartCoroutine(GhostFillRoutine(norm));
+        if (gameObject.activeInHierarchy)
+        {
+            if (ghostRoutine != null) StopCoroutine(ghostRoutine);
+            ghostRoutine = StartCoroutine(GhostFillRoutine(norm));
+        }
+        else
+        {
+            if (ghostSlider != null) ghostSlider.value = norm;
+        }
     }
 
     public void UpdatePhaseDisplay(int phase)
@@ -248,8 +323,16 @@ public class BossHealthBarUI : MonoBehaviour
 
     public void HideBoss()
     {
-        StopAllCoroutines();
-        StartCoroutine(FadeOutRoutine());
+        if (gameObject.activeInHierarchy)
+        {
+            StopAllCoroutines();
+            StartCoroutine(FadeOutRoutine());
+        }
+        else
+        {
+            isVisible = false;
+            if (canvasGroup != null) canvasGroup.alpha = 0f;
+        }
     }
 
     private IEnumerator FadeInRoutine()

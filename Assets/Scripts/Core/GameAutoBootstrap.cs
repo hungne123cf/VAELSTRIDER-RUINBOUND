@@ -48,8 +48,10 @@ public class GameAutoBootstrap : MonoBehaviour
         {
             // Dang o Map 2: Giu nguyen dia hinh thung lung Map 2, khoi tao UI, Upgrade va Ancient Shrine Tru Da Phat Sang
             PotionQuickSlotUI.EnsureUIExists();
+        GameOverUI.EnsureUIExists();
             EnsureSpecialSkillButton();
             SettingsUI.EnsureSettingsButtonExists();
+            CharacterStatsUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ShrineUpgradeUI.EnsureUIExists();
             EnsureAncientShrine(new Vector3(-5.5f, 2.8f, 0f));
@@ -64,12 +66,14 @@ public class GameAutoBootstrap : MonoBehaviour
 
         // 1. Khoi tao nut Binh Mau (Potion Quick Slot) tren Canvas
         PotionQuickSlotUI.EnsureUIExists();
+        GameOverUI.EnsureUIExists();
 
         // 2. Khoi tao nut Tuyet Ky Ruin Whirlwind tren Canvas
         EnsureSpecialSkillButton();
 
         // 2b. Khoi tao nut Settings tren Canvas (cho ca Map 1 va Map 2)
         SettingsUI.EnsureSettingsButtonExists();
+        CharacterStatsUI.EnsureUIExists();
 
         // 3. Khoi tao He thong 3 dot quai + Boss Titan Wheel (WaveSpawner)
         EnsureWaveSpawner();
@@ -99,9 +103,29 @@ public class GameAutoBootstrap : MonoBehaviour
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
     }
 
+        public static Canvas GetMainGameplayCanvas()
+    {
+        var cObj = GameObject.Find("Canvas");
+        if (cObj != null)
+        {
+            var c = cObj.GetComponent<Canvas>();
+            if (c != null && c.isRootCanvas && c.enabled) return c;
+        }
+
+        var all = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+        foreach (var c in all)
+        {
+            if (c != null && c.isRootCanvas && c.enabled && !c.name.Contains("UltiCinematic") && !c.name.Contains("GameOver") && !c.name.Contains("ShrineUpgrade"))
+            {
+                return c;
+            }
+        }
+        return all.Length > 0 ? all[0] : null;
+    }
+
     public static GameObject EnsureSpecialSkillButton()
     {
-        Canvas canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GetMainGameplayCanvas();
         if (canvas == null) return null;
 
         Transform existing = canvas.transform.Find("Btn_Special");
@@ -217,7 +241,7 @@ public class GameAutoBootstrap : MonoBehaviour
         var waveUI = Object.FindAnyObjectByType<WaveUI>();
         if (waveUI != null) return waveUI;
 
-        Canvas canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GetMainGameplayCanvas();
         if (canvas == null) return null;
 
         Transform existing = canvas.transform.Find("WaveBanner");
@@ -315,7 +339,10 @@ public class GameAutoBootstrap : MonoBehaviour
     {
         string[] uiNames = new string[] {
             "Btn_Special", "PotionQuickSlot", "WaveBanner", "PlayerHealthBar",
-            "LostShardsGrave", "TreasureChest_Crypt", "DungeonBarriers", "DungeonTorches"
+            "LostShardsGrave", "TreasureChest_Crypt", "DungeonBarriers", "DungeonTorches",
+            "UltiCinematicCanvas", "UltiCinematicUI", "LoginManager_Auto", "Login_DarkBackdrop",
+            "GameOverPanel", "ShrineUpgradePanel", "CharacterStatsPanel", "SettingsPanel",
+            "Btn_SettingsGear", "Btn_CharacterStats"
         };
         foreach (var name in uiNames)
         {

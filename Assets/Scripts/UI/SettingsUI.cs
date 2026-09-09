@@ -80,13 +80,39 @@ public class SettingsUI : MonoBehaviour
             sfxSlider.onValueChanged.AddListener(OnSfxChanged);
         }
 
-        LocalizationManager.OnLanguageChanged += RefreshLabels;
         RefreshLabels();
     }
 
-    void OnDestroy()
+    void Update()
     {
-        LocalizationManager.OnLanguageChanged -= RefreshLabels;
+        // ESC de bat / tat Cài đặt
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (guidePanel != null && guidePanel.activeSelf)
+            {
+                CloseGuide();
+            }
+            else
+            {
+                ToggleSettings();
+            }
+        }
+    }
+
+    private void OnBgmChanged(float val)
+    {
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.MusicVolume = val;
+        }
+    }
+
+    private void OnSfxChanged(float val)
+    {
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.SFXVolume = val;
+        }
     }
 
     public void ShowSettings()
@@ -106,14 +132,24 @@ public class SettingsUI : MonoBehaviour
         }
         if (guidePanel != null && !isOpen) guidePanel.SetActive(false);
 
-        string curScene = SceneManager.GetActiveScene().name; bool isLogin = curScene == "LoginScene" || curScene == "MainMenuScene";
+        bool isLogin = SceneManager.GetActiveScene().name == "LoginScene";
         Time.timeScale = (isOpen && !isLogin) ? 0f : 1f;
         if (isOpen) RefreshLabels();
     }
 
+    public void SetLanguage(int langIndex)
+    {
+        LocalizationManager.CurrentLanguage = (langIndex == 0) ? LocalizationManager.Language.Vietnamese : LocalizationManager.Language.English;
+        RefreshLabels();
+    }
+
     public void ShowGuide()
     {
-        if (guidePanel != null) guidePanel.SetActive(true);
+        if (guidePanel != null)
+        {
+            guidePanel.transform.SetAsLastSibling();
+            guidePanel.SetActive(true);
+        }
     }
 
     public void CloseGuide()
@@ -121,31 +157,15 @@ public class SettingsUI : MonoBehaviour
         if (guidePanel != null) guidePanel.SetActive(false);
     }
 
-    private void OnBgmChanged(float val)
-    {
-        if (SoundManager.Instance != null) SoundManager.Instance.MusicVolume = val;
-    }
-
-    private void OnSfxChanged(float val)
-    {
-        if (SoundManager.Instance != null) SoundManager.Instance.SFXVolume = val;
-    }
-
-    public void SetLanguage(int langIndex)
-    {
-        LocalizationManager.CurrentLanguage = (LocalizationManager.Language)langIndex;
-    }
-
     public void RestartRun()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void ExitToLogin()
     {
         Time.timeScale = 1f;
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySwordSlash();
         SceneManager.LoadScene("LoginScene");
     }
 
@@ -161,48 +181,62 @@ public class SettingsUI : MonoBehaviour
         if (exitBtnText != null) exitBtnText.text = LocalizationManager.Get("BTN_EXIT_LOGIN");
     }
 
+    private static GameObject CreateUIObject(string name, Transform parent)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer));
+        go.layer = 5;
+        if (parent != null) go.transform.SetParent(parent, false);
+        return go;
+    }
+
     public static void EnsureSettingsButtonExists()
     {
-        Canvas canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
         if (canvas == null) return;
 
         Transform existingBtn = canvas.transform.Find("Btn_SettingsGear");
-        if (existingBtn != null) return;
+        Transform existingPanel = canvas.transform.Find("SettingsPanel");
+        if (existingBtn != null && existingPanel != null)
+        {
+            Instance = existingPanel.GetComponent<SettingsUI>();
+            return;
+        }
 
-        // 1. Create Gear Button on Top Right (next to pause/stats)
-        GameObject btnObj = new GameObject("Btn_SettingsGear");
-        btnObj.transform.SetParent(canvas.transform, false);
-
-        RectTransform btnRt = btnObj.AddComponent<RectTransform>();
+        // 1. Create Gear Button on Top Right (-20, -20)
+        GameObject btnObj = CreateUIObject("Btn_SettingsGear", canvas.transform);
+        RectTransform btnRt = btnObj.GetComponent<RectTransform>();
         btnRt.anchorMin = new Vector2(1f, 1f);
         btnRt.anchorMax = new Vector2(1f, 1f);
         btnRt.pivot = new Vector2(1f, 1f);
-        btnRt.anchoredPosition = new Vector2(-25f, -25f);
-        btnRt.sizeDelta = new Vector2(58f, 58f);
+        btnRt.anchoredPosition = new Vector2(-20f, -20f);
+        btnRt.sizeDelta = new Vector2(50f, 50f);
 
         Image btnImg = btnObj.AddComponent<Image>();
-        btnImg.color = new Color(0.12f, 0.14f, 0.2f, 0.92f);
+        btnImg.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
+
+        var outline = btnObj.AddComponent<Outline>();
+        outline.effectColor = new Color(0.85f, 0.70f, 0.25f, 0.75f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
 
         Button btn = btnObj.AddComponent<Button>();
+        btn.targetGraphic = btnImg;
 
-        GameObject iconObj = new GameObject("GearIcon");
-        iconObj.transform.SetParent(btnObj.transform, false);
-        RectTransform iconRt = iconObj.AddComponent<RectTransform>();
+        GameObject iconObj = CreateUIObject("GearIcon", btnObj.transform);
+        RectTransform iconRt = iconObj.GetComponent<RectTransform>();
         iconRt.anchorMin = Vector2.zero;
         iconRt.anchorMax = Vector2.one;
         iconRt.sizeDelta = Vector2.zero;
         var iconTmp = iconObj.AddComponent<TextMeshProUGUI>();
-        iconTmp.text = "[*]";
-        iconTmp.fontSize = 28;
+        iconTmp.text = "SET\n<size=10>(ESC)</size>";
+        iconTmp.fontSize = 12;
         iconTmp.fontStyle = FontStyles.Bold;
         iconTmp.color = new Color(1f, 0.88f, 0.4f);
         iconTmp.alignment = TextAlignmentOptions.Center;
         iconTmp.raycastTarget = false;
 
         // 2. Create Settings Window Panel
-        GameObject panelObj = new GameObject("SettingsPanel");
-        panelObj.transform.SetParent(canvas.transform, false);
-        RectTransform panelRt = panelObj.AddComponent<RectTransform>();
+        GameObject panelObj = CreateUIObject("SettingsPanel", canvas.transform);
+        RectTransform panelRt = panelObj.GetComponent<RectTransform>();
         panelRt.anchorMin = Vector2.zero;
         panelRt.anchorMax = Vector2.one;
         panelRt.offsetMin = Vector2.zero;
@@ -212,15 +246,15 @@ public class SettingsUI : MonoBehaviour
         panelBg.color = new Color(0.04f, 0.05f, 0.08f, 0.88f); // Dim overlay
 
         // Settings Card
-        GameObject cardObj = new GameObject("Card");
-        cardObj.transform.SetParent(panelObj.transform, false);
-        RectTransform cardRt = cardObj.AddComponent<RectTransform>();
+        GameObject cardObj = CreateUIObject("Card", panelObj.transform);
+        RectTransform cardRt = cardObj.GetComponent<RectTransform>();
         cardRt.sizeDelta = new Vector2(640f, 530f);
+        cardRt.anchoredPosition = Vector2.zero;
         Image cardBg = cardObj.AddComponent<Image>();
         cardBg.color = new Color(0.11f, 0.12f, 0.18f, 0.98f);
-        var outline = cardObj.AddComponent<Outline>();
-        outline.effectColor = new Color(0.3f, 0.35f, 0.45f, 0.8f);
-        outline.effectDistance = new Vector2(2f, -2f);
+        var cardOutline = cardObj.AddComponent<Outline>();
+        cardOutline.effectColor = new Color(0.3f, 0.35f, 0.45f, 0.8f);
+        cardOutline.effectDistance = new Vector2(2f, -2f);
 
         var settingsUI = panelObj.AddComponent<SettingsUI>();
         settingsUI.settingsPanel = panelObj;
@@ -228,9 +262,8 @@ public class SettingsUI : MonoBehaviour
         btn.onClick.AddListener(settingsUI.ToggleSettings);
 
         // Title
-        GameObject titleObj = new GameObject("Title");
-        titleObj.transform.SetParent(cardObj.transform, false);
-        RectTransform titleRt = titleObj.AddComponent<RectTransform>();
+        GameObject titleObj = CreateUIObject("Title", cardObj.transform);
+        RectTransform titleRt = titleObj.GetComponent<RectTransform>();
         titleRt.anchoredPosition = new Vector2(0f, 215f);
         titleRt.sizeDelta = new Vector2(500f, 40f);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
@@ -257,7 +290,7 @@ public class SettingsUI : MonoBehaviour
         CreateActionButton(cardObj.transform, "Btn_ExitToLogin", "VE TRANG DANG NHAP", new Vector2(135f, -135f), new Vector2(240f, 46f), new Color(0.75f, 0.22f, 0.22f), () => settingsUI.ExitToLogin(), out settingsUI.exitBtnText);
 
         // Row 3 Action Button: Reset All Progress (Hardcore Mode)
-        CreateActionButton(cardObj.transform, "Btn_ResetGameProgress", "💀 RESET GAME (XÓA TIẾN TRÌNH)", new Vector2(0f, -195f), new Vector2(510f, 44f), new Color(0.68f, 0.12f, 0.16f), () => {
+        CreateActionButton(cardObj.transform, "Btn_ResetGameProgress", "RESET GAME (XOA TIEN TRINH)", new Vector2(0f, -195f), new Vector2(510f, 44f), new Color(0.68f, 0.12f, 0.16f), () => {
             PlayerUpgradeManager.ResetEntireGameProgress();
             Time.timeScale = 1f;
             SceneManager.LoadScene("LoginScene");
@@ -272,15 +305,13 @@ public class SettingsUI : MonoBehaviour
 
     private static Slider CreateSliderRow(Transform parent, string name, string label, float posY, out TextMeshProUGUI labelTmp)
     {
-        GameObject row = new GameObject("Row_" + name);
-        row.transform.SetParent(parent, false);
-        RectTransform rt = row.AddComponent<RectTransform>();
+        GameObject row = CreateUIObject("Row_" + name, parent);
+        RectTransform rt = row.GetComponent<RectTransform>();
         rt.anchoredPosition = new Vector2(0f, posY);
         rt.sizeDelta = new Vector2(520f, 40f);
 
-        GameObject lblObj = new GameObject("Label");
-        lblObj.transform.SetParent(row.transform, false);
-        RectTransform lblRt = lblObj.AddComponent<RectTransform>();
+        GameObject lblObj = CreateUIObject("Label", row.transform);
+        RectTransform lblRt = lblObj.GetComponent<RectTransform>();
         lblRt.anchorMin = new Vector2(0f, 0.5f);
         lblRt.anchorMax = new Vector2(0f, 0.5f);
         lblRt.pivot = new Vector2(0f, 0.5f);
@@ -291,9 +322,8 @@ public class SettingsUI : MonoBehaviour
         labelTmp.color = Color.white;
         labelTmp.alignment = TextAlignmentOptions.Left;
 
-        GameObject sliderObj = new GameObject("Slider");
-        sliderObj.transform.SetParent(row.transform, false);
-        RectTransform sRt = sliderObj.AddComponent<RectTransform>();
+        GameObject sliderObj = CreateUIObject("Slider", row.transform);
+        RectTransform sRt = sliderObj.GetComponent<RectTransform>();
         sRt.anchorMin = new Vector2(1f, 0.5f);
         sRt.anchorMax = new Vector2(1f, 0.5f);
         sRt.pivot = new Vector2(1f, 0.5f);
@@ -303,25 +333,22 @@ public class SettingsUI : MonoBehaviour
         slider.minValue = 0f;
         slider.maxValue = 1f;
 
-        GameObject bgObj = new GameObject("Background");
-        bgObj.transform.SetParent(sliderObj.transform, false);
-        RectTransform bgRt = bgObj.AddComponent<RectTransform>();
+        GameObject bgObj = CreateUIObject("Background", sliderObj.transform);
+        RectTransform bgRt = bgObj.GetComponent<RectTransform>();
         bgRt.anchorMin = Vector2.zero;
         bgRt.anchorMax = Vector2.one;
         bgRt.sizeDelta = Vector2.zero;
         Image bgImg = bgObj.AddComponent<Image>();
         bgImg.color = new Color(0.2f, 0.22f, 0.28f);
 
-        GameObject fillArea = new GameObject("Fill Area");
-        fillArea.transform.SetParent(sliderObj.transform, false);
-        RectTransform faRt = fillArea.AddComponent<RectTransform>();
+        GameObject fillArea = CreateUIObject("Fill Area", sliderObj.transform);
+        RectTransform faRt = fillArea.GetComponent<RectTransform>();
         faRt.anchorMin = Vector2.zero;
         faRt.anchorMax = Vector2.one;
         faRt.sizeDelta = Vector2.zero;
 
-        GameObject fillObj = new GameObject("Fill");
-        fillObj.transform.SetParent(fillArea.transform, false);
-        RectTransform fRt = fillObj.AddComponent<RectTransform>();
+        GameObject fillObj = CreateUIObject("Fill", fillArea.transform);
+        RectTransform fRt = fillObj.GetComponent<RectTransform>();
         fRt.anchorMin = Vector2.zero;
         fRt.anchorMax = Vector2.one;
         fRt.sizeDelta = Vector2.zero;
@@ -334,15 +361,13 @@ public class SettingsUI : MonoBehaviour
 
     private static void CreateLanguageRow(Transform parent, float posY, SettingsUI ui, out TextMeshProUGUI langLabelTmp)
     {
-        GameObject row = new GameObject("Row_Language");
-        row.transform.SetParent(parent, false);
-        RectTransform rt = row.AddComponent<RectTransform>();
+        GameObject row = CreateUIObject("Row_Language", parent);
+        RectTransform rt = row.GetComponent<RectTransform>();
         rt.anchoredPosition = new Vector2(0f, posY);
         rt.sizeDelta = new Vector2(520f, 40f);
 
-        GameObject lblObj = new GameObject("Label");
-        lblObj.transform.SetParent(row.transform, false);
-        RectTransform lblRt = lblObj.AddComponent<RectTransform>();
+        GameObject lblObj = CreateUIObject("Label", row.transform);
+        RectTransform lblRt = lblObj.GetComponent<RectTransform>();
         lblRt.anchorMin = new Vector2(0f, 0.5f);
         lblRt.anchorMax = new Vector2(0f, 0.5f);
         lblRt.pivot = new Vector2(0f, 0.5f);
@@ -361,19 +386,18 @@ public class SettingsUI : MonoBehaviour
 
     private static void CreateActionButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, System.Action onClick, out TextMeshProUGUI btnTxt)
     {
-        GameObject obj = new GameObject(name);
-        obj.transform.SetParent(parent, false);
-        RectTransform rt = obj.AddComponent<RectTransform>();
+        GameObject obj = CreateUIObject(name, parent);
+        RectTransform rt = obj.GetComponent<RectTransform>();
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
         Image img = obj.AddComponent<Image>();
         img.color = bgColor;
         Button btn = obj.AddComponent<Button>();
+        btn.targetGraphic = img;
         btn.onClick.AddListener(() => onClick());
 
-        GameObject txtObj = new GameObject("Text");
-        txtObj.transform.SetParent(obj.transform, false);
-        RectTransform tRt = txtObj.AddComponent<RectTransform>();
+        GameObject txtObj = CreateUIObject("Text", obj.transform);
+        RectTransform tRt = txtObj.GetComponent<RectTransform>();
         tRt.anchorMin = Vector2.zero;
         tRt.anchorMax = Vector2.one;
         tRt.sizeDelta = Vector2.zero;
@@ -388,19 +412,18 @@ public class SettingsUI : MonoBehaviour
 
     private static void CreateSmallButton(Transform parent, string name, string text, Vector2 pos, System.Action onClick)
     {
-        GameObject obj = new GameObject(name);
-        obj.transform.SetParent(parent, false);
-        RectTransform rt = obj.AddComponent<RectTransform>();
+        GameObject obj = CreateUIObject(name, parent);
+        RectTransform rt = obj.GetComponent<RectTransform>();
         rt.anchoredPosition = pos;
         rt.sizeDelta = new Vector2(110f, 36f);
         Image img = obj.AddComponent<Image>();
         img.color = new Color(0.25f, 0.3f, 0.4f);
         Button btn = obj.AddComponent<Button>();
+        btn.targetGraphic = img;
         btn.onClick.AddListener(() => onClick());
 
-        GameObject txtObj = new GameObject("Text");
-        txtObj.transform.SetParent(obj.transform, false);
-        RectTransform tRt = txtObj.AddComponent<RectTransform>();
+        GameObject txtObj = CreateUIObject("Text", obj.transform);
+        RectTransform tRt = txtObj.GetComponent<RectTransform>();
         tRt.anchorMin = Vector2.zero;
         tRt.anchorMax = Vector2.one;
         tRt.sizeDelta = Vector2.zero;
@@ -415,9 +438,8 @@ public class SettingsUI : MonoBehaviour
 
     private static GameObject CreateGuidePanel(Transform canvas, SettingsUI ui)
     {
-        GameObject panelObj = new GameObject("GuidePanel");
-        panelObj.transform.SetParent(canvas, false);
-        RectTransform panelRt = panelObj.AddComponent<RectTransform>();
+        GameObject panelObj = CreateUIObject("GuidePanel", canvas);
+        RectTransform panelRt = panelObj.GetComponent<RectTransform>();
         panelRt.anchorMin = Vector2.zero;
         panelRt.anchorMax = Vector2.one;
         panelRt.offsetMin = Vector2.zero;
@@ -426,17 +448,16 @@ public class SettingsUI : MonoBehaviour
         Image panelBg = panelObj.AddComponent<Image>();
         panelBg.color = new Color(0.02f, 0.03f, 0.05f, 0.95f);
 
-        GameObject cardObj = new GameObject("GuideCard");
-        cardObj.transform.SetParent(panelObj.transform, false);
-        RectTransform cardRt = cardObj.AddComponent<RectTransform>();
+        GameObject cardObj = CreateUIObject("GuideCard", panelObj.transform);
+        RectTransform cardRt = cardObj.GetComponent<RectTransform>();
         cardRt.sizeDelta = new Vector2(760f, 540f);
+        cardRt.anchoredPosition = Vector2.zero;
         Image cardBg = cardObj.AddComponent<Image>();
         cardBg.color = new Color(0.12f, 0.14f, 0.2f);
 
         // Guide Title
-        GameObject titleObj = new GameObject("GuideTitle");
-        titleObj.transform.SetParent(cardObj.transform, false);
-        RectTransform titleRt = titleObj.AddComponent<RectTransform>();
+        GameObject titleObj = CreateUIObject("GuideTitle", cardObj.transform);
+        RectTransform titleRt = titleObj.GetComponent<RectTransform>();
         titleRt.anchoredPosition = new Vector2(0f, 220f);
         titleRt.sizeDelta = new Vector2(700f, 45f);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
@@ -455,9 +476,8 @@ public class SettingsUI : MonoBehaviour
         float startY = 145f;
         for (int i = 0; i < guideKeys.Length; i++)
         {
-            GameObject gObj = new GameObject("GuideItem_" + i);
-            gObj.transform.SetParent(cardObj.transform, false);
-            RectTransform gRt = gObj.AddComponent<RectTransform>();
+            GameObject gObj = CreateUIObject("GuideItem_" + i, cardObj.transform);
+            RectTransform gRt = gObj.GetComponent<RectTransform>();
             gRt.anchoredPosition = new Vector2(0f, startY - (i * 48f));
             gRt.sizeDelta = new Vector2(680f, 40f);
             var gTmp = gObj.AddComponent<TextMeshProUGUI>();

@@ -39,7 +39,7 @@ public class EnemyProjectile : MonoBehaviour
 
         var col = GetComponent<CircleCollider2D>();
         col.isTrigger = true;
-        col.radius = 0.25f;
+        col.radius = 0.07f;
     }
 
     void Update()
@@ -54,14 +54,14 @@ public class EnemyProjectile : MonoBehaviour
     {
         if (hasHit) return;
 
-        // Ignore enemies and triggers (e.g. shard pickup zones)
-        if (other.GetComponent<BotWheelAI>() != null || other.isTrigger)
+        // Ignore all enemies, boss, and triggers
+        if (other.GetComponentInParent<BotWheelAI>() != null || other.CompareTag("Enemy") || other.isTrigger)
         {
             return;
         }
 
         // Hit Player
-        var playerHealth = other.GetComponent<PlayerHealth>();
+        var playerHealth = other.GetComponentInParent<PlayerHealth>();
         if (playerHealth != null)
         {
             hasHit = true;

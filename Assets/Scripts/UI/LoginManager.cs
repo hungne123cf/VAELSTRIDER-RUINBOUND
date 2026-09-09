@@ -34,6 +34,7 @@ public class LoginManager : MonoBehaviour
 
     void Awake()
     {
+        Time.timeScale = 1f;
         Instance = this;
         GameAutoBootstrap.CleanUpGameplayUI();
         CleanObsoletePanels();
@@ -99,7 +100,7 @@ public class LoginManager : MonoBehaviour
 
     private void CleanObsoletePanels()
     {
-        string[] obsolete = new string[] { "SettingsPanel", "GuidePanel", "Btn_SettingsGear", "Btn_Settings" };
+        string[] obsolete = new string[] { "SettingsPanel", "GuidePanel", "Btn_SettingsGear", "Btn_Settings", "UltiCinematicCanvas", "UltiCinematicUI", "GameOverPanel", "ShrineUpgradePanel", "CharacterStatsPanel", "Btn_CharacterStats" };
         foreach (var name in obsolete)
         {
             var obj = GameObject.Find(name);
@@ -227,6 +228,7 @@ public class LoginManager : MonoBehaviour
             bgRt.sizeDelta = Vector2.zero;
             var bgImg = bgObj.AddComponent<Image>();
             bgImg.color = new Color(0.04f, 0.05f, 0.08f, 0.98f);
+            bgImg.raycastTarget = false;
         }
 
         // 3. Header Title (Gon gang, cach tam hop ly)

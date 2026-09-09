@@ -91,7 +91,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
         int droppedPotions = Random.Range(0, 3); // 0, 1 hoac 2 binh
         for (int i = 0; i < droppedPotions; i++)
         {
-            HealthPotion.Spawn(dropPos, 35);
+            HealthPotion.Spawn(dropPos, 1);
         }
 
         // 2. Roi tinh the Shards

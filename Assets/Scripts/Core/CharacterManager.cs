@@ -97,7 +97,7 @@ public class CharacterManager : MonoBehaviour
             skillDescVN = "Vung nhát chém hình nón hủy diệt: Tiêu diệt TỨC THÌ mọi quái thường, gây choáng và sát thương cực lớn lên Boss!",
             skillDescEN = "Unleashes a devastating cone cleave: INSTANTLY EXECUTES normal monsters, deals massive damage & stuns Bosses!",
             baseHealth = 85,
-            baseAttack = 8,
+            baseAttack = 5,
             baseSpeed = 5.8f,
             unlockPrice = 999,
             controllerPath = "Assets/Animation/Maid/Maid.controller",

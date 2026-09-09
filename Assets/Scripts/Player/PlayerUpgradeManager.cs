@@ -203,8 +203,16 @@ public class PlayerUpgradeManager : MonoBehaviour
         return GetLevel(UpgradeType.Ultimate) * 8;
     }
 
+    public int GetAttackBonus() => GetLevel(UpgradeType.Attack) * 2;
+    public int GetHealthBonus() => GetLevel(UpgradeType.Health) * 15;
+    public float GetDashCooldownReduction() => GetLevel(UpgradeType.Agility) * 0.05f;
+    public bool IsMaxLevel(UpgradeType type) => GetLevel(type) >= MAX_LEVEL;
+    public string GetUpgradeDescription(UpgradeType type) => GetDescription(type, GetLevel(type));
+    public string GetNextBonusString(UpgradeType type) => GetNextBonusDescription(type);
+
     public static void ResetEntireGameProgress()
     {
+        Time.timeScale = 1.0f;
         // 1. Reset Aethel Shards (dong bo ca Save_ va Saved_)
         PlayerPrefs.SetInt("Save_AethelShards", 0);
         PlayerPrefs.SetInt("Saved_AethelShards", 0);

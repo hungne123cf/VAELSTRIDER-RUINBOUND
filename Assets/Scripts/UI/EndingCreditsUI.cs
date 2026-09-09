@@ -25,11 +25,66 @@ public class EndingCreditsUI : MonoBehaviour
 
     public static void ShowEnding()
     {
+        HideAllGameplayButtons();
+        BossGigapackSkills.ClearAllWarningZonesAndEffects();
         if (Instance == null)
         {
             CreateRuntimeEndingUI();
         }
         Instance.StartEndingSequence();
+    }
+
+    public static void HideAllGameplayButtons()
+    {
+        // 1. Tắt toàn bộ nút Mobile Action (Attack, Dash, Skill, Potion,...)
+        var actionButtons = Object.FindObjectsByType<MobileActionButton>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var btn in actionButtons)
+        {
+            if (btn != null && btn.gameObject != null)
+            {
+                btn.gameObject.SetActive(false);
+            }
+        }
+
+        // 2. Tắt Virtual Joystick và cụm Joystick điều khiển
+        var joysticks = Object.FindObjectsByType<VirtualJoystick>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var joy in joysticks)
+        {
+            if (joy != null && joy.gameObject != null)
+            {
+                joy.gameObject.SetActive(false);
+            }
+        }
+        var joyBg = GameObject.Find("JoystickBackground");
+        if (joyBg != null) joyBg.SetActive(false);
+
+        // 3. Tắt các nút và UI chức năng gameplay khác
+        string[] uiNamesToHide = new string[]
+        {
+            "Btn_Attack", "Btn_Dash", "Btn_Special", "Btn_Potion", 
+            "Btn_Settings", "Btn_CharacterStats", 
+            "PlayerHealthBar", "ShardsCounter", "WaveBanner", 
+            "VictoryPanel", "BossHealthBarPanel", "ShrineUpgradePanel", "GameOverPanel"
+        };
+        foreach (var name in uiNamesToHide)
+        {
+            var go = GameObject.Find(name);
+            if (go != null) go.SetActive(false);
+        }
+
+        // 4. Tìm Main Gameplay Canvas và ẩn toàn bộ các con của nó (đảm bảo không còn nút nào sót lại)
+        Canvas mainCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (mainCanvas != null)
+        {
+            for (int i = 0; i < mainCanvas.transform.childCount; i++)
+            {
+                Transform child = mainCanvas.transform.GetChild(i);
+                if (child.name != "EndingCreditsCanvas" && child.name != "EndingCreditsPanel" && child.name != "TopControls")
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+        }
     }
 
     void Awake()
@@ -41,6 +96,7 @@ public class EndingCreditsUI : MonoBehaviour
     {
         gameObject.SetActive(true);
         Time.timeScale = 1.0f; // Bỏ pause game nếu có
+        HideAllGameplayButtons();
         StartCoroutine(EndingSequenceRoutine());
     }
 
@@ -196,17 +252,26 @@ public class EndingCreditsUI : MonoBehaviour
 
     public static void CreateRuntimeEndingUI()
     {
-        Canvas canvas = Object.FindAnyObjectByType<Canvas>();
-        if (canvas == null)
+        GameObject canvasObj = GameObject.Find("EndingCreditsCanvas");
+        Canvas canvas = null;
+        if (canvasObj == null)
         {
-            GameObject cObj = new GameObject("EndingCanvas");
-            canvas = cObj.AddComponent<Canvas>();
+            canvasObj = new GameObject("EndingCreditsCanvas");
+            canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 9999;
-            var scaler = cObj.AddComponent<CanvasScaler>();
+            canvas.sortingOrder = 99998;
+            var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
-            cObj.AddComponent<GraphicRaycaster>();
+            scaler.matchWidthOrHeight = 0.5f;
+            canvasObj.AddComponent<GraphicRaycaster>();
+        }
+        else
+        {
+            canvas = canvasObj.GetComponent<Canvas>();
+            if (canvas == null) canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 99998;
         }
 
         Transform existing = canvas.transform.Find("EndingCreditsPanel");
@@ -269,12 +334,12 @@ public class EndingCreditsUI : MonoBehaviour
         topRt.anchorMin = new Vector2(1f, 1f);
         topRt.anchorMax = new Vector2(1f, 1f);
         topRt.pivot = new Vector2(1f, 1f);
-        topRt.anchoredPosition = new Vector2(-40f, -40f);
-        topRt.sizeDelta = new Vector2(360f, 60f);
+        topRt.anchoredPosition = new Vector2(-30f, -30f);
+        topRt.sizeDelta = new Vector2(340f, 50f);
 
-        ui.btnSpeedUp = CreateSmallButton(topBar.transform, new Vector2(-180f, 0f), "⏩ SPEED UP", new Color(0.18f, 0.28f, 0.45f, 0.85f), ui.ToggleSpeedUp);
+        ui.btnSpeedUp = CreateSmallButton(topBar.transform, new Vector2(-170f, 0f), "⏩ SPEED UP", new Color(0.18f, 0.28f, 0.45f, 0.95f), ui.ToggleSpeedUp);
         ui.speedUpText = ui.btnSpeedUp.GetComponentInChildren<TextMeshProUGUI>();
-        ui.btnSkip = CreateSmallButton(topBar.transform, new Vector2(0f, 0f), "✕ SKIP", new Color(0.35f, 0.15f, 0.18f, 0.85f), ui.SkipCredits);
+        ui.btnSkip = CreateSmallButton(topBar.transform, new Vector2(0f, 0f), "✕ SKIP", new Color(0.45f, 0.15f, 0.18f, 0.95f), ui.SkipCredits);
 
         // Stats Window
         GameObject statsObj = new GameObject("FinalStatsCard");
@@ -326,6 +391,9 @@ public class EndingCreditsUI : MonoBehaviour
         CreateActionButton(sBtnContainer.transform, new Vector2(-140f, 0f), "🔄 PLAY AGAIN", new Color(0.2f, 0.38f, 0.72f, 1f), ui.OnClickPlayAgain);
         CreateActionButton(sBtnContainer.transform, new Vector2(140f, 0f), "🏠 MAIN MENU", new Color(0.24f, 0.58f, 0.35f, 1f), ui.OnClickMainMenu);
 
+        // Đảm bảo TopControls luôn ở lớp trên cùng
+        topBar.transform.SetAsLastSibling();
+
         root.SetActive(false);
     }
 
@@ -371,11 +439,18 @@ public class EndingCreditsUI : MonoBehaviour
         btnObj.transform.SetParent(parent, false);
 
         RectTransform rt = btnObj.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(1f, 0.5f);
+        rt.anchorMax = new Vector2(1f, 0.5f);
+        rt.pivot = new Vector2(1f, 0.5f);
         rt.anchoredPosition = pos;
-        rt.sizeDelta = new Vector2(160f, 44f);
+        rt.sizeDelta = new Vector2(150f, 44f);
 
         Image bg = btnObj.AddComponent<Image>();
         bg.color = color;
+
+        Outline outline = btnObj.AddComponent<Outline>();
+        outline.effectColor = new Color(1f, 1f, 1f, 0.4f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
 
         Button btn = btnObj.AddComponent<Button>();
         btn.onClick.AddListener(onClick);
@@ -390,7 +465,7 @@ public class EndingCreditsUI : MonoBehaviour
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         tmp.text = label;
-        tmp.fontSize = 16;
+        tmp.fontSize = 15;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
         tmp.alignment = TextAlignmentOptions.Center;

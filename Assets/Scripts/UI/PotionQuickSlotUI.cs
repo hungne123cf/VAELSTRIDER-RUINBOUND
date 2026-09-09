@@ -258,7 +258,7 @@ public class PotionQuickSlotUI : MonoBehaviour
     {
         if (Instance != null) return Instance;
 
-        Canvas canvas = FindAnyObjectByType<Canvas>();
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
         if (canvas == null) return null;
 
         Transform existing = canvas.transform.Find("Btn_Potion");

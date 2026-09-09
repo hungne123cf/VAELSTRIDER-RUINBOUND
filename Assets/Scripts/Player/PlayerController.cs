@@ -47,7 +47,9 @@ public class PlayerController : MonoBehaviour
         }
         animator = GetComponent<Animator>();
         baseMoveSpeed = moveSpeed;
-        baseDashCooldown = dashCooldown;
+        // Bat buoc dash cooldown mo dau la 5s
+        dashCooldown = 5.0f;
+        baseDashCooldown = 5.0f;
         if (GetComponent<DashGhostTrail>() == null) gameObject.AddComponent<DashGhostTrail>();
         AutoAlignCollider();
 
@@ -142,6 +144,22 @@ public class PlayerController : MonoBehaviour
             dashTimer = dashDuration;
             dashCooldownTimer = dashCooldown;
         }
+    }
+
+    public float GetDashCooldownNormalized()
+    {
+        if (dashCooldown <= 0f) return 0f;
+        return Mathf.Clamp01(dashCooldownTimer / dashCooldown);
+    }
+
+    public float GetDashCooldownRemaining()
+    {
+        return Mathf.Max(0f, dashCooldownTimer);
+    }
+
+    public bool IsDashReady()
+    {
+        return dashCooldownTimer <= 0f && !isDashing;
     }
 
     private void UpdateAnimations()
