@@ -40,11 +40,13 @@ public class VictoryUI : MonoBehaviour
     {
         Instance = this;
         BotWheelAI.OnEnemyDied += HandleEnemyDied;
+        BloodMonsterAI.OnEnemyDied += HandleBloodMonsterDied;
     }
 
     void OnDisable()
     {
         BotWheelAI.OnEnemyDied -= HandleEnemyDied;
+        BloodMonsterAI.OnEnemyDied -= HandleBloodMonsterDied;
     }
 
     void Start()
@@ -53,6 +55,11 @@ public class VictoryUI : MonoBehaviour
     }
 
     private void HandleEnemyDied(BotWheelAI enemy)
+    {
+        enemiesKilled++;
+    }
+
+    private void HandleBloodMonsterDied(BloodMonsterAI enemy)
     {
         enemiesKilled++;
     }
@@ -117,15 +124,32 @@ public class VictoryUI : MonoBehaviour
         Time.timeScale = 1f;
         runStartTime = 0f;
         enemiesKilled = 0;
-        if (Application.CanStreamedLevelBeLoaded("Map2_ValleyRuin"))
+        string currentScene = SceneManager.GetActiveScene().name;
+
+        if (currentScene == "SampleScene" || currentScene.Contains("Map1"))
         {
-            SceneManager.LoadScene("Map2_ValleyRuin");
+            if (Application.CanStreamedLevelBeLoaded("Map2_ValleyRuin"))
+            {
+                SceneManager.LoadScene("Map2_ValleyRuin");
+                return;
+            }
         }
-        else
+        else if (currentScene.Contains("Map2") || currentScene.Contains("Valley"))
         {
-            Debug.LogWarning("[VICTORY] Map2_ValleyRuin scene chua duoc them vao Build Settings! Tai lai scene hien tai.");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            if (Application.CanStreamedLevelBeLoaded("Map3_AncientRuins"))
+            {
+                SceneManager.LoadScene("Map3_AncientRuins");
+                return;
+            }
         }
+        else if (currentScene.Contains("Map3") || currentScene.Contains("Ancient"))
+        {
+            EndingCreditsUI.ShowEnding();
+            return;
+        }
+
+        Debug.LogWarning("[VICTORY] Không tìm thấy Scene tiếp theo! Tải lại scene hiện tại.");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public static void CreateRuntimeVictoryUI()

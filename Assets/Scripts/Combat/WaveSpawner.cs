@@ -41,11 +41,13 @@ public class WaveSpawner : MonoBehaviour
     void OnEnable()
     {
         BotWheelAI.OnEnemyDied += HandleEnemyDied;
+        BloodMonsterAI.OnEnemyDied += HandleBloodMonsterDied;
     }
 
     void OnDisable()
     {
         BotWheelAI.OnEnemyDied -= HandleEnemyDied;
+        BloodMonsterAI.OnEnemyDied -= HandleBloodMonsterDied;
     }
 
     void Start()
@@ -122,7 +124,17 @@ public class WaveSpawner : MonoBehaviour
         }
     }
 
+    private void HandleBloodMonsterDied(BloodMonsterAI enemy)
+    {
+        HandleAnyEnemyDied();
+    }
+
     private void HandleEnemyDied(BotWheelAI enemy)
+    {
+        HandleAnyEnemyDied();
+    }
+
+    private void HandleAnyEnemyDied()
     {
         aliveEnemies--;
         Debug.Log($"<color=green>[SPAWNER]</color> Quái vật bị hạ gục! Còn lại trong phòng: {aliveEnemies}");

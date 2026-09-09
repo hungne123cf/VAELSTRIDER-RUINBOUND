@@ -41,7 +41,7 @@ public class RuinPortal : MonoBehaviour
         spriteRenderer.sortingOrder = 4900;
 
         string sceneName = SceneManager.GetActiveScene().name;
-        isFinalRealm = sceneName.Contains("Map2") || sceneName.Contains("Valley");
+        isFinalRealm = sceneName.Contains("Map3") || sceneName.Contains("Ancient");
 
         if (isFinalRealm)
         {

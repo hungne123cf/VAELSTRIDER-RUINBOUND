@@ -155,9 +155,34 @@ public class PlayerCombat : MonoBehaviour
         Vector3 origin = (attackPoint != null) ? attackPoint.position : transform.position;
         int damage = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
 
+        // Đảm bảo enemyLayers luôn quét đúng layer Enemy
+        if (enemyLayers.value == 0)
+        {
+            int eLayer = LayerMask.NameToLayer("Enemy");
+            if (eLayer != -1) enemyLayers = 1 << eLayer;
+            else enemyLayers = ~0;
+        }
+
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(origin, attackRadius, enemyLayers);
 
-        Debug.Log($"<color=cyan>[ATTACK]</color> Vung kiem (Combo {comboStep})! Tim thay: {hitEnemies.Length} ke dich.");
+        // Fallback cực mạnh: nếu layer mask không khớp hoặc kẻ địch nằm trên layer khác,
+        // quét tất cả collider trong tầm có IDamageable (loại trừ bản thân người chơi)
+        if (hitEnemies == null || hitEnemies.Length == 0)
+        {
+            Collider2D[] allHits = Physics2D.OverlapCircleAll(origin, attackRadius + 0.6f);
+            System.Collections.Generic.List<Collider2D> validList = new System.Collections.Generic.List<Collider2D>();
+            foreach (var col in allHits)
+            {
+                if (col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
+                if (col.GetComponent<IDamageable>() != null || col.GetComponentInParent<IDamageable>() != null)
+                {
+                    validList.Add(col);
+                }
+            }
+            hitEnemies = validList.ToArray();
+        }
+
+        Debug.Log($"<color=cyan>[ATTACK]</color> Vung kiếm (Combo {comboStep})! Tìm thấy: {hitEnemies.Length} kẻ địch.");
 
         foreach (Collider2D enemy in hitEnemies)
         {

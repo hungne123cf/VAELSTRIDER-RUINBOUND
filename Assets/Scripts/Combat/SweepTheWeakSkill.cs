@@ -158,7 +158,7 @@ public class SweepTheWeakSkill : MonoBehaviour
                     {
                         isBoss = true;
                     }
-                    else if (col.gameObject.name.ToLower().Contains("boss") || col.gameObject.name.ToLower().Contains("titan"))
+                    else if (col.gameObject.name.ToLower().Contains("boss") || col.gameObject.name.ToLower().Contains("titan") || col.gameObject.name.ToLower().Contains("gormok") || col.GetComponent<BloodMonsterAI>()?.IsBoss == true)
                     {
                         isBoss = true;
                     }

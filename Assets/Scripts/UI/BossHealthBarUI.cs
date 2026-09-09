@@ -228,6 +228,12 @@ public class BossHealthBarUI : MonoBehaviour
         return ui;
     }
 
+    public void ShowBoss(string name, int totalPhases = 3)
+    {
+        ShowBoss(null, name);
+        UpdatePhaseDisplay(totalPhases);
+    }
+
     public void ShowBoss(BotWheelAI boss, string name)
     {
         if (!gameObject.activeSelf) gameObject.SetActive(true);

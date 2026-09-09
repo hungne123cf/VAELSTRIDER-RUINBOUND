@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1045 &1
 EditorBuildSettings:
@@ -10,12 +10,15 @@ EditorBuildSettings:
     guid: 7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c
   - enabled: 1
     path: Assets/Scenes/MainMenuScene.unity
-    guid: e1a2b3c4d5e6f708192a3b4c5d6e7f80
+    guid: 4f10cd94cb5058141bfb8c725e351bca
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
     path: Assets/Scenes/Map2_ValleyRuin.unity
     guid: 011548e6cb8e6164fbf8a21fd297e9b0
+  - enabled: 1
+    path: Assets/Scenes/Map3_AncientRuins.unity
+    guid: 31c1670c6806ef84bbd5f2867a65b386
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
