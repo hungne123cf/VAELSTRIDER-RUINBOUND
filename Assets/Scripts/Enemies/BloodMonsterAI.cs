@@ -118,7 +118,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         FindPlayerTarget();
         if (isBoss)
         {
-            BossHealthBarUI.EnsureInstance()?.ShowBoss(null, "✦ GOR'MOK • HUYẾT THÚ CỔ TỰ ✦");
+            BossHealthBarUI.EnsureInstance()?.ShowBoss(null, "GOR'MOK • HUYẾT THÚ CỔ TỰ");
             BossHealthBarUI.EnsureInstance()?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
         }
     }
@@ -462,6 +462,6 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
             originalColor = spriteRenderer.color;
         }
 
-        BossHealthBarUI.EnsureInstance()?.ShowBoss("✦ GOR'MOK • HUYẾT THÚ CỔ TỰ ✦", totalBossPhases);
+        BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK • HUYẾT THÚ CỔ TỰ", totalBossPhases);
     }
 }

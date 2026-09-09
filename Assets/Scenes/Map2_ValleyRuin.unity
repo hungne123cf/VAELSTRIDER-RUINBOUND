@@ -22622,7 +22622,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 622b5f905df982840bb4acb589757d8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 10000
+  maxHealth: 1000
   isInvulnerable: 0
 --- !u!114 &1658266366
 MonoBehaviour:

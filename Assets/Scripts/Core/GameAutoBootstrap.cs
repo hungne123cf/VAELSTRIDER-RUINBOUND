@@ -61,8 +61,29 @@ public class GameAutoBootstrap : MonoBehaviour
             return;
         }
 
-        // 0. Kien tao Ban Do Da Phong 4 phong (Multi-Room Dungeon) cho Map 1
-        DungeonMapBuilder.BuildDungeon();
+        if (currentScene.Contains("Map3") || currentScene.Contains("Ancient"))
+        {
+            // Đang ở Map 3: Giữ nguyên 100% bản đồ bạn tự vẽ, chỉ nạp UI điều khiển và nâng cấp
+            PotionQuickSlotUI.EnsureUIExists();
+            GameOverUI.EnsureUIExists();
+            EnsureSpecialSkillButton();
+            SettingsUI.EnsureSettingsButtonExists();
+            CharacterStatsUI.EnsureUIExists();
+            PlayerUpgradeManager.EnsureInstance();
+            ShrineUpgradeUI.EnsureUIExists();
+            EnsureAncientShrine(new Vector3(-1.5f, -5.0f, 0f));
+            LostShardsGrave.EnsureSpawnGrave();
+            ApplySelectedCharacterToPlayer();
+            Map3ArenaManager.EnsureManager();
+            Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Ancient Ruins)! Giữ nguyên bản đồ tự vẽ, tuyệt đối không ghi đè.");
+            return;
+        }
+
+        // 0. Kiến tạo Bản Đồ Đa Phòng chỉ riêng cho Map 1 (SampleScene)
+        if (currentScene == "SampleScene")
+        {
+            DungeonMapBuilder.BuildDungeon();
+        }
 
         // 1. Khoi tao nut Binh Mau (Potion Quick Slot) tren Canvas
         PotionQuickSlotUI.EnsureUIExists();

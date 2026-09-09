@@ -12,17 +12,28 @@ public class CameraFollow : MonoBehaviour
     [Header("Khoảng cách nhìn")]
     [SerializeField] private Vector3 offset = new Vector3(0, 0, -10f);
 
+    public static CameraFollow Instance { get; private set; }
+
     private Camera cam;
     private float defaultOrthoSize = 5f;
     private float targetOrthoSize = 5f;
     private float zoomVelocity = 0f;
+    private float currentZoomSmoothTime = 0.35f;
+
+    private Vector3 defaultOffset;
+    private Vector3 targetOffset;
+    private Vector3 offsetVelocity = Vector3.zero;
     private Vector3 velocity = Vector3.zero;
 
     void Awake()
     {
+        Instance = this;
         cam = GetComponent<Camera>();
         if (cam != null) defaultOrthoSize = cam.orthographicSize;
         targetOrthoSize = defaultOrthoSize;
+
+        defaultOffset = offset;
+        targetOffset = offset;
 
         if (target == null)
         {
@@ -38,11 +49,14 @@ public class CameraFollow : MonoBehaviour
 
     void LateUpdate()
     {
-        // Smooth Zoom hỗ trợ cả Unscaled Time (khi ngưng đọng thời gian Ulti)
+        // Smooth Zoom hỗ trợ cả Unscaled Time (khi ngưng đọng thời gian Ulti hoặc chuyển tầng)
         if (cam != null && Mathf.Abs(cam.orthographicSize - targetOrthoSize) > 0.005f)
         {
-            cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, targetOrthoSize, ref zoomVelocity, 0.12f, Mathf.Infinity, Time.unscaledDeltaTime);
+            cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, targetOrthoSize, ref zoomVelocity, currentZoomSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
         }
+
+        // Smooth Offset khi lên đài cao
+        offset = Vector3.SmoothDamp(offset, targetOffset, ref offsetVelocity, currentZoomSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
 
         if (target == null) return;
 
@@ -52,12 +66,28 @@ public class CameraFollow : MonoBehaviour
 
     public void SetCinematicZoom(float orthoSize)
     {
+        currentZoomSmoothTime = 0.12f;
         targetOrthoSize = orthoSize;
     }
 
     public void ResetZoom()
     {
+        currentZoomSmoothTime = 0.25f;
         targetOrthoSize = defaultOrthoSize;
+    }
+
+    public void SetElevationView(float orthoSize, Vector2 extraOffset, float smoothTime = 0.5f)
+    {
+        currentZoomSmoothTime = smoothTime;
+        targetOrthoSize = orthoSize;
+        targetOffset = defaultOffset + new Vector3(extraOffset.x, extraOffset.y, 0f);
+    }
+
+    public void ResetElevationView(float smoothTime = 0.5f)
+    {
+        currentZoomSmoothTime = smoothTime;
+        targetOrthoSize = defaultOrthoSize;
+        targetOffset = defaultOffset;
     }
 
     public void Shake(float duration = 0.15f, float magnitude = 0.2f)

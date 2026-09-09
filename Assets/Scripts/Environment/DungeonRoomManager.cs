@@ -118,6 +118,9 @@ public class DungeonRoomManager : MonoBehaviour
         {
                         if (room.roomType == DungeonRoom.RoomType.TitanSanctum)
             {
+                PlayerPrefs.SetInt("Map1_Completed", 1);
+                PlayerPrefs.Save();
+
                 bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
                 waveUI.ShowBanner(isVi ? "KHU VUC DA DUOC QUET SACH!" : "REALM PURIFIED!", isVi ? "Cong co tich da mo o phia tren!" : "The Ruin Portal has opened ahead!");
                 // Spawn Victory Portal cach vi tri trung tam 2.5m ve phia tren va co tre 1.5s de tranh de len nguoi choi

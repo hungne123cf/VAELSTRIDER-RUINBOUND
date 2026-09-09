@@ -284,7 +284,7 @@ public class AncientShrine : MonoBehaviour
 
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
         if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
-        if (baseSprite != null) sr.sprite = baseSprite;
+        if (sr.sprite == null && baseSprite != null) sr.sprite = baseSprite;
         sr.sortingLayerName = "Entities";
         sr.sortingOrder = 3;
 

@@ -25,6 +25,14 @@ public class MainMenuManager : MonoBehaviour
     private GameObject shopModal;
     private GameObject confirmResetModal;
 
+    // Map 2 Lock State UI
+    private Image cardMap2Img;
+    private TextMeshProUGUI map2BadgeText;
+    private TextMeshProUGUI map2NoticeText;
+    private Image btnEnterMap2Img;
+    private TextMeshProUGUI btnEnterMap2Text;
+    private Button btnEnterMap2;
+
     // Sprite references
     private Sprite[] maidIdleSprites;
     private Sprite[] vaelIdleSprites;
@@ -237,66 +245,80 @@ public class MainMenuManager : MonoBehaviour
     }
     private void BuildMapSelectModal(Transform parent)
     {
-        mapSelectModal = CreatePanel(parent, "MapSelectModal", new Color(0.04f, 0.05f, 0.08f, 0.95f));
+        mapSelectModal = CreatePanel(parent, "MapSelectModal", new Color(0.04f, 0.05f, 0.08f, 0.96f));
         SetFullScreen(mapSelectModal.GetComponent<RectTransform>());
         mapSelectModal.SetActive(false);
 
         CreateTMP(mapSelectModal.transform, "Title", "CHỌN KHU VỰC XUẤT TRẬN", 34, FontStyles.Bold, new Color(0.95f, 0.85f, 0.4f),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -120f), new Vector2(800f, 50f), TextAlignmentOptions.Center);
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -90f), new Vector2(800f, 50f), TextAlignmentOptions.Center);
 
-        // Map 1 Card
-        GameObject card1 = CreatePanel(mapSelectModal.transform, "CardMap1", new Color(0.12f, 0.14f, 0.2f, 0.9f));
+        // ================= MAP 1 CARD (HẦM NGỤC CỔ) =================
+        GameObject card1 = CreatePanel(mapSelectModal.transform, "CardMap1", new Color(0.10f, 0.13f, 0.20f, 0.95f));
         RectTransform c1Rt = card1.GetComponent<RectTransform>();
-        c1Rt.anchoredPosition = new Vector2(-370f, 0f);
-        c1Rt.sizeDelta = new Vector2(350f, 480f);
+        c1Rt.anchoredPosition = new Vector2(-230f, 10f);
+        c1Rt.sizeDelta = new Vector2(400f, 500f);
 
-        CreateTMP(card1.transform, "Map1Title", "HẦM NGỤC CỔ", 24, FontStyles.Bold, new Color(0.4f, 0.85f, 1f),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -35f), new Vector2(320f, 35f), TextAlignmentOptions.Center);
-        CreateTMP(card1.transform, "Map1Subtitle", "Tầng 1 • Độ Khó: DỄ", 14, FontStyles.Normal, new Color(0.7f, 0.75f, 0.85f),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(320f, 25f), TextAlignmentOptions.Center);
-        CreateTMP(card1.transform, "Map1Desc", "Phế tích hầm ngục u tối với 4 căn phòng cổ, cạm bẫy lửa, bão quái máy và Rương Kho Báu cổ đại.", 14, FontStyles.Normal, Color.white,
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(310f, 150f), TextAlignmentOptions.Center);
+        CreateTMP(card1.transform, "Map1Title", "HẦM NGỤC CỔ", 26, FontStyles.Bold, new Color(0.4f, 0.85f, 1f),
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -35f), new Vector2(360f, 35f), TextAlignmentOptions.Center);
+        CreateTMP(card1.transform, "Map1Subtitle", "Tầng 1 • Độ Khó: DỄ", 15, FontStyles.Normal, new Color(0.7f, 0.75f, 0.85f),
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(360f, 25f), TextAlignmentOptions.Center);
+        CreateTMP(card1.transform, "Map1Badge", "✦ [ ĐÃ MỞ KHÓA ]", 14, FontStyles.Bold, new Color(0.3f, 0.95f, 0.6f),
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(360f, 25f), TextAlignmentOptions.Center);
+
+        CreateTMP(card1.transform, "Map1Desc", "Phế tích hầm ngục u tối với 4 căn phòng cổ, cạm bẫy lửa, bão quái máy và Rương Kho Báu cổ đại.", 15, FontStyles.Normal, new Color(0.9f, 0.92f, 0.96f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(340f, 120f), TextAlignmentOptions.Center);
 
         Button btnEnter1 = CreateButton(card1.transform, "BtnEnter1", "TIẾN VÀO (MAP 1)", new Color(0.85f, 0.65f, 0.15f),
-            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 45f), new Vector2(240f, 50f));
+            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 45f), new Vector2(280f, 52f));
         btnEnter1.onClick.AddListener(() => { Time.timeScale = 1.0f; SceneManager.LoadScene("SampleScene"); });
 
-        // Map 2 Card
-        GameObject card2 = CreatePanel(mapSelectModal.transform, "CardMap2", new Color(0.12f, 0.16f, 0.18f, 0.9f));
+        // ================= MAP 2 CARD (THUNG LŨNG CỔ THỤ) =================
+        GameObject card2 = CreatePanel(mapSelectModal.transform, "CardMap2", new Color(0.12f, 0.16f, 0.18f, 0.95f));
+        cardMap2Img = card2.GetComponent<Image>();
         RectTransform c2Rt = card2.GetComponent<RectTransform>();
-        c2Rt.anchoredPosition = new Vector2(0f, 0f);
-        c2Rt.sizeDelta = new Vector2(350f, 480f);
+        c2Rt.anchoredPosition = new Vector2(230f, 10f);
+        c2Rt.sizeDelta = new Vector2(400f, 500f);
 
-        CreateTMP(card2.transform, "Map2Title", "THUNG LŨNG CỔ THỤ", 24, FontStyles.Bold, new Color(0.35f, 0.95f, 0.55f),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -35f), new Vector2(320f, 35f), TextAlignmentOptions.Center);
-        CreateTMP(card2.transform, "Map2Subtitle", "Tầng 2 • Độ Khó: TRUNG BÌNH", 14, FontStyles.Normal, new Color(0.7f, 0.75f, 0.85f),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(320f, 25f), TextAlignmentOptions.Center);
-        CreateTMP(card2.transform, "Map2Desc", "Thiên nhiên rộng lớn bao quanh bởi tán cây khổng lồ nghìn năm, Trụ Đá Cổ Phát Sáng và quái vật hung bạo.", 14, FontStyles.Normal, Color.white,
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(310f, 150f), TextAlignmentOptions.Center);
+        CreateTMP(card2.transform, "Map2Title", "THUNG LŨNG CỔ THỤ", 26, FontStyles.Bold, new Color(0.35f, 0.95f, 0.55f),
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -35f), new Vector2(360f, 35f), TextAlignmentOptions.Center);
+        CreateTMP(card2.transform, "Map2Subtitle", "Tầng 2 (CUỐI) • Độ Khó: THỬ THÁCH", 15, FontStyles.Normal, new Color(0.7f, 0.85f, 0.75f),
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(360f, 25f), TextAlignmentOptions.Center);
+        map2BadgeText = CreateTMP(card2.transform, "Map2Badge", "🔒 [ CHƯA MỞ KHÓA ]", 14, FontStyles.Bold, new Color(1f, 0.45f, 0.35f),
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(360f, 25f), TextAlignmentOptions.Center);
 
-        Button btnEnter2 = CreateButton(card2.transform, "BtnEnter2", "TIẾN VÀO (MAP 2)", new Color(0.2f, 0.7f, 0.4f),
-            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 45f), new Vector2(240f, 50f));
-        btnEnter2.onClick.AddListener(() => { Time.timeScale = 1.0f; SceneManager.LoadScene("Map2_ValleyRuin"); });
+        CreateTMP(card2.transform, "Map2Desc", "Thiên nhiên rộng lớn bao quanh bởi tán cây khổng lồ nghìn năm, Trụ Đá Cổ Phát Sáng và Đại Boss Hộ Vệ Thần Thụ.", 15, FontStyles.Normal, new Color(0.9f, 0.92f, 0.96f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 35f), new Vector2(340f, 120f), TextAlignmentOptions.Center);
 
-        // Map 3 Card
-        GameObject card3 = CreatePanel(mapSelectModal.transform, "CardMap3", new Color(0.20f, 0.10f, 0.14f, 0.9f));
-        RectTransform c3Rt = card3.GetComponent<RectTransform>();
-        c3Rt.anchoredPosition = new Vector2(370f, 0f);
-        c3Rt.sizeDelta = new Vector2(350f, 480f);
+        map2NoticeText = CreateTMP(card2.transform, "Map2Notice", "⚠️ Yêu cầu: Vượt qua Tầng 1 để mở khóa!", 14, FontStyles.Italic, new Color(1f, 0.82f, 0.35f),
+            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 115f), new Vector2(360f, 35f), TextAlignmentOptions.Center);
 
-        CreateTMP(card3.transform, "Map3Title", "CỔ TỰ HUYẾT TẾ", 24, FontStyles.Bold, new Color(1.0f, 0.35f, 0.4f),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -35f), new Vector2(320f, 35f), TextAlignmentOptions.Center);
-        CreateTMP(card3.transform, "Map3Subtitle", "Tầng 3 (CUỐI) • Độ Khó: CỰC HẠN", 14, FontStyles.Normal, new Color(1.0f, 0.75f, 0.8f),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(320f, 25f), TextAlignmentOptions.Center);
-        CreateTMP(card3.transform, "Map3Desc", "Khu đền cổ linh thiêng chứa Điện Thờ Khổng Lồ, Đài Nước Phong Ấn và Đại Trùm Huyết Thú Gor'Mok hung tàn!", 14, FontStyles.Normal, Color.white,
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(310f, 150f), TextAlignmentOptions.Center);
+        btnEnterMap2 = CreateButton(card2.transform, "BtnEnter2", "TIẾN VÀO (MAP 2)", new Color(0.2f, 0.7f, 0.4f),
+            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 45f), new Vector2(280f, 52f));
+        btnEnterMap2Img = btnEnterMap2.GetComponent<Image>();
+        btnEnterMap2Text = btnEnterMap2.GetComponentInChildren<TextMeshProUGUI>();
 
-        Button btnEnter3 = CreateButton(card3.transform, "BtnEnter3", "TIẾN VÀO (MAP 3)", new Color(0.85f, 0.2f, 0.25f),
-            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 45f), new Vector2(240f, 50f));
-        btnEnter3.onClick.AddListener(() => { Time.timeScale = 1.0f; SceneManager.LoadScene("Map3_AncientRuins"); });
+        btnEnterMap2.onClick.AddListener(() =>
+        {
+            bool isMap1Cleared = PlayerPrefs.GetInt("Map1_Completed", 0) == 1;
+            if (isMap1Cleared)
+            {
+                Time.timeScale = 1.0f;
+                SceneManager.LoadScene("Map2_ValleyRuin");
+            }
+            else
+            {
+                SoundManager.EnsureInstance()?.PlayHitImpact();
+                StartCoroutine(ShakeCardRoutine(c2Rt));
+                if (map2NoticeText != null)
+                {
+                    map2NoticeText.text = "<b><color=#FF4444>🔒 BẠN CẦN HOÀN THÀNH TẦNG 1 TRƯỚC!</color></b>";
+                }
+            }
+        });
 
+        // ================= ĐÓNG =================
         Button btnClose = CreateButton(mapSelectModal.transform, "BtnClose", "ĐÓNG", new Color(0.5f, 0.15f, 0.2f),
-            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(160f, 45f));
+            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(160f, 45f));
         btnClose.onClick.AddListener(() => mapSelectModal.SetActive(false));
     }
 
@@ -502,6 +524,64 @@ public class MainMenuManager : MonoBehaviour
         heroRosterModal?.SetActive(false);
         shopModal?.SetActive(false);
         mapSelectModal?.SetActive(true);
+        RefreshMapSelectModal();
+    }
+
+    public void RefreshMapSelectModal()
+    {
+        bool isMap1Cleared = PlayerPrefs.GetInt("Map1_Completed", 0) == 1;
+
+        if (cardMap2Img != null)
+        {
+            cardMap2Img.color = isMap1Cleared
+                ? new Color(0.10f, 0.18f, 0.15f, 0.96f)
+                : new Color(0.08f, 0.09f, 0.12f, 0.96f);
+        }
+
+        if (map2BadgeText != null)
+        {
+            map2BadgeText.text = isMap1Cleared ? "✦ [ ĐÃ MỞ KHÓA ]" : "🔒 [ CHƯA MỞ KHÓA ]";
+            map2BadgeText.color = isMap1Cleared ? new Color(0.3f, 0.95f, 0.6f) : new Color(1f, 0.45f, 0.35f);
+        }
+
+        if (map2NoticeText != null)
+        {
+            map2NoticeText.text = isMap1Cleared
+                ? "<color=#66FF99>✦ Đã đủ điều kiện tiến vào quyết chiến!</color>"
+                : "<color=#FFAA33>⚠️ Yêu cầu: Vượt qua Tầng 1 (Hầm Ngục Cổ) để mở khóa!</color>";
+        }
+
+        if (btnEnterMap2Img != null && btnEnterMap2Text != null)
+        {
+            if (isMap1Cleared)
+            {
+                btnEnterMap2Img.color = new Color(0.18f, 0.72f, 0.38f);
+                btnEnterMap2Text.text = "TIẾN VÀO (MAP 2)";
+                btnEnterMap2Text.color = Color.white;
+            }
+            else
+            {
+                btnEnterMap2Img.color = new Color(0.24f, 0.25f, 0.28f);
+                btnEnterMap2Text.text = "🔒 ĐANG KHÓA";
+                btnEnterMap2Text.color = new Color(0.7f, 0.7f, 0.7f);
+            }
+        }
+    }
+
+    private IEnumerator ShakeCardRoutine(RectTransform target)
+    {
+        if (target == null) yield break;
+        Vector2 origPos = target.anchoredPosition;
+        float elapsed = 0f;
+        float duration = 0.35f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float offset = Mathf.Sin(elapsed * 45f) * (8f * (1f - elapsed / duration));
+            target.anchoredPosition = new Vector2(origPos.x + offset, origPos.y);
+            yield return null;
+        }
+        target.anchoredPosition = origPos;
     }
 
     public void OpenHeroRosterModal()
@@ -683,6 +763,7 @@ public class MainMenuManager : MonoBehaviour
         tmp.color = color;
         tmp.alignment = align;
         tmp.raycastTarget = false;
+        tmp.enableWordWrapping = true;
         return tmp;
     }
 

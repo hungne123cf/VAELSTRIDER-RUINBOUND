@@ -69,6 +69,13 @@ public class VictoryUI : MonoBehaviour
         if (isEnded) return;
         isEnded = true;
 
+        string currentScene = SceneManager.GetActiveScene().name;
+        if (currentScene == "SampleScene" || currentScene.Contains("Map1"))
+        {
+            PlayerPrefs.SetInt("Map1_Completed", 1);
+            PlayerPrefs.Save();
+        }
+
         float elapsed = Time.time - (runStartTime > 0 ? runStartTime : Time.time - 90f);
         int minutes = Mathf.FloorToInt(elapsed / 60f);
         int seconds = Mathf.FloorToInt(elapsed % 60f);
@@ -134,15 +141,7 @@ public class VictoryUI : MonoBehaviour
                 return;
             }
         }
-        else if (currentScene.Contains("Map2") || currentScene.Contains("Valley"))
-        {
-            if (Application.CanStreamedLevelBeLoaded("Map3_AncientRuins"))
-            {
-                SceneManager.LoadScene("Map3_AncientRuins");
-                return;
-            }
-        }
-        else if (currentScene.Contains("Map3") || currentScene.Contains("Ancient"))
+        else if (currentScene.Contains("Map2") || currentScene.Contains("Valley") || currentScene.Contains("Map3") || currentScene.Contains("Ancient"))
         {
             EndingCreditsUI.ShowEnding();
             return;

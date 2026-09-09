@@ -84,4 +84,9 @@ public class WaveUI : MonoBehaviour
         }
         canvasGroup.alpha = 0f;
     }
+
+    public static WaveUI EnsureUIExists()
+    {
+        return GameAutoBootstrap.EnsureWaveUI();
+    }
 }

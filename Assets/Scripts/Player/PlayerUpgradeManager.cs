@@ -245,6 +245,7 @@ public class PlayerUpgradeManager : MonoBehaviour
         // 6. Khoa lai Maid va chon Vaelstrider mac dinh
         PlayerPrefs.SetInt("Char_Unlocked_Maid", 0);
         PlayerPrefs.SetString("Selected_Character_ID", "Vaelstrider");
+        PlayerPrefs.SetInt("Map1_Completed", 0);
 
         PlayerPrefs.Save();
 
