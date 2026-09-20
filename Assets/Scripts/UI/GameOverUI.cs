@@ -118,8 +118,8 @@ public class GameOverUI : MonoBehaviour
         {
             bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
             respawnStatusText.text = canRespawn 
-                ? (isVi ? "— Bạn còn 1 lần hồi sinh trong bản đồ này —" : "— You have 1 respawn left for this realm —")
-                : (isVi ? "— Đã hết lượt hồi sinh cho map này (Tối đa: 1/1) —" : "— Out of respawns for this map (Max: 1/1) —");
+                ? (isVi ? "- Bạn còn 1 lần hồi sinh trong bản đồ này -" : "- You have 1 respawn left for this realm -")
+                : (isVi ? "- Đã hết lượt hồi sinh cho map này (Tối đa: 1/1) -" : "- Out of respawns for this map (Max: 1/1) -");
             respawnStatusText.color = canRespawn ? new Color(0.3f, 0.95f, 0.65f) : new Color(0.95f, 0.45f, 0.45f);
         }
 

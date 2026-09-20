@@ -140,16 +140,16 @@ public class DungeonMapBuilder : MonoBehaviour
         Transform barriersRoot = GetOrCreateRoot("DungeonBarriers");
         ClearChildren(barriersRoot);
 
-        // Barrier 1: Cửa vào Sảnh 2 (x = 8, y = 0, cao 3 tiles)
-        var b1 = RoomBarrier.Create(new Vector3(8f, 0f, 0f), true, 3.2f, "Barrier_Room2");
+        // Barrier 1: Cửa vào Sảnh 2 (x = 8, y = 0.5, cao 3 tiles: [-1.0, 2.0])
+        var b1 = RoomBarrier.Create(new Vector3(8f, 0.5f, 0f), true, 3.0f, "Barrier_Room2");
         b1.transform.SetParent(barriersRoot);
 
-        // Barrier 2: Cửa vào Hầm 3 (x = 19, y = 24, rộng 3 tiles)
-        var b2 = RoomBarrier.Create(new Vector3(19f, 23.5f, 0f), false, 3.2f, "Barrier_Room3");
+        // Barrier 2: Cửa vào Hầm 3 (x = 19.5, y = 24, rộng 3 tiles: [18.0, 21.0])
+        var b2 = RoomBarrier.Create(new Vector3(19.5f, 24f, 0f), false, 3.0f, "Barrier_Room3");
         b2.transform.SetParent(barriersRoot);
 
-        // Barrier 3: Cửa vào Đại Điện Boss 4 (x = 42, y = 34, cao 3 tiles)
-        var b3 = RoomBarrier.Create(new Vector3(41.5f, 34f, 0f), true, 3.2f, "Barrier_Room4_Boss");
+        // Barrier 3: Cửa vào Đại Điện Boss 4 (x = 42, y = 34.5, cao 3 tiles: [33.0, 36.0])
+        var b3 = RoomBarrier.Create(new Vector3(42f, 34.5f, 0f), true, 3.0f, "Barrier_Room4_Boss");
         b3.transform.SetParent(barriersRoot);
 
         // 6. Đặt Đuốc Tường (Torches with Light2D)
@@ -204,7 +204,7 @@ public class DungeonMapBuilder : MonoBehaviour
         var r1 = r1Obj.AddComponent<DungeonRoom>();
         r1.roomIndex = 1;
         r1.roomType = DungeonRoom.RoomType.Sanctuary;
-        r1.roomTitle = "✦ SANCTUARY OF AWAKENING ✦";
+        r1.roomTitle = "SANCTUARY OF AWAKENING";
         r1.roomSubtitle = "Đền Thờ Khởi Đầu - Vùng An Toàn";
         r1.roomBounds = new Rect(-16, -6, 14, 12);
         r1.roomCenter = new Vector3(-9, 0, 0);
@@ -218,7 +218,7 @@ public class DungeonMapBuilder : MonoBehaviour
         var r2 = r2Obj.AddComponent<DungeonRoom>();
         r2.roomIndex = 2;
         r2.roomType = DungeonRoom.RoomType.SunkenHall;
-        r2.roomTitle = "✦ THE SUNKEN HALL ✦";
+        r2.roomTitle = "THE SUNKEN HALL";
         r2.roomSubtitle = "Tiêu diệt toán Vệ Binh Tuần Tra (Wave 1)";
         r2.roomBounds = new Rect(8, -8, 22, 20);
         r2.roomCenter = new Vector3(19, 2, 0);
@@ -232,7 +232,7 @@ public class DungeonMapBuilder : MonoBehaviour
         var r3 = r3Obj.AddComponent<DungeonRoom>();
         r3.roomIndex = 3;
         r3.roomType = DungeonRoom.RoomType.CursedCrypt;
-        r3.roomTitle = "✦ THE CURSED CRYPT ✦";
+        r3.roomTitle = "THE CURSED CRYPT";
         r3.roomSubtitle = "Thanh tẩy Hầm Mộ Bị Nguyền Rủa (Wave 2)";
         r3.roomBounds = new Rect(8, 24, 22, 20);
         r3.roomCenter = new Vector3(19, 34, 0);
@@ -246,7 +246,7 @@ public class DungeonMapBuilder : MonoBehaviour
         var r4 = r4Obj.AddComponent<DungeonRoom>();
         r4.roomIndex = 4;
         r4.roomType = DungeonRoom.RoomType.TitanSanctum;
-        r4.roomTitle = "✦ SANCTUM OF THE TITAN ✦";
+        r4.roomTitle = "SANCTUM OF THE TITAN";
         r4.roomSubtitle = "ĐẠI CHIẾN BOSS: TITAN WHEEL";
         r4.roomBounds = new Rect(42, 20, 28, 28);
         r4.roomCenter = new Vector3(56, 34, 0);

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
@@ -115,7 +115,7 @@ public class LostShardsGrave : MonoBehaviour
         labelObj.transform.localPosition = new Vector3(0f, 1.25f, 0f);
 
         labelTmp = labelObj.AddComponent<TextMeshPro>();
-        labelTmp.text = $"<color=#52F0FF>✦ VUNG HON ✦</color>\n<color=#FFE066>+{lostShardsAmount} Shards</color>\n<size=70%>(Cham de thu hoi)</size>";
+        labelTmp.text = $"<color=#52F0FF>VUNG HON</color>\n<color=#FFE066>+{lostShardsAmount} Shards</color>\n<size=70%>(Cham de thu hoi)</size>";
         labelTmp.fontSize = 3.2f;
         labelTmp.fontStyle = FontStyles.Bold;
         labelTmp.alignment = TextAlignmentOptions.Center;
@@ -137,6 +137,7 @@ public class LostShardsGrave : MonoBehaviour
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Circle;
         shape.radius = 0.4f;
+        var psRenderer = psObj.GetComponent<ParticleSystemRenderer>(); if (psRenderer != null) psRenderer.material = HeavenlyPortalFX.GetOrCreateParticleMaterial();
     }
 
     private void Collect()

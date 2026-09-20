@@ -145,7 +145,7 @@ public class BossGigapackSkills : MonoBehaviour
         // 1. Bao ten skill len dau Boss
         Vector3 popupPos = bossCenter + Vector3.up * 1.6f;
         Color nameCol = isMap2 ? new Color(1f, 0.45f, 0.25f) : new Color(0.95f, 0.85f, 0.35f);
-        DamagePopup.CreateText(popupPos, $"✦ {skill.nameVN} ✦", nameCol);
+        DamagePopup.CreateText(popupPos, $"{skill.nameVN}", nameCol);
 
         // 2. Chuan bi vi tri thi trien (khoa vi tri nguoi choi tai thoi diem bao dong)
         Vector3 targetPos = skill.targetPlayerPos && playerTransform != null 

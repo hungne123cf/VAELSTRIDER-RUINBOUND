@@ -52,6 +52,23 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (isDead || isInvulnerable) return;
 
+        // 1. Kiem tra va hap thu sat thuong bang Lop Giap Ao Ho Than neu co
+        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+        if (energySys != null && energySys.IsShieldActive())
+        {
+            damage = energySys.AbsorbDamage(damage);
+            if (damage <= 0)
+            {
+                // Giap ho than da chan dung toan bo don danh!
+                return;
+            }
+        }
+        else if (energySys != null)
+        {
+            // Khi bi danh trung (khi chua co giap), tich luy them Noi Nang de nhanh kich hoat giap
+            energySys.AddInnerEnergy(10f);
+        }
+
         currentHealth -= damage;
         PlayerPrefs.SetInt("Saved_CurrentHealth", Mathf.Max(0, currentHealth));
         PlayerPrefs.Save();

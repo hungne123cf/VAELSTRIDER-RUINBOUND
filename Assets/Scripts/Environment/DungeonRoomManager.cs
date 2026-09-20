@@ -128,7 +128,7 @@ public class DungeonRoomManager : MonoBehaviour
             }
             else
             {
-                waveUI.ShowBanner("✦ KHU VỰC ĐÃ DỌN SẠCH! ✦", "Cổng phong ấn đã mở. Hãy tiến lên phía trước!");
+                waveUI.ShowBanner("KHU VỰC ĐÃ DỌN SẠCH!", "Cổng phong ấn đã mở. Hãy tiến lên phía trước!");
             }
         }
     }

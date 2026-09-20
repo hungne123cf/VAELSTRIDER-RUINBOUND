@@ -140,6 +140,12 @@ public class PlayerController : MonoBehaviour
     {
         if (dashCooldownTimer <= 0 && lastFacingDirection != Vector2.zero && !isDashing)
         {
+            var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+            if (energySys != null && !energySys.TryConsumeEnergy(20f))
+            {
+                return; // Khong du nang luong de luot
+            }
+
             isDashing = true;
             dashTimer = dashDuration;
             dashCooldownTimer = dashCooldown;

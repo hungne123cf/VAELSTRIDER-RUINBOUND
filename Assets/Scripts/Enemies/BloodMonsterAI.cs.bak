@@ -1,0 +1,675 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Collections;
+
+[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
+public class BloodMonsterAI : MonoBehaviour, IDamageable
+{
+    public static event System.Action<BloodMonsterAI> OnEnemyDied;
+
+    [Header("Boss / Monster Mode")]
+    [SerializeField] public bool isBoss = false;
+    public bool IsBoss => isBoss;
+
+    [Header("Stats")]
+    [SerializeField] private int maxHealth = 75;
+    [SerializeField] private float moveSpeed = 3.5f;
+    [SerializeField] private int attackDamage = 12;
+    [SerializeField] private float attackCooldown = 1.8f;
+
+    [Header("Boss Phases (if Boss)")]
+    public int totalBossPhases = 3;
+    private int currentBossPhase = 3;
+    public int CurrentBossPhase => currentBossPhase;
+    private int phaseMaxHealth = 450;
+    private bool isTransitioningPhase = false;
+
+    [Header("Ranges")]
+    [SerializeField] private float detectionRange = 10f;
+    [SerializeField] private float meleeRange = 1.9f;
+    [SerializeField] private float rangedAttackRange = 7.5f;
+
+    [Header("Ranged Attack Settings")]
+    [SerializeField] private float projectileSpeed = 8.0f;
+    [SerializeField] private Sprite runtimeBloodOrbSprite;
+
+    private int currentHealth;
+    private float attackTimer = 0f;
+    private bool isAttacking = false;
+    private bool isDead = false;
+    public bool IsDead => isDead;
+    private bool isKnockedBack = false;
+
+    private Transform player;
+    private Rigidbody2D rb;
+    private SpriteRenderer spriteRenderer;
+    private Color originalColor;
+    private Animator animator;
+    private Collider2D enemyCol;
+
+    // Visual warning indicators (Bat buoc 2 giay cho Boss)
+    private GameObject redWarningZone;
+    private LineRenderer warningLine;
+
+    // Animator Hashes
+    private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
+    private static readonly int AttackHash = Animator.StringToHash("Attack");
+    private static readonly int SpecialAttackHash = Animator.StringToHash("SpecialAttack");
+    private static readonly int HurtHash = Animator.StringToHash("Hurt");
+    private static readonly int DieHash = Animator.StringToHash("Die");
+
+    void Awake()
+    {
+        currentHealth = maxHealth;
+        rb = GetComponent<Rigidbody2D>();
+        enemyCol = GetComponent<Collider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
+
+        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        if (enemyLayer != -1) gameObject.layer = enemyLayer;
+        gameObject.tag = "Enemy";
+
+        if (enemyCol == null)
+        {
+            var cap = gameObject.AddComponent<CapsuleCollider2D>();
+            cap.size = isBoss ? new Vector2(1.5f, 1.4f) : new Vector2(1.0f, 1.0f);
+            cap.direction = CapsuleDirection2D.Vertical;
+            enemyCol = cap;
+        }
+
+        if (animator == null) animator = gameObject.AddComponent<Animator>();
+        if (spriteRenderer != null) originalColor = spriteRenderer.color;
+
+        rb.gravityScale = 0f;
+        rb.freezeRotation = true;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+        CreateBloodOrbSprite();
+        CreateWarningZone();
+    }
+
+    private void CreateWarningZone()
+    {
+        redWarningZone = new GameObject("Boss_BloodWarningZone");
+        redWarningZone.transform.SetParent(transform);
+        redWarningZone.transform.localPosition = Vector3.zero;
+
+        warningLine = redWarningZone.AddComponent<LineRenderer>();
+        warningLine.material = new Material(Shader.Find("Sprites/Default"));
+        warningLine.startColor = new Color(1f, 0.1f, 0.15f, 0.88f);
+        warningLine.endColor = new Color(1f, 0.25f, 0.1f, 0.88f);
+        warningLine.startWidth = 0.14f;
+        warningLine.endWidth = 0.14f;
+        warningLine.loop = true;
+        warningLine.sortingOrder = 4900;
+
+        int segments = 40;
+        warningLine.positionCount = segments;
+        redWarningZone.SetActive(false);
+    }
+
+    private void DrawWarningCircle(Vector3 center, float radius)
+    {
+        if (redWarningZone == null || warningLine == null) return;
+        redWarningZone.transform.SetParent(null);
+        redWarningZone.transform.position = center;
+        redWarningZone.SetActive(true);
+
+        int segments = 40;
+        for (int i = 0; i < segments; i++)
+        {
+            float rad = (i / (float)segments) * Mathf.PI * 2f;
+            Vector3 pos = new Vector3(Mathf.Cos(rad) * radius, Mathf.Sin(rad) * radius, 0);
+            warningLine.SetPosition(i, pos);
+        }
+    }
+
+    private void HideWarningZone()
+    {
+        if (redWarningZone != null)
+        {
+            redWarningZone.SetActive(false);
+            redWarningZone.transform.SetParent(transform);
+        }
+    }
+
+    private void CreateBloodOrbSprite()
+    {
+        if (runtimeBloodOrbSprite != null) return;
+
+        int size = 16;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float center = 7.5f;
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                if (dist < 2.5f)
+                    tex.SetPixel(x, y, new Color(1f, 0.9f, 0.8f, 1f));
+                else if (dist < 5.0f)
+                    tex.SetPixel(x, y, new Color(0.95f, 0.15f, 0.2f, 1f));
+                else if (dist < 7.0f)
+                    tex.SetPixel(x, y, new Color(0.55f, 0.05f, 0.1f, 0.85f));
+                else if (dist < 8.0f)
+                    tex.SetPixel(x, y, new Color(0.35f, 0.0f, 0.05f, 0.35f));
+                else
+                    tex.SetPixel(x, y, Color.clear);
+            }
+        }
+        tex.Apply();
+        runtimeBloodOrbSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 32);
+    }
+
+    void Start()
+    {
+        FindPlayerTarget();
+        if (isBoss)
+        {
+            BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK - HUYẾT THÚ CỔ TỰ", totalBossPhases);
+            BossHealthBarUI.EnsureInstance()?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+        }
+    }
+
+    private void FindPlayerTarget()
+    {
+        var p = GameObject.FindGameObjectWithTag("Player");
+        if (p != null) player = p.transform;
+    }
+
+    void Update()
+    {
+        if (isDead) return;
+
+        if (attackTimer > 0f)
+        {
+            attackTimer -= Time.deltaTime;
+        }
+
+        if (player == null)
+        {
+            FindPlayerTarget();
+            SetMoving(false);
+            return;
+        }
+
+        if (isKnockedBack || isTransitioningPhase || isAttacking) return;
+
+        float distance = Vector2.Distance(transform.position, player.position);
+
+        // Ngoai tam phat hien
+        if (distance > detectionRange)
+        {
+            rb.linearVelocity = Vector2.zero;
+            SetMoving(false);
+            return;
+        }
+
+        // Quay mat ve huong nguoi choi
+        Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        if (spriteRenderer != null)
+        {
+            if (dir.x > 0.05f) spriteRenderer.flipX = false;
+            else if (dir.x < -0.05f) spriteRenderer.flipX = true;
+        }
+
+        // 1. Can chien (Melee Claws hoac Boss Crimson Slam)
+        if (distance <= meleeRange)
+        {
+            rb.linearVelocity = Vector2.zero;
+            SetMoving(false);
+            if (attackTimer <= 0f)
+            {
+                if (isBoss) StartCoroutine(PerformBossSlamRoutine());
+                else StartCoroutine(PerformMeleeAttackRoutine());
+            }
+            return;
+        }
+
+        // 2. Danh tam xa (Blood Orb Spit)
+        if (distance <= rangedAttackRange)
+        {
+            if (attackTimer <= 0f)
+            {
+                StartCoroutine(PerformRangedAttackRoutine());
+                return;
+            }
+        }
+
+        // 3. Di chuyen tiep can
+        rb.linearVelocity = dir * moveSpeed;
+        SetMoving(true);
+    }
+
+    private void SetMoving(bool moving)
+    {
+        if (animator != null && animator.runtimeAnimatorController != null)
+        {
+            animator.SetBool(IsMovingHash, moving);
+        }
+    }
+
+    private IEnumerator PerformMeleeAttackRoutine()
+    {
+        isAttacking = true;
+        attackTimer = attackCooldown;
+        rb.linearVelocity = Vector2.zero;
+        SetMoving(false);
+
+        if (animator != null && animator.runtimeAnimatorController != null)
+        {
+            animator.SetTrigger(AttackHash);
+        }
+
+        yield return new WaitForSeconds(0.35f);
+        if (isDead) { isAttacking = false; yield break; }
+
+        if (player != null && Vector2.Distance(transform.position, player.position) <= (meleeRange + 0.6f))
+        {
+            var dmg = player.GetComponent<IDamageable>();
+            if (dmg != null)
+            {
+                dmg.TakeDamage(attackDamage);
+                SoundManager.EnsureInstance()?.PlayHitImpact();
+                DamagePopup.Create(player.position + Vector3.up * 0.8f, attackDamage, isPlayer: true);
+            }
+        }
+
+        yield return new WaitForSeconds(0.35f);
+        isAttacking = false;
+    }
+
+    /// <summary>
+    /// Boss Skill 1: Huyết Trận Địa Chấn - Cảnh báo đỏ 2.0s trước khi dậm đất
+    /// </summary>
+    private IEnumerator PerformBossSlamRoutine()
+    {
+        isAttacking = true;
+        attackTimer = attackCooldown + 1.5f;
+        rb.linearVelocity = Vector2.zero;
+        SetMoving(false);
+
+        // 1. CANH BAO VUNG DO + AM THANH CANH BAO TRUOC DUNG 2 GIAY
+        Vector3 slamCenter = transform.position;
+        float slamRadius = 3.5f;
+        DrawWarningCircle(slamCenter, slamRadius);
+        SoundManager.EnsureInstance()?.PlayBossWarning();
+
+        yield return new WaitForSeconds(2.0f);
+        HideWarningZone();
+
+        if (isDead) { isAttacking = false; yield break; }
+
+        // 2. TUNG CHIEU DAM DAT
+        if (animator != null && animator.runtimeAnimatorController != null)
+        {
+            animator.SetTrigger(AttackHash);
+        }
+
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.35f, 0.4f);
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+
+        if (player != null && Vector2.Distance(slamCenter, player.position) <= slamRadius)
+        {
+            var dmg = player.GetComponent<IDamageable>();
+            if (dmg != null)
+            {
+                int slamDmg = attackDamage + 8;
+                dmg.TakeDamage(slamDmg);
+                DamagePopup.Create(player.position + Vector3.up * 1.0f, slamDmg, isPlayer: true);
+            }
+        }
+
+        yield return new WaitForSeconds(0.5f);
+        isAttacking = false;
+    }
+
+    /// <summary>
+    /// Danh tam xa: Minion ban 1 cau gai mau. Boss canh bao do 2.0s truoc khi ban chum 5 cau gai mau!
+    /// </summary>
+    private IEnumerator PerformRangedAttackRoutine()
+    {
+        isAttacking = true;
+        attackTimer = attackCooldown;
+        rb.linearVelocity = Vector2.zero;
+        SetMoving(false);
+
+        // Neu la Boss: bat buoc hien vung canh bao do va am thanh canh bao truoc 2 giay!
+        if (isBoss)
+        {
+            attackTimer = attackCooldown + 1.5f;
+            Vector3 targetPos = (player != null) ? player.position : transform.position + transform.right * 4f;
+            DrawWarningCircle(targetPos, 2.5f);
+            SoundManager.EnsureInstance()?.PlayBossWarning();
+
+            yield return new WaitForSeconds(2.0f);
+            HideWarningZone();
+            if (isDead) { isAttacking = false; yield break; }
+        }
+
+        if (animator != null && animator.runtimeAnimatorController != null)
+        {
+            animator.SetTrigger(SpecialAttackHash);
+        }
+
+        yield return new WaitForSeconds(0.35f);
+        if (isDead) { isAttacking = false; yield break; }
+
+        if (player != null)
+        {
+            Vector2 aimDir = ((Vector2)player.position + Vector2.up * 0.4f - (Vector2)transform.position).normalized;
+            Vector3 spawnPos = transform.position + (Vector3)(aimDir * 0.6f) + Vector3.up * 0.3f;
+
+            if (isBoss)
+            {
+                // Boss ban chum 5 vien cau gai mau hinh canh quat
+                float[] angles = new float[] { -30f, -15f, 0f, 15f, 30f };
+                foreach (float angle in angles)
+                {
+                    Vector2 spreadDir = Quaternion.Euler(0, 0, angle) * aimDir;
+                    SpawnBloodProjectile(spawnPos, spreadDir);
+                }
+            }
+            else
+            {
+                SpawnBloodProjectile(spawnPos, aimDir);
+            }
+
+            SoundManager.EnsureInstance()?.PlayEnemyShoot();
+        }
+
+        yield return new WaitForSeconds(0.4f);
+        isAttacking = false;
+    }
+
+    private void SpawnBloodProjectile(Vector3 pos, Vector2 dir)
+    {
+        GameObject proj = new GameObject("BloodMonster_Projectile");
+        proj.transform.position = pos;
+        proj.transform.localScale = isBoss ? Vector3.one * 0.55f : Vector3.one * 0.40f;
+
+        var sr = proj.AddComponent<SpriteRenderer>();
+        sr.sprite = runtimeBloodOrbSprite;
+        sr.sortingOrder = 5500;
+
+        var col = proj.AddComponent<CircleCollider2D>();
+        col.isTrigger = true;
+        col.radius = 0.14f;
+
+        var rbProj = proj.AddComponent<Rigidbody2D>();
+        rbProj.gravityScale = 0f;
+        rbProj.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+        var enemyProj = proj.AddComponent<EnemyProjectile>();
+        enemyProj.Initialize(dir, isBoss ? attackDamage : attackDamage - 2, projectileSpeed);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isDead || isTransitioningPhase) return;
+
+        currentHealth -= damage;
+
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.12f, 0.2f);
+
+        if (animator != null && animator.runtimeAnimatorController != null)
+        {
+            animator.SetTrigger(HurtHash);
+        }
+
+        if (player != null && !isBoss)
+        {
+            Vector2 knockbackDir = ((Vector2)transform.position - (Vector2)player.position).normalized;
+            StartCoroutine(KnockbackRoutine(knockbackDir));
+        }
+
+        if (spriteRenderer != null)
+        {
+            StartCoroutine(FlashRedRoutine());
+        }
+
+        if (isBoss)
+        {
+            var bossUI = BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance();
+            bossUI?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+        }
+
+        if (currentHealth <= 0)
+        {
+            if (isBoss && currentBossPhase > 1)
+            {
+                StartCoroutine(BossPhaseTransitionRoutine());
+            }
+            else
+            {
+                if (isBoss)
+                {
+                    var bossUI = BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance();
+                    bossUI?.HideBoss();
+                }
+                Die();
+            }
+        }
+    }
+
+    private IEnumerator BossPhaseTransitionRoutine()
+    {
+        isTransitioningPhase = true;
+        currentBossPhase--;
+        currentHealth = phaseMaxHealth;
+
+        rb.linearVelocity = Vector2.zero;
+        SetMoving(false);
+        HideWarningZone();
+
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.5f, 0.6f);
+
+        SoundManager.EnsureInstance()?.PlayPortalSpawn();
+
+        string title = currentBossPhase == 2 
+            ? "PHASE II: HUYẾT THẦN THỨC TỈNH!" 
+            : "FINAL PHASE: TẬN THẾ HUYẾT NGUYỆT!";
+        DamagePopup.CreateText(transform.position + Vector3.up * 2.0f, title, new Color(1f, 0.2f, 0.2f));
+
+        moveSpeed *= 1.2f;
+        attackDamage += 6;
+        attackCooldown *= 0.8f;
+
+        if (spriteRenderer != null)
+        {
+            originalColor = currentBossPhase == 2 ? new Color(1f, 0.45f, 0.45f) : new Color(1f, 0.2f, 0.2f);
+            spriteRenderer.color = originalColor;
+        }
+
+        var bossUI = BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance();
+        bossUI?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+
+        yield return new WaitForSeconds(1.2f);
+        isTransitioningPhase = false;
+    }
+
+    private IEnumerator KnockbackRoutine(Vector2 dir)
+    {
+        isKnockedBack = true;
+        rb.linearVelocity = dir * 5.5f;
+        yield return new WaitForSeconds(0.14f);
+        isKnockedBack = false;
+    }
+
+    private IEnumerator FlashRedRoutine()
+    {
+        spriteRenderer.color = Color.white;
+        yield return new WaitForSeconds(0.1f);
+        spriteRenderer.color = originalColor;
+    }
+
+    private void Die()
+    {
+        isDead = true;
+        rb.linearVelocity = Vector2.zero;
+        SetMoving(false);
+        HideWarningZone();
+
+        Debug.Log($"<color=red>[BLOOD MONSTER SLAIN]</color> {(isBoss ? "Đại Trùm Gor'Mok" : "Huyết Thú")} đã gục ngã!");
+
+        if (animator != null && animator.runtimeAnimatorController != null)
+        {
+            animator.SetTrigger(DieHash);
+        }
+
+        if (isBoss) SoundManager.EnsureInstance()?.PlayBossDeath();
+        else SoundManager.EnsureInstance()?.PlayHitImpact();
+
+        OnEnemyDied?.Invoke(this);
+
+        if (isBoss)
+        {
+            AethelShard.SpawnShards(transform.position, Random.Range(25, 35));
+            // Ty le roi binh mau lon cho nguoi choi
+            var potionPrefab = Resources.Load<GameObject>("Items/HealthPotion");
+            if (potionPrefab != null)
+            {
+                Instantiate(potionPrefab, transform.position + Vector3.left * 0.8f, Quaternion.identity);
+                Instantiate(potionPrefab, transform.position + Vector3.right * 0.8f, Quaternion.identity);
+            }
+        }
+        else
+        {
+            AethelShard.SpawnShards(transform.position, Random.Range(4, 8));
+        }
+
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
+        Destroy(gameObject, 0.85f);
+    }
+
+    void OnDestroy()
+    {
+        if (redWarningZone != null)
+        {
+            Destroy(redWarningZone);
+        }
+    }
+
+    public void SetupBoss(float scaleMultiplier = 1.85f, int damageMultiplier = 2)
+    {
+        isBoss = true;
+        transform.localScale = Vector3.one * scaleMultiplier;
+
+        totalBossPhases = 3;
+        currentBossPhase = 3;
+        phaseMaxHealth = 480;
+        currentHealth = phaseMaxHealth;
+
+        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        if (enemyLayer != -1) gameObject.layer = enemyLayer;
+        gameObject.tag = "Enemy";
+
+        var cap = GetComponent<CapsuleCollider2D>();
+        if (cap == null) cap = gameObject.AddComponent<CapsuleCollider2D>();
+        cap.size = new Vector2(1.5f, 1.4f);
+        cap.direction = CapsuleDirection2D.Vertical;
+        cap.isTrigger = false;
+        enemyCol = cap;
+
+        attackDamage *= damageMultiplier;
+        moveSpeed *= 1.15f;
+        projectileSpeed *= 1.25f;
+        meleeRange = 2.4f;
+        rangedAttackRange = 8.5f;
+        detectionRange = 14.0f;
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = new Color(1f, 0.35f, 0.35f);
+            originalColor = spriteRenderer.color;
+        }
+
+        BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK - HUYẾT THÚ CỔ TỰ", totalBossPhases);
+    }
+
+    /// <summary>
+    /// Factory tao Blood Monster day du hinh anh, animation, collider va AI
+    /// </summary>
+    public static BloodMonsterAI Spawn(Vector3 pos, bool isBoss = false, int index = 1)
+    {
+        GameObject enemyObj = new GameObject(isBoss ? "Boss_GorMok_BloodMonster" : $"BloodMonster_{index}");
+        enemyObj.transform.position = pos;
+        enemyObj.transform.localScale = isBoss ? new Vector3(1.85f, 1.85f, 1f) : new Vector3(1.2f, 1.2f, 1f);
+
+        var sr = enemyObj.AddComponent<SpriteRenderer>();
+        sr.sprite = LoadBloodMonsterSprite();
+        sr.sortingOrder = 10;
+
+        var anim = enemyObj.AddComponent<Animator>();
+        anim.runtimeAnimatorController = LoadBloodMonsterAnimator();
+
+        var rb = enemyObj.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 0f;
+        rb.freezeRotation = true;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+        var col = enemyObj.AddComponent<CapsuleCollider2D>();
+        col.size = isBoss ? new Vector2(1.5f, 1.4f) : new Vector2(1.0f, 1.0f);
+        col.direction = CapsuleDirection2D.Vertical;
+
+        // Tranh day vat ly gay ket player vao tuong
+        var player = Object.FindAnyObjectByType<PlayerController>();
+        if (player != null)
+        {
+            var pCols = player.GetComponentsInChildren<Collider2D>();
+            foreach (var pCol in pCols)
+            {
+                if (pCol != null && col != null)
+                    Physics2D.IgnoreCollision(pCol, col, true);
+            }
+        }
+
+        var ai = enemyObj.AddComponent<BloodMonsterAI>();
+        if (isBoss)
+        {
+            ai.SetupBoss(1.85f, 2);
+        }
+        else
+        {
+            ai.isBoss = false;
+            ai.maxHealth = 65;
+            ai.currentHealth = 65;
+            ai.attackDamage = 11;
+            ai.moveSpeed = 3.6f;
+        }
+
+        return ai;
+    }
+
+    public static Sprite LoadBloodMonsterSprite()
+    {
+        Sprite s = null;
+#if UNITY_EDITOR
+        var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Blood Monster_A with shadows/Blood Monster_A.png");
+        if (all != null)
+        {
+            foreach (var a in all)
+            {
+                if (a is Sprite sp) { s = sp; break; }
+            }
+        }
+#endif
+        return s;
+    }
+
+    public static RuntimeAnimatorController LoadBloodMonsterAnimator()
+    {
+        RuntimeAnimatorController anim = null;
+#if UNITY_EDITOR
+        anim = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/BloodMonster/BloodMonster.controller");
+#endif
+        return anim;
+    }
+}

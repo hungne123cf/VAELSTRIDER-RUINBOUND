@@ -123,8 +123,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         {
             string scene = SceneManager.GetActiveScene().name;
             string bName = scene.Contains("Map2") || scene.Contains("Valley")
-                ? "✦ VALENTHUS • HỘ VỆ THẦN THỤ ✦"
-                : "✦ TITAN CRUSHER • CỖ MÁY TÀN TÍCH ✦";
+                ? "VALENTHUS - HỘ VỆ THẦN THỤ"
+                : "TITAN CRUSHER - CỖ MÁY TÀN TÍCH";
             BossHealthBarUI.EnsureInstance()?.ShowBoss(this, bName);
         }
     }
@@ -345,8 +345,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
                 {
                     string scene = SceneManager.GetActiveScene().name;
                     string bName = scene.Contains("Map2") || scene.Contains("Valley")
-                        ? "✦ VALENTHUS • HỘ VỆ THẦN THỤ ✦"
-                        : "✦ TITAN CRUSHER • CỖ MÁY TÀN TÍCH ✦";
+                        ? "VALENTHUS - HỘ VỆ THẦN THỤ"
+                        : "TITAN CRUSHER - CỖ MÁY TÀN TÍCH";
                     bossUI.ShowBoss(this, bName);
                 }
                 bossUI.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
@@ -537,8 +537,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         // Tự động kích hoạt thanh máu Boss 3 lớp
         string scene = SceneManager.GetActiveScene().name;
         string bName = scene.Contains("Map2") || scene.Contains("Valley")
-            ? "✦ VALENTHUS • HỘ VỆ THẦN THỤ ✦"
-            : "✦ TITAN CRUSHER • CỖ MÁY TÀN TÍCH ✦";
+            ? "VALENTHUS - HỘ VỆ THẦN THỤ"
+            : "TITAN CRUSHER - CỖ MÁY TÀN TÍCH";
 
         BossHealthBarUI.EnsureInstance()?.ShowBoss(this, bName);
     }
@@ -576,7 +576,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         // Hiển thị thông báo chiêu thức ngay trên đầu tâm thật của Boss
         Vector3 initialCenter = GetBossVisualCenter();
         Vector3 popupPos = initialCenter + Vector3.up * (1.1f * Mathf.Abs(transform.localScale.y));
-        DamagePopup.CreateText(popupPos, "✦ MA TRẬN HƯ KHÔNG ✦", new Color(0.85f, 0.35f, 1f));
+        DamagePopup.CreateText(popupPos, "MA TRẬN HƯ KHÔNG", new Color(0.85f, 0.35f, 1f));
         SoundManager.EnsureInstance()?.PlayPortalSpawn();
 
         // 1. BOSS ĐỨNG IM 1 GIÂY
@@ -713,7 +713,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         }
         activeClones.Clear();
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 2.2f, "✦ TAM THỂ PHÂN THÂN ✦", new Color(1f, 0.3f, 0.3f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 2.2f, "TAM THỂ PHÂN THÂN", new Color(1f, 0.3f, 0.3f));
         SoundManager.EnsureInstance()?.PlayPortalSpawn();
 
         // 1. Trùm chính: Màu Đỏ Huyết Nguyệt (Blood Crimson)
@@ -724,10 +724,10 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         }
 
         // 2. Phân thân 1: Màu Tím Hư Không (Void Violet)
-        CreateBossClone(new Vector3(-2.8f, 0.5f, 0f), new Color(0.72f, 0.22f, 1f), "✦ PHÂN THÂN HƯ KHÔNG ✦");
+        CreateBossClone(new Vector3(-2.8f, 0.5f, 0f), new Color(0.72f, 0.22f, 1f), "PHÂN THÂN HƯ KHÔNG");
 
         // 3. Phân thân 2: Màu Lam Lôi Đình (Storm Cyan)
-        CreateBossClone(new Vector3(2.8f, -0.5f, 0f), new Color(0.12f, 0.85f, 1f), "✦ PHÂN THÂN LÔI ĐÌNH ✦");
+        CreateBossClone(new Vector3(2.8f, -0.5f, 0f), new Color(0.12f, 0.85f, 1f), "PHÂN THÂN LÔI ĐÌNH");
     }
 
     private void CreateBossClone(Vector3 offset, Color cloneColor, string cloneTitle)

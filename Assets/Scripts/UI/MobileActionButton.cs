@@ -108,6 +108,14 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     {
         if (buttonType != ButtonType.Skill && buttonType != ButtonType.Dash) return;
 
+        Sprite circleSprite = Resources.Load<Sprite>("Combat/circle_fill");
+#if UNITY_EDITOR
+        if (circleSprite == null)
+        {
+            circleSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
+        }
+#endif
+
         if (cooldownOverlay == null)
         {
             Transform cdT = transform.Find("CooldownOverlay");
@@ -133,13 +141,10 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 img.fillClockwise = false;
                 img.fillOrigin = (int)Image.Origin360.Top;
 
-#if UNITY_EDITOR
-                Sprite circleSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
                 if (circleSprite != null)
                 {
                     img.sprite = circleSprite;
                 }
-#endif
                 cooldownOverlay = img;
             }
         }
@@ -194,6 +199,10 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 cooldownOverlay.fillClockwise = false;
                 cooldownOverlay.fillOrigin = (int)Image.Origin360.Top;
             }
+            if (circleSprite != null && cooldownOverlay.sprite != circleSprite)
+            {
+                cooldownOverlay.sprite = circleSprite;
+            }
         }
 
         if (cooldownText != null)
@@ -214,8 +223,6 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         Image btnImg = GetComponent<Image>();
         if (btnImg != null)
         {
-            btnImg.color = Color.white;
-
             Sprite roundSprite = null;
 #if UNITY_EDITOR
             if (buttonType == ButtonType.Attack)
@@ -231,9 +238,18 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 roundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/ulti.png");
             }
 #endif
-            if (roundSprite != null)
+            if (roundSprite != null && btnImg.sprite != roundSprite)
             {
+                btnImg.color = Color.white;
                 btnImg.sprite = roundSprite;
+            }
+            else if (btnImg.sprite == null)
+            {
+                Sprite circle = Resources.Load<Sprite>("Combat/circle_fill");
+                if (circle != null)
+                {
+                    btnImg.sprite = circle;
+                }
             }
         }
 
@@ -241,13 +257,14 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         if (iconT != null)
         {
             Image iconImg = iconT.GetComponent<Image>();
-            if (iconImg != null)
+            if (iconImg != null && iconImg.sprite == null)
             {
                 iconImg.color = Color.white;
+                Sprite icon = Resources.Load<Sprite>("Combat/skill_whirlwind_icon");
 #if UNITY_EDITOR
-                Sprite ultiSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/ulti.png");
-                if (ultiSprite != null) iconImg.sprite = ultiSprite;
+                if (icon == null) icon = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/Combat/skill_whirlwind_icon.png");
 #endif
+                if (icon != null) iconImg.sprite = icon;
             }
         }
     }
@@ -338,6 +355,14 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             if (!cooldownOverlay.gameObject.activeSelf) cooldownOverlay.gameObject.SetActive(true);
             cooldownOverlay.enabled = false;
+            if (cooldownOverlay.sprite == null)
+            {
+                Sprite circle = Resources.Load<Sprite>("Combat/circle_fill");
+#if UNITY_EDITOR
+                if (circle == null) circle = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
+#endif
+                if (circle != null) cooldownOverlay.sprite = circle;
+            }
         }
         if (cooldownText != null)
         {

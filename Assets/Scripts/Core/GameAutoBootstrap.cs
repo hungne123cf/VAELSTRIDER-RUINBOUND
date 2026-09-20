@@ -52,11 +52,13 @@ public class GameAutoBootstrap : MonoBehaviour
             EnsureSpecialSkillButton();
             SettingsUI.EnsureSettingsButtonExists();
             CharacterStatsUI.EnsureUIExists();
+            PlayerEnergyUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ShrineUpgradeUI.EnsureUIExists();
             EnsureAncientShrine(new Vector3(-5.5f, 2.8f, 0f));
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
+            EnsureBreakables();
             Debug.Log("<color=green>[BOOTSTRAP]</color> Dang o Map 2 (Valley Ruin)! Da khoi tao Ancient Shrine Tru Da Phat Sang va UI.");
             return;
         }
@@ -69,11 +71,13 @@ public class GameAutoBootstrap : MonoBehaviour
             EnsureSpecialSkillButton();
             SettingsUI.EnsureSettingsButtonExists();
             CharacterStatsUI.EnsureUIExists();
+            PlayerEnergyUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ShrineUpgradeUI.EnsureUIExists();
             EnsureAncientShrine(new Vector3(-1.5f, -5.0f, 0f));
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
+            EnsureBreakables();
             Map3ArenaManager.EnsureManager();
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Ancient Ruins)! Giữ nguyên bản đồ tự vẽ, tuyệt đối không ghi đè.");
             return;
@@ -95,6 +99,7 @@ public class GameAutoBootstrap : MonoBehaviour
         // 2b. Khoi tao nut Settings tren Canvas (cho ca Map 1 va Map 2)
         SettingsUI.EnsureSettingsButtonExists();
         CharacterStatsUI.EnsureUIExists();
+        PlayerEnergyUI.EnsureUIExists();
 
         // 3. Khoi tao He thong 3 dot quai + Boss Titan Wheel (WaveSpawner)
         EnsureWaveSpawner();
@@ -120,6 +125,7 @@ public class GameAutoBootstrap : MonoBehaviour
 
         // 10. Ap dung Nhan Vat da chon (Vaelstrider / Maid) va Tuyet Ky Quet Tan Ke Yeu
         ApplySelectedCharacterToPlayer();
+            EnsureBreakables();
 
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
     }
@@ -166,7 +172,12 @@ public class GameAutoBootstrap : MonoBehaviour
         rt.sizeDelta = new Vector2(100, 100);
 
         Image bg = btnObj.AddComponent<Image>();
-        bg.color = new Color(0.12f, 0.18f, 0.28f, 0.92f);
+        bg.color = Color.white;
+        var bgCircle = Resources.Load<Sprite>("Combat/circle_fill");
+#if UNITY_EDITOR
+        if (bgCircle == null) bgCircle = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
+#endif
+        if (bgCircle != null) bg.sprite = bgCircle;
 
         // Icon bão kiếm xoay
         GameObject iconObj = new GameObject("SkillIcon");
@@ -200,6 +211,11 @@ public class GameAutoBootstrap : MonoBehaviour
         cdImg.fillClockwise = false;
         cdImg.raycastTarget = false;
         cdImg.enabled = false;
+        var cdCircle = Resources.Load<Sprite>("Combat/circle_fill");
+#if UNITY_EDITOR
+        if (cdCircle == null) cdCircle = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
+#endif
+        if (cdCircle != null) cdImg.sprite = cdCircle;
 
         // Số đếm Cooldown
         GameObject txtObj = new GameObject("CooldownText");
@@ -218,22 +234,7 @@ public class GameAutoBootstrap : MonoBehaviour
         tmp.raycastTarget = false;
         tmp.enabled = false;
 
-        // Nhãn phím PC (F)
-        GameObject hintObj = new GameObject("KeyHint");
-        hintObj.transform.SetParent(btnObj.transform, false);
-        RectTransform hintRt = hintObj.AddComponent<RectTransform>();
-        hintRt.anchorMin = new Vector2(1, 0);
-        hintRt.anchorMax = new Vector2(1, 0);
-        hintRt.pivot = new Vector2(1, 0);
-        hintRt.anchoredPosition = new Vector2(-6, 6);
-        hintRt.sizeDelta = new Vector2(24, 20);
-        var hintTmp = hintObj.AddComponent<TextMeshProUGUI>();
-        hintTmp.text = "[F]";
-        hintTmp.fontSize = 12;
-        hintTmp.fontStyle = FontStyles.Bold;
-        hintTmp.color = new Color(0.55f, 0.8f, 1f, 0.85f);
-        hintTmp.alignment = TextAlignmentOptions.BottomRight;
-        hintTmp.raycastTarget = false;
+        // Nút bấm cảm ứng điện thoại (không hiển thị phím PC)
 
         var actionBtn = btnObj.AddComponent<MobileActionButton>();
         var btnTypeField = typeof(MobileActionButton).GetField("buttonType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -401,7 +402,7 @@ public class GameAutoBootstrap : MonoBehaviour
             if (btnSpecial != null)
             {
                 var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
-                if (txt != null) txt.text = "SWEEP" + "\n" + "(F)";
+                if (txt != null) txt.text = "SWEEP";
             }
 
             Debug.Log("<color=magenta>[CHARACTER]</color> Da ap dung nhan vat MAID CHIEN BINH voi tuyet ky Quet Tan Ke Yeu!");
@@ -424,7 +425,7 @@ public class GameAutoBootstrap : MonoBehaviour
             if (btnSpecial != null)
             {
                 var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
-                if (txt != null) txt.text = "WHIRL WIND" + "\n" + "(F)";
+                if (txt != null) txt.text = "WHIRL WIND";
             }
         }
     }
@@ -452,6 +453,11 @@ public class GameAutoBootstrap : MonoBehaviour
         {
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        }
+
+        if (player.GetComponent<PlayerEnergySystem>() == null)
+        {
+            player.gameObject.AddComponent<PlayerEnergySystem>();
         }
 
         var tPoint = player.transform.Find("AttackPoint");
@@ -483,4 +489,48 @@ public class GameAutoBootstrap : MonoBehaviour
             }
         }
     }
+
+    public static void EnsureBreakables()
+    {
+        if (GameObject.Find("DungeonBreakables") != null) return;
+
+        GameObject root = new GameObject("DungeonBreakables");
+        string currentScene = SceneManager.GetActiveScene().name;
+
+        if (currentScene.Contains("Map2"))
+        {
+            // Cụm bình và hoa cỏ rải rác quanh thung lũng Map 2
+            BreakableProp.Create(new Vector3(-4f, 1f, 0), BreakableProp.PropType.Pot, 0, root.transform);
+            BreakableProp.Create(new Vector3(-2f, -2f, 0), BreakableProp.PropType.Pot, 1, root.transform);
+            BreakableProp.Create(new Vector3(4f, 2f, 0), BreakableProp.PropType.Pot, 2, root.transform);
+            BreakableProp.Create(new Vector3(6f, -3f, 0), BreakableProp.PropType.Pot, 3, root.transform);
+            BreakableProp.Create(new Vector3(0f, 4f, 0), BreakableProp.PropType.Pot, 0, root.transform);
+
+            BreakableProp.Create(new Vector3(-3f, 3f, 0), BreakableProp.PropType.Foliage, 0, root.transform);
+            BreakableProp.Create(new Vector3(3f, -2f, 0), BreakableProp.PropType.Foliage, 1, root.transform);
+            BreakableProp.Create(new Vector3(5f, 4f, 0), BreakableProp.PropType.Foliage, 2, root.transform);
+            BreakableProp.Create(new Vector3(-5f, -4f, 0), BreakableProp.PropType.Foliage, 3, root.transform);
+        }
+        else
+        {
+            // Map 1 (SampleScene)
+            BreakableProp.Create(new Vector3(-6f, 3f, 0), BreakableProp.PropType.Pot, 0, root.transform);
+            BreakableProp.Create(new Vector3(-6f, -3f, 0), BreakableProp.PropType.Pot, 1, root.transform);
+            BreakableProp.Create(new Vector3(-13f, -4f, 0), BreakableProp.PropType.Foliage, 0, root.transform);
+            BreakableProp.Create(new Vector3(-4f, -4f, 0), BreakableProp.PropType.Foliage, 1, root.transform);
+
+            // Corridor 1 & Room 2
+            BreakableProp.Create(new Vector3(2f, 0.8f, 0), BreakableProp.PropType.Pot, 2, root.transform);
+            BreakableProp.Create(new Vector3(5f, -0.6f, 0), BreakableProp.PropType.Pot, 3, root.transform);
+            BreakableProp.Create(new Vector3(10f, 6f, 0), BreakableProp.PropType.Pot, 0, root.transform);
+            BreakableProp.Create(new Vector3(26f, 6f, 0), BreakableProp.PropType.Pot, 1, root.transform);
+            BreakableProp.Create(new Vector3(10f, -4f, 0), BreakableProp.PropType.Pot, 2, root.transform);
+            BreakableProp.Create(new Vector3(26f, -4f, 0), BreakableProp.PropType.Pot, 3, root.transform);
+            BreakableProp.Create(new Vector3(12f, 2f, 0), BreakableProp.PropType.Foliage, 2, root.transform);
+            BreakableProp.Create(new Vector3(24f, 2f, 0), BreakableProp.PropType.Foliage, 3, root.transform);
+        }
+
+        Debug.Log("<color=cyan>[BREAKABLES]</color> Đã khởi tạo các bình gốm và bụi hoa cỏ chém vỡ được!");
+    }
+
 }

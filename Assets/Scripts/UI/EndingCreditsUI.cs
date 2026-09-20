@@ -157,12 +157,12 @@ public class EndingCreditsUI : MonoBehaviour
         if (currentSpeedMultiplier == 1f)
         {
             currentSpeedMultiplier = 3.5f;
-            if (speedUpText != null) speedUpText.text = "⚡ SPEED 3X";
+            if (speedUpText != null) speedUpText.text = "SPEED 3X";
         }
         else
         {
             currentSpeedMultiplier = 1f;
-            if (speedUpText != null) speedUpText.text = "⏩ SPEED UP";
+            if (speedUpText != null) speedUpText.text = "SPEED UP";
         }
     }
 
@@ -202,11 +202,11 @@ public class EndingCreditsUI : MonoBehaviour
         if (statsText != null)
         {
             statsText.text = 
-                $"<color=#FFE066>✦ REALMS PURIFIED: 2 / 2 ✦</color>\n" +
+                $"<color=#FFE066>REALMS PURIFIED: 2 / 2</color>\n" +
                 $"<color=#E0E6ED>Chapter 1:</color> Sunken Sepulcher  <color=#52F0FF>[CLEARED]</color>\n" +
                 $"<color=#E0E6ED>Chapter 2:</color> Valley Ruin of Ancients  <color=#52F0FF>[PURIFIED]</color>\n\n" +
-                $"<color=#FFE066>✦ TOTAL AETHEL SHARDS:</color> {shards}\n" +
-                $"<color=#FFE066>✦ CLEAR RANK:</color> <color=#FF5577>S+ GRAND CHAMPION</color>\n\n" +
+                $"<color=#FFE066>TOTAL AETHEL SHARDS:</color> {shards}\n" +
+                $"<color=#FFE066>CLEAR RANK:</color> <color=#FF5577>S+ GRAND CHAMPION</color>\n\n" +
                 $"<i>\"The cycle of decay is broken. The world of Vaelstrider is at peace.\"</i>";
         }
     }
@@ -337,9 +337,9 @@ public class EndingCreditsUI : MonoBehaviour
         topRt.anchoredPosition = new Vector2(-30f, -30f);
         topRt.sizeDelta = new Vector2(340f, 50f);
 
-        ui.btnSpeedUp = CreateSmallButton(topBar.transform, new Vector2(-170f, 0f), "⏩ SPEED UP", new Color(0.18f, 0.28f, 0.45f, 0.95f), ui.ToggleSpeedUp);
+        ui.btnSpeedUp = CreateSmallButton(topBar.transform, new Vector2(-170f, 0f), "SPEED UP", new Color(0.18f, 0.28f, 0.45f, 0.95f), ui.ToggleSpeedUp);
         ui.speedUpText = ui.btnSpeedUp.GetComponentInChildren<TextMeshProUGUI>();
-        ui.btnSkip = CreateSmallButton(topBar.transform, new Vector2(0f, 0f), "✕ SKIP", new Color(0.45f, 0.15f, 0.18f, 0.95f), ui.SkipCredits);
+        ui.btnSkip = CreateSmallButton(topBar.transform, new Vector2(0f, 0f), "SKIP", new Color(0.45f, 0.15f, 0.18f, 0.95f), ui.SkipCredits);
 
         // Stats Window
         GameObject statsObj = new GameObject("FinalStatsCard");
@@ -363,7 +363,7 @@ public class EndingCreditsUI : MonoBehaviour
         sTitleRt.anchoredPosition = new Vector2(0f, 180f);
         sTitleRt.sizeDelta = new Vector2(600f, 50f);
         var sTitleTmp = sTitleObj.AddComponent<TextMeshProUGUI>();
-        sTitleTmp.text = "✦ JOURNEY COMPLETED ✦";
+        sTitleTmp.text = "JOURNEY COMPLETED";
         sTitleTmp.fontSize = 32;
         sTitleTmp.fontStyle = FontStyles.Bold;
         sTitleTmp.color = new Color(1f, 0.88f, 0.35f);
@@ -388,8 +388,8 @@ public class EndingCreditsUI : MonoBehaviour
         sBtnRt.anchoredPosition = new Vector2(0f, -170f);
         sBtnRt.sizeDelta = new Vector2(560f, 60f);
 
-        CreateActionButton(sBtnContainer.transform, new Vector2(-140f, 0f), "🔄 PLAY AGAIN", new Color(0.2f, 0.38f, 0.72f, 1f), ui.OnClickPlayAgain);
-        CreateActionButton(sBtnContainer.transform, new Vector2(140f, 0f), "🏠 MAIN MENU", new Color(0.24f, 0.58f, 0.35f, 1f), ui.OnClickMainMenu);
+        CreateActionButton(sBtnContainer.transform, new Vector2(-140f, 0f), "PLAY AGAIN", new Color(0.2f, 0.38f, 0.72f, 1f), ui.OnClickPlayAgain);
+        CreateActionButton(sBtnContainer.transform, new Vector2(140f, 0f), "MAIN MENU", new Color(0.24f, 0.58f, 0.35f, 1f), ui.OnClickMainMenu);
 
         // Đảm bảo TopControls luôn ở lớp trên cùng
         topBar.transform.SetAsLastSibling();
@@ -400,9 +400,9 @@ public class EndingCreditsUI : MonoBehaviour
     private static string GetCreditsFormattedText()
     {
         return
-            "<size=150%><color=#FFE066><b>✦ VAELSTRIDER: RUINBOUND ✦</b></color></size>\n" +
+            "<size=150%><color=#FFE066><b>VAELSTRIDER: RUINBOUND</b></color></size>\n" +
             "<color=#52F0FF>THE ANCIENT CYCLE RESTORED</color>\n\n" +
-            "─────────────────────────────────\n\n" +
+            "---------------------------------\n\n" +
             "<color=#94A3B8><size=80%>PRODUCED & DIRECTED BY</size></color>\n" +
             "<size=120%><color=#FFFFFF><b>Trương Hùng</b></color></size>\n\n\n" +
             "<color=#94A3B8><size=80%>SYSTEM ARCHITECT & AI PAIR PROGRAMMER</size></color>\n" +
@@ -426,7 +426,7 @@ public class EndingCreditsUI : MonoBehaviour
             "<color=#94A3B8><size=80%>LEVEL & WORLD DESIGN</size></color>\n" +
             "<color=#FFFFFF><b>Realm 1: Sunken Sepulcher</b></color>\n" +
             "<color=#FFFFFF><b>Realm 2: Valley Ruin of the Ancients</b></color>\n\n\n" +
-            "─────────────────────────────────\n\n" +
+            "---------------------------------\n\n" +
             "<color=#94A3B8><size=80%>SPECIAL DEDICATION</size></color>\n" +
             "<color=#E2E8F0>To every warrior who walked through the darkness,</color>\n" +
             "<color=#E2E8F0>and held fast until the first light of dawn.</color>\n\n" +

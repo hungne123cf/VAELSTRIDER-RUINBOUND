@@ -104,7 +104,7 @@ public class Map3ArenaManager : MonoBehaviour
         // 4. Bật thanh máu Boss Gor'Mok
         if (bossGorMok != null)
         {
-            BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK • HUYẾT THÚ CỔ TỰ", bossGorMok.totalBossPhases);
+            BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK - HUYẾT THÚ CỔ TỰ", bossGorMok.totalBossPhases);
         }
     }
 

@@ -155,51 +155,54 @@ public class PlayerCombat : MonoBehaviour
         Vector3 origin = (attackPoint != null) ? attackPoint.position : transform.position;
         int damage = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
 
-        // Đảm bảo enemyLayers luôn quét đúng layer Enemy
-        if (enemyLayers.value == 0)
-        {
-            int eLayer = LayerMask.NameToLayer("Enemy");
-            if (eLayer != -1) enemyLayers = 1 << eLayer;
-            else enemyLayers = ~0;
-        }
+        // Quet toan bo muc tieu trong tam chem (Bao gom ca Quai vat va Vat the chem be BreakableProp)
+        Collider2D[] allHits = Physics2D.OverlapCircleAll(origin, attackRadius + 0.45f);
+        var damagedSet = new System.Collections.Generic.HashSet<IDamageable>();
+        int enemyCount = 0;
 
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(origin, attackRadius, enemyLayers);
-
-        // Fallback cực mạnh: nếu layer mask không khớp hoặc kẻ địch nằm trên layer khác,
-        // quét tất cả collider trong tầm có IDamageable (loại trừ bản thân người chơi)
-        if (hitEnemies == null || hitEnemies.Length == 0)
+        foreach (var col in allHits)
         {
-            Collider2D[] allHits = Physics2D.OverlapCircleAll(origin, attackRadius + 0.6f);
-            System.Collections.Generic.List<Collider2D> validList = new System.Collections.Generic.List<Collider2D>();
-            foreach (var col in allHits)
+            if (col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
+
+            var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
+            if (damageable != null && !damagedSet.Contains(damageable))
             {
-                if (col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
-                if (col.GetComponent<IDamageable>() != null || col.GetComponentInParent<IDamageable>() != null)
+                damagedSet.Add(damageable);
+                damageable.TakeDamage(damage);
+
+                // Neu la Quai vat (khong phai binh gom / hoa co BreakableProp)
+                bool isProp = (col.GetComponent<BreakableProp>() != null || col.GetComponentInParent<BreakableProp>() != null);
+                if (!isProp)
                 {
-                    validList.Add(col);
+                    enemyCount++;
+                    SoundManager.EnsureInstance()?.PlayHitImpact();
+                    bool isCrit = (comboStep == 2);
+                    DamagePopup.Create(col.transform.position, damage, isCritical: isCrit);
+
+                    // Hoi nang luong va tich luy Noi Nang khi chem trung quai
+                    var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+                    if (energySys != null)
+                    {
+                        energySys.RestoreEnergy(8f);
+                        energySys.AddInnerEnergy(15f);
+                    }
                 }
             }
-            hitEnemies = validList.ToArray();
         }
 
-        Debug.Log($"<color=cyan>[ATTACK]</color> Vung kiếm (Combo {comboStep})! Tìm thấy: {hitEnemies.Length} kẻ địch.");
-
-        foreach (Collider2D enemy in hitEnemies)
-        {
-            var damageable = enemy.GetComponent<IDamageable>() ?? enemy.GetComponentInParent<IDamageable>();
-            if (damageable != null)
-            {
-                damageable.TakeDamage(damage);
-                SoundManager.EnsureInstance()?.PlayHitImpact();
-                bool isCrit = (comboStep == 2);
-                DamagePopup.Create(enemy.transform.position, damage, isCritical: isCrit);
-            }
-        }
+        Debug.Log($"<color=cyan>[ATTACK]</color> Vung kiếm (Combo {comboStep})! Đánh trúng: {damagedSet.Count} mục tiêu ({enemyCount} quái vật).");
     }
 
     public bool PerformSpecialSkill()
     {
         if (skillCooldownTimer > 0f || isUltiActive) return false;
+
+        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+        if (energySys != null && !energySys.TryConsumeEnergy(50f))
+        {
+            return false; // Khong du nang luong de thi trien Tuyet ky
+        }
+
         float effectiveCooldown = Mathf.Max(5.0f, skillCooldown - ultiCooldownReduction);
         skillCooldownTimer = effectiveCooldown;
         lastSpecialSkillFrame = Time.frameCount;
@@ -300,6 +303,7 @@ public class PlayerCombat : MonoBehaviour
         if (playerHealth != null) playerHealth.isInvulnerable = false;
         if (playerController != null) playerController.SetCanMove(true);
         isUltiActive = false;
+        if (animator != null) animator.Play("Idle", 0, 0f);
 
         Debug.Log("<color=cyan>[SPECIAL SKILL]</color> Hoàn tất chuỗi Bão Lốc Tàn Tích!");
     }
@@ -318,7 +322,7 @@ public class PlayerCombat : MonoBehaviour
 
                 if (isFinal)
                 {
-                    DamagePopup.CreateText(enemy.transform.position, $"✦ RUIN BURST! {damage} ✦", new Color(1f, 0.85f, 0.2f));
+                    DamagePopup.CreateText(enemy.transform.position, $"RUIN BURST! {damage}", new Color(1f, 0.85f, 0.2f));
                 }
                 else
                 {

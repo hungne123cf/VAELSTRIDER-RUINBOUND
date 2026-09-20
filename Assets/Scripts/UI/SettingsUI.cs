@@ -227,8 +227,8 @@ public class SettingsUI : MonoBehaviour
         iconRt.anchorMax = Vector2.one;
         iconRt.sizeDelta = Vector2.zero;
         var iconTmp = iconObj.AddComponent<TextMeshProUGUI>();
-        iconTmp.text = "SET\n<size=10>(ESC)</size>";
-        iconTmp.fontSize = 12;
+        iconTmp.text = "SET";
+        iconTmp.fontSize = 14;
         iconTmp.fontStyle = FontStyles.Bold;
         iconTmp.color = new Color(1f, 0.88f, 0.4f);
         iconTmp.alignment = TextAlignmentOptions.Center;

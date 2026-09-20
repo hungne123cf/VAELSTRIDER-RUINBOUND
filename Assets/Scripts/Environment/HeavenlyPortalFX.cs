@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using System.Collections;
 
@@ -9,6 +9,44 @@ public class HeavenlyPortalFX : MonoBehaviour
     private Transform rotatingRays;
     private Transform outerHalo;
     private ParticleSystem sparkles;
+
+    private static Material _cachedParticleMaterial;
+
+    public static Material GetOrCreateParticleMaterial()
+    {
+        if (_cachedParticleMaterial != null) return _cachedParticleMaterial;
+
+        Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+        if (shader == null) shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
+        if (shader == null) shader = Shader.Find("Particles/Standard Unlit");
+        if (shader == null) shader = Shader.Find("Sprites/Default");
+        if (shader == null) shader = Shader.Find("Legacy Shaders/Particles/Additive");
+        if (shader == null) shader = Shader.Find("Hidden/Internal-Colored");
+
+        _cachedParticleMaterial = new Material(shader != null ? shader : Shader.Find("Sprites/Default"));
+
+        // Tạo texture hạt phát sáng tròn mềm (Soft Glowing Circle) để triệt tiêu vỡ pixel / hình vuông
+        int size = 32;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        tex.wrapMode = TextureWrapMode.Clamp;
+        Vector2 center = new Vector2(size * 0.5f - 0.5f, size * 0.5f - 0.5f);
+        float radius = size * 0.5f;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dist = Vector2.Distance(new Vector2(x, y), center) / radius;
+                float alpha = Mathf.Clamp01(1f - dist);
+                alpha = Mathf.Pow(alpha, 1.8f);
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+            }
+        }
+        tex.Apply();
+        _cachedParticleMaterial.mainTexture = tex;
+        return _cachedParticleMaterial;
+    }
 
     public static HeavenlyPortalFX Attach(GameObject targetObj)
     {
@@ -58,7 +96,7 @@ public class HeavenlyPortalFX : MonoBehaviour
         haloSr.sprite = CreateHolyRingsSprite();
         haloSr.color = new Color(1f, 0.95f, 0.7f, 0.9f);
         haloSr.sortingLayerName = "Default";
-        haloSr.sortingOrder = 5050; // Hiển thị trên nền và cổng
+        haloSr.sortingOrder = 5050;
 
         // 3. Tia hào quang xoay (Radiant Rays)
         GameObject raysObj = new GameObject("Heavenly_Rays");
@@ -72,7 +110,7 @@ public class HeavenlyPortalFX : MonoBehaviour
         raysSr.sortingLayerName = "Default";
         raysSr.sortingOrder = 5040;
 
-        // 4. Hạt bụi vàng bay lượn (Golden Dust Particle System)
+        // 4. Hạt bụi vàng bay lên (Golden Dust Particle System)
         GameObject psObj = new GameObject("Heavenly_Sparkles");
         psObj.transform.SetParent(transform, false);
         psObj.transform.localPosition = new Vector3(0f, 0.35f, 0f);
@@ -82,7 +120,7 @@ public class HeavenlyPortalFX : MonoBehaviour
         main.loop = true;
         main.startLifetime = 2.2f;
         main.startSpeed = 0.8f;
-        main.startSize = 0.12f;
+        main.startSize = 0.16f;
         main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.92f, 0.5f, 0.9f), new Color(1f, 1f, 1f, 0.95f));
         main.simulationSpace = ParticleSystemSimulationSpace.World;
 
@@ -103,13 +141,13 @@ public class HeavenlyPortalFX : MonoBehaviour
         colorOverLifetime.color = grad;
 
         var psRenderer = psObj.GetComponent<ParticleSystemRenderer>();
+        psRenderer.material = GetOrCreateParticleMaterial();
         psRenderer.sortingLayerName = "Default";
         psRenderer.sortingOrder = 5100;
     }
 
     void Update()
     {
-        // Hiệu ứng thở nhẹ và xoay chuyển hào quang
         float pulse = Mathf.Sin(Time.time * 2.8f) * 0.08f;
         if (outerHalo != null)
         {
@@ -144,7 +182,6 @@ public class HeavenlyPortalFX : MonoBehaviour
                 float d = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
                 float normD = d / maxR;
 
-                // Tạo 3 vòng sáng đồng tâm vàng trắng
                 float ring1 = Mathf.Exp(-Mathf.Pow((normD - 0.55f) * 14f, 2));
                 float ring2 = Mathf.Exp(-Mathf.Pow((normD - 0.85f) * 16f, 2));
                 float coreGlow = Mathf.Clamp01(1f - normD * 1.5f) * 0.7f;
@@ -174,7 +211,6 @@ public class HeavenlyPortalFX : MonoBehaviour
                 float d = Mathf.Sqrt(dx * dx + dy * dy);
                 float angle = Mathf.Atan2(dy, dx);
 
-                // 8 tia sáng mặt trời chiếu rực rỡ
                 float rays = Mathf.Pow(Mathf.Cos(angle * 4f), 4);
                 float falloff = Mathf.Clamp01(1f - d / maxR);
                 float alpha = Mathf.Clamp01(rays * falloff * 0.85f);

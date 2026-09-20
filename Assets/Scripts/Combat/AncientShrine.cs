@@ -167,7 +167,7 @@ public class AncientShrine : MonoBehaviour
         worldPromptObj.transform.localPosition = promptOffset + new Vector3(0f, 0.7f, 0f);
 
         var textMesh = worldPromptObj.AddComponent<TextMeshPro>();
-        textMesh.text = "[E] NANG CAP CO DAI";
+        textMesh.text = "NANG CAP CO DAI";
         textMesh.fontSize = 3.6f;
         textMesh.fontStyle = FontStyles.Bold;
         textMesh.alignment = TextAlignmentOptions.Center;

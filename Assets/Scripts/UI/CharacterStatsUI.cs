@@ -110,8 +110,9 @@ public class CharacterStatsUI : MonoBehaviour
         if (attackCardDesc != null)
         {
             attackCardDesc.text = 
-                $"• <b>Sat thuong:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Goc 5 + Cap kiem +{atkBonus}). Tam danh: 1.35m.\n" +
-                $"• <b>Hinh thuc:</b> Combo 2 nhip kiem lien hoan [Phim J / Chuot trai / Nut Tan cong].\n" +
+                $"- <b>Sat thuong:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Goc 5 + Cap kiem +{atkBonus}). Tam danh: 1.35m.\n" +
+                $"- <b>Hinh thuc:</b> Combo 2 nhip kiem lien hoan [Phim J / Chuot trai / Nut Tan cong].\n" +
+                $"- <b>Hoi phuc:</b> Moi don chem trung hoi <color=#38BDF8><b>+8 NL</b></color> & tich <color=#FBBF24><b>+15 Noi Nang</b></color>.\n" +
                 $"  - <i>Nhip 1:</i> Vung kiem quet ngang nhanh, lam cham nhe quai.\n" +
                 $"  - <i>Nhip 2:</i> Bo kiem chi mang don sat thuong ket hop day lui doi thu.";
         }
@@ -120,9 +121,9 @@ public class CharacterStatsUI : MonoBehaviour
         if (dashCardDesc != null)
         {
             dashCardDesc.text = 
-                $"• <b>Hoi chieu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (Goc 5.0s - Giam tru {dashCdRed:F1}s) [Phim Space / Nut Luot].\n" +
-                $"• <b>Sat thuong:</b> <color=#FFFF66><b>0 DMG</b></color> (Ky nang ne don thuan tuy, tuyet doi khong gay sat thuong).\n" +
-                $"• <b>Dac tinh:</b> Luot toc bien 12 m/s theo huong di chuyen, de lai tan anh bong ma. <color=#55FF88><b>Bat tu hoan toan trong 0.2s</b></color> de ne moi don danh va dan cua quai.";
+                $"- <b>Tieu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hoi chieu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> [Phim Space / Nut Luot].\n" +
+                $"- <b>Sat thuong:</b> <color=#FFFF66><b>0 DMG</b></color> (Ky nang ne don thuan tuy, tuyet doi khong gay sat thuong).\n" +
+                $"- <b>Dac tinh:</b> Luot toc bien 12 m/s theo huong di chuyen, de lai tan anh bong ma. <color=#55FF88><b>Bat tu hoan toan trong 0.2s</b></color> de ne moi don danh va dan cua quai.";
         }
 
         // Card 3: Ulti
@@ -137,18 +138,18 @@ public class CharacterStatsUI : MonoBehaviour
             if (isMaid)
             {
                 ultiCardDesc.text = 
-                    $"• <b>Hoi chieu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> (Goc 30.0s - Giam tru {ultiCdRed:F1}s) [Phim F / Nut Ulti].\n" +
-                    $"• <b>Dien anh:</b> Ngung dong thoi gian slow-mo, camera can canh, mat loe sang ruc ro va phat loi thoai don dep phe tich!\n" +
-                    $"• <b>Hieu ung uy luc:</b> Vung dao khi trang khuyet goc rong 140 do ban kinh 4.8m:\n" +
+                    $"- <b>Tieu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hoi chieu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> (Goc 30.0s - Giam tru {ultiCdRed:F1}s) [Phim F / Nut Ulti].\n" +
+                    $"- <b>Dien anh:</b> Ngung dong thoi gian slow-mo, camera can canh, mat loe sang ruc ro va phat loi thoai don dep phe tich!\n" +
+                    $"- <b>Hieu ung uy luc:</b> Vung dao khi trang khuyet goc rong 140 do ban kinh 4.8m:\n" +
                     $"  - <color=#FF4455><b>Quai thuong:</b> KET LIEU NGAY LAP TUC (Insta-Kill/Execute)</color> toan bo quai trong tam quet.\n" +
                     $"  - <color=#FFCC33><b>Boss:</b> Gay 250 DMG (+{ultiDmgBonus}) va LAM CHOANG BOSS TRONG 2.5 GIAY</color>!";
             }
             else
             {
                 ultiCardDesc.text = 
-                    $"• <b>Hoi chieu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> (Goc 30.0s - Giam tru {ultiCdRed:F1}s) [Phim F / Nut Ulti].\n" +
-                    $"• <b>Hieu ung uy luc:</b> Van noi luc trieu hoi Con Bao Kiem Co Tu ban kinh 2.8m quet 4 dot lien tuc.\n" +
-                    $"• <b>Sat thuong:</b> Hut toan bo quai xung quanh vao tam bao, don sat thuong dien rong uy luc va phat no hat vang moi ke dich can duong!";
+                    $"- <b>Tieu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hoi chieu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> (Goc 30.0s - Giam tru {ultiCdRed:F1}s) [Phim F / Nut Ulti].\n" +
+                    $"- <b>Hieu ung uy luc:</b> Van noi luc trieu hoi Con Bao Kiem Co Tu ban kinh 2.8m quet 4 dot lien tuc.\n" +
+                    $"- <b>Sat thuong:</b> Hut toan bo quai xung quanh vao tam bao, don sat thuong dien rong uy luc va phat no hat vang moi ke dich can duong!";
             }
         }
     }
@@ -200,8 +201,8 @@ public class CharacterStatsUI : MonoBehaviour
             txtRt.sizeDelta = Vector2.zero;
 
             var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = "STATS\n<size=10>(C)</size>";
-            tmp.fontSize = 12;
+            tmp.text = "STATS";
+            tmp.fontSize = 14;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.color = new Color(0.4f, 0.92f, 1f, 1f);

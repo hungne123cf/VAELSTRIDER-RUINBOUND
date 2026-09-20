@@ -42,13 +42,23 @@ public class WaveSpawner : MonoBehaviour
     {
         BotWheelAI.OnEnemyDied += HandleEnemyDied;
         BloodMonsterAI.OnEnemyDied += HandleBloodMonsterDied;
+        ValleyBeastAI.OnEnemyDied += HandleValleyBeastDied;
+        ValleySpitterAI.OnEnemyDied += HandleValleySpitterDied;
+        ValleyGolemBossAI.OnEnemyDied += HandleValleyBossDied;
     }
 
     void OnDisable()
     {
         BotWheelAI.OnEnemyDied -= HandleEnemyDied;
         BloodMonsterAI.OnEnemyDied -= HandleBloodMonsterDied;
+        ValleyBeastAI.OnEnemyDied -= HandleValleyBeastDied;
+        ValleySpitterAI.OnEnemyDied -= HandleValleySpitterDied;
+        ValleyGolemBossAI.OnEnemyDied -= HandleValleyBossDied;
     }
+
+    private void HandleValleyBeastDied(ValleyBeastAI e) { HandleAnyEnemyDied(); }
+    private void HandleValleySpitterDied(ValleySpitterAI e) { HandleAnyEnemyDied(); }
+    private void HandleValleyBossDied(ValleyGolemBossAI e) { HandleAnyEnemyDied(); }
 
     void Start()
     {
@@ -197,10 +207,16 @@ public class WaveSpawner : MonoBehaviour
         currentWave++;
         waveInProgress = true;
 
+        bool isMap2 = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Map2");
+
         string title = $"WAVE {currentWave} / {totalWaves}";
         if (currentWave == totalWaves)
         {
-            title = "BOSS INCOMING: TITAN WHEEL!";
+            title = isMap2 ? "BOSS INCOMING: ĐẠI TRÙM GOR'MOK!" : "BOSS INCOMING: TITAN WHEEL!";
+        }
+        else if (isMap2)
+        {
+            title = (currentWave == 1) ? "WAVE 1 / 3: HUYẾT THÚ XUẤT HIỆN!" : "WAVE 2 / 3: HUYẾT THÚ CUỒNG NỘ!";
         }
 
         OnWaveStarted?.Invoke(currentWave, totalWaves, title);
@@ -209,10 +225,12 @@ public class WaveSpawner : MonoBehaviour
 
     private IEnumerator SpawnWaveRoutine(int wave)
     {
+        bool isMap2 = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Map2");
+
         int countToSpawn = 0;
         bool isBossWave = (wave == totalWaves);
 
-        if (wave == 1) countToSpawn = 2;
+        if (wave == 1) countToSpawn = isMap2 ? 3 : 2;
         else if (wave == 2) countToSpawn = 4;
         else if (isBossWave) countToSpawn = 1;
 
@@ -221,33 +239,49 @@ public class WaveSpawner : MonoBehaviour
         for (int i = 0; i < countToSpawn; i++)
         {
             Vector3 spawnPos = GetSpawnPosition(i);
-            
-            if (enemyPrefab != null)
+
+            if (isMap2)
             {
-                GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
-                newEnemy.SetActive(true);
-
-                var player = FindAnyObjectByType<PlayerController>();
-                if (player != null)
-                {
-                    var pCols = player.GetComponentsInChildren<Collider2D>();
-                    var eCols = newEnemy.GetComponentsInChildren<Collider2D>();
-                    foreach (var pCol in pCols)
-                    {
-                        foreach (var eCol in eCols)
-                        {
-                            if (pCol != null && eCol != null)
-                                Physics2D.IgnoreCollision(pCol, eCol, true);
-                        }
-                    }
-                }
-
+                // Map 2: Su dung quai vat Blood Monster_A with shadows
                 if (isBossWave)
                 {
-                    var ai = newEnemy.GetComponent<BotWheelAI>();
-                    if (ai != null)
+                    BloodMonsterAI.Spawn(spawnPos, isBoss: true, index: 1);
+                }
+                else
+                {
+                    BloodMonsterAI.Spawn(spawnPos, isBoss: false, index: i + 1);
+                }
+            }
+            else
+            {
+                // Map 1: Dung quai goc BotWheel
+                if (enemyPrefab != null)
+                {
+                    GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+                    newEnemy.SetActive(true);
+
+                    var player = FindAnyObjectByType<PlayerController>();
+                    if (player != null)
                     {
-                        ai.SetupBoss(1.85f, 3, 2);
+                        var pCols = player.GetComponentsInChildren<Collider2D>();
+                        var eCols = newEnemy.GetComponentsInChildren<Collider2D>();
+                        foreach (var pCol in pCols)
+                        {
+                            foreach (var eCol in eCols)
+                            {
+                                if (pCol != null && eCol != null)
+                                    Physics2D.IgnoreCollision(pCol, eCol, true);
+                            }
+                        }
+                    }
+
+                    if (isBossWave)
+                    {
+                        var ai = newEnemy.GetComponent<BotWheelAI>();
+                        if (ai != null)
+                        {
+                            ai.SetupBoss(1.85f, 3, 2);
+                        }
                     }
                 }
             }

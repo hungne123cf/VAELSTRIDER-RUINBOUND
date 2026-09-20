@@ -74,7 +74,8 @@ public class RoomWaypointUI : MonoBehaviour
 
     private void SetVisible(bool visible)
     {
-        if (arrowImage != null) arrowImage.enabled = visible;
+        // Arrow square removed as requested
+        if (arrowImage != null) arrowImage.enabled = false;
         if (distanceText != null) distanceText.enabled = visible;
     }
 
@@ -114,6 +115,7 @@ public class RoomWaypointUI : MonoBehaviour
         instance.arrowImage = arrowObj.AddComponent<Image>();
         instance.arrowImage.color = new Color(0.3f, 0.95f, 1f, 0.9f);
         instance.arrowImage.raycastTarget = false;
+        instance.arrowImage.enabled = false;
 
         // Distance text
         GameObject distObj = new GameObject("DistText");

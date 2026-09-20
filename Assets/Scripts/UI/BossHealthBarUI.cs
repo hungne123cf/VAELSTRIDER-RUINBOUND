@@ -122,7 +122,7 @@ public class BossHealthBarUI : MonoBehaviour
         nameRt.sizeDelta = new Vector2(760f, 32f);
 
         var nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
-        nameTmp.text = "✦ TITAN CRUSHER • CỖ MÁY TÀN TÍCH ✦";
+        nameTmp.text = "TITAN CRUSHER - CỖ MÁY TÀN TÍCH";
         nameTmp.fontSize = 20;
         nameTmp.fontStyle = FontStyles.Bold;
         nameTmp.color = new Color(1f, 0.88f, 0.45f);
@@ -217,7 +217,7 @@ public class BossHealthBarUI : MonoBehaviour
         phaseRt.sizeDelta = new Vector2(740f, 20f);
 
         var pTmp = phaseObj.AddComponent<TextMeshProUGUI>();
-        pTmp.text = "◆ ◆ ◆ [ 3 THANH MÁU • PHASE I ]";
+        pTmp.text = "[ 3 THANH MÁU - PHASE I ]";
         pTmp.fontSize = 13;
         pTmp.fontStyle = FontStyles.Bold;
         pTmp.color = new Color(0.5f, 0.85f, 1f);
@@ -311,17 +311,17 @@ public class BossHealthBarUI : MonoBehaviour
         {
             if (phase == 3)
             {
-                phaseText.text = "<color=#38BDF8>◆ ◆ ◆</color>  [ GIAI ĐOẠN 1: MÁY XAY CỔ ĐẠI ]";
+                phaseText.text = "<color=#38BDF8>[III]</color>  [ GIAI ĐOẠN 1: MÁY XAY CỔ ĐẠI ]";
                 phaseText.color = new Color(0.4f, 0.8f, 1f);
             }
             else if (phase == 2)
             {
-                phaseText.text = "<color=#C084FC>◆ ◆ ◇</color>  [ GIAI ĐOẠN 2: HƯ KHÔNG THỨC TỈNH ]";
+                phaseText.text = "<color=#C084FC>[II]</color>  [ GIAI ĐOẠN 2: HƯ KHÔNG THỨC TỈNH ]";
                 phaseText.color = new Color(0.85f, 0.45f, 1f);
             }
             else
             {
-                phaseText.text = "<color=#EF4444>◆ ◇ ◇</color>  [ GIAI ĐOẠN 3: CUỒNG NỘ HUYẾT NGUYỆT ]";
+                phaseText.text = "<color=#EF4444>[I]</color>  [ GIAI ĐOẠN 3: CUỒNG NỘ HUYẾT NGUYỆT ]";
                 phaseText.color = new Color(1f, 0.25f, 0.25f);
             }
         }

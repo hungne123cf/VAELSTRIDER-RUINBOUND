@@ -44,6 +44,11 @@ public class RoomBarrier : MonoBehaviour
                 boxCollider.offset = Vector2.zero;
             }
         }
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.drawMode = SpriteDrawMode.Sliced;
+            spriteRenderer.size = isVertical ? new Vector2(0.7f, size) : new Vector2(size, 0.7f);
+        }
     }
 
     public void Setup(bool vertical, float length)

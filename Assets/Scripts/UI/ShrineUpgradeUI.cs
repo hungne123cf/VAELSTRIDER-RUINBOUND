@@ -72,7 +72,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         if (shardsCounterText != null)
         {
             string label = isVi ? "MẢNH CỔ TỰ (AETHEL SHARDS)" : "AETHEL SHARDS";
-            shardsCounterText.text = $"{label}: {mgr.CurrentShards} ✦";
+            shardsCounterText.text = $"{label}: {mgr.CurrentShards}";
         }
 
         for (int i = 0; i < 4; i++)
@@ -93,7 +93,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             if (bonusTexts[i] != null)
             {
                 bonusTexts[i].text = isMax 
-                    ? (isVi ? "<color=#66FF99>✦ ĐÃ KÍCH HOẠT SỨC MẠNH CỰC HẠN ✦</color>" : "<color=#66FF99>✦ PEAK POWER UNLOCKED ✦</color>")
+                    ? (isVi ? "<color=#66FF99>ĐÃ KÍCH HOẠT SỨC MẠNH CỰC HẠN</color>" : "<color=#66FF99>PEAK POWER UNLOCKED</color>")
                     : (isVi ? $"Cấp kế tiếp: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>" : $"Next Level: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>");
             }
 
@@ -184,7 +184,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         tRt.anchoredPosition = new Vector2(0, -20);
         tRt.sizeDelta = new Vector2(760, 36);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = "✦ BÀN THỜ NÂNG CẤP CỔ ĐẠI (30 BẬC) ✦";
+        titleTmp.text = "BÀN THỜ NÂNG CẤP CỔ ĐẠI (30 BẬC)";
         titleTmp.fontSize = 23;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.alignment = TextAlignmentOptions.Center;
@@ -230,7 +230,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         cxRt.anchorMax = Vector2.one;
         cxRt.sizeDelta = Vector2.zero;
         var cxTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
-        cxTmp.text = "✕";
+        cxTmp.text = "X";
         cxTmp.fontSize = 20;
         cxTmp.fontStyle = FontStyles.Bold;
         cxTmp.alignment = TextAlignmentOptions.Center;

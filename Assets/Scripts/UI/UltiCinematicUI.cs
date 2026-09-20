@@ -199,7 +199,7 @@ public class UltiCinematicUI : MonoBehaviour
 
         speakerTMP = speakerObj.GetComponent<TextMeshProUGUI>();
         if (sdfFont != null) speakerTMP.font = sdfFont;
-        speakerTMP.text = "✦ VAELSTRIDER ✦";
+        speakerTMP.text = "VAELSTRIDER";
         speakerTMP.fontSize = 20;
         speakerTMP.fontStyle = FontStyles.Bold;
         speakerTMP.alignment = TextAlignmentOptions.Center;
@@ -218,7 +218,7 @@ public class UltiCinematicUI : MonoBehaviour
 
         quoteTMP = quoteObj.GetComponent<TextMeshProUGUI>();
         if (sdfFont != null) quoteTMP.font = sdfFont;
-        quoteTMP.text = "“Bão Lực Tàn Tích... Biến mất vào hư không!”";
+        quoteTMP.text = "\"Bão Lực Tàn Tích... Biến mất vào hư không!\"";
         quoteTMP.fontSize = 25;
         quoteTMP.fontStyle = FontStyles.Bold | FontStyles.Italic;
         quoteTMP.alignment = TextAlignmentOptions.Center;
@@ -249,8 +249,8 @@ public class UltiCinematicUI : MonoBehaviour
 
     private IEnumerator CutsceneRoutine(float durationRealtime, string speaker, string quote, bool isMaid)
     {
-        string speakerFormatted = "✦ " + (string.IsNullOrEmpty(speaker) ? "VAELSTRIDER" : speaker.ToUpper()) + " ✦";
-        string quoteFormatted = "“" + quote + "”";
+        string speakerFormatted = (string.IsNullOrEmpty(speaker) ? "VAELSTRIDER" : speaker.ToUpper());
+        string quoteFormatted = "\"" + quote + "\"";
 
         if (speakerTMP != null) speakerTMP.text = speakerFormatted;
 

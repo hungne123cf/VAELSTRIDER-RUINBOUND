@@ -223,19 +223,19 @@ public class MainMenuManager : MonoBehaviour
         float spacing = 20f;
         float startX = -((4 * w + 3 * spacing) * 0.5f) + w * 0.5f;
 
-        Button btnPlay = CreateButton(navBar.transform, "BtnPlay", "⚔️ XUẤT TRẬN", new Color(0.85f, 0.65f, 0.15f),
+        Button btnPlay = CreateButton(navBar.transform, "BtnPlay", "XUẤT TRẬN", new Color(0.85f, 0.65f, 0.15f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(startX, 0f), new Vector2(w, 65f));
         btnPlay.onClick.AddListener(() => OpenMapSelectModal());
 
-        Button btnHero = CreateButton(navBar.transform, "BtnHero", "👥 NHÂN VẬT", new Color(0.2f, 0.45f, 0.75f),
+        Button btnHero = CreateButton(navBar.transform, "BtnHero", "NHÂN VẬT", new Color(0.2f, 0.45f, 0.75f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(startX + (w + spacing), 0f), new Vector2(w, 65f));
         btnHero.onClick.AddListener(() => OpenHeroRosterModal());
 
-        Button btnShop = CreateButton(navBar.transform, "BtnShop", "🛒 CỬA HÀNG", new Color(0.25f, 0.65f, 0.45f),
+        Button btnShop = CreateButton(navBar.transform, "BtnShop", "CỬA HÀNG", new Color(0.25f, 0.65f, 0.45f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(startX + 2 * (w + spacing), 0f), new Vector2(w, 65f));
         btnShop.onClick.AddListener(() => OpenShopModal());
 
-        Button btnSettings = CreateButton(navBar.transform, "BtnSettings", "⚙️ CÀI ĐẶT", new Color(0.4f, 0.42f, 0.5f),
+        Button btnSettings = CreateButton(navBar.transform, "BtnSettings", "CÀI ĐẶT", new Color(0.4f, 0.42f, 0.5f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(startX + 3 * (w + spacing), 0f), new Vector2(w, 65f));
         btnSettings.onClick.AddListener(() =>
         {
@@ -260,9 +260,9 @@ public class MainMenuManager : MonoBehaviour
 
         CreateTMP(card1.transform, "Map1Title", "HẦM NGỤC CỔ", 26, FontStyles.Bold, new Color(0.4f, 0.85f, 1f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -35f), new Vector2(360f, 35f), TextAlignmentOptions.Center);
-        CreateTMP(card1.transform, "Map1Subtitle", "Tầng 1 • Độ Khó: DỄ", 15, FontStyles.Normal, new Color(0.7f, 0.75f, 0.85f),
+        CreateTMP(card1.transform, "Map1Subtitle", "Tầng 1 - Độ Khó: DỄ", 15, FontStyles.Normal, new Color(0.7f, 0.75f, 0.85f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(360f, 25f), TextAlignmentOptions.Center);
-        CreateTMP(card1.transform, "Map1Badge", "✦ [ ĐÃ MỞ KHÓA ]", 14, FontStyles.Bold, new Color(0.3f, 0.95f, 0.6f),
+        CreateTMP(card1.transform, "Map1Badge", "[ ĐÃ MỞ KHÓA ]", 14, FontStyles.Bold, new Color(0.3f, 0.95f, 0.6f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(360f, 25f), TextAlignmentOptions.Center);
 
         CreateTMP(card1.transform, "Map1Desc", "Phế tích hầm ngục u tối với 4 căn phòng cổ, cạm bẫy lửa, bão quái máy và Rương Kho Báu cổ đại.", 15, FontStyles.Normal, new Color(0.9f, 0.92f, 0.96f),
@@ -281,15 +281,15 @@ public class MainMenuManager : MonoBehaviour
 
         CreateTMP(card2.transform, "Map2Title", "THUNG LŨNG CỔ THỤ", 26, FontStyles.Bold, new Color(0.35f, 0.95f, 0.55f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -35f), new Vector2(360f, 35f), TextAlignmentOptions.Center);
-        CreateTMP(card2.transform, "Map2Subtitle", "Tầng 2 (CUỐI) • Độ Khó: THỬ THÁCH", 15, FontStyles.Normal, new Color(0.7f, 0.85f, 0.75f),
+        CreateTMP(card2.transform, "Map2Subtitle", "Tầng 2 (CUỐI) - Độ Khó: THỬ THÁCH", 15, FontStyles.Normal, new Color(0.7f, 0.85f, 0.75f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(360f, 25f), TextAlignmentOptions.Center);
-        map2BadgeText = CreateTMP(card2.transform, "Map2Badge", "🔒 [ CHƯA MỞ KHÓA ]", 14, FontStyles.Bold, new Color(1f, 0.45f, 0.35f),
+        map2BadgeText = CreateTMP(card2.transform, "Map2Badge", "[ CHƯA MỞ KHÓA ]", 14, FontStyles.Bold, new Color(1f, 0.45f, 0.35f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(360f, 25f), TextAlignmentOptions.Center);
 
         CreateTMP(card2.transform, "Map2Desc", "Thiên nhiên rộng lớn bao quanh bởi tán cây khổng lồ nghìn năm, Trụ Đá Cổ Phát Sáng và Đại Boss Hộ Vệ Thần Thụ.", 15, FontStyles.Normal, new Color(0.9f, 0.92f, 0.96f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 35f), new Vector2(340f, 120f), TextAlignmentOptions.Center);
 
-        map2NoticeText = CreateTMP(card2.transform, "Map2Notice", "⚠️ Yêu cầu: Vượt qua Tầng 1 để mở khóa!", 14, FontStyles.Italic, new Color(1f, 0.82f, 0.35f),
+        map2NoticeText = CreateTMP(card2.transform, "Map2Notice", "Yêu cầu: Vượt qua Tầng 1 để mở khóa!", 14, FontStyles.Italic, new Color(1f, 0.82f, 0.35f),
             new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 115f), new Vector2(360f, 35f), TextAlignmentOptions.Center);
 
         btnEnterMap2 = CreateButton(card2.transform, "BtnEnter2", "TIẾN VÀO (MAP 2)", new Color(0.2f, 0.7f, 0.4f),
@@ -311,7 +311,7 @@ public class MainMenuManager : MonoBehaviour
                 StartCoroutine(ShakeCardRoutine(c2Rt));
                 if (map2NoticeText != null)
                 {
-                    map2NoticeText.text = "<b><color=#FF4444>🔒 BẠN CẦN HOÀN THÀNH TẦNG 1 TRƯỚC!</color></b>";
+                    map2NoticeText.text = "<b><color=#FF4444>BẠN CẦN HOÀN THÀNH TẦNG 1 TRƯỚC!</color></b>";
                 }
             }
         });
@@ -341,7 +341,7 @@ public class MainMenuManager : MonoBehaviour
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(400f, 40f), TextAlignmentOptions.Center);
         CreateTMP(card1.transform, "VaelRole", "Hiệp Sĩ Cân Bằng (Đã Mở Khóa)", 16, FontStyles.Normal, new Color(0.4f, 0.85f, 1f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -80f), new Vector2(400f, 30f), TextAlignmentOptions.Center);
-        CreateTMP(card1.transform, "VaelStats", "❤️ Máu: 100\n⚔️ Tấn Công: 20\n⚡ Tốc Độ: 5.0\n\n🌟 Tuyệt Kỹ: Bão Lốc Tàn Tích\n(Xoay kiếm hút quái & nổ hất văng)", 18, FontStyles.Normal, Color.white,
+        CreateTMP(card1.transform, "VaelStats", "Máu: 100\nTấn Công: 20\nTốc Độ: 5.0\n\nTuyệt Kỹ: Bão Lốc Tàn Tích\n(Xoay kiếm hút quái & nổ hất văng)", 18, FontStyles.Normal, Color.white,
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(400f, 200f), TextAlignmentOptions.Center);
 
         Button btnSelectVael = CreateButton(card1.transform, "BtnSelectVael", "CHỌN", new Color(0.2f, 0.6f, 0.9f),
@@ -363,7 +363,7 @@ public class MainMenuManager : MonoBehaviour
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(400f, 40f), TextAlignmentOptions.Center);
         CreateTMP(card2.transform, "MaidRole", "Sát Thủ Hầu Gái (Tốc Độ & Bạo Kích)", 16, FontStyles.Normal, new Color(1f, 0.8f, 0.9f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -80f), new Vector2(400f, 30f), TextAlignmentOptions.Center);
-        CreateTMP(card2.transform, "MaidStats", "❤️ Máu: 85\n⚔️ Tấn Công: 25\n⚡ Tốc Độ: 5.8\n\n🌟 Tuyệt Kỹ: Quét Tan Kẻ Yếu\n(Chém nón diệt TỨC THÌ quái thường, choáng Boss)", 18, FontStyles.Normal, Color.white,
+        CreateTMP(card2.transform, "MaidStats", "Máu: 85\nTấn Công: 25\nTốc Độ: 5.8\n\nTuyệt Kỹ: Quét Tan Kẻ Yếu\n(Chém nón diệt TỨC THÌ quái thường, choáng Boss)", 18, FontStyles.Normal, Color.white,
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(400f, 200f), TextAlignmentOptions.Center);
 
         Button btnSelectMaid = CreateButton(card2.transform, "BtnSelectMaid", "CHỌN", new Color(0.85f, 0.25f, 0.55f),
@@ -407,7 +407,7 @@ public class MainMenuManager : MonoBehaviour
         CreateTMP(item1.transform, "MaidShopDesc", "Tuyệt kỹ: Quét Tan Kẻ Yếu (Tiêu diệt tức thì quái thường)", 15, FontStyles.Normal, Color.white,
             new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(25f, -15f), new Vector2(400f, 30f), TextAlignmentOptions.Left);
 
-        Button btnBuyMaid = CreateButton(item1.transform, "BtnBuyMaid", "💎 999 SHARDS", new Color(0.85f, 0.25f, 0.55f),
+        Button btnBuyMaid = CreateButton(item1.transform, "BtnBuyMaid", "999 SHARDS", new Color(0.85f, 0.25f, 0.55f),
             new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-120f, 0f), new Vector2(200f, 55f));
         btnBuyMaid.onClick.AddListener(() =>
         {
@@ -432,7 +432,7 @@ public class MainMenuManager : MonoBehaviour
         CreateTMP(item2.transform, "PotionShopDesc", "Hồi 50 HP tức thì trong giao tranh (Tối đa 5 bình)", 15, FontStyles.Normal, Color.white,
             new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(25f, -15f), new Vector2(400f, 30f), TextAlignmentOptions.Left);
 
-        Button btnBuyPotion = CreateButton(item2.transform, "BtnBuyPotion", "💎 25 SHARDS", new Color(0.2f, 0.7f, 0.4f),
+        Button btnBuyPotion = CreateButton(item2.transform, "BtnBuyPotion", "25 SHARDS", new Color(0.2f, 0.7f, 0.4f),
             new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-120f, 0f), new Vector2(200f, 55f));
         btnBuyPotion.onClick.AddListener(() =>
         {
@@ -456,12 +456,12 @@ public class MainMenuManager : MonoBehaviour
         i3Rt.anchoredPosition = new Vector2(0f, -120f);
         i3Rt.sizeDelta = new Vector2(750f, 100f);
 
-        CreateTMP(item3.transform, "ResetName", "💀 RESET GAME (NEW GAME+)", 22, FontStyles.Bold, new Color(1f, 0.35f, 0.38f),
+        CreateTMP(item3.transform, "ResetName", "RESET GAME (NEW GAME+)", 22, FontStyles.Bold, new Color(1f, 0.35f, 0.38f),
             new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(25f, 15f), new Vector2(440f, 35f), TextAlignmentOptions.Left);
         CreateTMP(item3.transform, "ResetDesc", "Game quá dễ? Xóa sạch Tinh Thể, cấp Đền Thờ & Khóa Tướng để thử thách lại!", 14, FontStyles.Normal, new Color(0.9f, 0.85f, 0.88f),
             new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(25f, -15f), new Vector2(440f, 30f), TextAlignmentOptions.Left);
 
-        Button btnReset = CreateButton(item3.transform, "BtnResetGame", "💀 RESET GAME", new Color(0.75f, 0.16f, 0.20f),
+        Button btnReset = CreateButton(item3.transform, "BtnResetGame", "RESET GAME", new Color(0.75f, 0.16f, 0.20f),
             new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-120f, 0f), new Vector2(200f, 55f));
         btnReset.onClick.AddListener(() =>
         {
@@ -484,14 +484,14 @@ public class MainMenuManager : MonoBehaviour
         bRt.anchoredPosition = Vector2.zero;
         bRt.sizeDelta = new Vector2(620f, 360f);
 
-        CreateTMP(box.transform, "ConfirmTitle", "⚠️ XÁC NHẬN RESET TOÀN BỘ GAME", 24, FontStyles.Bold, new Color(1f, 0.3f, 0.35f),
+        CreateTMP(box.transform, "ConfirmTitle", "XÁC NHẬN RESET TOÀN BỘ GAME", 24, FontStyles.Bold, new Color(1f, 0.3f, 0.35f),
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(560f, 40f), TextAlignmentOptions.Center);
 
         string warningMsg = "Bạn có chắc chắn muốn <b>TÁI SINH TỪ SỐ 0</b>?\n\n" +
-            "• Tinh thể Aethel Shards sẽ về 0\n" +
-            "• Tất cả 4 nhánh nâng cấp Đền Thờ bị xóa sạch\n" +
-            "• Tướng Maid Chiến Binh sẽ bị khóa lại\n" +
-            "• Số bình máu trở về mặc định (3 bình)\n\n" +
+            "- Tinh thể Aethel Shards sẽ về 0\n" +
+            "- Tất cả 4 nhánh nâng cấp Đền Thờ bị xóa sạch\n" +
+            "- Tướng Maid Chiến Binh sẽ bị khóa lại\n" +
+            "- Số bình máu trở về mặc định (3 bình)\n\n" +
             "<color=#F87171>Hành động này không thể hoàn tác!</color>";
 
         CreateTMP(box.transform, "ConfirmDesc", warningMsg, 16, FontStyles.Normal, new Color(0.92f, 0.94f, 0.98f),
@@ -540,15 +540,15 @@ public class MainMenuManager : MonoBehaviour
 
         if (map2BadgeText != null)
         {
-            map2BadgeText.text = isMap1Cleared ? "✦ [ ĐÃ MỞ KHÓA ]" : "🔒 [ CHƯA MỞ KHÓA ]";
+            map2BadgeText.text = isMap1Cleared ? "[ ĐÃ MỞ KHÓA ]" : "[ CHƯA MỞ KHÓA ]";
             map2BadgeText.color = isMap1Cleared ? new Color(0.3f, 0.95f, 0.6f) : new Color(1f, 0.45f, 0.35f);
         }
 
         if (map2NoticeText != null)
         {
             map2NoticeText.text = isMap1Cleared
-                ? "<color=#66FF99>✦ Đã đủ điều kiện tiến vào quyết chiến!</color>"
-                : "<color=#FFAA33>⚠️ Yêu cầu: Vượt qua Tầng 1 (Hầm Ngục Cổ) để mở khóa!</color>";
+                ? "<color=#66FF99>Đã đủ điều kiện tiến vào quyết chiến!</color>"
+                : "<color=#FFAA33>Yêu cầu: Vượt qua Tầng 1 (Hầm Ngục Cổ) để mở khóa!</color>";
         }
 
         if (btnEnterMap2Img != null && btnEnterMap2Text != null)
@@ -562,7 +562,7 @@ public class MainMenuManager : MonoBehaviour
             else
             {
                 btnEnterMap2Img.color = new Color(0.24f, 0.25f, 0.28f);
-                btnEnterMap2Text.text = "🔒 ĐANG KHÓA";
+                btnEnterMap2Text.text = "ĐANG KHÓA";
                 btnEnterMap2Text.color = new Color(0.7f, 0.7f, 0.7f);
             }
         }
@@ -598,7 +598,7 @@ public class MainMenuManager : MonoBehaviour
             bool isSelected = CharacterManager.Instance.GetSelectedCharacterId() == CharacterManager.CHAR_MAID;
             if (txt != null)
             {
-                txt.text = isSelected ? "ĐANG CHỌN" : (isUnlocked ? "CHỌN TƯỚNG" : "MUA NGAY (999 💎)");
+                txt.text = isSelected ? "ĐANG CHỌN" : (isUnlocked ? "CHỌN TƯỚNG" : "MUA NGAY (999 )");
             }
         }
         var btnVael = heroRosterModal.transform.Find("CardVael/BtnSelectVael");
@@ -631,7 +631,7 @@ public class MainMenuManager : MonoBehaviour
             }
             else
             {
-                if (txt != null) txt.text = "💎 999 SHARDS";
+                if (txt != null) txt.text = "999 SHARDS";
                 if (btn != null) btn.interactable = true;
             }
         }
@@ -642,8 +642,8 @@ public class MainMenuManager : MonoBehaviour
         int shards = PlayerPrefs.GetInt("Save_AethelShards", 0);
         int potions = PlayerPrefs.GetInt("Save_HealthPotions", 3);
 
-        if (shardsText != null) shardsText.text = $"💎 {shards}";
-        if (potionsText != null) potionsText.text = $"🧪 {potions}";
+        if (shardsText != null) shardsText.text = $"{shards}";
+        if (potionsText != null) potionsText.text = $"Bình máu: {potions}";
     }
 
         public void RefreshHeroDisplay()

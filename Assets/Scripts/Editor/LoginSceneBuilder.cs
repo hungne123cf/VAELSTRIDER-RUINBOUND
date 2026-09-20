@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -71,6 +71,7 @@ public static class LoginSceneBuilder
         shape.shapeType = ParticleSystemShapeType.Box;
         shape.scale = new Vector3(16f, 1f, 1f);
         particlesObj.transform.position = new Vector3(0f, -6f, 0f);
+        var psRenderer = particlesObj.GetComponent<ParticleSystemRenderer>(); if (psRenderer != null) psRenderer.material = HeavenlyPortalFX.GetOrCreateParticleMaterial();
 
         // 4. UI Canvas & EventSystem
         GameObject canvasObj = new GameObject("Canvas");
