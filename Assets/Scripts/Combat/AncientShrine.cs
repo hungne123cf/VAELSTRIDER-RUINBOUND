@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -10,9 +10,15 @@ public class AncientShrine : MonoBehaviour
 
     private Transform playerTransform;
     private GameObject worldPromptObj;
+    private TextMeshPro promptTextMesh;
+    private Color originalPromptTextColor = new Color(0.35f, 0.95f, 1f, 1f);
+
     private GameObject openBadgeObj;
     private RectTransform openBadgeRt;
+    private CanvasGroup openBadgeCanvasGroup;
     private Outline openBadgeOutline;
+    private float popupCurrentAlpha = 1.0f;
+
     private bool isPlayerInRange = false;
     private bool isMenuOpen = false;
 
@@ -67,6 +73,37 @@ public class AncientShrine : MonoBehaviour
         }
         UpdateMobileInteractButton(shouldShow);
 
+        // Kiem tra neu Player dung sau hoac trong pham vi che khuat cua chu OPEN / Popup
+        // Neu Player o sau -> Lam mo chu OPEN va Khung popup de nguoi choi nhin ro Player!
+        bool isPlayerBehindPopup = false;
+        if (shouldShow && openBadgeObj != null)
+        {
+            Vector3 badgePos = openBadgeObj.transform.position;
+            Vector3 pPos = playerTransform.position;
+
+            // Vung che khuat cua Popup chu OPEN: be ngang ~ 1.4m, chieu cao tu duoi badge toi tren dong chu
+            float dx = Mathf.Abs(pPos.x - badgePos.x);
+            if (dx < 1.35f && pPos.y >= badgePos.y - 0.45f && pPos.y <= badgePos.y + 1.8f)
+            {
+                isPlayerBehindPopup = true;
+            }
+        }
+
+        // Fade Alpha muot ma ve 0.22f khi Player o sau, hoi phuc 1.0f khi Player ra ngoai
+        float targetAlpha = isPlayerBehindPopup ? 0.22f : 1.0f;
+        if (!Mathf.Approximately(popupCurrentAlpha, targetAlpha))
+        {
+            popupCurrentAlpha = Mathf.MoveTowards(popupCurrentAlpha, targetAlpha, Time.deltaTime * 5.5f);
+            if (openBadgeCanvasGroup != null)
+            {
+                openBadgeCanvasGroup.alpha = popupCurrentAlpha;
+            }
+            if (promptTextMesh != null)
+            {
+                promptTextMesh.color = new Color(originalPromptTextColor.r, originalPromptTextColor.g, originalPromptTextColor.b, originalPromptTextColor.a * popupCurrentAlpha);
+            }
+        }
+
         // Hieu ung bay bong, nhap nhay vien sang cho badge "OPEN"
         if (openBadgeObj != null && openBadgeObj.activeSelf && openBadgeRt != null)
         {
@@ -80,7 +117,7 @@ public class AncientShrine : MonoBehaviour
             {
                 float alpha = (Mathf.Sin(Time.time * 4f) + 1f) * 0.5f;
                 Color baseCol = new Color(0.35f, 0.95f, 1f, 1f);
-                openBadgeOutline.effectColor = new Color(baseCol.r, baseCol.g, baseCol.b, Mathf.Lerp(0.5f, 1f, alpha));
+                openBadgeOutline.effectColor = new Color(baseCol.r, baseCol.g, baseCol.b, Mathf.Lerp(0.5f, 1f, alpha) * popupCurrentAlpha);
             }
         }
 
@@ -98,7 +135,8 @@ public class AncientShrine : MonoBehaviour
     }
 
     /// <summary>
-    /// Tao huy hieu nút bấm "OPEN" cuc ky de bam tren man hinh Mobile & chuot PC
+    /// Tao huy hieu nut bam "OPEN" cuc ky de bam tren man hinh Mobile & chuot PC
+    /// Cho phep Player di xuyen qua hoan toan tu do (BoxCollider2D isTrigger = true)
     /// </summary>
     private void CreateOpenBadge()
     {
@@ -118,6 +156,10 @@ public class AncientShrine : MonoBehaviour
         var cs = openBadgeObj.AddComponent<CanvasScaler>();
         cs.dynamicPixelsPerUnit = 100;
         openBadgeObj.AddComponent<GraphicRaycaster>();
+
+        openBadgeCanvasGroup = openBadgeObj.AddComponent<CanvasGroup>();
+        openBadgeCanvasGroup.alpha = 1.0f;
+        openBadgeCanvasGroup.blocksRaycasts = true;
 
         openBadgeRt = openBadgeObj.GetComponent<RectTransform>();
         openBadgeRt.sizeDelta = new Vector2(160f, 60f);
@@ -151,9 +193,10 @@ public class AncientShrine : MonoBehaviour
         Button btn = openBadgeObj.AddComponent<Button>();
         btn.onClick.AddListener(OnBadgeClicked);
 
-        // BoxCollider2D de bat ca su kien Touch / Click truc tiep trong the gioi 2D
+        // BoxCollider2D trigger de bat ca su kien Touch / Click truc tiep trong the gioi 2D MA CHO PLAYER DI XUYEN QUA
         BoxCollider2D col = openBadgeObj.AddComponent<BoxCollider2D>();
         col.size = new Vector2(160f, 60f);
+        col.isTrigger = true; // TUYET DOI LA TRIGGER DE KHONG CAN TRO PLAYER DI CHUYEN
         var clicker = openBadgeObj.AddComponent<ShrineBadgeClicker>();
         clicker.shrine = this;
 
@@ -166,14 +209,14 @@ public class AncientShrine : MonoBehaviour
         worldPromptObj.transform.SetParent(transform);
         worldPromptObj.transform.localPosition = promptOffset + new Vector3(0f, 0.7f, 0f);
 
-        var textMesh = worldPromptObj.AddComponent<TextMeshPro>();
-        textMesh.text = "NANG CAP CO DAI";
-        textMesh.fontSize = 3.6f;
-        textMesh.fontStyle = FontStyles.Bold;
-        textMesh.alignment = TextAlignmentOptions.Center;
-        textMesh.color = new Color(0.35f, 0.95f, 1f, 1f);
-        textMesh.sortingLayerID = SortingLayer.NameToID("UI");
-        textMesh.sortingOrder = 100;
+        promptTextMesh = worldPromptObj.AddComponent<TextMeshPro>();
+        promptTextMesh.text = "NANG CAP CO DAI";
+        promptTextMesh.fontSize = 3.6f;
+        promptTextMesh.fontStyle = FontStyles.Bold;
+        promptTextMesh.alignment = TextAlignmentOptions.Center;
+        promptTextMesh.color = originalPromptTextColor;
+        promptTextMesh.sortingLayerID = SortingLayer.NameToID("UI");
+        promptTextMesh.sortingOrder = 100;
 
         worldPromptObj.SetActive(false);
     }
@@ -291,7 +334,7 @@ public class AncientShrine : MonoBehaviour
         // Dam bao co GlowingRunePillar voi khe nut phat sang va am thanh khong gian
         GlowingRunePillar.Create(gameObject, glowSprite, new Color(0.45f, 0.95f, 1f, 1f));
 
-        // Chan de va cham vat ly
+        // Chan de va cham vat ly (Tru da cung ko the di qua)
         var baseCol = GetComponent<BoxCollider2D>();
         if (baseCol == null) baseCol = gameObject.AddComponent<BoxCollider2D>();
         baseCol.size = new Vector2(0.9f, 0.9f);

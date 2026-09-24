@@ -41,23 +41,27 @@ public class RuinPortal : MonoBehaviour
         spriteRenderer.sortingOrder = 4900;
 
         string sceneName = SceneManager.GetActiveScene().name;
-        isFinalRealm = sceneName.Contains("Map2") || sceneName.Contains("Valley") || sceneName.Contains("Map3") || sceneName.Contains("Ancient");
+        isFinalRealm = sceneName.Contains("Map3") || sceneName.Contains("Forgotten");
 
-        if (isFinalRealm)
+        // Tuyet doi khong attach HeavenlyPortalFX o Awake! Chi attach khi thuc su ActivatePortal()
+        if (!isActivated)
         {
-            spriteRenderer.color = new Color(1f, 0.96f, 0.75f, 1f);
-            HeavenlyPortalFX.Attach(gameObject);
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
+            if (circleCollider != null) circleCollider.enabled = false;
+            transform.localScale = Vector3.zero;
         }
     }
 
     void OnEnable()
     {
         WaveSpawner.OnAllWavesCleared += HandleAllWavesCleared;
+        Map3WaveSpawner.OnAllWavesCleared += HandleAllWavesCleared;
     }
 
     void OnDisable()
     {
         WaveSpawner.OnAllWavesCleared -= HandleAllWavesCleared;
+        Map3WaveSpawner.OnAllWavesCleared -= HandleAllWavesCleared;
     }
 
     void Start()
@@ -192,6 +196,16 @@ public class RuinPortal : MonoBehaviour
 
     public static RuinPortal SpawnPortal(Vector3 pos)
     {
+        // Kiem tra neu trong scene da co RuinPortal nao thi tai su dung, khong sinh ra cong thu hai!
+        var existingPortal = Object.FindAnyObjectByType<RuinPortal>(FindObjectsInactive.Include);
+        if (existingPortal != null)
+        {
+            existingPortal.gameObject.SetActive(true);
+            existingPortal.transform.position = pos;
+            existingPortal.ActivatePortal();
+            return existingPortal;
+        }
+
         GameObject portalObj = new GameObject("RuinPortal");
         portalObj.transform.position = pos;
 
@@ -206,13 +220,6 @@ public class RuinPortal : MonoBehaviour
         sr.sprite = portalSprite;
         sr.sortingOrder = 4900;
 
-        string activeScene = SceneManager.GetActiveScene().name;
-        if (activeScene.Contains("Map2") || activeScene.Contains("Valley"))
-        {
-            sr.color = new Color(1f, 0.96f, 0.75f, 1f);
-            HeavenlyPortalFX.Attach(portalObj);
-        }
-
         var col = portalObj.AddComponent<CircleCollider2D>();
         col.isTrigger = true;
         col.radius = 0.85f;
@@ -222,3 +229,4 @@ public class RuinPortal : MonoBehaviour
         return portal;
     }
 }
+

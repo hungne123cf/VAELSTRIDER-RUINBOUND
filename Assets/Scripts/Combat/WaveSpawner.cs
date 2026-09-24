@@ -24,6 +24,7 @@ public class WaveSpawner : MonoBehaviour
     public static event System.Action<int, int, string> OnWaveStarted;
     public static event System.Action<string> OnWaveMessage;
     public static event System.Action OnAllWavesCleared;
+    public static void TriggerAllWavesCleared() => OnAllWavesCleared?.Invoke();
 
     void Awake()
     {
@@ -88,7 +89,9 @@ public class WaveSpawner : MonoBehaviour
         waveInProgress = true;
 
         currentWave++;
-        string title = isBoss ? "BOSS INCOMING: TITAN WHEEL!" : $"WAVE {currentWave} / {totalWaves}";
+        string title = isBoss 
+            ? LocalizationManager.T("CẢNH BÁO: TRÙM TITAN WHEEL!", "BOSS INCOMING: TITAN WHEEL!") 
+            : $"{LocalizationManager.Get("HUD_WAVE")} {currentWave} / {totalWaves}";
         OnWaveStarted?.Invoke(currentWave, totalWaves, title);
 
         StartCoroutine(SpawnRoomEnemiesRoutine(spawnPositions, isBoss));
@@ -209,14 +212,19 @@ public class WaveSpawner : MonoBehaviour
 
         bool isMap2 = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Map2");
 
-        string title = $"WAVE {currentWave} / {totalWaves}";
+        string wavePrefix = LocalizationManager.Get("HUD_WAVE");
+        string title = $"{wavePrefix} {currentWave} / {totalWaves}";
         if (currentWave == totalWaves)
         {
-            title = isMap2 ? "BOSS INCOMING: ĐẠI TRÙM GOR'MOK!" : "BOSS INCOMING: TITAN WHEEL!";
+            title = isMap2 
+                ? LocalizationManager.T("CẢNH BÁO: ĐẠI TRÙM GOR'MOK!", "BOSS INCOMING: GOR'MOK!") 
+                : LocalizationManager.T("CẢNH BÁO: TRÙM TITAN WHEEL!", "BOSS INCOMING: TITAN WHEEL!");
         }
         else if (isMap2)
         {
-            title = (currentWave == 1) ? "WAVE 1 / 3: HUYẾT THÚ XUẤT HIỆN!" : "WAVE 2 / 3: HUYẾT THÚ CUỒNG NỘ!";
+            title = (currentWave == 1) 
+                ? LocalizationManager.T("ĐỢT 1 / 3: HUYẾT THÚ XUẤT HIỆN!", "WAVE 1 / 3: BLOOD MONSTERS ARRIVE!") 
+                : LocalizationManager.T("ĐỢT 2 / 3: HUYẾT THÚ CUỒNG NỘ!", "WAVE 2 / 3: ENRAGED BLOOD MONSTERS!");
         }
 
         OnWaveStarted?.Invoke(currentWave, totalWaves, title);
@@ -301,3 +309,4 @@ public class WaveSpawner : MonoBehaviour
         return transform.position + new Vector3(randomCircle.x, randomCircle.y, 0);
     }
 }
+

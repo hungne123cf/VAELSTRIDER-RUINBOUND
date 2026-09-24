@@ -78,8 +78,8 @@ public class GameAutoBootstrap : MonoBehaviour
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
-            Map3ArenaManager.EnsureManager();
-            Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Ancient Ruins)! Giữ nguyên bản đồ tự vẽ, tuyệt đối không ghi đè.");
+            // Map 3 hoan toan do Map3WaveSpawner quan ly (Goblin, Skeleton, Slime, Skeleton King Boss)
+            Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Forgotten Memories)! Tải toàn diện hệ thống Map 3.");
             return;
         }
 
@@ -460,6 +460,8 @@ public class GameAutoBootstrap : MonoBehaviour
             player.gameObject.AddComponent<PlayerEnergySystem>();
         }
 
+        PlayerEquipmentVisual.EnsureExists(player.gameObject);
+
         var tPoint = player.transform.Find("AttackPoint");
 
         if (selectedChar == CharacterManager.CHAR_MAID)
@@ -534,3 +536,4 @@ public class GameAutoBootstrap : MonoBehaviour
     }
 
 }
+

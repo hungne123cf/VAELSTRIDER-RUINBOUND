@@ -32,6 +32,16 @@ public class ShrineUpgradeUI : MonoBehaviour
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
     }
 
+    private void Start()
+    {
+        LocalizationManager.OnLanguageChanged += RefreshUI;
+    }
+
+    private void OnDestroy()
+    {
+        LocalizationManager.OnLanguageChanged -= RefreshUI;
+    }
+
     public void Open()
     {
         isOpen = true;

@@ -647,7 +647,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
             {
                 float ang = Random.Range(0f, 360f) * Mathf.Deg2Rad;
                 Vector3 starPos = playerTransform.position + new Vector3(Mathf.Cos(ang) * 0.45f, Mathf.Sin(ang) * 0.45f + 0.85f, 0);
-                DamagePopup.CreateText(starPos, "★", new Color(1f, 0.9f, 0.15f));
+                DamagePopup.CreateText(starPos, "*", new Color(1f, 0.9f, 0.15f));
             }
             elapsed += Time.deltaTime;
             yield return null;

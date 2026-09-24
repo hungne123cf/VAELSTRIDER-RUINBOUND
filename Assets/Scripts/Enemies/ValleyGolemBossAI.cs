@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -81,7 +81,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
         var waveUI = FindAnyObjectByType<WaveUI>();
         if (waveUI != null)
         {
-            waveUI.ShowBanner("BOSS INCOMING: ANCIENT GOLEM!", "Cá»± Tháº¡ch Há»™ Vá»‡ Thung LÅ©ng TÃ n TÃ­ch");
+            waveUI.ShowBanner("BOSS INCOMING: ANCIENT GOLEM!", LocalizationManager.T("Cự Thạch Hộ Vệ Thung Lũng Tàn Tích", "Valley Ruins Ancient Stone Golem"));
         }
     }
 

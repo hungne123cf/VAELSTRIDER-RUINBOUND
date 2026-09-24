@@ -45,11 +45,13 @@ public class GameOverUI : MonoBehaviour
     void OnEnable()
     {
         SceneManager.sceneLoaded += HandleSceneLoaded;
+        LocalizationManager.OnLanguageChanged += UpdateButtonsAndTexts;
     }
 
     void OnDisable()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
+        LocalizationManager.OnLanguageChanged -= UpdateButtonsAndTexts;
     }
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)

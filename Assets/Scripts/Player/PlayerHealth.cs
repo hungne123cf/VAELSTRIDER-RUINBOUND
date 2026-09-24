@@ -35,6 +35,14 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     void Awake()
     {
         baseMaxHealth = maxHealth;
+        
+        ArmorShopUI.GetEquippedArmorBonus(out int armorHp, out float _, out float _);
+        if (armorHp > 0)
+        {
+            maxHealth += armorHp;
+            baseMaxHealth += armorHp;
+        }
+
         int savedHp = PlayerPrefs.GetInt("Saved_CurrentHealth", maxHealth);
         if (savedHp <= 0) savedHp = maxHealth;
         currentHealth = Mathf.Min(savedHp, maxHealth);
@@ -51,6 +59,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public void TakeDamage(int damage)
     {
         if (isDead || isInvulnerable) return;
+
+        // Giam sat thuong theo Giap cua trang bi dang mac
+        ArmorShopUI.GetEquippedArmorBonus(out int _, out float armorDef, out float _);
+        if (armorDef > 0)
+        {
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - armorDef / 100f)));
+        }
 
         // 1. Kiem tra va hap thu sat thuong bang Lop Giap Ao Ho Than neu co
         var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;

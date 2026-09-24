@@ -32,6 +32,54 @@ public class PlayerController : MonoBehaviour
         dashCooldown = Mathf.Max(1.0f, baseDashCooldown - dashCooldownReduction);
     }
 
+        public bool IsStunned => isStunned;
+    private bool isStunned = false;
+
+    public void ApplyStun(float duration)
+    {
+        StartCoroutine(StunRoutine(duration));
+    }
+
+    private System.Collections.IEnumerator StunRoutine(float duration)
+    {
+        isStunned = true;
+        canMove = false;
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        if (animator != null) animator.SetFloat(SpeedHash, 0f);
+
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "STUNNED! (2s)", new Color(1f, 0.9f, 0.3f));
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+
+        GameObject webTrap = new GameObject("WebTrapVisual");
+        webTrap.transform.SetParent(transform, false);
+        webTrap.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+        var srWeb = webTrap.AddComponent<SpriteRenderer>();
+#if UNITY_EDITOR
+        srWeb.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_0.png");
+#endif
+        srWeb.color = new Color(1f, 1f, 1f, 0.8f);
+        srWeb.sortingOrder = 3000;
+        webTrap.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+
+        yield return new WaitForSeconds(duration);
+
+        if (webTrap != null) Destroy(webTrap);
+        isStunned = false;
+        canMove = true;
+    }
+
+    public void ApplySlow(float slowMultiplier, float duration)
+    {
+        StartCoroutine(SlowRoutine(slowMultiplier, duration));
+    }
+
+    private System.Collections.IEnumerator SlowRoutine(float multiplier, float duration)
+    {
+        moveSpeed = (baseMoveSpeed + bonusSpeed) * multiplier;
+        yield return new WaitForSeconds(duration);
+        moveSpeed = baseMoveSpeed + bonusSpeed;
+    }
+
     // Animator Hashes
     private static readonly int MoveXHash = Animator.StringToHash("MoveX");
     private static readonly int MoveYHash = Animator.StringToHash("MoveY");
@@ -47,10 +95,19 @@ public class PlayerController : MonoBehaviour
         }
         animator = GetComponent<Animator>();
         baseMoveSpeed = moveSpeed;
+
+        ArmorShopUI.GetEquippedArmorBonus(out int _, out float _, out float armorSpd);
+        if (armorSpd > 0)
+        {
+            baseMoveSpeed += armorSpd;
+            moveSpeed += armorSpd;
+        }
+
         // Bat buoc dash cooldown mo dau la 5s
         dashCooldown = 5.0f;
         baseDashCooldown = 5.0f;
         if (GetComponent<DashGhostTrail>() == null) gameObject.AddComponent<DashGhostTrail>();
+        PlayerEquipmentVisual.EnsureExists(gameObject);
         AutoAlignCollider();
 
         // Khong de Player va Enemy day nhau (loai bo vat ly va cham day nhau gay kho chiu)
@@ -222,3 +279,4 @@ public class PlayerController : MonoBehaviour
     }
 #endif
 }
+

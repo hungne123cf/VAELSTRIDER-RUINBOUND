@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 38799347}
   - component: {fileID: 38799349}
   - component: {fileID: 38799348}
+  - component: {fileID: 38799350}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -256,6 +257,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 38799346}
   m_CullTransparentMesh: 1
+--- !u!114 &38799350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 38799346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 602ece55dd9314847af06e2c82bcd4ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  localizationKey: 
+  vietnameseText: "\u200B"
+  englishText: "\u200B"
 --- !u!1 &173468334
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,14 +399,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40bc583c98b43f4bb410d697472ea13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoginManager
-  nameInput: {fileID: 1580494217}
-  playButton: {fileID: 1629457560}
-  quitButton: {fileID: 565158642}
   titleText: {fileID: 366823138}
   subtitleText: {fileID: 389065821}
-  playButtonText: {fileID: 1894029897}
-  quitButtonText: {fileID: 1576520577}
-  warriorNameLabel: {fileID: 1845465789}
+  guestLoginBtn: {fileID: 0}
+  googleLoginBtn: {fileID: 0}
+  settingsBtn: {fileID: 0}
+  guestBtnText: {fileID: 0}
+  googleBtnText: {fileID: 0}
+  versionText: {fileID: 0}
+  settingsPanel: {fileID: 0}
+  settingsUI: {fileID: 0}
 --- !u!114 &250342957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -625,6 +643,7 @@ GameObject:
   - component: {fileID: 366823136}
   - component: {fileID: 366823137}
   - component: {fileID: 366823138}
+  - component: {fileID: 366823139}
   m_Layer: 0
   m_Name: GameTitle
   m_TagString: Untagged
@@ -679,7 +698,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VAELSTRIDER
+  m_text: 'VAELSTRIDER: RUINBOUND'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -751,6 +770,21 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &366823139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 366823135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 602ece55dd9314847af06e2c82bcd4ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  localizationKey: APP_TITLE
+  vietnameseText: 
+  englishText: 
 --- !u!1 &389065820
 GameObject:
   m_ObjectHideFlags: 0
@@ -762,6 +796,7 @@ GameObject:
   - component: {fileID: 389065823}
   - component: {fileID: 389065822}
   - component: {fileID: 389065821}
+  - component: {fileID: 389065824}
   m_Layer: 0
   m_Name: Subtitle
   m_TagString: Untagged
@@ -888,6 +923,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -32}
   m_SizeDelta: {x: 850, y: 35}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &389065824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 389065820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 602ece55dd9314847af06e2c82bcd4ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  localizationKey: 
+  vietnameseText: '- RUINBOUND: KE DU HANH CO TICH -'
+  englishText: '- RUINBOUND: KE DU HANH CO TICH -'
 --- !u!1 &565158638
 GameObject:
   m_ObjectHideFlags: 0
@@ -6015,6 +6065,7 @@ GameObject:
   - component: {fileID: 1576520575}
   - component: {fileID: 1576520576}
   - component: {fileID: 1576520577}
+  - component: {fileID: 1576520578}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -6141,6 +6192,21 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1576520578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1576520574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 602ece55dd9314847af06e2c82bcd4ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  localizationKey: 
+  vietnameseText: THOAT GAME
+  englishText: THOAT GAME
 --- !u!1 &1580494212
 GameObject:
   m_ObjectHideFlags: 0
@@ -6572,6 +6638,7 @@ GameObject:
   - component: {fileID: 1845465791}
   - component: {fileID: 1845465790}
   - component: {fileID: 1845465789}
+  - component: {fileID: 1845465792}
   m_Layer: 0
   m_Name: InputLabel
   m_TagString: Untagged
@@ -6698,6 +6765,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 115}
   m_SizeDelta: {x: 460, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1845465792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1845465788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 602ece55dd9314847af06e2c82bcd4ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  localizationKey: 
+  vietnameseText: 'TEN CHIEN BINH:'
+  englishText: 'TEN CHIEN BINH:'
 --- !u!1 &1894029894
 GameObject:
   m_ObjectHideFlags: 0
@@ -6709,6 +6791,7 @@ GameObject:
   - component: {fileID: 1894029895}
   - component: {fileID: 1894029896}
   - component: {fileID: 1894029897}
+  - component: {fileID: 1894029898}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -6835,6 +6918,21 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1894029898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1894029894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 602ece55dd9314847af06e2c82bcd4ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
+  localizationKey: 
+  vietnameseText: BAT DAU HANH TRINH
+  englishText: BAT DAU HANH TRINH
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

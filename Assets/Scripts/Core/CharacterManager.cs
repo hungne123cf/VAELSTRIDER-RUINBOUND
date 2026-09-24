@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections.Generic;
 
@@ -111,13 +111,19 @@ public class CharacterManager : MonoBehaviour
 
     public string GetSelectedCharacterId()
     {
-        return PlayerPrefs.GetString(SELECTED_CHAR_KEY, CHAR_VAELSTRIDER);
+        string selected = PlayerPrefs.GetString(SELECTED_CHAR_KEY, CHAR_VAELSTRIDER);
+        if (selected == CHAR_MAID)
+        {
+            // Tam khoa nhan vat so 2, tu dong chuyen ve Vaelstrider
+            selected = CHAR_VAELSTRIDER;
+            PlayerPrefs.SetString(SELECTED_CHAR_KEY, CHAR_VAELSTRIDER);
+            PlayerPrefs.Save();
+        }
+        return selected;
     }
 
     public CharacterData GetSelectedCharacter()
     {
-        string id = GetSelectedCharacterId();
-        if (characters.TryGetValue(id, out var data)) return data;
         return characters[CHAR_VAELSTRIDER];
     }
 
@@ -129,30 +135,34 @@ public class CharacterManager : MonoBehaviour
 
     public bool IsCharacterUnlocked(string id)
     {
-        if (id == CHAR_VAELSTRIDER) return true;
-        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + id, 0) == 1;
+        if (id == CHAR_MAID)
+        {
+            // Tam khoa nhan vat so 2 (Maid)
+            return false;
+        }
+        return true;
     }
 
     public bool UnlockCharacter(string id)
     {
-        if (characters.TryGetValue(id, out var data))
+        if (id == CHAR_MAID)
         {
-            int currentShards = PlayerPrefs.GetInt("Save_AethelShards", 0);
-            if (currentShards >= data.unlockPrice)
-            {
-                currentShards -= data.unlockPrice;
-                PlayerPrefs.SetInt("Save_AethelShards", currentShards);
-                PlayerPrefs.SetInt(UNLOCKED_PREFIX + id, 1);
-                PlayerPrefs.Save();
-                Debug.Log($"<color=green>[CHARACTER]</color> Mở khóa thành công nhân vật: {data.nameVN}");
-                return true;
-            }
+            Debug.LogWarning("<color=yellow>[CHARACTER]</color> Nhân vật Maid hiện đang tạm khóa!");
+            return false;
         }
-        return false;
+        return true;
     }
 
     public void SelectCharacter(string id)
     {
+        if (id == CHAR_MAID)
+        {
+            Debug.LogWarning("<color=yellow>[CHARACTER]</color> Nhân vật Maid hiện đang tạm khóa, giữ nguyên Vaelstrider!");
+            PlayerPrefs.SetString(SELECTED_CHAR_KEY, CHAR_VAELSTRIDER);
+            PlayerPrefs.Save();
+            return;
+        }
+
         if (IsCharacterUnlocked(id))
         {
             PlayerPrefs.SetString(SELECTED_CHAR_KEY, id);

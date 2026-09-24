@@ -89,11 +89,11 @@ public class PlayerUpgradeManager : MonoBehaviour
     {
         switch (type)
         {
-            case UpgradeType.Attack: return "Kiếm Tàn Tích (Ruin Blade)";
-            case UpgradeType.Health: return "Sinh Lực Khổng Lồ (Titan Vitality)";
-            case UpgradeType.Agility: return "Thoát Thân Bóng Ma (Agility)";
-            case UpgradeType.Ultimate: return "Cơn Bão Cổ Đại (Storm Mastery)";
-            default: return "Nâng Cấp";
+            case UpgradeType.Attack: return LocalizationManager.T("Kiếm Tàn Tích (Tấn Công)", "Ruin Blade (Attack)");
+            case UpgradeType.Health: return LocalizationManager.T("Sinh Lực Khổng Lồ (Máu)", "Titan Vitality (Health)");
+            case UpgradeType.Agility: return LocalizationManager.T("Thoát Thân Bóng Ma (Tốc Độ)", "Agile Shadow (Speed)");
+            case UpgradeType.Ultimate: return LocalizationManager.T("Cơn Bão Cổ Đại (Tuyệt Kỹ)", "Storm Mastery (Ultimate)");
+            default: return LocalizationManager.T("Nâng Cấp", "Upgrade");
         }
     }
 
@@ -102,13 +102,13 @@ public class PlayerUpgradeManager : MonoBehaviour
         switch (type)
         {
             case UpgradeType.Attack:
-                return "+" + (level * 2) + " Sát thương (+ATK)";
+                return LocalizationManager.T("+" + (level * 2) + " Sát thương (+ATK)", "+" + (level * 2) + " Attack Damage (+ATK)");
             case UpgradeType.Health:
-                return "+" + (level * 15) + " Máu tối đa (+Max HP)";
+                return LocalizationManager.T("+" + (level * 15) + " Máu tối đa (+Max HP)", "+" + (level * 15) + " Max Health (+Max HP)");
             case UpgradeType.Agility:
-                return "+" + (level * 0.08f).ToString("F2") + " Tốc độ | -" + (level * 0.05f).ToString("F2") + "s Dash";
+                return LocalizationManager.T("+" + (level * 0.08f).ToString("F2") + " Tốc độ | -" + (level * 0.05f).ToString("F2") + "s Lướt", "+" + (level * 0.08f).ToString("F2") + " Speed | -" + (level * 0.05f).ToString("F2") + "s Dash");
             case UpgradeType.Ultimate:
-                return "-" + (level * 0.6f).ToString("F1") + "s Hồi Ulti | +" + (level * 8) + " Dmg";
+                return LocalizationManager.T("-" + (level * 0.6f).ToString("F1") + "s Hồi Ulti | +" + (level * 8) + " Sát thương", "-" + (level * 0.6f).ToString("F1") + "s Ulti CD | +" + (level * 8) + " Damage");
             default:
                 return "";
         }
@@ -117,14 +117,14 @@ public class PlayerUpgradeManager : MonoBehaviour
     public string GetNextBonusDescription(UpgradeType type)
     {
         int level = GetLevel(type);
-        if (level >= MAX_LEVEL) return "ĐÃ ĐẠT CẤP TỐI ĐA (30)";
+        if (level >= MAX_LEVEL) return LocalizationManager.T("ĐÃ ĐẠT CẤP TỐI ĐA (30)", "MAX LEVEL REACHED (30)");
 
         switch (type)
         {
-            case UpgradeType.Attack: return "+2 Sát thương chém";
-            case UpgradeType.Health: return "+15 Máu tối đa & Hồi máu";
-            case UpgradeType.Agility: return "+0.08 Tốc chạy & -0.05s Dash";
-            case UpgradeType.Ultimate: return "-0.6s Hồi chiêu & +8 Dmg";
+            case UpgradeType.Attack: return LocalizationManager.T("+2 Sát thương chém", "+2 Strike Damage");
+            case UpgradeType.Health: return LocalizationManager.T("+15 Máu tối đa & Hồi máu", "+15 Max Health & Heal");
+            case UpgradeType.Agility: return LocalizationManager.T("+0.08 Tốc chạy & -0.05s Lướt", "+0.08 Move Speed & -0.05s Dash");
+            case UpgradeType.Ultimate: return LocalizationManager.T("-0.6s Hồi chiêu & +8 Sát thương", "-0.6s Cooldown & +8 Damage");
             default: return "";
         }
     }

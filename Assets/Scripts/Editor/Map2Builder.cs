@@ -239,10 +239,10 @@ public static class Map2Builder
         SpawnTreeWithWind(envRoot.transform, "obj_07_79x89.png", "Tree_BottomRight", new Vector3(13.2f, -4.8f, 0f), 4, 0.9f, 1.5f, 2.1f);
 
         // 7G. Boulders in the glade
-        SpawnProp(envRoot.transform, "obj_32_44x27.png", "Boulder_MidLeft", new Vector3(-10.8f, -1.5f, 0f), 3, new Vector2(2.2f, 1.4f), false);
-        SpawnProp(envRoot.transform, "obj_33_44x27.png", "Boulder_BottomRight", new Vector3(7.5f, -9.2f, 0f), 3, new Vector2(2.4f, 1.4f), false);
+        SpawnProp(envRoot.transform, "obj_32_44x27.png", "Boulder_MidLeft", new Vector3(-10.8f, -1.5f, 0f), 3, new Vector2(1.6f, 0.8f), false);
+        SpawnProp(envRoot.transform, "obj_33_44x27.png", "Boulder_BottomRight", new Vector3(7.5f, -9.2f, 0f), 3, new Vector2(1.8f, 0.9f), false);
         SpawnProp(envRoot.transform, "obj_31_32x27.png", "Boulder_FarRight", new Vector3(14.0f, -1.8f, 0f), 3, new Vector2(1.8f, 1.3f), false);
-        SpawnProp(envRoot.transform, "obj_35_48x47.png", "Boulder_BottomLeft_Mossy", new Vector3(-6.5f, -7.2f, 0f), 3, new Vector2(2.4f, 2.2f), false);
+        SpawnProp(envRoot.transform, "obj_35_48x47.png", "Boulder_BottomLeft_Mossy", new Vector3(-6.5f, -7.2f, 0f), 3, new Vector2(1.8f, 1.1f), false);
 
         // 7H. ANCIENT STONE PILLARS WITH GLOWING CRACKS!
         // Pillar 1: South Center
@@ -266,7 +266,7 @@ public static class Map2Builder
 
         foreach (var pos in borderTreePositions)
         {
-            SpawnTreeWithWind(envRoot.transform, "obj_07_79x89.png", "Forest_Border_Tree", pos, 4, 1.0f, 1.3f, 1.6f);
+            SpawnTreeWithWind(envRoot.transform, "obj_07_79x89.png", "Forest_Border_Tree", pos, 4, 0.6f, 1.3f, 1.6f);
         }
 
         // 8. Ancient Upgrade Shrine reposition if needed
@@ -359,6 +359,9 @@ public static class Map2Builder
 
         // Wind Sway Animation
         var sway = obj.AddComponent<TreeWindSway>();
+          // TreeOcclusionFader: tu dong gan cho tat ca cay co tan la
+          if (obj.GetComponent<TreeOcclusionFader>() == null)
+              obj.AddComponent<TreeOcclusionFader>();
         sway.SetupParameters(windSpeed, maxAngle, 0.02f);
     }
 
@@ -380,8 +383,8 @@ public static class Map2Builder
 
         // Solid collider
         var box = pillarObj.AddComponent<BoxCollider2D>();
-        box.size = new Vector2(0.9f, 2.2f);
-        box.offset = new Vector2(0f, 0f);
+        box.size = new Vector2(0.8f, 0.7f);
+        box.offset = new Vector2(0f, -0.75f);
 
         // Add Glowing Rune script
         GlowingRunePillar.Create(pillarObj, glowSprite, glowColor);

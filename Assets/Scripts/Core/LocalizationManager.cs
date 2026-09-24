@@ -1,76 +1,169 @@
-﻿using UnityEngine;
+using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 public static class LocalizationManager
 {
     public enum Language
     {
-        Vietnamese,
-        English
+        Vietnamese = 0,
+        English = 1
     }
+
+    private const string PREF_LANG_KEY = "Game_Language_Preference";
+
+    public static Action OnLanguageChanged;
 
     public static Language CurrentLanguage
     {
-        get => (Language)PlayerPrefs.GetInt("Game_Language", (int)Language.Vietnamese);
+        get => (Language)PlayerPrefs.GetInt(PREF_LANG_KEY, (int)Language.Vietnamese);
         set
         {
-            PlayerPrefs.SetInt("Game_Language", (int)value);
+            PlayerPrefs.SetInt(PREF_LANG_KEY, (int)value);
             PlayerPrefs.Save();
             OnLanguageChanged?.Invoke();
         }
     }
 
-    public static System.Action OnLanguageChanged;
+    public static bool IsVietnamese => CurrentLanguage == Language.Vietnamese;
+
+    public static string T(string vi, string en)
+    {
+        return CurrentLanguage == Language.Vietnamese ? vi : en;
+    }
+
+    public static void ToggleLanguage()
+    {
+        CurrentLanguage = CurrentLanguage == Language.Vietnamese ? Language.English : Language.Vietnamese;
+    }
+
+    public static void SetLanguage(Language lang)
+    {
+        CurrentLanguage = lang;
+    }
+
+    private static readonly Dictionary<string, (string vi, string en)> localizedStrings = new Dictionary<string, (string, string)>
+    {
+        // General UI & Login
+        { "APP_TITLE", ("VAELSTRIDER: RUINBOUND", "VAELSTRIDER: RUINBOUND") },
+        { "LOGIN_SUBTITLE", ("HÀNH TRÌNH TÀN TÍCH THƯỢNG CỔ", "JOURNEY TO THE ANCIENT RUINS") },
+        { "BTN_GUEST_LOGIN", ("ĐĂNG NHẬP KHÁCH", "GUEST LOGIN") },
+        { "BTN_GOOGLE_LOGIN", ("ĐĂNG NHẬP GOOGLE", "GOOGLE LOGIN") },
+        { "LOGIN_VERSION", ("Phiên bản v1.0.0 - Sẵn sàng chiến đấu", "Version v1.0.0 - Ready for Battle") },
+
+        // Top Bar & Account Info
+        { "LBL_PLAYER_DEFAULT_NAME", ("HÙNG", "HERO") },
+        { "LBL_PLAYER_TITLE", ("LỮ KHÁCH TÀN TÍCH", "RUIN WANDERER") },
+        { "LBL_SHARDS", ("LINH HỒN", "SHARDS") },
+        { "LBL_POTIONS", ("BÌNH MÁU", "POTIONS") },
+        { "BTN_LOGOUT", ("ĐĂNG XUẤT", "LOGOUT") },
+
+        // Navigation & Menu Buttons
+        { "BTN_PLAY", ("XUẤT TRẬN", "BATTLE") },
+        { "BTN_MAP_SELECT", ("CHỌN BẢN ĐỒ", "SELECT MAP") },
+        { "BTN_ROSTER", ("NHÂN VẬT", "HEROES") },
+        { "BTN_SHOP", ("CỬA HÀNG", "SHOP") },
+        { "BTN_UPGRADE", ("NÂNG CẤP", "UPGRADES") },
+        { "BTN_SETTINGS", ("CÀI ĐẶT", "SETTINGS") },
+        { "BTN_EXIT", ("THOÁT", "EXIT") },
+        { "BTN_BACK", ("QUAY LẠI", "BACK") },
+        { "BTN_CONFIRM", ("XÁC NHẬN", "CONFIRM") },
+        { "BTN_CANCEL", ("HỦY", "CANCEL") },
+        { "BTN_RESET_DATA", ("XÓA DỮ LIỆU", "RESET DATA") },
+        { "BTN_RESUME", ("TIẾP TỤC", "RESUME") },
+        { "BTN_RESTART", ("CHƠI LẠI", "RESTART") },
+        { "BTN_MAIN_MENU", ("TRANG CHỦ", "MAIN MENU") },
+        { "BTN_HOW_TO_PLAY", ("HƯỚNG DẪN", "HOW TO PLAY") },
+        { "BTN_SELECT", ("LỰA CHỌN", "SELECT") },
+        { "BTN_SELECTED", ("ĐANG CHỌN", "SELECTED") },
+        { "BTN_LOCKED", ("ĐÃ KHÓA", "LOCKED") },
+        { "BTN_TEMP_LOCKED", ("TẠM KHÓA (SẮP RA MẮT)", "LOCKED (COMING SOON)") },
+        { "BTN_UNLOCK", ("MỞ KHÓA", "UNLOCK") },
+
+        // Audio & Settings
+        { "SETTINGS_TITLE", ("CÀI ĐẶT HỆ THỐNG", "SETTINGS") },
+        { "LBL_BGM", ("ÂM NHẠC (BGM)", "MUSIC VOLUME") },
+        { "LBL_SFX", ("HIỆU ỨNG (SFX)", "SFX VOLUME") },
+        { "LBL_LANGUAGE", ("NGÔN NGỮ", "LANGUAGE") },
+        { "LANG_CURRENT", ("Tiếng Việt", "English") },
+        { "MSG_RESET_CONFIRM", ("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu lưu?", "Are you sure you want to reset all game data?") },
+        { "MSG_RESET_SUCCESS", ("Đã đặt lại dữ liệu thành công!", "Game data reset successfully!") },
+
+        // Maps
+        { "MAP1_NAME", ("Tàn Tích Thung Lũng", "Valley Ruins") },
+        { "MAP1_DESC", ("Vùng đất thung lũng đá cổ xưa, nơi ngự trị của Quái Thú và Thạch Thần.", "Ancient rocky valley inhabited by Valley Beasts and the Stone Golem.") },
+        { "MAP2_NAME", ("Ngục Tối Rực Lửa", "Flame Dungeon") },
+        { "MAP2_DESC", ("Hầm ngục rực lửa với những ngọn đuốc bí ẩn và Vua Xương Bất Diệt.", "Blazing dungeon lit by mystic torches and ruled by the Undying Skeleton King.") },
+        { "MAP3_NAME", ("Ký Ức Lãng Quên", "Forgotten Memories") },
+        { "MAP3_DESC", ("Cung điện thần thánh u ám, nơi chôn giấu sức mạnh tà ác của Huyết Quái.", "Desolate divine palace harboring the corrupt essence of the Blood Fiend.") },
+
+        // Characters
+        { "HERO_VAEL_NAME", ("Hiệp Sĩ Cân Bằng", "Balanced Knight (Vael)") },
+        { "HERO_VAEL_ROLE", ("Chiến Binh / Kiếm Thuật Cổ Tộc", "Warrior / Blade Master") },
+        { "HERO_VAEL_SKILL", ("Tuyệt Kỹ: Cơn Lốc Tàn Tích", "Skill: Ruin Whirlwind") },
+        { "HERO_VAEL_SKILL_DESC", ("Vận nội lực xoay kiếm tạo bão quét nát quái xung quanh.", "Spins ancient blade to unleash a storm cleaving nearby foes.") },
+
+        { "HERO_MAID_NAME", ("Hầu Gái Sát Thủ", "Combat Maid (Elysia)") },
+        { "HERO_MAID_ROLE", ("Sát Thủ / Tốc Biến Nhanh Nhẹn", "Assassin / Agile Shadow") },
+        { "HERO_MAID_SKILL", ("Tuyệt Kỹ: Quét Tận Kẻ Yếu", "Skill: Sweep the Weak") },
+        { "HERO_MAID_SKILL_DESC", ("Lướt nhanh như chớp và vung đao khí trăng khuyết kết liễu kẻ thù.", "Flashes through the battlefield executing normal foes & stunning bosses.") },
+
+        { "STAT_HP", ("MÁU", "HP") },
+        { "STAT_ATK", ("TẤN CÔNG", "ATK") },
+        { "STAT_SPD", ("TỐC ĐỘ", "SPD") },
+        { "STAT_ULTI", ("TUYỆT KỸ", "ULTIMATE") },
+
+        // Combat & HUD
+        { "HUD_HEALTH", ("MÁU", "HP") },
+        { "HUD_ENERGY", ("NĂNG LƯỢNG", "ENERGY") },
+        { "HUD_SHARDS", ("MẢNH LINH HỒN", "AETHEL SHARDS") },
+        { "HUD_POTIONS", ("BÌNH MÁU", "POTIONS") },
+        { "HUD_WAVE", ("ĐỢT QUÁI", "WAVE") },
+        { "HUD_BOSS_ALERT", ("CẢNH BÁO: TRÙM ĐANG ĐẾN!", "WARNING: BOSS INCOMING!") },
+        { "HUD_VICTORY", ("CHIẾN THẮNG!", "VICTORY!") },
+        { "HUD_DEFEAT", ("BẠN ĐÃ TỬ TRẬN", "YOU DIED") },
+        { "GAMEOVER_TITLE", ("BẠN ĐÃ TỬ TRẬN", "YOU DIED") },
+        { "GAMEOVER_SUBTITLE", ("Linh hồn của bạn tan biến vào hư vô tàn tích...", "Your soul fades into the endless ruins...") },
+        { "GAMEOVER_RESPAWN_AVAILABLE", ("HỒI SINH (CÒN 1 LẦN)", "RESPAWN (1 REMAINING)") },
+        { "GAMEOVER_RESPAWN_USED", ("ĐÃ HẾT LƯỢT HỒI SINH", "NO RESPAWNS LEFT") },
+        { "GAMEOVER_RESTART_MAP", ("CHƠI LẠI BẢN ĐỒ", "RESTART MAP") },
+        { "GAMEOVER_EXIT_LOGIN", ("VỀ MÀN HÌNH ĐĂNG NHẬP", "EXIT TO LOGIN") },
+        { "HUD_CLEAR_TIME", ("Thời Gian Hoàn Thành:", "Clear Time:") },
+        { "HUD_ENEMIES_SLAIN", ("Kẻ Thù Tiêu Diệt:", "Enemies Slain:") },
+        { "HUD_SHARDS_EARNED", ("Linh Hồn Thu Được:", "Shards Earned:") },
+
+        // Prompts & Interactions
+        { "PROMPT_SHRINE", ("[E] Tế Đàn Cổ Đại", "[E] Ancient Shrine") },
+        { "PROMPT_CHEST", ("[E] Mở Rương Báu", "[E] Open Treasure Chest") },
+        { "PROMPT_PORTAL", ("[E] Cổng Không Gian", "[E] Ruin Portal") },
+        { "PROMPT_GRAVE", ("[E] Thu Hồi Mảnh Linh Hồn", "[E] Retrieve Lost Shards") },
+
+        // Shrine Upgrades
+        { "SHRINE_TITLE", ("TẾ ĐÀN NÂNG CẤP CỔ ĐẠI", "ANCIENT UPGRADE SHRINE") },
+        { "UPGRADE_ATK", ("Cường Hóa Tấn Công (+10%)", "Upgrade Attack (+10%)") },
+        { "UPGRADE_HP", ("Tăng Lực Máu Tối Đa (+25 HP)", "Upgrade Max Health (+25 HP)") },
+        { "UPGRADE_SPD", ("Gia Tăng Tốc Độ (+15%)", "Upgrade Move Speed (+15%)") },
+        { "UPGRADE_ULTI", ("Giảm Hồi Chiêu Tuyệt Kỹ (-10%)", "Upgrade Ultimate Cooldown (-10%)") },
+        { "UPGRADE_COST", ("Chi Phí:", "Cost:") },
+        { "MSG_NOT_ENOUGH_SHARDS", ("Không đủ Mảnh Linh Hồn!", "Not enough Aethel Shards!") },
+        { "MSG_UPGRADE_SUCCESS", ("Nâng cấp thành công!", "Upgrade Successful!") }
+    };
 
     public static string Get(string key)
     {
-        bool isVi = CurrentLanguage == Language.Vietnamese;
-        switch (key)
+        if (string.IsNullOrEmpty(key)) return "";
+        if (localizedStrings.TryGetValue(key, out var val))
         {
-            // Settings UI
-            case "SETTINGS_TITLE": return isVi ? "CÀI ĐẶT HỆ THỐNG" : "SYSTEM SETTINGS";
-            case "AUDIO_BGM": return isVi ? "Nhạc Nền (BGM)" : "Music (BGM)";
-            case "AUDIO_SFX": return isVi ? "Hiệu Ứng (SFX)" : "Sound Effects";
-            case "LANGUAGE": return isVi ? "Ngôn Ngữ" : "Language";
-            case "BTN_RESUME": return isVi ? "TIẾP TỤC" : "RESUME";
-            case "BTN_RESTART": return isVi ? "CHƠI LẠI TỪ ĐẦU" : "RESTART RUN";
-            case "BTN_GUIDE": return isVi ? "HƯỚNG DẪN CHƠI" : "HOW TO PLAY";
-            case "BTN_CLOSE": return isVi ? "ĐÓNG" : "CLOSE";
-            case "BTN_EXIT_LOGIN": return isVi ? "VỀ TRANG ĐĂNG NHẬP" : "EXIT TO LOGIN";
+            return CurrentLanguage == Language.Vietnamese ? val.vi : val.en;
+        }
+        return key;
+    }
 
-            // Game Over Screen
-            case "GAMEOVER_TITLE": return isVi ? "BẠN ĐÃ GỤC NGÃ" : "YOU DIED";
-            case "GAMEOVER_SUBTITLE": return isVi ? "Chuyến hành trình của bạn đã tạm dừng..." : "Your journey in the ruins has halted.";
-            case "GAMEOVER_RESPAWN_AVAILABLE": return isVi ? "HỒI SINH TẠI CHỖ (1/1)" : "RESPAWN HERE (1/1)";
-            case "GAMEOVER_RESPAWN_USED": return isVi ? "ĐÃ HẾT LƯỢT HỒI SINH (0/1)" : "OUT OF RESPAWNS (0/1)";
-            case "GAMEOVER_RESTART_MAP": return isVi ? "CHƠI LẠI TỪ ĐẦU" : "RESTART MAP";
-            case "GAMEOVER_EXIT_LOGIN": return isVi ? "VỀ TRANG ĐĂNG NHẬP" : "EXIT TO LOGIN";
-
-            // Main Menu Hub
-            case "MENU_TITLE": return isVi ? "SẢNH CHÍNH" : "MAIN HUB";
-            case "BTN_PLAY": return isVi ? "XUẤT TRẬN" : "EXPEDITION";
-            case "BTN_HERO": return isVi ? "NHÂN VẬT" : "HEROES";
-            case "BTN_SHOP": return isVi ? "CỬA HÀNG" : "SHOP";
-            case "BTN_SETTINGS": return isVi ? "CÀI ĐẶT" : "SETTINGS";
-            case "BTN_LOGOUT": return isVi ? "ĐĂNG XUẤT" : "LOGOUT";
-
-            // Map Selection
-            case "MAP_SELECT_TITLE": return isVi ? "CHỌN KHU VỰC XUẤT TRẬN" : "SELECT EXPEDITION";
-            case "MAP1_NAME": return isVi ? "HẦM NGỤC CỔ" : "DUNGEON OF OLD";
-            case "MAP1_DESC": return isVi ? "Phế tích ngầm u tối với quái vật máy cổ đại và bẫy gai nguy hiểm." : "Dark underground crypt crawling with ancient machines.";
-            case "MAP2_NAME": return isVi ? "THUNG LŨNG CỔ THỤ" : "VALLEY OF ANCIENT TREES";
-            case "MAP2_DESC": return isVi ? "Vùng thung lũng thiên nhiên rộng mở với bóng mát Cổ Thụ nghìn năm." : "Vast open valley shaded by colossal millenary trees.";
-
-            // Shop & Roster
-            case "SHOP_TITLE": return isVi ? "CỬA HÀNG CỔ ĐẠI" : "ANCIENT SHOP";
-            case "BUY_MAID": return isVi ? "MUA MAID CHIẾN BINH" : "BUY BATTLE MAID";
-            case "BUY_POTION": return isVi ? "BÌNH MÁU HỒI PHỤC (+50 HP)" : "HEALTH POTION (+50 HP)";
-            case "ROSTER_TITLE": return isVi ? "DANH SÁCH ANH HÙNG" : "HERO ROSTER";
-            case "SELECT_HERO": return isVi ? "XUẤT TRẬN" : "SELECT";
-            case "SELECTED": return isVi ? "ĐANG CHỌN" : "SELECTED";
-            case "LOCKED": return isVi ? "CHƯA SỞ HỮU" : "LOCKED";
-            case "SHARDS_NOT_ENOUGH": return isVi ? "Không đủ Tinh Thể Aethel!" : "Not enough Aethel Shards!";
-
-            default: return key;
+    public static void Register(string key, string vi, string en)
+    {
+        if (!string.IsNullOrEmpty(key))
+        {
+            localizedStrings[key] = (vi, en);
         }
     }
 }

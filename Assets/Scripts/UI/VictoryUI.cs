@@ -41,12 +41,20 @@ public class VictoryUI : MonoBehaviour
         Instance = this;
         BotWheelAI.OnEnemyDied += HandleEnemyDied;
         BloodMonsterAI.OnEnemyDied += HandleBloodMonsterDied;
+        GoblinAI.OnEnemyDied += HandleGoblinDied;
+        SkeletonAI.OnEnemyDied += HandleSkeletonDied;
+        SlimeAI.OnEnemyDied += HandleSlimeDied;
+        SkeletonKingBossAI.OnBossDied += HandleSkeletonKingDied;
     }
 
     void OnDisable()
     {
         BotWheelAI.OnEnemyDied -= HandleEnemyDied;
         BloodMonsterAI.OnEnemyDied -= HandleBloodMonsterDied;
+        GoblinAI.OnEnemyDied -= HandleGoblinDied;
+        SkeletonAI.OnEnemyDied -= HandleSkeletonDied;
+        SlimeAI.OnEnemyDied -= HandleSlimeDied;
+        SkeletonKingBossAI.OnBossDied -= HandleSkeletonKingDied;
     }
 
     void Start()
@@ -64,6 +72,26 @@ public class VictoryUI : MonoBehaviour
         enemiesKilled++;
     }
 
+    private void HandleGoblinDied(GoblinAI enemy)
+    {
+        enemiesKilled++;
+    }
+
+    private void HandleSkeletonDied(SkeletonAI enemy)
+    {
+        enemiesKilled++;
+    }
+
+    private void HandleSlimeDied(SlimeAI enemy)
+    {
+        enemiesKilled++;
+    }
+
+    private void HandleSkeletonKingDied(SkeletonKingBossAI boss)
+    {
+        enemiesKilled++;
+    }
+
     public void ShowVictoryScreen()
     {
         if (isEnded) return;
@@ -73,8 +101,16 @@ public class VictoryUI : MonoBehaviour
         if (currentScene == "SampleScene" || currentScene.Contains("Map1"))
         {
             PlayerPrefs.SetInt("Map1_Completed", 1);
-            PlayerPrefs.Save();
         }
+        else if (currentScene.Contains("Map2") || currentScene.Contains("Valley"))
+        {
+            PlayerPrefs.SetInt("Map2_Completed", 1);
+        }
+        else if (currentScene.Contains("Map3") || currentScene.Contains("Forgotten"))
+        {
+            PlayerPrefs.SetInt("Map3_Completed", 1);
+        }
+        PlayerPrefs.Save();
 
         float elapsed = Time.time - (runStartTime > 0 ? runStartTime : Time.time - 90f);
         int minutes = Mathf.FloorToInt(elapsed / 60f);
@@ -94,8 +130,8 @@ public class VictoryUI : MonoBehaviour
         else if (elapsed > 120f) rank = "A RANK";
 
         if (timeText != null) timeText.text = timeStr;
-        if (enemiesText != null) enemiesText.text = $"{enemiesKilled} Slain";
-        if (shardsText != null) shardsText.text = $"{totalShards} Shards";
+        if (enemiesText != null) enemiesText.text = $"{enemiesKilled} " + LocalizationManager.T("Kẻ địch", "Slain");
+        if (shardsText != null) shardsText.text = $"{totalShards} " + LocalizationManager.T("Linh hồn", "Shards");
         if (rankText != null) rankText.text = rank;
 
         StartCoroutine(FadeInRoutine());
@@ -141,7 +177,15 @@ public class VictoryUI : MonoBehaviour
                 return;
             }
         }
-        else if (currentScene.Contains("Map2") || currentScene.Contains("Valley") || currentScene.Contains("Map3") || currentScene.Contains("Ancient"))
+        else if (currentScene.Contains("Map2") || currentScene.Contains("Valley"))
+        {
+            if (Application.CanStreamedLevelBeLoaded("Map3_ForgottenMemories"))
+            {
+                SceneManager.LoadScene("Map3_ForgottenMemories");
+                return;
+            }
+        }
+        else if (currentScene.Contains("Map3") || currentScene.Contains("Forgotten"))
         {
             EndingCreditsUI.ShowEnding();
             return;
@@ -193,7 +237,8 @@ public class VictoryUI : MonoBehaviour
         titleRect.anchoredPosition = new Vector2(0, 150);
         titleRect.sizeDelta = new Vector2(500, 50);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = "REALM PURIFIED!";
+        var locTitle = titleObj.AddComponent<LocalizedText>();
+        locTitle.SetTexts("CHIẾN THẮNG!", "REALM PURIFIED!");
         titleTmp.fontSize = 36;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = new Color(1f, 0.85f, 0.2f);
@@ -206,7 +251,8 @@ public class VictoryUI : MonoBehaviour
         subRect.anchoredPosition = new Vector2(0, 115);
         subRect.sizeDelta = new Vector2(480, 30);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
-        subTmp.text = "The ancient ruins have been cleansed of corruption.";
+        var locSub = subObj.AddComponent<LocalizedText>();
+        locSub.SetTexts("Tàn tích cổ đại đã được thanh tẩy khỏi sự tha hóa.", "The ancient ruins have been cleansed of corruption.");
         subTmp.fontSize = 15;
         subTmp.color = new Color(0.75f, 0.75f, 0.85f);
         subTmp.alignment = TextAlignmentOptions.Center;
@@ -218,10 +264,10 @@ public class VictoryUI : MonoBehaviour
         statsRect.anchoredPosition = new Vector2(0, 20);
         statsRect.sizeDelta = new Vector2(440, 140);
 
-        var timeTmp = CreateRow(statsContainer.transform, "TIME ELAPSED", "01:25", 45);
-        var enemiesTmp = CreateRow(statsContainer.transform, "ENEMIES SLAIN", $"{enemiesKilled} Slain", 15);
-        var shardsTmp = CreateRow(statsContainer.transform, "AETHEL SHARDS", "0 Shards", -15);
-        var rankTmp = CreateRow(statsContainer.transform, "CLEAR RANK", "S RANK", -45, new Color(1f, 0.85f, 0.2f));
+        var timeTmp = CreateRow(statsContainer.transform, "TIME_ROW", LocalizationManager.T("THỜI GIAN", "TIME ELAPSED"), "01:25", 45);
+        var enemiesTmp = CreateRow(statsContainer.transform, "ENEMIES_ROW", LocalizationManager.T("KẺ ĐỊCH TIÊU DIỆT", "ENEMIES SLAIN"), $"{enemiesKilled}", 15);
+        var shardsTmp = CreateRow(statsContainer.transform, "SHARDS_ROW", LocalizationManager.T("MẢNH LINH HỒN", "AETHEL SHARDS"), "0", -15);
+        var rankTmp = CreateRow(statsContainer.transform, "RANK_ROW", LocalizationManager.T("XẾP HẠNG", "CLEAR RANK"), "S RANK", -45, new Color(1f, 0.85f, 0.2f));
 
         // Buttons
         GameObject btnContainer = new GameObject("ButtonsContainer");
@@ -230,8 +276,8 @@ public class VictoryUI : MonoBehaviour
         btnRect.anchoredPosition = new Vector2(0, -145);
         btnRect.sizeDelta = new Vector2(460, 60);
 
-        var playBtn = CreateBtn(btnContainer.transform, "Btn_PlayAgain", "PLAY AGAIN", new Vector2(-115, 0), new Color(0.25f, 0.35f, 0.7f));
-        var nextBtn = CreateBtn(btnContainer.transform, "Btn_NextRealm", "NEXT REALM", new Vector2(115, 0), new Color(0.85f, 0.45f, 0.15f));
+        var playBtn = CreateBtn(btnContainer.transform, "Btn_PlayAgain", LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Vector2(-115, 0), new Color(0.25f, 0.35f, 0.7f));
+        var nextBtn = CreateBtn(btnContainer.transform, "Btn_NextRealm", LocalizationManager.T("ẢI TIẾP THEO", "NEXT REALM"), new Vector2(115, 0), new Color(0.85f, 0.45f, 0.15f));
 
         playBtn.onClick.AddListener(victoryComp.RestartRun);
         nextBtn.onClick.AddListener(victoryComp.GoToNextRealm);
@@ -245,9 +291,9 @@ public class VictoryUI : MonoBehaviour
         victoryComp.ShowVictoryScreen();
     }
 
-    private static TextMeshProUGUI CreateRow(Transform parent, string label, string defaultValue, float posY, Color? valColor = null)
+    private static TextMeshProUGUI CreateRow(Transform parent, string rowName, string label, string defaultValue, float posY, Color? valColor = null)
     {
-        GameObject row = new GameObject("Row_" + label);
+        GameObject row = new GameObject("Row_" + rowName);
         row.transform.SetParent(parent, false);
         RectTransform rect = row.AddComponent<RectTransform>();
         rect.anchoredPosition = new Vector2(0, posY);
@@ -316,3 +362,4 @@ public class VictoryUI : MonoBehaviour
         return btn;
     }
 }
+

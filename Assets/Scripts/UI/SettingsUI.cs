@@ -7,489 +7,602 @@ public class SettingsUI : MonoBehaviour
 {
     public static SettingsUI Instance { get; private set; }
 
-    [Header("UI Panels")]
+    [Header("Panels")]
     [SerializeField] private GameObject settingsPanel;
-    [SerializeField] private GameObject guidePanel;
+    [SerializeField] private GameObject resetConfirmModal;
+    [SerializeField] private CanvasGroup panelCanvasGroup;
 
-    [Header("Controls")]
-    [SerializeField] private Slider bgmSlider;
-    [SerializeField] private Slider sfxSlider;
-    [SerializeField] private Button langViBtn;
-    [SerializeField] private Button langEnBtn;
-
-    [Header("Text Components")]
+    [Header("Headers & Titles")]
     [SerializeField] private TextMeshProUGUI titleText;
+
+    [Header("Volume Controls")]
     [SerializeField] private TextMeshProUGUI bgmLabel;
+    [SerializeField] private Slider bgmSlider;
     [SerializeField] private TextMeshProUGUI sfxLabel;
-    [SerializeField] private TextMeshProUGUI langLabel;
-    [SerializeField] private TextMeshProUGUI guideBtnText;
-    [SerializeField] private TextMeshProUGUI restartBtnText;
+    [SerializeField] private Slider sfxSlider;
+
+    [Header("Language Controls")]
+    [SerializeField] private TextMeshProUGUI languageLabel;
+    [SerializeField] private Button languageToggleButton;
+    [SerializeField] private TextMeshProUGUI languageButtonText;
+
+    [Header("Action Buttons")]
+    [SerializeField] private Button resumeButton;
+    [SerializeField] private Button restartButton;
+    [SerializeField] private Button mainMenuButton;
+    [SerializeField] private Button resetDataButton;
+    [SerializeField] private Button closeButton;
+
     [SerializeField] private TextMeshProUGUI resumeBtnText;
-    [SerializeField] private TextMeshProUGUI exitBtnText;
+    [SerializeField] private TextMeshProUGUI restartBtnText;
+    [SerializeField] private TextMeshProUGUI mainMenuBtnText;
+    [SerializeField] private TextMeshProUGUI resetDataBtnText;
+    [SerializeField] private TextMeshProUGUI closeBtnText;
 
-    private bool isOpen = false;
+    [Header("Reset Confirmation Modal")]
+    [SerializeField] private TextMeshProUGUI resetPromptText;
+    [SerializeField] private Button resetConfirmYesBtn;
+    [SerializeField] private Button resetConfirmNoBtn;
+    [SerializeField] private TextMeshProUGUI resetYesBtnText;
+    [SerializeField] private TextMeshProUGUI resetNoBtnText;
 
-    void Awake()
+    public static SettingsUI EnsureUIExists(Canvas targetCanvas = null)
     {
-        Instance = this;
-    }
-
-    public static SettingsUI EnsureInstance() => GetOrCreate();
-
-    public static SettingsUI GetOrCreate()
-    {
-        if (Instance != null) return Instance;
-
-        var all = Resources.FindObjectsOfTypeAll<SettingsUI>();
-        foreach (var s in all)
+        if (Instance == null)
         {
-            if (s != null && s.gameObject.scene.isLoaded)
-            {
-                Instance = s;
-                return Instance;
-            }
+            Instance = Object.FindAnyObjectByType<SettingsUI>();
         }
 
-        EnsureSettingsButtonExists();
-
-        if (Instance != null) return Instance;
-
-        all = Resources.FindObjectsOfTypeAll<SettingsUI>();
-        foreach (var s in all)
+        if (Instance == null)
         {
-            if (s != null && s.gameObject.scene.isLoaded)
+            Canvas canvas = targetCanvas != null ? targetCanvas : GameAutoBootstrap.GetMainGameplayCanvas();
+            if (canvas == null)
             {
-                Instance = s;
-                return Instance;
+                canvas = Object.FindAnyObjectByType<Canvas>();
             }
+
+            if (canvas == null)
+            {
+                GameObject canvasObj = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+                canvas = canvasObj.GetComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                var scaler = canvasObj.GetComponent<CanvasScaler>();
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920, 1080);
+            }
+
+            GameObject settingsObj = new GameObject("SettingsUI", typeof(RectTransform), typeof(CanvasRenderer));
+            settingsObj.transform.SetParent(canvas.transform, false);
+            Instance = settingsObj.AddComponent<SettingsUI>();
+            Instance.BuildSettingsPanelDirectly();
         }
+        else if (Instance.settingsPanel == null)
+        {
+            Instance.BuildSettingsPanelDirectly();
+        }
+
         return Instance;
     }
 
-    void Start()
+    public static SettingsUI EnsureSettingsButtonExists()
     {
-        if (bgmSlider != null)
-        {
-            bgmSlider.value = SoundManager.Instance != null ? SoundManager.Instance.MusicVolume : 0.8f;
-            bgmSlider.onValueChanged.AddListener(OnBgmChanged);
-        }
+        var ui = EnsureUIExists();
 
-        if (sfxSlider != null)
-        {
-            sfxSlider.value = SoundManager.Instance != null ? SoundManager.Instance.SFXVolume : 0.85f;
-            sfxSlider.onValueChanged.AddListener(OnSfxChanged);
-        }
+        Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (rootCanvas == null) rootCanvas = Object.FindAnyObjectByType<Canvas>();
 
-        RefreshLabels();
-    }
-
-    void Update()
-    {
-        // ESC de bat / tat Cài đặt
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (rootCanvas != null)
         {
-            if (guidePanel != null && guidePanel.activeSelf)
+            Transform existingBtn = rootCanvas.transform.Find("Btn_SettingsGear");
+            if (existingBtn == null) existingBtn = rootCanvas.transform.Find("Btn_Settings");
+
+            if (existingBtn == null)
             {
-                CloseGuide();
+                GameObject btnObj = new GameObject("Btn_SettingsGear", typeof(RectTransform), typeof(CanvasRenderer));
+                btnObj.layer = 5;
+                btnObj.transform.SetParent(rootCanvas.transform, false);
+
+                RectTransform btnRt = btnObj.GetComponent<RectTransform>();
+                btnRt.anchorMin = new Vector2(1f, 1f);
+                btnRt.anchorMax = new Vector2(1f, 1f);
+                btnRt.pivot = new Vector2(1f, 1f);
+                btnRt.anchoredPosition = new Vector2(-20f, -20f);
+                btnRt.sizeDelta = new Vector2(50f, 50f);
+
+                Image btnImg = btnObj.AddComponent<Image>();
+                btnImg.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
+
+                var outline = btnObj.AddComponent<Outline>();
+                outline.effectColor = new Color(0.85f, 0.75f, 0.35f, 0.85f);
+                outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+                Button btn = btnObj.AddComponent<Button>();
+                btn.targetGraphic = btnImg;
+                btn.onClick.AddListener(() =>
+                {
+                    if (Instance != null) Instance.OpenSettings();
+                    else EnsureUIExists()?.OpenSettings();
+                });
+
+                GameObject txtObj = new GameObject("GearIconText", typeof(RectTransform), typeof(CanvasRenderer));
+                txtObj.layer = 5;
+                txtObj.transform.SetParent(btnObj.transform, false);
+
+                RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+                txtRt.anchorMin = Vector2.zero;
+                txtRt.anchorMax = Vector2.one;
+                txtRt.sizeDelta = Vector2.zero;
+
+                TextMeshProUGUI tmp = txtObj.AddComponent<TextMeshProUGUI>();
+                tmp.text = "SET";
+                tmp.fontSize = 15;
+                tmp.fontStyle = FontStyles.Bold;
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.color = new Color(1f, 0.9f, 0.5f);
+                tmp.raycastTarget = false;
             }
-            else
-            {
-                ToggleSettings();
-            }
         }
+
+        return ui;
     }
 
-    private void OnBgmChanged(float val)
+    private void Awake()
     {
-        if (SoundManager.Instance != null)
+        Instance = this;
+        if (settingsPanel == null)
         {
-            SoundManager.Instance.MusicVolume = val;
+            BuildSettingsPanelDirectly();
         }
+        InitializeSliders();
+        HookListeners();
     }
 
-    private void OnSfxChanged(float val)
+    private void Start()
     {
-        if (SoundManager.Instance != null)
-        {
-            SoundManager.Instance.SFXVolume = val;
-        }
+        UpdateLocalizedTexts();
+        LocalizationManager.OnLanguageChanged += UpdateLocalizedTexts;
     }
 
-    public void ShowSettings()
+    private void OnDestroy()
     {
-        if (!isOpen) ToggleSettings();
+        LocalizationManager.OnLanguageChanged -= UpdateLocalizedTexts;
     }
 
-    public void ToggleSettings()
+    public void BuildSettingsPanelDirectly()
     {
-        isOpen = !isOpen;
-        if (settingsPanel == null) settingsPanel = gameObject;
+        if (settingsPanel != null) return;
 
-        if (settingsPanel != null)
-        {
-            settingsPanel.transform.SetAsLastSibling();
-            settingsPanel.SetActive(isOpen);
-        }
-        if (guidePanel != null && !isOpen) guidePanel.SetActive(false);
+        // 1. Root Modal Panel (Overlay)
+        settingsPanel = new GameObject("SettingsModalPanel", typeof(RectTransform), typeof(CanvasRenderer));
+        settingsPanel.layer = 5;
+        settingsPanel.transform.SetParent(transform, false);
 
-        bool isLogin = SceneManager.GetActiveScene().name == "LoginScene";
-        Time.timeScale = (isOpen && !isLogin) ? 0f : 1f;
-        if (isOpen) RefreshLabels();
-    }
+        RectTransform overlayRt = settingsPanel.GetComponent<RectTransform>();
+        overlayRt.anchorMin = Vector2.zero;
+        overlayRt.anchorMax = Vector2.one;
+        overlayRt.sizeDelta = Vector2.zero;
 
-    public void SetLanguage(int langIndex)
-    {
-        LocalizationManager.CurrentLanguage = (langIndex == 0) ? LocalizationManager.Language.Vietnamese : LocalizationManager.Language.English;
-        RefreshLabels();
-    }
+        Image overlayImg = settingsPanel.AddComponent<Image>();
+        overlayImg.color = new Color(0f, 0f, 0f, 0.75f);
+        overlayImg.raycastTarget = true;
 
-    public void ShowGuide()
-    {
-        if (guidePanel != null)
-        {
-            guidePanel.transform.SetAsLastSibling();
-            guidePanel.SetActive(true);
-        }
-    }
+        panelCanvasGroup = settingsPanel.AddComponent<CanvasGroup>();
 
-    public void CloseGuide()
-    {
-        if (guidePanel != null) guidePanel.SetActive(false);
-    }
+        // 2. Dialog Box
+        GameObject dialogBox = new GameObject("DialogBox", typeof(RectTransform), typeof(CanvasRenderer));
+        dialogBox.layer = 5;
+        dialogBox.transform.SetParent(settingsPanel.transform, false);
 
-    public void RestartRun()
-    {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
+        RectTransform boxRt = dialogBox.GetComponent<RectTransform>();
+        boxRt.anchorMin = new Vector2(0.5f, 0.5f);
+        boxRt.anchorMax = new Vector2(0.5f, 0.5f);
+        boxRt.pivot = new Vector2(0.5f, 0.5f);
+        boxRt.sizeDelta = new Vector2(500f, 540f);
 
-    public void ExitToLogin()
-    {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("LoginScene");
-    }
+        Image boxImg = dialogBox.AddComponent<Image>();
+        boxImg.color = new Color(0.08f, 0.10f, 0.15f, 0.96f);
 
-    private void RefreshLabels()
-    {
-        if (titleText != null) titleText.text = LocalizationManager.Get("SETTINGS_TITLE");
-        if (bgmLabel != null) bgmLabel.text = LocalizationManager.Get("AUDIO_BGM");
-        if (sfxLabel != null) sfxLabel.text = LocalizationManager.Get("AUDIO_SFX");
-        if (langLabel != null) langLabel.text = LocalizationManager.Get("LANGUAGE");
-        if (guideBtnText != null) guideBtnText.text = LocalizationManager.Get("BTN_GUIDE");
-        if (restartBtnText != null) restartBtnText.text = LocalizationManager.Get("BTN_RESTART");
-        if (resumeBtnText != null) resumeBtnText.text = LocalizationManager.Get("BTN_RESUME");
-        if (exitBtnText != null) exitBtnText.text = LocalizationManager.Get("BTN_EXIT_LOGIN");
-    }
+        var outline = dialogBox.AddComponent<Outline>();
+        outline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.9f);
+        outline.effectDistance = new Vector2(2f, -2f);
 
-    private static GameObject CreateUIObject(string name, Transform parent)
-    {
-        GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer));
-        go.layer = 5;
-        if (parent != null) go.transform.SetParent(parent, false);
-        return go;
-    }
-
-    public static void EnsureSettingsButtonExists()
-    {
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) return;
-
-        Transform existingBtn = canvas.transform.Find("Btn_SettingsGear");
-        Transform existingPanel = canvas.transform.Find("SettingsPanel");
-        if (existingBtn != null && existingPanel != null)
-        {
-            Instance = existingPanel.GetComponent<SettingsUI>();
-            return;
-        }
-
-        // 1. Create Gear Button on Top Right (-20, -20)
-        GameObject btnObj = CreateUIObject("Btn_SettingsGear", canvas.transform);
-        RectTransform btnRt = btnObj.GetComponent<RectTransform>();
-        btnRt.anchorMin = new Vector2(1f, 1f);
-        btnRt.anchorMax = new Vector2(1f, 1f);
-        btnRt.pivot = new Vector2(1f, 1f);
-        btnRt.anchoredPosition = new Vector2(-20f, -20f);
-        btnRt.sizeDelta = new Vector2(50f, 50f);
-
-        Image btnImg = btnObj.AddComponent<Image>();
-        btnImg.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
-
-        var outline = btnObj.AddComponent<Outline>();
-        outline.effectColor = new Color(0.85f, 0.70f, 0.25f, 0.75f);
-        outline.effectDistance = new Vector2(1.5f, -1.5f);
-
-        Button btn = btnObj.AddComponent<Button>();
-        btn.targetGraphic = btnImg;
-
-        GameObject iconObj = CreateUIObject("GearIcon", btnObj.transform);
-        RectTransform iconRt = iconObj.GetComponent<RectTransform>();
-        iconRt.anchorMin = Vector2.zero;
-        iconRt.anchorMax = Vector2.one;
-        iconRt.sizeDelta = Vector2.zero;
-        var iconTmp = iconObj.AddComponent<TextMeshProUGUI>();
-        iconTmp.text = "SET";
-        iconTmp.fontSize = 14;
-        iconTmp.fontStyle = FontStyles.Bold;
-        iconTmp.color = new Color(1f, 0.88f, 0.4f);
-        iconTmp.alignment = TextAlignmentOptions.Center;
-        iconTmp.raycastTarget = false;
-
-        // 2. Create Settings Window Panel
-        GameObject panelObj = CreateUIObject("SettingsPanel", canvas.transform);
-        RectTransform panelRt = panelObj.GetComponent<RectTransform>();
-        panelRt.anchorMin = Vector2.zero;
-        panelRt.anchorMax = Vector2.one;
-        panelRt.offsetMin = Vector2.zero;
-        panelRt.offsetMax = Vector2.zero;
-
-        Image panelBg = panelObj.AddComponent<Image>();
-        panelBg.color = new Color(0.04f, 0.05f, 0.08f, 0.88f); // Dim overlay
-
-        // Settings Card
-        GameObject cardObj = CreateUIObject("Card", panelObj.transform);
-        RectTransform cardRt = cardObj.GetComponent<RectTransform>();
-        cardRt.sizeDelta = new Vector2(640f, 530f);
-        cardRt.anchoredPosition = Vector2.zero;
-        Image cardBg = cardObj.AddComponent<Image>();
-        cardBg.color = new Color(0.11f, 0.12f, 0.18f, 0.98f);
-        var cardOutline = cardObj.AddComponent<Outline>();
-        cardOutline.effectColor = new Color(0.3f, 0.35f, 0.45f, 0.8f);
-        cardOutline.effectDistance = new Vector2(2f, -2f);
-
-        var settingsUI = panelObj.AddComponent<SettingsUI>();
-        settingsUI.settingsPanel = panelObj;
-        Instance = settingsUI;
-        btn.onClick.AddListener(settingsUI.ToggleSettings);
-
-        // Title
-        GameObject titleObj = CreateUIObject("Title", cardObj.transform);
+        // 3. Title Text
+        GameObject titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer));
+        titleObj.transform.SetParent(dialogBox.transform, false);
         RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchoredPosition = new Vector2(0f, 215f);
-        titleRt.sizeDelta = new Vector2(500f, 40f);
-        var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = "CAI DAT HE THONG";
-        titleTmp.fontSize = 28;
-        titleTmp.fontStyle = FontStyles.Bold;
-        titleTmp.color = new Color(1f, 0.85f, 0.35f);
-        titleTmp.alignment = TextAlignmentOptions.Center;
-        settingsUI.titleText = titleTmp;
+        titleRt.anchorMin = new Vector2(0f, 1f);
+        titleRt.anchorMax = new Vector2(1f, 1f);
+        titleRt.pivot = new Vector2(0.5f, 1f);
+        titleRt.anchoredPosition = new Vector2(0f, -20f);
+        titleRt.sizeDelta = new Vector2(0f, 40f);
 
-        // Sliders & Controls
-        settingsUI.bgmSlider = CreateSliderRow(cardObj.transform, "BGM", "Nhac Nen (BGM)", 140f, out settingsUI.bgmLabel);
-        settingsUI.sfxSlider = CreateSliderRow(cardObj.transform, "SFX", "Hieu Ung (SFX)", 80f, out settingsUI.sfxLabel);
+        titleText = titleObj.AddComponent<TextMeshProUGUI>();
+        titleText.fontSize = 26;
+        titleText.fontStyle = FontStyles.Bold;
+        titleText.alignment = TextAlignmentOptions.Center;
+        titleText.color = new Color(1f, 0.85f, 0.4f);
+        titleText.text = "CÀI ĐẶT / SETTINGS";
 
-        // Language Row
-        CreateLanguageRow(cardObj.transform, 20f, settingsUI, out settingsUI.langLabel);
+        // 4. Content Area
+        float startY = -80f;
 
-        // Row 1 Action Buttons: Resume & Guide
-        CreateActionButton(cardObj.transform, "Btn_Resume", "TIEP TUC", new Vector2(-135f, -65f), new Vector2(240f, 46f), new Color(0.2f, 0.55f, 0.35f), () => settingsUI.ToggleSettings(), out settingsUI.resumeBtnText);
-        CreateActionButton(cardObj.transform, "Btn_Guide", "HUONG DAN CHOI", new Vector2(135f, -65f), new Vector2(240f, 46f), new Color(0.25f, 0.4f, 0.75f), () => settingsUI.ShowGuide(), out settingsUI.guideBtnText);
+        // BGM Slider Row
+        bgmLabel = CreateLabel(dialogBox.transform, "BGMLabel", "Âm nhạc (BGM):", new Vector2(40f, startY), new Vector2(150f, 30f));
+        bgmSlider = CreateSlider(dialogBox.transform, "BGMSlider", new Vector2(200f, startY), new Vector2(240f, 24f));
 
-        // Row 2 Action Buttons: Restart & Exit to Login!
-        CreateActionButton(cardObj.transform, "Btn_Restart", "CHOI LAI TU DAU", new Vector2(-135f, -135f), new Vector2(240f, 46f), new Color(0.7f, 0.4f, 0.2f), () => settingsUI.RestartRun(), out settingsUI.restartBtnText);
-        CreateActionButton(cardObj.transform, "Btn_ExitToLogin", "VE TRANG DANG NHAP", new Vector2(135f, -135f), new Vector2(240f, 46f), new Color(0.75f, 0.22f, 0.22f), () => settingsUI.ExitToLogin(), out settingsUI.exitBtnText);
+        startY -= 55f;
+        // SFX Slider Row
+        sfxLabel = CreateLabel(dialogBox.transform, "SFXLabel", "Hiệu ứng (SFX):", new Vector2(40f, startY), new Vector2(150f, 30f));
+        sfxSlider = CreateSlider(dialogBox.transform, "SFXSlider", new Vector2(200f, startY), new Vector2(240f, 24f));
 
-        // Row 3 Action Button: Reset All Progress (Hardcore Mode)
-        CreateActionButton(cardObj.transform, "Btn_ResetGameProgress", "RESET GAME (XOA TIEN TRINH)", new Vector2(0f, -195f), new Vector2(510f, 44f), new Color(0.68f, 0.12f, 0.16f), () => {
-            PlayerUpgradeManager.ResetEntireGameProgress();
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("LoginScene");
-        }, out _);
+        startY -= 65f;
+        // Language Toggle Row
+        languageLabel = CreateLabel(dialogBox.transform, "LangLabel", "Ngôn ngữ:", new Vector2(40f, startY), new Vector2(150f, 30f));
+        languageToggleButton = CreateStyledButton(dialogBox.transform, "Btn_LanguageToggle", new Vector2(200f, startY), new Vector2(240f, 40f), new Color(0.18f, 0.22f, 0.32f), out languageButtonText);
+        languageButtonText.text = LocalizationManager.IsVietnamese ? "[VI] TIẾNG VIỆT" : "[EN] ENGLISH";
 
-        // Guide Sub-Panel
-        settingsUI.guidePanel = CreateGuidePanel(canvas.transform, settingsUI);
-        settingsUI.guidePanel.SetActive(false);
+        startY -= 75f;
+        // Reset Data Button
+        resetDataButton = CreateStyledButton(dialogBox.transform, "Btn_ResetData", new Vector2(50f, startY), new Vector2(400f, 38f), new Color(0.35f, 0.12f, 0.12f), out resetDataBtnText);
+        resetDataBtnText.text = LocalizationManager.Get("BTN_RESET_DATA");
 
-        panelObj.SetActive(false);
+        startY -= 50f;
+        // Restart Button (Optional for gameplay)
+        restartButton = CreateStyledButton(dialogBox.transform, "Btn_Restart", new Vector2(50f, startY), new Vector2(190f, 42f), new Color(0.2f, 0.25f, 0.35f), out restartBtnText);
+        restartBtnText.text = LocalizationManager.Get("BTN_RESTART");
+
+        // Main Menu Button
+        mainMenuButton = CreateStyledButton(dialogBox.transform, "Btn_MainMenu", new Vector2(260f, startY), new Vector2(190f, 42f), new Color(0.2f, 0.25f, 0.35f), out mainMenuBtnText);
+        mainMenuBtnText.text = LocalizationManager.Get("BTN_MAIN_MENU");
+
+        startY -= 55f;
+        // Close / Resume Button
+        closeButton = CreateStyledButton(dialogBox.transform, "Btn_Close", new Vector2(50f, startY), new Vector2(400f, 44f), new Color(0.15f, 0.45f, 0.25f), out closeBtnText);
+        closeBtnText.text = LocalizationManager.Get("BTN_BACK");
+        resumeButton = closeButton;
+        resumeBtnText = closeBtnText;
+
+        // 5. Build Reset Confirmation Modal
+        BuildResetConfirmModal(dialogBox.transform);
+
+        settingsPanel.SetActive(false);
     }
 
-    private static Slider CreateSliderRow(Transform parent, string name, string label, float posY, out TextMeshProUGUI labelTmp)
+    private void BuildResetConfirmModal(Transform parent)
     {
-        GameObject row = CreateUIObject("Row_" + name, parent);
-        RectTransform rt = row.GetComponent<RectTransform>();
-        rt.anchoredPosition = new Vector2(0f, posY);
-        rt.sizeDelta = new Vector2(520f, 40f);
+        resetConfirmModal = new GameObject("ResetConfirmModal", typeof(RectTransform), typeof(CanvasRenderer));
+        resetConfirmModal.layer = 5;
+        resetConfirmModal.transform.SetParent(parent, false);
 
-        GameObject lblObj = CreateUIObject("Label", row.transform);
-        RectTransform lblRt = lblObj.GetComponent<RectTransform>();
-        lblRt.anchorMin = new Vector2(0f, 0.5f);
-        lblRt.anchorMax = new Vector2(0f, 0.5f);
-        lblRt.pivot = new Vector2(0f, 0.5f);
-        lblRt.sizeDelta = new Vector2(220f, 35f);
-        labelTmp = lblObj.AddComponent<TextMeshProUGUI>();
-        labelTmp.text = label;
-        labelTmp.fontSize = 18;
-        labelTmp.color = Color.white;
-        labelTmp.alignment = TextAlignmentOptions.Left;
+        RectTransform rt = resetConfirmModal.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.sizeDelta = Vector2.zero;
 
-        GameObject sliderObj = CreateUIObject("Slider", row.transform);
-        RectTransform sRt = sliderObj.GetComponent<RectTransform>();
-        sRt.anchorMin = new Vector2(1f, 0.5f);
-        sRt.anchorMax = new Vector2(1f, 0.5f);
-        sRt.pivot = new Vector2(1f, 0.5f);
-        sRt.sizeDelta = new Vector2(250f, 24f);
+        Image img = resetConfirmModal.AddComponent<Image>();
+        img.color = new Color(0.05f, 0.05f, 0.08f, 0.98f);
+
+        resetPromptText = CreateLabel(resetConfirmModal.transform, "PromptText", LocalizationManager.Get("MSG_RESET_CONFIRM"), new Vector2(30f, -120f), new Vector2(440f, 80f));
+        resetPromptText.fontSize = 20;
+        resetPromptText.alignment = TextAlignmentOptions.Center;
+
+        resetConfirmYesBtn = CreateStyledButton(resetConfirmModal.transform, "Btn_ConfirmYes", new Vector2(50f, -240f), new Vector2(180f, 45f), new Color(0.6f, 0.15f, 0.15f), out resetYesBtnText);
+        resetYesBtnText.text = LocalizationManager.Get("BTN_CONFIRM");
+
+        resetConfirmNoBtn = CreateStyledButton(resetConfirmModal.transform, "Btn_ConfirmNo", new Vector2(270f, -240f), new Vector2(180f, 45f), new Color(0.2f, 0.25f, 0.35f), out resetNoBtnText);
+        resetNoBtnText.text = LocalizationManager.Get("BTN_CANCEL");
+
+        resetConfirmModal.SetActive(false);
+    }
+
+    private TextMeshProUGUI CreateLabel(Transform parent, string name, string text, Vector2 anchoredPos, Vector2 size)
+    {
+        GameObject obj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer));
+        obj.transform.SetParent(parent, false);
+        RectTransform rt = obj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0f, 1f);
+        rt.anchorMax = new Vector2(0f, 1f);
+        rt.pivot = new Vector2(0f, 1f);
+        rt.anchoredPosition = anchoredPos;
+        rt.sizeDelta = size;
+
+        TextMeshProUGUI tmp = obj.AddComponent<TextMeshProUGUI>();
+        tmp.text = text;
+        tmp.fontSize = 18;
+        tmp.color = new Color(0.9f, 0.92f, 0.95f);
+        tmp.alignment = TextAlignmentOptions.Left;
+        return tmp;
+    }
+
+    private Slider CreateSlider(Transform parent, string name, Vector2 anchoredPos, Vector2 size)
+    {
+        GameObject sliderObj = new GameObject(name, typeof(RectTransform));
+        sliderObj.transform.SetParent(parent, false);
+        RectTransform rt = sliderObj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0f, 1f);
+        rt.anchorMax = new Vector2(0f, 1f);
+        rt.pivot = new Vector2(0f, 1f);
+        rt.anchoredPosition = anchoredPos;
+        rt.sizeDelta = size;
 
         Slider slider = sliderObj.AddComponent<Slider>();
-        slider.minValue = 0f;
-        slider.maxValue = 1f;
 
-        GameObject bgObj = CreateUIObject("Background", sliderObj.transform);
-        RectTransform bgRt = bgObj.GetComponent<RectTransform>();
-        bgRt.anchorMin = Vector2.zero;
-        bgRt.anchorMax = Vector2.one;
+        // Background
+        GameObject bg = new GameObject("Background", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        bg.transform.SetParent(sliderObj.transform, false);
+        RectTransform bgRt = bg.GetComponent<RectTransform>();
+        bgRt.anchorMin = new Vector2(0f, 0.25f);
+        bgRt.anchorMax = new Vector2(1f, 0.75f);
         bgRt.sizeDelta = Vector2.zero;
-        Image bgImg = bgObj.AddComponent<Image>();
-        bgImg.color = new Color(0.2f, 0.22f, 0.28f);
+        bg.GetComponent<Image>().color = new Color(0.15f, 0.18f, 0.25f, 1f);
 
-        GameObject fillArea = CreateUIObject("Fill Area", sliderObj.transform);
+        // Fill Area
+        GameObject fillArea = new GameObject("Fill Area", typeof(RectTransform));
+        fillArea.transform.SetParent(sliderObj.transform, false);
         RectTransform faRt = fillArea.GetComponent<RectTransform>();
-        faRt.anchorMin = Vector2.zero;
-        faRt.anchorMax = Vector2.one;
+        faRt.anchorMin = new Vector2(0f, 0.25f);
+        faRt.anchorMax = new Vector2(1f, 0.75f);
         faRt.sizeDelta = Vector2.zero;
 
-        GameObject fillObj = CreateUIObject("Fill", fillArea.transform);
-        RectTransform fRt = fillObj.GetComponent<RectTransform>();
-        fRt.anchorMin = Vector2.zero;
-        fRt.anchorMax = Vector2.one;
+        GameObject fill = new GameObject("Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        fill.transform.SetParent(fillArea.transform, false);
+        RectTransform fRt = fill.GetComponent<RectTransform>();
         fRt.sizeDelta = Vector2.zero;
-        Image fillImg = fillObj.AddComponent<Image>();
-        fillImg.color = new Color(0.25f, 0.75f, 0.95f);
+        fill.GetComponent<Image>().color = new Color(0.9f, 0.75f, 0.3f, 1f);
+
+        // Handle Slide Area
+        GameObject handleArea = new GameObject("Handle Slide Area", typeof(RectTransform));
+        handleArea.transform.SetParent(sliderObj.transform, false);
+        RectTransform haRt = handleArea.GetComponent<RectTransform>();
+        haRt.anchorMin = Vector2.zero;
+        haRt.anchorMax = Vector2.one;
+        haRt.sizeDelta = Vector2.zero;
+
+        GameObject handle = new GameObject("Handle", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        handle.transform.SetParent(handleArea.transform, false);
+        RectTransform hRt = handle.GetComponent<RectTransform>();
+        hRt.sizeDelta = new Vector2(24f, 24f);
+        handle.GetComponent<Image>().color = new Color(1f, 0.95f, 0.8f, 1f);
+
         slider.fillRect = fRt;
+        slider.handleRect = hRt;
+        slider.targetGraphic = handle.GetComponent<Image>();
+        slider.direction = Slider.Direction.LeftToRight;
+        slider.minValue = 0f;
+        slider.maxValue = 1f;
+        slider.value = 0.8f;
 
         return slider;
     }
 
-    private static void CreateLanguageRow(Transform parent, float posY, SettingsUI ui, out TextMeshProUGUI langLabelTmp)
+    private Button CreateStyledButton(Transform parent, string name, Vector2 anchoredPos, Vector2 size, Color bgColor, out TextMeshProUGUI btnText)
     {
-        GameObject row = CreateUIObject("Row_Language", parent);
-        RectTransform rt = row.GetComponent<RectTransform>();
-        rt.anchoredPosition = new Vector2(0f, posY);
-        rt.sizeDelta = new Vector2(520f, 40f);
+        GameObject btnObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        btnObj.transform.SetParent(parent, false);
 
-        GameObject lblObj = CreateUIObject("Label", row.transform);
-        RectTransform lblRt = lblObj.GetComponent<RectTransform>();
-        lblRt.anchorMin = new Vector2(0f, 0.5f);
-        lblRt.anchorMax = new Vector2(0f, 0.5f);
-        lblRt.pivot = new Vector2(0f, 0.5f);
-        lblRt.sizeDelta = new Vector2(220f, 35f);
-        langLabelTmp = lblObj.AddComponent<TextMeshProUGUI>();
-        langLabelTmp.text = "Ngon Ngu";
-        langLabelTmp.fontSize = 18;
-        langLabelTmp.color = Color.white;
-        langLabelTmp.alignment = TextAlignmentOptions.Left;
-
-        // VI Button
-        CreateSmallButton(row.transform, "Btn_VI", "Tieng Viet", new Vector2(90f, 0f), () => ui.SetLanguage(0));
-        // EN Button
-        CreateSmallButton(row.transform, "Btn_EN", "English", new Vector2(215f, 0f), () => ui.SetLanguage(1));
-    }
-
-    private static void CreateActionButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, System.Action onClick, out TextMeshProUGUI btnTxt)
-    {
-        GameObject obj = CreateUIObject(name, parent);
-        RectTransform rt = obj.GetComponent<RectTransform>();
-        rt.anchoredPosition = pos;
+        RectTransform rt = btnObj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0f, 1f);
+        rt.anchorMax = new Vector2(0f, 1f);
+        rt.pivot = new Vector2(0f, 1f);
+        rt.anchoredPosition = anchoredPos;
         rt.sizeDelta = size;
-        Image img = obj.AddComponent<Image>();
+
+        Image img = btnObj.GetComponent<Image>();
         img.color = bgColor;
-        Button btn = obj.AddComponent<Button>();
-        btn.targetGraphic = img;
-        btn.onClick.AddListener(() => onClick());
 
-        GameObject txtObj = CreateUIObject("Text", obj.transform);
-        RectTransform tRt = txtObj.GetComponent<RectTransform>();
-        tRt.anchorMin = Vector2.zero;
-        tRt.anchorMax = Vector2.one;
-        tRt.sizeDelta = Vector2.zero;
-        btnTxt = txtObj.AddComponent<TextMeshProUGUI>();
-        btnTxt.text = text;
-        btnTxt.fontSize = 16;
-        btnTxt.fontStyle = FontStyles.Bold;
-        btnTxt.color = Color.white;
-        btnTxt.alignment = TextAlignmentOptions.Center;
-        btnTxt.raycastTarget = false;
+        var outline = btnObj.AddComponent<Outline>();
+        outline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.8f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        Button btn = btnObj.GetComponent<Button>();
+        btn.targetGraphic = img;
+
+        GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        txtObj.transform.SetParent(btnObj.transform, false);
+        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.sizeDelta = Vector2.zero;
+
+        btnText = txtObj.AddComponent<TextMeshProUGUI>();
+        btnText.fontSize = 18;
+        btnText.fontStyle = FontStyles.Bold;
+        btnText.alignment = TextAlignmentOptions.Center;
+        btnText.color = Color.white;
+        btnText.raycastTarget = false;
+
+        return btn;
     }
 
-    private static void CreateSmallButton(Transform parent, string name, string text, Vector2 pos, System.Action onClick)
+    private void InitializeSliders()
     {
-        GameObject obj = CreateUIObject(name, parent);
-        RectTransform rt = obj.GetComponent<RectTransform>();
-        rt.anchoredPosition = pos;
-        rt.sizeDelta = new Vector2(110f, 36f);
-        Image img = obj.AddComponent<Image>();
-        img.color = new Color(0.25f, 0.3f, 0.4f);
-        Button btn = obj.AddComponent<Button>();
-        btn.targetGraphic = img;
-        btn.onClick.AddListener(() => onClick());
-
-        GameObject txtObj = CreateUIObject("Text", obj.transform);
-        RectTransform tRt = txtObj.GetComponent<RectTransform>();
-        tRt.anchorMin = Vector2.zero;
-        tRt.anchorMax = Vector2.one;
-        tRt.sizeDelta = Vector2.zero;
-        var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = text;
-        tmp.fontSize = 14;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.raycastTarget = false;
+        if (SoundManager.Instance != null)
+        {
+            if (bgmSlider != null) bgmSlider.value = SoundManager.Instance.GetBGMVolume();
+            if (sfxSlider != null) sfxSlider.value = SoundManager.Instance.GetSFXVolume();
+        }
+        else
+        {
+            if (bgmSlider != null) bgmSlider.value = PlayerPrefs.GetFloat("Game_BGM_Volume", 0.7f);
+            if (sfxSlider != null) sfxSlider.value = PlayerPrefs.GetFloat("Game_SFX_Volume", 0.8f);
+        }
     }
 
-    private static GameObject CreateGuidePanel(Transform canvas, SettingsUI ui)
+    private void HookListeners()
     {
-        GameObject panelObj = CreateUIObject("GuidePanel", canvas);
-        RectTransform panelRt = panelObj.GetComponent<RectTransform>();
-        panelRt.anchorMin = Vector2.zero;
-        panelRt.anchorMax = Vector2.one;
-        panelRt.offsetMin = Vector2.zero;
-        panelRt.offsetMax = Vector2.zero;
-
-        Image panelBg = panelObj.AddComponent<Image>();
-        panelBg.color = new Color(0.02f, 0.03f, 0.05f, 0.95f);
-
-        GameObject cardObj = CreateUIObject("GuideCard", panelObj.transform);
-        RectTransform cardRt = cardObj.GetComponent<RectTransform>();
-        cardRt.sizeDelta = new Vector2(760f, 540f);
-        cardRt.anchoredPosition = Vector2.zero;
-        Image cardBg = cardObj.AddComponent<Image>();
-        cardBg.color = new Color(0.12f, 0.14f, 0.2f);
-
-        // Guide Title
-        GameObject titleObj = CreateUIObject("GuideTitle", cardObj.transform);
-        RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchoredPosition = new Vector2(0f, 220f);
-        titleRt.sizeDelta = new Vector2(700f, 45f);
-        var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = LocalizationManager.Get("GUIDE_TITLE");
-        titleTmp.fontSize = 26;
-        titleTmp.fontStyle = FontStyles.Bold;
-        titleTmp.color = new Color(1f, 0.85f, 0.3f);
-        titleTmp.alignment = TextAlignmentOptions.Center;
-
-        // Guide Items
-        string[] guideKeys = new string[]
+        if (bgmSlider != null)
         {
-            "GUIDE_MOVE", "GUIDE_ATTACK", "GUIDE_DASH", "GUIDE_SKILL", "GUIDE_POTION", "GUIDE_SHRINE"
-        };
-
-        float startY = 145f;
-        for (int i = 0; i < guideKeys.Length; i++)
-        {
-            GameObject gObj = CreateUIObject("GuideItem_" + i, cardObj.transform);
-            RectTransform gRt = gObj.GetComponent<RectTransform>();
-            gRt.anchoredPosition = new Vector2(0f, startY - (i * 48f));
-            gRt.sizeDelta = new Vector2(680f, 40f);
-            var gTmp = gObj.AddComponent<TextMeshProUGUI>();
-            gTmp.text = LocalizationManager.Get(guideKeys[i]);
-            gTmp.fontSize = 17;
-            gTmp.color = new Color(0.9f, 0.92f, 0.96f);
-            gTmp.alignment = TextAlignmentOptions.Left;
+            bgmSlider.onValueChanged.RemoveAllListeners();
+            bgmSlider.onValueChanged.AddListener((val) => {
+                if (SoundManager.Instance != null) SoundManager.Instance.SetBGMVolume(val);
+                else
+                {
+                    PlayerPrefs.SetFloat("Game_BGM_Volume", val);
+                    PlayerPrefs.Save();
+                }
+            });
         }
 
-        // Close Guide Button
-        CreateActionButton(cardObj.transform, "Btn_CloseGuide", "DONG", new Vector2(0f, -205f), new Vector2(200f, 45f), new Color(0.7f, 0.25f, 0.25f), () => ui.CloseGuide(), out _);
+        if (sfxSlider != null)
+        {
+            sfxSlider.onValueChanged.RemoveAllListeners();
+            sfxSlider.onValueChanged.AddListener((val) => {
+                if (SoundManager.Instance != null) SoundManager.Instance.SetSFXVolume(val);
+                else
+                {
+                    PlayerPrefs.SetFloat("Game_SFX_Volume", val);
+                    PlayerPrefs.Save();
+                }
+            });
+        }
 
-        return panelObj;
+        if (languageToggleButton != null)
+        {
+            languageToggleButton.onClick.RemoveAllListeners();
+            languageToggleButton.onClick.AddListener(OnLanguageToggleClicked);
+        }
+        if (resumeButton != null)
+        {
+            resumeButton.onClick.RemoveAllListeners();
+            resumeButton.onClick.AddListener(CloseSettings);
+        }
+        if (restartButton != null)
+        {
+            restartButton.onClick.RemoveAllListeners();
+            restartButton.onClick.AddListener(OnRestartClicked);
+        }
+        if (mainMenuButton != null)
+        {
+            mainMenuButton.onClick.RemoveAllListeners();
+            mainMenuButton.onClick.AddListener(OnMainMenuClicked);
+        }
+        if (resetDataButton != null)
+        {
+            resetDataButton.onClick.RemoveAllListeners();
+            resetDataButton.onClick.AddListener(OnResetDataClicked);
+        }
+        if (closeButton != null && closeButton != resumeButton)
+        {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(CloseSettings);
+        }
+
+        if (resetConfirmYesBtn != null)
+        {
+            resetConfirmYesBtn.onClick.RemoveAllListeners();
+            resetConfirmYesBtn.onClick.AddListener(OnConfirmResetYes);
+        }
+        if (resetConfirmNoBtn != null)
+        {
+            resetConfirmNoBtn.onClick.RemoveAllListeners();
+            resetConfirmNoBtn.onClick.AddListener(OnConfirmResetNo);
+        }
+    }
+
+    public void UpdateLocalizedTexts()
+    {
+        if (titleText != null) titleText.text = LocalizationManager.Get("SETTINGS_TITLE");
+        if (bgmLabel != null) bgmLabel.text = LocalizationManager.Get("LBL_BGM");
+        if (sfxLabel != null) sfxLabel.text = LocalizationManager.Get("LBL_SFX");
+        if (languageLabel != null) languageLabel.text = LocalizationManager.Get("LBL_LANGUAGE");
+
+        if (languageButtonText != null)
+        {
+            languageButtonText.text = LocalizationManager.IsVietnamese ? "[VI] TIẾNG VIỆT" : "[EN] ENGLISH";
+        }
+
+        string curScene = SceneManager.GetActiveScene().name;
+        bool isGameplay = curScene.Contains("Map") || curScene == "SampleScene";
+
+        if (restartButton != null) restartButton.gameObject.SetActive(isGameplay);
+        if (mainMenuButton != null) mainMenuButton.gameObject.SetActive(isGameplay);
+
+        if (resumeBtnText != null) resumeBtnText.text = isGameplay ? LocalizationManager.Get("BTN_RESUME") : LocalizationManager.Get("BTN_BACK");
+        if (restartBtnText != null) restartBtnText.text = LocalizationManager.Get("BTN_RESTART");
+        if (mainMenuBtnText != null) mainMenuBtnText.text = LocalizationManager.Get("BTN_MAIN_MENU");
+        if (resetDataBtnText != null) resetDataBtnText.text = LocalizationManager.Get("BTN_RESET_DATA");
+        if (closeBtnText != null) closeBtnText.text = LocalizationManager.Get("BTN_BACK");
+
+        if (resetPromptText != null) resetPromptText.text = LocalizationManager.Get("MSG_RESET_CONFIRM");
+        if (resetYesBtnText != null) resetYesBtnText.text = LocalizationManager.Get("BTN_CONFIRM");
+        if (resetNoBtnText != null) resetNoBtnText.text = LocalizationManager.Get("BTN_CANCEL");
+    }
+
+    public void OpenSettings()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayMenuOpen();
+        if (settingsPanel == null) BuildSettingsPanelDirectly();
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(true);
+            settingsPanel.transform.SetAsLastSibling();
+        }
+        if (resetConfirmModal != null) resetConfirmModal.SetActive(false);
+        InitializeSliders();
+        HookListeners();
+        UpdateLocalizedTexts();
+    }
+
+    public void CloseSettings()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayMenuClose();
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (resetConfirmModal != null) resetConfirmModal.SetActive(false);
+    }
+
+    private void OnLanguageToggleClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        LocalizationManager.ToggleLanguage();
+        UpdateLocalizedTexts();
+        if (MainMenuManager.Instance != null)
+        {
+            MainMenuManager.Instance.UpdateAllTexts();
+        }
+    }
+
+    private void OnRestartClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        Time.timeScale = 1.0f;
+        Scene current = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(current.name);
+    }
+
+    private void OnMainMenuClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        Time.timeScale = 1.0f;
+        SceneManager.LoadScene("MainMenuScene");
+    }
+
+    private void OnResetDataClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        if (resetConfirmModal != null)
+        {
+            resetConfirmModal.SetActive(true);
+            resetConfirmModal.transform.SetAsLastSibling();
+        }
+    }
+
+    private void OnConfirmResetYes()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+        if (resetConfirmModal != null) resetConfirmModal.SetActive(false);
+        UpdateLocalizedTexts();
+        if (MainMenuManager.Instance != null)
+        {
+            MainMenuManager.Instance.UpdateCurrencyDisplay();
+            MainMenuManager.Instance.UpdateAllTexts();
+        }
+    }
+
+    private void OnConfirmResetNo()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        if (resetConfirmModal != null) resetConfirmModal.SetActive(false);
     }
 }

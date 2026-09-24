@@ -19,9 +19,9 @@ public class BossHealthBarUI : MonoBehaviour
 
     private Color[] phaseColors = new Color[]
     {
-        new Color(0.95f, 0.22f, 0.22f, 1f), // Phase 1 (Core/Cuối): Đỏ rực
-        new Color(0.75f, 0.35f, 0.95f, 1f), // Phase 2: Tím hư không
-        new Color(0.22f, 0.75f, 0.95f, 1f)  // Phase 3 (Mở đầu): Xanh ngọc
+        new Color(0.95f, 0.22f, 0.22f, 1f), // Phase 1: Do ruc
+        new Color(0.75f, 0.35f, 0.95f, 1f), // Phase 2: Tim ma thuat
+        new Color(0.22f, 0.75f, 0.95f, 1f)  // Phase 3: Xanh ngoc
     };
 
     private BotWheelAI currentBoss;
@@ -122,7 +122,7 @@ public class BossHealthBarUI : MonoBehaviour
         nameRt.sizeDelta = new Vector2(760f, 32f);
 
         var nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
-        nameTmp.text = "TITAN CRUSHER - CỖ MÁY TÀN TÍCH";
+        nameTmp.text = "CHUA TE NHEN - SKELETON KING";
         nameTmp.fontSize = 20;
         nameTmp.fontStyle = FontStyles.Bold;
         nameTmp.color = new Color(1f, 0.88f, 0.45f);
@@ -142,7 +142,7 @@ public class BossHealthBarUI : MonoBehaviour
         Image frameImg = frameObj.AddComponent<Image>();
         frameImg.color = new Color(0.06f, 0.07f, 0.10f, 0.95f);
 
-        // 3. Ghost Slider (Vết máu tụt chậm)
+        // 3. Ghost Slider
         GameObject ghostObj = new GameObject("GhostSlider");
         ghostObj.transform.SetParent(frameObj.transform, false);
         RectTransform ghostRt = ghostObj.AddComponent<RectTransform>();
@@ -217,7 +217,7 @@ public class BossHealthBarUI : MonoBehaviour
         phaseRt.sizeDelta = new Vector2(740f, 20f);
 
         var pTmp = phaseObj.AddComponent<TextMeshProUGUI>();
-        pTmp.text = "[ 3 THANH MÁU - PHASE I ]";
+        pTmp.text = "[ 3 THANH MAU - GIAI DOAN 1 ]";
         pTmp.fontSize = 13;
         pTmp.fontStyle = FontStyles.Bold;
         pTmp.color = new Color(0.5f, 0.85f, 1f);
@@ -311,17 +311,17 @@ public class BossHealthBarUI : MonoBehaviour
         {
             if (phase == 3)
             {
-                phaseText.text = "<color=#38BDF8>[III]</color>  [ GIAI ĐOẠN 1: MÁY XAY CỔ ĐẠI ]";
+                phaseText.text = LocalizationManager.T("<color=#38BDF8>[III]</color>  [ GIAI ĐOẠN 1: CHÚA TỂ THỨC TỈNH ]", "<color=#38BDF8>[III]</color>  [ PHASE 1: LORD AWAKENING ]");
                 phaseText.color = new Color(0.4f, 0.8f, 1f);
             }
             else if (phase == 2)
             {
-                phaseText.text = "<color=#C084FC>[II]</color>  [ GIAI ĐOẠN 2: HƯ KHÔNG THỨC TỈNH ]";
+                phaseText.text = LocalizationManager.T("<color=#C084FC>[II]</color>  [ GIAI ĐOẠN 2: BẦY NHỆN SĂN MỒI ]", "<color=#C084FC>[II]</color>  [ PHASE 2: HUNTING SWARM ]");
                 phaseText.color = new Color(0.85f, 0.45f, 1f);
             }
             else
             {
-                phaseText.text = "<color=#EF4444>[I]</color>  [ GIAI ĐOẠN 3: CUỒNG NỘ HUYẾT NGUYỆT ]";
+                phaseText.text = LocalizationManager.T("<color=#EF4444>[I]</color>  [ GIAI ĐOẠN 3: CUỒNG NỘ HUYẾT NGUYỆT ]", "<color=#EF4444>[I]</color>  [ PHASE 3: BLOOD MOON FRENZY ]");
                 phaseText.color = new Color(1f, 0.25f, 0.25f);
             }
         }
@@ -338,6 +338,7 @@ public class BossHealthBarUI : MonoBehaviour
         {
             isVisible = false;
             if (canvasGroup != null) canvasGroup.alpha = 0f;
+            gameObject.SetActive(false);
         }
     }
 
@@ -345,26 +346,27 @@ public class BossHealthBarUI : MonoBehaviour
     {
         isVisible = true;
         float t = 0f;
-        while (t < 0.4f)
+        while (t < 0.35f)
         {
             t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(0f, 1f, t / 0.4f);
+            if (canvasGroup != null) canvasGroup.alpha = Mathf.Lerp(0f, 1f, t / 0.35f);
             yield return null;
         }
-        canvasGroup.alpha = 1f;
+        if (canvasGroup != null) canvasGroup.alpha = 1f;
     }
 
     private IEnumerator FadeOutRoutine()
     {
         isVisible = false;
         float t = 0f;
-        while (t < 0.6f)
+        while (t < 0.45f)
         {
             t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(1f, 0f, t / 0.6f);
+            if (canvasGroup != null) canvasGroup.alpha = Mathf.Lerp(1f, 0f, t / 0.45f);
             yield return null;
         }
-        canvasGroup.alpha = 0f;
+        if (canvasGroup != null) canvasGroup.alpha = 0f;
+        gameObject.SetActive(false);
     }
 
     private IEnumerator GhostFillRoutine(float targetVal)

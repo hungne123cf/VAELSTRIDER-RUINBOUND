@@ -56,6 +56,10 @@ public class PlayerCombat : MonoBehaviour
         skillCooldown = 30.0f;
 
         AutoAlignCombat();
+        if (enemyLayers.value == 0)
+        {
+            enemyLayers = ~0; // Chem tat ca cac layer co IDamageable
+        }
 
         if (attackPoint == null)
         {
@@ -128,7 +132,7 @@ public class PlayerCombat : MonoBehaviour
     public void PerformAttack()
     {
         if (isUltiActive) return;
-        if (playerController != null && playerController.IsDashing()) return;
+        if (playerController != null && (playerController.IsDashing() || playerController.IsStunned)) return;
 
         if (Time.frameCount == lastAttackFrame) return;
         lastAttackFrame = Time.frameCount;
@@ -195,7 +199,7 @@ public class PlayerCombat : MonoBehaviour
 
     public bool PerformSpecialSkill()
     {
-        if (skillCooldownTimer > 0f || isUltiActive) return false;
+        if (skillCooldownTimer > 0f || isUltiActive || (playerController != null && playerController.IsStunned)) return false;
 
         var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
         if (energySys != null && !energySys.TryConsumeEnergy(50f))

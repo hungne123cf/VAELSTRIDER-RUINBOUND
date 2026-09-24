@@ -3,8 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Bang chi so chi tiet nhan vat & ky nang (Character Stats & Skill Details).
-/// Cho phep mo bat cu luc nao qua nut bam [STATS (C)] tren HUD hoac phim tat 'C'.
+/// Bảng chỉ số chi tiết nhân vật & kỹ năng (Character Stats & Skill Details).
+/// Hỗ trợ chuyển đổi ngôn ngữ linh hoạt 100% Tiếng Việt / English.
 /// </summary>
 public class CharacterStatsUI : MonoBehaviour
 {
@@ -21,7 +21,9 @@ public class CharacterStatsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI ultiCdStatText;
 
     // 3 Skill Detail Cards
+    [SerializeField] private TextMeshProUGUI attackCardTitle;
     [SerializeField] private TextMeshProUGUI attackCardDesc;
+    [SerializeField] private TextMeshProUGUI dashCardTitle;
     [SerializeField] private TextMeshProUGUI dashCardDesc;
     [SerializeField] private TextMeshProUGUI ultiCardTitle;
     [SerializeField] private TextMeshProUGUI ultiCardDesc;
@@ -31,9 +33,18 @@ public class CharacterStatsUI : MonoBehaviour
         Instance = this;
     }
 
+    void Start()
+    {
+        LocalizationManager.OnLanguageChanged += RefreshData;
+    }
+
+    void OnDestroy()
+    {
+        LocalizationManager.OnLanguageChanged -= RefreshData;
+    }
+
     void Update()
     {
-        // Phim tat C de bat/tat bang chi so chi tiet
         if (Input.GetKeyDown(KeyCode.C))
         {
             Toggle();
@@ -74,6 +85,7 @@ public class CharacterStatsUI : MonoBehaviour
 
         string selectedCharId = charMgr != null ? charMgr.GetSelectedCharacterId() : "Vaelstrider";
         bool isMaid = (selectedCharId == CharacterManager.CHAR_MAID);
+        bool isVi = LocalizationManager.IsVietnamese;
 
         int atkBonus = upgradeMgr != null ? upgradeMgr.GetAttackBonus() : 0;
         int hpBonus = upgradeMgr != null ? upgradeMgr.GetHealthBonus() : 0;
@@ -90,66 +102,102 @@ public class CharacterStatsUI : MonoBehaviour
         if (characterTitleText != null)
         {
             characterTitleText.text = isMaid 
-                ? "CHIEN BINH MAID (WARRIOR MAID)" 
-                : "HIEP SI VAELSTRIDER";
+                ? (isVi ? "HẦU GÁI CHIẾN BINH (ELYSIA)" : "WARRIOR MAID (ELYSIA)")
+                : (isVi ? "HIỆP SĨ VAELSTRIDER" : "KNIGHT VAELSTRIDER");
         }
         if (characterSubtitleText != null)
         {
             characterSubtitleText.text = isMaid
-                ? "Phong cach: Tuyet ky Trang Khuyet | Tram sat tuc thi & Khong che Boss"
-                : "Phong cach: Kiem Si Co Tu | Dot kich lien hoan & Bao kiem quet rong";
+                ? (isVi ? "Phong cách: Tuyệt kỹ Trăng Khuyết | Trảm sát tức thì & Khống chế Boss" : "Style: Crescent Slash | Instant Execute & Boss Stun")
+                : (isVi ? "Phong cách: Kiếm Sĩ Cổ Tộc | Đột kích liên hoàn & Bão kiếm quét rộng" : "Style: Ancient Blade | Multi-slash Combo & Area Storm");
         }
 
         // 4 Quick Stats
-        if (hpStatText != null) hpStatText.text = $"MAU (HP)\n<color=#55FF88>{totalHp}</color> <size=12>(+ {hpBonus})</size>";
-        if (atkStatText != null) atkStatText.text = $"TAN CONG (ATK)\n<color=#FF5566>{totalAtk}</color> <size=12>(+ {atkBonus})</size>";
-        if (dashCdStatText != null) dashCdStatText.text = $"LUOT (DASH CD)\n<color=#44DDFF>{finalDashCd:F1}s</color> <size=12>(- {dashCdRed:F1}s)</size>";
-        if (ultiCdStatText != null) ultiCdStatText.text = $"TUYET KY (ULTI CD)\n<color=#FFAA33>{finalUltiCd:F1}s</color> <size=12>(- {ultiCdRed:F1}s)</size>";
+        if (hpStatText != null)
+        {
+            string label = isVi ? "MÁU (HP)" : "HEALTH (HP)";
+            hpStatText.text = $"{label}\n<color=#55FF88>{totalHp}</color> <size=12>(+ {hpBonus})</size>";
+        }
+        if (atkStatText != null)
+        {
+            string label = isVi ? "TẤN CÔNG (ATK)" : "ATTACK (ATK)";
+            atkStatText.text = $"{label}\n<color=#FF5566>{totalAtk}</color> <size=12>(+ {atkBonus})</size>";
+        }
+        if (dashCdStatText != null)
+        {
+            string label = isVi ? "LƯỚT (DASH CD)" : "DASH (CD)";
+            dashCdStatText.text = $"{label}\n<color=#44DDFF>{finalDashCd:F1}s</color> <size=12>(- {dashCdRed:F1}s)</size>";
+        }
+        if (ultiCdStatText != null)
+        {
+            string label = isVi ? "TUYỆT KỸ (ULTI CD)" : "ULTIMATE (CD)";
+            ultiCdStatText.text = $"{label}\n<color=#FFAA33>{finalUltiCd:F1}s</color> <size=12>(- {ultiCdRed:F1}s)</size>";
+        }
 
         // Card 1: Attack
+        if (attackCardTitle != null)
+        {
+            attackCardTitle.text = isVi ? "1. ĐÒN ĐÁNH CƠ BẢN (BASIC ATTACK)" : "1. BASIC ATTACK";
+        }
         if (attackCardDesc != null)
         {
-            attackCardDesc.text = 
-                $"- <b>Sat thuong:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Goc 5 + Cap kiem +{atkBonus}). Tam danh: 1.35m.\n" +
-                $"- <b>Hinh thuc:</b> Combo 2 nhip kiem lien hoan [Phim J / Chuot trai / Nut Tan cong].\n" +
-                $"- <b>Hoi phuc:</b> Moi don chem trung hoi <color=#38BDF8><b>+8 NL</b></color> & tich <color=#FBBF24><b>+15 Noi Nang</b></color>.\n" +
-                $"  - <i>Nhip 1:</i> Vung kiem quet ngang nhanh, lam cham nhe quai.\n" +
-                $"  - <i>Nhip 2:</i> Bo kiem chi mang don sat thuong ket hop day lui doi thu.";
+            attackCardDesc.text = isVi
+                ? $"- <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Gốc 5 + Cấp kiếm +{atkBonus}). Tầm đánh: 1.35m.\n" +
+                  $"- <b>Hình thức:</b> Combo 2 nhịp kiếm liên hoàn [Phím J / Chuột trái / Nút Tấn công].\n" +
+                  $"- <b>Hồi phục:</b> Mỗi đòn chém trúng hồi <color=#38BDF8><b>+8 NL</b></color> & tích <color=#FBBF24><b>+15 Nội Năng</b></color>."
+                : $"- <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Base 5 + Sword +{atkBonus}). Range: 1.35m.\n" +
+                  $"- <b>Pattern:</b> 2-Hit Strike Combo [Key J / Left Click / Attack Button].\n" +
+                  $"- <b>Regen:</b> Hits restore <color=#38BDF8><b>+8 Energy</b></color> & gain <color=#FBBF24><b>+15 Inner Power</b></color>.";
         }
 
         // Card 2: Dash
+        if (dashCardTitle != null)
+        {
+            dashCardTitle.text = isVi ? "2. LƯỚT TỐC BIẾN & NÉ ĐÒN (DASH)" : "2. DASH & DODGE";
+        }
         if (dashCardDesc != null)
         {
-            dashCardDesc.text = 
-                $"- <b>Tieu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hoi chieu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> [Phim Space / Nut Luot].\n" +
-                $"- <b>Sat thuong:</b> <color=#FFFF66><b>0 DMG</b></color> (Ky nang ne don thuan tuy, tuyet doi khong gay sat thuong).\n" +
-                $"- <b>Dac tinh:</b> Luot toc bien 12 m/s theo huong di chuyen, de lai tan anh bong ma. <color=#55FF88><b>Bat tu hoan toan trong 0.2s</b></color> de ne moi don danh va dan cua quai.";
+            dashCardDesc.text = isVi
+                ? $"- <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> [Phím Space / Nút Lướt].\n" +
+                  $"- <b>Sát thương:</b> <color=#FFFF66><b>0 DMG</b></color> (Kỹ năng né đòn thuần túy).\n" +
+                  $"- <b>Đặc tính:</b> Lướt tốc biến 12 m/s theo hướng di chuyển. <color=#55FF88><b>Bất tử hoàn toàn trong 0.2s</b></color> để né mọi đòn đánh."
+                : $"- <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> [Space / Dash Button].\n" +
+                  $"- <b>Damage:</b> <color=#FFFF66><b>0 DMG</b></color> (Pure evasion skill).\n" +
+                  $"- <b>Trait:</b> Dash at 12 m/s in movement direction. <color=#55FF88><b>Invincible for 0.2s</b></color> dodging all attacks.";
         }
 
         // Card 3: Ulti
         if (ultiCardTitle != null)
         {
             ultiCardTitle.text = isMaid 
-                ? "TUYET KY: QUET TAN KE YEU (SWEEP THE WEAK)" 
-                : "TUYET KY: CON LOC TAN TICH (RUIN WHIRLWIND)";
+                ? (isVi ? "3. TUYỆT KỸ: QUÉT TẬN KẺ YẾU" : "3. ULTIMATE: SWEEP THE WEAK") 
+                : (isVi ? "3. TUYỆT KỸ: CƠN LỐC TÀN TÍCH" : "3. ULTIMATE: RUIN WHIRLWIND");
         }
         if (ultiCardDesc != null)
         {
             if (isMaid)
             {
-                ultiCardDesc.text = 
-                    $"- <b>Tieu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hoi chieu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> (Goc 30.0s - Giam tru {ultiCdRed:F1}s) [Phim F / Nut Ulti].\n" +
-                    $"- <b>Dien anh:</b> Ngung dong thoi gian slow-mo, camera can canh, mat loe sang ruc ro va phat loi thoai don dep phe tich!\n" +
-                    $"- <b>Hieu ung uy luc:</b> Vung dao khi trang khuyet goc rong 140 do ban kinh 4.8m:\n" +
-                    $"  - <color=#FF4455><b>Quai thuong:</b> KET LIEU NGAY LAP TUC (Insta-Kill/Execute)</color> toan bo quai trong tam quet.\n" +
-                    $"  - <color=#FFCC33><b>Boss:</b> Gay 250 DMG (+{ultiDmgBonus}) va LAM CHOANG BOSS TRONG 2.5 GIAY</color>!";
+                ultiCardDesc.text = isVi
+                    ? $"- <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> [Phím F / Nút Ulti].\n" +
+                      $"- <b>Điện ảnh:</b> Ngưng đọng thời gian slow-mo, camera cận cảnh rực rỡ!\n" +
+                      $"- <b>Hiệu ứng:</b> Vung đao khí trăng khuyết góc rộng 140 độ bán kính 4.8m:\n" +
+                      $"  - <color=#FF4455><b>Quái thường:</b> KẾT LIỄU NGAY LẬP TỨC (Insta-Kill)</color>.\n" +
+                      $"  - <color=#FFCC33><b>Boss:</b> Gây 250 DMG (+{ultiDmgBonus}) và LÀM CHOÁNG BOSS 2.5 GIÂY</color>!"
+                    : $"- <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> [Key F / Ulti Button].\n" +
+                      $"- <b>Cinematic:</b> Slow-motion camera zoom with glowing flash!\n" +
+                      $"- <b>Effect:</b> Slashes wide crescent energy blade across 4.8m:\n" +
+                      $"  - <color=#FF4455><b>Normal Mobs:</b> INSTANT EXECUTION (Insta-Kill)</color>.\n" +
+                      $"  - <color=#FFCC33><b>Boss:</b> Deals 250 DMG (+{ultiDmgBonus}) & STUNS FOR 2.5s</color>!";
             }
             else
             {
-                ultiCardDesc.text = 
-                    $"- <b>Tieu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hoi chieu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> (Goc 30.0s - Giam tru {ultiCdRed:F1}s) [Phim F / Nut Ulti].\n" +
-                    $"- <b>Hieu ung uy luc:</b> Van noi luc trieu hoi Con Bao Kiem Co Tu ban kinh 2.8m quet 4 dot lien tuc.\n" +
-                    $"- <b>Sat thuong:</b> Hut toan bo quai xung quanh vao tam bao, don sat thuong dien rong uy luc va phat no hat vang moi ke dich can duong!";
+                ultiCardDesc.text = isVi
+                    ? $"- <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> [Phím F / Nút Ulti].\n" +
+                      $"- <b>Hiệu ứng:</b> Vận nội lực triệu hồi Cơn Bão Kiếm bán kính 2.8m quét 4 đợt liên tục.\n" +
+                      $"- <b>Sát thương:</b> Hút quái xung quanh vào tâm bão, dồn sát thương diện rộng uy lực!"
+                    : $"- <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> [Key F / Ulti Button].\n" +
+                      $"- <b>Effect:</b> Summons ancient Ruin Whirlwind in 2.8m radius striking 4 times.\n" +
+                      $"- <b>Damage:</b> Pulls nearby enemies to storm center dealing massive AOE damage!";
             }
         }
     }
@@ -167,7 +215,6 @@ public class CharacterStatsUI : MonoBehaviour
         Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
         if (rootCanvas == null) return null;
 
-        // 1. Tao Nut Bam [STATS] tren HUD (-78, -20) ben canh nut Setting (-20, -20)
         Transform existingBtn = rootCanvas.transform.Find("Btn_CharacterStats");
         if (existingBtn == null)
         {
@@ -200,151 +247,126 @@ public class CharacterStatsUI : MonoBehaviour
             txtRt.anchorMax = Vector2.one;
             txtRt.sizeDelta = Vector2.zero;
 
-            var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = "STATS";
+            TextMeshProUGUI tmp = txtObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = "INFO";
             tmp.fontSize = 14;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = new Color(0.4f, 0.92f, 1f, 1f);
+            tmp.color = new Color(0.4f, 0.8f, 1f);
             tmp.raycastTarget = false;
         }
 
-        // 2. Tao Cua So Modal CharacterStatsPanel
-        Transform existingModal = rootCanvas.transform.Find("CharacterStatsPanel");
-        if (existingModal != null)
+        Transform existingPanel = rootCanvas.transform.Find("CharacterStatsPanel");
+        if (existingPanel != null)
         {
-            Instance = existingModal.GetComponent<CharacterStatsUI>();
-            if (Instance != null) return Instance;
+            var comp = existingPanel.GetComponent<CharacterStatsUI>();
+            if (comp != null) return comp;
         }
 
-        GameObject modalObj = CreateUIObject("CharacterStatsPanel", rootCanvas.transform);
-        RectTransform modalRt = modalObj.GetComponent<RectTransform>();
-        modalRt.anchorMin = Vector2.zero;
-        modalRt.anchorMax = Vector2.one;
-        modalRt.offsetMin = Vector2.zero;
-        modalRt.offsetMax = Vector2.zero;
+        // Tạo Panel Character Stats
+        GameObject panelObj = CreateUIObject("CharacterStatsPanel", rootCanvas.transform);
+        RectTransform pRt = panelObj.GetComponent<RectTransform>();
+        pRt.anchorMin = new Vector2(0.5f, 0.5f);
+        pRt.anchorMax = new Vector2(0.5f, 0.5f);
+        pRt.pivot = new Vector2(0.5f, 0.5f);
+        pRt.anchoredPosition = Vector2.zero;
+        pRt.sizeDelta = new Vector2(850f, 540f);
 
-        Image modalBg = modalObj.AddComponent<Image>();
-        modalBg.color = new Color(0.04f, 0.05f, 0.08f, 0.88f); // Backdrop mo sang trong
+        Image panelBg = panelObj.AddComponent<Image>();
+        panelBg.color = new Color(0.06f, 0.08f, 0.13f, 0.98f);
 
-        Instance = modalObj.AddComponent<CharacterStatsUI>();
+        var pOutline = panelObj.AddComponent<Outline>();
+        pOutline.effectColor = new Color(0.35f, 0.75f, 1f, 0.85f);
+        pOutline.effectDistance = new Vector2(2f, -2f);
 
-        // Card Box chinh giua man hinh (860 x 580)
-        GameObject boxObj = CreateUIObject("StatsBox", modalObj.transform);
-        RectTransform boxRt = boxObj.GetComponent<RectTransform>();
-        boxRt.sizeDelta = new Vector2(860f, 580f);
-        boxRt.anchoredPosition = Vector2.zero;
+        var uiComp = panelObj.AddComponent<CharacterStatsUI>();
 
-        Image boxBg = boxObj.AddComponent<Image>();
-        boxBg.color = new Color(0.08f, 0.10f, 0.16f, 0.98f);
+        // Header Title
+        GameObject headerObj = CreateUIObject("HeaderTitle", panelObj.transform);
+        RectTransform hRt = headerObj.GetComponent<RectTransform>();
+        hRt.anchorMin = new Vector2(0f, 1f);
+        hRt.anchorMax = new Vector2(1f, 1f);
+        hRt.pivot = new Vector2(0.5f, 1f);
+        hRt.anchoredPosition = new Vector2(0f, -15f);
+        hRt.sizeDelta = new Vector2(-40f, 35f);
 
-        var boxOutline = boxObj.AddComponent<Outline>();
-        boxOutline.effectColor = new Color(0.28f, 0.65f, 0.95f, 0.85f);
-        boxOutline.effectDistance = new Vector2(2f, -2f);
+        uiComp.characterTitleText = headerObj.AddComponent<TextMeshProUGUI>();
+        uiComp.characterTitleText.fontSize = 22;
+        uiComp.characterTitleText.fontStyle = FontStyles.Bold;
+        uiComp.characterTitleText.alignment = TextAlignmentOptions.Center;
+        uiComp.characterTitleText.color = new Color(1f, 0.85f, 0.35f);
 
-        // Header: Tieu de
-        GameObject titleObj = CreateUIObject("HeaderTitle", boxObj.transform);
-        RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchorMin = new Vector2(0f, 1f);
-        titleRt.anchorMax = new Vector2(1f, 1f);
-        titleRt.pivot = new Vector2(0.5f, 1f);
-        titleRt.anchoredPosition = new Vector2(0f, -14f);
-        titleRt.sizeDelta = new Vector2(0f, 32f);
+        // Subtitle
+        GameObject subObj = CreateUIObject("HeaderSubtitle", panelObj.transform);
+        RectTransform sRt = subObj.GetComponent<RectTransform>();
+        sRt.anchorMin = new Vector2(0f, 1f);
+        sRt.anchorMax = new Vector2(1f, 1f);
+        sRt.pivot = new Vector2(0.5f, 1f);
+        sRt.anchoredPosition = new Vector2(0f, -48f);
+        sRt.sizeDelta = new Vector2(-40f, 24f);
 
-        Instance.characterTitleText = titleObj.AddComponent<TextMeshProUGUI>();
-        Instance.characterTitleText.fontSize = 22;
-        Instance.characterTitleText.fontStyle = FontStyles.Bold;
-        Instance.characterTitleText.alignment = TextAlignmentOptions.Center;
-        Instance.characterTitleText.color = new Color(1f, 0.85f, 0.35f);
+        uiComp.characterSubtitleText = subObj.AddComponent<TextMeshProUGUI>();
+        uiComp.characterSubtitleText.fontSize = 13;
+        uiComp.characterSubtitleText.alignment = TextAlignmentOptions.Center;
+        uiComp.characterSubtitleText.color = new Color(0.6f, 0.85f, 1f);
 
-        // Header: Phu de
-        GameObject subObj = CreateUIObject("HeaderSubtitle", boxObj.transform);
-        RectTransform subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchorMin = new Vector2(0f, 1f);
-        subRt.anchorMax = new Vector2(1f, 1f);
-        subRt.pivot = new Vector2(0.5f, 1f);
-        subRt.anchoredPosition = new Vector2(0f, -44f);
-        subRt.sizeDelta = new Vector2(0f, 22f);
+        // 4 Badges Container
+        GameObject badgesRow = CreateUIObject("BadgesRow", panelObj.transform);
+        RectTransform bRowRt = badgesRow.GetComponent<RectTransform>();
+        bRowRt.anchorMin = new Vector2(0.5f, 1f);
+        bRowRt.anchorMax = new Vector2(0.5f, 1f);
+        bRowRt.pivot = new Vector2(0.5f, 1f);
+        bRowRt.anchoredPosition = new Vector2(0f, -80f);
+        bRowRt.sizeDelta = new Vector2(810f, 50f);
 
-        Instance.characterSubtitleText = subObj.AddComponent<TextMeshProUGUI>();
-        Instance.characterSubtitleText.fontSize = 12;
-        Instance.characterSubtitleText.fontStyle = FontStyles.Italic;
-        Instance.characterSubtitleText.alignment = TextAlignmentOptions.Center;
-        Instance.characterSubtitleText.color = new Color(0.75f, 0.85f, 0.95f);
+        float bWidth = 195f;
+        float bSpace = 10f;
+        uiComp.hpStatText = CreateMiniBadge(badgesRow.transform, 0, bWidth, bSpace, new Color(0.12f, 0.28f, 0.18f, 0.95f));
+        uiComp.atkStatText = CreateMiniBadge(badgesRow.transform, 1, bWidth, bSpace, new Color(0.32f, 0.14f, 0.16f, 0.95f));
+        uiComp.dashCdStatText = CreateMiniBadge(badgesRow.transform, 2, bWidth, bSpace, new Color(0.12f, 0.22f, 0.32f, 0.95f));
+        uiComp.ultiCdStatText = CreateMiniBadge(badgesRow.transform, 3, bWidth, bSpace, new Color(0.32f, 0.24f, 0.12f, 0.95f));
 
-        // Close Button [X]
-        GameObject closeBtnObj = CreateUIObject("Btn_Close", boxObj.transform);
+        // 3 Cards
+        CreateSkillCard(panelObj.transform, "Card_Attack", -145f, 110f, "1. BASIC ATTACK", out uiComp.attackCardDesc, out uiComp.attackCardTitle);
+        CreateSkillCard(panelObj.transform, "Card_Dash", -265f, 105f, "2. DASH", out uiComp.dashCardDesc, out uiComp.dashCardTitle);
+        CreateSkillCard(panelObj.transform, "Card_Ulti", -380f, 115f, "3. ULTIMATE", out uiComp.ultiCardDesc, out uiComp.ultiCardTitle);
+
+        // Close Button
+        GameObject closeBtnObj = CreateUIObject("Btn_Close", panelObj.transform);
         RectTransform cRt = closeBtnObj.GetComponent<RectTransform>();
         cRt.anchorMin = new Vector2(1f, 1f);
         cRt.anchorMax = new Vector2(1f, 1f);
         cRt.pivot = new Vector2(1f, 1f);
-        cRt.anchoredPosition = new Vector2(-16f, -16f);
-        cRt.sizeDelta = new Vector2(36f, 36f);
+        cRt.anchoredPosition = new Vector2(-10f, -10f);
+        cRt.sizeDelta = new Vector2(35f, 35f);
 
         Image cImg = closeBtnObj.AddComponent<Image>();
-        cImg.color = new Color(0.75f, 0.18f, 0.22f, 1f);
+        cImg.color = new Color(0.3f, 0.12f, 0.14f, 0.9f);
 
-        Button closeBtn = closeBtnObj.AddComponent<Button>();
-        closeBtn.targetGraphic = cImg;
-        closeBtn.onClick.AddListener(() => Instance.Close());
+        Button cBtn = closeBtnObj.AddComponent<Button>();
+        cBtn.targetGraphic = cImg;
+        cBtn.onClick.AddListener(uiComp.Close);
 
-        GameObject cTxtObj = CreateUIObject("X", closeBtnObj.transform);
-        RectTransform cxRt = cTxtObj.GetComponent<RectTransform>();
-        cxRt.anchorMin = Vector2.zero;
-        cxRt.anchorMax = Vector2.one;
-        cxRt.sizeDelta = Vector2.zero;
+        GameObject cTxtObj = CreateUIObject("Text", closeBtnObj.transform);
+        RectTransform ctRt = cTxtObj.GetComponent<RectTransform>();
+        ctRt.anchorMin = Vector2.zero;
+        ctRt.anchorMax = Vector2.one;
+        ctRt.sizeDelta = Vector2.zero;
 
-        var cxTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
-        cxTmp.text = "X";
-        cxTmp.fontSize = 20;
-        cxTmp.fontStyle = FontStyles.Bold;
-        cxTmp.alignment = TextAlignmentOptions.Center;
-        cxTmp.color = Color.white;
-        cxTmp.raycastTarget = false;
+        TextMeshProUGUI cTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
+        cTmp.text = "X";
+        cTmp.fontSize = 18;
+        cTmp.fontStyle = FontStyles.Bold;
+        cTmp.alignment = TextAlignmentOptions.Center;
+        cTmp.color = Color.white;
 
-        // 4 Quick Stat Badges Strip
-        GameObject statsStrip = CreateUIObject("StatsStrip", boxObj.transform);
-        RectTransform ssRt = statsStrip.GetComponent<RectTransform>();
-        ssRt.anchorMin = new Vector2(0.5f, 1f);
-        ssRt.anchorMax = new Vector2(0.5f, 1f);
-        ssRt.pivot = new Vector2(0.5f, 1f);
-        ssRt.anchoredPosition = new Vector2(0f, -80f);
-        ssRt.sizeDelta = new Vector2(810f, 52f);
-
-        float badgeWidth = 195f;
-        float badgeSpacing = 10f;
-        Instance.hpStatText = CreateStatBadge(statsStrip.transform, "Badge_HP", 0, badgeWidth, badgeSpacing, new Color(0.12f, 0.24f, 0.18f, 0.9f));
-        Instance.atkStatText = CreateStatBadge(statsStrip.transform, "Badge_ATK", 1, badgeWidth, badgeSpacing, new Color(0.26f, 0.14f, 0.16f, 0.9f));
-        Instance.dashCdStatText = CreateStatBadge(statsStrip.transform, "Badge_DashCD", 2, badgeWidth, badgeSpacing, new Color(0.12f, 0.20f, 0.28f, 0.9f));
-        Instance.ultiCdStatText = CreateStatBadge(statsStrip.transform, "Badge_UltiCD", 3, badgeWidth, badgeSpacing, new Color(0.28f, 0.20f, 0.12f, 0.9f));
-
-        // 3 Detail Cards (Attack, Dash, Ulti)
-        float cardY = -145f;
-        float cardHeight = 125f;
-        float cardSpacing = 135f;
-
-        // Card 1: Attack
-        CreateSkillCard(boxObj.transform, "Card_Attack", cardY, cardHeight, 
-            "DON DANH THUONG (BASIC ATTACK) [J / Chuot trai / Nut Danh]",
-            out Instance.attackCardDesc);
-
-        // Card 2: Dash
-        CreateSkillCard(boxObj.transform, "Card_Dash", cardY - cardSpacing, cardHeight, 
-            "LUOT BONG MA (SHADOW DASH) [Space / Nut Luot]",
-            out Instance.dashCardDesc);
-
-        // Card 3: Ulti
-        CreateSkillCard(boxObj.transform, "Card_Ulti", cardY - (cardSpacing * 2), cardHeight + 25f, 
-            "CHIEU CUOI TUYET KY (ULTIMATE SKILL) [F / Nut Tuyet Ky]",
-            out Instance.ultiCardDesc, out Instance.ultiCardTitle);
-
-        modalObj.SetActive(false);
-        return Instance;
+        panelObj.SetActive(false);
+        return uiComp;
     }
 
-    private static TextMeshProUGUI CreateStatBadge(Transform parent, string name, int index, float width, float spacing, Color bgColor)
+    private static TextMeshProUGUI CreateMiniBadge(Transform parent, int index, float width, float spacing, Color bgColor)
     {
-        GameObject badgeObj = CreateUIObject(name, parent);
+        GameObject badgeObj = CreateUIObject($"Badge_{index}", parent);
         RectTransform bRt = badgeObj.GetComponent<RectTransform>();
         bRt.anchorMin = new Vector2(0f, 0.5f);
         bRt.anchorMax = new Vector2(0f, 0.5f);
@@ -374,12 +396,6 @@ public class CharacterStatsUI : MonoBehaviour
         return tmp;
     }
 
-    private static void CreateSkillCard(Transform parent, string name, float yPos, float height, string title, out TextMeshProUGUI descTmp)
-    {
-        TextMeshProUGUI unusedTitleTmp;
-        CreateSkillCard(parent, name, yPos, height, title, out descTmp, out unusedTitleTmp);
-    }
-
     private static void CreateSkillCard(Transform parent, string name, float yPos, float height, string title, out TextMeshProUGUI descTmp, out TextMeshProUGUI titleTmp)
     {
         GameObject cardObj = CreateUIObject(name, parent);
@@ -397,7 +413,6 @@ public class CharacterStatsUI : MonoBehaviour
         outline.effectColor = new Color(0.25f, 0.55f, 0.85f, 0.65f);
         outline.effectDistance = new Vector2(1.5f, -1.5f);
 
-        // Header Title Text
         GameObject tObj = CreateUIObject("Title", cardObj.transform);
         RectTransform tRt = tObj.GetComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0f, 1f);
@@ -412,7 +427,6 @@ public class CharacterStatsUI : MonoBehaviour
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = new Color(1f, 0.88f, 0.38f);
 
-        // Description Body Text
         GameObject dObj = CreateUIObject("Desc", cardObj.transform);
         RectTransform dRt = dObj.GetComponent<RectTransform>();
         dRt.anchorMin = new Vector2(0f, 0f);

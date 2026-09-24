@@ -201,13 +201,20 @@ public class EndingCreditsUI : MonoBehaviour
 
         if (statsText != null)
         {
-            statsText.text = 
-                $"<color=#FFE066>REALMS PURIFIED: 2 / 2</color>\n" +
-                $"<color=#E0E6ED>Chapter 1:</color> Sunken Sepulcher  <color=#52F0FF>[CLEARED]</color>\n" +
-                $"<color=#E0E6ED>Chapter 2:</color> Valley Ruin of Ancients  <color=#52F0FF>[PURIFIED]</color>\n\n" +
-                $"<color=#FFE066>TOTAL AETHEL SHARDS:</color> {shards}\n" +
-                $"<color=#FFE066>CLEAR RANK:</color> <color=#FF5577>S+ GRAND CHAMPION</color>\n\n" +
-                $"<i>\"The cycle of decay is broken. The world of Vaelstrider is at peace.\"</i>";
+            bool isVi = LocalizationManager.IsVietnamese;
+            statsText.text = isVi
+                ? $"<color=#FFE066>ẢI ĐÃ HOÀN THÀNH: 2 / 2</color>\n" +
+                  $"<color=#E0E6ED>Chương 1:</color> Tàn Tích Thung Lũng  <color=#52F0FF>[VƯỢT QUA]</color>\n" +
+                  $"<color=#E0E6ED>Chương 2:</color> Ngục Tối Rực Lửa  <color=#52F0FF>[THANH TẨY]</color>\n\n" +
+                  $"<color=#FFE066>TỔNG LINH HỒN:</color> {shards}\n" +
+                  $"<color=#FFE066>XẾP HẠNG TỔNG KẾT:</color> <color=#FF5577>S+ ĐẠI CHIẾN TƯỚNG</color>\n\n" +
+                  $"<i>\"Vòng lặp diệt vong đã bị phá vỡ. Vương quốc Vaelstrider đã tìm lại thái bình.\"</i>"
+                : $"<color=#FFE066>REALMS PURIFIED: 2 / 2</color>\n" +
+                  $"<color=#E0E6ED>Chapter 1:</color> Sunken Sepulcher  <color=#52F0FF>[CLEARED]</color>\n" +
+                  $"<color=#E0E6ED>Chapter 2:</color> Valley Ruin of Ancients  <color=#52F0FF>[PURIFIED]</color>\n\n" +
+                  $"<color=#FFE066>TOTAL AETHEL SHARDS:</color> {shards}\n" +
+                  $"<color=#FFE066>CLEAR RANK:</color> <color=#FF5577>S+ GRAND CHAMPION</color>\n\n" +
+                  $"<i>\"The cycle of decay is broken. The world of Vaelstrider is at peace.\"</i>";
         }
     }
 
@@ -363,7 +370,8 @@ public class EndingCreditsUI : MonoBehaviour
         sTitleRt.anchoredPosition = new Vector2(0f, 180f);
         sTitleRt.sizeDelta = new Vector2(600f, 50f);
         var sTitleTmp = sTitleObj.AddComponent<TextMeshProUGUI>();
-        sTitleTmp.text = "JOURNEY COMPLETED";
+        var sTitleLoc = sTitleObj.AddComponent<LocalizedText>();
+        sTitleLoc.SetTexts("HOÀN THÀNH HÀNH TRÌNH", "JOURNEY COMPLETED");
         sTitleTmp.fontSize = 32;
         sTitleTmp.fontStyle = FontStyles.Bold;
         sTitleTmp.color = new Color(1f, 0.88f, 0.35f);
@@ -388,8 +396,8 @@ public class EndingCreditsUI : MonoBehaviour
         sBtnRt.anchoredPosition = new Vector2(0f, -170f);
         sBtnRt.sizeDelta = new Vector2(560f, 60f);
 
-        CreateActionButton(sBtnContainer.transform, new Vector2(-140f, 0f), "PLAY AGAIN", new Color(0.2f, 0.38f, 0.72f, 1f), ui.OnClickPlayAgain);
-        CreateActionButton(sBtnContainer.transform, new Vector2(140f, 0f), "MAIN MENU", new Color(0.24f, 0.58f, 0.35f, 1f), ui.OnClickMainMenu);
+        CreateActionButton(sBtnContainer.transform, new Vector2(-140f, 0f), LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Color(0.2f, 0.38f, 0.72f, 1f), ui.OnClickPlayAgain);
+        CreateActionButton(sBtnContainer.transform, new Vector2(140f, 0f), LocalizationManager.T("TRANG CHỦ", "MAIN MENU"), new Color(0.24f, 0.58f, 0.35f, 1f), ui.OnClickMainMenu);
 
         // Đảm bảo TopControls luôn ở lớp trên cùng
         topBar.transform.SetAsLastSibling();
