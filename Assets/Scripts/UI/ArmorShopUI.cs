@@ -102,26 +102,42 @@ public class ArmorShopUI : MonoBehaviour
     {
         if (instance != null) return instance;
         instance = Object.FindAnyObjectByType<ArmorShopUI>(FindObjectsInactive.Include);
-        if (instance != null) return instance;
+
+        // Found an existing ArmorShopUI - but is it properly built?
+        // If dialogBox is null, it's a stale scene-serialized object with no runtime UI wired.
+        // Destroy it and create a fresh one.
+        if (instance != null)
+        {
+            if (instance.dialogBox != null) return instance; // Properly built, just return it
+            // Stale - destroy and fall through to rebuild
+            if (Application.isPlaying) Object.Destroy(instance.gameObject);
+            else Object.DestroyImmediate(instance.gameObject);
+            instance = null;
+        }
 
         Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
         if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
         if (canvas == null) return null;
 
+        // Also destroy any stale named ArmorShopModal in scene hierarchy
         var existing = canvas.transform.Find("ArmorShopModal");
         if (existing != null)
         {
-            instance = existing.GetComponent<ArmorShopUI>();
-            if (instance == null) instance = existing.gameObject.AddComponent<ArmorShopUI>();
-            return instance;
+            if (Application.isPlaying) Object.Destroy(existing.gameObject);
+            else Object.DestroyImmediate(existing.gameObject);
         }
 
         GameObject shopObj = new GameObject("ArmorShopModal", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         shopObj.layer = 5;
         shopObj.transform.SetParent(canvas.transform, false);
 
-        instance = shopObj.AddComponent<ArmorShopUI>();
-        instance.BuildUI(canvas);
+        instance = shopObj.AddComponent<ArmorShopUI>(); // Triggers Awake() synchronously
+        // Awake may have already called BuildUI if it had a parent canvas.
+        // Only call BuildUI here if Awake didn't already build it.
+        if (instance.dialogBox == null)
+        {
+            instance.BuildUI(canvas);
+        }
         shopObj.SetActive(false);
         return instance;
     }
@@ -129,18 +145,46 @@ public class ArmorShopUI : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        gameObject.layer = 5; // UI layer
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
         InitDatabase();
         LoadPlayerIdleFrames();
         EnsureEventSystemActive();
+
+        // If dialogBox is null the UI hasn't been built yet (e.g. this component was added to a
+        // pre-existing scene object without calling BuildUI). Build now.
+        if (dialogBox == null)
+        {
+            Canvas parentCanvas = GetComponentInParent<Canvas>();
+            if (parentCanvas == null) parentCanvas = Object.FindAnyObjectByType<Canvas>();
+            if (parentCanvas != null) BuildUI(parentCanvas);
+        }
     }
 
     private void OnEnable()
     {
         isOpen = true;
         EnsureEventSystemActive();
-        BindUIReferencesAndEvents();
+
+        // Ensure CanvasGroup is always interactive when opened
+        if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+
+        // If dialogBox is missing (can happen if scene was loaded with old data), rebuild
+        if (dialogBox == null)
+        {
+            Canvas parentCanvas = GetComponentInParent<Canvas>();
+            if (parentCanvas == null) parentCanvas = Object.FindAnyObjectByType<Canvas>();
+            if (parentCanvas != null) BuildUI(parentCanvas);
+        }
+
         LoadPlayerIdleFrames();
         RefreshUI();
 
@@ -1870,6 +1914,15 @@ public class ArmorShopUI : MonoBehaviour
     {
         isOpen = true;
         EnsureEventSystemActive();
+
+        // Final safety: if UI was never built (somehow), build it now before making visible
+        if (dialogBox == null)
+        {
+            Canvas parentCanvas = GetComponentInParent<Canvas>();
+            if (parentCanvas == null) parentCanvas = Object.FindAnyObjectByType<Canvas>();
+            if (parentCanvas != null) BuildUI(parentCanvas);
+        }
+
         gameObject.SetActive(true);
         transform.SetAsLastSibling();
 
