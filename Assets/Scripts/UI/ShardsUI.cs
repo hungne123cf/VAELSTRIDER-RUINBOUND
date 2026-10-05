@@ -4,7 +4,7 @@ using TMPro;
 
 public class ShardsUI : MonoBehaviour
 {
-    [Header("UI Component (Ho tro ca Text truyen thong va TextMeshPro)")]
+    [Header("UI Component (Hỗ trợ cả Text truyền thống và TextMeshPro)")]
     [SerializeField] private Text legacyText;
     [SerializeField] private TextMeshProUGUI tmpText;
 
@@ -17,23 +17,39 @@ public class ShardsUI : MonoBehaviour
         FindTextComponents();
     }
 
+    void OnEnable()
+    {
+        FindTextComponents();
+        RefreshDisplay();
+    }
+
     void Start()
     {
         FindTextComponents();
         AccountDatabase.EnsureActiveSessionLoaded();
+        HookInventory();
+        RefreshDisplay();
+    }
 
-        // Hiển thị ngay từ AccountDatabase (tránh hiện 0 khi chưa có PlayerInventory)
-        long initShards = AccountDatabase.GetAethelShards();
-        SetDisplayText(initShards);
+    private void FindTextComponents()
+    {
+        if (legacyText == null) legacyText = GetComponentInChildren<Text>();
+        if (tmpText == null) tmpText = GetComponentInChildren<TextMeshProUGUI>();
+    }
 
-        inventory = FindAnyObjectByType<PlayerInventory>();
+    private void HookInventory()
+    {
         if (inventory == null)
         {
-            var pc = FindAnyObjectByType<PlayerController>();
-            if (pc != null)
+            inventory = FindAnyObjectByType<PlayerInventory>();
+            if (inventory == null)
             {
-                inventory = pc.GetComponent<PlayerInventory>();
-                if (inventory == null) inventory = pc.gameObject.AddComponent<PlayerInventory>();
+                var pc = FindAnyObjectByType<PlayerController>();
+                if (pc != null)
+                {
+                    inventory = pc.GetComponent<PlayerInventory>();
+                    if (inventory == null) inventory = pc.gameObject.AddComponent<PlayerInventory>();
+                }
             }
         }
 
@@ -41,14 +57,14 @@ public class ShardsUI : MonoBehaviour
         {
             inventory.OnShardsChanged -= UpdateShardsDisplay;
             inventory.OnShardsChanged += UpdateShardsDisplay;
-            UpdateShardsDisplay(inventory.GetShards());
         }
     }
 
-    private void FindTextComponents()
+    public void RefreshDisplay()
     {
-        if (legacyText == null) legacyText = GetComponentInChildren<Text>();
-        if (tmpText == null) tmpText = GetComponentInChildren<TextMeshProUGUI>();
+        HookInventory();
+        long amount = (inventory != null) ? inventory.GetShards() : AccountDatabase.GetAethelShards();
+        SetDisplayText(amount);
     }
 
     void OnDestroy()
@@ -84,8 +100,6 @@ public class ShardsUI : MonoBehaviour
     {
         FindTextComponents();
         SetDisplayText(amount);
-
-        Debug.Log($"<color=green>[UI UPDATED]</color> So tien Aethel Shards tren man hinh: {amount}");
 
         // Chỉ chạy hiệu ứng khi GameObject đang active, tránh crash coroutine
         if (gameObject.activeInHierarchy)

@@ -105,10 +105,20 @@ public static class LocalizationManager
         { "HERO_VAEL_SKILL", ("Tuyệt Kỹ: Cơn Lốc Tàn Tích", "Skill: Ruin Whirlwind") },
         { "HERO_VAEL_SKILL_DESC", ("Vận nội lực xoay kiếm tạo bão quét nát quái xung quanh.", "Spins ancient blade to unleash a storm cleaving nearby foes.") },
 
-        { "HERO_MAID_NAME", ("Hầu Gái Sát Thủ", "Combat Maid (Elysia)") },
-        { "HERO_MAID_ROLE", ("Sát Thủ / Tốc Biến Nhanh Nhẹn", "Assassin / Agile Shadow") },
-        { "HERO_MAID_SKILL", ("Tuyệt Kỹ: Quét Tận Kẻ Yếu", "Skill: Sweep the Weak") },
-        { "HERO_MAID_SKILL_DESC", ("Lướt nhanh như chớp và vung đao khí trăng khuyết kết liễu kẻ thù.", "Flashes through the battlefield executing normal foes & stunning bosses.") },
+        { "HERO_RONIN_NAME", ("Phong Lôi Lãng Khách", "Gale Ronin") },
+        { "HERO_RONIN_ROLE", ("Bạch Dạ Kiếm Khách / Phong Ấn & Ảo Ảnh", "Phantom Blade / Wind Marks & Phantom Cleave") },
+        { "HERO_RONIN_SKILL", ("Tuyệt Kỹ: Bão Phong Trảm", "Skill: Phantom Cleave") },
+        { "HERO_RONIN_SKILL_DESC", ("Đòn chém quét 180° tích Phong Ấn bộc phá bạo kích & lốc xoáy. Tuyệt kỹ lướt ảo ảnh chém liên hoàn.", "180° cleave stacking Wind Marks for critical bursts & vortex. Special skill unleashes phantom dash slashes.") },
+
+        { "HERO_MAID_NAME", ("Phong Lôi Lãng Khách", "Gale Ronin") },
+        { "HERO_MAID_ROLE", ("Bạch Dạ Kiếm Khách / Phong Ấn & Ảo Ảnh", "Phantom Blade / Wind Marks & Phantom Cleave") },
+        { "HERO_MAID_SKILL", ("Tuyệt Kỹ: Bão Phong Trảm", "Skill: Phantom Cleave") },
+        { "HERO_MAID_SKILL_DESC", ("Đòn chém quét 180° tích Phong Ấn bộc phá bạo kích & lốc xoáy. Tuyệt kỹ lướt ảo ảnh chém liên hoàn.", "180° cleave stacking Wind Marks for critical bursts & vortex. Special skill unleashes phantom dash slashes.") },
+
+        { "HERO_AZURE_NAME", ("Lam Kiếm Sĩ", "Azure Blade") },
+        { "HERO_AZURE_ROLE", ("Trọng Kiếm Khí / Sóng Kiếm Tầm Xa", "Heavy Crescent / Piercing Waves") },
+        { "HERO_AZURE_SKILL", ("Tuyệt Kỹ: Bão Sóng Kiếm", "Skill: Crescent Tempest") },
+        { "HERO_AZURE_SKILL_DESC", ("Chém xuất sóng kiếm xuyên thấu quái. Tuyệt kỹ phóng 5 luồng đại kiếm khí nan quạt.", "Slashes unleash piercing waves. Special skill fires 5 massive crescent waves in a fan spread.") },
 
         { "STAT_HP", ("MÁU", "HP") },
         { "STAT_ATK", ("TẤN CÔNG", "ATK") },

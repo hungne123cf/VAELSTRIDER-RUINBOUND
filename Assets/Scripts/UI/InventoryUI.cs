@@ -214,6 +214,45 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        LocalizationManager.OnLanguageChanged -= RefreshLanguageTexts;
+        LocalizationManager.OnLanguageChanged += RefreshLanguageTexts;
+    }
+
+    void OnDisable()
+    {
+        LocalizationManager.OnLanguageChanged -= RefreshLanguageTexts;
+    }
+
+    private void RefreshLanguageTexts()
+    {
+        if (titleText != null)
+            titleText.text = LocalizationManager.T("TÚI ĐỒ & ĐÀI QUAY VẬN MỆNH", "INVENTORY & GACHA VAULT");
+        if (subtitleText != null)
+            subtitleText.text = LocalizationManager.T("Lưu trữ trang bị, khoáng thạch & Dùng Linh Hồn quay Thần Binh cổ đại", "Store battle gear & spend Aethel Shards to summon mythic artifacts");
+
+        if (isOpen)
+        {
+            if (gemSocketModalObj != null && gemSocketModalObj.activeSelf)
+            {
+                RefreshGemSocketModal();
+            }
+            else if (currentCategoryFilter == 99)
+            {
+                UpdateGachaBalanceDisplay();
+            }
+            else
+            {
+                RefreshGrid();
+                if (!string.IsNullOrEmpty(selectedItemId))
+                {
+                    InspectItem(selectedItemId);
+                }
+            }
+        }
+    }
+
     public static InventoryUI EnsureUIExists()
     {
         Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();

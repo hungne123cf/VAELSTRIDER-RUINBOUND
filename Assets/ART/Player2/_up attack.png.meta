@@ -17,6 +17,18 @@ TextureImporter:
   - first:
       213: -216096936941801959
     second: _up attack_4
+  - first:
+      213: 2763182838146757282
+    second: _up attack_0_0
+  - first:
+      213: -7144986831620687792
+    second: _up attack_0_1
+  - first:
+      213: 7037977510595836693
+    second: _up attack_1_0
+  - first:
+      213: 1780439347096855980
+    second: _up attack_1_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -36,7 +48,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -49,7 +61,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -63,7 +75,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -87,7 +99,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -151,111 +163,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: _up attack_0
+      name: _up attack_0_0
       rect:
         serializedVersion: 2
-        x: 15
-        y: 77
-        width: 34
-        height: 47
+        x: 0
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 842db2f459f4908a0800000000000000
-      internalID: -6338447497850269112
+      spriteID: 2a2713db62cc85620800000000000000
+      internalID: 2763182838146757282
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up attack_1
+      name: _up attack_0_1
       rect:
         serializedVersion: 2
-        x: 81
-        y: 85
-        width: 32
-        height: 38
+        x: 64
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ec1a795b161b46e30800000000000000
-      internalID: 4495913361239155150
+      spriteID: 058b7681558e7dc90800000000000000
+      internalID: -7144986831620687792
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up attack_2
+      name: _up attack_1_0
       rect:
         serializedVersion: 2
-        x: 88
-        y: 77
-        width: 16
-        height: 34
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd8364c8db81f2040800000000000000
-      internalID: 4624942544714086619
+      spriteID: 51bb040d14beba160800000000000000
+      internalID: 7037977510595836693
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up attack_3
+      name: _up attack_1_1
       rect:
         serializedVersion: 2
-        x: 18
-        y: 40
-        width: 11
-        height: 14
+        x: 64
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 01543d2a7d1bbc020800000000000000
-      internalID: 2363177969193796880
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: _up attack_4
-      rect:
-        serializedVersion: 2
-        x: 24
-        y: 13
-        width: 24
-        height: 41
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 91ea8841bf4400df0800000000000000
-      internalID: -216096936941801959
+      spriteID: ca526db272465b810800000000000000
+      internalID: 1780439347096855980
       vertices: []
       indices: 
       edges: []
@@ -264,7 +254,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 961ea432bbcf50c47a936d95a6c1ec95
     internalID: 0
     vertices: []
     indices: 
@@ -272,13 +262,17 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       _up attack_0: -6338447497850269112
+      _up attack_0_0: 2763182838146757282
+      _up attack_0_1: -7144986831620687792
       _up attack_1: 4495913361239155150
+      _up attack_1_0: 7037977510595836693
+      _up attack_1_1: 1780439347096855980
       _up attack_2: 4624942544714086619
-      _up attack_3: 2363177969193796880
-      _up attack_4: -216096936941801959
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

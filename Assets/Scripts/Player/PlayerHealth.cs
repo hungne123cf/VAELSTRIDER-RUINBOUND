@@ -304,6 +304,18 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             var res = Resources.LoadAll<Sprite>("Player3/Sword_Death");
             if (res != null && res.Length > 0) return res;
         }
+        else if (curHero.Contains("ronin") || curHero.Contains("gale") || GetComponent<GaleRoninSkill>() != null)
+        {
+#if UNITY_EDITOR
+            var sprites = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player2/_pick up.png");
+            if (sprites != null)
+            {
+                var list = new List<Sprite>();
+                foreach (var o in sprites) if (o is Sprite s) list.Add(s);
+                if (list.Count > 0) return list.OrderByDescending(s => s.rect.y).ThenBy(s => s.rect.x).Take(5).ToArray();
+            }
+#endif
+        }
 
         return Resources.LoadAll<Sprite>("Player/player_death");
     }
@@ -399,13 +411,20 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         StopAllCoroutines();
         StartCoroutine(ReviveInvulnerabilityRoutine());
 
-        // 4. Hieu ung am thanh
+        // 4. Hieu ung am thanh & Khoi phuc HUD dieu khien
+        GameAutoBootstrap.SetGameplayHUDVisible(true);
+        var shardsUI = FindAnyObjectByType<ShardsUI>();
+        if (shardsUI != null)
+        {
+            shardsUI.RefreshDisplay();
+        }
+
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.PlayShardPickup();
         }
 
-        Debug.Log("<color=green>[PLAYER REVIVED]</color> Chien binh da duoc hoi sinh thanh cong voi 100% HP va khien bao ve tam thoi!");
+        Debug.Log("<color=green>[PLAYER REVIVED]</color> Chien binh da duoc hoi sinh thanh cong voi 100% HP, toan bo HUD duoc khoi phuc va co khien bao ve tam thoi!");
     }
 
     private IEnumerator ReviveInvulnerabilityRoutine()

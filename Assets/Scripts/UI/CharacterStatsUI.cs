@@ -105,7 +105,7 @@ public class CharacterStatsUI : MonoBehaviour
 
         string selectedCharId = charMgr != null ? charMgr.GetSelectedCharacterId() : "Vaelstrider";
         bool isAzure = (selectedCharId == CharacterManager.CHAR_AZURE_BLADE);
-        bool isMaid = (selectedCharId == CharacterManager.CHAR_MAID);
+        bool isRonin = (selectedCharId == CharacterManager.CHAR_GALE_RONIN || selectedCharId == "Maid");
         bool isVi = LocalizationManager.IsVietnamese;
 
         int atkBonus = upgradeMgr != null ? upgradeMgr.GetAttackBonus() : 0;
@@ -117,18 +117,21 @@ public class CharacterStatsUI : MonoBehaviour
         // Gem Socket Bonuses
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out int sAtk, out int sHp, out int sDef, out float sLifesteal, out float sCd, out float sShard, out float sRegen);
 
-        int totalAtk = (isAzure ? 6 : 5) + atkBonus + sAtk;
-        int totalHp = (isAzure ? 110 : 100) + hpBonus + sHp;
+        int baseAtk = isAzure ? 6 : (isRonin ? 6 : 5);
+        int baseHp = isAzure ? 110 : (isRonin ? 95 : 100);
+        int totalAtk = baseAtk + atkBonus + sAtk;
+        int totalHp = baseHp + hpBonus + sHp;
         float finalDashCd = Mathf.Max(1.0f, 5.0f - dashCdRed);
-        float finalUltiCd = Mathf.Max(5.0f, (isAzure ? 18.0f : 30.0f) - ultiCdRed - (30.0f * sCd));
+        float baseUltiCd = isAzure ? 18.0f : (isRonin ? 15.0f : 30.0f);
+        float finalUltiCd = Mathf.Max(5.0f, baseUltiCd - ultiCdRed - (30.0f * sCd));
 
         // Header Title
         if (characterTitleText != null)
         {
             if (isAzure)
                 characterTitleText.text = isVi ? "LAM KIẾM SĨ (AZURE BLADE)" : "AZURE BLADE (SWORDSWOMAN)";
-            else if (isMaid)
-                characterTitleText.text = isVi ? "HẦU GÁI CHIẾN BINH (ELYSIA)" : "WARRIOR MAID (ELYSIA)";
+            else if (isRonin)
+                characterTitleText.text = isVi ? "PHONG LÔI LÃNG KHÁCH (GALE RONIN)" : "GALE RONIN (PHANTOM BLADE)";
             else
                 characterTitleText.text = isVi ? "HIỆP SĨ VAELSTRIDER" : "KNIGHT VAELSTRIDER";
         }
@@ -136,8 +139,8 @@ public class CharacterStatsUI : MonoBehaviour
         {
             if (isAzure)
                 characterSubtitleText.text = isVi ? "Phong cách: Trọng Kiếm Khí | Chém chậm xuất Sóng Kiếm xuyên quái & Bão kiếm nan quạt" : "Style: Heavy Crescent | Slow Slashes with Piercing Waves & Fan Spread Tempest";
-            else if (isMaid)
-                characterSubtitleText.text = isVi ? "Phong cách: Tuyệt kỹ Trăng Khuyết | Trảm sát tức thì & Khống chế Boss" : "Style: Crescent Slash | Instant Execute & Boss Stun";
+            else if (isRonin)
+                characterSubtitleText.text = isVi ? "Phong cách: Bán Nguyệt Phong Ấn | Chém quét 180° tích tầng Phong Ấn bộc phá & Lốc xoáy mini" : "Style: Crescent Wind | 180° Cleave, Wind Marks Stack Burst & Mini Vortex";
             else
                 characterSubtitleText.text = isVi ? "Phong cách: Kiếm Sĩ Cổ Tộc | Đột kích liên hoàn & Bão kiếm quét rộng" : "Style: Ancient Blade | Multi-slash Combo & Area Storm";
         }
@@ -167,15 +170,39 @@ public class CharacterStatsUI : MonoBehaviour
         // Card 1: Attack
         if (attackCardTitle != null)
         {
-            attackCardTitle.text = isVi ? "1. ĐÒN ĐÁNH CƠ BẢN" : "1. BASIC ATTACK";
+            if (isAzure)
+                attackCardTitle.text = isVi ? "1. TRỌNG KIẾM & SÓNG KIẾM" : "1. HEAVY SLICE & SWORD WAVE";
+            else if (isRonin)
+                attackCardTitle.text = isVi ? "1. PHONG NGUYỆT TRẢM (180°)" : "1. GALE CRESCENT SWEEP";
+            else
+                attackCardTitle.text = isVi ? "1. ĐÒN ĐÁNH CƠ BẢN" : "1. BASIC ATTACK";
         }
         if (attackCardDesc != null)
         {
-            attackCardDesc.text = isVi
-                ? $"• <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Tầm đánh: 1.35m)\n" +
-                  $"• <b>Hiệu ứng:</b> Đánh trúng hồi <color=#38BDF8><b>+8 Năng Lượng</b></color>"
-                : $"• <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Range: 1.35m)\n" +
-                  $"• <b>Effect:</b> Restores <color=#38BDF8><b>+8 Energy</b></color> on hit";
+            if (isAzure)
+            {
+                attackCardDesc.text = isVi
+                    ? $"• <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Phóng <color=#55FFFF><b>Sóng Kiếm</b></color> xuyên quái (Tầm 6.5m)\n" +
+                      $"• <b>Hiệu ứng:</b> Đánh trúng hồi <color=#38BDF8><b>+6 Năng Lượng</b></color>"
+                    : $"• <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Fires <color=#55FFFF><b>Piercing Sword Wave</b></color> (6.5m)\n" +
+                      $"• <b>Effect:</b> Restores <color=#38BDF8><b>+6 Energy</b></color> on hit";
+            }
+            else if (isRonin)
+            {
+                attackCardDesc.text = isVi
+                    ? $"• <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Quét bán nguyệt 180° cực nhanh\n" +
+                      $"• <b>Nội tại:</b> Tích <b>Phong Ấn</b> (3 tầng nổ <color=#FFAA33><b>240% Crit</b></color> + tạo <b>Lốc Xoáy hút quái</b>)"
+                    : $"• <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Fast 180° Crescent Cleave\n" +
+                      $"• <b>Passive:</b> Stacks <b>Wind Marks</b> (3 stacks detonates for <color=#FFAA33><b>240% Crit</b></color> + <b>Vacuum Vortex</b>)";
+            }
+            else
+            {
+                attackCardDesc.text = isVi
+                    ? $"• <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Tầm đánh: 1.35m)\n" +
+                      $"• <b>Hiệu ứng:</b> Đánh trúng hồi <color=#38BDF8><b>+8 Năng Lượng</b></color>"
+                    : $"• <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Range: 1.35m)\n" +
+                      $"• <b>Effect:</b> Restores <color=#38BDF8><b>+8 Energy</b></color> on hit";
+            }
         }
 
         // Card 2: Dash
@@ -195,19 +222,30 @@ public class CharacterStatsUI : MonoBehaviour
         // Card 3: Ulti
         if (ultiCardTitle != null)
         {
-            ultiCardTitle.text = isMaid 
-                ? (isVi ? "3. TUYỆT KỸ: QUÉT TẬN KẺ YẾU" : "3. ULTIMATE: SWEEP THE WEAK") 
-                : (isVi ? "3. TUYỆT KỸ: CƠN LỐC TÀN TÍCH" : "3. ULTIMATE: RUIN WHIRLWIND");
+            if (isAzure)
+                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: BÃO SÓNG KIẾM" : "3. ULTIMATE: CRESCENT TEMPEST";
+            else if (isRonin)
+                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: BÃO PHONG TRẢM" : "3. ULTIMATE: PHANTOM CLEAVE";
+            else
+                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: CƠN LỐC TÀN TÍCH" : "3. ULTIMATE: RUIN WHIRLWIND";
         }
         if (ultiCardDesc != null)
         {
-            if (isMaid)
+            if (isAzure)
             {
                 ultiCardDesc.text = isVi
                     ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Hiệu ứng:</b> <color=#FF4455><b>Kết liễu quái thường</b></color> | Gây choáng Boss 2.5s"
+                      $"• <b>Hiệu ứng:</b> Phóng 5 luồng đại kiếm khí nan quạt quét sạch chiến trường"
                     : $"• <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Effect:</b> <color=#FF4455><b>Insta-kill normal mobs</b></color> | Stun Boss 2.5s";
+                      $"• <b>Effect:</b> Fires 5 massive fan-spread crescent waves piercing enemies";
+            }
+            else if (isRonin)
+            {
+                ultiCardDesc.text = isVi
+                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>40 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Hiệu ứng:</b> Ảo ảnh lướt trảm 4 đợt liên hoàn + kích nổ toàn bộ Phong Ấn quái"
+                    : $"• <b>Cost:</b> <color=#38BDF8><b>40 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Effect:</b> 4-strike phantom dash slashes + detonates all enemy Wind Marks";
             }
             else
             {

@@ -77,6 +77,11 @@ public class MatchTimerUI : MonoBehaviour
         isRunning = true;
     }
 
+    public void ResumeTimer()
+    {
+        isRunning = true;
+    }
+
     public void ResetAndStartTimer()
     {
         elapsedTime = 0f;

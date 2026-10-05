@@ -16,6 +16,8 @@ public class SwordWaveProjectile : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
     private AzureBladeSkill ownerSkill;
+    private bool isUltiWave = false;
+    private bool isChargedWave = false;
 
     private static Sprite[] twinSwordFrames = null;
     private float animationTimer = 0f;
@@ -72,6 +74,8 @@ public class SwordWaveProjectile : MonoBehaviour
     public void Setup(Vector2 direction, int waveDamage, float waveSpeed, float scaleMultiplier, bool isUlti, bool isCharged = false, int pierceLimit = 4, AzureBladeSkill ownerSkill = null)
     {
         this.ownerSkill = ownerSkill;
+        this.isUltiWave = isUlti;
+        this.isChargedWave = isCharged;
         moveDirection = direction.normalized;
         if (moveDirection.sqrMagnitude < 0.001f) moveDirection = Vector2.down;
 
@@ -196,7 +200,7 @@ public class SwordWaveProjectile : MonoBehaviour
 
         // Kiểm tra đối tượng có thể nhận sát thương (Quái vật, Bình gốm, Boss)
         var damageable = hitObj.GetComponent<IDamageable>() ?? hitObj.GetComponentInParent<IDamageable>();
-        if (damageable != null)
+        if (damageable != null && !(damageable is PlayerHealth))
         {
             GameObject targetRoot = hitObj.transform.root.gameObject;
             if (!hitEnemies.Contains(targetRoot))
@@ -204,15 +208,19 @@ public class SwordWaveProjectile : MonoBehaviour
                 hitEnemies.Add(targetRoot);
                 damageable.TakeDamage(damage);
 
-                // Giảm 50% thời gian hồi chiêu khi chém trúng kẻ địch
-                if (ownerSkill != null)
+                // Giảm 50% thời gian hồi chiêu và hồi phục Năng Lượng / Nội Năng khi chém trúng quái vật thực sự
+                bool isProp = (hitObj.GetComponent<BreakableProp>() != null || hitObj.GetComponentInParent<BreakableProp>() != null || hitObj.GetComponent<TreasureChest>() != null || hitObj.GetComponentInParent<TreasureChest>() != null);
+                if (!isProp)
                 {
-                    ownerSkill.OnWaveHitEnemy();
-                }
-                else
-                {
-                    var fallbackSkill = FindAnyObjectByType<AzureBladeSkill>();
-                    if (fallbackSkill != null) fallbackSkill.OnWaveHitEnemy();
+                    if (ownerSkill != null)
+                    {
+                        ownerSkill.OnWaveHitEnemy(isChargedWave, isUltiWave);
+                    }
+                    else
+                    {
+                        var fallbackSkill = FindAnyObjectByType<AzureBladeSkill>();
+                        if (fallbackSkill != null) fallbackSkill.OnWaveHitEnemy(isChargedWave, isUltiWave);
+                    }
                 }
 
                 SoundManager.EnsureInstance()?.PlayHitImpact();

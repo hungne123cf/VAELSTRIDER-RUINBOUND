@@ -20,6 +20,30 @@ TextureImporter:
   - first:
       213: 162902138978581607
     second: _up walk_5
+  - first:
+      213: -8151910479491957885
+    second: _up walk_0_0
+  - first:
+      213: 8098765222248558802
+    second: _up walk_0_1
+  - first:
+      213: 5891475941151455180
+    second: _up walk_0_2
+  - first:
+      213: -8791139402822936666
+    second: _up walk_0_3
+  - first:
+      213: 7717903036896866206
+    second: _up walk_1_0
+  - first:
+      213: 7585057350280913344
+    second: _up walk_1_1
+  - first:
+      213: -6325378658475835906
+    second: _up walk_1_2
+  - first:
+      213: 1024330393266996363
+    second: _up walk_1_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -39,7 +63,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -52,7 +76,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -66,7 +90,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -90,7 +114,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -154,133 +178,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: _up walk_0
+      name: _up walk_0_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 77
-        width: 16
-        height: 33
+        x: 0
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4c13a7c6274eef330800000000000000
-      internalID: 3746683120116183492
+      spriteID: 38bf81d0c989ede80800000000000000
+      internalID: -8151910479491957885
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up walk_1
+      name: _up walk_0_1
       rect:
         serializedVersion: 2
-        x: 88
-        y: 77
-        width: 16
-        height: 33
+        x: 64
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3760915658b50b3e0800000000000000
-      internalID: -2040030002713917837
+      spriteID: 2d0b96f7f08946070800000000000000
+      internalID: 8098765222248558802
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up walk_2
+      name: _up walk_0_2
       rect:
         serializedVersion: 2
-        x: 152
-        y: 77
-        width: 16
-        height: 35
+        x: 128
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 778ebd2043885d800800000000000000
-      internalID: 636564679310436471
+      spriteID: cc7b713772ab2c150800000000000000
+      internalID: 5891475941151455180
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up walk_3
+      name: _up walk_0_3
       rect:
         serializedVersion: 2
-        x: 216
-        y: 77
-        width: 16
-        height: 35
+        x: 192
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0c6ddd14c51422920800000000000000
-      internalID: 2964003369261061824
+      spriteID: 6a79cc36a499ff580800000000000000
+      internalID: -8791139402822936666
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up walk_4
+      name: _up walk_1_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 13
-        width: 16
-        height: 34
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2dae91fd09c9590f0800000000000000
-      internalID: -1110809587044717870
+      spriteID: e9f652dbbef7b1b60800000000000000
+      internalID: 7717903036896866206
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up walk_5
+      name: _up walk_1_1
       rect:
         serializedVersion: 2
-        x: 88
-        y: 13
-        width: 16
-        height: 34
+        x: 64
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 76c38fed1aeb24200800000000000000
-      internalID: 162902138978581607
+      spriteID: 0c1a5740979834960800000000000000
+      internalID: 7585057350280913344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _up walk_1_2
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efdf5b79f9db738a0800000000000000
+      internalID: -6325378658475835906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _up walk_1_3
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b84c057c017273e00800000000000000
+      internalID: 1024330393266996363
       vertices: []
       indices: 
       edges: []
@@ -289,7 +357,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 6c10538c850bc3742b21d46571ae710c
     internalID: 0
     vertices: []
     indices: 
@@ -297,10 +365,20 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       _up walk_0: 3746683120116183492
+      _up walk_0_0: -8151910479491957885
+      _up walk_0_1: 8098765222248558802
+      _up walk_0_2: 5891475941151455180
+      _up walk_0_3: -8791139402822936666
       _up walk_1: -2040030002713917837
+      _up walk_1_0: 7717903036896866206
+      _up walk_1_1: 7585057350280913344
+      _up walk_1_2: -6325378658475835906
+      _up walk_1_3: 1024330393266996363
       _up walk_2: 636564679310436471
       _up walk_3: 2964003369261061824
       _up walk_4: -1110809587044717870

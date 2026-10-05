@@ -30,7 +30,8 @@ public class CharacterManager : MonoBehaviour
     private const string UNLOCKED_PREFIX = "Char_Unlocked_";
 
     public const string CHAR_VAELSTRIDER = "Vaelstrider";
-    public const string CHAR_MAID = "Maid";
+    public const string CHAR_GALE_RONIN = "GaleRonin";
+    public const string CHAR_MAID = "GaleRonin"; // Backward compatible alias
     public const string CHAR_AZURE_BLADE = "AzureBlade";
 
     private Dictionary<string, CharacterData> characters = new Dictionary<string, CharacterData>();
@@ -101,24 +102,24 @@ public class CharacterManager : MonoBehaviour
             spriteSheetPath = "Assets/ART/Player/IDLE/idle_down.png"
         };
 
-        // 2. Maid Chiến Binh
-        characters[CHAR_MAID] = new CharacterData
+        // 2. Phong Lôi Lãng Khách (Player 2)
+        characters[CHAR_GALE_RONIN] = new CharacterData
         {
-            id = CHAR_MAID,
-            nameVN = "Maid Chiến Binh",
-            nameEN = "Battle Maid",
-            roleVN = "Sát Thủ Hầu Gái (Tốc Độ & Bạo Kích)",
-            roleEN = "Maid Assassin (Speed & Crit)",
-            skillNameVN = "Quét Tan Kẻ Yếu",
-            skillNameEN = "Sweep the Weak",
-            skillDescVN = "Vung nhát chém hình nón hủy diệt: Tiêu diệt TỨC THÌ mọi quái thường, gây choáng và sát thương cực lớn lên Boss!",
-            skillDescEN = "Unleashes a devastating cone cleave: INSTANTLY EXECUTES normal monsters, deals massive damage & stuns Bosses!",
-            baseHealth = 85,
-            baseAttack = 5,
-            baseSpeed = 5.8f,
-            unlockPrice = 999,
-            controllerPath = "Assets/Animation/Maid/Maid.controller",
-            spriteSheetPath = "Assets/ART/Player1/Maid Idle.png"
+            id = CHAR_GALE_RONIN,
+            nameVN = "Phong Lôi Lãng Khách",
+            nameEN = "Gale Ronin",
+            roleVN = "Bạch Dạ Kiếm Khách (Phong Ấn & Ảo Ảnh)",
+            roleEN = "Phantom Blade (Wind Mark & Phantom Cleave)",
+            skillNameVN = "Ám Ảnh Trảm",
+            skillNameEN = "Shadow Strike",
+            skillDescVN = "Đòn chém bán nguyệt quét rộng 180 độ tích tầng Phong Ấn. Tuyệt kỹ dịch chuyển tức thời ra sau lưng kẻ địch, tung đòn chém chí mạng kinh thiên động địa rồi thoắt ẩn thoắt hiện trở về vị trí cũ!",
+            skillDescEN = "Wide 180° sweeps applying Wind Marks. Special skill teleports behind the target's back, delivers a devastating decisive execution slash, and seamlessly returns to original position!",
+            baseHealth = 95,
+            baseAttack = 6,
+            baseSpeed = 5.4f,
+            unlockPrice = 0, // Mở khóa sẵn sàng chơi
+            controllerPath = "Assets/Animation/Player2/Player2.controller",
+            spriteSheetPath = "Assets/ART/Player2/_down idle.png"
         };
 
         // 3. Lam Kiếm Sĩ (Azure Blade)
@@ -143,6 +144,7 @@ public class CharacterManager : MonoBehaviour
 
         // Mặc định mở khóa
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_VAELSTRIDER, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_GALE_RONIN, 1);
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_AZURE_BLADE, 1);
         PlayerPrefs.Save();
     }
@@ -161,10 +163,13 @@ public class CharacterManager : MonoBehaviour
         {
             return CHAR_AZURE_BLADE;
         }
-        else if (string.Equals(selected, "maid", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, CHAR_MAID, StringComparison.OrdinalIgnoreCase))
+        else if (string.Equals(selected, "ronin", StringComparison.OrdinalIgnoreCase) || 
+                 string.Equals(selected, "galeronin", StringComparison.OrdinalIgnoreCase) || 
+                 string.Equals(selected, "player2", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(selected, "maid", StringComparison.OrdinalIgnoreCase) || 
+                 string.Equals(selected, CHAR_GALE_RONIN, StringComparison.OrdinalIgnoreCase))
         {
-            return CHAR_AZURE_BLADE; // Since maid is locked
+            return CHAR_GALE_RONIN;
         }
 
         return CHAR_VAELSTRIDER;
@@ -185,20 +190,11 @@ public class CharacterManager : MonoBehaviour
 
     public bool IsCharacterUnlocked(string id)
     {
-        if (id == CHAR_MAID)
-        {
-            return false;
-        }
-        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + id, 0) == 1 || id == CHAR_VAELSTRIDER || id == CHAR_AZURE_BLADE;
+        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + id, 0) == 1 || id == CHAR_VAELSTRIDER || id == CHAR_GALE_RONIN || id == CHAR_AZURE_BLADE;
     }
 
     public bool UnlockCharacter(string id)
     {
-        if (id == CHAR_MAID)
-        {
-            Debug.LogWarning("<color=yellow>[CHARACTER]</color> Nhân vật Maid hiện đang tạm khóa!");
-            return false;
-        }
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + id, 1);
         PlayerPrefs.Save();
         return true;
@@ -213,15 +209,17 @@ public class CharacterManager : MonoBehaviour
         {
             normId = CHAR_AZURE_BLADE;
         }
-        else if (string.Equals(id, "maid", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, CHAR_MAID, StringComparison.OrdinalIgnoreCase))
+        else if (string.Equals(id, "ronin", StringComparison.OrdinalIgnoreCase) || 
+                 string.Equals(id, "galeronin", StringComparison.OrdinalIgnoreCase) || 
+                 string.Equals(id, "player2", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(id, "maid", StringComparison.OrdinalIgnoreCase) || 
+                 string.Equals(id, CHAR_GALE_RONIN, StringComparison.OrdinalIgnoreCase))
         {
-            Debug.LogWarning("<color=yellow>[CHARACTER]</color> Nhân vật Maid hiện đang tạm khóa!");
-            return;
+            normId = CHAR_GALE_RONIN;
         }
 
         PlayerPrefs.SetString(SELECTED_CHAR_KEY, normId);
-        PlayerPrefs.SetString("SelectedHero", (normId == CHAR_AZURE_BLADE) ? "azure" : "vael");
+        PlayerPrefs.SetString("SelectedHero", (normId == CHAR_AZURE_BLADE) ? "azure" : (normId == CHAR_GALE_RONIN ? "ronin" : "vael"));
         PlayerPrefs.Save();
         Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {normId}");
     }

@@ -57,6 +57,7 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI heroSkillDescText;
     [SerializeField] private Sprite[] vaelIdleFrames;
     [SerializeField] private Sprite[] maidIdleFrames;
+    [SerializeField] private Sprite[] roninIdleFrames;
     [SerializeField] private Sprite[] azureIdleFrames;
 
     [Header("Map Select Panel")]
@@ -90,9 +91,11 @@ public class MainMenuManager : MonoBehaviour
     [Header("Roster Avatar Cards")]
     [SerializeField] private Button cardVaelBtn;
     [SerializeField] private Button cardMaidBtn;
+    [SerializeField] private Button cardRoninBtn;
     [SerializeField] private Button cardAzureBtn;
     [SerializeField] private Image cardVaelAvatarImg;
     [SerializeField] private Image cardMaidAvatarImg;
+    [SerializeField] private Image cardRoninAvatarImg;
     [SerializeField] private Image cardAzureAvatarImg;
     [SerializeField] private TextMeshProUGUI cardVaelTitleText;
     [SerializeField] private TextMeshProUGUI cardVaelSubText;
@@ -100,6 +103,9 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI cardMaidTitleText;
     [SerializeField] private TextMeshProUGUI cardMaidSubText;
     [SerializeField] private TextMeshProUGUI cardMaidStatusText;
+    [SerializeField] private TextMeshProUGUI cardRoninTitleText;
+    [SerializeField] private TextMeshProUGUI cardRoninSubText;
+    [SerializeField] private TextMeshProUGUI cardRoninStatusText;
     [SerializeField] private TextMeshProUGUI cardAzureTitleText;
     [SerializeField] private TextMeshProUGUI cardAzureSubText;
     [SerializeField] private TextMeshProUGUI cardAzureStatusText;
@@ -862,7 +868,10 @@ public class MainMenuManager : MonoBehaviour
             bool hasOldSkillFrame = sb != null && sb.GetComponent<Image>() != null && sb.GetComponent<Image>().sprite != null;
             Transform act = existing.Find("RosterBox/ShowcaseDetailsPanel/Btn_RosterAction");
             bool hasOldBtnFrame = act != null && act.GetComponent<Image>() != null && act.GetComponent<Image>().sprite != null;
-            if (boxRtExisting == null || boxRtExisting.anchorMax != Vector2.one || rosterHeroNameText == null || hasOldSkillFrame || hasOldBtnFrame)
+            Transform oldMaidCard = existing.Find("RosterBox/HeroSelectionColumn/Card_Maid");
+            bool hasOldMaid = oldMaidCard != null;
+
+            if (boxRtExisting == null || boxRtExisting.anchorMax != Vector2.one || rosterHeroNameText == null || hasOldSkillFrame || hasOldBtnFrame || hasOldMaid)
             {
                 if (Application.isPlaying)
                     Destroy(existing.gameObject);
@@ -1023,11 +1032,16 @@ public class MainMenuManager : MonoBehaviour
             out cardVaelAvatarImg, out cardVaelTitleText, out cardVaelSubText, out cardVaelStatusText);
         cardVaelBtn.onClick.AddListener(() => InspectHero("vael"));
 
-        Sprite maidAvatar = (maidIdleFrames != null && maidIdleFrames.Length > 0) ? maidIdleFrames[0] : null;
-        cardMaidBtn = CreateAvatarCard(leftCol.transform, "maid", new Vector2(0f, -190f), new Vector2(0f, 140f),
-            maidAvatar, true,
-            out cardMaidAvatarImg, out cardMaidTitleText, out cardMaidSubText, out cardMaidStatusText);
-        cardMaidBtn.onClick.AddListener(() => InspectHero("maid"));
+        Sprite roninAvatar = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames[0] : null;
+        cardRoninBtn = CreateAvatarCard(leftCol.transform, "ronin", new Vector2(0f, -190f), new Vector2(0f, 140f),
+            roninAvatar, false,
+            out cardRoninAvatarImg, out cardRoninTitleText, out cardRoninSubText, out cardRoninStatusText);
+        cardRoninBtn.onClick.AddListener(() => InspectHero("ronin"));
+        cardMaidBtn = cardRoninBtn;
+        cardMaidAvatarImg = cardRoninAvatarImg;
+        cardMaidTitleText = cardRoninTitleText;
+        cardMaidSubText = cardRoninSubText;
+        cardMaidStatusText = cardRoninStatusText;
 
         Sprite azureAvatar = (azureIdleFrames != null && azureIdleFrames.Length > 0) ? azureIdleFrames[0] : null;
         cardAzureBtn = CreateAvatarCard(leftCol.transform, "azure", new Vector2(0f, -340f), new Vector2(0f, 140f),
@@ -1221,9 +1235,13 @@ public class MainMenuManager : MonoBehaviour
         {
             return new Vector3(2.4f, 2.4f, 1f);
         }
+        else if (id == "ronin" || id == "galeronin" || id == "player2")
+        {
+            return new Vector3(2.4f, 2.4f, 1f);
+        }
         else if (id == "maid" || id == "elysia")
         {
-            return new Vector3(1.15f, 1.15f, 1f);
+            return new Vector3(2.4f, 2.4f, 1f);
         }
         else if (id == "azure" || id == "azureblade" || id == "player3")
         {
@@ -1234,7 +1252,7 @@ public class MainMenuManager : MonoBehaviour
 
     private Button CreateAvatarCard(Transform parent, string heroId, Vector2 pos, Vector2 size, Sprite avatarSprite, bool isLocked, out Image avatarImgRef, out TextMeshProUGUI titleTxtRef, out TextMeshProUGUI subTxtRef, out TextMeshProUGUI statusTxtRef)
     {
-        GameObject card = new GameObject(isLocked ? "Card_Maid" : "Card_Vael", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        GameObject card = new GameObject("Card_" + heroId, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         card.transform.SetParent(parent, false);
 
         RectTransform rt = card.GetComponent<RectTransform>();
@@ -1400,15 +1418,20 @@ public class MainMenuManager : MonoBehaviour
             if (list.Count > 0) vaelIdleFrames = list.ToArray();
         }
 
-        if (maidIdleFrames == null || maidIdleFrames.Length == 0)
+        if (roninIdleFrames == null || roninIdleFrames.Length == 0)
         {
-            var objects = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player1/Maid Idle.png");
+            var objects = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player2/_down idle.png");
             var list = new List<Sprite>();
             if (objects != null)
             {
                 foreach (var o in objects) if (o is Sprite s) list.Add(s);
             }
-            if (list.Count > 0) maidIdleFrames = list.ToArray();
+            if (list.Count > 0) roninIdleFrames = list.ToArray();
+        }
+
+        if (maidIdleFrames == null || maidIdleFrames.Length == 0)
+        {
+            maidIdleFrames = roninIdleFrames;
         }
 
         if (azureIdleFrames == null || azureIdleFrames.Length == 0)
@@ -1586,9 +1609,23 @@ public class MainMenuManager : MonoBehaviour
             cardVaelStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
         }
 
-        if (cardMaidTitleText != null) cardMaidTitleText.text = LocalizationManager.Get("HERO_MAID_NAME");
-        if (cardMaidSubText != null) cardMaidSubText.text = LocalizationManager.Get("HERO_MAID_ROLE");
-        if (cardMaidStatusText != null) cardMaidStatusText.text = LocalizationManager.T("<color=#FF5555>TẠM KHÓA</color>", "<color=#FF5555>LOCKED</color>");
+        if (cardRoninTitleText != null) cardRoninTitleText.text = LocalizationManager.Get("HERO_RONIN_NAME");
+        if (cardRoninSubText != null) cardRoninSubText.text = LocalizationManager.Get("HERO_RONIN_ROLE");
+        if (cardRoninStatusText != null)
+        {
+            bool isSel = (currentSelected == CharacterManager.CHAR_GALE_RONIN);
+            cardRoninStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
+        }
+        else if (cardMaidTitleText != null)
+        {
+            cardMaidTitleText.text = LocalizationManager.Get("HERO_RONIN_NAME");
+            if (cardMaidSubText != null) cardMaidSubText.text = LocalizationManager.Get("HERO_RONIN_ROLE");
+            if (cardMaidStatusText != null)
+            {
+                bool isSel = (currentSelected == CharacterManager.CHAR_GALE_RONIN);
+                cardMaidStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
+            }
+        }
 
         if (cardAzureTitleText != null) cardAzureTitleText.text = LocalizationManager.T("Lam Kiếm Sĩ (Azure)", "Azure Blade");
         if (cardAzureSubText != null) cardAzureSubText.text = LocalizationManager.T("Trọng Kiếm / Sóng Kiếm", "Heavy / Sword Waves");
@@ -1616,6 +1653,17 @@ public class MainMenuManager : MonoBehaviour
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 110   CÔNG: 24   TỐC: 4.8", "HP: 110   ATK: 24   SPD: 4.8");
+            }
+        }
+        else if (curChar == CharacterManager.CHAR_GALE_RONIN)
+        {
+            if (heroNameText != null) heroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách", "Gale Ronin");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách (Phong Ấn & Ảo Ảnh)", "Phantom Blade (Wind Marks & Cleave)");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Bão Phong Trảm", "Phantom Cleave");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Đòn chém quét 180° tích Phong Ấn bộc phá bạo kích & lốc xoáy. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "180° cleave stacking Wind Marks for critical bursts & vortex. Special skill unleashes phantom dash slashes across foes!");
+            if (heroStatsSummaryText != null)
+            {
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 95   CÔNG: 24   TỐC: 5.4", "HP: 95   ATK: 24   SPD: 5.4");
             }
         }
         else
@@ -1653,20 +1701,21 @@ public class MainMenuManager : MonoBehaviour
                 if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
             }
         }
-        else if (inspectedHeroId == "maid")
+        else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid")
         {
-            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.Get("HERO_MAID_NAME");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.Get("HERO_MAID_ROLE");
-            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 85   CÔNG: 25   TỐC: 5.8", "HP: 85   ATK: 25   SPD: 5.8");
-            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.Get("HERO_MAID_SKILL");
-            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.Get("HERO_MAID_SKILL_DESC");
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách (Gale Ronin)", "Gale Ronin (Phantom Blade)");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách (Phong Ấn & Ảo Ảnh)", "Phantom Blade (Wind Marks & Cleave)");
+            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 95   CÔNG: 24   TỐC: 5.4", "HP: 95   ATK: 24   SPD: 5.4");
+            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Bão Phong Trảm", "Special: Phantom Cleave");
+            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Đòn chém quét 180° tích Phong Ấn bộc phá bạo kích & lốc xoáy. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "180° cleave stacking Wind Marks for critical bursts & vortex. Special skill unleashes phantom dash slashes across foes!");
 
-            if (rosterActionBtnText != null) rosterActionBtnText.text = LocalizationManager.T("TẠM KHÓA - SẮP RA MẮT", "LOCKED - COMING SOON");
+            bool isSelected = (currentSelected == CharacterManager.CHAR_GALE_RONIN);
+            if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
             if (rosterActionBtn != null)
             {
-                rosterActionBtn.interactable = false;
+                rosterActionBtn.interactable = true;
                 var img = rosterActionBtn.GetComponent<Image>();
-                if (img != null) img.color = new Color(0.4f, 0.15f, 0.15f, 0.8f);
+                if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
             }
         }
         else
@@ -1701,7 +1750,7 @@ public class MainMenuManager : MonoBehaviour
     public void UpdateRosterEquipmentMaterial()
     {
         if (rosterHeroPreviewImage == null) return;
-        if (inspectedHeroId == "maid" || inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
+        if (inspectedHeroId == "maid" || inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
         {
             rosterHeroPreviewImage.material = null;
             return;
@@ -1739,20 +1788,24 @@ public class MainMenuManager : MonoBehaviour
 
     private void OnRosterActionClicked()
     {
-        if (inspectedHeroId == "maid")
-        {
-            if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
-            return;
-        }
-
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
 
-        string targetChar = (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
-            ? CharacterManager.CHAR_AZURE_BLADE 
-            : CharacterManager.CHAR_VAELSTRIDER;
+        string targetChar = CharacterManager.CHAR_VAELSTRIDER;
+        string heroPref = "vael";
+
+        if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
+        {
+            targetChar = CharacterManager.CHAR_AZURE_BLADE;
+            heroPref = "azure";
+        }
+        else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid")
+        {
+            targetChar = CharacterManager.CHAR_GALE_RONIN;
+            heroPref = "ronin";
+        }
 
         CharacterManager.EnsureInstance().SelectCharacter(targetChar);
-        PlayerPrefs.SetString("SelectedHero", (targetChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : "vael");
+        PlayerPrefs.SetString("SelectedHero", heroPref);
         PlayerPrefs.Save();
 
         AccountDatabase.SaveActiveSessionToDatabase();
@@ -1795,17 +1848,24 @@ public class MainMenuManager : MonoBehaviour
 
     public void SelectCharacter(string heroId)
     {
-        if (heroId.ToLower() == "maid")
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+
+        string target = CharacterManager.CHAR_VAELSTRIDER;
+        string heroPref = "vael";
+
+        if (heroId.ToLower() == "azure" || heroId.ToLower() == "azureblade")
         {
-            if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
-            Debug.LogWarning("[CHARACTER] Nhân vật Maid đang tạm khóa!");
-            return;
+            target = CharacterManager.CHAR_AZURE_BLADE;
+            heroPref = "azure";
+        }
+        else if (heroId.ToLower() == "ronin" || heroId.ToLower() == "galeronin" || heroId.ToLower() == "player2" || heroId.ToLower() == "maid")
+        {
+            target = CharacterManager.CHAR_GALE_RONIN;
+            heroPref = "ronin";
         }
 
-        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        string target = (heroId.ToLower() == "azure" || heroId.ToLower() == "azureblade") ? CharacterManager.CHAR_AZURE_BLADE : CharacterManager.CHAR_VAELSTRIDER;
         CharacterManager.EnsureInstance().SelectCharacter(target);
-        PlayerPrefs.SetString("SelectedHero", (target == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : "vael");
+        PlayerPrefs.SetString("SelectedHero", heroPref);
         PlayerPrefs.Save();
         AccountDatabase.SaveActiveSessionToDatabase();
         UpdateHeroDetails();
@@ -1821,17 +1881,22 @@ public class MainMenuManager : MonoBehaviour
     private IEnumerator AnimateMainHeroRoutine()
     {
         string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
-        Sprite[] frames = (curChar == CharacterManager.CHAR_AZURE_BLADE) ? azureIdleFrames : vaelIdleFrames;
+        Sprite[] frames = vaelIdleFrames;
+        if (curChar == CharacterManager.CHAR_AZURE_BLADE) frames = azureIdleFrames;
+        else if (curChar == CharacterManager.CHAR_GALE_RONIN) frames = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames;
+
         if (heroPreviewImage == null) yield break;
 
         heroPreviewImage.preserveAspect = true;
         heroPreviewImage.color = Color.white;
-        heroPreviewImage.transform.localScale = GetHeroVisualScale((curChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : "vael");
+        heroPreviewImage.transform.localScale = GetHeroVisualScale(curChar == CharacterManager.CHAR_AZURE_BLADE ? "azure" : (curChar == CharacterManager.CHAR_GALE_RONIN ? "ronin" : "vael"));
 
         if (frames == null || frames.Length == 0)
         {
             EnsureHeroSprites();
-            frames = (curChar == CharacterManager.CHAR_AZURE_BLADE) ? azureIdleFrames : vaelIdleFrames;
+            frames = (curChar == CharacterManager.CHAR_AZURE_BLADE) 
+                ? azureIdleFrames 
+                : (curChar == CharacterManager.CHAR_GALE_RONIN ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : vaelIdleFrames);
             if (frames == null || frames.Length == 0) yield break;
         }
 
@@ -1854,9 +1919,11 @@ public class MainMenuManager : MonoBehaviour
 
     private IEnumerator AnimateRosterHeroRoutine()
     {
-        Sprite[] frames = (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
-            ? azureIdleFrames 
-            : (inspectedHeroId == "maid" ? maidIdleFrames : vaelIdleFrames);
+        Sprite[] frames = vaelIdleFrames;
+        if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
+            frames = azureIdleFrames;
+        else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid") 
+            frames = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames;
 
         if (rosterHeroPreviewImage == null) yield break;
 
@@ -1868,7 +1935,7 @@ public class MainMenuManager : MonoBehaviour
             EnsureHeroSprites();
             frames = (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
                 ? azureIdleFrames 
-                : (inspectedHeroId == "maid" ? maidIdleFrames : vaelIdleFrames);
+                : ((inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid") ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : vaelIdleFrames);
             if (frames == null || frames.Length == 0) yield break;
         }
 

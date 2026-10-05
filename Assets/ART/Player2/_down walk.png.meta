@@ -20,6 +20,30 @@ TextureImporter:
   - first:
       213: -3395846732119627721
     second: _down walk_5
+  - first:
+      213: -4824384433428039067
+    second: _down walk_0_0
+  - first:
+      213: -6175661810313481624
+    second: _down walk_0_1
+  - first:
+      213: 7110779489662812774
+    second: _down walk_0_2
+  - first:
+      213: 3075211229400941564
+    second: _down walk_0_3
+  - first:
+      213: 2229817953174207654
+    second: _down walk_1_0
+  - first:
+      213: -8949065176558479531
+    second: _down walk_1_1
+  - first:
+      213: 7964080645552024946
+    second: _down walk_1_2
+  - first:
+      213: 8287622580739399274
+    second: _down walk_1_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -39,7 +63,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -52,7 +76,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -66,7 +90,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -90,7 +114,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -154,133 +178,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: _down walk_0
+      name: _down walk_0_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 77
-        width: 16
-        height: 35
+        x: 0
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7c0c75b7af045a050800000000000000
-      internalID: 5811122338746843335
+      spriteID: 56af8912be75c0db0800000000000000
+      internalID: -4824384433428039067
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down walk_1
+      name: _down walk_0_1
       rect:
         serializedVersion: 2
-        x: 88
-        y: 77
-        width: 16
-        height: 36
+        x: 64
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2e3c796d3a0f80e00800000000000000
-      internalID: 1011322702815282146
+      spriteID: 862b157bd44ab4aa0800000000000000
+      internalID: -6175661810313481624
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down walk_2
+      name: _down walk_0_2
       rect:
         serializedVersion: 2
-        x: 152
-        y: 77
-        width: 16
-        height: 35
+        x: 128
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3249ccf7f36febb70800000000000000
-      internalID: 8916835064827647011
+      spriteID: 6624c7575409ea260800000000000000
+      internalID: 7110779489662812774
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down walk_3
+      name: _down walk_0_3
       rect:
         serializedVersion: 2
-        x: 216
-        y: 77
-        width: 16
-        height: 36
+        x: 192
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8d3ff896de4bc9b70800000000000000
-      internalID: 8907193094803289048
+      spriteID: cf34cb9e1585daa20800000000000000
+      internalID: 3075211229400941564
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down walk_4
+      name: _down walk_1_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 13
-        width: 16
-        height: 36
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 82a318a0dc606aeb0800000000000000
-      internalID: -4709068882654971352
+      spriteID: 6acbcb44d97e1fe10800000000000000
+      internalID: 2229817953174207654
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down walk_5
+      name: _down walk_1_1
       rect:
         serializedVersion: 2
-        x: 88
-        y: 13
-        width: 16
-        height: 36
+        x: 64
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 738a65c93678fd0d0800000000000000
-      internalID: -3395846732119627721
+      spriteID: 557d967d2a88ec380800000000000000
+      internalID: -8949065176558479531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _down walk_1_2
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27d21b0d629168e60800000000000000
+      internalID: 7964080645552024946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _down walk_1_3
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6e5a75d3dc830370800000000000000
+      internalID: 8287622580739399274
       vertices: []
       indices: 
       edges: []
@@ -289,7 +357,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 399a4dfbc94c15e49a08624d43ec4eb3
     internalID: 0
     vertices: []
     indices: 
@@ -297,10 +365,20 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       _down walk_0: 5811122338746843335
+      _down walk_0_0: -4824384433428039067
+      _down walk_0_1: -6175661810313481624
+      _down walk_0_2: 7110779489662812774
+      _down walk_0_3: 3075211229400941564
       _down walk_1: 1011322702815282146
+      _down walk_1_0: 2229817953174207654
+      _down walk_1_1: -8949065176558479531
+      _down walk_1_2: 7964080645552024946
+      _down walk_1_3: 8287622580739399274
       _down walk_2: 8916835064827647011
       _down walk_3: 8907193094803289048
       _down walk_4: -4709068882654971352

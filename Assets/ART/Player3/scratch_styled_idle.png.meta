@@ -1,0 +1,1196 @@
+fileFormatVersion: 2
+guid: 808fb42355889e54ebc9b5fc4d0edee6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -931159736973413039
+    second: scratch_styled_idle_0
+  - first:
+      213: -722841637532183041
+    second: scratch_styled_idle_1
+  - first:
+      213: 2247390909311587737
+    second: scratch_styled_idle_2
+  - first:
+      213: 6470142714801427940
+    second: scratch_styled_idle_3
+  - first:
+      213: -6070828604324588249
+    second: scratch_styled_idle_4
+  - first:
+      213: -6427283933570918477
+    second: scratch_styled_idle_5
+  - first:
+      213: -7054191154534305959
+    second: scratch_styled_idle_6
+  - first:
+      213: 7194787322888301508
+    second: scratch_styled_idle_7
+  - first:
+      213: 4128888761817858821
+    second: scratch_styled_idle_8
+  - first:
+      213: -5473343440072010157
+    second: scratch_styled_idle_9
+  - first:
+      213: -6831737253404869957
+    second: scratch_styled_idle_10
+  - first:
+      213: 7544739522281930667
+    second: scratch_styled_idle_11
+  - first:
+      213: 5081367137056352304
+    second: scratch_styled_idle_12
+  - first:
+      213: -5226461532589034748
+    second: scratch_styled_idle_13
+  - first:
+      213: -654256371429417572
+    second: scratch_styled_idle_14
+  - first:
+      213: -7844629971908877321
+    second: scratch_styled_idle_15
+  - first:
+      213: 4694065933614369435
+    second: scratch_styled_idle_16
+  - first:
+      213: 6514718384627661468
+    second: scratch_styled_idle_17
+  - first:
+      213: 8718484143242957243
+    second: scratch_styled_idle_18
+  - first:
+      213: 8200986663907222427
+    second: scratch_styled_idle_19
+  - first:
+      213: -7829561306948961401
+    second: scratch_styled_idle_20
+  - first:
+      213: -4196738455162461563
+    second: scratch_styled_idle_21
+  - first:
+      213: 1932302338409621344
+    second: scratch_styled_idle_22
+  - first:
+      213: 7909520964955670276
+    second: scratch_styled_idle_23
+  - first:
+      213: -7775474225546008193
+    second: scratch_styled_idle_24
+  - first:
+      213: -3455260825321214920
+    second: scratch_styled_idle_25
+  - first:
+      213: 1425062260609356058
+    second: scratch_styled_idle_26
+  - first:
+      213: 1907760956919346188
+    second: scratch_styled_idle_27
+  - first:
+      213: 5670357471725015532
+    second: scratch_styled_idle_28
+  - first:
+      213: 7628247523856128536
+    second: scratch_styled_idle_29
+  - first:
+      213: -5166837626925026169
+    second: scratch_styled_idle_30
+  - first:
+      213: 3640874223857320059
+    second: scratch_styled_idle_31
+  - first:
+      213: -5932331094263719155
+    second: scratch_styled_idle_32
+  - first:
+      213: -5260005767509248968
+    second: scratch_styled_idle_33
+  - first:
+      213: -865022517224514878
+    second: scratch_styled_idle_34
+  - first:
+      213: -2238118615564295029
+    second: scratch_styled_idle_35
+  - first:
+      213: -6524264172277545742
+    second: scratch_styled_idle_36
+  - first:
+      213: 6142291278863322081
+    second: scratch_styled_idle_37
+  - first:
+      213: -5709345635248378635
+    second: scratch_styled_idle_38
+  - first:
+      213: -9027641291441178039
+    second: scratch_styled_idle_39
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: scratch_styled_idle_0
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 208
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 155bd88172bd313f0800000000000000
+      internalID: -931159736973413039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_1
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 208
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff558064c53f7f5f0800000000000000
+      internalID: -722841637532183041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_2
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 208
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99595f4ff16503f10800000000000000
+      internalID: 2247390909311587737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_3
+      rect:
+        serializedVersion: 2
+        x: 210
+        y: 208
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e512d1d4809ac950800000000000000
+      internalID: 6470142714801427940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_4
+      rect:
+        serializedVersion: 2
+        x: 274
+        y: 208
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 725d3fa8c8510cba0800000000000000
+      internalID: -6070828604324588249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_5
+      rect:
+        serializedVersion: 2
+        x: 339
+        y: 208
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b71eecc053bdc6a0800000000000000
+      internalID: -6427283933570918477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_6
+      rect:
+        serializedVersion: 2
+        x: 403
+        y: 208
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95fa748058a7a1e90800000000000000
+      internalID: -7054191154534305959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_7
+      rect:
+        serializedVersion: 2
+        x: 467
+        y: 208
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cbad3753f409d360800000000000000
+      internalID: 7194787322888301508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_8
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 208
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 503814df372cc4930800000000000000
+      internalID: 4128888761817858821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_9
+      rect:
+        serializedVersion: 2
+        x: 595
+        y: 208
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3561bc8e327ca04b0800000000000000
+      internalID: -5473343440072010157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_10
+      rect:
+        serializedVersion: 2
+        x: 659
+        y: 208
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbafff30a2bc031a0800000000000000
+      internalID: -6831737253404869957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_11
+      rect:
+        serializedVersion: 2
+        x: 723
+        y: 208
+        width: 21
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: baff67c2f9c44b860800000000000000
+      internalID: 7544739522281930667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_12
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 144
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03866992d74a48640800000000000000
+      internalID: 5081367137056352304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_13
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 144
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40379c55de0e777b0800000000000000
+      internalID: -5226461532589034748
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_14
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 144
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9dd9eceb4d9be6f0800000000000000
+      internalID: -654256371429417572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_15
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 144
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f32df96a96422390800000000000000
+      internalID: -7844629971908877321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_16
+      rect:
+        serializedVersion: 2
+        x: 277
+        y: 144
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9ac85da81ca42140800000000000000
+      internalID: 4694065933614369435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_17
+      rect:
+        serializedVersion: 2
+        x: 342
+        y: 144
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9a3077badde86a50800000000000000
+      internalID: 6514718384627661468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_18
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 144
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb15fd1c2274ef870800000000000000
+      internalID: 8718484143242957243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_19
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 144
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b93e7ed8be1cfc170800000000000000
+      internalID: 8200986663907222427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_20
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 144
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78bf920697fc75390800000000000000
+      internalID: -7829561306948961401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_21
+      rect:
+        serializedVersion: 2
+        x: 598
+        y: 144
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 582e1dc3c9032c5c0800000000000000
+      internalID: -4196738455162461563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_22
+      rect:
+        serializedVersion: 2
+        x: 662
+        y: 144
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 067ef8f2dbae0da10800000000000000
+      internalID: 1932302338409621344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_23
+      rect:
+        serializedVersion: 2
+        x: 726
+        y: 144
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40700b3496344cd60800000000000000
+      internalID: 7909520964955670276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_24
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f79ef1a5367f71490800000000000000
+      internalID: -7775474225546008193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_25
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83ce76c06927c00d0800000000000000
+      internalID: -3455260825321214920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_26
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a119f626396d6c310800000000000000
+      internalID: 1425062260609356058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_27
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0479898b7ab97a10800000000000000
+      internalID: 1907760956919346188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_28
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce1d6a3e31821be40800000000000000
+      internalID: 5670357471725015532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_29
+      rect:
+        serializedVersion: 2
+        x: 343
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81a923ee4bafcd960800000000000000
+      internalID: 7628247523856128536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_30
+      rect:
+        serializedVersion: 2
+        x: 407
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 784f20bad84bb48b0800000000000000
+      internalID: -5166837626925026169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_31
+      rect:
+        serializedVersion: 2
+        x: 471
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7044e001dbf68230800000000000000
+      internalID: 3640874223857320059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_32
+      rect:
+        serializedVersion: 2
+        x: 535
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0b1864fc402cada0800000000000000
+      internalID: -5932331094263719155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_33
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 834fa178f94b007b0800000000000000
+      internalID: -5260005767509248968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_34
+      rect:
+        serializedVersion: 2
+        x: 663
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ca5e1a8a92def3f0800000000000000
+      internalID: -865022517224514878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_35
+      rect:
+        serializedVersion: 2
+        x: 727
+        y: 80
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b84e91a2afa90f0e0800000000000000
+      internalID: -2238118615564295029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_36
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 16
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f4c6966d482575a0800000000000000
+      internalID: -6524264172277545742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_37
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 16
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ebc0a7ff5dcd3550800000000000000
+      internalID: 6142291278863322081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_38
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 16
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fce717e46454c0b0800000000000000
+      internalID: -5709345635248378635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_styled_idle_39
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 16
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94affff631067b280800000000000000
+      internalID: -9027641291441178039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      scratch_styled_idle_0: -931159736973413039
+      scratch_styled_idle_1: -722841637532183041
+      scratch_styled_idle_10: -6831737253404869957
+      scratch_styled_idle_11: 7544739522281930667
+      scratch_styled_idle_12: 5081367137056352304
+      scratch_styled_idle_13: -5226461532589034748
+      scratch_styled_idle_14: -654256371429417572
+      scratch_styled_idle_15: -7844629971908877321
+      scratch_styled_idle_16: 4694065933614369435
+      scratch_styled_idle_17: 6514718384627661468
+      scratch_styled_idle_18: 8718484143242957243
+      scratch_styled_idle_19: 8200986663907222427
+      scratch_styled_idle_2: 2247390909311587737
+      scratch_styled_idle_20: -7829561306948961401
+      scratch_styled_idle_21: -4196738455162461563
+      scratch_styled_idle_22: 1932302338409621344
+      scratch_styled_idle_23: 7909520964955670276
+      scratch_styled_idle_24: -7775474225546008193
+      scratch_styled_idle_25: -3455260825321214920
+      scratch_styled_idle_26: 1425062260609356058
+      scratch_styled_idle_27: 1907760956919346188
+      scratch_styled_idle_28: 5670357471725015532
+      scratch_styled_idle_29: 7628247523856128536
+      scratch_styled_idle_3: 6470142714801427940
+      scratch_styled_idle_30: -5166837626925026169
+      scratch_styled_idle_31: 3640874223857320059
+      scratch_styled_idle_32: -5932331094263719155
+      scratch_styled_idle_33: -5260005767509248968
+      scratch_styled_idle_34: -865022517224514878
+      scratch_styled_idle_35: -2238118615564295029
+      scratch_styled_idle_36: -6524264172277545742
+      scratch_styled_idle_37: 6142291278863322081
+      scratch_styled_idle_38: -5709345635248378635
+      scratch_styled_idle_39: -9027641291441178039
+      scratch_styled_idle_4: -6070828604324588249
+      scratch_styled_idle_5: -6427283933570918477
+      scratch_styled_idle_6: -7054191154534305959
+      scratch_styled_idle_7: 7194787322888301508
+      scratch_styled_idle_8: 4128888761817858821
+      scratch_styled_idle_9: -5473343440072010157
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

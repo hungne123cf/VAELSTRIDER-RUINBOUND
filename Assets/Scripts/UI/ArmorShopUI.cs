@@ -269,6 +269,17 @@ public class ArmorShopUI : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        LocalizationManager.OnLanguageChanged -= RefreshUI;
+        LocalizationManager.OnLanguageChanged += RefreshUI;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationManager.OnLanguageChanged -= RefreshUI;
+    }
+
     private void InitShopDatabase()
     {
         if (isDatabaseInitialized) return;

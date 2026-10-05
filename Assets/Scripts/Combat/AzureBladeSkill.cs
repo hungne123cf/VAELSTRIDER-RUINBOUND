@@ -20,6 +20,7 @@ public class AzureBladeSkill : MonoBehaviour
 
     private PlayerController playerController;
     private PlayerCombat playerCombat;
+    private PlayerHealth playerHealth;
     private Animator animator;
     private RangedAimIndicator aimIndicator;
 
@@ -43,6 +44,7 @@ public class AzureBladeSkill : MonoBehaviour
     {
         playerController = GetComponent<PlayerController>();
         playerCombat = GetComponent<PlayerCombat>();
+        playerHealth = GetComponent<PlayerHealth>();
         animator = GetComponent<Animator>();
         aimIndicator = RangedAimIndicator.EnsureExists(gameObject);
         RefreshCooldownStats();
@@ -212,27 +214,33 @@ public class AzureBladeSkill : MonoBehaviour
 
         // Phóng sóng kiếm (kích thước chuẩn 1.0 với hình ảnh vẽ tay Twin_sword)
         SwordWaveProjectile.Spawn(spawnPos, currentAimDir, totalDamage, speed, scaleMultiplier: 1.0f, isUlti: false, isCharged: (chargeProgress > 0.2f), pierceLimit: pierce, ownerSkill: this);
-
-        // Hồi năng lượng cho Player
-        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
-        if (energySys != null)
-        {
-            float energyGain = Mathf.Lerp(8f, 18f, chargeProgress);
-            energySys.RestoreEnergy(energyGain);
-            energySys.AddInnerEnergy(energyGain * 1.5f);
-        }
     }
 
     /// <summary>
-    /// Giảm 50% thời gian hồi chiêu khi chém trúng mục tiêu
+    /// Giảm 50% thời gian hồi chiêu và hồi phục Năng Lượng / Nội Năng khi kiếm khí chém trúng quái vật
     /// </summary>
-    public void OnWaveHitEnemy()
+    public void OnWaveHitEnemy(bool isCharged = false, bool isUlti = false)
     {
         if (attackCooldownTimer > 0.05f)
         {
             float reduction = attackCooldownTimer * 0.5f;
             attackCooldownTimer = Mathf.Max(0f, attackCooldownTimer - reduction);
             DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, "⚡ CD -50%!", new Color(0.2f, 1f, 0.85f));
+        }
+
+        // Tích tụ năng lượng & Nội Năng CHỈ KHI kiếm khí chém trúng quái vật
+        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+        if (energySys != null)
+        {
+            float gain = isUlti ? 4f : (isCharged ? 16f : 8f);
+            energySys.RestoreEnergy(gain);
+            energySys.AddInnerEnergy(gain * 1.5f);
+        }
+
+        if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
+        {
+            int heal = Mathf.Max(1, Mathf.RoundToInt(baseWaveDamage * playerCombat.LifestealPercent));
+            playerHealth.Heal(heal);
         }
     }
 

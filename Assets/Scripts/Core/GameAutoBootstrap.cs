@@ -507,6 +507,9 @@ public class GameAutoBootstrap : MonoBehaviour
             var sweep = player.GetComponent<SweepTheWeakSkill>();
             if (sweep != null) Object.Destroy(sweep);
 
+            var ronin = player.GetComponent<GaleRoninSkill>();
+            if (ronin != null) Object.Destroy(ronin);
+
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure == null)
             {
@@ -532,33 +535,69 @@ public class GameAutoBootstrap : MonoBehaviour
 
             Debug.Log("<color=cyan>[CHARACTER]</color> Đã áp dụng nhân vật LAM KIẾM SĨ (AZURE BLADE) với Tuyệt kỹ Bão Sóng Kiếm!");
         }
-        else if (selectedChar == CharacterManager.CHAR_MAID)
+        else if (selectedChar == CharacterManager.CHAR_GALE_RONIN)
         {
             player.transform.localScale = Vector3.one;
+            var sr = player.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.material = new Material(Shader.Find("Sprites/Default"));
+#if UNITY_EDITOR
+                var idleObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player2/_down idle.png");
+                if (idleObjs != null)
+                {
+                    foreach (var o in idleObjs)
+                    {
+                        if (o is Sprite s)
+                        {
+                            sr.sprite = s;
+                            break;
+                        }
+                    }
+                }
+#endif
+            }
+
             var anim = player.GetComponent<Animator>();
 #if UNITY_EDITOR
-            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Maid/Maid.controller");
+            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Player2/Player2.controller");
             if (controller != null && anim != null)
             {
                 anim.runtimeAnimatorController = controller;
+                anim.Rebind();
+                anim.Update(0f);
             }
 #endif
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure != null) Object.Destroy(azure);
 
-            if (player.GetComponent<SweepTheWeakSkill>() == null)
+            var sweep = player.GetComponent<SweepTheWeakSkill>();
+            if (sweep != null) Object.Destroy(sweep);
+
+            var ronin = player.GetComponent<GaleRoninSkill>();
+            if (ronin == null)
             {
-                player.gameObject.AddComponent<SweepTheWeakSkill>();
+                ronin = player.gameObject.AddComponent<GaleRoninSkill>();
             }
 
             var btnSpecial = GameObject.Find("Btn_Special");
             if (btnSpecial != null)
             {
                 var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
-                if (txt != null) txt.text = "SWEEP";
+                if (txt != null) txt.text = "SHADOW STRIKE";
+
+                var btn = btnSpecial.GetComponent<UnityEngine.UI.Button>();
+                if (btn != null)
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => {
+                        var r = player.GetComponent<GaleRoninSkill>();
+                        if (r != null) r.TriggerSpecialSkill();
+                    });
+                }
             }
 
-            Debug.Log("<color=magenta>[CHARACTER]</color> Đã áp dụng nhân vật MAID CHIẾN BINH với tuyệt kỹ Quét Tan Kẻ Yếu!");
+            Debug.Log("<color=green>[CHARACTER]</color> Đã áp dụng nhân vật PHONG LÔI LÃNG KHÁCH (GALE RONIN) với Tuyệt kỹ Ám Ảnh Trảm (Shadow Strike)!");
         }
         else
         {
@@ -573,6 +612,9 @@ public class GameAutoBootstrap : MonoBehaviour
 #endif
             var sweep = player.GetComponent<SweepTheWeakSkill>();
             if (sweep != null) Object.Destroy(sweep);
+
+            var ronin = player.GetComponent<GaleRoninSkill>();
+            if (ronin != null) Object.Destroy(ronin);
 
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure != null) Object.Destroy(azure);

@@ -135,6 +135,7 @@ public class PlayerCombat : MonoBehaviour
     }
 
     public int BonusAttackDamage => bonusAttackDamage;
+    public float LifestealPercent => lifestealPercent;
 
     private bool isAttackHolding = false;
     private float attackHoldDuration = 0f;
@@ -256,13 +257,24 @@ public class PlayerCombat : MonoBehaviour
             animator.Play(attackState, 0, 0f);
         }
 
+        // Kich hoat Phong Loi Lang Khach cho Nhan vat 2 (Gale Ronin)
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled)
+        {
+            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
+            int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
+            ronin.PerformAttack(facing, curAtk);
+            return;
+        }
+
         // Kich hoat Song Kiem cho Nhan vat 3 (Azure Blade)
         var azureBlade = GetComponent<AzureBladeSkill>();
-        if (azureBlade != null)
+        if (azureBlade != null && azureBlade.enabled)
         {
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
             int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
             azureBlade.OnPerformAttack(facing, curAtk);
+            return;
         }
 
         ExecuteHitDamage();
@@ -280,16 +292,16 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (var col in allHits)
         {
-            if (col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
+            if (col == null || col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
 
             var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
-            if (damageable != null && !damagedSet.Contains(damageable))
+            if (damageable != null && !(damageable is PlayerHealth) && !damagedSet.Contains(damageable))
             {
                 damagedSet.Add(damageable);
                 damageable.TakeDamage(damage);
 
-                // Neu la Quai vat (khong phai binh gom / hoa co BreakableProp)
-                bool isProp = (col.GetComponent<BreakableProp>() != null || col.GetComponentInParent<BreakableProp>() != null);
+                // Neu la Quai vat (khong phai binh gom / hoa co BreakableProp hoac TreasureChest)
+                bool isProp = (col.GetComponent<BreakableProp>() != null || col.GetComponentInParent<BreakableProp>() != null || col.GetComponent<TreasureChest>() != null || col.GetComponentInParent<TreasureChest>() != null);
                 if (!isProp)
                 {
                     enemyCount++;
@@ -297,7 +309,7 @@ public class PlayerCombat : MonoBehaviour
                     bool isCrit = (comboStep == 2);
                     DamagePopup.Create(col.transform.position, damage, isCritical: isCrit);
 
-                    // Hoi nang luong va tich luy Noi Nang khi chem trung quai
+                    // Hoi nang luong va tich luy Noi Nang CHỈ KHI chem trung quai vat
                     var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
                     if (energySys != null)
                     {
@@ -331,6 +343,14 @@ public class PlayerCombat : MonoBehaviour
         float effectiveCooldown = Mathf.Max(5.0f, skillCooldown - ultiCooldownReduction);
         skillCooldownTimer = effectiveCooldown;
         lastSpecialSkillFrame = Time.frameCount;
+
+        // Kích hoạt Bão Phong Trảm nếu nhân vật là Gale Ronin (Player 2)
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null)
+        {
+            ronin.TriggerSpecialSkill();
+            return true;
+        }
 
         // Kích hoạt Bão Sóng Kiếm nếu nhân vật là Azure Blade (Player 3)
         var azureBlade = GetComponent<AzureBladeSkill>();
@@ -453,8 +473,10 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (Collider2D enemy in hitEnemies)
         {
+            if (enemy == null || enemy.gameObject == gameObject || enemy.transform.IsChildOf(transform)) continue;
+
             var damageable = enemy.GetComponent<IDamageable>() ?? enemy.GetComponentInParent<IDamageable>();
-            if (damageable != null)
+            if (damageable != null && !(damageable is PlayerHealth))
             {
                 damageable.TakeDamage(damage);
                 SoundManager.EnsureInstance()?.PlayHitImpact();
@@ -468,17 +490,21 @@ public class PlayerCombat : MonoBehaviour
                     DamagePopup.CreateText(enemy.transform.position, $"{damage}", new Color(0.3f, 0.9f, 1f));
                 }
 
-                // Tích lũy Nội Năng khi Tuyệt kỹ đánh trúng quái
-                var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
-                if (energySys != null)
+                bool isProp = (enemy.GetComponent<BreakableProp>() != null || enemy.GetComponentInParent<BreakableProp>() != null || enemy.GetComponent<TreasureChest>() != null || enemy.GetComponentInParent<TreasureChest>() != null);
+                if (!isProp)
                 {
-                    energySys.AddInnerEnergy(isFinal ? 12f : 5f);
-                }
+                    // Tích lũy Nội Năng khi Tuyệt kỹ đánh trúng quái
+                    var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+                    if (energySys != null)
+                    {
+                        energySys.AddInnerEnergy(isFinal ? 12f : 5f);
+                    }
 
-                if (lifestealPercent > 0f && playerHealth != null)
-                {
-                    int healAmount = Mathf.Max(1, Mathf.RoundToInt(damage * lifestealPercent));
-                    playerHealth.Heal(healAmount);
+                    if (lifestealPercent > 0f && playerHealth != null)
+                    {
+                        int healAmount = Mathf.Max(1, Mathf.RoundToInt(damage * lifestealPercent));
+                        playerHealth.Heal(healAmount);
+                    }
                 }
             }
 
@@ -556,18 +582,36 @@ public class PlayerCombat : MonoBehaviour
     {
         string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
         bool isVaelstrider = (curChar == CharacterManager.CHAR_VAELSTRIDER);
+        bool isRonin = (curChar == CharacterManager.CHAR_GALE_RONIN || GetComponent<GaleRoninSkill>() != null);
+        bool isAzure = (curChar == CharacterManager.CHAR_AZURE_BLADE || GetComponent<AzureBladeSkill>() != null);
 
-        if (isVaelstrider)
+        if (isRonin)
         {
-            bodyCenterOffset = new Vector2(0f, 1.25f);
-            attackOffsetDistance = 0.85f;
-            attackRadius = 1.15f;
+            bodyCenterOffset = new Vector2(0f, 0.0f);
+            attackOffsetDistance = 0.45f;
+            attackRadius = 0.85f;
+            skillRadius = 1.8f;
+        }
+        else if (isAzure)
+        {
+            bodyCenterOffset = new Vector2(0f, 0.05f);
+            attackOffsetDistance = 0.55f;
+            attackRadius = 0.95f;
+            skillRadius = 2.0f;
+        }
+        else if (isVaelstrider)
+        {
+            bodyCenterOffset = new Vector2(0f, 0.65f);
+            attackOffsetDistance = 0.75f;
+            attackRadius = 1.05f;
+            skillRadius = 2.4f;
         }
         else
         {
-            bodyCenterOffset = new Vector2(0f, 0.1f);
-            attackOffsetDistance = 0.65f;
-            attackRadius = 1.15f;
+            bodyCenterOffset = new Vector2(0f, 0.05f);
+            attackOffsetDistance = 0.45f;
+            attackRadius = 0.85f;
+            skillRadius = 1.8f;
         }
 
         if (attackPoint != null)

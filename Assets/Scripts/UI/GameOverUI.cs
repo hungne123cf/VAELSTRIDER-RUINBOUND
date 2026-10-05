@@ -181,6 +181,12 @@ public class GameOverUI : MonoBehaviour
         }
         canvasGroup.alpha = 0f;
         isShown = false;
+        gameObject.SetActive(false);
+
+        // Khoi phuc lai toan bo HUD dieu khien, nut bam va UI/UX
+        GameAutoBootstrap.SetGameplayHUDVisible(true);
+        if (MatchTimerUI.Instance != null) MatchTimerUI.Instance.ResumeTimer();
+
         onComplete?.Invoke();
     }
 
@@ -201,6 +207,7 @@ public class GameOverUI : MonoBehaviour
         StartCoroutine(FadeOutRoutine(() =>
         {
             Time.timeScale = 1f;
+            GameAutoBootstrap.SetGameplayHUDVisible(true);
             var playerHealth = UnityEngine.Object.FindAnyObjectByType<PlayerHealth>();
             if (playerHealth != null)
             {

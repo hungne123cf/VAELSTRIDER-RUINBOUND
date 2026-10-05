@@ -17,6 +17,30 @@ TextureImporter:
   - first:
       213: 220666920469744789
     second: _up idle_4
+  - first:
+      213: -2611919724963383615
+    second: _up idle_0_0
+  - first:
+      213: 6196445118867266843
+    second: _up idle_0_1
+  - first:
+      213: 8134664693093233799
+    second: _up idle_0_2
+  - first:
+      213: -1260596368405055222
+    second: _up idle_0_3
+  - first:
+      213: 9216260089578516047
+    second: _up idle_1_0
+  - first:
+      213: -1875721079554021748
+    second: _up idle_1_1
+  - first:
+      213: -1167035441096672109
+    second: _up idle_1_2
+  - first:
+      213: -7124129489269997572
+    second: _up idle_1_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -36,7 +60,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -49,7 +73,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -63,7 +87,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -87,7 +111,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -151,111 +175,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: _up idle_0
+      name: _up idle_0_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 77
-        width: 16
-        height: 35
+        x: 0
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: de9378aafaca38d40800000000000000
-      internalID: 5585497833349790189
+      spriteID: 1c6b8b349d890cbd0800000000000000
+      internalID: -2611919724963383615
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up idle_1
+      name: _up idle_0_1
       rect:
         serializedVersion: 2
-        x: 88
-        y: 77
-        width: 16
-        height: 35
+        x: 64
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8cf446fb18840d5a0800000000000000
-      internalID: -6498614540196622392
+      spriteID: b1d594461023ef550800000000000000
+      internalID: 6196445118867266843
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up idle_2
+      name: _up idle_0_2
       rect:
         serializedVersion: 2
-        x: 152
-        y: 77
-        width: 16
-        height: 35
+        x: 128
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5b789495a12925610800000000000000
-      internalID: 1608508658789484469
+      spriteID: 784fbb6607224e070800000000000000
+      internalID: 8134664693093233799
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up idle_3
+      name: _up idle_0_3
       rect:
         serializedVersion: 2
-        x: 216
-        y: 77
-        width: 16
-        height: 35
+        x: 192
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 60dbca6bda88d36c0800000000000000
-      internalID: -4162020200944976634
+      spriteID: a09b1182846718ee0800000000000000
+      internalID: -1260596368405055222
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _up idle_4
+      name: _up idle_1_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 13
-        width: 16
-        height: 35
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 59c47402567ff0300800000000000000
-      internalID: 220666920469744789
+      spriteID: f4eefecb8bbb6ef70800000000000000
+      internalID: 9216260089578516047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _up idle_1_1
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c86687bbd9918f5e0800000000000000
+      internalID: -1875721079554021748
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _up idle_1_2
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39c3425137bddcfe0800000000000000
+      internalID: -1167035441096672109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _up idle_1_3
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cff3d2a89f1022d90800000000000000
+      internalID: -7124129489269997572
       vertices: []
       indices: 
       edges: []
@@ -264,7 +354,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 2de571e0e3a49a24fae1fc9451a45eb3
     internalID: 0
     vertices: []
     indices: 
@@ -272,10 +362,20 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       _up idle_0: 5585497833349790189
+      _up idle_0_0: -2611919724963383615
+      _up idle_0_1: 6196445118867266843
+      _up idle_0_2: 8134664693093233799
+      _up idle_0_3: -1260596368405055222
       _up idle_1: -6498614540196622392
+      _up idle_1_0: 9216260089578516047
+      _up idle_1_1: -1875721079554021748
+      _up idle_1_2: -1167035441096672109
+      _up idle_1_3: -7124129489269997572
       _up idle_2: 1608508658789484469
       _up idle_3: -4162020200944976634
       _up idle_4: 220666920469744789

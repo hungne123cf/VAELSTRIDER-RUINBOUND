@@ -17,6 +17,30 @@ TextureImporter:
   - first:
       213: 6639338315080358543
     second: _down idle_4
+  - first:
+      213: -6835321920652730446
+    second: _down idle_0_0
+  - first:
+      213: 7569460447128059616
+    second: _down idle_0_1
+  - first:
+      213: 1110996775530724651
+    second: _down idle_0_2
+  - first:
+      213: -4380150043931523255
+    second: _down idle_0_3
+  - first:
+      213: -7266249525789259706
+    second: _down idle_1_0
+  - first:
+      213: -3817262031951872219
+    second: _down idle_1_1
+  - first:
+      213: -7820379681658536857
+    second: _down idle_1_2
+  - first:
+      213: 111844459065084577
+    second: _down idle_1_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -36,7 +60,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -49,7 +73,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -63,7 +87,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -87,7 +111,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -151,111 +175,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: _down idle_0
+      name: _down idle_0_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 77
-        width: 16
-        height: 36
+        x: 0
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a06fa806bf45c8550800000000000000
-      internalID: 6164395428596610570
+      spriteID: 2bf9d02adee0421a0800000000000000
+      internalID: -6835321920652730446
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down idle_1
+      name: _down idle_0_1
       rect:
         serializedVersion: 2
-        x: 88
-        y: 77
-        width: 16
-        height: 36
+        x: 64
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3b6b4eb46dcf012d0800000000000000
-      internalID: -3309867728790833485
+      spriteID: 0eeff640c202c0960800000000000000
+      internalID: 7569460447128059616
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down idle_2
+      name: _down idle_0_2
       rect:
         serializedVersion: 2
-        x: 152
-        y: 77
-        width: 16
-        height: 36
+        x: 128
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5c529fa6baf4581b0800000000000000
-      internalID: -5655026159441074747
+      spriteID: b2dfc185ead0b6f00800000000000000
+      internalID: 1110996775530724651
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down idle_3
+      name: _down idle_0_3
       rect:
         serializedVersion: 2
-        x: 216
-        y: 77
-        width: 16
-        height: 35
+        x: 192
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 698a010bc7aecef20800000000000000
-      internalID: 3453392835537053846
+      spriteID: 947cc88fdb49633c0800000000000000
+      internalID: -4380150043931523255
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: _down idle_4
+      name: _down idle_1_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 13
-        width: 16
-        height: 36
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f8a5106550ba32c50800000000000000
-      internalID: 6639338315080358543
+      spriteID: 6480bf5fd88192b90800000000000000
+      internalID: -7266249525789259706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _down idle_1_1
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52f3cea186c560bc0800000000000000
+      internalID: -3817262031951872219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _down idle_1_2
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76c7f0a1d1e687390800000000000000
+      internalID: -7820379681658536857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: _down idle_1_3
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1aa8ba461f95d8100800000000000000
+      internalID: 111844459065084577
       vertices: []
       indices: 
       edges: []
@@ -264,7 +354,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 3093286e76df61a44a4feb20bc778fb0
     internalID: 0
     vertices: []
     indices: 
@@ -272,10 +362,20 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       _down idle_0: 6164395428596610570
+      _down idle_0_0: -6835321920652730446
+      _down idle_0_1: 7569460447128059616
+      _down idle_0_2: 1110996775530724651
+      _down idle_0_3: -4380150043931523255
       _down idle_1: -3309867728790833485
+      _down idle_1_0: -7266249525789259706
+      _down idle_1_1: -3817262031951872219
+      _down idle_1_2: -7820379681658536857
+      _down idle_1_3: 111844459065084577
       _down idle_2: -5655026159441074747
       _down idle_3: 3453392835537053846
       _down idle_4: 6639338315080358543
