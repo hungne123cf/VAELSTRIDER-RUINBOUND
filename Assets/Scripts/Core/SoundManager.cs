@@ -79,24 +79,31 @@ public class SoundManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Tao 3 AudioSources rieng biet: SFX, Voice, Music
-        if (sfxSource == null)
+        // Tao 3 AudioSources rieng biet: SFX, Voice, Music voi try-catch an toan tranh FMOD device error
+        try
         {
-            sfxSource = gameObject.AddComponent<AudioSource>();
-            sfxSource.playOnAwake = false;
-        }
+            if (sfxSource == null)
+            {
+                sfxSource = gameObject.AddComponent<AudioSource>();
+                sfxSource.playOnAwake = false;
+            }
 
-        if (voiceSource == null)
-        {
-            voiceSource = gameObject.AddComponent<AudioSource>();
-            voiceSource.playOnAwake = false;
-        }
+            if (voiceSource == null)
+            {
+                voiceSource = gameObject.AddComponent<AudioSource>();
+                voiceSource.playOnAwake = false;
+            }
 
-        if (musicSource == null)
+            if (musicSource == null)
+            {
+                musicSource = gameObject.AddComponent<AudioSource>();
+                musicSource.loop = true;
+                musicSource.playOnAwake = false;
+            }
+        }
+        catch (System.Exception ex)
         {
-            musicSource = gameObject.AddComponent<AudioSource>();
-            musicSource.loop = true;
-            musicSource.playOnAwake = false;
+            Debug.LogWarning($"[SoundManager] Warning khoi tao Audio Device (FMOD): {ex.Message}");
         }
 
         AutoLoadClips();
@@ -379,6 +386,7 @@ public class SoundManager : MonoBehaviour
     }
 
     public void PlayItemPickup() => PlayShardPickup();
+    public void PlayGemSocket() => PlayShardPickup();
     public void PlayUpgradeSuccess() => PlayHeavenlyAscension();
     public void PlayUpgradeFail() => PlayPlayerHurt();
     public void PlayChestBreak() => PlayChestOpen();

@@ -8,6 +8,7 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     [SerializeField] private RectTransform containerRect;
     [SerializeField] private RectTransform handleRect;
     [SerializeField] private float handleRange = 80f;
+    [SerializeField] private Vector2 handleSize = new Vector2(170f, 170f);
 
     [Header("Player Target")]
     [SerializeField] private PlayerController playerController;
@@ -27,28 +28,33 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
         Image bgImg = GetComponent<Image>();
         if (bgImg != null)
         {
-            Sprite baseSprite = Resources.Load<Sprite>("UI/joystick_base");
+            Sprite baseSprite = null;
 #if UNITY_EDITOR
+            baseSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Joystick Base.png");
             if (baseSprite == null) baseSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/joystick_base.png");
 #endif
-            if (baseSprite != null)
+            if (baseSprite == null) baseSprite = Resources.Load<Sprite>("UI/joystick_base");
+            if (baseSprite != null && bgImg.sprite != baseSprite)
             {
                 bgImg.sprite = baseSprite;
                 bgImg.color = Color.white;
             }
         }
 
-        // 2. Đảm bảo Joystick Handle (núm điều khiển) là hình tròn pha lê 3D thay vì khối vuông trắng
+        // 2. Đảm bảo Joystick Handle (núm điều khiển) to rõ ràng
         if (handleRect != null)
         {
+            handleRect.sizeDelta = handleSize;
             Image handleImg = handleRect.GetComponent<Image>();
             if (handleImg != null)
             {
-                Sprite handleSprite = Resources.Load<Sprite>("UI/joystick_handle");
+                Sprite handleSprite = null;
 #if UNITY_EDITOR
+                handleSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Joystick Handle.png");
                 if (handleSprite == null) handleSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/joystick_handle.png");
 #endif
-                if (handleSprite != null)
+                if (handleSprite == null) handleSprite = Resources.Load<Sprite>("UI/joystick_handle");
+                if (handleSprite != null && handleImg.sprite != handleSprite)
                 {
                     handleImg.sprite = handleSprite;
                     handleImg.color = Color.white;

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(SpriteRenderer), typeof(CircleCollider2D))]
@@ -6,7 +6,7 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
 {
     private SpriteRenderer sr;
     private CircleCollider2D col;
-    private int health = 30;
+    private int health = 110;
     private bool isDetonated = false;
 
     private Sprite[] idleSprites;
@@ -104,11 +104,14 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
             if (h.CompareTag("Player"))
             {
                 var target = h.GetComponent<IDamageable>();
-                if (target != null) target.TakeDamage(10);
+                if (target != null) target.TakeDamage(22);
             }
         }
 
         DamagePopup.CreateText(transform.position + Vector3.up * 1f, "EGG HATCH!", new Color(0.4f, 1f, 0.6f));
+
+        // Roi 1-2 linh hon nho
+        AethelShard.SpawnShards(transform.position, Random.Range(1, 3));
 
         // No ra 1 - 2 Nhen Con Mini!
         Vector3 hatchPos = transform.position;

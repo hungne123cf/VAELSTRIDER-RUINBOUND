@@ -122,7 +122,7 @@ public static class Map3ForgottenMemoriesBuilder
         {
             new EditorBuildSettingsScene("Assets/Scenes/LoginScene.unity", true),
             new EditorBuildSettingsScene("Assets/Scenes/MainMenuScene.unity", true),
-            new EditorBuildSettingsScene("Assets/Scenes/SampleScene.unity", true),
+            new EditorBuildSettingsScene("Assets/Scenes/Map1_Thestart.unity", true),
             new EditorBuildSettingsScene("Assets/Scenes/Map2_ValleyRuin.unity", true),
             new EditorBuildSettingsScene(MAP3_SCENE_PATH, true)
         };

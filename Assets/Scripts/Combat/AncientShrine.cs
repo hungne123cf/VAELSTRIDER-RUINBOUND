@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -6,41 +6,35 @@ public class AncientShrine : MonoBehaviour
 {
     [Header("Settings")]
     [SerializeField] private float interactRadius = 3.5f;
-    [SerializeField] private Vector3 promptOffset = new Vector3(0, 2.5f, 0);
+    [SerializeField] private Vector3 promptOffset = new Vector3(0, 2.2f, 0);
 
     private Transform playerTransform;
-    private GameObject worldPromptObj;
-    private TextMeshPro promptTextMesh;
-    private Color originalPromptTextColor = new Color(0.35f, 0.95f, 1f, 1f);
-
-    private GameObject openBadgeObj;
-    private RectTransform openBadgeRt;
-    private CanvasGroup openBadgeCanvasGroup;
-    private Outline openBadgeOutline;
-    private float popupCurrentAlpha = 1.0f;
+    private GameObject arrowIndicatorObj;
+    private TextMeshPro arrowTextMesh;
+    private Color arrowColor = new Color(0.35f, 0.95f, 1f, 1f);
 
     private bool isPlayerInRange = false;
-    private bool isMenuOpen = false;
-
-    // Mobile interact button reference
-    private static GameObject mobileInteractBtn;
 
     void Awake()
     {
-        mobileInteractBtn = null;
     }
 
     void OnDestroy()
     {
-        mobileInteractBtn = null;
     }
 
     void Start()
     {
         FindPlayer();
         EnsurePillarVisuals();
-        CreateOpenBadge();
-        CreateWorldPrompt();
+        CreateArrowIndicator();
+
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (canvas != null)
+        {
+            Transform oldBtn = canvas.transform.Find("Btn_Interact");
+            if (oldBtn != null) Destroy(oldBtn.gameObject);
+        }
     }
 
     void Update()
@@ -52,77 +46,38 @@ public class AncientShrine : MonoBehaviour
         }
 
         // Tinh khoang cach toi tam cua tru da (tru da cao khoang 2.5m nen tam o y + 0.8m)
-        Vector2 shrineCenter = (Vector2)transform.position + new Vector2(0f, 0.8f);
+        Vector2 shrineCenter = (Vector2)transform.position + new Vector2(0f, 0.4f);
         float dist = Vector2.Distance(shrineCenter, playerTransform.position);
-        float effectiveRadius = Mathf.Max(interactRadius, 4.2f);
+        float effectiveRadius = Mathf.Max(interactRadius, 1.8f);
         bool inRange = dist <= effectiveRadius;
         isPlayerInRange = inRange;
 
-        // Kiem tra truc tiep tu ShrineUpgradeUI xem Menu co dang mo hay khong
+        // Kiem tra truc tiep tu ShrineUpgradeUI va cac UI khac xem co dang mo hay khong
         bool menuOpen = ShrineUpgradeUI.Instance != null && ShrineUpgradeUI.Instance.IsOpen();
-        bool shouldShow = inRange && !menuOpen;
+        bool otherUIOpen = IsAnyOtherUIOpen();
+        bool shouldShow = inRange && !menuOpen && !otherUIOpen;
 
-        // Luon cap nhat trang thai hien thi cua Open Badge va World Prompt moi khung hinh
-        if (openBadgeObj != null && openBadgeObj.activeSelf != shouldShow)
+        // Cap nhat trang thai hien thi mui ten
+        if (arrowIndicatorObj != null && arrowIndicatorObj.activeSelf != shouldShow)
         {
-            openBadgeObj.SetActive(shouldShow);
+            arrowIndicatorObj.SetActive(shouldShow);
         }
-        if (worldPromptObj != null && worldPromptObj.activeSelf != shouldShow)
-        {
-            worldPromptObj.SetActive(shouldShow);
-        }
-        UpdateMobileInteractButton(shouldShow);
 
-        // Kiem tra neu Player dung sau hoac trong pham vi che khuat cua chu OPEN / Popup
-        // Neu Player o sau -> Lam mo chu OPEN va Khung popup de nguoi choi nhin ro Player!
-        bool isPlayerBehindPopup = false;
-        if (shouldShow && openBadgeObj != null)
+        // Hieu ung mui ten bay bong, nhap nhay nhe nhang tren dau tru da
+        if (arrowIndicatorObj != null && arrowIndicatorObj.activeSelf)
         {
-            Vector3 badgePos = openBadgeObj.transform.position;
-            Vector3 pPos = playerTransform.position;
+            float bobbing = Mathf.Sin(Time.time * 4.5f) * 0.12f;
+            arrowIndicatorObj.transform.localPosition = promptOffset + new Vector3(0f, bobbing, 0f);
 
-            // Vung che khuat cua Popup chu OPEN: be ngang ~ 1.4m, chieu cao tu duoi badge toi tren dong chu
-            float dx = Mathf.Abs(pPos.x - badgePos.x);
-            if (dx < 1.35f && pPos.y >= badgePos.y - 0.45f && pPos.y <= badgePos.y + 1.8f)
+            if (arrowTextMesh != null)
             {
-                isPlayerBehindPopup = true;
+                float pulse = (Mathf.Sin(Time.time * 5f) + 1f) * 0.5f;
+                arrowTextMesh.color = Color.Lerp(new Color(0.3f, 0.9f, 1f, 0.85f), new Color(1f, 0.95f, 0.4f, 1f), pulse);
             }
         }
 
-        // Fade Alpha muot ma ve 0.22f khi Player o sau, hoi phuc 1.0f khi Player ra ngoai
-        float targetAlpha = isPlayerBehindPopup ? 0.22f : 1.0f;
-        if (!Mathf.Approximately(popupCurrentAlpha, targetAlpha))
-        {
-            popupCurrentAlpha = Mathf.MoveTowards(popupCurrentAlpha, targetAlpha, Time.deltaTime * 5.5f);
-            if (openBadgeCanvasGroup != null)
-            {
-                openBadgeCanvasGroup.alpha = popupCurrentAlpha;
-            }
-            if (promptTextMesh != null)
-            {
-                promptTextMesh.color = new Color(originalPromptTextColor.r, originalPromptTextColor.g, originalPromptTextColor.b, originalPromptTextColor.a * popupCurrentAlpha);
-            }
-        }
-
-        // Hieu ung bay bong, nhap nhay vien sang cho badge "OPEN"
-        if (openBadgeObj != null && openBadgeObj.activeSelf && openBadgeRt != null)
-        {
-            float bobbing = Mathf.Sin(Time.time * 3.2f) * 0.12f;
-            openBadgeObj.transform.localPosition = new Vector3(0f, promptOffset.y + bobbing, 0f);
-
-            float targetScale = 0.015f;
-            openBadgeRt.localScale = Vector3.Lerp(openBadgeRt.localScale, Vector3.one * targetScale, Time.deltaTime * 10f);
-
-            if (openBadgeOutline != null)
-            {
-                float alpha = (Mathf.Sin(Time.time * 4f) + 1f) * 0.5f;
-                Color baseCol = new Color(0.35f, 0.95f, 1f, 1f);
-                openBadgeOutline.effectColor = new Color(baseCol.r, baseCol.g, baseCol.b, Mathf.Lerp(0.5f, 1f, alpha) * popupCurrentAlpha);
-            }
-        }
-
-        // Phim [E] de tuong tac tren PC
-        if (inRange && Input.GetKeyDown(KeyCode.E))
+        // Phim [E] de tuong tac tren PC (chi khi khong co UI nao khac dang mo)
+        if (inRange && !otherUIOpen && Input.GetKeyDown(KeyCode.E))
         {
             ToggleShrineMenu();
         }
@@ -135,95 +90,36 @@ public class AncientShrine : MonoBehaviour
     }
 
     /// <summary>
-    /// Tao huy hieu nut bam "OPEN" cuc ky de bam tren man hinh Mobile & chuot PC
-    /// Cho phep Player di xuyen qua hoan toan tu do (BoxCollider2D isTrigger = true)
+    /// Tao mui ten phat sang bay bong chi vao tru da, khong can chu OPEN / NANG CAP
     /// </summary>
-    private void CreateOpenBadge()
+    private void CreateArrowIndicator()
     {
-        if (openBadgeObj != null) return;
+        if (arrowIndicatorObj != null) return;
 
-        openBadgeObj = new GameObject("Shrine_OpenBadge");
-        openBadgeObj.transform.SetParent(transform, false);
-        openBadgeObj.transform.localPosition = promptOffset;
+        arrowIndicatorObj = new GameObject("Shrine_ArrowIndicator");
+        arrowIndicatorObj.transform.SetParent(transform, false);
+        arrowIndicatorObj.transform.localPosition = promptOffset;
 
-        // World space Canvas
-        Canvas badgeCanvas = openBadgeObj.AddComponent<Canvas>();
-        badgeCanvas.renderMode = RenderMode.WorldSpace;
-        badgeCanvas.sortingLayerName = "UI";
-        badgeCanvas.worldCamera = Camera.main;
-        badgeCanvas.sortingOrder = 500;
+        arrowTextMesh = arrowIndicatorObj.AddComponent<TextMeshPro>();
+        arrowTextMesh.text = "▼";
+        arrowTextMesh.fontSize = 5.2f;
+        arrowTextMesh.fontStyle = FontStyles.Bold;
+        arrowTextMesh.alignment = TextAlignmentOptions.Center;
+        arrowTextMesh.color = arrowColor;
+        arrowTextMesh.sortingLayerID = SortingLayer.NameToID("UI");
+        arrowTextMesh.sortingOrder = 500;
 
-        var cs = openBadgeObj.AddComponent<CanvasScaler>();
-        cs.dynamicPixelsPerUnit = 100;
-        openBadgeObj.AddComponent<GraphicRaycaster>();
-
-        openBadgeCanvasGroup = openBadgeObj.AddComponent<CanvasGroup>();
-        openBadgeCanvasGroup.alpha = 1.0f;
-        openBadgeCanvasGroup.blocksRaycasts = true;
-
-        openBadgeRt = openBadgeObj.GetComponent<RectTransform>();
-        openBadgeRt.sizeDelta = new Vector2(160f, 60f);
-        openBadgeRt.localScale = Vector3.one * 0.012f;
-
-        // Background
-        Image bgImg = openBadgeObj.AddComponent<Image>();
-        bgImg.color = new Color(0.06f, 0.12f, 0.20f, 0.94f);
-
-        openBadgeOutline = openBadgeObj.AddComponent<Outline>();
-        openBadgeOutline.effectColor = new Color(0.35f, 0.95f, 1f, 0.95f);
-        openBadgeOutline.effectDistance = new Vector2(3f, -3f);
-
-        // Text "OPEN"
-        GameObject txtObj = new GameObject("Text_Open");
-        txtObj.transform.SetParent(openBadgeObj.transform, false);
-        RectTransform txtRt = txtObj.AddComponent<RectTransform>();
-        txtRt.anchorMin = Vector2.zero;
-        txtRt.anchorMax = Vector2.one;
-        txtRt.sizeDelta = Vector2.zero;
-
-        var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = "OPEN";
-        tmp.fontSize = 32;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = new Color(1f, 0.92f, 0.35f); // Rich radiant gold
-        tmp.raycastTarget = false;
-
-        // UI Button component
-        Button btn = openBadgeObj.AddComponent<Button>();
-        btn.onClick.AddListener(OnBadgeClicked);
-
-        // BoxCollider2D trigger de bat ca su kien Touch / Click truc tiep trong the gioi 2D MA CHO PLAYER DI XUYEN QUA
-        BoxCollider2D col = openBadgeObj.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(160f, 60f);
-        col.isTrigger = true; // TUYET DOI LA TRIGGER DE KHONG CAN TRO PLAYER DI CHUYEN
-        var clicker = openBadgeObj.AddComponent<ShrineBadgeClicker>();
-        clicker.shrine = this;
-
-        openBadgeObj.SetActive(false);
-    }
-
-    private void CreateWorldPrompt()
-    {
-        worldPromptObj = new GameObject("ShrinePrompt");
-        worldPromptObj.transform.SetParent(transform);
-        worldPromptObj.transform.localPosition = promptOffset + new Vector3(0f, 0.7f, 0f);
-
-        promptTextMesh = worldPromptObj.AddComponent<TextMeshPro>();
-        promptTextMesh.text = "NANG CAP CO DAI";
-        promptTextMesh.fontSize = 3.6f;
-        promptTextMesh.fontStyle = FontStyles.Bold;
-        promptTextMesh.alignment = TextAlignmentOptions.Center;
-        promptTextMesh.color = originalPromptTextColor;
-        promptTextMesh.sortingLayerID = SortingLayer.NameToID("UI");
-        promptTextMesh.sortingOrder = 100;
-
-        worldPromptObj.SetActive(false);
+        arrowIndicatorObj.SetActive(false);
     }
 
     public void OnBadgeClicked()
     {
-        ToggleShrineMenu();
+        if (playerTransform == null) FindPlayer();
+        float dist = playerTransform != null ? Vector2.Distance((Vector2)transform.position + new Vector2(0f, 0.4f), playerTransform.position) : 99f;
+        if (dist <= 3.2f)
+        {
+            ToggleShrineMenu();
+        }
     }
 
     public void ToggleShrineMenu()
@@ -242,9 +138,7 @@ public class AncientShrine : MonoBehaviour
 
         bool menuOpen = ui.IsOpen();
         bool shouldShow = isPlayerInRange && !menuOpen;
-        if (openBadgeObj != null) openBadgeObj.SetActive(shouldShow);
-        if (worldPromptObj != null) worldPromptObj.SetActive(shouldShow);
-        UpdateMobileInteractButton(shouldShow);
+        if (arrowIndicatorObj != null) arrowIndicatorObj.SetActive(shouldShow);
     }
 
     public void OnMobileInteractClicked()
@@ -253,71 +147,6 @@ public class AncientShrine : MonoBehaviour
         {
             ToggleShrineMenu();
         }
-    }
-
-    private void UpdateMobileInteractButton(bool show)
-    {
-        EnsureMobileInteractButton();
-        if (mobileInteractBtn != null)
-        {
-            mobileInteractBtn.SetActive(show);
-        }
-    }
-
-    public static GameObject EnsureMobileInteractButton()
-    {
-        if (mobileInteractBtn != null) return mobileInteractBtn;
-
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) return null;
-
-        Transform existing = canvas.transform.Find("Btn_Interact");
-        if (existing != null)
-        {
-            mobileInteractBtn = existing.gameObject;
-            return mobileInteractBtn;
-        }
-
-        mobileInteractBtn = new GameObject("Btn_Interact", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-        mobileInteractBtn.layer = 5;
-        mobileInteractBtn.transform.SetParent(canvas.transform, false);
-
-        RectTransform rt = mobileInteractBtn.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(1, 0);
-        rt.anchorMax = new Vector2(1, 0);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = new Vector2(-470, 180);
-        rt.sizeDelta = new Vector2(90, 90);
-
-        Image bg = mobileInteractBtn.GetComponent<Image>();
-        bg.color = new Color(0.12f, 0.28f, 0.35f, 0.92f);
-
-        GameObject txtObj = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer));
-        txtObj.layer = 5;
-        txtObj.transform.SetParent(mobileInteractBtn.transform, false);
-        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
-        txtRt.anchorMin = Vector2.zero;
-        txtRt.anchorMax = Vector2.one;
-        txtRt.sizeDelta = Vector2.zero;
-
-        var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = "NANG\nCAP";
-        tmp.fontSize = 15;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = new Color(0.3f, 0.95f, 1f, 1f);
-        tmp.raycastTarget = false;
-
-        Button btn = mobileInteractBtn.GetComponent<Button>();
-        btn.targetGraphic = bg;
-        btn.onClick.AddListener(() =>
-        {
-            var shrine = FindAnyObjectByType<AncientShrine>();
-            if (shrine != null) shrine.OnMobileInteractClicked();
-        });
-
-        mobileInteractBtn.SetActive(false);
-        return mobileInteractBtn;
     }
 
     public void EnsurePillarVisuals()
@@ -334,17 +163,36 @@ public class AncientShrine : MonoBehaviour
         // Dam bao co GlowingRunePillar voi khe nut phat sang va am thanh khong gian
         GlowingRunePillar.Create(gameObject, glowSprite, new Color(0.45f, 0.95f, 1f, 1f));
 
-        // Chan de va cham vat ly (Tru da cung ko the di qua)
-        var baseCol = GetComponent<BoxCollider2D>();
-        if (baseCol == null) baseCol = gameObject.AddComponent<BoxCollider2D>();
-        baseCol.size = new Vector2(0.9f, 0.9f);
-        baseCol.offset = new Vector2(0f, -0.6f);
+        // Xoa cac CircleCollider2D cu khong mong muon
+        var circleCols = GetComponents<CircleCollider2D>();
+        foreach (var c in circleCols)
+        {
+            if (Application.isPlaying) Destroy(c);
+            else DestroyImmediate(c);
+        }
 
-        // Vung tuong tac trigger
-        var trigCol = GetComponent<CircleCollider2D>();
-        if (trigCol == null) trigCol = gameObject.AddComponent<CircleCollider2D>();
+        // 1. Chan de va cham vat ly (Tru da cung ko the di qua - chi o phan de duoi)
+        var boxCols = GetComponents<BoxCollider2D>();
+        BoxCollider2D baseCol = null;
+        BoxCollider2D trigCol = null;
+
+        if (boxCols.Length > 0) baseCol = boxCols[0];
+        if (boxCols.Length > 1) trigCol = boxCols[1];
+
+        if (baseCol == null) baseCol = gameObject.AddComponent<BoxCollider2D>();
+        baseCol.isTrigger = false;
+        baseCol.size = new Vector2(0.85f, 0.7f);
+        baseCol.offset = new Vector2(0f, -0.65f);
+
+        // 2. Vung tuong tac trigger & ho tro click/touch vua khit 100% voi Sprite tru da
+        if (trigCol == null) trigCol = gameObject.AddComponent<BoxCollider2D>();
         trigCol.isTrigger = true;
-        trigCol.radius = 2.8f;
+        trigCol.size = new Vector2(0.9f, 2.3f);
+        trigCol.offset = new Vector2(0f, 0.2f);
+
+        var clicker = GetComponent<ShrineBadgeClicker>();
+        if (clicker == null) clicker = gameObject.AddComponent<ShrineBadgeClicker>();
+        clicker.shrine = this;
     }
 
     public static AncientShrine SpawnShrine(Vector3 worldPos)
@@ -387,6 +235,36 @@ public class AncientShrine : MonoBehaviour
         if (s == null) s = Resources.Load<Sprite>("Props/obj_52_crack_glow");
         return s;
     }
+
+    public static bool IsAnyOtherUIOpen()
+    {
+        if (SettingsUI.Instance != null && SettingsUI.Instance.IsOpen()) return true;
+        if (InGameInventoryUI.Instance != null && InGameInventoryUI.Instance.IsOpen()) return true;
+        if (CharacterStatsUI.Instance != null && CharacterStatsUI.Instance.IsOpen()) return true;
+        if (ArmorShopUI.Instance != null && ArmorShopUI.Instance.IsOpen()) return true;
+        if (GameOverUI.Instance != null && GameOverUI.Instance.IsShown()) return true;
+        if (VictoryUI.Instance != null && VictoryUI.Instance.IsShown()) return true;
+        return false;
+    }
+
+    public static bool IsPointerOverUI()
+    {
+        if (UnityEngine.EventSystems.EventSystem.current == null) return false;
+
+        if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            return true;
+
+        if (Input.touchCount > 0)
+        {
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                    return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 public class ShrineBadgeClicker : MonoBehaviour
@@ -395,6 +273,18 @@ public class ShrineBadgeClicker : MonoBehaviour
 
     void OnMouseDown()
     {
+        // 1. TUYET DOI CHAN neu con tro / ngon tay dang bam vao bat ky UI nao (Settings, Inventory, Sliders, v.v.)
+        if (AncientShrine.IsPointerOverUI())
+        {
+            return;
+        }
+
+        // 2. Chan neu co bat ky Menu / UI nao khac dang mo tren man hinh
+        if (AncientShrine.IsAnyOtherUIOpen())
+        {
+            return;
+        }
+
         if (shrine != null)
         {
             shrine.OnBadgeClicked();

@@ -13,9 +13,8 @@ public static class SceneLocalizationApplier
     {
         "Assets/Scenes/LoginScene.unity",
         "Assets/Scenes/MainMenuScene.unity",
-        "Assets/Scenes/SampleScene.unity",
+        "Assets/Scenes/Map1_Thestart.unity",
         "Assets/Scenes/Map2_ValleyRuin.unity",
-        "Assets/Scenes/Map3_AncientRuins.unity",
         "Assets/Scenes/Map3_ForgottenMemories.unity"
     };
 

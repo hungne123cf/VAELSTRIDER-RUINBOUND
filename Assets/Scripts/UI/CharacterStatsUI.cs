@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -20,7 +21,7 @@ public class CharacterStatsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dashCdStatText;
     [SerializeField] private TextMeshProUGUI ultiCdStatText;
 
-    // 3 Skill Detail Cards
+    // 3 Skill & Trait Detail Cards
     [SerializeField] private TextMeshProUGUI attackCardTitle;
     [SerializeField] private TextMeshProUGUI attackCardDesc;
     [SerializeField] private TextMeshProUGUI dashCardTitle;
@@ -55,6 +56,8 @@ public class CharacterStatsUI : MonoBehaviour
         }
     }
 
+    public bool IsOpen() => gameObject.activeSelf;
+
     public void Toggle()
     {
         if (gameObject.activeSelf) Close();
@@ -63,6 +66,22 @@ public class CharacterStatsUI : MonoBehaviour
 
     public void Open()
     {
+        Transform dBox = transform.Find("DialogBox");
+        if (dBox != null)
+        {
+            RectTransform dRt = dBox.GetComponent<RectTransform>();
+            Transform closeBtn = dBox.Find("Btn_Close");
+            if ((dRt != null && dRt.sizeDelta != Vector2.zero) || closeBtn == null)
+            {
+                // Old layout without full-screen or missing close button: rebuild
+                Destroy(gameObject);
+                var freshUi = EnsureUIExists();
+                if (freshUi != null) freshUi.Open();
+                return;
+            }
+        }
+
+        GameAutoBootstrap.SetGameplayHUDVisible(false);
         gameObject.SetActive(true);
         transform.SetAsLastSibling();
 
@@ -74,6 +93,7 @@ public class CharacterStatsUI : MonoBehaviour
     public void Close()
     {
         gameObject.SetActive(false);
+        GameAutoBootstrap.SetGameplayHUDVisible(true);
         Time.timeScale = 1f;
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }
@@ -84,6 +104,7 @@ public class CharacterStatsUI : MonoBehaviour
         var charMgr = CharacterManager.EnsureInstance();
 
         string selectedCharId = charMgr != null ? charMgr.GetSelectedCharacterId() : "Vaelstrider";
+        bool isAzure = (selectedCharId == CharacterManager.CHAR_AZURE_BLADE);
         bool isMaid = (selectedCharId == CharacterManager.CHAR_MAID);
         bool isVi = LocalizationManager.IsVietnamese;
 
@@ -93,77 +114,82 @@ public class CharacterStatsUI : MonoBehaviour
         float ultiCdRed = upgradeMgr != null ? upgradeMgr.GetUltiCooldownReduction() : 0f;
         int ultiDmgBonus = upgradeMgr != null ? upgradeMgr.GetUltiDamageBonus() : 0;
 
-        int totalAtk = 5 + atkBonus;
-        int totalHp = 100 + hpBonus;
+        // Gem Socket Bonuses
+        EquipmentSocketManager.GetActiveEquippedSocketBonus(out int sAtk, out int sHp, out int sDef, out float sLifesteal, out float sCd, out float sShard, out float sRegen);
+
+        int totalAtk = (isAzure ? 6 : 5) + atkBonus + sAtk;
+        int totalHp = (isAzure ? 110 : 100) + hpBonus + sHp;
         float finalDashCd = Mathf.Max(1.0f, 5.0f - dashCdRed);
-        float finalUltiCd = Mathf.Max(5.0f, 30.0f - ultiCdRed);
+        float finalUltiCd = Mathf.Max(5.0f, (isAzure ? 18.0f : 30.0f) - ultiCdRed - (30.0f * sCd));
 
         // Header Title
         if (characterTitleText != null)
         {
-            characterTitleText.text = isMaid 
-                ? (isVi ? "HẦU GÁI CHIẾN BINH (ELYSIA)" : "WARRIOR MAID (ELYSIA)")
-                : (isVi ? "HIỆP SĨ VAELSTRIDER" : "KNIGHT VAELSTRIDER");
+            if (isAzure)
+                characterTitleText.text = isVi ? "LAM KIẾM SĨ (AZURE BLADE)" : "AZURE BLADE (SWORDSWOMAN)";
+            else if (isMaid)
+                characterTitleText.text = isVi ? "HẦU GÁI CHIẾN BINH (ELYSIA)" : "WARRIOR MAID (ELYSIA)";
+            else
+                characterTitleText.text = isVi ? "HIỆP SĨ VAELSTRIDER" : "KNIGHT VAELSTRIDER";
         }
         if (characterSubtitleText != null)
         {
-            characterSubtitleText.text = isMaid
-                ? (isVi ? "Phong cách: Tuyệt kỹ Trăng Khuyết | Trảm sát tức thì & Khống chế Boss" : "Style: Crescent Slash | Instant Execute & Boss Stun")
-                : (isVi ? "Phong cách: Kiếm Sĩ Cổ Tộc | Đột kích liên hoàn & Bão kiếm quét rộng" : "Style: Ancient Blade | Multi-slash Combo & Area Storm");
+            if (isAzure)
+                characterSubtitleText.text = isVi ? "Phong cách: Trọng Kiếm Khí | Chém chậm xuất Sóng Kiếm xuyên quái & Bão kiếm nan quạt" : "Style: Heavy Crescent | Slow Slashes with Piercing Waves & Fan Spread Tempest";
+            else if (isMaid)
+                characterSubtitleText.text = isVi ? "Phong cách: Tuyệt kỹ Trăng Khuyết | Trảm sát tức thì & Khống chế Boss" : "Style: Crescent Slash | Instant Execute & Boss Stun";
+            else
+                characterSubtitleText.text = isVi ? "Phong cách: Kiếm Sĩ Cổ Tộc | Đột kích liên hoàn & Bão kiếm quét rộng" : "Style: Ancient Blade | Multi-slash Combo & Area Storm";
         }
 
-        // 4 Quick Stats
+        // 4 Quick Stats Badges (To, ro rang, khong thua chu)
         if (hpStatText != null)
         {
             string label = isVi ? "MÁU (HP)" : "HEALTH (HP)";
-            hpStatText.text = $"{label}\n<color=#55FF88>{totalHp}</color> <size=12>(+ {hpBonus})</size>";
+            hpStatText.text = $"{label}\n<color=#55FF88><size=18><b>{totalHp}</b></size></color>";
         }
         if (atkStatText != null)
         {
             string label = isVi ? "TẤN CÔNG (ATK)" : "ATTACK (ATK)";
-            atkStatText.text = $"{label}\n<color=#FF5566>{totalAtk}</color> <size=12>(+ {atkBonus})</size>";
+            atkStatText.text = $"{label}\n<color=#FF5566><size=18><b>{totalAtk}</b></size></color>";
         }
         if (dashCdStatText != null)
         {
-            string label = isVi ? "LƯỚT (DASH CD)" : "DASH (CD)";
-            dashCdStatText.text = $"{label}\n<color=#44DDFF>{finalDashCd:F1}s</color> <size=12>(- {dashCdRed:F1}s)</size>";
+            string label = isVi ? "HỒI LƯỚT" : "DASH CD";
+            dashCdStatText.text = $"{label}\n<color=#44DDFF><size=18><b>{finalDashCd:F1}s</b></size></color>";
         }
         if (ultiCdStatText != null)
         {
-            string label = isVi ? "TUYỆT KỸ (ULTI CD)" : "ULTIMATE (CD)";
-            ultiCdStatText.text = $"{label}\n<color=#FFAA33>{finalUltiCd:F1}s</color> <size=12>(- {ultiCdRed:F1}s)</size>";
+            string label = isVi ? "HỒI TUYỆT KỸ" : "ULTI CD";
+            ultiCdStatText.text = $"{label}\n<color=#FFAA33><size=18><b>{finalUltiCd:F1}s</b></size></color>";
         }
 
         // Card 1: Attack
         if (attackCardTitle != null)
         {
-            attackCardTitle.text = isVi ? "1. ĐÒN ĐÁNH CƠ BẢN (BASIC ATTACK)" : "1. BASIC ATTACK";
+            attackCardTitle.text = isVi ? "1. ĐÒN ĐÁNH CƠ BẢN" : "1. BASIC ATTACK";
         }
         if (attackCardDesc != null)
         {
             attackCardDesc.text = isVi
-                ? $"- <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Gốc 5 + Cấp kiếm +{atkBonus}). Tầm đánh: 1.35m.\n" +
-                  $"- <b>Hình thức:</b> Combo 2 nhịp kiếm liên hoàn [Phím J / Chuột trái / Nút Tấn công].\n" +
-                  $"- <b>Hồi phục:</b> Mỗi đòn chém trúng hồi <color=#38BDF8><b>+8 NL</b></color> & tích <color=#FBBF24><b>+15 Nội Năng</b></color>."
-                : $"- <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Base 5 + Sword +{atkBonus}). Range: 1.35m.\n" +
-                  $"- <b>Pattern:</b> 2-Hit Strike Combo [Key J / Left Click / Attack Button].\n" +
-                  $"- <b>Regen:</b> Hits restore <color=#38BDF8><b>+8 Energy</b></color> & gain <color=#FBBF24><b>+15 Inner Power</b></color>.";
+                ? $"• <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Tầm đánh: 1.35m)\n" +
+                  $"• <b>Hiệu ứng:</b> Đánh trúng hồi <color=#38BDF8><b>+8 Năng Lượng</b></color>"
+                : $"• <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> (Range: 1.35m)\n" +
+                  $"• <b>Effect:</b> Restores <color=#38BDF8><b>+8 Energy</b></color> on hit";
         }
 
         // Card 2: Dash
         if (dashCardTitle != null)
         {
-            dashCardTitle.text = isVi ? "2. LƯỚT TỐC BIẾN & NÉ ĐÒN (DASH)" : "2. DASH & DODGE";
+            dashCardTitle.text = isVi ? "2. LƯỚT NÉ ĐÒN" : "2. DASH & DODGE";
         }
         if (dashCardDesc != null)
         {
             dashCardDesc.text = isVi
-                ? $"- <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> [Phím Space / Nút Lướt].\n" +
-                  $"- <b>Sát thương:</b> <color=#FFFF66><b>0 DMG</b></color> (Kỹ năng né đòn thuần túy).\n" +
-                  $"- <b>Đặc tính:</b> Lướt tốc biến 12 m/s theo hướng di chuyển. <color=#55FF88><b>Bất tử hoàn toàn trong 0.2s</b></color> để né mọi đòn đánh."
-                : $"- <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> [Space / Dash Button].\n" +
-                  $"- <b>Damage:</b> <color=#FFFF66><b>0 DMG</b></color> (Pure evasion skill).\n" +
-                  $"- <b>Trait:</b> Dash at 12 m/s in movement direction. <color=#55FF88><b>Invincible for 0.2s</b></color> dodging all attacks.";
+                ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                  $"• <b>Đặc tính:</b> Lướt nhanh và <color=#55FF88><b>bất tử 0.2s</b></color> né mọi sát thương"
+                : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                  $"• <b>Trait:</b> Dash forward with <color=#55FF88><b>0.2s Invincibility</b></color>";
         }
 
         // Card 3: Ulti
@@ -178,28 +204,21 @@ public class CharacterStatsUI : MonoBehaviour
             if (isMaid)
             {
                 ultiCardDesc.text = isVi
-                    ? $"- <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> [Phím F / Nút Ulti].\n" +
-                      $"- <b>Điện ảnh:</b> Ngưng đọng thời gian slow-mo, camera cận cảnh rực rỡ!\n" +
-                      $"- <b>Hiệu ứng:</b> Vung đao khí trăng khuyết góc rộng 140 độ bán kính 4.8m:\n" +
-                      $"  - <color=#FF4455><b>Quái thường:</b> KẾT LIỄU NGAY LẬP TỨC (Insta-Kill)</color>.\n" +
-                      $"  - <color=#FFCC33><b>Boss:</b> Gây 250 DMG (+{ultiDmgBonus}) và LÀM CHOÁNG BOSS 2.5 GIÂY</color>!"
-                    : $"- <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> [Key F / Ulti Button].\n" +
-                      $"- <b>Cinematic:</b> Slow-motion camera zoom with glowing flash!\n" +
-                      $"- <b>Effect:</b> Slashes wide crescent energy blade across 4.8m:\n" +
-                      $"  - <color=#FF4455><b>Normal Mobs:</b> INSTANT EXECUTION (Insta-Kill)</color>.\n" +
-                      $"  - <color=#FFCC33><b>Boss:</b> Deals 250 DMG (+{ultiDmgBonus}) & STUNS FOR 2.5s</color>!";
+                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Hiệu ứng:</b> <color=#FF4455><b>Kết liễu quái thường</b></color> | Gây choáng Boss 2.5s"
+                    : $"• <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Effect:</b> <color=#FF4455><b>Insta-kill normal mobs</b></color> | Stun Boss 2.5s";
             }
             else
             {
                 ultiCardDesc.text = isVi
-                    ? $"- <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> [Phím F / Nút Ulti].\n" +
-                      $"- <b>Hiệu ứng:</b> Vận nội lực triệu hồi Cơn Bão Kiếm bán kính 2.8m quét 4 đợt liên tục.\n" +
-                      $"- <b>Sát thương:</b> Hút quái xung quanh vào tâm bão, dồn sát thương diện rộng uy lực!"
-                    : $"- <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color> [Key F / Ulti Button].\n" +
-                      $"- <b>Effect:</b> Summons ancient Ruin Whirlwind in 2.8m radius striking 4 times.\n" +
-                      $"- <b>Damage:</b> Pulls nearby enemies to storm center dealing massive AOE damage!";
+                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Hiệu ứng:</b> Triệu hồi bão kiếm quét 4 đợt diện rộng, hút và dồn sát thương"
+                    : $"• <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Effect:</b> Summons 4-hit area whirlwind pulling and shredding enemies";
             }
         }
+
     }
 
     private static GameObject CreateUIObject(string name, Transform parent)
@@ -216,7 +235,20 @@ public class CharacterStatsUI : MonoBehaviour
         if (rootCanvas == null) return null;
 
         Transform existingBtn = rootCanvas.transform.Find("Btn_CharacterStats");
-        if (existingBtn == null)
+        if (existingBtn != null)
+        {
+            Button btn = existingBtn.GetComponent<Button>();
+            if (btn != null)
+            {
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() =>
+                {
+                    var ui = EnsureUIExists();
+                    if (ui != null) ui.Open();
+                });
+            }
+        }
+        else
         {
             GameObject btnObj = CreateUIObject("Btn_CharacterStats", rootCanvas.transform);
             RectTransform btnRt = btnObj.GetComponent<RectTransform>();
@@ -237,8 +269,8 @@ public class CharacterStatsUI : MonoBehaviour
             btn.targetGraphic = btnImg;
             btn.onClick.AddListener(() =>
             {
-                var ui = Instance != null ? Instance : EnsureUIExists();
-                if (ui != null) ui.Toggle();
+                var ui = EnsureUIExists();
+                if (ui != null) ui.Open();
             });
 
             GameObject txtObj = CreateUIObject("IconText", btnObj.transform);
@@ -259,89 +291,61 @@ public class CharacterStatsUI : MonoBehaviour
         Transform existingPanel = rootCanvas.transform.Find("CharacterStatsPanel");
         if (existingPanel != null)
         {
-            var comp = existingPanel.GetComponent<CharacterStatsUI>();
-            if (comp != null) return comp;
+            DestroyImmediate(existingPanel.gameObject);
         }
 
-        // Tạo Panel Character Stats
+        // Tạo Panel Character Stats (Full-Screen Edge-to-Edge Mobile Layout)
         GameObject panelObj = CreateUIObject("CharacterStatsPanel", rootCanvas.transform);
         RectTransform pRt = panelObj.GetComponent<RectTransform>();
-        pRt.anchorMin = new Vector2(0.5f, 0.5f);
-        pRt.anchorMax = new Vector2(0.5f, 0.5f);
+        pRt.anchorMin = Vector2.zero;
+        pRt.anchorMax = Vector2.one;
         pRt.pivot = new Vector2(0.5f, 0.5f);
-        pRt.anchoredPosition = Vector2.zero;
-        pRt.sizeDelta = new Vector2(850f, 540f);
+        pRt.offsetMin = Vector2.zero;
+        pRt.offsetMax = Vector2.zero;
 
         Image panelBg = panelObj.AddComponent<Image>();
-        panelBg.color = new Color(0.06f, 0.08f, 0.13f, 0.98f);
+        panelBg.color = new Color(0.02f, 0.04f, 0.08f, 0.96f);
+        panelBg.raycastTarget = true;
 
-        var pOutline = panelObj.AddComponent<Outline>();
-        pOutline.effectColor = new Color(0.35f, 0.75f, 1f, 0.85f);
-        pOutline.effectDistance = new Vector2(2f, -2f);
+        Canvas csCanvas = panelObj.AddComponent<Canvas>();
+        csCanvas.overrideSorting = true;
+        csCanvas.sortingOrder = 99995;
+        panelObj.AddComponent<GraphicRaycaster>();
+
+        CanvasGroup cg = panelObj.AddComponent<CanvasGroup>();
+        cg.blocksRaycasts = true;
+        cg.interactable = true;
+
+        // Dialog Box inside - Edge to Edge Full Screen
+        GameObject dialogBox = CreateUIObject("DialogBox", panelObj.transform);
+        RectTransform dRt = dialogBox.GetComponent<RectTransform>();
+        dRt.anchorMin = Vector2.zero;
+        dRt.anchorMax = Vector2.one;
+        dRt.pivot = new Vector2(0.5f, 0.5f);
+        dRt.offsetMin = Vector2.zero;
+        dRt.offsetMax = Vector2.zero;
+
+        Image dImg = dialogBox.AddComponent<Image>();
+        dImg.color = new Color(0.04f, 0.05f, 0.09f, 0.98f);
+        var dOutline = dialogBox.AddComponent<Outline>();
+        dOutline.effectColor = new Color(0.25f, 0.65f, 0.95f, 0.85f);
+        dOutline.effectDistance = new Vector2(2f, -2f);
 
         var uiComp = panelObj.AddComponent<CharacterStatsUI>();
 
-        // Header Title
-        GameObject headerObj = CreateUIObject("HeaderTitle", panelObj.transform);
-        RectTransform hRt = headerObj.GetComponent<RectTransform>();
-        hRt.anchorMin = new Vector2(0f, 1f);
-        hRt.anchorMax = new Vector2(1f, 1f);
-        hRt.pivot = new Vector2(0.5f, 1f);
-        hRt.anchoredPosition = new Vector2(0f, -15f);
-        hRt.sizeDelta = new Vector2(-40f, 35f);
-
-        uiComp.characterTitleText = headerObj.AddComponent<TextMeshProUGUI>();
-        uiComp.characterTitleText.fontSize = 22;
-        uiComp.characterTitleText.fontStyle = FontStyles.Bold;
-        uiComp.characterTitleText.alignment = TextAlignmentOptions.Center;
-        uiComp.characterTitleText.color = new Color(1f, 0.85f, 0.35f);
-
-        // Subtitle
-        GameObject subObj = CreateUIObject("HeaderSubtitle", panelObj.transform);
-        RectTransform sRt = subObj.GetComponent<RectTransform>();
-        sRt.anchorMin = new Vector2(0f, 1f);
-        sRt.anchorMax = new Vector2(1f, 1f);
-        sRt.pivot = new Vector2(0.5f, 1f);
-        sRt.anchoredPosition = new Vector2(0f, -48f);
-        sRt.sizeDelta = new Vector2(-40f, 24f);
-
-        uiComp.characterSubtitleText = subObj.AddComponent<TextMeshProUGUI>();
-        uiComp.characterSubtitleText.fontSize = 13;
-        uiComp.characterSubtitleText.alignment = TextAlignmentOptions.Center;
-        uiComp.characterSubtitleText.color = new Color(0.6f, 0.85f, 1f);
-
-        // 4 Badges Container
-        GameObject badgesRow = CreateUIObject("BadgesRow", panelObj.transform);
-        RectTransform bRowRt = badgesRow.GetComponent<RectTransform>();
-        bRowRt.anchorMin = new Vector2(0.5f, 1f);
-        bRowRt.anchorMax = new Vector2(0.5f, 1f);
-        bRowRt.pivot = new Vector2(0.5f, 1f);
-        bRowRt.anchoredPosition = new Vector2(0f, -80f);
-        bRowRt.sizeDelta = new Vector2(810f, 50f);
-
-        float bWidth = 195f;
-        float bSpace = 10f;
-        uiComp.hpStatText = CreateMiniBadge(badgesRow.transform, 0, bWidth, bSpace, new Color(0.12f, 0.28f, 0.18f, 0.95f));
-        uiComp.atkStatText = CreateMiniBadge(badgesRow.transform, 1, bWidth, bSpace, new Color(0.32f, 0.14f, 0.16f, 0.95f));
-        uiComp.dashCdStatText = CreateMiniBadge(badgesRow.transform, 2, bWidth, bSpace, new Color(0.12f, 0.22f, 0.32f, 0.95f));
-        uiComp.ultiCdStatText = CreateMiniBadge(badgesRow.transform, 3, bWidth, bSpace, new Color(0.32f, 0.24f, 0.12f, 0.95f));
-
-        // 3 Cards
-        CreateSkillCard(panelObj.transform, "Card_Attack", -145f, 110f, "1. BASIC ATTACK", out uiComp.attackCardDesc, out uiComp.attackCardTitle);
-        CreateSkillCard(panelObj.transform, "Card_Dash", -265f, 105f, "2. DASH", out uiComp.dashCardDesc, out uiComp.dashCardTitle);
-        CreateSkillCard(panelObj.transform, "Card_Ulti", -380f, 115f, "3. ULTIMATE", out uiComp.ultiCardDesc, out uiComp.ultiCardTitle);
-
-        // Close Button
-        GameObject closeBtnObj = CreateUIObject("Btn_Close", panelObj.transform);
+        // Top-Right Close Button [X] (Touch-Friendly Mobile Button)
+        GameObject closeBtnObj = CreateUIObject("Btn_Close", dialogBox.transform);
         RectTransform cRt = closeBtnObj.GetComponent<RectTransform>();
         cRt.anchorMin = new Vector2(1f, 1f);
         cRt.anchorMax = new Vector2(1f, 1f);
         cRt.pivot = new Vector2(1f, 1f);
-        cRt.anchoredPosition = new Vector2(-10f, -10f);
-        cRt.sizeDelta = new Vector2(35f, 35f);
+        cRt.anchoredPosition = new Vector2(-25f, -22f);
+        cRt.sizeDelta = new Vector2(52f, 52f);
 
         Image cImg = closeBtnObj.AddComponent<Image>();
-        cImg.color = new Color(0.3f, 0.12f, 0.14f, 0.9f);
+        cImg.color = new Color(0.75f, 0.22f, 0.25f, 1f);
+        var cOutline = closeBtnObj.AddComponent<Outline>();
+        cOutline.effectColor = new Color(1f, 0.85f, 0.4f, 0.7f);
 
         Button cBtn = closeBtnObj.AddComponent<Button>();
         cBtn.targetGraphic = cImg;
@@ -352,34 +356,112 @@ public class CharacterStatsUI : MonoBehaviour
         ctRt.anchorMin = Vector2.zero;
         ctRt.anchorMax = Vector2.one;
         ctRt.sizeDelta = Vector2.zero;
-
         TextMeshProUGUI cTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
-        cTmp.text = "X";
-        cTmp.fontSize = 18;
+        cTmp.text = "<b>X</b>";
+        cTmp.fontSize = 26;
         cTmp.fontStyle = FontStyles.Bold;
         cTmp.alignment = TextAlignmentOptions.Center;
         cTmp.color = Color.white;
+
+        // Header Title
+        GameObject headerObj = CreateUIObject("HeaderTitle", dialogBox.transform);
+        RectTransform hRt = headerObj.GetComponent<RectTransform>();
+        hRt.anchorMin = new Vector2(0f, 1f);
+        hRt.anchorMax = new Vector2(1f, 1f);
+        hRt.pivot = new Vector2(0.5f, 1f);
+        hRt.anchoredPosition = new Vector2(0f, -20f);
+        hRt.sizeDelta = new Vector2(-160f, 38f);
+
+        uiComp.characterTitleText = headerObj.AddComponent<TextMeshProUGUI>();
+        uiComp.characterTitleText.fontSize = 28;
+        uiComp.characterTitleText.fontStyle = FontStyles.Bold;
+        uiComp.characterTitleText.alignment = TextAlignmentOptions.Center;
+        uiComp.characterTitleText.color = new Color(1f, 0.85f, 0.35f);
+
+        // Subtitle
+        GameObject subObj = CreateUIObject("HeaderSubtitle", dialogBox.transform);
+        RectTransform sRt = subObj.GetComponent<RectTransform>();
+        sRt.anchorMin = new Vector2(0f, 1f);
+        sRt.anchorMax = new Vector2(1f, 1f);
+        sRt.pivot = new Vector2(0.5f, 1f);
+        sRt.anchoredPosition = new Vector2(0f, -60f);
+        sRt.sizeDelta = new Vector2(-160f, 26f);
+
+        uiComp.characterSubtitleText = subObj.AddComponent<TextMeshProUGUI>();
+        uiComp.characterSubtitleText.fontSize = 15;
+        uiComp.characterSubtitleText.alignment = TextAlignmentOptions.Center;
+        uiComp.characterSubtitleText.color = new Color(0.6f, 0.85f, 1f);
+
+        // 4 Badges Container (Stretches across top under subtitle)
+        GameObject badgesRow = CreateUIObject("BadgesRow", dialogBox.transform);
+        RectTransform bRowRt = badgesRow.GetComponent<RectTransform>();
+        bRowRt.anchorMin = new Vector2(0f, 1f);
+        bRowRt.anchorMax = new Vector2(1f, 1f);
+        bRowRt.pivot = new Vector2(0.5f, 1f);
+        bRowRt.anchoredPosition = new Vector2(0f, -95f);
+        bRowRt.sizeDelta = new Vector2(-60f, 66f);
+
+        var hlg = badgesRow.AddComponent<HorizontalLayoutGroup>();
+        hlg.spacing = 16f;
+        hlg.childAlignment = TextAnchor.MiddleCenter;
+        hlg.childControlWidth = true;
+        hlg.childControlHeight = true;
+        hlg.childForceExpandWidth = true;
+        hlg.childForceExpandHeight = true;
+
+        uiComp.hpStatText = CreateMiniBadge(badgesRow.transform, "HP", new Color(0.12f, 0.28f, 0.18f, 0.95f));
+        uiComp.atkStatText = CreateMiniBadge(badgesRow.transform, "ATK", new Color(0.32f, 0.14f, 0.16f, 0.95f));
+        uiComp.dashCdStatText = CreateMiniBadge(badgesRow.transform, "DashCD", new Color(0.12f, 0.22f, 0.32f, 0.95f));
+        uiComp.ultiCdStatText = CreateMiniBadge(badgesRow.transform, "UltiCD", new Color(0.32f, 0.24f, 0.12f, 0.95f));
+
+        // 3 Cards Container (Fills the remaining screen area)
+        GameObject cardsSection = CreateUIObject("CardsSection", dialogBox.transform);
+        RectTransform csRt = cardsSection.GetComponent<RectTransform>();
+        csRt.anchorMin = new Vector2(0f, 0f);
+        csRt.anchorMax = new Vector2(1f, 1f);
+        csRt.pivot = new Vector2(0.5f, 0.5f);
+        csRt.offsetMin = new Vector2(30f, 22f);
+        csRt.offsetMax = new Vector2(-30f, -172f);
+
+        var vlg = cardsSection.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing = 14f;
+        vlg.childAlignment = TextAnchor.UpperCenter;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = true;
+
+        Sprite sprAttack = LoadSprite("Assets/Sprites/UI/Attack.png", "UI/Attack");
+        Sprite sprDash = LoadSprite("Assets/Sprites/UI/Dash.png", "UI/Dash");
+        Sprite sprUlti = LoadSprite("Assets/Sprites/UI/Ulti.png", "UI/Ulti");
+
+        CreateSkillCard(cardsSection.transform, "Card_Attack", "1. ĐÒN ĐÁNH CƠ BẢN", sprAttack, new Color(1f, 0.45f, 0.25f), out uiComp.attackCardDesc, out uiComp.attackCardTitle);
+        CreateSkillCard(cardsSection.transform, "Card_Dash", "2. LƯỚT NÉ ĐÒN", sprDash, new Color(0.2f, 0.95f, 0.65f), out uiComp.dashCardDesc, out uiComp.dashCardTitle);
+        CreateSkillCard(cardsSection.transform, "Card_Ulti", "3. TUYỆT KỸ", sprUlti, new Color(0.75f, 0.5f, 1f), out uiComp.ultiCardDesc, out uiComp.ultiCardTitle);
 
         panelObj.SetActive(false);
         return uiComp;
     }
 
-    private static TextMeshProUGUI CreateMiniBadge(Transform parent, int index, float width, float spacing, Color bgColor)
+    private static Sprite LoadSprite(string assetPath, string resourcePath)
     {
-        GameObject badgeObj = CreateUIObject($"Badge_{index}", parent);
-        RectTransform bRt = badgeObj.GetComponent<RectTransform>();
-        bRt.anchorMin = new Vector2(0f, 0.5f);
-        bRt.anchorMax = new Vector2(0f, 0.5f);
-        bRt.pivot = new Vector2(0f, 0.5f);
-        bRt.anchoredPosition = new Vector2(index * (width + spacing), 0f);
-        bRt.sizeDelta = new Vector2(width, 50f);
+        Sprite spr = null;
+#if UNITY_EDITOR
+        spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+#endif
+        if (spr == null) spr = Resources.Load<Sprite>(resourcePath);
+        return spr;
+    }
 
+    private static TextMeshProUGUI CreateMiniBadge(Transform parent, string id, Color bgColor)
+    {
+        GameObject badgeObj = CreateUIObject($"Badge_{id}", parent);
         Image bg = badgeObj.AddComponent<Image>();
         bg.color = bgColor;
 
         var outline = badgeObj.AddComponent<Outline>();
         outline.effectColor = new Color(0.4f, 0.7f, 1f, 0.45f);
-        outline.effectDistance = new Vector2(1f, -1f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
 
         GameObject txtObj = CreateUIObject("Text", badgeObj.transform);
         RectTransform tRt = txtObj.GetComponent<RectTransform>();
@@ -388,42 +470,68 @@ public class CharacterStatsUI : MonoBehaviour
         tRt.sizeDelta = Vector2.zero;
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-        tmp.fontSize = 11;
+        tmp.fontSize = 13.5f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = Color.white;
-        tmp.lineSpacing = 12;
+        tmp.lineSpacing = 10;
         return tmp;
     }
 
-    private static void CreateSkillCard(Transform parent, string name, float yPos, float height, string title, out TextMeshProUGUI descTmp, out TextMeshProUGUI titleTmp)
+    private static void CreateSkillCard(Transform parent, string name, string title, Sprite iconSpr, Color accentCol, out TextMeshProUGUI descTmp, out TextMeshProUGUI titleTmp)
     {
         GameObject cardObj = CreateUIObject(name, parent);
-        RectTransform rt = cardObj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 1f);
-        rt.anchorMax = new Vector2(0.5f, 1f);
-        rt.pivot = new Vector2(0.5f, 1f);
-        rt.anchoredPosition = new Vector2(0f, yPos);
-        rt.sizeDelta = new Vector2(810f, height);
-
         Image bg = cardObj.AddComponent<Image>();
-        bg.color = new Color(0.11f, 0.14f, 0.22f, 0.95f);
+        bg.color = new Color(0.10f, 0.13f, 0.20f, 0.96f);
 
         var outline = cardObj.AddComponent<Outline>();
-        outline.effectColor = new Color(0.25f, 0.55f, 0.85f, 0.65f);
+        outline.effectColor = new Color(accentCol.r, accentCol.g, accentCol.b, 0.65f);
         outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        float leftPad = 25f;
+        if (iconSpr != null)
+        {
+            GameObject iconBadgeObj = CreateUIObject("IconBadge", cardObj.transform);
+            RectTransform ibRt = iconBadgeObj.GetComponent<RectTransform>();
+            ibRt.anchorMin = new Vector2(0f, 0.5f);
+            ibRt.anchorMax = new Vector2(0f, 0.5f);
+            ibRt.pivot = new Vector2(0f, 0.5f);
+            ibRt.anchoredPosition = new Vector2(25f, 0f);
+            ibRt.sizeDelta = new Vector2(76f, 76f);
+
+            Image ibBg = iconBadgeObj.AddComponent<Image>();
+            ibBg.color = new Color(0.04f, 0.06f, 0.10f, 0.95f);
+            var ibOutline = iconBadgeObj.AddComponent<Outline>();
+            ibOutline.effectColor = accentCol;
+            ibOutline.effectDistance = new Vector2(2f, -2f);
+
+            GameObject iconInner = CreateUIObject("Icon", iconBadgeObj.transform);
+            RectTransform iiRt = iconInner.GetComponent<RectTransform>();
+            iiRt.anchorMin = new Vector2(0.5f, 0.5f);
+            iiRt.anchorMax = new Vector2(0.5f, 0.5f);
+            iiRt.pivot = new Vector2(0.5f, 0.5f);
+            iiRt.anchoredPosition = Vector2.zero;
+            iiRt.sizeDelta = new Vector2(62f, 62f);
+
+            Image iiImg = iconInner.AddComponent<Image>();
+            iiImg.sprite = iconSpr;
+            iiImg.preserveAspect = true;
+            iiImg.raycastTarget = false;
+
+            leftPad = 125f;
+        }
 
         GameObject tObj = CreateUIObject("Title", cardObj.transform);
         RectTransform tRt = tObj.GetComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0f, 1f);
         tRt.anchorMax = new Vector2(1f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.anchoredPosition = new Vector2(18f, -8f);
-        tRt.sizeDelta = new Vector2(-36f, 24f);
+        tRt.anchoredPosition = new Vector2(leftPad, -16f);
+        tRt.sizeDelta = new Vector2(-(leftPad + 25f), 32f);
 
         titleTmp = tObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = title;
-        titleTmp.fontSize = 14;
+        titleTmp.fontSize = 22f;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = new Color(1f, 0.88f, 0.38f);
 
@@ -432,13 +540,13 @@ public class CharacterStatsUI : MonoBehaviour
         dRt.anchorMin = new Vector2(0f, 0f);
         dRt.anchorMax = new Vector2(1f, 1f);
         dRt.pivot = new Vector2(0f, 1f);
-        dRt.anchoredPosition = new Vector2(18f, -32f);
-        dRt.sizeDelta = new Vector2(-36f, -38f);
+        dRt.anchoredPosition = new Vector2(leftPad, -52f);
+        dRt.sizeDelta = new Vector2(-(leftPad + 25f), -60f);
 
         descTmp = dObj.AddComponent<TextMeshProUGUI>();
-        descTmp.fontSize = 12.5f;
+        descTmp.fontSize = 17f;
         descTmp.lineSpacing = 16;
-        descTmp.color = new Color(0.88f, 0.92f, 0.98f);
+        descTmp.color = new Color(0.90f, 0.94f, 1f);
         descTmp.enableWordWrapping = true;
     }
 }

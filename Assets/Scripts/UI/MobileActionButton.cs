@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
     public enum ButtonType { Attack, Dash, Skill }
     [Header("Loai nut")]
@@ -19,6 +19,10 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     [SerializeField] private Text legacyCooldownText;
 
     private Vector3 originalScale;
+    private bool isPointerDown = false;
+    private float pointerDownTime = 0f;
+    private Vector2 pointerDownPos = Vector2.zero;
+    private Vector2 currentDragAimDir = Vector2.zero;
 
     void Awake()
     {
@@ -44,7 +48,33 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         EnsureRoundedSprites();
         EnsureCooldownVisuals();
 
-        if (buttonType == ButtonType.Skill)
+        if (buttonType == ButtonType.Attack)
+        {
+            var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
+            if (azureBlade != null)
+            {
+                float norm = azureBlade.AttackCooldownRatio;
+                float rem = azureBlade.AttackCooldownRemaining;
+                UpdateCooldownDisplay(norm, rem);
+
+                if (isPointerDown)
+                {
+                    float holdDur = Time.time - pointerDownTime;
+                    if (holdDur >= 0.10f)
+                    {
+                        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : azureBlade.GetFacingDirection();
+                        azureBlade.UpdateAim(aimDir, holdDur);
+                    }
+                }
+            }
+            else
+            {
+                if (cooldownOverlay != null && cooldownOverlay.enabled) cooldownOverlay.enabled = false;
+                if (cooldownText != null && cooldownText.enabled) cooldownText.enabled = false;
+                if (legacyCooldownText != null && legacyCooldownText.enabled) legacyCooldownText.enabled = false;
+            }
+        }
+        else if (buttonType == ButtonType.Skill)
         {
             if (playerCombat != null)
             {
@@ -106,7 +136,12 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     private void EnsureCooldownVisuals()
     {
-        if (buttonType != ButtonType.Skill && buttonType != ButtonType.Dash) return;
+        bool supportsCooldown = (buttonType == ButtonType.Skill || buttonType == ButtonType.Dash);
+        if (buttonType == ButtonType.Attack && playerCombat != null && playerCombat.GetComponent<AzureBladeSkill>() != null)
+        {
+            supportsCooldown = true;
+        }
+        if (!supportsCooldown) return;
 
         Sprite circleSprite = Resources.Load<Sprite>("Combat/circle_fill");
 #if UNITY_EDITOR
@@ -205,67 +240,98 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             }
         }
 
+        if (cooldownOverlay != null)
+        {
+            cooldownOverlay.transform.SetAsLastSibling();
+        }
         if (cooldownText != null)
         {
             if (!cooldownText.gameObject.activeSelf)
                 cooldownText.gameObject.SetActive(true);
+            cooldownText.transform.SetAsLastSibling();
         }
 
         if (legacyCooldownText != null)
         {
             if (!legacyCooldownText.gameObject.activeSelf)
                 legacyCooldownText.gameObject.SetActive(true);
+            legacyCooldownText.transform.SetAsLastSibling();
         }
     }
 
     private void EnsureRoundedSprites()
     {
-        Image btnImg = GetComponent<Image>();
-        if (btnImg != null)
-        {
-            Sprite roundSprite = null;
+        // 1. Khung viền (Frame Background)
+        Sprite frameSprite = null;
 #if UNITY_EDITOR
-            if (buttonType == ButtonType.Attack)
-            {
-                roundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/atk.png");
-            }
-            else if (buttonType == ButtonType.Dash)
-            {
-                roundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/dash.png");
-            }
-            else if (buttonType == ButtonType.Skill)
-            {
-                roundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/ulti.png");
-            }
+        frameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/potion_slot_circle.png");
+        if (frameSprite == null) frameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
 #endif
-            if (roundSprite != null && btnImg.sprite != roundSprite)
+        if (frameSprite == null) frameSprite = Resources.Load<Sprite>("UI/potion_slot_circle");
+
+        Image btnImg = GetComponent<Image>();
+        if (btnImg != null && frameSprite != null)
+        {
+            if (btnImg.sprite != frameSprite)
             {
-                btnImg.color = Color.white;
-                btnImg.sprite = roundSprite;
-            }
-            else if (btnImg.sprite == null)
-            {
-                Sprite circle = Resources.Load<Sprite>("Combat/circle_fill");
-                if (circle != null)
-                {
-                    btnImg.sprite = circle;
-                }
+                btnImg.sprite = frameSprite;
+                btnImg.color = new Color(0.9f, 0.95f, 1f, 0.95f);
             }
         }
 
+        // 2. Icon vẽ tay ở giữa (Attack / Dash / Ulti)
+        Sprite actionSprite = null;
+#if UNITY_EDITOR
+        if (buttonType == ButtonType.Attack)
+        {
+            actionSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Attack.png");
+        }
+        else if (buttonType == ButtonType.Dash)
+        {
+            actionSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Dash.png");
+        }
+        else if (buttonType == ButtonType.Skill)
+        {
+            actionSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Ulti.png");
+        }
+#endif
+
+        Transform actionIconT = transform.Find("ActionIcon");
+        Image actionIconImg = null;
+        if (actionIconT == null)
+        {
+            GameObject iconGo = new GameObject("ActionIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            iconGo.transform.SetParent(transform, false);
+            iconGo.transform.SetSiblingIndex(0);
+
+            RectTransform rt = iconGo.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.18f, 0.18f);
+            rt.anchorMax = new Vector2(0.82f, 0.82f);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            actionIconImg = iconGo.GetComponent<Image>();
+            actionIconImg.raycastTarget = false;
+            actionIconImg.preserveAspect = true;
+        }
+        else
+        {
+            actionIconImg = actionIconT.GetComponent<Image>();
+        }
+
+        if (actionIconImg != null && actionSprite != null)
+        {
+            actionIconImg.sprite = actionSprite;
+            actionIconImg.color = Color.white;
+            actionIconImg.preserveAspect = true;
+            if (!actionIconImg.gameObject.activeSelf) actionIconImg.gameObject.SetActive(true);
+        }
+
+        // 3. Tắt icon lốc xoáy cũ
         Transform iconT = transform.Find("SkillIcon");
         if (iconT != null)
         {
-            Image iconImg = iconT.GetComponent<Image>();
-            if (iconImg != null && iconImg.sprite == null)
-            {
-                iconImg.color = Color.white;
-                Sprite icon = Resources.Load<Sprite>("Combat/skill_whirlwind_icon");
-#if UNITY_EDITOR
-                if (icon == null) icon = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/Combat/skill_whirlwind_icon.png");
-#endif
-                if (icon != null) iconImg.sprite = icon;
-            }
+            iconT.gameObject.SetActive(false);
         }
     }
 
@@ -283,12 +349,67 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             playerCombat.BlockAttackThisFrame();
         }
-        ExecuteAction();
+
+        if (buttonType == ButtonType.Attack)
+        {
+            var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
+            if (azureBlade != null && !azureBlade.IsAttackReady)
+            {
+                StartCoroutine(ShakeButtonRoutine());
+                return;
+            }
+
+            isPointerDown = true;
+            pointerDownTime = Time.time;
+            pointerDownPos = eventData.position;
+            currentDragAimDir = Vector2.zero;
+
+            if (azureBlade != null)
+            {
+                azureBlade.StartAim(azureBlade.GetFacingDirection());
+            }
+        }
+        else
+        {
+            ExecuteAction();
+        }
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (buttonType == ButtonType.Attack && isPointerDown)
+        {
+            Vector2 delta = eventData.position - pointerDownPos;
+            if (delta.sqrMagnitude > 200f) // Kéo ngắm vượt qua vùng chết
+            {
+                currentDragAimDir = delta.normalized;
+            }
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         transform.localScale = originalScale;
+
+        if (buttonType == ButtonType.Attack && isPointerDown)
+        {
+            EnsureTargets();
+            float holdDur = Time.time - pointerDownTime;
+            var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
+
+            if (azureBlade != null && (holdDur >= 0.10f || currentDragAimDir.sqrMagnitude > 0.01f))
+            {
+                int bonusAtk = (playerCombat != null) ? playerCombat.BonusAttackDamage : 0;
+                azureBlade.ReleaseAimAndFire(bonusAtk);
+            }
+            else if (playerCombat != null)
+            {
+                playerCombat.PerformAttack();
+            }
+
+            isPointerDown = false;
+            currentDragAimDir = Vector2.zero;
+        }
     }
 
     private void ExecuteAction()

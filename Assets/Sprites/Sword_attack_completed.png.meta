@@ -1,0 +1,1040 @@
+fileFormatVersion: 2
+guid: 8b3429493903a4042bd106fdf35a746f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7043154417184961101
+    second: Sword_attack_completed_0
+  - first:
+      213: 2876972194096191212
+    second: Sword_attack_completed_1
+  - first:
+      213: -4932363700458088788
+    second: Sword_attack_completed_2
+  - first:
+      213: -7989136588706975423
+    second: Sword_attack_completed_3
+  - first:
+      213: -6917844756669927033
+    second: Sword_attack_completed_4
+  - first:
+      213: 5851229520049728634
+    second: Sword_attack_completed_5
+  - first:
+      213: 4092495842636361198
+    second: Sword_attack_completed_6
+  - first:
+      213: -6520253846467940357
+    second: Sword_attack_completed_7
+  - first:
+      213: 2949363612448220950
+    second: Sword_attack_completed_8
+  - first:
+      213: 1909717238543062412
+    second: Sword_attack_completed_9
+  - first:
+      213: 8225752753085079071
+    second: Sword_attack_completed_10
+  - first:
+      213: -2410718695425694815
+    second: Sword_attack_completed_11
+  - first:
+      213: 8069371509587224721
+    second: Sword_attack_completed_12
+  - first:
+      213: -5307497623556834454
+    second: Sword_attack_completed_13
+  - first:
+      213: 8847334996447217475
+    second: Sword_attack_completed_14
+  - first:
+      213: 7675420374600194203
+    second: Sword_attack_completed_15
+  - first:
+      213: -6336424120672098822
+    second: Sword_attack_completed_16
+  - first:
+      213: 3924347506505921634
+    second: Sword_attack_completed_17
+  - first:
+      213: -851119600350797397
+    second: Sword_attack_completed_18
+  - first:
+      213: -8506132694079053469
+    second: Sword_attack_completed_19
+  - first:
+      213: -8233685927558736123
+    second: Sword_attack_completed_20
+  - first:
+      213: 5936331889495212778
+    second: Sword_attack_completed_21
+  - first:
+      213: -6483861600090739309
+    second: Sword_attack_completed_22
+  - first:
+      213: -1739196210419132837
+    second: Sword_attack_completed_23
+  - first:
+      213: 7064179521698991290
+    second: Sword_attack_completed_24
+  - first:
+      213: 4924000140634698459
+    second: Sword_attack_completed_25
+  - first:
+      213: -2441159879374141540
+    second: Sword_attack_completed_26
+  - first:
+      213: 7327512175344321791
+    second: Sword_attack_completed_27
+  - first:
+      213: 4145185592686592265
+    second: Sword_attack_completed_28
+  - first:
+      213: -3744819702857024023
+    second: Sword_attack_completed_29
+  - first:
+      213: -8079284679160545876
+    second: Sword_attack_completed_30
+  - first:
+      213: 6763086005353316575
+    second: Sword_attack_completed_31
+  - first:
+      213: 8735484850092807825
+    second: Sword_attack_completed_32
+  - first:
+      213: -6456653172257612296
+    second: Sword_attack_completed_33
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Sword_attack_completed_0
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 208
+        width: 24
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d42788e40af4eb160800000000000000
+      internalID: 7043154417184961101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 208
+        width: 33
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce697c9b7fe0de720800000000000000
+      internalID: 2876972194096191212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_2
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 208
+        width: 35
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca61a23e859bc8bb0800000000000000
+      internalID: -4932363700458088788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_3
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 203
+        width: 27
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1417b00d992e02190800000000000000
+      internalID: -7989136588706975423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_4
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 203
+        width: 36
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 781f36b98d0eeff90800000000000000
+      internalID: -6917844756669927033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_5
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 199
+        width: 34
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7ce7d15f3eb33150800000000000000
+      internalID: 5851229520049728634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_6
+      rect:
+        serializedVersion: 2
+        x: 343
+        y: 208
+        width: 28
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eed6a1139477bc830800000000000000
+      internalID: 4092495842636361198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_7
+      rect:
+        serializedVersion: 2
+        x: 401
+        y: 199
+        width: 32
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bff67e32ca76385a0800000000000000
+      internalID: -6520253846467940357
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_8
+      rect:
+        serializedVersion: 2
+        x: 471
+        y: 208
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6176071449e3ee820800000000000000
+      internalID: 2949363612448220950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_9
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 144
+        width: 20
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c859cc8d5bda08a10800000000000000
+      internalID: 1909717238543062412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_10
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 143
+        width: 21
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1ed3d90c8eb72270800000000000000
+      internalID: 8225752753085079071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_11
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 144
+        width: 22
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a322c97e186b8ed0800000000000000
+      internalID: -2410718695425694815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_12
+      rect:
+        serializedVersion: 2
+        x: 210
+        y: 143
+        width: 22
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 198aa9572aa2cff60800000000000000
+      internalID: 8069371509587224721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_13
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 144
+        width: 30
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6b3aad180bf756b0800000000000000
+      internalID: -5307497623556834454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_14
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 143
+        width: 31
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3474e18dd4c08ca70800000000000000
+      internalID: 8847334996447217475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_15
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 144
+        width: 31
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9817d12a22948a60800000000000000
+      internalID: 7675420374600194203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_16
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 144
+        width: 22
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af56f1585df7018a0800000000000000
+      internalID: -6336424120672098822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_17
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 80
+        width: 17
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 264b97cd345167630800000000000000
+      internalID: 3924347506505921634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_18
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 79
+        width: 22
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba1e7bf9b373034f0800000000000000
+      internalID: -851119600350797397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_19
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 81
+        width: 27
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 361e415d16524f980800000000000000
+      internalID: -8506132694079053469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_20
+      rect:
+        serializedVersion: 2
+        x: 206
+        y: 79
+        width: 30
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5079ab7d5421cbd80800000000000000
+      internalID: -8233685927558736123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_21
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 80
+        width: 33
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae28f26c666126250800000000000000
+      internalID: 5936331889495212778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_22
+      rect:
+        serializedVersion: 2
+        x: 343
+        y: 79
+        width: 33
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39dabc94a32b406a0800000000000000
+      internalID: -6483861600090739309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_23
+      rect:
+        serializedVersion: 2
+        x: 407
+        y: 80
+        width: 33
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b561343e2422dd7e0800000000000000
+      internalID: -1739196210419132837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_24
+      rect:
+        serializedVersion: 2
+        x: 471
+        y: 80
+        width: 23
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abc057ce8d1090260800000000000000
+      internalID: 7064179521698991290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_25
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 16
+        width: 26
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd231881a00955440800000000000000
+      internalID: 4924000140634698459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_26
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 16
+        width: 27
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9708f506024f1ed0800000000000000
+      internalID: -2441159879374141540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_27
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 17
+        width: 27
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff48fba208d80b560800000000000000
+      internalID: 7327512175344321791
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_28
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 17
+        width: 29
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 901c62c9558a68930800000000000000
+      internalID: 4145185592686592265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_29
+      rect:
+        serializedVersion: 2
+        x: 268
+        y: 16
+        width: 36
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9edb257325ab70cc0800000000000000
+      internalID: -3744819702857024023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_30
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 40
+        width: 34
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cad3163e36d90ef80800000000000000
+      internalID: -8079284679160545876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_31
+      rect:
+        serializedVersion: 2
+        x: 335
+        y: 16
+        width: 30
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd00086b3ee4bdd50800000000000000
+      internalID: 6763086005353316575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_32
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 16
+        width: 32
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1969696403daa3970800000000000000
+      internalID: 8735484850092807825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sword_attack_completed_33
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 17
+        width: 25
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fd9fad062c5566a0800000000000000
+      internalID: -6456653172257612296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Sword_attack_completed_0: 7043154417184961101
+      Sword_attack_completed_1: 2876972194096191212
+      Sword_attack_completed_10: 8225752753085079071
+      Sword_attack_completed_11: -2410718695425694815
+      Sword_attack_completed_12: 8069371509587224721
+      Sword_attack_completed_13: -5307497623556834454
+      Sword_attack_completed_14: 8847334996447217475
+      Sword_attack_completed_15: 7675420374600194203
+      Sword_attack_completed_16: -6336424120672098822
+      Sword_attack_completed_17: 3924347506505921634
+      Sword_attack_completed_18: -851119600350797397
+      Sword_attack_completed_19: -8506132694079053469
+      Sword_attack_completed_2: -4932363700458088788
+      Sword_attack_completed_20: -8233685927558736123
+      Sword_attack_completed_21: 5936331889495212778
+      Sword_attack_completed_22: -6483861600090739309
+      Sword_attack_completed_23: -1739196210419132837
+      Sword_attack_completed_24: 7064179521698991290
+      Sword_attack_completed_25: 4924000140634698459
+      Sword_attack_completed_26: -2441159879374141540
+      Sword_attack_completed_27: 7327512175344321791
+      Sword_attack_completed_28: 4145185592686592265
+      Sword_attack_completed_29: -3744819702857024023
+      Sword_attack_completed_3: -7989136588706975423
+      Sword_attack_completed_30: -8079284679160545876
+      Sword_attack_completed_31: 6763086005353316575
+      Sword_attack_completed_32: 8735484850092807825
+      Sword_attack_completed_33: -6456653172257612296
+      Sword_attack_completed_4: -6917844756669927033
+      Sword_attack_completed_5: 5851229520049728634
+      Sword_attack_completed_6: 4092495842636361198
+      Sword_attack_completed_7: -6520253846467940357
+      Sword_attack_completed_8: 2949363612448220950
+      Sword_attack_completed_9: 1909717238543062412
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

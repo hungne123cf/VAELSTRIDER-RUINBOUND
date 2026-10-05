@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class AethelShard : MonoBehaviour
 {
@@ -123,7 +123,14 @@ public class AethelShard : MonoBehaviour
 
             if (distance <= 0.45f)
             {
-                playerInventory?.AddShards(shardValue);
+                EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out _, out _, out float shardBonusPct, out _);
+                int finalShards = shardValue;
+                if (shardBonusPct > 0f)
+                {
+                    finalShards = Mathf.Max(1, Mathf.RoundToInt(shardValue * (1f + shardBonusPct)));
+                }
+
+                playerInventory?.AddShards(finalShards);
                 SoundManager.EnsureInstance()?.PlayShardPickup();
                 Destroy(gameObject);
             }

@@ -32,12 +32,17 @@ public class PlayerCombat : MonoBehaviour
     private int bonusAttackDamage = 0;
     private float ultiCooldownReduction = 0f;
     private int bonusUltiDamage = 0;
+    private float lifestealPercent = 0f;
+
+    private int upgradeBonusAtk = 0;
+    private int weaponBonusAtk = 0;
+    private int socketBonusAtk = 0;
 
     public void ApplyUpgradeBonus(int bonusAtk, float ultiCdReduction, int bonusUltiDmg)
     {
-        bonusAttackDamage = bonusAtk;
-        ultiCooldownReduction = ultiCdReduction;
+        upgradeBonusAtk = bonusAtk;
         bonusUltiDamage = bonusUltiDmg;
+        RecalculateCombatStats();
     }
 
     // Hashes
@@ -76,7 +81,63 @@ public class PlayerCombat : MonoBehaviour
             }
         }
         UpdateAttackPointPosition();
+
+        RefreshEquipmentBonuses();
     }
+
+    void Start()
+    {
+        RefreshEquipmentBonuses();
+    }
+
+    public void RefreshEquipmentBonuses()
+    {
+        var upgradeMgr = PlayerUpgradeManager.EnsureInstance();
+        if (upgradeMgr != null)
+        {
+            upgradeBonusAtk = upgradeMgr.GetAttackBonus();
+            bonusUltiDamage = upgradeMgr.GetUltiDamageBonus();
+        }
+
+        string equippedWpnId = PlayerPrefs.GetString("Equipped_Weapon_Id", "");
+        weaponBonusAtk = 0;
+        if (!string.IsNullOrEmpty(equippedWpnId))
+        {
+            var def = InventoryItemDatabase.GetItem(equippedWpnId);
+            if (def != null && def.atkBonus > 0)
+            {
+                weaponBonusAtk = def.atkBonus;
+            }
+        }
+
+        EquipmentSocketManager.GetActiveEquippedSocketBonus(out socketBonusAtk, out _, out _, out lifestealPercent, out _, out _, out _);
+        RecalculateCombatStats();
+    }
+
+    public void RecalculateCombatStats()
+    {
+        bonusAttackDamage = upgradeBonusAtk + weaponBonusAtk + socketBonusAtk;
+
+        EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out lifestealPercent, out float cdReduc, out _, out _);
+        float upUltiCd = 0f;
+        var upgradeMgr = PlayerUpgradeManager.EnsureInstance();
+        if (upgradeMgr != null)
+        {
+            upUltiCd = upgradeMgr.GetUltiCooldownReduction();
+        }
+        ultiCooldownReduction = upUltiCd + (30.0f * cdReduc);
+
+        var azureBlade = GetComponent<AzureBladeSkill>();
+        if (azureBlade != null)
+        {
+            azureBlade.RefreshCooldownStats();
+        }
+    }
+
+    public int BonusAttackDamage => bonusAttackDamage;
+
+    private bool isAttackHolding = false;
+    private float attackHoldDuration = 0f;
 
     void Update()
     {
@@ -97,23 +158,67 @@ public class PlayerCombat : MonoBehaviour
             PerformSpecialSkill();
         }
 
-        // Danh thuong (Chuot trai hoac phim J)
+        // Danh thuong & Tu luc ngam ban (Chuot trai hoac phim J)
         if (Time.frameCount != lastSpecialSkillFrame && !isUltiActive)
         {
-            if (Input.GetKeyDown(KeyCode.J))
+            var azureBlade = GetComponent<AzureBladeSkill>();
+
+            if (Input.GetKeyDown(KeyCode.J) || (Input.GetMouseButtonDown(0) && !IsPointerOverUI()))
             {
-                PerformAttack();
+                if (azureBlade == null || azureBlade.IsAttackReady)
+                {
+                    isAttackHolding = true;
+                    attackHoldDuration = 0f;
+                    if (azureBlade != null)
+                    {
+                        Vector2 initialAim = GetAimDirectionFromInput();
+                        azureBlade.StartAim(initialAim);
+                    }
+                }
             }
-            else if (Input.GetMouseButtonDown(0))
+
+            if (isAttackHolding)
             {
-                if (!IsPointerOverUI())
+                attackHoldDuration += Time.deltaTime;
+                if (azureBlade != null && attackHoldDuration >= 0.10f)
+                {
+                    Vector2 aimDir = GetAimDirectionFromInput();
+                    azureBlade.UpdateAim(aimDir, attackHoldDuration);
+                }
+            }
+
+            if (isAttackHolding && (Input.GetKeyUp(KeyCode.J) || Input.GetMouseButtonUp(0)))
+            {
+                if (azureBlade != null && attackHoldDuration >= 0.10f)
+                {
+                    azureBlade.ReleaseAimAndFire(bonusAttackDamage);
+                }
+                else
                 {
                     PerformAttack();
                 }
+                isAttackHolding = false;
+                attackHoldDuration = 0f;
             }
         }
 
         UpdateAttackPointPosition();
+    }
+
+    public Vector2 GetAimDirectionFromInput()
+    {
+        if (Camera.main != null)
+        {
+            Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 diff = (Vector2)mouseWorld - (Vector2)transform.position;
+            if (diff.sqrMagnitude > 0.04f) return diff.normalized;
+        }
+        if (playerController != null)
+        {
+            Vector2 f = playerController.GetFacingDirection();
+            if (f.sqrMagnitude > 0.01f) return f.normalized;
+        }
+        return Vector2.down;
     }
 
     private void UpdateAttackPointPosition()
@@ -149,6 +254,15 @@ public class PlayerCombat : MonoBehaviour
 
             string attackState = (comboStep == 1) ? "Attack1" : "Attack2";
             animator.Play(attackState, 0, 0f);
+        }
+
+        // Kich hoat Song Kiem cho Nhan vat 3 (Azure Blade)
+        var azureBlade = GetComponent<AzureBladeSkill>();
+        if (azureBlade != null)
+        {
+            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
+            int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
+            azureBlade.OnPerformAttack(facing, curAtk);
         }
 
         ExecuteHitDamage();
@@ -190,6 +304,13 @@ public class PlayerCombat : MonoBehaviour
                         energySys.RestoreEnergy(8f);
                         energySys.AddInnerEnergy(15f);
                     }
+
+                    // Hồi phục Máu từ Ngọc Huyết Thạch (Lifesteal)
+                    if (lifestealPercent > 0f && playerHealth != null)
+                    {
+                        int healAmount = Mathf.Max(1, Mathf.RoundToInt(damage * lifestealPercent));
+                        playerHealth.Heal(healAmount);
+                    }
                 }
             }
         }
@@ -211,6 +332,14 @@ public class PlayerCombat : MonoBehaviour
         skillCooldownTimer = effectiveCooldown;
         lastSpecialSkillFrame = Time.frameCount;
 
+        // Kích hoạt Bão Sóng Kiếm nếu nhân vật là Azure Blade (Player 3)
+        var azureBlade = GetComponent<AzureBladeSkill>();
+        if (azureBlade != null)
+        {
+            azureBlade.TriggerSpecialSkill();
+            return true;
+        }
+
         // Kích hoạt Quét Tan Kẻ Yếu nếu nhân vật là Maid
         var sweepSkill = GetComponent<SweepTheWeakSkill>();
         if (sweepSkill != null)
@@ -230,7 +359,6 @@ public class PlayerCombat : MonoBehaviour
         if (playerController != null) playerController.SetCanMove(false);
 
         var cam = FindAnyObjectByType<CameraFollow>();
-        float originalTimeScale = Time.timeScale;
 
         try
         {
@@ -262,54 +390,61 @@ public class PlayerCombat : MonoBehaviour
         // Chờ 1.0 giây thời gian thực (Realtime)
         yield return new WaitForSecondsRealtime(1.0f);
 
-        // ====================================================
-        // GIAI ĐOẠN 2: THỜI GIAN TRỞ LẠI & BÙNG NỔ BÃO LỐC
-        // ====================================================
-        Time.timeScale = 1.0f; // Luôn đảm bảo khôi phục thời gian bình thường!
-        if (cam != null)
+        try
         {
-            cam.ResetZoom();
-            cam.Shake(0.25f, 0.35f);
+            // ====================================================
+            // GIAI ĐOẠN 2: THỜI GIAN TRỞ LẠI & BÙNG NỔ BÃO LỐC
+            // ====================================================
+            Time.timeScale = 1.0f; // Luôn đảm bảo khôi phục thời gian bình thường!
+            if (cam != null)
+            {
+                cam.ResetZoom();
+                cam.Shake(0.25f, 0.35f);
+            }
+
+            Vector3 center = transform.position + new Vector3(bodyCenterOffset.x, bodyCenterOffset.y, 0f);
+
+            // ĐỢT 1 (t = 0.0s): Chém mở màn & Hút nhẹ quái vào tâm bão
+            if (animator != null) animator.Play("Player_Ulti", 0, 0f);
+            SoundManager.EnsureInstance()?.PlaySwordSlash();
+            ExecuteCleaveWave(center, damage: 20 + Mathf.RoundToInt(bonusAttackDamage * 0.4f), isFinal: false, pullInward: true);
+            yield return new WaitForSecondsRealtime(0.28f);
+
+            // ĐỢT 2 (t = 0.28s): Bão kiếm cuộn xoay liên kích 2
+            if (animator != null) animator.Play("Player_Ulti", 0, 0.15f);
+            SoundManager.EnsureInstance()?.PlaySwordSlash();
+            if (cam != null) cam.Shake(0.12f, 0.2f);
+            ExecuteCleaveWave(center, damage: 20 + Mathf.RoundToInt(bonusAttackDamage * 0.4f), isFinal: false, pullInward: false);
+            yield return new WaitForSecondsRealtime(0.28f);
+
+            // ĐỢT 3 (t = 0.56s): Bão kiếm cuộn xoay liên kích 3
+            if (animator != null) animator.Play("Player_Ulti", 0, 0.3f);
+            SoundManager.EnsureInstance()?.PlaySwordSlash();
+            ExecuteCleaveWave(center, damage: 25 + Mathf.RoundToInt(bonusAttackDamage * 0.5f), isFinal: false, pullInward: false);
+            yield return new WaitForSecondsRealtime(0.28f);
+
+            // ĐỢT 4 - ĐÒN KẾT LIỄU CỰC ĐẠI (t = 0.84s): NỔ TUNG HẤT VĂNG TOÀN BỘ QUÁI
+            if (animator != null) animator.Play("Player_Ulti", 0, 0.45f);
+            SoundManager.EnsureInstance()?.PlaySwordSlash();
+            SoundManager.EnsureInstance()?.PlayHitImpact();
+            if (cam != null) cam.Shake(0.4f, 0.5f);
+            ExecuteCleaveWave(center, damage: 50 + bonusUltiDamage + bonusAttackDamage, isFinal: true, pullInward: false);
+            yield return new WaitForSecondsRealtime(0.30f);
         }
+        finally
+        {
+            // ====================================================
+            // KẾT THÚC TUYỆT KỸ - BẢO ĐẢM 100% LUÔN PHỤC HỒI DI CHUYỂN
+            // ====================================================
+            Time.timeScale = 1.0f;
+            if (cam != null) cam.ResetZoom();
+            if (playerHealth != null) playerHealth.isInvulnerable = false;
+            if (playerController != null) playerController.SetCanMove(true);
+            isUltiActive = false;
+            if (animator != null) animator.Play("Idle", 0, 0f);
 
-        Vector3 center = transform.position + new Vector3(bodyCenterOffset.x, bodyCenterOffset.y, 0f);
-
-        // ĐỢT 1 (t = 0.0s): Chém mở màn & Hút nhẹ quái vào tâm bão
-        if (animator != null) animator.Play("Player_Ulti", 0, 0f);
-        SoundManager.EnsureInstance()?.PlaySwordSlash();
-        ExecuteCleaveWave(center, damage: 20, isFinal: false, pullInward: true);
-        yield return new WaitForSeconds(0.32f);
-
-        // ĐỢT 2 (t = 0.32s): Bão kiếm cuộn xoay liên kích 2
-        if (animator != null) animator.Play("Player_Ulti", 0, 0.15f);
-        SoundManager.EnsureInstance()?.PlaySwordSlash();
-        if (cam != null) cam.Shake(0.12f, 0.2f);
-        ExecuteCleaveWave(center, damage: 20, isFinal: false, pullInward: false);
-        yield return new WaitForSeconds(0.32f);
-
-        // ĐỢT 3 (t = 0.64s): Bão kiếm cuộn xoay liên kích 3
-        if (animator != null) animator.Play("Player_Ulti", 0, 0.3f);
-        SoundManager.EnsureInstance()?.PlaySwordSlash();
-        ExecuteCleaveWave(center, damage: 25, isFinal: false, pullInward: false);
-        yield return new WaitForSeconds(0.32f);
-
-        // ĐỢT 4 - ĐÒN KẾT LIỄU CỰC ĐẠI (t = 0.96s): NỔ TUNG HẤT VĂNG TOÀN BỘ QUÁI
-        if (animator != null) animator.Play("Player_Ulti", 0, 0.45f);
-        SoundManager.EnsureInstance()?.PlaySwordSlash();
-        SoundManager.EnsureInstance()?.PlayHitImpact();
-        if (cam != null) cam.Shake(0.4f, 0.5f);
-        ExecuteCleaveWave(center, damage: 50 + bonusUltiDamage, isFinal: true, pullInward: false);
-        yield return new WaitForSeconds(0.35f);
-
-        // ====================================================
-        // KẾT THÚC TUYỆT KỸ
-        // ====================================================
-        if (playerHealth != null) playerHealth.isInvulnerable = false;
-        if (playerController != null) playerController.SetCanMove(true);
-        isUltiActive = false;
-        if (animator != null) animator.Play("Idle", 0, 0f);
-
-        Debug.Log("<color=cyan>[SPECIAL SKILL]</color> Hoàn tất chuỗi Bão Lốc Tàn Tích!");
+            Debug.Log("<color=cyan>[SPECIAL SKILL]</color> Hoàn tất chuỗi Bão Lốc Tàn Tích!");
+        }
     }
 
     private void ExecuteCleaveWave(Vector3 center, int damage, bool isFinal, bool pullInward)
@@ -331,6 +466,19 @@ public class PlayerCombat : MonoBehaviour
                 else
                 {
                     DamagePopup.CreateText(enemy.transform.position, $"{damage}", new Color(0.3f, 0.9f, 1f));
+                }
+
+                // Tích lũy Nội Năng khi Tuyệt kỹ đánh trúng quái
+                var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+                if (energySys != null)
+                {
+                    energySys.AddInnerEnergy(isFinal ? 12f : 5f);
+                }
+
+                if (lifestealPercent > 0f && playerHealth != null)
+                {
+                    int healAmount = Mathf.Max(1, Mathf.RoundToInt(damage * lifestealPercent));
+                    playerHealth.Heal(healAmount);
                 }
             }
 
@@ -406,9 +554,10 @@ public class PlayerCombat : MonoBehaviour
 
     public void AutoAlignCombat()
     {
-        var sr = GetComponent<SpriteRenderer>();
-        bool isAdventurer = (sr != null && sr.sprite != null && (sr.sprite.rect.height >= 60 || sr.sprite.name.ToLower().Contains("idle") || sr.sprite.name.ToLower().Contains("adventurer")));
-        if (isAdventurer)
+        string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        bool isVaelstrider = (curChar == CharacterManager.CHAR_VAELSTRIDER);
+
+        if (isVaelstrider)
         {
             bodyCenterOffset = new Vector2(0f, 1.25f);
             attackOffsetDistance = 0.85f;
@@ -416,9 +565,9 @@ public class PlayerCombat : MonoBehaviour
         }
         else
         {
-            bodyCenterOffset = new Vector2(0f, 0.05f);
+            bodyCenterOffset = new Vector2(0f, 0.1f);
             attackOffsetDistance = 0.65f;
-            attackRadius = 0.95f;
+            attackRadius = 1.15f;
         }
 
         if (attackPoint != null)

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 /// <summary>
@@ -11,11 +11,11 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
     public static event System.Action<ValleySpitterAI> OnEnemyDied;
 
     [Header("Stats")]
-    [SerializeField] private int maxHealth = 35;
+    [SerializeField] private int maxHealth = 180;
     [SerializeField] private int currentHealth;
     [SerializeField] private float attackRange = 8.5f;
     [SerializeField] private float attackCooldown = 2.8f;
-    [SerializeField] private int projectileDamage = 10;
+    [SerializeField] private int projectileDamage = 20;
     [SerializeField] private float projectileSpeed = 7.0f;
 
     private Transform player;
@@ -116,11 +116,13 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
             elapsed += Time.deltaTime;
             if (player != null)
             {
-                aimDir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+                Vector2 playerTarget = (Vector2)player.position + Vector2.up * 1.0f;
+                Vector2 myCenter = (Vector2)transform.position + Vector2.up * 0.5f;
+                aimDir = (playerTarget - myCenter).normalized;
                 if (telegraphLine != null)
                 {
-                    telegraphLine.SetPosition(0, transform.position);
-                    telegraphLine.SetPosition(1, (Vector2)transform.position + aimDir * attackRange);
+                    telegraphLine.SetPosition(0, myCenter);
+                    telegraphLine.SetPosition(1, myCenter + aimDir * attackRange);
                 }
             }
 
@@ -147,7 +149,9 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
     private void SpawnThornProjectile(Vector3 origin, Vector2 dir)
     {
         GameObject proj = new GameObject("Valley_Thorn_Projectile");
-        proj.transform.position = origin + (Vector3)(dir * 0.5f);
+        float distToPlayer = (player != null) ? Vector2.Distance(transform.position, player.position) : 5f;
+        float spawnDist = Mathf.Min(0.35f, distToPlayer * 0.35f);
+        proj.transform.position = origin + (Vector3)(dir * spawnDist);
 
         float rotZ = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         proj.transform.rotation = Quaternion.Euler(0, 0, rotZ);
@@ -165,7 +169,7 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
         srProj.sortingOrder = 5200;
 
         var col = proj.AddComponent<CircleCollider2D>();
-        col.radius = 0.25f;
+        col.radius = 0.35f;
         col.isTrigger = true;
 
         var script = proj.AddComponent<ValleyThornProjectile>();
@@ -201,8 +205,9 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
         if (telegraphLine != null) telegraphLine.enabled = false;
         if (myCol != null) myCol.enabled = false;
 
-        // Roi tinh the xanh
+        // Roi tinh the xanh & da khoang
         AethelShard.SpawnShards(transform.position, Random.Range(3, 5));
+        WorldItemPickup.RollDrop(transform.position, false);
         OnEnemyDied?.Invoke(this);
 
         Destroy(gameObject, 0.1f);
@@ -236,33 +241,61 @@ public class ValleyThornProjectile : MonoBehaviour
     private Vector2 velocity;
     private int damage;
     private float maxLifetime = 3.5f;
+    private bool hasHit = false;
 
     public void Init(Vector2 vel, int dmg)
     {
         velocity = vel;
         damage = dmg;
+        CheckProximity();
         Destroy(gameObject, maxLifetime);
     }
 
     void Update()
     {
+        if (hasHit) return;
         transform.position += (Vector3)(velocity * Time.deltaTime);
+        CheckProximity();
+    }
+
+    private void CheckProximity()
+    {
+        if (hasHit) return;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.35f);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            var h = hits[i];
+            if (h == null) continue;
+            var ph = h.GetComponent<PlayerHealth>() ?? h.GetComponentInParent<PlayerHealth>();
+            if (ph != null)
+            {
+                hasHit = true;
+                ph.TakeDamage(damage);
+                SoundManager.EnsureInstance()?.PlayPlayerHurt();
+                DamagePopup.Create(h.transform.position, damage, isPlayer: true);
+                Destroy(gameObject);
+                return;
+            }
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player") || other.GetComponent<PlayerHealth>() != null)
+        if (hasHit || other == null) return;
+
+        var ph = other.GetComponent<PlayerHealth>() ?? other.GetComponentInParent<PlayerHealth>();
+        if (ph != null)
         {
-            var ph = other.GetComponent<PlayerHealth>() ?? other.GetComponentInParent<PlayerHealth>();
-            if (ph != null)
-            {
-                ph.TakeDamage(damage);
-                SoundManager.EnsureInstance()?.PlayPlayerHurt();
-            }
+            hasHit = true;
+            ph.TakeDamage(damage);
+            SoundManager.EnsureInstance()?.PlayPlayerHurt();
+            DamagePopup.Create(other.transform.position, damage, isPlayer: true);
             Destroy(gameObject);
+            return;
         }
         else if (other.gameObject.name.ToLower().Contains("wall") || other.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>() != null)
         {
+            hasHit = true;
             Destroy(gameObject);
         }
     }

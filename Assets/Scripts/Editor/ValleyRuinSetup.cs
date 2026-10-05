@@ -15,7 +15,7 @@ public static class ValleyRuinSetup
     private const string OBJECTS_FOLDER = ASSET_ROOT + "/Objects";
     private const string GENERATED_TILES_FOLDER = ASSET_ROOT + "/GeneratedTiles";
     private const string PALETTE_PATH = ASSET_ROOT + "/ValleyRuin_Palette.prefab";
-    private const string MAP1_SCENE_PATH = "Assets/Scenes/SampleScene.unity";
+    private const string MAP1_SCENE_PATH = "Assets/Scenes/Map1_Thestart.unity";
     private const string MAP2_SCENE_PATH = "Assets/Scenes/Map2_ValleyRuin.unity";
 
     static ValleyRuinSetup()

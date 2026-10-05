@@ -9,7 +9,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
     public static event System.Action<Vector3> OnEggHatched;
 
     [Header("Egg Stats")]
-    [SerializeField] private int maxHealth = 120;
+    [SerializeField] private int maxHealth = 550;
     [SerializeField] private int currentHealth;
 
     private SpriteRenderer sr;
@@ -229,6 +229,12 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(0.1f);
 
         Vector3 spawnPos = transform.position;
+
+        // Roi Linh Hon, Binh Mau va Vat Pham khi pha huy Ken Phong An
+        AethelShard.SpawnShards(spawnPos, 15);
+        HealthPotion.Spawn(spawnPos + Vector3.left * 0.5f, 1);
+        WorldItemPickup.RollDrop(spawnPos + Vector3.right * 0.5f, true);
+
         OnEggHatched?.Invoke(spawnPos);
 
         Destroy(gameObject);

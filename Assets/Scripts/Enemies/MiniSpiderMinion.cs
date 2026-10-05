@@ -9,10 +9,10 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
     private SpriteRenderer sr;
     private CircleCollider2D col;
 
-    private int maxHealth = 20;
+    private int maxHealth = 85;
     private int currentHealth;
     private float moveSpeed = 4.2f;
-    private int biteDamage = 6;
+    private int biteDamage = 14;
     private float biteCooldown = 1.0f;
     private float biteTimer = 0f;
     private bool isDead = false;
@@ -156,6 +156,13 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
 
         if (deathSprite != null) sr.sprite = deathSprite;
         SoundManager.EnsureInstance()?.PlayHitImpact();
+
+        // Roi Linh Hon & Vat pham ngau nhien
+        AethelShard.SpawnShards(transform.position, Random.Range(1, 3));
+        if (Random.value < 0.25f)
+        {
+            WorldItemPickup.RollDrop(transform.position, false, -0.1f);
+        }
 
         Destroy(gameObject, 0.25f);
     }

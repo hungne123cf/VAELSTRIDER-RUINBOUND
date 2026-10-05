@@ -15,7 +15,7 @@ public static class Map2Builder
     private const string OBJECTS_FOLDER = ASSET_ROOT + "/Objects";
     private const string EXTRACTED_FOLDER = OBJECTS_FOLDER + "/Extracted";
     private const string GENERATED_TILES_FOLDER = ASSET_ROOT + "/GeneratedTiles";
-    private const string MAP1_SCENE_PATH = "Assets/Scenes/SampleScene.unity";
+    private const string MAP1_SCENE_PATH = "Assets/Scenes/Map1_Thestart.unity";
     private const string MAP2_SCENE_PATH = "Assets/Scenes/Map2_ValleyRuin.unity";
     private const string TRIGGER_FILE = "Temp/build_map2.trigger";
 

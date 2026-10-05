@@ -7,9 +7,9 @@ public class SlimeAI : MonoBehaviour, IDamageable
     public static event System.Action<SlimeAI> OnEnemyDied;
 
     [Header("Slime Stats")]
-    [SerializeField] private int maxHealth = 85;
+    [SerializeField] private int maxHealth = 135;
     [SerializeField] private int currentHealth;
-    [SerializeField] private int attackDamage = 12;
+    [SerializeField] private int attackDamage = 16;
     [SerializeField] private float moveSpeed = 2.6f;
     [SerializeField] private float detectionRange = 100f; // Luon phat hien va truy duoi
     [SerializeField] private float meleeRange = 1.6f;
@@ -220,6 +220,7 @@ public class SlimeAI : MonoBehaviour, IDamageable
         if (animator != null) animator.SetTrigger(DieHash);
 
         AethelShard.SpawnShards(transform.position, Random.Range(1, 3));
+        WorldItemPickup.RollDrop(transform.position, false);
 
         OnEnemyDied?.Invoke(this);
         Destroy(gameObject, 0.8f);

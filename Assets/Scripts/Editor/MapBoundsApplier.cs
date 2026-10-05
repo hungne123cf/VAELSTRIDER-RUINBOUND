@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -66,11 +66,11 @@ public static class MapBoundsApplier
 
     private static void ApplyToMap1()
     {
-        string path = "Assets/Scenes/SampleScene.unity";
+        string path = "Assets/Scenes/Map1_Thestart.unity";
         if (!File.Exists(path)) return;
 
         var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
-        Debug.Log("<color=yellow>[MAP 1]</color> Đang cấu hình SampleScene...");
+        Debug.Log("<color=yellow>[MAP 1]</color> Đang cấu hình Map1_Thestart...");
 
         // Map 1 Dungeon: x từ -17 đến 72, y từ -9 đến 50
         Vector2 min = new Vector2(-17f, -9f);

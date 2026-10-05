@@ -12,16 +12,16 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     public bool IsBoss => isBoss;
 
     [Header("Enemy Stats")]
-    [SerializeField] private int maxHealth = 130; // Quai thuong mau trau hon (130 HP)
+    [SerializeField] private int maxHealth = 320; // Quai thuong mau trau hon (320 HP)
     [SerializeField] private float moveSpeed = 3.2f;
-    [SerializeField] private int attackDamage = 15;
+    [SerializeField] private int attackDamage = 28;
     [SerializeField] private float attackCooldown = 1.8f;
 
     [Header("Boss 3 Health Bars")]
     public int totalBossPhases = 3;
     private int currentBossPhase = 3;
     public int CurrentBossPhase => currentBossPhase;
-    private int phaseMaxHealth = 450;
+    private int phaseMaxHealth = 950;
     private bool isTransitioningPhase = false;
 
     [Header("Boss Clone & Teleport Mechanics")]
@@ -184,12 +184,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             SetMoving(false);
 
             // Luon quay nong sung ve phia Player
-            Vector2 aimDir = ((Vector2)player.position - (Vector2)transform.position).normalized;
-            if (spriteRenderer != null)
-            {
-                if (aimDir.x > 0.05f) SetFacing(false);
-                else if (aimDir.x < -0.05f) SetFacing(true);
-            }
+            bool faceLeft = player.position.x < transform.position.x;
+            SetFacing(faceLeft);
 
             if (attackCooldownTimer <= 0)
             {
@@ -205,8 +201,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         if (spriteRenderer != null)
         {
-            if (dir.x > 0.05f) SetFacing(false);
-            else if (dir.x < -0.05f) SetFacing(true);
+            bool moveFaceLeft = player.position.x < transform.position.x;
+            SetFacing(moveFaceLeft);
         }
     }
 
@@ -229,29 +225,31 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         if (player != null)
         {
-            Vector2 shootDir = ((Vector2)player.position + Vector2.up * 0.4f - (Vector2)transform.position).normalized;
-            StartCoroutine(SpawnBulletRoutine(shootDir));
+            StartCoroutine(SpawnBulletRoutine());
             SoundManager.EnsureInstance()?.PlayEnemyShoot();
         }
     }
 
-    private IEnumerator SpawnBulletRoutine(Vector2 dir)
+    private IEnumerator SpawnBulletRoutine()
     {
         yield return new WaitForSeconds(0.12f);
-        if (isDead) yield break;
+        if (isDead || player == null) yield break;
 
-        // Tính toán vị trí đầu nòng súng BotWheel chính xác trên sprite
-        // Sprite có pivot ở chân (0.5, 0), chiều rộng 117 pixel, ptu 32
-        // Nòng súng trên sprite kết thúc tại x=32, y=10 (Unity y=15)
-        // Khi quay phải (flipX == false): đầu nòng súng ở -0.80f * scaleX
-        // Khi quay trái (flipX == true): đầu nòng súng ở +0.80f * scaleX
-        bool facingLeft = spriteRenderer != null && spriteRenderer.flipX;
-        float muzzleX = (facingLeft ? 0.80f : -0.80f) * transform.localScale.x;
-        float muzzleY = 0.45f * transform.localScale.y;
+        // Vị trí trọng tâm người chơi (ngực / BoxCollider2D của Player)
+        Vector3 playerCenter = player.position + Vector3.up * 1.0f;
+
+        // Luôn quay nòng súng đối diện người chơi
+        bool facingLeft = playerCenter.x < transform.position.x;
+        SetFacing(facingLeft);
+
+        // Vị trí nòng súng phía trước mặt quái
+        float muzzleX = (facingLeft ? -0.45f : 0.45f) * transform.localScale.x;
+        float muzzleY = 0.55f * transform.localScale.y;
         Vector3 muzzlePos = transform.position + new Vector3(muzzleX, muzzleY, 0f);
 
-        // Đạn xuất phát sát ngay đầu nòng súng hướng về phía mục tiêu
-        Vector3 spawnBase = muzzlePos + (Vector3)(dir.normalized * (0.06f * (isBoss ? 1.4f : 1.0f)));
+        // Hướng bắn trực diện từ nòng súng vào thẳng ngực người chơi (dù đứng sát cạnh hay góc nào đều bắn trúng 100%)
+        Vector2 flyDir = ((Vector2)playerCenter - (Vector2)muzzlePos).normalized;
+        Vector3 spawnBase = muzzlePos + (Vector3)(flyDir * 0.1f);
 
         if (isBoss)
         {
@@ -259,13 +257,13 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             float[] angles = new float[] { -15f, 0f, 15f };
             foreach (float angle in angles)
             {
-                Vector2 spreadDir = Quaternion.Euler(0, 0, angle) * dir;
+                Vector2 spreadDir = Quaternion.Euler(0, 0, angle) * flyDir;
                 CreateRuntimeBullet(spawnBase, spreadDir);
             }
         }
         else
         {
-            CreateRuntimeBullet(spawnBase, dir);
+            CreateRuntimeBullet(spawnBase, flyDir);
         }
     }
 
@@ -273,8 +271,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     {
         GameObject bullet = new GameObject("Enemy_EnergyBullet");
         bullet.transform.position = spawnPos;
-        // Kich thuoc sieu gon, nho hon dau cua Player nhung ro rang, bay dep mat
-        bullet.transform.localScale = isBoss ? Vector3.one * 0.48f : Vector3.one * 0.38f;
+        // Kích thước rõ ràng, bay đẹp mắt
+        bullet.transform.localScale = isBoss ? Vector3.one * 0.55f : Vector3.one * 0.45f;
 
         var sr = bullet.AddComponent<SpriteRenderer>();
         sr.sprite = runtimeBulletSprite;
@@ -282,7 +280,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         var col = bullet.AddComponent<CircleCollider2D>();
         col.isTrigger = true;
-        col.radius = 0.12f;
+        col.radius = 0.35f;
 
         var rbBullet = bullet.AddComponent<Rigidbody2D>();
         rbBullet.gravityScale = 0f;
@@ -492,10 +490,12 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         if (isBoss && !isClone)
         {
             AethelShard.SpawnShards(transform.position, Random.Range(18, 26));
+            WorldItemPickup.RollDrop(transform.position, true);
         }
         else if (!isClone)
         {
             AethelShard.SpawnShards(transform.position, Random.Range(3, 6));
+            WorldItemPickup.RollDrop(transform.position, false);
         }
 
         Collider2D col = GetComponent<Collider2D>();
@@ -510,10 +510,10 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         initialSpawnPosition = transform.position;
         transform.localScale = transform.localScale * scaleMultiplier;
 
-        // Hệ thống 3 thanh máu: Mỗi thanh 450 HP (Tổng 1350 HP)
+        // Hệ thống 3 thanh máu: Mỗi thanh 950 HP (Tổng 2850 HP)
         totalBossPhases = 3;
         currentBossPhase = 3;
-        phaseMaxHealth = 450;
+        phaseMaxHealth = 950;
         currentHealth = phaseMaxHealth;
 
         attackDamage *= damageMultiplier;

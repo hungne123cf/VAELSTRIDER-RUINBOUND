@@ -20,10 +20,26 @@ public class ShardsUI : MonoBehaviour
     void Start()
     {
         FindTextComponents();
+        AccountDatabase.EnsureActiveSessionLoaded();
+
+        // Hiển thị ngay từ AccountDatabase (tránh hiện 0 khi chưa có PlayerInventory)
+        long initShards = AccountDatabase.GetAethelShards();
+        SetDisplayText(initShards);
 
         inventory = FindAnyObjectByType<PlayerInventory>();
+        if (inventory == null)
+        {
+            var pc = FindAnyObjectByType<PlayerController>();
+            if (pc != null)
+            {
+                inventory = pc.GetComponent<PlayerInventory>();
+                if (inventory == null) inventory = pc.gameObject.AddComponent<PlayerInventory>();
+            }
+        }
+
         if (inventory != null)
         {
+            inventory.OnShardsChanged -= UpdateShardsDisplay;
             inventory.OnShardsChanged += UpdateShardsDisplay;
             UpdateShardsDisplay(inventory.GetShards());
         }
@@ -43,26 +59,40 @@ public class ShardsUI : MonoBehaviour
         }
     }
 
-    private void UpdateShardsDisplay(int amount)
+    private void SetDisplayText(long amount)
     {
-        FindTextComponents();
-
-        string str = amount.ToString();
+        string str = (amount >= 1_000_000_000) ? (amount / 1_000_000_000.0).ToString("0.##") + "B" :
+                     (amount >= 1_000_000) ? (amount / 1_000_000.0).ToString("0.##") + "M" :
+                     (amount >= 10_000) ? (amount / 1_000.0).ToString("0.#") + "K" :
+                     amount.ToString("N0");
 
         if (legacyText != null)
         {
             legacyText.text = str;
+            legacyText.horizontalOverflow = HorizontalWrapMode.Overflow;
         }
 
         if (tmpText != null)
         {
             tmpText.text = str;
+            tmpText.enableWordWrapping = false;
+            tmpText.overflowMode = TextOverflowModes.Overflow;
         }
+    }
 
-        Debug.Log($"<color=green>[UI UPDATED]</color> So tien Aethel Shards tren man hinh: {str}");
+    private void UpdateShardsDisplay(long amount)
+    {
+        FindTextComponents();
+        SetDisplayText(amount);
 
-        StopAllCoroutines();
-        StartCoroutine(PunchScaleRoutine());
+        Debug.Log($"<color=green>[UI UPDATED]</color> So tien Aethel Shards tren man hinh: {amount}");
+
+        // Chỉ chạy hiệu ứng khi GameObject đang active, tránh crash coroutine
+        if (gameObject.activeInHierarchy)
+        {
+            StopAllCoroutines();
+            StartCoroutine(PunchScaleRoutine());
+        }
     }
 
     private System.Collections.IEnumerator PunchScaleRoutine()

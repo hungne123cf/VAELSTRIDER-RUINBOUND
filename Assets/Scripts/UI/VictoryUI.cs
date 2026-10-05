@@ -10,6 +10,8 @@ public class VictoryUI : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private TextMeshProUGUI titleText;
+    [SerializeField] private TextMeshProUGUI subtitleText;
     [SerializeField] private TextMeshProUGUI timeText;
     [SerializeField] private TextMeshProUGUI enemiesText;
     [SerializeField] private TextMeshProUGUI shardsText;
@@ -20,6 +22,7 @@ public class VictoryUI : MonoBehaviour
     private static float runStartTime = 0f;
     private static int enemiesKilled = 0;
     private bool isEnded = false;
+    public bool IsShown() => isEnded || (canvasGroup != null && canvasGroup.alpha > 0.05f);
 
     void Awake()
     {
@@ -31,6 +34,31 @@ public class VictoryUI : MonoBehaviour
         canvasGroup.alpha = 0f;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
+
+        if (titleText == null)
+        {
+            var t = transform.Find("CardWindow/TitleText");
+            if (t != null) titleText = t.GetComponent<TextMeshProUGUI>();
+        }
+        if (subtitleText == null)
+        {
+            var s = transform.Find("CardWindow/SubtitleText");
+            if (s != null) subtitleText = s.GetComponent<TextMeshProUGUI>();
+        }
+
+        // Xoa cac component LocalizedText trung lap bi loi gan APP_TITLE de tranh de len nhau
+        if (titleText != null)
+        {
+            var loc = titleText.GetComponent<LocalizedText>();
+            if (loc != null) Destroy(loc);
+            titleText.text = LocalizationManager.T("CHIẾN THẮNG!", "REALM PURIFIED!");
+        }
+        if (subtitleText != null)
+        {
+            var loc = subtitleText.GetComponent<LocalizedText>();
+            if (loc != null) Destroy(loc);
+            subtitleText.text = LocalizationManager.T("Tàn tích cổ đại đã được thanh tẩy khỏi sự tha hóa.", "The ancient ruins have been cleansed of corruption.");
+        }
 
         if (playAgainButton != null) playAgainButton.onClick.AddListener(RestartRun);
         if (nextRealmButton != null) nextRealmButton.onClick.AddListener(GoToNextRealm);
@@ -101,39 +129,54 @@ public class VictoryUI : MonoBehaviour
         if (currentScene == "SampleScene" || currentScene.Contains("Map1"))
         {
             PlayerPrefs.SetInt("Map1_Completed", 1);
+            AccountDatabase.AddItemToActiveUser("scroll_summon_mythic", 1, "GachaArtifact", "Chiến Thắng Map 1");
+            AccountDatabase.AddItemToActiveUser("gem_amethyst", 3, "Material", "Chiến Thắng Map 1");
         }
         else if (currentScene.Contains("Map2") || currentScene.Contains("Valley"))
         {
             PlayerPrefs.SetInt("Map2_Completed", 1);
+            AccountDatabase.AddItemToActiveUser("scroll_summon_mythic", 2, "GachaArtifact", "Chiến Thắng Map 2");
+            AccountDatabase.AddItemToActiveUser("gem_bloodstone", 2, "Material", "Chiến Thắng Map 2");
+            AccountDatabase.AddItemToActiveUser("chest_ancient_relic", 1, "GachaArtifact", "Chiến Thắng Map 2");
         }
         else if (currentScene.Contains("Map3") || currentScene.Contains("Forgotten"))
         {
             PlayerPrefs.SetInt("Map3_Completed", 1);
+            AccountDatabase.AddItemToActiveUser("core_abyssal_soul", 1, "GachaArtifact", "Đại Thắng Map 3");
+            AccountDatabase.AddItemToActiveUser("scroll_summon_mythic", 3, "GachaArtifact", "Đại Thắng Map 3");
         }
         PlayerPrefs.Save();
+        AccountDatabase.SaveActiveSessionToDatabase();
 
-        float elapsed = Time.time - (runStartTime > 0 ? runStartTime : Time.time - 90f);
-        int minutes = Mathf.FloorToInt(elapsed / 60f);
-        int seconds = Mathf.FloorToInt(elapsed % 60f);
-        string timeStr = string.Format("{0:00}:{1:00}", minutes, seconds);
+        if (MatchTimerUI.Instance != null) MatchTimerUI.Instance.StopTimer();
+        float elapsed = MatchTimerUI.LastFinalClearTime > 0f ? MatchTimerUI.LastFinalClearTime : (Time.time - runStartTime);
+        string timeStr = MatchTimerUI.GetFormattedLastClearTime();
 
-        int totalShards = 0;
+        long totalShards = 0;
         var player = Object.FindAnyObjectByType<PlayerController>();
         if (player != null)
         {
             var inv = player.GetComponent<PlayerInventory>();
             if (inv != null) totalShards = inv.GetShards();
         }
+        if (totalShards == 0)
+        {
+            totalShards = AccountDatabase.GetAethelShards();
+        }
 
         string rank = "S RANK";
-        if (elapsed > 180f) rank = "B RANK";
-        else if (elapsed > 120f) rank = "A RANK";
+        if (elapsed > 240f) rank = "B RANK";
+        else if (elapsed > 150f) rank = "A RANK";
+
+        if (titleText != null) titleText.text = LocalizationManager.T("CHIẾN THẮNG!", "REALM PURIFIED!");
+        if (subtitleText != null) subtitleText.text = LocalizationManager.T("Tàn tích cổ đại đã được thanh tẩy khỏi sự tha hóa.", "The ancient ruins have been cleansed of corruption.");
 
         if (timeText != null) timeText.text = timeStr;
         if (enemiesText != null) enemiesText.text = $"{enemiesKilled} " + LocalizationManager.T("Kẻ địch", "Slain");
-        if (shardsText != null) shardsText.text = $"{totalShards} " + LocalizationManager.T("Linh hồn", "Shards");
+        if (shardsText != null) shardsText.text = $"{MainMenuManager.FormatCompactNumber(totalShards)} " + LocalizationManager.T("Linh hồn", "Shards");
         if (rankText != null) rankText.text = rank;
 
+        GameAutoBootstrap.SetGameplayHUDVisible(false);
         StartCoroutine(FadeInRoutine());
     }
 

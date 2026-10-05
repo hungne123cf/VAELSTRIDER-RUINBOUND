@@ -29,6 +29,7 @@ public class GameAutoBootstrap : MonoBehaviour
     public static void BootstrapAll()
     {
         Time.timeScale = 1.0f; // Dam bao thoi gian luon chay binh thuong khi vao map
+        AccountDatabase.EnsureActiveSessionLoaded();
         string currentScene = SceneManager.GetActiveScene().name;
         if (currentScene == "LoginScene")
         {
@@ -47,18 +48,23 @@ public class GameAutoBootstrap : MonoBehaviour
         if (currentScene == "Map2_ValleyRuin")
         {
             // Dang o Map 2: Giu nguyen dia hinh thung lung Map 2, khoi tao UI, Upgrade va Ancient Shrine Tru Da Phat Sang
+            MatchTimerUI.EnsureUIExists();
+            MinimapHUD.EnsureUIExists();
             PotionQuickSlotUI.EnsureUIExists();
-        GameOverUI.EnsureUIExists();
+            GameOverUI.EnsureUIExists();
             EnsureSpecialSkillButton();
             SettingsUI.EnsureSettingsButtonExists();
             CharacterStatsUI.EnsureUIExists();
+            InGameInventoryUI.EnsureUIExists();
             PlayerEnergyUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ShrineUpgradeUI.EnsureUIExists();
+            ChestLootPopupUI.EnsureUIExists();
             EnsureAncientShrine(new Vector3(-5.5f, 2.8f, 0f));
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
+            MapSpiritSparksManager.EnsureInstance();
             Debug.Log("<color=green>[BOOTSTRAP]</color> Dang o Map 2 (Valley Ruin)! Da khoi tao Ancient Shrine Tru Da Phat Sang va UI.");
             return;
         }
@@ -66,40 +72,49 @@ public class GameAutoBootstrap : MonoBehaviour
         if (currentScene.Contains("Map3") || currentScene.Contains("Ancient"))
         {
             // Đang ở Map 3: Giữ nguyên 100% bản đồ bạn tự vẽ, chỉ nạp UI điều khiển và nâng cấp
+            MatchTimerUI.EnsureUIExists();
+            MinimapHUD.EnsureUIExists();
             PotionQuickSlotUI.EnsureUIExists();
             GameOverUI.EnsureUIExists();
             EnsureSpecialSkillButton();
             SettingsUI.EnsureSettingsButtonExists();
             CharacterStatsUI.EnsureUIExists();
+            InGameInventoryUI.EnsureUIExists();
             PlayerEnergyUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ShrineUpgradeUI.EnsureUIExists();
+            ChestLootPopupUI.EnsureUIExists();
             EnsureAncientShrine(new Vector3(-1.5f, -5.0f, 0f));
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
+            MapSpiritSparksManager.EnsureInstance();
             // Map 3 hoan toan do Map3WaveSpawner quan ly (Goblin, Skeleton, Slime, Skeleton King Boss)
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Forgotten Memories)! Tải toàn diện hệ thống Map 3.");
             return;
         }
 
-        // 0. Kiến tạo Bản Đồ Đa Phòng chỉ riêng cho Map 1 (SampleScene)
-        if (currentScene == "SampleScene")
+        // 0. Kiến tạo Bản Đồ Đa Phòng chỉ riêng cho Map 1 (Map1_Thestart)
+        if (currentScene == "SampleScene" || currentScene == "Map1_Thestart")
         {
             DungeonMapBuilder.BuildDungeon();
         }
 
-        // 1. Khoi tao nut Binh Mau (Potion Quick Slot) tren Canvas
+        // 1. Khoi tao nut Binh Mau, Timer & Minimap tren Canvas
+        MatchTimerUI.EnsureUIExists();
+        MinimapHUD.EnsureUIExists();
         PotionQuickSlotUI.EnsureUIExists();
         GameOverUI.EnsureUIExists();
 
         // 2. Khoi tao nut Tuyet Ky Ruin Whirlwind tren Canvas
         EnsureSpecialSkillButton();
 
-        // 2b. Khoi tao nut Settings tren Canvas (cho ca Map 1 va Map 2)
+        // 2b. Khoi tao nut Settings, Character Stats va In-Game Bag tren Canvas
         SettingsUI.EnsureSettingsButtonExists();
         CharacterStatsUI.EnsureUIExists();
+        InGameInventoryUI.EnsureUIExists();
         PlayerEnergyUI.EnsureUIExists();
+        ChestLootPopupUI.EnsureUIExists();
 
         // 3. Khoi tao He thong 3 dot quai + Boss Titan Wheel (WaveSpawner)
         EnsureWaveSpawner();
@@ -119,6 +134,7 @@ public class GameAutoBootstrap : MonoBehaviour
         // 8. Dam bao Player Upgrade Manager va UI
         PlayerUpgradeManager.EnsureInstance();
         ShrineUpgradeUI.EnsureUIExists();
+        MapSpiritSparksManager.EnsureInstance();
 
         // 9. Co che Dark Souls: Kiem tra va tai sinh Vung Hon (Lost Shards Grave) tai vi tri tu tran cu
         LostShardsGrave.EnsureSpawnGrave();
@@ -130,7 +146,80 @@ public class GameAutoBootstrap : MonoBehaviour
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
     }
 
-        public static Canvas GetMainGameplayCanvas()
+    public static void SetGameplayHUDVisible(bool visible)
+    {
+        string curScene = SceneManager.GetActiveScene().name;
+        if (curScene == "MainMenuScene" || curScene == "LoginScene") return;
+
+        // 1. Virtual Joysticks
+        var joysticks = Object.FindObjectsByType<VirtualJoystick>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var joy in joysticks)
+        {
+            if (joy != null && joy.gameObject != null) joy.gameObject.SetActive(visible);
+        }
+        var joyBg = GameObject.Find("JoystickBackground");
+        if (joyBg != null) joyBg.SetActive(visible);
+
+        // 2. All Minimap components & roots
+        var minimaps = Object.FindObjectsByType<MinimapHUD>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var m in minimaps)
+        {
+            if (m != null && m.gameObject != null) m.gameObject.SetActive(visible);
+        }
+
+        // 3. Match Timer
+        var timers = Object.FindObjectsByType<MatchTimerUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var t in timers)
+        {
+            if (t != null && t.gameObject != null) t.gameObject.SetActive(visible);
+        }
+
+        // 4. Potion & Energy
+        if (PotionQuickSlotUI.Instance != null && PotionQuickSlotUI.Instance.gameObject != null)
+            PotionQuickSlotUI.Instance.gameObject.SetActive(visible);
+
+        if (PlayerEnergyUI.Instance != null && PlayerEnergyUI.Instance.gameObject != null)
+            PlayerEnergyUI.Instance.gameObject.SetActive(visible);
+
+        // 5. Hide / Show all specific HUD objects across ALL Canvases
+        string[] hudNames = new string[]
+        {
+            "Btn_Attack", "Btn_Dash", "Btn_Special", "Btn_Potion",
+            "Btn_InGameBag", "Btn_CharacterStats", "Btn_SettingsGear", "Btn_InGameSettings", "Btn_InGameInfo",
+            "PlayerHealthBar", "PlayerHealthUI", "ShardsCounter", "WaveBanner", "MatchTimerPanel", "RuinRadarCompass",
+            "Minimap_Compass_HUD", "RadarDisc", "CompassNeedle", "RuinPortalDistanceText"
+        };
+
+        var allCanvases = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var c in allCanvases)
+        {
+            if (c == null) continue;
+            string cName = c.gameObject.name;
+            if (cName.Contains("InGameInventoryModal") || cName.Contains("SettingsModal") || cName.Contains("CharacterStatsPanel") || cName.Contains("ShrineUpgrade"))
+                continue;
+
+            HideChildrenByName(c.transform, hudNames, visible);
+        }
+    }
+
+    private static void HideChildrenByName(Transform parent, string[] targetNames, bool visible)
+    {
+        if (parent == null) return;
+        for (int i = 0; i < targetNames.Length; i++)
+        {
+            if (parent.name == targetNames[i])
+            {
+                parent.gameObject.SetActive(visible);
+                return;
+            }
+        }
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            HideChildrenByName(parent.GetChild(i), targetNames, visible);
+        }
+    }
+
+    public static Canvas GetMainGameplayCanvas()
     {
         var cObj = GameObject.Find("Canvas");
         if (cObj != null)
@@ -364,7 +453,7 @@ public class GameAutoBootstrap : MonoBehaviour
             "LostShardsGrave", "TreasureChest_Crypt", "DungeonBarriers", "DungeonTorches",
             "UltiCinematicCanvas", "UltiCinematicUI", "LoginManager_Auto", "Login_DarkBackdrop",
             "GameOverPanel", "ShrineUpgradePanel", "CharacterStatsPanel", "SettingsPanel",
-            "Btn_SettingsGear", "Btn_CharacterStats"
+            "Btn_SettingsGear", "Btn_CharacterStats", "ChestLootPopupModal"
         };
         foreach (var name in uiNames)
         {
@@ -382,9 +471,70 @@ public class GameAutoBootstrap : MonoBehaviour
         string selectedChar = CharacterManager.Instance.GetSelectedCharacterId();
 
         EnsurePlayerColliderAndCombat(player, selectedChar);
-        if (selectedChar == CharacterManager.CHAR_MAID)
+        if (selectedChar == CharacterManager.CHAR_AZURE_BLADE)
         {
-            player.transform.localScale = Vector3.one; // Chuan kich co 32x32 bang voi Player dau tien
+            player.transform.localScale = Vector3.one;
+            var sr = player.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.material = new Material(Shader.Find("Sprites/Default"));
+#if UNITY_EDITOR
+                var idleObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player3/Sword_Idle.png");
+                if (idleObjs != null)
+                {
+                    foreach (var o in idleObjs)
+                    {
+                        if (o is Sprite s)
+                        {
+                            sr.sprite = s;
+                            break;
+                        }
+                    }
+                }
+#endif
+            }
+
+            var anim = player.GetComponent<Animator>();
+#if UNITY_EDITOR
+            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Player3/Player3.controller");
+            if (controller != null && anim != null)
+            {
+                anim.runtimeAnimatorController = controller;
+                anim.Rebind();
+                anim.Update(0f);
+            }
+#endif
+            var sweep = player.GetComponent<SweepTheWeakSkill>();
+            if (sweep != null) Object.Destroy(sweep);
+
+            var azure = player.GetComponent<AzureBladeSkill>();
+            if (azure == null)
+            {
+                azure = player.gameObject.AddComponent<AzureBladeSkill>();
+            }
+
+            var btnSpecial = GameObject.Find("Btn_Special");
+            if (btnSpecial != null)
+            {
+                var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = "SWORD WAVE";
+
+                var btn = btnSpecial.GetComponent<UnityEngine.UI.Button>();
+                if (btn != null)
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => {
+                        var az = player.GetComponent<AzureBladeSkill>();
+                        if (az != null) az.TriggerSpecialSkill();
+                    });
+                }
+            }
+
+            Debug.Log("<color=cyan>[CHARACTER]</color> Đã áp dụng nhân vật LAM KIẾM SĨ (AZURE BLADE) với Tuyệt kỹ Bão Sóng Kiếm!");
+        }
+        else if (selectedChar == CharacterManager.CHAR_MAID)
+        {
+            player.transform.localScale = Vector3.one;
             var anim = player.GetComponent<Animator>();
 #if UNITY_EDITOR
             var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Maid/Maid.controller");
@@ -393,6 +543,9 @@ public class GameAutoBootstrap : MonoBehaviour
                 anim.runtimeAnimatorController = controller;
             }
 #endif
+            var azure = player.GetComponent<AzureBladeSkill>();
+            if (azure != null) Object.Destroy(azure);
+
             if (player.GetComponent<SweepTheWeakSkill>() == null)
             {
                 player.gameObject.AddComponent<SweepTheWeakSkill>();
@@ -405,7 +558,7 @@ public class GameAutoBootstrap : MonoBehaviour
                 if (txt != null) txt.text = "SWEEP";
             }
 
-            Debug.Log("<color=magenta>[CHARACTER]</color> Da ap dung nhan vat MAID CHIEN BINH voi tuyet ky Quet Tan Ke Yeu!");
+            Debug.Log("<color=magenta>[CHARACTER]</color> Đã áp dụng nhân vật MAID CHIẾN BINH với tuyệt kỹ Quét Tan Kẻ Yếu!");
         }
         else
         {
@@ -420,6 +573,9 @@ public class GameAutoBootstrap : MonoBehaviour
 #endif
             var sweep = player.GetComponent<SweepTheWeakSkill>();
             if (sweep != null) Object.Destroy(sweep);
+
+            var azure = player.GetComponent<AzureBladeSkill>();
+            if (azure != null) Object.Destroy(azure);
 
             var btnSpecial = GameObject.Find("Btn_Special");
             if (btnSpecial != null)
@@ -460,11 +616,29 @@ public class GameAutoBootstrap : MonoBehaviour
             player.gameObject.AddComponent<PlayerEnergySystem>();
         }
 
+        if (player.GetComponent<PlayerInventory>() == null)
+        {
+            player.gameObject.AddComponent<PlayerInventory>();
+        }
+
         PlayerEquipmentVisual.EnsureExists(player.gameObject);
 
         var tPoint = player.transform.Find("AttackPoint");
 
-        if (selectedChar == CharacterManager.CHAR_MAID)
+        if (selectedChar == CharacterManager.CHAR_AZURE_BLADE)
+        {
+            // Azure Blade: 64x64 pixel art, pivot (0.5, 0.5)
+            if (box != null)
+            {
+                box.offset = new Vector2(0f, 0f);
+                box.size = new Vector2(0.55f, 0.85f);
+            }
+            if (tPoint != null)
+            {
+                tPoint.localPosition = new Vector3(0f, 0.1f, 0f);
+            }
+        }
+        else if (selectedChar == CharacterManager.CHAR_MAID)
         {
             // Maid: pivot (0.5, 0.5), chan o y=-0.45, dau o y=+0.45
             if (box != null)

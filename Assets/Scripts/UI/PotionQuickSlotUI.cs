@@ -127,9 +127,24 @@ public class PotionQuickSlotUI : MonoBehaviour
 
     private void UpdateUI(int count)
     {
-        string text = count > 0 ? $"x{count}" : "0";
-        if (legacyCountText != null) legacyCountText.text = text;
-        if (tmpCountText != null) tmpCountText.text = text;
+        string text;
+        if (count > 99) text = "99+";
+        else if (count > 0) text = $"x{count}";
+        else text = "0";
+
+        if (legacyCountText != null)
+        {
+            legacyCountText.text = text;
+            legacyCountText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            legacyCountText.verticalOverflow = VerticalWrapMode.Overflow;
+        }
+
+        if (tmpCountText != null)
+        {
+            tmpCountText.text = text;
+            tmpCountText.enableWordWrapping = false;
+            tmpCountText.overflowMode = TextOverflowModes.Overflow;
+        }
 
         if (canvasGroup != null)
         {
@@ -314,12 +329,17 @@ public class PotionQuickSlotUI : MonoBehaviour
 
         var tmp = badgeObj.AddComponent<TextMeshProUGUI>();
         tmp.text = "x0";
-        tmp.fontSize = 18;
+        tmp.fontSize = 15;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
         tmp.alignment = TextAlignmentOptions.BottomRight;
         tmp.enableWordWrapping = false;
+        tmp.overflowMode = TextOverflowModes.Overflow;
         tmp.raycastTarget = false;
+
+        var outline = badgeObj.AddComponent<Outline>();
+        outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
 
         Instance = btnObj.AddComponent<PotionQuickSlotUI>();
         return Instance;

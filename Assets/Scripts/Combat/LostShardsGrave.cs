@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 public class LostShardsGrave : MonoBehaviour
 {
     [Header("Grave Data")]
-    [SerializeField] private int lostShardsAmount = 0;
+    [SerializeField] private long lostShardsAmount = 0;
 
     private Transform playerTransform;
     private TextMeshPro labelTmp;
@@ -21,7 +21,17 @@ public class LostShardsGrave : MonoBehaviour
     public static void EnsureSpawnGrave()
     {
         int hasLost = PlayerPrefs.GetInt("Has_Lost_Shards", 0);
-        int amount = PlayerPrefs.GetInt("Lost_Shards_Amount", 0);
+        string amountStr = PlayerPrefs.GetString("Lost_Shards_Amount_Long", "");
+        long amount = 0;
+        if (!string.IsNullOrEmpty(amountStr) && long.TryParse(amountStr, out long parsedVal))
+        {
+            amount = parsedVal;
+        }
+        else
+        {
+            amount = (long)PlayerPrefs.GetInt("Lost_Shards_Amount", 0);
+        }
+
         string deathScene = PlayerPrefs.GetString("Lost_Shards_Scene", "");
         string currentScene = SceneManager.GetActiveScene().name;
 
@@ -115,7 +125,8 @@ public class LostShardsGrave : MonoBehaviour
         labelObj.transform.localPosition = new Vector3(0f, 1.25f, 0f);
 
         labelTmp = labelObj.AddComponent<TextMeshPro>();
-        labelTmp.text = $"<color=#52F0FF>VUNG HON</color>\n<color=#FFE066>+{lostShardsAmount} Shards</color>\n<size=70%>(Cham de thu hoi)</size>";
+        string formattedAmount = MainMenuManager.FormatCompactNumber(lostShardsAmount);
+        labelTmp.text = $"<color=#52F0FF>VUNG HON</color>\n<color=#FFE066>+{formattedAmount} Shards</color>\n<size=70%>(Cham de thu hoi)</size>";
         labelTmp.fontSize = 3.2f;
         labelTmp.fontStyle = FontStyles.Bold;
         labelTmp.alignment = TextAlignmentOptions.Center;
@@ -153,6 +164,7 @@ public class LostShardsGrave : MonoBehaviour
 
         // Xoa trang thai tien danh roi
         PlayerPrefs.SetInt("Has_Lost_Shards", 0);
+        PlayerPrefs.DeleteKey("Lost_Shards_Amount_Long");
         PlayerPrefs.SetInt("Lost_Shards_Amount", 0);
         PlayerPrefs.Save();
 

@@ -134,7 +134,11 @@ public class Map3WaveSpawner : MonoBehaviour
 
     private IEnumerator NextWaveDelayRoutine()
     {
-        yield return new WaitForSeconds(2.0f);
+        // Thuong dot quai
+        DamagePopup.CreateText(Vector3.zero, LocalizationManager.T("HOÀN THÀNH ĐỢT QUÁI! +THƯỞNG", "WAVE CLEARED! +REWARDS"), new Color(1f, 0.85f, 0.2f));
+        AethelShard.SpawnShards(Vector3.zero, 10);
+        WorldItemPickup.RollDrop(Vector3.zero + new Vector3(Random.Range(-0.8f, 0.8f), Random.Range(-0.8f, 0.8f), 0), false);
+        yield return new WaitForSeconds(2.5f);
         StartCoroutine(StartWaveRoutine(currentWave + 1));
     }
 

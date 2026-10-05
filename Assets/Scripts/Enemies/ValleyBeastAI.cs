@@ -12,10 +12,10 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
     public static event System.Action<ValleyBeastAI> OnEnemyDied;
 
     [Header("Stats")]
-    [SerializeField] private int maxHealth = 45;
+    [SerializeField] private int maxHealth = 220;
     [SerializeField] private int currentHealth;
     [SerializeField] private float moveSpeed = 4.2f;
-    [SerializeField] private int attackDamage = 8;
+    [SerializeField] private int attackDamage = 22;
     [SerializeField] private float attackRange = 1.35f;
     [SerializeField] private float attackCooldown = 1.4f;
     [SerializeField] private float detectionRadius = 10f;
@@ -214,8 +214,9 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
         if (myCol != null) myCol.enabled = false;
         rb.linearVelocity = Vector2.zero;
 
-        // Roi tinh the Aethel Shards
+        // Roi tinh the Aethel Shards & Khoang thach
         AethelShard.SpawnShards(transform.position, Random.Range(3, 6));
+        WorldItemPickup.RollDrop(transform.position, false);
 
         OnEnemyDied?.Invoke(this);
 

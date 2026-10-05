@@ -31,8 +31,11 @@ public class CharacterManager : MonoBehaviour
 
     public const string CHAR_VAELSTRIDER = "Vaelstrider";
     public const string CHAR_MAID = "Maid";
+    public const string CHAR_AZURE_BLADE = "AzureBlade";
 
     private Dictionary<string, CharacterData> characters = new Dictionary<string, CharacterData>();
+
+    private static bool isQuitting = false;
 
     void Awake()
     {
@@ -48,10 +51,24 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
+    void OnApplicationQuit()
+    {
+        isQuitting = true;
+    }
+
     public static CharacterManager EnsureInstance()
     {
+        if (isQuitting) return Instance;
+
         if (Instance == null)
         {
+            var existing = FindAnyObjectByType<CharacterManager>();
+            if (existing != null)
+            {
+                Instance = existing;
+                return Instance;
+            }
+
             var go = new GameObject("CharacterManager");
             Instance = go.AddComponent<CharacterManager>();
             DontDestroyOnLoad(go);
@@ -104,26 +121,59 @@ public class CharacterManager : MonoBehaviour
             spriteSheetPath = "Assets/ART/Player1/Maid Idle.png"
         };
 
-        // Mặc định Vaelstrider luôn mở khóa
+        // 3. Lam Kiếm Sĩ (Azure Blade)
+        characters[CHAR_AZURE_BLADE] = new CharacterData
+        {
+            id = CHAR_AZURE_BLADE,
+            nameVN = "Lam Kiếm Sĩ",
+            nameEN = "Azure Blade",
+            roleVN = "Kiếm Khí Trọng Kiếm (Tầm Xa & Sóng Kiếm)",
+            roleEN = "Heavy Crescent Blade (Ranged Waves)",
+            skillNameVN = "Bão Sóng Kiếm",
+            skillNameEN = "Crescent Tempest",
+            skillDescVN = "Đòn chém chậm nhưng uy lực, mỗi nhát chém phóng ra sóng kiếm xuyên thấu quái vật. Tuyệt kỹ phóng ra 5 đợt kiếm khí hình nan quạt quét sạch chiến trường!",
+            skillDescEN = "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!",
+            baseHealth = 110,
+            baseAttack = 6,
+            baseSpeed = 4.8f,
+            unlockPrice = 0, // Mở khóa sẵn sàng chơi
+            controllerPath = "Assets/Animation/Player3/Player3.controller",
+            spriteSheetPath = "Assets/ART/Player3/Sword_Idle.png"
+        };
+
+        // Mặc định mở khóa
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_VAELSTRIDER, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_AZURE_BLADE, 1);
         PlayerPrefs.Save();
     }
 
     public string GetSelectedCharacterId()
     {
-        string selected = PlayerPrefs.GetString(SELECTED_CHAR_KEY, CHAR_VAELSTRIDER);
-        if (selected == CHAR_MAID)
+        string selected = PlayerPrefs.GetString(SELECTED_CHAR_KEY, "");
+        if (string.IsNullOrEmpty(selected))
         {
-            // Tam khoa nhan vat so 2, tu dong chuyen ve Vaelstrider
-            selected = CHAR_VAELSTRIDER;
-            PlayerPrefs.SetString(SELECTED_CHAR_KEY, CHAR_VAELSTRIDER);
-            PlayerPrefs.Save();
+            selected = PlayerPrefs.GetString("SelectedHero", CHAR_AZURE_BLADE);
         }
-        return selected;
+
+        if (string.Equals(selected, "azure", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(selected, "azureblade", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(selected, CHAR_AZURE_BLADE, StringComparison.OrdinalIgnoreCase))
+        {
+            return CHAR_AZURE_BLADE;
+        }
+        else if (string.Equals(selected, "maid", StringComparison.OrdinalIgnoreCase) || 
+                 string.Equals(selected, CHAR_MAID, StringComparison.OrdinalIgnoreCase))
+        {
+            return CHAR_AZURE_BLADE; // Since maid is locked
+        }
+
+        return CHAR_VAELSTRIDER;
     }
 
     public CharacterData GetSelectedCharacter()
     {
+        string id = GetSelectedCharacterId();
+        if (characters.TryGetValue(id, out var data)) return data;
         return characters[CHAR_VAELSTRIDER];
     }
 
@@ -137,10 +187,9 @@ public class CharacterManager : MonoBehaviour
     {
         if (id == CHAR_MAID)
         {
-            // Tam khoa nhan vat so 2 (Maid)
             return false;
         }
-        return true;
+        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + id, 0) == 1 || id == CHAR_VAELSTRIDER || id == CHAR_AZURE_BLADE;
     }
 
     public bool UnlockCharacter(string id)
@@ -150,24 +199,30 @@ public class CharacterManager : MonoBehaviour
             Debug.LogWarning("<color=yellow>[CHARACTER]</color> Nhân vật Maid hiện đang tạm khóa!");
             return false;
         }
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + id, 1);
+        PlayerPrefs.Save();
         return true;
     }
 
     public void SelectCharacter(string id)
     {
-        if (id == CHAR_MAID)
+        string normId = CHAR_VAELSTRIDER;
+        if (string.Equals(id, "azure", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(id, "azureblade", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(id, CHAR_AZURE_BLADE, StringComparison.OrdinalIgnoreCase))
         {
-            Debug.LogWarning("<color=yellow>[CHARACTER]</color> Nhân vật Maid hiện đang tạm khóa, giữ nguyên Vaelstrider!");
-            PlayerPrefs.SetString(SELECTED_CHAR_KEY, CHAR_VAELSTRIDER);
-            PlayerPrefs.Save();
+            normId = CHAR_AZURE_BLADE;
+        }
+        else if (string.Equals(id, "maid", StringComparison.OrdinalIgnoreCase) || 
+                 string.Equals(id, CHAR_MAID, StringComparison.OrdinalIgnoreCase))
+        {
+            Debug.LogWarning("<color=yellow>[CHARACTER]</color> Nhân vật Maid hiện đang tạm khóa!");
             return;
         }
 
-        if (IsCharacterUnlocked(id))
-        {
-            PlayerPrefs.SetString(SELECTED_CHAR_KEY, id);
-            PlayerPrefs.Save();
-            Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {id}");
-        }
+        PlayerPrefs.SetString(SELECTED_CHAR_KEY, normId);
+        PlayerPrefs.SetString("SelectedHero", (normId == CHAR_AZURE_BLADE) ? "azure" : "vael");
+        PlayerPrefs.Save();
+        Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {normId}");
     }
 }

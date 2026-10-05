@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,13 +11,13 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
     public string bossName = "CHUA TE NHEN - SKELETON KING";
     public int totalBossPhases = 3;
     public int currentBossPhase = 1;
-    public int phaseMaxHealth = 380;
+    public int phaseMaxHealth = 1250;
     public int currentHealth;
 
     [Header("Stats")]
     [SerializeField] private float moveSpeed = 3.2f;
-    [SerializeField] private int meleeDamage = 25;
-    [SerializeField] private int slamDamage = 35;
+    [SerializeField] private int meleeDamage = 38;
+    [SerializeField] private int slamDamage = 55;
     [SerializeField] private float meleeRange = 2.4f;
     [SerializeField] private float meleeCooldown = 1.5f;
     [SerializeField] private float skillCooldown = 6.0f;
@@ -522,7 +522,12 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.6f, 1.0f);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 2f, "SKELETON KING DA BI HA GUC!", Color.yellow);
+        AethelShard.SpawnShards(transform.position, 35);
+        HealthPotion.Spawn(transform.position + Vector3.left * 0.8f, 1);
+        HealthPotion.Spawn(transform.position + Vector3.right * 0.8f, 1);
+        WorldItemPickup.Spawn(transform.position, "core_abyssal_soul", 1);
+        WorldItemPickup.RollDrop(transform.position + Vector3.up * 0.5f, true);
+        TreasureChest.SpawnChest(transform.position + Vector3.down * 1.5f);
 
         // 3. Trieu hoi duy nhat 1 Cong Thien Gioi
         StartCoroutine(SpawnHeavenlyPortalRoutine());

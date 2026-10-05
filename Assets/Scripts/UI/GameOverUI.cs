@@ -29,6 +29,7 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI respawnStatusText;
 
     private bool isShown = false;
+    public bool IsShown() => isShown || (canvasGroup != null && canvasGroup.alpha > 0.05f);
 
     void Awake()
     {
@@ -76,6 +77,7 @@ public class GameOverUI : MonoBehaviour
 
     public void TriggerShow()
     {
+        if (MatchTimerUI.Instance != null) MatchTimerUI.Instance.StopTimer();
         gameObject.SetActive(true);
         transform.SetAsLastSibling();
         UpdateButtonsAndTexts();
@@ -151,6 +153,7 @@ public class GameOverUI : MonoBehaviour
     private IEnumerator FadeInRoutine()
     {
         isShown = true;
+        GameAutoBootstrap.SetGameplayHUDVisible(false);
         canvasGroup.blocksRaycasts = true;
         canvasGroup.interactable = true;
 
@@ -217,10 +220,10 @@ public class GameOverUI : MonoBehaviour
         var inv = UnityEngine.Object.FindAnyObjectByType<PlayerInventory>();
         if (inv != null)
         {
-            inv.DropAllShardsOnDeath(PlayerHealth.LastDeathPosition, SceneManager.GetActiveScene().name);
+            inv.SaveData();
         }
 
-        Debug.Log("<color=cyan>[RESTART MAP]</color> Choi lai tu dau map!");
+        Debug.Log("<color=cyan>[RESTART MAP]</color> Choi lai tu dau map (Giu nguyen linh hon/Shards)!");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -235,10 +238,10 @@ public class GameOverUI : MonoBehaviour
         var inv = UnityEngine.Object.FindAnyObjectByType<PlayerInventory>();
         if (inv != null)
         {
-            inv.DropAllShardsOnDeath(PlayerHealth.LastDeathPosition, SceneManager.GetActiveScene().name);
+            inv.SaveData();
         }
 
-        Debug.Log("<color=yellow>[EXIT]</color> Tro ve trang LoginScene...");
+        Debug.Log("<color=yellow>[EXIT]</color> Tro ve trang LoginScene (Giu nguyen linh hon/Shards)...");
         SceneManager.LoadScene("LoginScene");
     }
 

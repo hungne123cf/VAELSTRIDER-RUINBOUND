@@ -7,9 +7,9 @@ public class SkeletonAI : MonoBehaviour, IDamageable
     public static event System.Action<SkeletonAI> OnEnemyDied;
 
     [Header("Skeleton Stats")]
-    [SerializeField] private int maxHealth = 110;
+    [SerializeField] private int maxHealth = 240;
     [SerializeField] private int currentHealth;
-    [SerializeField] private int attackDamage = 14;
+    [SerializeField] private int attackDamage = 24;
     [SerializeField] private float moveSpeed = 3.2f;
     [SerializeField] private float detectionRange = 100f; // Luon phat hien va truy duoi
     [SerializeField] private float meleeRange = 1.65f;
@@ -206,6 +206,7 @@ public class SkeletonAI : MonoBehaviour, IDamageable
         if (animator != null) animator.SetTrigger(DieHash);
 
         AethelShard.SpawnShards(transform.position, Random.Range(2, 5));
+        WorldItemPickup.RollDrop(transform.position, false);
 
         OnEnemyDied?.Invoke(this);
         Destroy(gameObject, 0.75f);

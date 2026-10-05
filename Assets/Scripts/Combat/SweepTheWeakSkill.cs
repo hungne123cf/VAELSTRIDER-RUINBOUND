@@ -102,100 +102,106 @@ public class SweepTheWeakSkill : MonoBehaviour
             Time.timeScale = 1.0f;
         }
 
-        // ====================================================
-        // GIAI DOAN 2: THOI GIAN TRO LAI & VUNG NHAT CHEM HUY DIET
-        // ====================================================
-        Time.timeScale = 1.0f;
-        if (cam != null)
+        try
         {
-            cam.ResetZoom();
-            cam.Shake(0.5f, 0.65f);
-        }
-
-        if (anim != null)
-        {
-            anim.Play("Player_Ulti", 0, 0f);
-        }
-
-        SoundManager.EnsureInstance()?.PlaySwordSlash();
-        SoundManager.EnsureInstance()?.PlayHitImpact();
-
-        Vector2 facingDir = playerController != null ? playerController.GetFacingDirection() : Vector2.down;
-        if (facingDir == Vector2.zero) facingDir = Vector2.down;
-        Vector3 origin = transform.position + new Vector3(0f, 0.1f, 0f);
-
-        // Phong duong song kiem khi sac ben HD 512x512 ruc sang ve phia truoc
-        SpawnSharpSlashWave(origin, facingDir);
-
-        // Luot nhe ve phia truoc theo huong chem
-        var rb = GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.linearVelocity = facingDir * 5.5f;
-        }
-
-        // Quet va gay sat thuong trong pham vi hinh non
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(origin, skillRadius, enemyLayers);
-        HashSet<IDamageable> damagedTargets = new HashSet<IDamageable>();
-        int killedCount = 0;
-
-        foreach (var col in colliders)
-        {
-            if (col == null) continue;
-            Vector2 toTarget = ((Vector2)col.transform.position - (Vector2)origin).normalized;
-            float angle = Vector2.Angle(facingDir, toTarget);
-
-            if (angle <= coneAngle * 0.5f)
+            // ====================================================
+            // GIAI DOAN 2: THOI GIAN TRO LAI & VUNG NHAT CHEM HUY DIET
+            // ====================================================
+            Time.timeScale = 1.0f;
+            if (cam != null)
             {
-                var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
-                if (damageable != null && !damagedTargets.Contains(damageable))
+                cam.ResetZoom();
+                cam.Shake(0.5f, 0.65f);
+            }
+
+            if (anim != null)
+            {
+                anim.Play("Player_Ulti", 0, 0f);
+            }
+
+            SoundManager.EnsureInstance()?.PlaySwordSlash();
+            SoundManager.EnsureInstance()?.PlayHitImpact();
+
+            Vector2 facingDir = playerController != null ? playerController.GetFacingDirection() : Vector2.down;
+            if (facingDir == Vector2.zero) facingDir = Vector2.down;
+            Vector3 origin = transform.position + new Vector3(0f, 0.1f, 0f);
+
+            // Phong duong song kiem khi sac ben HD 512x512 ruc sang ve phia truoc
+            SpawnSharpSlashWave(origin, facingDir);
+
+            // Luot nhe ve phia truoc theo huong chem
+            var rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.linearVelocity = facingDir * 5.5f;
+            }
+
+            // Quet va gay sat thuong trong pham vi hinh non
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(origin, skillRadius, enemyLayers);
+            HashSet<IDamageable> damagedTargets = new HashSet<IDamageable>();
+            int killedCount = 0;
+
+            foreach (var col in colliders)
+            {
+                if (col == null) continue;
+                Vector2 toTarget = ((Vector2)col.transform.position - (Vector2)origin).normalized;
+                float angle = Vector2.Angle(facingDir, toTarget);
+
+                if (angle <= coneAngle * 0.5f)
                 {
-                    damagedTargets.Add(damageable);
+                    var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
+                    if (damageable != null && !damagedTargets.Contains(damageable))
+                    {
+                        damagedTargets.Add(damageable);
 
-                    bool isBoss = false;
-                    var botAI = col.GetComponent<BotWheelAI>() ?? col.GetComponentInParent<BotWheelAI>();
-                    if (botAI != null && (botAI.IsBoss || botAI.isBoss))
-                    {
-                        isBoss = true;
-                    }
-                    else if (col.gameObject.name.ToLower().Contains("boss") || col.gameObject.name.ToLower().Contains("titan") || col.gameObject.name.ToLower().Contains("gormok") || col.GetComponent<BloodMonsterAI>()?.IsBoss == true)
-                    {
-                        isBoss = true;
-                    }
-
-                    if (!isBoss)
-                    {
-                        damageable.TakeDamage(9999);
-                        DamagePopup.Create(col.transform.position, 9999, isCritical: true);
-                        killedCount++;
-                    }
-                    else
-                    {
-                        damageable.TakeDamage(bossDamage);
-                        DamagePopup.Create(col.transform.position, bossDamage, isCritical: true);
-
-                        var rbEnemy = col.GetComponent<Rigidbody2D>() ?? col.GetComponentInParent<Rigidbody2D>();
-                        if (rbEnemy != null)
+                        bool isBoss = false;
+                        var botAI = col.GetComponent<BotWheelAI>() ?? col.GetComponentInParent<BotWheelAI>();
+                        if (botAI != null && (botAI.IsBoss || botAI.isBoss))
                         {
-                            rbEnemy.AddForce(toTarget * 16f, ForceMode2D.Impulse);
+                            isBoss = true;
+                        }
+                        else if (col.gameObject.name.ToLower().Contains("boss") || col.gameObject.name.ToLower().Contains("titan") || col.gameObject.name.ToLower().Contains("gormok") || col.GetComponent<BloodMonsterAI>()?.IsBoss == true)
+                        {
+                            isBoss = true;
+                        }
+
+                        if (!isBoss)
+                        {
+                            damageable.TakeDamage(9999);
+                            DamagePopup.Create(col.transform.position, 9999, isCritical: true);
+                            killedCount++;
+                        }
+                        else
+                        {
+                            damageable.TakeDamage(bossDamage);
+                            DamagePopup.Create(col.transform.position, bossDamage, isCritical: true);
+
+                            var rbEnemy = col.GetComponent<Rigidbody2D>() ?? col.GetComponentInParent<Rigidbody2D>();
+                            if (rbEnemy != null)
+                            {
+                                rbEnemy.AddForce(toTarget * 16f, ForceMode2D.Impulse);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Camera impact feedback manh me thay vi dung timeScale de tranh xung dot
-        if (damagedTargets.Count > 0 && cam != null)
+            // Camera impact feedback manh me thay vi dung timeScale de tranh xung dot
+            if (damagedTargets.Count > 0 && cam != null)
+            {
+                cam.Shake(0.35f, 0.45f);
+            }
+
+            yield return new WaitForSecondsRealtime(0.25f);
+        }
+        finally
         {
-            cam.Shake(0.35f, 0.45f);
+            // Khoi phuc trang thai nguoi choi
+            Time.timeScale = 1.0f;
+            if (cam != null) cam.ResetZoom();
+            if (health != null) health.isInvulnerable = false;
+            if (playerController != null) playerController.SetCanMove(true);
         }
-
-        // Khoi phuc trang thai nguoi choi
-        yield return new WaitForSeconds(0.2f);
-        Time.timeScale = 1.0f;
-        if (cam != null) cam.ResetZoom();
-        if (health != null) health.isInvulnerable = false;
-        if (playerController != null) playerController.SetCanMove(true);
     }
 
     private void SpawnSharpSlashWave(Vector3 origin, Vector2 direction)

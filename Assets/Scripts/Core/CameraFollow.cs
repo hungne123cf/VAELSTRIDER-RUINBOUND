@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
@@ -174,7 +174,7 @@ public class CameraFollow : MonoBehaviour
             SetMapBounds(new Vector2(-20f, -14f), new Vector2(20f, 14f));
             return;
         }
-        else if (sceneName.Contains("SampleScene"))
+        else if (sceneName.Contains("Map1") || sceneName.Contains("Thestart") || sceneName.Contains("SampleScene"))
         {
             // Map 1: Hầm ngục nhiều phòng từ -17 đến 72, -9 đến 50
             SetMapBounds(new Vector2(-17f, -9f), new Vector2(72f, 50f));

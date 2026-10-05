@@ -13,7 +13,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
     public static event System.Action<ValleyGolemBossAI> OnEnemyDied;
 
     [Header("Boss Stats")]
-    [SerializeField] private int maxHealth = 250;
+    [SerializeField] private int maxHealth = 1400;
     [SerializeField] private int currentHealth;
     [SerializeField] private float moveSpeed = 1.8f;
     [SerializeField] private float skillCooldown = 4.5f;
@@ -215,7 +215,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
         {
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(25);
+                playerHealth.TakeDamage(45);
                 SoundManager.EnsureInstance()?.PlayPlayerHurt();
             }
         }
@@ -326,10 +326,11 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
 
         SoundManager.EnsureInstance()?.PlayBossDeath();
 
-        // Roi mua Tinh The Xanh va Binh Mau
+        // Roi mua Tinh The Xanh, Binh Mau va Da Quy Cuc Pham
         AethelShard.SpawnShards(transform.position, 20);
         HealthPotion.Spawn(transform.position + new Vector3(-0.6f, 0, 0), 1);
         HealthPotion.Spawn(transform.position + new Vector3(0.6f, 0, 0), 1);
+        WorldItemPickup.RollDrop(transform.position, true);
 
         OnEnemyDied?.Invoke(this);
 

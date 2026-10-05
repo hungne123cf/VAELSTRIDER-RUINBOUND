@@ -4,19 +4,20 @@ using System;
 public class PlayerInventory : MonoBehaviour
 {
     [Header("Currency")]
-    [SerializeField] private int aethelShards = 0;
+    [SerializeField] private long aethelShards = 0;
 
     [Header("Consumables")]
     [SerializeField] private int healthPotions = 0;
 
-    public event Action<int> OnShardsChanged;
+    public event Action<long> OnShardsChanged;
     public event Action<int> OnPotionsChanged;
 
     void Awake()
     {
-        // Load saved shards and potions from PlayerPrefs (dong bo ca Save_ va Saved_)
-        int defaultShards = PlayerPrefs.GetInt("Saved_AethelShards", aethelShards);
-        aethelShards = PlayerPrefs.GetInt("Save_AethelShards", defaultShards);
+        AccountDatabase.EnsureActiveSessionLoaded();
+
+        // Load saved shards and potions from Database / PlayerPrefs
+        aethelShards = AccountDatabase.GetAethelShards();
 
         int defaultPotions = PlayerPrefs.GetInt("Saved_HealthPotions", healthPotions);
         healthPotions = PlayerPrefs.GetInt("Save_HealthPotions", defaultPotions);
@@ -31,16 +32,28 @@ public class PlayerInventory : MonoBehaviour
         PotionQuickSlotUI.EnsureUIExists();
     }
 
-    public void AddShards(int amount)
+    void OnDisable()
     {
+        SaveData();
+    }
+
+    void OnDestroy()
+    {
+        SaveData();
+    }
+
+    public void AddShards(long amount)
+    {
+        if (amount <= 0) return;
         aethelShards += amount;
         SaveData();
         Debug.Log($"<color=cyan>[INVENTORY]</color> Nhặt được +{amount} Aethel Shards! Tổng sở hữu: {aethelShards}");
         OnShardsChanged?.Invoke(aethelShards);
     }
 
-    public bool SpendShards(int amount)
+    public bool SpendShards(long amount)
     {
+        if (amount <= 0) return true;
         if (aethelShards >= amount)
         {
             aethelShards -= amount;
@@ -51,7 +64,7 @@ public class PlayerInventory : MonoBehaviour
         return false;
     }
 
-    public int GetShards() => aethelShards;
+    public long GetShards() => aethelShards;
 
     public void AddPotions(int count)
     {
@@ -92,17 +105,21 @@ public class PlayerInventory : MonoBehaviour
         return false;
     }
 
-    private void SaveData()
+    public void SaveData()
     {
-        // Luu dong bo ca 2 key de dam bao MainMenu, Shop, Ingame va Upgrade deu nhat quan
-        PlayerPrefs.SetInt("Save_AethelShards", aethelShards);
-        PlayerPrefs.SetInt("Saved_AethelShards", aethelShards);
+        // Luu dong bo tat ca cac key de dam bao MainMenu, Shop, Ingame va Upgrade deu nhat quan
+        AccountDatabase.SetAethelShards(aethelShards);
+
         PlayerPrefs.SetInt("Save_HealthPotions", healthPotions);
         PlayerPrefs.SetInt("Saved_HealthPotions", healthPotions);
+        PlayerPrefs.SetInt("Player_Health_Potions", healthPotions);
         PlayerPrefs.Save();
+
+        // Dong bo vao Database tai khoan hien tai
+        AccountDatabase.UpdateCurrentAccountShardsAndPotions(aethelShards, healthPotions);
     }
 
-    public void ResetInventory(int shards = 0, int potions = 0)
+    public void ResetInventory(long shards = 0, int potions = 0)
     {
         aethelShards = shards;
         healthPotions = potions;
@@ -120,7 +137,7 @@ public class PlayerInventory : MonoBehaviour
     /// </summary>
     public void DropAllShardsOnDeath(Vector3 deathPos, string sceneName)
     {
-        int dropped = aethelShards;
+        long dropped = aethelShards;
         aethelShards = 0;
         SaveData();
         OnShardsChanged?.Invoke(0);
@@ -128,7 +145,8 @@ public class PlayerInventory : MonoBehaviour
         if (dropped > 0)
         {
             PlayerPrefs.SetInt("Has_Lost_Shards", 1);
-            PlayerPrefs.SetInt("Lost_Shards_Amount", dropped);
+            PlayerPrefs.SetString("Lost_Shards_Amount_Long", dropped.ToString());
+            PlayerPrefs.SetInt("Lost_Shards_Amount", (int)Math.Min((long)int.MaxValue, dropped));
             PlayerPrefs.SetFloat("Lost_Shards_X", deathPos.x);
             PlayerPrefs.SetFloat("Lost_Shards_Y", deathPos.y);
             PlayerPrefs.SetString("Lost_Shards_Scene", sceneName);
@@ -140,6 +158,7 @@ public class PlayerInventory : MonoBehaviour
             // Neu chet ma tren nguoi co 0 Shards (tuc la chet tren duong di nhat lai ma chua nhat duoc),
             // thi mo hon cu bi de boi 0 shards (mat vinh vien)!
             PlayerPrefs.SetInt("Has_Lost_Shards", 0);
+            PlayerPrefs.DeleteKey("Lost_Shards_Amount_Long");
             PlayerPrefs.SetInt("Lost_Shards_Amount", 0);
             PlayerPrefs.Save();
             Debug.Log("<color=red>[DARK SOULS LOST]</color> Chien binh da chet truoc khi kip thu hoi vung hon! Toan bo so Shards cu da tan bien vinh vien!");

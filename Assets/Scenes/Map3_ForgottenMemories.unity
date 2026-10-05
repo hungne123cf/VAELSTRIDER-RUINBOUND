@@ -5311,7 +5311,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'VAELSTRIDER: RUINBOUND'
+  m_text: "CHI\u1EBEN TH\u1EAENG!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5403,7 +5403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 602ece55dd9314847af06e2c82bcd4ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
-  localizationKey: APP_TITLE
+  localizationKey: VICTORY_TITLE
   vietnameseText: 
   englishText: 
 --- !u!1 &957117673
@@ -8938,7 +8938,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 622b5f905df982840bb4acb589757d8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 1000
+  maxHealth: 100
   isInvulnerable: 0
 --- !u!114 &1658266366
 MonoBehaviour:
@@ -11819,7 +11819,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'VAELSTRIDER: RUINBOUND'
+  m_text: "T\u00E0n t\u00EDch c\u1ED5 \u0111\u1EA1i \u0111\u00E3 \u0111\u01B0\u1EE3c thanh t\u1EA9y kh\u1ECFi s\u1EF1 tha h\u00F3a."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -11911,7 +11911,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 602ece55dd9314847af06e2c82bcd4ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LocalizedText
-  localizationKey: APP_TITLE
+  localizationKey: VICTORY_SUBTITLE
   vietnameseText: 
   englishText: 
 --- !u!1660057539 &9223372036854775807

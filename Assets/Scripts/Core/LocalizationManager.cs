@@ -62,6 +62,8 @@ public static class LocalizationManager
         { "BTN_PLAY", ("XUẤT TRẬN", "BATTLE") },
         { "BTN_MAP_SELECT", ("CHỌN BẢN ĐỒ", "SELECT MAP") },
         { "BTN_ROSTER", ("NHÂN VẬT", "HEROES") },
+        { "BTN_SKILLS", ("KỸ NĂNG", "SKILLS") },
+        { "BTN_INVENTORY", ("TÚI ĐỒ", "INVENTORY") },
         { "BTN_SHOP", ("CỬA HÀNG", "SHOP") },
         { "BTN_UPGRADE", ("NÂNG CẤP", "UPGRADES") },
         { "BTN_SETTINGS", ("CÀI ĐẶT", "SETTINGS") },
@@ -146,7 +148,15 @@ public static class LocalizationManager
         { "UPGRADE_ULTI", ("Giảm Hồi Chiêu Tuyệt Kỹ (-10%)", "Upgrade Ultimate Cooldown (-10%)") },
         { "UPGRADE_COST", ("Chi Phí:", "Cost:") },
         { "MSG_NOT_ENOUGH_SHARDS", ("Không đủ Mảnh Linh Hồn!", "Not enough Aethel Shards!") },
-        { "MSG_UPGRADE_SUCCESS", ("Nâng cấp thành công!", "Upgrade Successful!") }
+        { "MSG_UPGRADE_SUCCESS", ("Nâng cấp thành công!", "Upgrade Successful!") },
+
+        // Victory Screen
+        { "VICTORY_TITLE", ("CHIẾN THẮNG!", "REALM PURIFIED!") },
+        { "VICTORY_SUBTITLE", ("Tàn tích cổ đại đã được thanh tẩy khỏi sự tha hóa.", "The ancient ruins have been cleansed of corruption.") },
+        { "CHEST_LOOT_TITLE", ("RƯƠNG BÁU TÀN TÍCH", "ANCIENT RUIN CHEST") },
+        { "CHEST_LOOT_SUB", ("Chạm vào vật phẩm để lấy riêng, hoặc nhận toàn bộ:", "Tap an item to loot, or claim everything:") },
+        { "BTN_CLAIM_ALL", ("LẤY TẤT CẢ", "CLAIM ALL") },
+        { "BTN_TAKE_ITEM", ("NHẬN", "LOOT") }
     };
 
     public static string Get(string key)

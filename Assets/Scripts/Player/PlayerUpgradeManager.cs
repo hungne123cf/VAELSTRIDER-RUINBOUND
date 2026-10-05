@@ -13,7 +13,7 @@ public class PlayerUpgradeManager : MonoBehaviour
         Ultimate
     }
 
-    public const int MAX_LEVEL = 30;
+    public const int MAX_LEVEL = int.MaxValue;
 
     public event Action OnUpgradesChanged;
 
@@ -46,7 +46,7 @@ public class PlayerUpgradeManager : MonoBehaviour
         if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
     }
 
-        public int CurrentShards
+        public long CurrentShards
     {
         get
         {
@@ -68,18 +68,16 @@ public class PlayerUpgradeManager : MonoBehaviour
     public int GetCost(UpgradeType type)
     {
         int level = GetLevel(type);
-        if (level >= MAX_LEVEL) return -1; // Max level 30
-
         switch (type)
         {
             case UpgradeType.Attack:
-                return 4 + level * 5; // 4, 9, 14, ..., 149 shards
+                return 4 + level * 5; // 4, 9, 14, ...
             case UpgradeType.Health:
-                return 3 + level * 4; // 3, 7, 11, ..., 119 shards
+                return 3 + level * 4; // 3, 7, 11, ...
             case UpgradeType.Agility:
-                return 3 + level * 4; // 3, 7, 11, ..., 119 shards
+                return 3 + level * 4; // 3, 7, 11, ...
             case UpgradeType.Ultimate:
-                return 5 + level * 6; // 5, 11, 17, ..., 179 shards
+                return 5 + level * 6; // 5, 11, 17, ...
             default:
                 return 5 + level * 5;
         }
@@ -106,7 +104,7 @@ public class PlayerUpgradeManager : MonoBehaviour
             case UpgradeType.Health:
                 return LocalizationManager.T("+" + (level * 15) + " Máu tối đa (+Max HP)", "+" + (level * 15) + " Max Health (+Max HP)");
             case UpgradeType.Agility:
-                return LocalizationManager.T("+" + (level * 0.08f).ToString("F2") + " Tốc độ | -" + (level * 0.05f).ToString("F2") + "s Lướt", "+" + (level * 0.08f).ToString("F2") + " Speed | -" + (level * 0.05f).ToString("F2") + "s Dash");
+                return LocalizationManager.T("+" + (level * 0.08f).ToString("F2") + " Tốc độ | -" + (level * 0.05f).ToString("F2") + "s Lướt | -" + (level * 0.35f).ToString("F2") + "s Hồi Kiếm Khí", "+" + (level * 0.08f).ToString("F2") + " Speed | -" + (level * 0.05f).ToString("F2") + "s Dash | -" + (level * 0.35f).ToString("F2") + "s Wave CD");
             case UpgradeType.Ultimate:
                 return LocalizationManager.T("-" + (level * 0.6f).ToString("F1") + "s Hồi Ulti | +" + (level * 8) + " Sát thương", "-" + (level * 0.6f).ToString("F1") + "s Ulti CD | +" + (level * 8) + " Damage");
             default:
@@ -116,14 +114,11 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     public string GetNextBonusDescription(UpgradeType type)
     {
-        int level = GetLevel(type);
-        if (level >= MAX_LEVEL) return LocalizationManager.T("ĐÃ ĐẠT CẤP TỐI ĐA (30)", "MAX LEVEL REACHED (30)");
-
         switch (type)
         {
             case UpgradeType.Attack: return LocalizationManager.T("+2 Sát thương chém", "+2 Strike Damage");
             case UpgradeType.Health: return LocalizationManager.T("+15 Máu tối đa & Hồi máu", "+15 Max Health & Heal");
-            case UpgradeType.Agility: return LocalizationManager.T("+0.08 Tốc chạy & -0.05s Lướt", "+0.08 Move Speed & -0.05s Dash");
+            case UpgradeType.Agility: return LocalizationManager.T("+0.08 Tốc chạy | -0.05s Lướt | -0.35s Hồi Kiếm Khí", "+0.08 Speed | -0.05s Dash | -0.35s Wave CD");
             case UpgradeType.Ultimate: return LocalizationManager.T("-0.6s Hồi chiêu & +8 Sát thương", "-0.6s Cooldown & +8 Damage");
             default: return "";
         }
@@ -133,9 +128,6 @@ public class PlayerUpgradeManager : MonoBehaviour
     {
         FindPlayerComponents();
         if (inventory == null) return false;
-
-        int level = GetLevel(type);
-        if (level >= MAX_LEVEL) return false;
 
         int cost = GetCost(type);
         return inventory.GetShards() >= cost;
@@ -153,6 +145,8 @@ public class PlayerUpgradeManager : MonoBehaviour
             PlayerPrefs.SetInt("Upgrade_" + type.ToString() + "_Level", nextLevel);
             PlayerPrefs.Save();
 
+            AccountDatabase.SaveActiveSessionToDatabase();
+
             ApplyAllUpgrades();
             OnUpgradesChanged?.Invoke();
 
@@ -167,7 +161,7 @@ public class PlayerUpgradeManager : MonoBehaviour
     {
         FindPlayerComponents();
 
-        // 1. Attack Bonus (+2 per level up to +60 at LV 30)
+        // 1. Attack Bonus (+2 per level)
         int atkLevel = GetLevel(UpgradeType.Attack);
         int bonusAtk = atkLevel * 2;
         if (playerCombat != null)
@@ -175,7 +169,7 @@ public class PlayerUpgradeManager : MonoBehaviour
             playerCombat.ApplyUpgradeBonus(bonusAtk, GetUltiCooldownReduction(), GetUltiDamageBonus());
         }
 
-        // 2. Health Bonus (+15 HP per level up to +450 HP at LV 30)
+        // 2. Health Bonus (+15 HP per level)
         int hpLevel = GetLevel(UpgradeType.Health);
         int bonusHp = hpLevel * 15;
         if (playerHealth != null)
@@ -206,7 +200,7 @@ public class PlayerUpgradeManager : MonoBehaviour
     public int GetAttackBonus() => GetLevel(UpgradeType.Attack) * 2;
     public int GetHealthBonus() => GetLevel(UpgradeType.Health) * 15;
     public float GetDashCooldownReduction() => GetLevel(UpgradeType.Agility) * 0.05f;
-    public bool IsMaxLevel(UpgradeType type) => GetLevel(type) >= MAX_LEVEL;
+    public bool IsMaxLevel(UpgradeType type) => false;
     public string GetUpgradeDescription(UpgradeType type) => GetDescription(type, GetLevel(type));
     public string GetNextBonusString(UpgradeType type) => GetNextBonusDescription(type);
 
@@ -214,8 +208,7 @@ public class PlayerUpgradeManager : MonoBehaviour
     {
         Time.timeScale = 1.0f;
         // 1. Reset Aethel Shards (dong bo ca Save_ va Saved_)
-        PlayerPrefs.SetInt("Save_AethelShards", 0);
-        PlayerPrefs.SetInt("Saved_AethelShards", 0);
+        AccountDatabase.SetAethelShards(0);
 
         // 2. Reset Health Potions ve 0
         PlayerPrefs.SetInt("Save_HealthPotions", 0);

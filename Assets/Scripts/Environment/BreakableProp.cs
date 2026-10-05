@@ -96,7 +96,11 @@ public class BreakableProp : MonoBehaviour, IDamageable
                 int count = Random.Range(minShards, maxShards + 1);
                 AethelShard.SpawnShards(spawnPos, count);
             }
-            // Con lai la 15% khong roi gi de giu can bang
+            else
+            {
+                // 15% con lai co the roi khoang thach / soi linh
+                WorldItemPickup.RollDrop(spawnPos, false, -0.05f);
+            }
         }
         else if (propType == PropType.Foliage)
         {

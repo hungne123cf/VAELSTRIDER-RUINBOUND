@@ -25,18 +25,22 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private Button playButton;
     [SerializeField] private Button mapSelectButton;
     [SerializeField] private Button rosterButton;
+    [SerializeField] private Button skillButton;
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button exitButton;
     [SerializeField] private Button logoutButton;
     [SerializeField] private Button shopButton;
+    [SerializeField] private Button inventoryButton;
 
     [SerializeField] private TextMeshProUGUI playBtnText;
     [SerializeField] private TextMeshProUGUI mapSelectBtnText;
     [SerializeField] private TextMeshProUGUI rosterBtnText;
+    [SerializeField] private TextMeshProUGUI skillBtnText;
     [SerializeField] private TextMeshProUGUI settingsBtnText;
     [SerializeField] private TextMeshProUGUI exitBtnText;
     [SerializeField] private TextMeshProUGUI logoutBtnText;
     [SerializeField] private TextMeshProUGUI shopBtnText;
+    [SerializeField] private TextMeshProUGUI inventoryBtnText;
 
     [Header("Top Bar Display")]
     [SerializeField] private TextMeshProUGUI playerNameText;
@@ -53,6 +57,7 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI heroSkillDescText;
     [SerializeField] private Sprite[] vaelIdleFrames;
     [SerializeField] private Sprite[] maidIdleFrames;
+    [SerializeField] private Sprite[] azureIdleFrames;
 
     [Header("Map Select Panel")]
     [SerializeField] private TextMeshProUGUI mapPanelTitleText;
@@ -85,14 +90,19 @@ public class MainMenuManager : MonoBehaviour
     [Header("Roster Avatar Cards")]
     [SerializeField] private Button cardVaelBtn;
     [SerializeField] private Button cardMaidBtn;
+    [SerializeField] private Button cardAzureBtn;
     [SerializeField] private Image cardVaelAvatarImg;
     [SerializeField] private Image cardMaidAvatarImg;
+    [SerializeField] private Image cardAzureAvatarImg;
     [SerializeField] private TextMeshProUGUI cardVaelTitleText;
     [SerializeField] private TextMeshProUGUI cardVaelSubText;
     [SerializeField] private TextMeshProUGUI cardVaelStatusText;
     [SerializeField] private TextMeshProUGUI cardMaidTitleText;
     [SerializeField] private TextMeshProUGUI cardMaidSubText;
     [SerializeField] private TextMeshProUGUI cardMaidStatusText;
+    [SerializeField] private TextMeshProUGUI cardAzureTitleText;
+    [SerializeField] private TextMeshProUGUI cardAzureSubText;
+    [SerializeField] private TextMeshProUGUI cardAzureStatusText;
     [SerializeField] private TextMeshProUGUI cardPlaceholderText;
 
     [Header("Currency / Info Display")]
@@ -105,7 +115,7 @@ public class MainMenuManager : MonoBehaviour
     private Coroutine rosterHeroAnimCoroutine;
     private int mainAnimFrame = 0;
     private int rosterAnimFrame = 0;
-    private string inspectedHeroId = "vael";
+    private string inspectedHeroId = "azure";
 
     public static MainMenuManager EnsureInstance()
     {
@@ -121,19 +131,26 @@ public class MainMenuManager : MonoBehaviour
         Instance = this;
         EnsureInputSystemUIModule();
         EnsureDynamicBackground();
+        EnsureBottomNavigationBar();
         AutoBindUIElements();
         HideCenterHeroDisplay();
-        EnsureMapSelectPanel();
         EnsureRosterPanel();
+        InventoryUI.EnsureUIExists();
+        ArmorShopUI.EnsureUIExists();
+        SettingsUI.EnsureUIExists();
     }
 
     private void Start()
     {
+        AccountDatabase.EnsureActiveSessionLoaded();
         EnsureDynamicBackground();
+        EnsureBottomNavigationBar();
         EnsureHeroSprites();
         HideCenterHeroDisplay();
-        EnsureMapSelectPanel();
         EnsureRosterPanel();
+        InventoryUI.EnsureUIExists();
+        ArmorShopUI.EnsureUIExists();
+        SettingsUI.EnsureUIExists();
         HookButtons();
         UpdateAllTexts();
         UpdateCurrencyDisplay();
@@ -148,6 +165,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void RefreshHeroDisplay() => UpdateHeroDetails();
     public void RefreshCurrencies() => UpdateCurrencyDisplay();
+    public void UpdateTopHUD() => UpdateCurrencyDisplay();
     public void RefreshAllTexts() => UpdateAllTexts();
 
     public void HideCenterHeroDisplay()
@@ -202,8 +220,18 @@ public class MainMenuManager : MonoBehaviour
                 var child = mainPanel.transform.GetChild(i);
                 string cName = child.name.ToLower();
 
-                // Preserve Top Bar and Bottom navigation buttons
-                if (cName.Contains("top") || cName.Contains("header") || cName.Contains("bar") || cName.Contains("player") || cName.Contains("currency") || cName.Contains("shard") || cName.Contains("potion") || cName.Contains("logout"))
+                // Preserve Top Bar and Bottom navigation buttons (hide potion display)
+                if (cName.Contains("potion") || cName.Contains("binhmau"))
+                {
+                    child.gameObject.SetActive(false);
+                    continue;
+                }
+                if (cName.Contains("logout"))
+                {
+                    child.gameObject.SetActive(false);
+                    continue;
+                }
+                if (cName.Contains("top") || cName.Contains("header") || cName.Contains("bar") || cName.Contains("player") || cName.Contains("currency") || cName.Contains("shard"))
                 {
                     child.gameObject.SetActive(true);
                     continue;
@@ -289,12 +317,157 @@ public class MainMenuManager : MonoBehaviour
     public void BuildMainMenuUI()
     {
         EnsureDynamicBackground();
+        EnsureBottomNavigationBar();
         AutoBindUIElements();
         HideCenterHeroDisplay();
-        EnsureMapSelectPanel();
         EnsureRosterPanel();
         EnsureHeroSprites();
+        InventoryUI.EnsureUIExists();
         ArmorShopUI.EnsureUIExists();
+        SettingsUI.EnsureUIExists();
+    }
+
+    public void EnsureBottomNavigationBar()
+    {
+        // 1. Find existing buttons in the scene
+        AutoBindUIElements();
+
+        Transform navParent = null;
+        if (playButton != null) navParent = playButton.transform.parent;
+        else if (rosterButton != null) navParent = rosterButton.transform.parent;
+        else if (shopButton != null) navParent = shopButton.transform.parent;
+        else if (settingsButton != null) navParent = settingsButton.transform.parent;
+
+        if (navParent == null)
+        {
+            if (mainPanel != null) navParent = mainPanel.transform;
+            else
+            {
+                var p = GameObject.Find("MainPanel");
+                if (p == null) p = GameObject.Find("Panel_Main");
+                if (p != null) { mainPanel = p; navParent = p.transform; }
+            }
+        }
+
+        if (navParent == null)
+        {
+            Canvas c = GameAutoBootstrap.GetMainGameplayCanvas();
+            if (c == null) c = FindAnyObjectByType<Canvas>();
+            if (c != null) navParent = c.transform;
+        }
+
+        if (navParent == null) return;
+
+        // 2. Ensure 6 Navigation Buttons:
+        // [ XUẤT TRẬN / BATTLE ]  [ NHÂN VẬT / HEROES ]  [ KỸ NĂNG / SKILLS ]  [ TÚI ĐỒ / INVENTORY ]  [ CỬA HÀNG / SHOP ]  [ CÀI ĐẶT / SETTINGS ]
+        float btnWidth = 165f;
+        float btnHeight = 52f;
+        float posY = 50f;
+
+        playButton = EnsureNavButton(navParent, playButton, "Btn_Play", LocalizationManager.Get("BTN_PLAY"), new Vector2(-425f, posY), new Vector2(btnWidth, btnHeight), new Color(0.85f, 0.55f, 0.15f, 1f), out playBtnText);
+        rosterButton = EnsureNavButton(navParent, rosterButton, "Btn_Hero", LocalizationManager.Get("BTN_ROSTER"), new Vector2(-255f, posY), new Vector2(btnWidth, btnHeight), new Color(0.22f, 0.48f, 0.82f, 1f), out rosterBtnText);
+        skillButton = EnsureNavButton(navParent, skillButton, "Btn_Skills", LocalizationManager.Get("BTN_SKILLS"), new Vector2(-85f, posY), new Vector2(btnWidth, btnHeight), new Color(0.12f, 0.55f, 0.85f, 1f), out skillBtnText);
+        inventoryButton = EnsureNavButton(navParent, inventoryButton, "Btn_Inventory", LocalizationManager.Get("BTN_INVENTORY"), new Vector2(85f, posY), new Vector2(btnWidth, btnHeight), new Color(0.55f, 0.28f, 0.82f, 1f), out inventoryBtnText);
+        shopButton = EnsureNavButton(navParent, shopButton, "Btn_Shop", LocalizationManager.Get("BTN_SHOP"), new Vector2(255f, posY), new Vector2(btnWidth, btnHeight), new Color(0.22f, 0.65f, 0.42f, 1f), out shopBtnText);
+        settingsButton = EnsureNavButton(navParent, settingsButton, "Btn_Settings", LocalizationManager.Get("BTN_SETTINGS"), new Vector2(425f, posY), new Vector2(btnWidth, btnHeight), new Color(0.42f, 0.46f, 0.56f, 1f), out settingsBtnText);
+
+        HookButtons();
+        UpdateAllTexts();
+    }
+
+    private Button EnsureNavButton(Transform parent, Button existingBtn, string name, string defaultText, Vector2 pos, Vector2 size, Color bgColor, out TextMeshProUGUI btnTxt)
+    {
+        GameObject btnObj = null;
+        if (existingBtn != null)
+        {
+            btnObj = existingBtn.gameObject;
+        }
+        else
+        {
+            Transform existing = parent.Find(name);
+            if (existing != null)
+            {
+                btnObj = existing.gameObject;
+            }
+            else
+            {
+                btnObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+                btnObj.layer = 5;
+                btnObj.transform.SetParent(parent, false);
+            }
+        }
+
+        btnObj.name = name;
+        btnObj.SetActive(true);
+
+        RectTransform rt = btnObj.GetComponent<RectTransform>();
+        if (rt == null) rt = btnObj.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0f);
+        rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.pivot = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = size;
+
+        Image img = btnObj.GetComponent<Image>();
+        if (img == null) img = btnObj.AddComponent<Image>();
+#if UNITY_EDITOR
+        if (img.sprite == null)
+        {
+            var navSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/UI/Default/Panel/panel-001.png");
+            if (navSpr != null)
+            {
+                img.sprite = navSpr;
+                img.type = Image.Type.Sliced;
+            }
+        }
+#endif
+        img.color = bgColor;
+
+        var outline = btnObj.GetComponent<Outline>();
+        if (outline == null) outline = btnObj.AddComponent<Outline>();
+        outline.effectColor = new Color(0.9f, 0.8f, 0.4f, 0.8f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        Button btn = btnObj.GetComponent<Button>();
+        if (btn == null) btn = btnObj.AddComponent<Button>();
+        btn.targetGraphic = img;
+
+        Transform txtT = btnObj.transform.Find("Text");
+        GameObject txtObj;
+        if (txtT != null)
+        {
+            txtObj = txtT.gameObject;
+        }
+        else
+        {
+            var tmpInChild = btnObj.GetComponentInChildren<TextMeshProUGUI>();
+            if (tmpInChild != null)
+            {
+                txtObj = tmpInChild.gameObject;
+            }
+            else
+            {
+                txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+                txtObj.layer = 5;
+                txtObj.transform.SetParent(btnObj.transform, false);
+            }
+        }
+
+        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.sizeDelta = Vector2.zero;
+
+        btnTxt = txtObj.GetComponent<TextMeshProUGUI>();
+        if (btnTxt == null) btnTxt = txtObj.AddComponent<TextMeshProUGUI>();
+        if (string.IsNullOrEmpty(btnTxt.text)) btnTxt.text = defaultText;
+        btnTxt.fontSize = 18;
+        btnTxt.fontStyle = FontStyles.Bold;
+        btnTxt.alignment = TextAlignmentOptions.Center;
+        btnTxt.color = Color.white;
+        btnTxt.raycastTarget = false;
+
+        return btn;
     }
 
     private void AutoBindUIElements()
@@ -315,17 +488,22 @@ public class MainMenuManager : MonoBehaviour
                 playButton = btn;
                 playBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
             }
-            else if (mapSelectButton == null && (bName.Contains("map") || bName.Contains("stage") || bName.Contains("chien truong")))
-            {
-                mapSelectButton = btn;
-                mapSelectBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
-            }
-            else if (rosterButton == null && (bName.Contains("roster") || bName.Contains("hero") || bName.Contains("nhan vat") || bName.Contains("btn_roster")))
+            else if (rosterButton == null && (bName == "btnhero" || bName == "btn_hero" || bName == "btn_roster" || bName.Contains("roster")))
             {
                 rosterButton = btn;
                 rosterBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
             }
-            else if (shopButton == null && (bName.Contains("shop") || bName.Contains("cua hang") || bName.Contains("store") || bName.Contains("btn_shop")))
+            else if (skillButton == null && (bName == "btn_skills" || bName.Contains("skill") || bName.Contains("ky nang") || bName.Contains("kham")))
+            {
+                skillButton = btn;
+                skillBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
+            }
+            else if (inventoryButton == null && (bName == "btn_inventory" || bName.Contains("inventory") || bName.Contains("tui do") || bName.Contains("bag") || bName.Contains("kho")))
+            {
+                inventoryButton = btn;
+                inventoryBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
+            }
+            else if (shopButton == null && (bName == "btnshop" || bName == "btn_shop" || bName == "btn_store"))
             {
                 shopButton = btn;
                 shopBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
@@ -339,14 +517,41 @@ public class MainMenuManager : MonoBehaviour
             {
                 logoutButton = btn;
                 logoutBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
+                // Hide floating logout button from main screen (Moved cleanly inside Settings)
+                btn.gameObject.SetActive(false);
+            }
+        }
+
+        // Second pass: fallback với pattern rộng cho button nào vẫn chưa tìm được
+        // Chỉ xét button đang active và không phải button close/back/reset
+        if (rosterButton == null || shopButton == null)
+        {
+            foreach (var btn in allButtons)
+            {
+                if (btn == null || !btn.gameObject.activeInHierarchy) continue; // Chỉ xét button đang active
+                string bName = !string.IsNullOrEmpty(btn.name) ? btn.name.ToLower() : "";
+                // Bỏ qua button close, back, reset, x
+                if (bName.Contains("close") || bName.Contains("back") || bName.Contains("reset") || bName == "x") continue;
+
+                if (rosterButton == null && (bName.Contains("hero") || bName.Contains("nhan vat")))
+                {
+                    rosterButton = btn;
+                    rosterBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
+                }
+                else if (shopButton == null && (bName.Contains("shop") || bName.Contains("cua hang") || bName.Contains("store")))
+                {
+                    shopButton = btn;
+                    shopBtnText = btn.GetComponentInChildren<TextMeshProUGUI>();
+                }
             }
         }
 
         var allTexts = FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var tmp in allTexts)
         {
-            string tName = tmp.name.ToLower();
-            string tText = tmp.text.ToLower();
+            if (tmp == null) continue;
+            string tName = !string.IsNullOrEmpty(tmp.name) ? tmp.name.ToLower() : "";
+            string tText = !string.IsNullOrEmpty(tmp.text) ? tmp.text.ToLower() : "";
             if (playerTitleText == null && (tName.Contains("title") || tText.Contains("wanderer") || tText.Contains("lữ khách")))
             {
                 playerTitleText = tmp;
@@ -355,9 +560,10 @@ public class MainMenuManager : MonoBehaviour
             {
                 shardsTopText = tmp;
             }
-            if (potionsTopText == null && (tName.Contains("potion") || tText.Contains("bình máu")))
+            if (potionsTopText == null && (tName.Contains("potion") || tText.Contains("bình máu") || tText.Contains("binh mau")))
             {
                 potionsTopText = tmp;
+                potionsTopText.gameObject.SetActive(false);
             }
             if (heroSkillText == null && (tName.Contains("skill") || tText.Contains("tuyệt kỹ") || tText.Contains("ultimate")))
             {
@@ -376,7 +582,9 @@ public class MainMenuManager : MonoBehaviour
         var allImages = FindObjectsByType<Image>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var img in allImages)
         {
-            if (heroPreviewImage == null && (img.name.ToLower().Contains("preview") || img.name.ToLower().Contains("heropreview") || img.name.ToLower().Contains("character")))
+            if (img == null) continue;
+            string imgName = !string.IsNullOrEmpty(img.name) ? img.name.ToLower() : "";
+            if (heroPreviewImage == null && (imgName.Contains("preview") || imgName.Contains("heropreview") || imgName.Contains("character")))
             {
                 heroPreviewImage = img;
             }
@@ -451,7 +659,7 @@ public class MainMenuManager : MonoBehaviour
         float startX = -totalWidth / 2f + cardWidth / 2f;
 
         CreateMapCard(dialogBox.transform, new Vector2(startX, -30f), new Vector2(cardWidth, cardHeight),
-            "MAP1_NAME", "MAP1_DESC", "SampleScene", out map1TitleText, out map1DescText, out map1Button);
+            "MAP1_NAME", "MAP1_DESC", "Map1_Thestart", out map1TitleText, out map1DescText, out map1Button);
 
         CreateMapCard(dialogBox.transform, new Vector2(startX + cardWidth + spacing, -30f), new Vector2(cardWidth, cardHeight),
             "MAP2_NAME", "MAP2_DESC", "Map2_ValleyRuin", out map2TitleText, out map2DescText, out map2Button);
@@ -477,7 +685,9 @@ public class MainMenuManager : MonoBehaviour
 
         mapBackBtn = backBtnObj.GetComponent<Button>();
         mapBackBtn.targetGraphic = backImg;
+        mapBackBtn.onClick.RemoveAllListeners();
         mapBackBtn.onClick.AddListener(ShowMainPanel);
+        AttachPointerClick(backBtnObj, ShowMainPanel);
 
         GameObject backTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
         backTxtObj.transform.SetParent(backBtnObj.transform, false);
@@ -492,6 +702,7 @@ public class MainMenuManager : MonoBehaviour
         mapBackBtnText.alignment = TextAlignmentOptions.Center;
         mapBackBtnText.color = Color.white;
         mapBackBtnText.text = LocalizationManager.Get("BTN_BACK");
+        mapBackBtnText.raycastTarget = false;
 
         mapSelectPanel.SetActive(false);
     }
@@ -530,6 +741,7 @@ public class MainMenuManager : MonoBehaviour
         titleTxt.alignment = TextAlignmentOptions.Center;
         titleTxt.color = new Color(1f, 0.85f, 0.45f);
         titleTxt.text = LocalizationManager.Get(titleKey);
+        titleTxt.raycastTarget = false;
 
         GameObject dObj = new GameObject("Desc", typeof(RectTransform), typeof(CanvasRenderer));
         dObj.transform.SetParent(card.transform, false);
@@ -545,6 +757,7 @@ public class MainMenuManager : MonoBehaviour
         descTxt.alignment = TextAlignmentOptions.Center;
         descTxt.color = new Color(0.8f, 0.85f, 0.9f);
         descTxt.text = LocalizationManager.Get(descKey);
+        descTxt.raycastTarget = false;
 
         GameObject bObj = new GameObject("Btn_Deploy", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         bObj.transform.SetParent(card.transform, false);
@@ -564,7 +777,9 @@ public class MainMenuManager : MonoBehaviour
 
         deployBtn = bObj.GetComponent<Button>();
         deployBtn.targetGraphic = bImg;
+        deployBtn.onClick.RemoveAllListeners();
         deployBtn.onClick.AddListener(() => LoadMap(sceneName));
+        AttachPointerClick(bObj, () => LoadMap(sceneName));
 
         GameObject btObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
         btObj.transform.SetParent(bObj.transform, false);
@@ -579,6 +794,55 @@ public class MainMenuManager : MonoBehaviour
         btTmp.alignment = TextAlignmentOptions.Center;
         btTmp.color = Color.white;
         btTmp.text = LocalizationManager.Get("BTN_PLAY");
+        btTmp.raycastTarget = false;
+    }
+
+    private static Sprite sprRosterFrameBorder;
+
+    private static Sprite LoadFramedSprite(string relativePath, Vector4 border)
+    {
+        Sprite spr = null;
+#if UNITY_EDITOR
+        string fullAssetPath = "Assets/ART/UI/Default/" + relativePath;
+        var allObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(fullAssetPath);
+        if (allObjs != null)
+        {
+            foreach (var obj in allObjs)
+            {
+                if (obj is Sprite s && (s.name.EndsWith("_1") || s.name == System.IO.Path.GetFileNameWithoutExtension(relativePath)))
+                {
+                    spr = s;
+                    break;
+                }
+            }
+            if (spr == null)
+            {
+                spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(fullAssetPath);
+            }
+        }
+#endif
+        if (spr == null)
+        {
+            string filePath = System.IO.Path.Combine(Application.dataPath, "ART/UI/Default/" + relativePath);
+            if (System.IO.File.Exists(filePath))
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(filePath);
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                if (tex.LoadImage(bytes))
+                {
+                    tex.filterMode = FilterMode.Point;
+                    Rect r = (tex.width >= 48) ? new Rect(1, 1, tex.width - 2, tex.height - 2) : new Rect(0, 0, tex.width, tex.height);
+                    spr = Sprite.Create(tex, r, new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
+                }
+            }
+        }
+        return spr;
+    }
+
+    private static void EnsureRosterSprites()
+    {
+        if (sprRosterFrameBorder == null) sprRosterFrameBorder = LoadFramedSprite("Border/panel-border-014.png", new Vector4(8, 8, 8, 8));
+        if (sprRosterFrameBorder == null) sprRosterFrameBorder = LoadFramedSprite("Border/panel-border-000.png", new Vector4(8, 8, 8, 8));
     }
 
     public void EnsureRosterPanel()
@@ -587,16 +851,34 @@ public class MainMenuManager : MonoBehaviour
         if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
         if (canvas == null) return;
 
-        // Clean up any outdated or misconfigured RosterModalPanel in scene
+        EnsureRosterSprites();
+
         var existing = canvas.transform.Find("RosterModalPanel");
         if (existing != null)
         {
-            if (Application.isPlaying) Destroy(existing.gameObject);
-            else DestroyImmediate(existing.gameObject);
+            Transform boxT = existing.Find("RosterBox");
+            RectTransform boxRtExisting = boxT != null ? boxT.GetComponent<RectTransform>() : null;
+            Transform sb = existing.Find("RosterBox/ShowcaseDetailsPanel/SkillBox");
+            bool hasOldSkillFrame = sb != null && sb.GetComponent<Image>() != null && sb.GetComponent<Image>().sprite != null;
+            Transform act = existing.Find("RosterBox/ShowcaseDetailsPanel/Btn_RosterAction");
+            bool hasOldBtnFrame = act != null && act.GetComponent<Image>() != null && act.GetComponent<Image>().sprite != null;
+            if (boxRtExisting == null || boxRtExisting.anchorMax != Vector2.one || rosterHeroNameText == null || hasOldSkillFrame || hasOldBtnFrame)
+            {
+                if (Application.isPlaying)
+                    Destroy(existing.gameObject);
+                else
+                    DestroyImmediate(existing.gameObject);
+                existing = null;
+            }
+            else
+            {
+                rosterPanel = existing.gameObject;
+                return;
+            }
         }
 
         // 1. Root Modal Overlay
-        rosterPanel = new GameObject("RosterModalPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        rosterPanel = new GameObject("RosterModalPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         rosterPanel.layer = 5;
         rosterPanel.transform.SetParent(canvas.transform, false);
 
@@ -606,64 +888,94 @@ public class MainMenuManager : MonoBehaviour
         overlayRt.sizeDelta = Vector2.zero;
 
         Image overlayImg = rosterPanel.GetComponent<Image>();
-        overlayImg.color = new Color(0.03f, 0.04f, 0.07f, 0.92f);
+        overlayImg.color = new Color(0.02f, 0.03f, 0.06f, 0.92f);
         overlayImg.raycastTarget = true;
 
-        // 2. Main Dialog Box (1040 x 580)
+        Button overlayBtn = rosterPanel.GetComponent<Button>();
+        overlayBtn.targetGraphic = overlayImg;
+        overlayBtn.onClick.RemoveAllListeners();
+        overlayBtn.onClick.AddListener(CloseRosterPanel);
+
+        // 2. Main Dialog Box - 100% Edge-to-Edge Full Screen
         GameObject dialogBox = new GameObject("RosterBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         dialogBox.layer = 5;
         dialogBox.transform.SetParent(rosterPanel.transform, false);
 
         RectTransform boxRt = dialogBox.GetComponent<RectTransform>();
-        boxRt.anchorMin = new Vector2(0.5f, 0.5f);
-        boxRt.anchorMax = new Vector2(0.5f, 0.5f);
+        boxRt.anchorMin = Vector2.zero;
+        boxRt.anchorMax = Vector2.one;
         boxRt.pivot = new Vector2(0.5f, 0.5f);
-        boxRt.sizeDelta = new Vector2(1040f, 580f);
+        boxRt.offsetMin = Vector2.zero;
+        boxRt.offsetMax = Vector2.zero;
 
         Image boxImg = dialogBox.GetComponent<Image>();
-        boxImg.color = new Color(0.08f, 0.10f, 0.15f, 0.98f);
+        boxImg.color = new Color(0.04f, 0.05f, 0.09f, 1f);
+        boxImg.raycastTarget = true;
 
         var outline = dialogBox.AddComponent<Outline>();
-        outline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.9f);
+        outline.effectColor = new Color(0.85f, 0.65f, 0.25f, 0.95f);
         outline.effectDistance = new Vector2(2.5f, -2.5f);
 
-        // 3. Header Title
+        // 3. Header Title & Subtitle
         GameObject titleObj = new GameObject("RosterPanelTitle", typeof(RectTransform), typeof(CanvasRenderer));
         titleObj.transform.SetParent(dialogBox.transform, false);
         RectTransform titleRt = titleObj.GetComponent<RectTransform>();
         titleRt.anchorMin = new Vector2(0f, 1f);
         titleRt.anchorMax = new Vector2(1f, 1f);
         titleRt.pivot = new Vector2(0.5f, 1f);
-        titleRt.anchoredPosition = new Vector2(0f, -15f);
-        titleRt.sizeDelta = new Vector2(0f, 36f);
+        titleRt.anchoredPosition = new Vector2(0f, -25f);
+        titleRt.sizeDelta = new Vector2(0f, 40f);
 
         rosterPanelTitleText = titleObj.AddComponent<TextMeshProUGUI>();
-        rosterPanelTitleText.fontSize = 24;
+        rosterPanelTitleText.fontSize = 28;
         rosterPanelTitleText.fontStyle = FontStyles.Bold;
         rosterPanelTitleText.alignment = TextAlignmentOptions.Center;
-        rosterPanelTitleText.color = new Color(1f, 0.85f, 0.4f);
+        rosterPanelTitleText.color = new Color(1f, 0.85f, 0.35f);
         rosterPanelTitleText.text = LocalizationManager.Get("BTN_ROSTER");
+        rosterPanelTitleText.raycastTarget = false;
 
-        // Top-Right Close Button [X]
+        GameObject subObj = new GameObject("RosterSubtitle", typeof(RectTransform), typeof(CanvasRenderer));
+        subObj.transform.SetParent(dialogBox.transform, false);
+        RectTransform subRt = subObj.GetComponent<RectTransform>();
+        subRt.anchorMin = new Vector2(0f, 1f);
+        subRt.anchorMax = new Vector2(1f, 1f);
+        subRt.pivot = new Vector2(0.5f, 1f);
+        subRt.anchoredPosition = new Vector2(0f, -68f);
+        subRt.sizeDelta = new Vector2(0f, 26f);
+
+        var subTmp = subObj.AddComponent<TextMeshProUGUI>();
+        subTmp.fontSize = 15;
+        subTmp.color = new Color(0.7f, 0.75f, 0.85f);
+        subTmp.alignment = TextAlignmentOptions.Center;
+        subTmp.text = LocalizationManager.T("Chọn chiến binh xuất trận & Xem thông số kỹ năng anh hùng", "Select vanguard hero & inspect combat skill specifications");
+        subTmp.raycastTarget = false;
+
+        // Top-Right Close Button [X] (52 x 52)
         GameObject closeBtnObj = new GameObject("Btn_CloseTopRight", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        closeBtnObj.layer = 5;
         closeBtnObj.transform.SetParent(dialogBox.transform, false);
         RectTransform closeRt = closeBtnObj.GetComponent<RectTransform>();
         closeRt.anchorMin = new Vector2(1f, 1f);
         closeRt.anchorMax = new Vector2(1f, 1f);
         closeRt.pivot = new Vector2(1f, 1f);
-        closeRt.anchoredPosition = new Vector2(-15f, -15f);
-        closeRt.sizeDelta = new Vector2(36f, 36f);
+        closeRt.anchoredPosition = new Vector2(-30f, -30f);
+        closeRt.sizeDelta = new Vector2(52f, 52f);
 
         Image closeImg = closeBtnObj.GetComponent<Image>();
-        closeImg.color = new Color(0.35f, 0.12f, 0.15f, 0.95f);
+        closeImg.color = new Color(0.75f, 0.22f, 0.25f, 1f);
+        closeImg.raycastTarget = true;
+
         var closeOutline = closeBtnObj.AddComponent<Outline>();
-        closeOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.8f);
+        closeOutline.effectColor = new Color(1f, 0.85f, 0.4f, 0.9f);
+        closeOutline.effectDistance = new Vector2(2f, -2f);
 
         Button closeBtn = closeBtnObj.GetComponent<Button>();
         closeBtn.targetGraphic = closeImg;
-        closeBtn.onClick.AddListener(ShowMainPanel);
+        closeBtn.onClick.RemoveAllListeners();
+        closeBtn.onClick.AddListener(CloseRosterPanel);
 
         GameObject closeTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        closeTxtObj.layer = 5;
         closeTxtObj.transform.SetParent(closeBtnObj.transform, false);
         RectTransform closeTxtRt = closeTxtObj.GetComponent<RectTransform>();
         closeTxtRt.anchorMin = Vector2.zero;
@@ -671,66 +983,74 @@ public class MainMenuManager : MonoBehaviour
         closeTxtRt.sizeDelta = Vector2.zero;
         var closeTmp = closeTxtObj.AddComponent<TextMeshProUGUI>();
         closeTmp.text = "X";
-        closeTmp.fontSize = 18;
+        closeTmp.fontSize = 24;
         closeTmp.fontStyle = FontStyles.Bold;
         closeTmp.alignment = TextAlignmentOptions.Center;
         closeTmp.color = Color.white;
+        closeTmp.raycastTarget = false;
 
-        // 4. LEFT COLUMN: Avatar List (Width 350, Height 430, positioned from y=-20)
-        GameObject leftCol = new GameObject("AvatarGridColumn", typeof(RectTransform));
+        rosterBackBtn = closeBtn;
+        rosterBackBtnText = null;
+
+        // 4. LEFT COLUMN: Hero Selection List (Full-Height Split Left Column)
+        GameObject leftCol = new GameObject("HeroSelectionColumn", typeof(RectTransform));
         leftCol.transform.SetParent(dialogBox.transform, false);
         RectTransform lRt = leftCol.GetComponent<RectTransform>();
-        lRt.anchorMin = new Vector2(0f, 0.5f);
-        lRt.anchorMax = new Vector2(0f, 0.5f);
-        lRt.pivot = new Vector2(0f, 0.5f);
-        lRt.anchoredPosition = new Vector2(30f, -20f);
-        lRt.sizeDelta = new Vector2(350f, 430f);
+        lRt.anchorMin = new Vector2(0f, 0f);
+        lRt.anchorMax = new Vector2(0.48f, 1f);
+        lRt.pivot = new Vector2(0f, 1f);
+        lRt.offsetMin = new Vector2(40f, 30f);
+        lRt.offsetMax = new Vector2(-15f, -110f);
 
         GameObject lHeaderObj = new GameObject("ColHeader", typeof(RectTransform), typeof(CanvasRenderer));
         lHeaderObj.transform.SetParent(leftCol.transform, false);
         RectTransform lhRt = lHeaderObj.GetComponent<RectTransform>();
         lhRt.anchorMin = new Vector2(0f, 1f);
         lhRt.anchorMax = new Vector2(1f, 1f);
-        lhRt.pivot = new Vector2(0.5f, 1f);
+        lhRt.pivot = new Vector2(0f, 1f);
         lhRt.anchoredPosition = new Vector2(0f, 0f);
-        lhRt.sizeDelta = new Vector2(0f, 25f);
+        lhRt.sizeDelta = new Vector2(0f, 30f);
         leftColHeaderText = lHeaderObj.AddComponent<TextMeshProUGUI>();
-        leftColHeaderText.fontSize = 15;
+        leftColHeaderText.fontSize = 18;
         leftColHeaderText.fontStyle = FontStyles.Bold;
         leftColHeaderText.color = new Color(0.85f, 0.90f, 0.95f);
         leftColHeaderText.text = LocalizationManager.T("CHỌN ANH HÙNG", "HERO SELECTION");
 
         EnsureHeroSprites();
         Sprite vaelAvatar = (vaelIdleFrames != null && vaelIdleFrames.Length > 0) ? vaelIdleFrames[0] : null;
-        cardVaelBtn = CreateAvatarCard(leftCol.transform, "vael", new Vector2(0f, -30f), new Vector2(345f, 85f),
+        cardVaelBtn = CreateAvatarCard(leftCol.transform, "vael", new Vector2(0f, -40f), new Vector2(0f, 140f),
             vaelAvatar, false,
             out cardVaelAvatarImg, out cardVaelTitleText, out cardVaelSubText, out cardVaelStatusText);
         cardVaelBtn.onClick.AddListener(() => InspectHero("vael"));
 
         Sprite maidAvatar = (maidIdleFrames != null && maidIdleFrames.Length > 0) ? maidIdleFrames[0] : null;
-        cardMaidBtn = CreateAvatarCard(leftCol.transform, "maid", new Vector2(0f, -125f), new Vector2(345f, 85f),
+        cardMaidBtn = CreateAvatarCard(leftCol.transform, "maid", new Vector2(0f, -190f), new Vector2(0f, 140f),
             maidAvatar, true,
             out cardMaidAvatarImg, out cardMaidTitleText, out cardMaidSubText, out cardMaidStatusText);
         cardMaidBtn.onClick.AddListener(() => InspectHero("maid"));
 
-        CreateLockedPlaceholderCard(leftCol.transform, new Vector2(0f, -220f), new Vector2(345f, 75f), out cardPlaceholderText);
+        Sprite azureAvatar = (azureIdleFrames != null && azureIdleFrames.Length > 0) ? azureIdleFrames[0] : null;
+        cardAzureBtn = CreateAvatarCard(leftCol.transform, "azure", new Vector2(0f, -340f), new Vector2(0f, 140f),
+            azureAvatar, false,
+            out cardAzureAvatarImg, out cardAzureTitleText, out cardAzureSubText, out cardAzureStatusText);
+        cardAzureBtn.onClick.AddListener(() => InspectHero("azure"));
 
-        // 5. RIGHT COLUMN: Showcase Details Panel (Width 590, Height 430, positioned from y=-20)
+        // 5. RIGHT COLUMN: Showcase Details Panel (Full-Height Split Right Column)
         GameObject rightCol = new GameObject("ShowcaseDetailsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rightCol.transform.SetParent(dialogBox.transform, false);
         RectTransform rRt = rightCol.GetComponent<RectTransform>();
-        rRt.anchorMin = new Vector2(1f, 0.5f);
-        rRt.anchorMax = new Vector2(1f, 0.5f);
-        rRt.pivot = new Vector2(1f, 0.5f);
-        rRt.anchoredPosition = new Vector2(-30f, -20f);
-        rRt.sizeDelta = new Vector2(590f, 430f);
+        rRt.anchorMin = new Vector2(0.48f, 0f);
+        rRt.anchorMax = new Vector2(1f, 1f);
+        rRt.pivot = new Vector2(1f, 1f);
+        rRt.offsetMin = new Vector2(15f, 30f);
+        rRt.offsetMax = new Vector2(-40f, -110f);
 
         Image rcImg = rightCol.GetComponent<Image>();
-        rcImg.color = new Color(0.12f, 0.15f, 0.22f, 0.95f);
+        rcImg.color = new Color(0.09f, 0.12f, 0.18f, 0.96f);
 
         var rcOutline = rightCol.AddComponent<Outline>();
-        rcOutline.effectColor = new Color(0.7f, 0.6f, 0.3f, 0.7f);
-        rcOutline.effectDistance = new Vector2(1.5f, -1.5f);
+        rcOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.6f);
+        rcOutline.effectDistance = new Vector2(2f, -2f);
 
         // Animation Showcase Box (with RectMask2D)
         GameObject animBox = new GameObject("ShowcaseAnimBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D));
@@ -739,13 +1059,14 @@ public class MainMenuManager : MonoBehaviour
         aRt.anchorMin = new Vector2(0f, 1f);
         aRt.anchorMax = new Vector2(0f, 1f);
         aRt.pivot = new Vector2(0f, 1f);
-        aRt.anchoredPosition = new Vector2(20f, -15f);
-        aRt.sizeDelta = new Vector2(115f, 115f);
+        aRt.anchoredPosition = new Vector2(30f, -30f);
+        aRt.sizeDelta = new Vector2(160f, 160f);
 
         Image abImg = animBox.GetComponent<Image>();
-        abImg.color = new Color(0.07f, 0.09f, 0.14f, 1f);
+        abImg.color = new Color(0.06f, 0.08f, 0.12f, 1f);
         var abOutline = animBox.AddComponent<Outline>();
-        abOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.8f);
+        abOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.95f);
+        abOutline.effectDistance = new Vector2(2f, -2f);
 
         GameObject animImgObj = new GameObject("HeroLiveSprite", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         animImgObj.transform.SetParent(animBox.transform, false);
@@ -764,10 +1085,10 @@ public class MainMenuManager : MonoBehaviour
         nRt.anchorMin = new Vector2(0f, 1f);
         nRt.anchorMax = new Vector2(1f, 1f);
         nRt.pivot = new Vector2(0f, 1f);
-        nRt.anchoredPosition = new Vector2(150f, -15f);
-        nRt.sizeDelta = new Vector2(-170f, 30f);
+        nRt.anchoredPosition = new Vector2(215f, -30f);
+        nRt.sizeDelta = new Vector2(-235f, 36f);
         rosterHeroNameText = nameObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroNameText.fontSize = 22;
+        rosterHeroNameText.fontSize = 26;
         rosterHeroNameText.fontStyle = FontStyles.Bold;
         rosterHeroNameText.color = new Color(1f, 0.88f, 0.45f);
 
@@ -777,10 +1098,10 @@ public class MainMenuManager : MonoBehaviour
         rlRt.anchorMin = new Vector2(0f, 1f);
         rlRt.anchorMax = new Vector2(1f, 1f);
         rlRt.pivot = new Vector2(0f, 1f);
-        rlRt.anchoredPosition = new Vector2(150f, -48f);
-        rlRt.sizeDelta = new Vector2(-170f, 24f);
+        rlRt.anchoredPosition = new Vector2(215f, -75f);
+        rlRt.sizeDelta = new Vector2(-235f, 26f);
         rosterHeroRoleText = roleObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroRoleText.fontSize = 14.5f;
+        rosterHeroRoleText.fontSize = 16f;
         rosterHeroRoleText.color = new Color(0.6f, 0.85f, 1f);
 
         GameObject statsObj = new GameObject("RosterHeroStats", typeof(RectTransform), typeof(CanvasRenderer));
@@ -789,26 +1110,26 @@ public class MainMenuManager : MonoBehaviour
         stRt.anchorMin = new Vector2(0f, 1f);
         stRt.anchorMax = new Vector2(1f, 1f);
         stRt.pivot = new Vector2(0f, 1f);
-        stRt.anchoredPosition = new Vector2(150f, -76f);
-        stRt.sizeDelta = new Vector2(-170f, 26f);
+        stRt.anchoredPosition = new Vector2(215f, -115f);
+        stRt.sizeDelta = new Vector2(-235f, 30f);
         rosterHeroStatsText = statsObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroStatsText.fontSize = 14;
+        rosterHeroStatsText.fontSize = 16;
         rosterHeroStatsText.fontStyle = FontStyles.Bold;
         rosterHeroStatsText.color = new Color(0.95f, 0.95f, 0.95f);
 
-        // Special Skill Section
+        // Special Skill Section - Spacious Stretched Box
         GameObject skillBox = new GameObject("SkillBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         skillBox.transform.SetParent(rightCol.transform, false);
         RectTransform skRt = skillBox.GetComponent<RectTransform>();
-        skRt.anchorMin = new Vector2(0f, 1f);
+        skRt.anchorMin = new Vector2(0f, 0f);
         skRt.anchorMax = new Vector2(1f, 1f);
         skRt.pivot = new Vector2(0.5f, 1f);
-        skRt.anchoredPosition = new Vector2(0f, -145f);
-        skRt.sizeDelta = new Vector2(-35f, 120f);
+        skRt.offsetMin = new Vector2(30f, 105f);
+        skRt.offsetMax = new Vector2(-30f, -210f);
         Image skImg = skillBox.GetComponent<Image>();
-        skImg.color = new Color(0.08f, 0.10f, 0.15f, 0.9f);
+        skImg.color = new Color(0.06f, 0.08f, 0.12f, 0.92f);
         var skOutline = skillBox.AddComponent<Outline>();
-        skOutline.effectColor = new Color(0.5f, 0.5f, 0.6f, 0.4f);
+        skOutline.effectColor = new Color(0.40f, 0.45f, 0.55f, 0.5f);
 
         GameObject skTitleObj = new GameObject("SkillTitle", typeof(RectTransform), typeof(CanvasRenderer));
         skTitleObj.transform.SetParent(skillBox.transform, false);
@@ -816,10 +1137,10 @@ public class MainMenuManager : MonoBehaviour
         sktRt.anchorMin = new Vector2(0f, 1f);
         sktRt.anchorMax = new Vector2(1f, 1f);
         sktRt.pivot = new Vector2(0.5f, 1f);
-        sktRt.anchoredPosition = new Vector2(15f, -8f);
-        sktRt.sizeDelta = new Vector2(-30f, 24f);
+        sktRt.anchoredPosition = new Vector2(20f, -16f);
+        sktRt.sizeDelta = new Vector2(-40f, 30f);
         rosterHeroSkillTitleText = skTitleObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroSkillTitleText.fontSize = 15;
+        rosterHeroSkillTitleText.fontSize = 18;
         rosterHeroSkillTitleText.fontStyle = FontStyles.Bold;
         rosterHeroSkillTitleText.color = new Color(1f, 0.85f, 0.35f);
 
@@ -828,29 +1149,32 @@ public class MainMenuManager : MonoBehaviour
         RectTransform skdRt = skDescObj.GetComponent<RectTransform>();
         skdRt.anchorMin = Vector2.zero;
         skdRt.anchorMax = Vector2.one;
-        skdRt.anchoredPosition = new Vector2(15f, -22f);
-        skdRt.sizeDelta = new Vector2(-30f, -34f);
+        skdRt.anchoredPosition = new Vector2(20f, -54f);
+        skdRt.sizeDelta = new Vector2(-40f, -70f);
         rosterHeroSkillDescText = skDescObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroSkillDescText.fontSize = 13.5f;
+        rosterHeroSkillDescText.fontSize = 15f;
+        rosterHeroSkillDescText.lineSpacing = 12;
         rosterHeroSkillDescText.color = new Color(0.85f, 0.88f, 0.92f);
 
         // Action Button (Bottom of Right Column)
         GameObject actBtnObj = new GameObject("Btn_RosterAction", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         actBtnObj.transform.SetParent(rightCol.transform, false);
         RectTransform actRt = actBtnObj.GetComponent<RectTransform>();
-        actRt.anchorMin = new Vector2(0.5f, 0f);
-        actRt.anchorMax = new Vector2(0.5f, 0f);
+        actRt.anchorMin = new Vector2(0f, 0f);
+        actRt.anchorMax = new Vector2(1f, 0f);
         actRt.pivot = new Vector2(0.5f, 0f);
-        actRt.anchoredPosition = new Vector2(0f, 18f);
-        actRt.sizeDelta = new Vector2(420f, 46f);
+        actRt.anchoredPosition = new Vector2(0f, 25f);
+        actRt.sizeDelta = new Vector2(-60f, 60f);
 
         Image actImg = actBtnObj.GetComponent<Image>();
-        actImg.color = new Color(0.18f, 0.55f, 0.28f, 1f);
+        actImg.color = new Color(0.16f, 0.58f, 0.28f, 1f);
         var actOutline = actBtnObj.AddComponent<Outline>();
-        actOutline.effectColor = new Color(0.9f, 0.8f, 0.3f, 0.8f);
+        actOutline.effectColor = new Color(0.95f, 0.82f, 0.35f, 0.9f);
+        actOutline.effectDistance = new Vector2(2f, -2f);
 
         rosterActionBtn = actBtnObj.GetComponent<Button>();
         rosterActionBtn.targetGraphic = actImg;
+        rosterActionBtn.onClick.RemoveAllListeners();
         rosterActionBtn.onClick.AddListener(OnRosterActionClicked);
 
         GameObject actTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
@@ -860,45 +1184,33 @@ public class MainMenuManager : MonoBehaviour
         actTxtRt.anchorMax = Vector2.one;
         actTxtRt.sizeDelta = Vector2.zero;
         rosterActionBtnText = actTxtObj.AddComponent<TextMeshProUGUI>();
-        rosterActionBtnText.fontSize = 16.5f;
+        rosterActionBtnText.fontSize = 20f;
         rosterActionBtnText.fontStyle = FontStyles.Bold;
         rosterActionBtnText.alignment = TextAlignmentOptions.Center;
         rosterActionBtnText.color = Color.white;
-
-        // 6. BOTTOM CLOSE / BACK BUTTON (Centered at Bottom of DialogBox)
-        GameObject backBtnObj = new GameObject("Btn_RosterBack", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-        backBtnObj.transform.SetParent(dialogBox.transform, false);
-        RectTransform backRt = backBtnObj.GetComponent<RectTransform>();
-        backRt.anchorMin = new Vector2(0.5f, 0f);
-        backRt.anchorMax = new Vector2(0.5f, 0f);
-        backRt.pivot = new Vector2(0.5f, 0f);
-        backRt.anchoredPosition = new Vector2(0f, 14f);
-        backRt.sizeDelta = new Vector2(220f, 38f);
-
-        Image backImg = backBtnObj.GetComponent<Image>();
-        backImg.color = new Color(0.2f, 0.25f, 0.35f, 1f);
-        var backOutline = backBtnObj.AddComponent<Outline>();
-        backOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.8f);
-
-        rosterBackBtn = backBtnObj.GetComponent<Button>();
-        rosterBackBtn.targetGraphic = backImg;
-        rosterBackBtn.onClick.AddListener(ShowMainPanel);
-
-        GameObject backTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        backTxtObj.transform.SetParent(backBtnObj.transform, false);
-        RectTransform backTxtRt = backTxtObj.GetComponent<RectTransform>();
-        backTxtRt.anchorMin = Vector2.zero;
-        backTxtRt.anchorMax = Vector2.one;
-        backTxtRt.sizeDelta = Vector2.zero;
-
-        rosterBackBtnText = backTxtObj.AddComponent<TextMeshProUGUI>();
-        rosterBackBtnText.fontSize = 16.5f;
-        rosterBackBtnText.fontStyle = FontStyles.Bold;
-        rosterBackBtnText.alignment = TextAlignmentOptions.Center;
-        rosterBackBtnText.color = Color.white;
-        rosterBackBtnText.text = LocalizationManager.Get("BTN_BACK");
+        rosterActionBtnText.raycastTarget = false;
 
         rosterPanel.SetActive(false);
+    }
+
+    public void CloseRosterPanel()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        if (rosterPanel != null) rosterPanel.SetActive(false);
+
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        if (canvas != null)
+        {
+            var r = canvas.transform.Find("RosterModalPanel");
+            if (r != null) r.gameObject.SetActive(false);
+            var hr = canvas.transform.Find("HeroRosterModal");
+            if (hr != null) hr.gameObject.SetActive(false);
+        }
+
+        if (mainPanel != null) mainPanel.SetActive(true);
+        HideCenterHeroDisplay();
+        UpdateCurrencyDisplay();
     }
 
     public static Vector3 GetHeroVisualScale(string heroId)
@@ -912,6 +1224,10 @@ public class MainMenuManager : MonoBehaviour
         else if (id == "maid" || id == "elysia")
         {
             return new Vector3(1.15f, 1.15f, 1f);
+        }
+        else if (id == "azure" || id == "azureblade" || id == "player3")
+        {
+            return new Vector3(2.4f, 2.4f, 1f);
         }
         return Vector3.one;
     }
@@ -929,27 +1245,30 @@ public class MainMenuManager : MonoBehaviour
         rt.sizeDelta = size;
 
         Image img = card.GetComponent<Image>();
-        img.color = isLocked ? new Color(0.12f, 0.13f, 0.18f, 0.9f) : new Color(0.15f, 0.20f, 0.28f, 0.95f);
+        img.color = isLocked ? new Color(0.10f, 0.11f, 0.16f, 0.90f) : new Color(0.12f, 0.16f, 0.24f, 0.95f);
 
         var outline = card.AddComponent<Outline>();
-        outline.effectColor = isLocked ? new Color(0.4f, 0.4f, 0.45f, 0.5f) : new Color(0.85f, 0.72f, 0.35f, 0.8f);
+        outline.effectColor = isLocked ? new Color(0.40f, 0.40f, 0.45f, 0.5f) : new Color(0.85f, 0.72f, 0.35f, 0.85f);
         outline.effectDistance = new Vector2(1.5f, -1.5f);
 
         Button btn = card.GetComponent<Button>();
         btn.targetGraphic = img;
 
-        // Avatar frame with RectMask2D to neatly clip scaled sprites
+        // Avatar frame with clean vector outline & RectMask2D to neatly clip scaled sprites
         GameObject avBox = new GameObject("AvatarFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D));
         avBox.transform.SetParent(card.transform, false);
         RectTransform avRt = avBox.GetComponent<RectTransform>();
         avRt.anchorMin = new Vector2(0f, 0.5f);
         avRt.anchorMax = new Vector2(0f, 0.5f);
         avRt.pivot = new Vector2(0f, 0.5f);
-        avRt.anchoredPosition = new Vector2(8f, 0f);
-        avRt.sizeDelta = new Vector2(65f, 65f);
+        avRt.anchoredPosition = new Vector2(15f, 0f);
+        avRt.sizeDelta = new Vector2(90f, 90f);
 
         Image avbImg = avBox.GetComponent<Image>();
         avbImg.color = new Color(0.06f, 0.08f, 0.12f, 1f);
+        var avOutline = avBox.AddComponent<Outline>();
+        avOutline.effectColor = isLocked ? new Color(0.40f, 0.40f, 0.45f, 0.6f) : new Color(0.85f, 0.72f, 0.35f, 0.85f);
+        avOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
         GameObject avImgObj = new GameObject("AvatarImg", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         avImgObj.transform.SetParent(avBox.transform, false);
@@ -981,11 +1300,12 @@ public class MainMenuManager : MonoBehaviour
             liRt.anchorMax = Vector2.one;
             liRt.sizeDelta = Vector2.zero;
             var liTmp = lockIcon.AddComponent<TextMeshProUGUI>();
-            liTmp.text = "KHOA";
-            liTmp.fontSize = 11;
+            liTmp.text = LocalizationManager.T("KHÓA", "LOCKED");
+            liTmp.fontSize = 12;
             liTmp.fontStyle = FontStyles.Bold;
             liTmp.alignment = TextAlignmentOptions.Center;
             liTmp.color = new Color(1f, 0.85f, 0.4f);
+            liTmp.raycastTarget = false;
         }
 
         GameObject tObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
@@ -994,12 +1314,13 @@ public class MainMenuManager : MonoBehaviour
         tRt.anchorMin = new Vector2(0f, 1f);
         tRt.anchorMax = new Vector2(1f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.anchoredPosition = new Vector2(82f, -10f);
-        tRt.sizeDelta = new Vector2(-90f, 22f);
+        tRt.anchoredPosition = new Vector2(120f, -16f);
+        tRt.sizeDelta = new Vector2(-130f, 26f);
         titleTxtRef = tObj.AddComponent<TextMeshProUGUI>();
-        titleTxtRef.fontSize = 15f;
+        titleTxtRef.fontSize = 17f;
         titleTxtRef.fontStyle = FontStyles.Bold;
         titleTxtRef.color = isLocked ? new Color(0.75f, 0.75f, 0.8f) : new Color(1f, 0.88f, 0.45f);
+        titleTxtRef.raycastTarget = false;
 
         GameObject sObj = new GameObject("Sub", typeof(RectTransform), typeof(CanvasRenderer));
         sObj.transform.SetParent(card.transform, false);
@@ -1007,11 +1328,12 @@ public class MainMenuManager : MonoBehaviour
         sRt.anchorMin = new Vector2(0f, 1f);
         sRt.anchorMax = new Vector2(1f, 1f);
         sRt.pivot = new Vector2(0f, 1f);
-        sRt.anchoredPosition = new Vector2(82f, -32f);
-        sRt.sizeDelta = new Vector2(-90f, 18f);
+        sRt.anchoredPosition = new Vector2(120f, -46f);
+        sRt.sizeDelta = new Vector2(-130f, 22f);
         subTxtRef = sObj.AddComponent<TextMeshProUGUI>();
-        subTxtRef.fontSize = 12f;
-        subTxtRef.color = new Color(0.7f, 0.75f, 0.82f);
+        subTxtRef.fontSize = 13.5f;
+        subTxtRef.color = new Color(0.6f, 0.85f, 1f);
+        subTxtRef.raycastTarget = false;
 
         GameObject stObj = new GameObject("Status", typeof(RectTransform), typeof(CanvasRenderer));
         stObj.transform.SetParent(card.transform, false);
@@ -1019,11 +1341,12 @@ public class MainMenuManager : MonoBehaviour
         stRt.anchorMin = new Vector2(0f, 0f);
         stRt.anchorMax = new Vector2(1f, 0f);
         stRt.pivot = new Vector2(0f, 0f);
-        stRt.anchoredPosition = new Vector2(82f, 10f);
-        stRt.sizeDelta = new Vector2(-90f, 18f);
+        stRt.anchoredPosition = new Vector2(120f, 16f);
+        stRt.sizeDelta = new Vector2(-130f, 22f);
         statusTxtRef = stObj.AddComponent<TextMeshProUGUI>();
-        statusTxtRef.fontSize = 12.5f;
+        statusTxtRef.fontSize = 13f;
         statusTxtRef.fontStyle = FontStyles.Bold;
+        statusTxtRef.raycastTarget = false;
 
         return btn;
     }
@@ -1051,10 +1374,10 @@ public class MainMenuManager : MonoBehaviour
         txtRt.sizeDelta = Vector2.zero;
 
         txtRef = txtObj.AddComponent<TextMeshProUGUI>();
-        txtRef.fontSize = 13;
+        txtRef.fontSize = 14;
         txtRef.alignment = TextAlignmentOptions.Center;
         txtRef.color = new Color(0.5f, 0.55f, 0.65f, 0.7f);
-        txtRef.text = LocalizationManager.T("KHOA - ANH HUNG TIEP THEO", "LOCKED - COMING SOON");
+        txtRef.text = LocalizationManager.T("KHÓA - ANH HÙNG TIẾP THEO", "LOCKED - COMING SOON");
     }
 
     public void EnsureHeroSprites()
@@ -1087,6 +1410,17 @@ public class MainMenuManager : MonoBehaviour
             }
             if (list.Count > 0) maidIdleFrames = list.ToArray();
         }
+
+        if (azureIdleFrames == null || azureIdleFrames.Length == 0)
+        {
+            var objects = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player3/Sword_Idle.png");
+            var list = new List<Sprite>();
+            if (objects != null)
+            {
+                foreach (var o in objects) if (o is Sprite s) list.Add(s);
+            }
+            if (list.Count > 0) azureIdleFrames = list.ToArray();
+        }
 #endif
     }
 
@@ -1110,6 +1444,18 @@ public class MainMenuManager : MonoBehaviour
             rosterButton.onClick.AddListener(OnRosterClicked);
             AttachPointerClick(rosterButton.gameObject, OnRosterClicked);
         }
+        if (skillButton != null)
+        {
+            skillButton.onClick.RemoveAllListeners();
+            skillButton.onClick.AddListener(OnSkillsClicked);
+            AttachPointerClick(skillButton.gameObject, OnSkillsClicked);
+        }
+        if (inventoryButton != null)
+        {
+            inventoryButton.onClick.RemoveAllListeners();
+            inventoryButton.onClick.AddListener(OnInventoryClicked);
+            AttachPointerClick(inventoryButton.gameObject, OnInventoryClicked);
+        }
         if (shopButton != null)
         {
             shopButton.onClick.RemoveAllListeners();
@@ -1130,6 +1476,7 @@ public class MainMenuManager : MonoBehaviour
         }
         if (logoutButton != null)
         {
+            logoutButton.gameObject.SetActive(false);
             logoutButton.onClick.RemoveAllListeners();
             logoutButton.onClick.AddListener(OnLogoutClicked);
             AttachPointerClick(logoutButton.gameObject, OnLogoutClicked);
@@ -1138,8 +1485,8 @@ public class MainMenuManager : MonoBehaviour
         if (map1Button != null)
         {
             map1Button.onClick.RemoveAllListeners();
-            map1Button.onClick.AddListener(() => LoadMap("SampleScene"));
-            AttachPointerClick(map1Button.gameObject, () => LoadMap("SampleScene"));
+            map1Button.onClick.AddListener(() => LoadMap("Map1_Thestart"));
+            AttachPointerClick(map1Button.gameObject, () => LoadMap("Map1_Thestart"));
         }
         if (map2Button != null)
         {
@@ -1182,6 +1529,25 @@ public class MainMenuManager : MonoBehaviour
 
     public void UpdateAllTexts()
     {
+        string activeUser = PlayerPrefs.GetString(AccountDatabase.PREF_CURRENT_USER, PlayerPrefs.GetString("Player_Name", "WANDERER"));
+        if (playerNameText != null)
+        {
+            playerNameText.text = activeUser.ToUpper();
+        }
+        else
+        {
+            var tmps = Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var t in tmps)
+            {
+                if (t.name.ToLower().Contains("playername") || t.text == "HUNG" || t.text == "WANDERER")
+                {
+                    playerNameText = t;
+                    t.text = activeUser.ToUpper();
+                    break;
+                }
+            }
+        }
+
         if (titleText != null) titleText.text = LocalizationManager.Get("APP_TITLE");
         if (playerTitleText != null) playerTitleText.text = LocalizationManager.Get("LBL_PLAYER_TITLE");
         if (logoutBtnText != null) logoutBtnText.text = LocalizationManager.Get("BTN_LOGOUT");
@@ -1189,6 +1555,8 @@ public class MainMenuManager : MonoBehaviour
         if (playBtnText != null) playBtnText.text = LocalizationManager.Get("BTN_PLAY");
         if (mapSelectBtnText != null) mapSelectBtnText.text = LocalizationManager.Get("BTN_MAP_SELECT");
         if (rosterBtnText != null) rosterBtnText.text = LocalizationManager.Get("BTN_ROSTER");
+        if (skillBtnText != null) skillBtnText.text = LocalizationManager.Get("BTN_SKILLS");
+        if (inventoryBtnText != null) inventoryBtnText.text = LocalizationManager.Get("BTN_INVENTORY");
         if (shopBtnText != null) shopBtnText.text = LocalizationManager.Get("BTN_SHOP");
         if (settingsBtnText != null) settingsBtnText.text = LocalizationManager.Get("BTN_SETTINGS");
         if (exitBtnText != null) exitBtnText.text = LocalizationManager.Get("BTN_EXIT");
@@ -1208,40 +1576,84 @@ public class MainMenuManager : MonoBehaviour
         if (leftColHeaderText != null) leftColHeaderText.text = LocalizationManager.T("CHỌN ANH HÙNG", "HERO SELECTION");
         if (rosterBackBtnText != null) rosterBackBtnText.text = LocalizationManager.Get("BTN_BACK");
 
+        string currentSelected = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+
         if (cardVaelTitleText != null) cardVaelTitleText.text = LocalizationManager.Get("HERO_VAEL_NAME");
         if (cardVaelSubText != null) cardVaelSubText.text = LocalizationManager.Get("HERO_VAEL_ROLE");
-        if (cardVaelStatusText != null) cardVaelStatusText.text = LocalizationManager.T("<color=#55FF55>SẴN SÀNG</color>", "<color=#55FF55>READY</color>");
+        if (cardVaelStatusText != null)
+        {
+            bool isSel = (currentSelected == CharacterManager.CHAR_VAELSTRIDER);
+            cardVaelStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
+        }
 
         if (cardMaidTitleText != null) cardMaidTitleText.text = LocalizationManager.Get("HERO_MAID_NAME");
         if (cardMaidSubText != null) cardMaidSubText.text = LocalizationManager.Get("HERO_MAID_ROLE");
         if (cardMaidStatusText != null) cardMaidStatusText.text = LocalizationManager.T("<color=#FF5555>TẠM KHÓA</color>", "<color=#FF5555>LOCKED</color>");
 
-        if (cardPlaceholderText != null) cardPlaceholderText.text = LocalizationManager.T("KHÓA - ANH HÙNG TIẾP THEO", "LOCKED - COMING SOON");
+        if (cardAzureTitleText != null) cardAzureTitleText.text = LocalizationManager.T("Lam Kiếm Sĩ (Azure)", "Azure Blade");
+        if (cardAzureSubText != null) cardAzureSubText.text = LocalizationManager.T("Trọng Kiếm / Sóng Kiếm", "Heavy / Sword Waves");
+        if (cardAzureStatusText != null)
+        {
+            bool isSel = (currentSelected == CharacterManager.CHAR_AZURE_BLADE);
+            cardAzureStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
+        }
 
         UpdateCurrencyDisplay();
         UpdateHeroDetails();
         InspectHero(inspectedHeroId);
+        UpdateMapCardsLockState();
     }
 
     private void UpdateHeroDetails()
     {
-        PlayerPrefs.SetString("SelectedHero", "vael");
-
-        if (heroNameText != null) heroNameText.text = LocalizationManager.Get("HERO_VAEL_NAME");
-        if (heroRoleText != null) heroRoleText.text = LocalizationManager.Get("HERO_VAEL_ROLE");
-        if (heroSkillText != null) heroSkillText.text = LocalizationManager.Get("HERO_VAEL_SKILL");
-        if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.Get("HERO_VAEL_SKILL_DESC");
-        if (heroStatsSummaryText != null)
+        string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        if (curChar == CharacterManager.CHAR_AZURE_BLADE)
         {
-            heroStatsSummaryText.text = LocalizationManager.T("MÁU: 100   CÔNG: 20   TỐC: 5.0", "HP: 100   ATK: 20   SPD: 5.0");
+            if (heroNameText != null) heroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ", "Azure Blade");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí (Sóng Kiếm Tầm Xa)", "Heavy Crescent Blade");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Bão Sóng Kiếm", "Crescent Tempest");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Đòn chém chậm nhưng uy lực, mỗi nhát chém phóng ra sóng kiếm xuyên thấu quái vật. Tuyệt kỹ phóng ra 5 đợt kiếm khí hình nan quạt quét sạch chiến trường!", "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!");
+            if (heroStatsSummaryText != null)
+            {
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 110   CÔNG: 24   TỐC: 4.8", "HP: 110   ATK: 24   SPD: 4.8");
+            }
+        }
+        else
+        {
+            if (heroNameText != null) heroNameText.text = LocalizationManager.Get("HERO_VAEL_NAME");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.Get("HERO_VAEL_ROLE");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.Get("HERO_VAEL_SKILL");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.Get("HERO_VAEL_SKILL_DESC");
+            if (heroStatsSummaryText != null)
+            {
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 100   CÔNG: 20   TỐC: 5.0", "HP: 100   ATK: 20   SPD: 5.0");
+            }
         }
     }
 
     public void InspectHero(string heroId)
     {
         inspectedHeroId = heroId.ToLower();
+        string currentSelected = CharacterManager.EnsureInstance().GetSelectedCharacterId();
 
-        if (inspectedHeroId == "maid")
+        if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
+        {
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ (Azure Blade)", "Azure Blade");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí (Sóng Kiếm Tầm Xa)", "Heavy Crescent Blade (Ranged Waves)");
+            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 110   CÔNG: 24   TỐC: 4.8", "HP: 110   ATK: 24   SPD: 4.8");
+            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Bão Sóng Kiếm", "Special: Crescent Tempest");
+            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Đòn chém chậm nhưng uy lực, mỗi nhát chém phóng ra sóng kiếm xuyên thấu quái vật. Tuyệt kỹ phóng ra 5 đợt kiếm khí hình nan quạt quét sạch chiến trường!", "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!");
+
+            bool isSelected = (currentSelected == CharacterManager.CHAR_AZURE_BLADE);
+            if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
+            if (rosterActionBtn != null)
+            {
+                rosterActionBtn.interactable = true;
+                var img = rosterActionBtn.GetComponent<Image>();
+                if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
+            }
+        }
+        else if (inspectedHeroId == "maid")
         {
             if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.Get("HERO_MAID_NAME");
             if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.Get("HERO_MAID_ROLE");
@@ -1265,12 +1677,13 @@ public class MainMenuManager : MonoBehaviour
             if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.Get("HERO_VAEL_SKILL");
             if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.Get("HERO_VAEL_SKILL_DESC");
 
-            if (rosterActionBtnText != null) rosterActionBtnText.text = LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE");
+            bool isSelected = (currentSelected == CharacterManager.CHAR_VAELSTRIDER);
+            if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
             if (rosterActionBtn != null)
             {
                 rosterActionBtn.interactable = true;
                 var img = rosterActionBtn.GetComponent<Image>();
-                if (img != null) img.color = new Color(0.18f, 0.55f, 0.28f, 1f);
+                if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
             }
         }
 
@@ -1288,7 +1701,7 @@ public class MainMenuManager : MonoBehaviour
     public void UpdateRosterEquipmentMaterial()
     {
         if (rosterHeroPreviewImage == null) return;
-        if (inspectedHeroId == "maid")
+        if (inspectedHeroId == "maid" || inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
         {
             rosterHeroPreviewImage.material = null;
             return;
@@ -1333,28 +1746,50 @@ public class MainMenuManager : MonoBehaviour
         }
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        PlayerPrefs.SetString("SelectedHero", "vael");
+
+        string targetChar = (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
+            ? CharacterManager.CHAR_AZURE_BLADE 
+            : CharacterManager.CHAR_VAELSTRIDER;
+
+        CharacterManager.EnsureInstance().SelectCharacter(targetChar);
+        PlayerPrefs.SetString("SelectedHero", (targetChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : "vael");
         PlayerPrefs.Save();
-        InspectHero("vael");
-        UpdateHeroDetails();
+
+        AccountDatabase.SaveActiveSessionToDatabase();
+
+        InspectHero(inspectedHeroId);
+        UpdateAllTexts();
+    }
+
+    public static string FormatCompactNumber(long val)
+    {
+        if (val >= 1_000_000_000) return (val / 1_000_000_000.0).ToString("0.##") + "B";
+        if (val >= 1_000_000) return (val / 1_000_000.0).ToString("0.##") + "M";
+        if (val >= 10_000) return (val / 1_000.0).ToString("0.#") + "K";
+        return val.ToString("N0");
     }
 
     public void UpdateCurrencyDisplay()
     {
-        int shards = PlayerPrefs.GetInt("AethelShards", 0);
-        int potions = PlayerPrefs.GetInt("Player_Health_Potions", 3);
+        long shards = AccountDatabase.GetAethelShards();
+        string formattedShards = FormatCompactNumber(shards);
 
         if (shardsTopText != null)
         {
-            shardsTopText.text = $"{LocalizationManager.Get("LBL_SHARDS")}: {shards}";
+            shardsTopText.text = $"{LocalizationManager.Get("LBL_SHARDS")}: {formattedShards}";
+            shardsTopText.enableWordWrapping = false;
+            shardsTopText.overflowMode = TextOverflowModes.Overflow;
+            shardsTopText.gameObject.SetActive(true);
         }
         if (potionsTopText != null)
         {
-            potionsTopText.text = $"{LocalizationManager.Get("LBL_POTIONS")}: {potions}";
+            potionsTopText.gameObject.SetActive(false);
         }
         if (aethelShardsDisplay != null)
         {
-            aethelShardsDisplay.text = $"{LocalizationManager.Get("LBL_SHARDS")}: {shards}";
+            aethelShardsDisplay.text = $"{LocalizationManager.Get("LBL_SHARDS")}: {formattedShards}";
+            aethelShardsDisplay.enableWordWrapping = false;
+            aethelShardsDisplay.overflowMode = TextOverflowModes.Overflow;
         }
     }
 
@@ -1368,8 +1803,11 @@ public class MainMenuManager : MonoBehaviour
         }
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        PlayerPrefs.SetString("SelectedHero", "vael");
+        string target = (heroId.ToLower() == "azure" || heroId.ToLower() == "azureblade") ? CharacterManager.CHAR_AZURE_BLADE : CharacterManager.CHAR_VAELSTRIDER;
+        CharacterManager.EnsureInstance().SelectCharacter(target);
+        PlayerPrefs.SetString("SelectedHero", (target == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : "vael");
         PlayerPrefs.Save();
+        AccountDatabase.SaveActiveSessionToDatabase();
         UpdateHeroDetails();
         StartMainHeroAnimation();
     }
@@ -1382,17 +1820,18 @@ public class MainMenuManager : MonoBehaviour
 
     private IEnumerator AnimateMainHeroRoutine()
     {
-        Sprite[] frames = vaelIdleFrames;
+        string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        Sprite[] frames = (curChar == CharacterManager.CHAR_AZURE_BLADE) ? azureIdleFrames : vaelIdleFrames;
         if (heroPreviewImage == null) yield break;
 
         heroPreviewImage.preserveAspect = true;
         heroPreviewImage.color = Color.white;
-        heroPreviewImage.transform.localScale = GetHeroVisualScale("vael");
+        heroPreviewImage.transform.localScale = GetHeroVisualScale((curChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : "vael");
 
         if (frames == null || frames.Length == 0)
         {
             EnsureHeroSprites();
-            frames = vaelIdleFrames;
+            frames = (curChar == CharacterManager.CHAR_AZURE_BLADE) ? azureIdleFrames : vaelIdleFrames;
             if (frames == null || frames.Length == 0) yield break;
         }
 
@@ -1415,7 +1854,10 @@ public class MainMenuManager : MonoBehaviour
 
     private IEnumerator AnimateRosterHeroRoutine()
     {
-        Sprite[] frames = inspectedHeroId == "maid" ? maidIdleFrames : vaelIdleFrames;
+        Sprite[] frames = (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
+            ? azureIdleFrames 
+            : (inspectedHeroId == "maid" ? maidIdleFrames : vaelIdleFrames);
+
         if (rosterHeroPreviewImage == null) yield break;
 
         rosterHeroPreviewImage.preserveAspect = true;
@@ -1424,7 +1866,9 @@ public class MainMenuManager : MonoBehaviour
         if (frames == null || frames.Length == 0)
         {
             EnsureHeroSprites();
-            frames = inspectedHeroId == "maid" ? maidIdleFrames : vaelIdleFrames;
+            frames = (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
+                ? azureIdleFrames 
+                : (inspectedHeroId == "maid" ? maidIdleFrames : vaelIdleFrames);
             if (frames == null || frames.Length == 0) yield break;
         }
 
@@ -1442,15 +1886,14 @@ public class MainMenuManager : MonoBehaviour
     public void OnPlayClicked()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        EnsureMapSelectPanel();
-        ShowMapSelectPanel();
+        AccountDatabase.SaveActiveSessionToDatabase();
+        Time.timeScale = 1.0f;
+        SceneManager.LoadScene("Map1_Thestart");
     }
 
     public void OnMapSelectClicked()
     {
-        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        EnsureMapSelectPanel();
-        ShowMapSelectPanel();
+        OnPlayClicked();
     }
 
     public void OnRosterClicked()
@@ -1458,6 +1901,26 @@ public class MainMenuManager : MonoBehaviour
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         EnsureRosterPanel();
         ShowRosterPanel();
+    }
+
+    public void OnSkillsClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        var invUI = InventoryUI.EnsureUIExists();
+        if (invUI != null)
+        {
+            invUI.OpenGemSocketModal("skills");
+        }
+    }
+
+    public void OnInventoryClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        var invUI = InventoryUI.EnsureUIExists();
+        if (invUI != null)
+        {
+            invUI.Open();
+        }
     }
 
     public void OnShopClicked()
@@ -1483,6 +1946,7 @@ public class MainMenuManager : MonoBehaviour
     public void OnLogoutClicked()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        AccountDatabase.SaveActiveSessionToDatabase();
         SceneManager.LoadScene("LoginScene");
     }
 
@@ -1503,8 +1967,26 @@ public class MainMenuManager : MonoBehaviour
         HideCenterHeroDisplay();
         if (mapSelectPanel != null) mapSelectPanel.SetActive(false);
         if (rosterPanel != null) rosterPanel.SetActive(false);
+
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        if (canvas != null)
+        {
+            var r = canvas.transform.Find("RosterModalPanel");
+            if (r != null) r.gameObject.SetActive(false);
+            var hr = canvas.transform.Find("HeroRosterModal");
+            if (hr != null) hr.gameObject.SetActive(false);
+            var ms = canvas.transform.Find("MapSelectModalPanel");
+            if (ms != null) ms.gameObject.SetActive(false);
+            var inv = canvas.transform.Find("InventoryModalPanel");
+            if (inv != null) inv.gameObject.SetActive(false);
+        }
+
         if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (SettingsUI.Instance != null) SettingsUI.Instance.CloseSettings();
+        if (InventoryUI.Instance != null) InventoryUI.Instance.Close();
         if (ArmorShopUI.Instance != null) ArmorShopUI.Instance.Close();
+        UpdateCurrencyDisplay();
     }
 
     public void ShowMapSelectPanel()
@@ -1518,7 +2000,62 @@ public class MainMenuManager : MonoBehaviour
         }
         if (rosterPanel != null) rosterPanel.SetActive(false);
         if (settingsPanel != null) settingsPanel.SetActive(false);
+        UpdateMapCardsLockState();
         UpdateAllTexts();
+    }
+
+    public void UpdateMapCardsLockState()
+    {
+        bool map1Completed = PlayerPrefs.GetInt("Map1_Completed", 0) == 1;
+        bool map2Completed = PlayerPrefs.GetInt("Map2_Completed", 0) == 1;
+
+        // Map 1: Luôn mở
+        SetMapCardState(map1Button, true, LocalizationManager.Get("BTN_PLAY"));
+
+        // Map 2: Cần vượt Map 1
+        if (map1Completed)
+        {
+            SetMapCardState(map2Button, true, LocalizationManager.Get("BTN_PLAY"));
+        }
+        else
+        {
+            SetMapCardState(map2Button, false, LocalizationManager.T("KHÓA (VƯỢT MAP 1)", "LOCKED (CLEAR MAP 1)"));
+        }
+
+        // Map 3: Cần vượt Map 2
+        if (map2Completed)
+        {
+            SetMapCardState(map3Button, true, LocalizationManager.Get("BTN_PLAY"));
+        }
+        else
+        {
+            SetMapCardState(map3Button, false, LocalizationManager.T("KHÓA (VƯỢT MAP 2)", "LOCKED (CLEAR MAP 2)"));
+        }
+    }
+
+    private void SetMapCardState(Button btn, bool unlocked, string text)
+    {
+        if (btn == null) return;
+        btn.interactable = unlocked;
+
+        var img = btn.GetComponent<Image>();
+        if (img != null)
+        {
+            img.color = unlocked ? new Color(0.72f, 0.22f, 0.18f, 1f) : new Color(0.2f, 0.22f, 0.26f, 0.85f);
+        }
+
+        var tmp = btn.GetComponentInChildren<TextMeshProUGUI>();
+        if (tmp != null)
+        {
+            tmp.text = text;
+            tmp.color = unlocked ? Color.white : new Color(0.6f, 0.65f, 0.7f, 0.8f);
+        }
+
+        var outline = btn.GetComponent<Outline>();
+        if (outline != null)
+        {
+            outline.effectColor = unlocked ? new Color(1f, 0.85f, 0.3f, 0.8f) : new Color(0.3f, 0.3f, 0.3f, 0.3f);
+        }
     }
 
     public void ShowRosterPanel()
@@ -1538,6 +2075,8 @@ public class MainMenuManager : MonoBehaviour
 
     public void LoadMap(string sceneName)
     {
+        if (string.IsNullOrEmpty(sceneName) || sceneName == "SampleScene") sceneName = "Map1_Thestart";
+
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         Time.timeScale = 1.0f;
         SceneManager.LoadScene(sceneName);

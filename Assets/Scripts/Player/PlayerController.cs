@@ -103,6 +103,17 @@ public class PlayerController : MonoBehaviour
             moveSpeed += armorSpd;
         }
 
+        string equippedWpnId = PlayerPrefs.GetString("Equipped_Weapon_Id", "");
+        if (!string.IsNullOrEmpty(equippedWpnId))
+        {
+            var def = InventoryItemDatabase.GetItem(equippedWpnId);
+            if (def != null && def.speedBonus > 0f)
+            {
+                baseMoveSpeed += def.speedBonus;
+                moveSpeed += def.speedBonus;
+            }
+        }
+
         // Bat buoc dash cooldown mo dau la 5s
         dashCooldown = 5.0f;
         baseDashCooldown = 5.0f;
@@ -117,6 +128,11 @@ public class PlayerController : MonoBehaviour
         {
             Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, true);
         }
+    }
+
+    void Start()
+    {
+        GameAutoBootstrap.ApplySelectedCharacterToPlayer();
     }
 
     void Update()
@@ -206,6 +222,13 @@ public class PlayerController : MonoBehaviour
             isDashing = true;
             dashTimer = dashDuration;
             dashCooldownTimer = dashCooldown;
+
+            // Hồi ngay đòn đánh thường cho Lam Kiếm Sĩ khi Dash
+            var azureBlade = GetComponent<AzureBladeSkill>();
+            if (azureBlade != null)
+            {
+                azureBlade.ResetAttackCooldown();
+            }
         }
     }
 
@@ -253,19 +276,22 @@ public class PlayerController : MonoBehaviour
     public void AutoAlignCollider()
     {
         var box = GetComponent<BoxCollider2D>();
+        if (box == null) box = gameObject.AddComponent<BoxCollider2D>();
         var sr = GetComponent<SpriteRenderer>();
-        if (box == null || sr == null || sr.sprite == null) return;
 
-        bool isAdventurer = (sr.sprite.rect.height >= 60 || sr.sprite.name.ToLower().Contains("idle") || sr.sprite.name.ToLower().Contains("adventurer"));
-        if (isAdventurer)
+        if (sr != null && sr.sprite != null)
         {
-            box.offset = new Vector2(0f, 1.25f);
-            box.size = new Vector2(0.55f, 1.05f);
+            Bounds b = sr.sprite.bounds;
+            float cy = Mathf.Clamp(b.center.y, 0.35f, 0.55f);
+            float h = Mathf.Max(0.9f, b.size.y * 0.85f);
+            float w = Mathf.Max(0.55f, b.size.x * 0.6f);
+            box.offset = new Vector2(0f, cy);
+            box.size = new Vector2(w, h);
         }
         else
         {
-            box.offset = new Vector2(0f, -0.05f);
-            box.size = new Vector2(0.55f, 0.8f);
+            box.offset = new Vector2(0f, 0.45f);
+            box.size = new Vector2(0.6f, 0.95f);
         }
 
         var combat = GetComponent<PlayerCombat>();

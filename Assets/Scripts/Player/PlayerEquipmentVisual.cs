@@ -70,6 +70,13 @@ public class PlayerEquipmentVisual : MonoBehaviour
         if (baseSr == null) baseSr = GetComponent<SpriteRenderer>();
         if (baseSr == null) return;
 
+        string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        if (curChar != CharacterManager.CHAR_VAELSTRIDER)
+        {
+            baseSr.material = new Material(Shader.Find("Sprites/Default"));
+            return;
+        }
+
         Shader shader = Shader.Find("Custom/CharacterEquipmentShader");
         if (shader == null) shader = Shader.Find("Sprites/Default");
 
@@ -82,6 +89,14 @@ public class PlayerEquipmentVisual : MonoBehaviour
 
     public void RefreshAllEquipmentVisuals()
     {
+        string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        if (curChar != CharacterManager.CHAR_VAELSTRIDER)
+        {
+            if (baseSr == null) baseSr = GetComponent<SpriteRenderer>();
+            if (baseSr != null) baseSr.material = new Material(Shader.Find("Sprites/Default"));
+            return;
+        }
+
         if (equipmentMat == null) InitEquipmentMaterial();
         if (equipmentMat == null) return;
 

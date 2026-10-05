@@ -45,6 +45,7 @@ public class ShrineUpgradeUI : MonoBehaviour
     public void Open()
     {
         isOpen = true;
+        GameAutoBootstrap.SetGameplayHUDVisible(false);
         gameObject.SetActive(true);
         transform.SetAsLastSibling();
         if (canvasGroup != null)
@@ -67,6 +68,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             canvasGroup.blocksRaycasts = false;
         }
         gameObject.SetActive(false);
+        GameAutoBootstrap.SetGameplayHUDVisible(true);
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }
 
@@ -82,7 +84,8 @@ public class ShrineUpgradeUI : MonoBehaviour
         if (shardsCounterText != null)
         {
             string label = isVi ? "MẢNH CỔ TỰ (AETHEL SHARDS)" : "AETHEL SHARDS";
-            shardsCounterText.text = $"{label}: {mgr.CurrentShards}";
+            string curShardsStr = MainMenuManager.FormatCompactNumber(mgr.CurrentShards);
+            shardsCounterText.text = $"{label}: {curShardsStr}";
         }
 
         for (int i = 0; i < 4; i++)
@@ -96,34 +99,36 @@ public class ShrineUpgradeUI : MonoBehaviour
             if (descTexts[i] != null) descTexts[i].text = mgr.GetUpgradeDescription(type);
             if (levelTexts[i] != null)
             {
-                levelTexts[i].text = isMax 
-                    ? (isVi ? "<color=#FFE266>CẤP: TỐI ĐA (30/30)</color>" : "<color=#FFE266>LEVEL: MAX (30/30)</color>")
-                    : (isVi ? $"CẤP HIỆN TẠI: <color=#66CCFF>{lvl}/30</color>" : $"CURRENT LVL: <color=#66CCFF>{lvl}/30</color>");
+                levelTexts[i].text = isVi 
+                    ? $"CẤP HIỆN TẠI: <color=#66CCFF>Lv.{lvl}</color>" 
+                    : $"CURRENT LEVEL: <color=#66CCFF>Lv.{lvl}</color>";
             }
             if (bonusTexts[i] != null)
             {
-                bonusTexts[i].text = isMax 
-                    ? (isVi ? "<color=#66FF99>ĐÃ KÍCH HOẠT SỨC MẠNH CỰC HẠN</color>" : "<color=#66FF99>PEAK POWER UNLOCKED</color>")
-                    : (isVi ? $"Cấp kế tiếp: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>" : $"Next Level: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>");
+                bonusTexts[i].text = isVi 
+                    ? $"Cấp kế tiếp: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>" 
+                    : $"Next Level: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>";
             }
 
             if (costTexts[i] != null)
             {
-                costTexts[i].text = isMax 
-                    ? (isVi ? "TỐI ĐA" : "MAXED")
-                    : (isVi ? $"NÂNG CẤP\n<size=11>{cost} Mảnh</size>" : $"UPGRADE\n<size=11>{cost} Shards</size>");
+                string costStr = cost >= 10000 ? (cost / 1000.0).ToString("0.#") + "K" : cost.ToString("N0");
+                costTexts[i].text = isVi 
+                    ? $"NÂNG CẤP\n<size=11>{costStr} Mảnh</size>" 
+                    : $"UPGRADE\n<size=11>{costStr} Shards</size>";
+                costTexts[i].enableAutoSizing = true;
+                costTexts[i].fontSizeMin = 8.5f;
+                costTexts[i].fontSizeMax = 12f;
             }
 
             if (upgradeButtons[i] != null)
             {
-                bool canAfford = !isMax && (mgr.CurrentShards >= cost);
+                bool canAfford = (mgr.CurrentShards >= cost);
                 upgradeButtons[i].interactable = canAfford;
                 var img = upgradeButtons[i].GetComponent<Image>();
                 if (img != null)
                 {
-                    img.color = isMax 
-                        ? new Color(0.24f, 0.28f, 0.35f, 0.85f)
-                        : (canAfford ? new Color(0.18f, 0.55f, 0.38f, 1f) : new Color(0.35f, 0.18f, 0.20f, 0.75f));
+                    img.color = canAfford ? new Color(0.18f, 0.55f, 0.38f, 1f) : new Color(0.35f, 0.18f, 0.20f, 0.75f);
                 }
             }
         }
@@ -156,10 +161,11 @@ public class ShrineUpgradeUI : MonoBehaviour
 
         Image panelBg = panelObj.GetComponent<Image>();
         panelBg.color = new Color(0.02f, 0.03f, 0.06f, 0.88f);
+        panelBg.raycastTarget = true;
 
         Canvas pCanvas = panelObj.AddComponent<Canvas>();
         pCanvas.overrideSorting = true;
-        pCanvas.sortingOrder = 9997;
+        pCanvas.sortingOrder = 99990;
         panelObj.AddComponent<GraphicRaycaster>();
 
         instance = panelObj.AddComponent<ShrineUpgradeUI>();
@@ -194,7 +200,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         tRt.anchoredPosition = new Vector2(0, -20);
         tRt.sizeDelta = new Vector2(760, 36);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = "BÀN THỜ NÂNG CẤP CỔ ĐẠI (30 BẬC)";
+        titleTmp.text = "BÀN THỜ NÂNG CẤP CỔ ĐẠI";
         titleTmp.fontSize = 23;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.alignment = TextAlignmentOptions.Center;

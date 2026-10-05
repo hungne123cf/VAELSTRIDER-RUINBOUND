@@ -14,19 +14,24 @@ public class MainMenuSceneBuilder
 {
     public const string LOGIN_SCENE_PATH = "Assets/Scenes/LoginScene.unity";
     public const string MAIN_MENU_SCENE_PATH = "Assets/Scenes/MainMenuScene.unity";
-    public const string MAP1_SCENE_PATH = "Assets/Scenes/SampleScene.unity";
+    public const string MAP1_SCENE_PATH = "Assets/Scenes/Map1_Thestart.unity";
     public const string MAP2_SCENE_PATH = "Assets/Scenes/Map2_ValleyRuin.unity";
     public const string MAP3_SCENE_PATH = "Assets/Scenes/Map3_ForgottenMemories.unity";
 
+    private const string TRIGGER_FILE = "Temp/build_mainmenu.trigger";
+
     static MainMenuSceneBuilder()
     {
-        EditorApplication.delayCall += CheckAndBuildMainMenuScene;
-    }
-
-    public static void CheckAndBuildMainMenuScene()
-    {
-        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-        UpdateBuildSettings();
+        EditorApplication.delayCall += () =>
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            if (File.Exists(TRIGGER_FILE))
+            {
+                try { File.Delete(TRIGGER_FILE); } catch {}
+                BuildMainMenuScene();
+            }
+            UpdateBuildSettings();
+        };
     }
 
     [MenuItem("Vaelstrider/Scenes/Xay Dung & Luu UI Main Menu Truc Tiep Vao Scene")]
@@ -121,7 +126,8 @@ public class MainMenuSceneBuilder
         mgr.RefreshCurrencies();
         mgr.RefreshAllTexts();
 
-        // 6. Ensure all modals (ArmorShop, Settings, Roster, MapSelect) exist in Scene Hierarchy
+        // 6. Ensure all modals (Inventory, ArmorShop, Settings, Roster) exist in Scene Hierarchy
+        InventoryUI.EnsureUIExists();
         ArmorShopUI.EnsureUIExists();
         SettingsUI.EnsureUIExists();
 

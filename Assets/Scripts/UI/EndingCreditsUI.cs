@@ -195,9 +195,10 @@ public class EndingCreditsUI : MonoBehaviour
         }
 
         // Cập nhật số liệu hành trình
-        int shards = 0;
+        long shards = 0;
         var inv = Object.FindAnyObjectByType<PlayerInventory>();
         if (inv != null) shards = inv.GetShards();
+        string formattedShards = MainMenuManager.FormatCompactNumber(shards);
 
         if (statsText != null)
         {
@@ -206,13 +207,13 @@ public class EndingCreditsUI : MonoBehaviour
                 ? $"<color=#FFE066>ẢI ĐÃ HOÀN THÀNH: 2 / 2</color>\n" +
                   $"<color=#E0E6ED>Chương 1:</color> Tàn Tích Thung Lũng  <color=#52F0FF>[VƯỢT QUA]</color>\n" +
                   $"<color=#E0E6ED>Chương 2:</color> Ngục Tối Rực Lửa  <color=#52F0FF>[THANH TẨY]</color>\n\n" +
-                  $"<color=#FFE066>TỔNG LINH HỒN:</color> {shards}\n" +
+                  $"<color=#FFE066>TỔNG LINH HỒN:</color> {formattedShards}\n" +
                   $"<color=#FFE066>XẾP HẠNG TỔNG KẾT:</color> <color=#FF5577>S+ ĐẠI CHIẾN TƯỚNG</color>\n\n" +
                   $"<i>\"Vòng lặp diệt vong đã bị phá vỡ. Vương quốc Vaelstrider đã tìm lại thái bình.\"</i>"
                 : $"<color=#FFE066>REALMS PURIFIED: 2 / 2</color>\n" +
                   $"<color=#E0E6ED>Chapter 1:</color> Sunken Sepulcher  <color=#52F0FF>[CLEARED]</color>\n" +
                   $"<color=#E0E6ED>Chapter 2:</color> Valley Ruin of Ancients  <color=#52F0FF>[PURIFIED]</color>\n\n" +
-                  $"<color=#FFE066>TOTAL AETHEL SHARDS:</color> {shards}\n" +
+                  $"<color=#FFE066>TOTAL AETHEL SHARDS:</color> {formattedShards}\n" +
                   $"<color=#FFE066>CLEAR RANK:</color> <color=#FF5577>S+ GRAND CHAMPION</color>\n\n" +
                   $"<i>\"The cycle of decay is broken. The world of Vaelstrider is at peace.\"</i>";
         }
@@ -234,9 +235,9 @@ public class EndingCreditsUI : MonoBehaviour
     public void OnClickPlayAgain()
     {
         Time.timeScale = 1f;
-        if (Application.CanStreamedLevelBeLoaded("SampleScene"))
+        if (Application.CanStreamedLevelBeLoaded("Map1_Thestart"))
         {
-            SceneManager.LoadScene("SampleScene");
+            SceneManager.LoadScene("Map1_Thestart");
         }
         else
         {

@@ -7,9 +7,9 @@ public class GoblinAI : MonoBehaviour, IDamageable
     public static event System.Action<GoblinAI> OnEnemyDied;
 
     [Header("Goblin Stats")]
-    [SerializeField] private int maxHealth = 60;
+    [SerializeField] private int maxHealth = 145;
     [SerializeField] private int currentHealth;
-    [SerializeField] private int attackDamage = 10;
+    [SerializeField] private int attackDamage = 18;
     [SerializeField] private float moveSpeed = 3.8f;
     [SerializeField] private float detectionRange = 100f; // Luon phat hien va truy duoi
     [SerializeField] private float meleeRange = 1.35f;
@@ -216,6 +216,7 @@ public class GoblinAI : MonoBehaviour, IDamageable
         if (animator != null) animator.SetTrigger(DieHash);
 
         AethelShard.SpawnShards(transform.position, Random.Range(1, 3));
+        WorldItemPickup.RollDrop(transform.position, false);
 
         OnEnemyDied?.Invoke(this);
         Destroy(gameObject, 0.65f);

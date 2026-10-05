@@ -12,9 +12,9 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     public bool IsBoss => isBoss;
 
     [Header("Base Stats")]
-    [SerializeField] public int maxHealth = 65;
+    [SerializeField] public int maxHealth = 220;
     [SerializeField] public int currentHealth;
-    [SerializeField] public int attackDamage = 11;
+    [SerializeField] public int attackDamage = 22;
     [SerializeField] public float moveSpeed = 3.6f;
     [SerializeField] public float detectionRange = 10f;
     [SerializeField] public float meleeRange = 1.4f;
@@ -25,7 +25,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     [Header("Boss 3-Phase Settings")]
     [SerializeField] public int totalBossPhases = 3;
     [SerializeField] public int currentBossPhase = 3; // 3: Normal -> 2: Enraged -> 1: Final Nightmare
-    [SerializeField] public int phaseMaxHealth = 480;
+    [SerializeField] public int phaseMaxHealth = 1100;
 
     // Cooldown timers
     private float attackTimer = 0f;
@@ -459,9 +459,13 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
             if (isDead) break;
             if (player != null)
             {
-                // Tinh lai nhe huong huong ve player
-                Vector2 curAim = ((Vector2)player.position - (Vector2)transform.position).normalized;
-                Vector3 sp = transform.position + (Vector3)(curAim * 0.7f) + Vector3.up * 0.3f;
+                Vector2 playerCenter = (Vector2)player.position + Vector2.up * 0.4f;
+                Vector2 monsterCenter = (Vector2)transform.position + Vector2.up * 0.3f;
+                Vector2 curAim = (playerCenter - monsterCenter).normalized;
+                float distToPlayer = Vector2.Distance(monsterCenter, playerCenter);
+                float spawnDist = Mathf.Min(0.35f, distToPlayer * 0.35f);
+                Vector3 sp = (Vector3)monsterCenter + (Vector3)(curAim * spawnDist);
+
                 foreach (float a in spreadAngles)
                 {
                     SpawnBloodProjectile(sp, Quaternion.Euler(0, 0, a) * curAim);
@@ -723,8 +727,13 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(0.2f);
         if (player != null)
         {
-            Vector2 aimDir = ((Vector2)player.position + Vector2.up * 0.4f - (Vector2)transform.position).normalized;
-            Vector3 sp = transform.position + (Vector3)(aimDir * 0.6f) + Vector3.up * 0.3f;
+            Vector2 playerCenter = (Vector2)player.position + Vector2.up * 1.0f;
+            Vector2 monsterCenter = (Vector2)transform.position + Vector2.up * 0.5f;
+            Vector2 aimDir = (playerCenter - monsterCenter).normalized;
+            float distToPlayer = Vector2.Distance(monsterCenter, playerCenter);
+            float spawnDist = Mathf.Min(0.35f, distToPlayer * 0.35f);
+            Vector3 sp = (Vector3)monsterCenter + (Vector3)(aimDir * spawnDist);
+
             if (isBoss)
             {
                 float[] angs = { -16f, 0f, 16f };
@@ -741,7 +750,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     {
         GameObject proj = new GameObject("BloodMonster_Projectile");
         proj.transform.position = pos;
-        proj.transform.localScale = isBoss ? Vector3.one * 0.52f : Vector3.one * 0.38f;
+        proj.transform.localScale = isBoss ? Vector3.one * 0.58f : Vector3.one * 0.45f;
 
         var sr = proj.AddComponent<SpriteRenderer>();
         sr.sprite = runtimeBloodOrbSprite;
@@ -749,7 +758,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
 
         var col = proj.AddComponent<CircleCollider2D>();
         col.isTrigger = true;
-        col.radius = 0.14f;
+        col.radius = 0.35f;
 
         var rbP = proj.AddComponent<Rigidbody2D>();
         rbP.gravityScale = 0f;
@@ -855,16 +864,14 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         if (isBoss)
         {
             AethelShard.SpawnShards(transform.position, Random.Range(25, 35));
-            var pf = Resources.Load<GameObject>("Items/HealthPotion");
-            if (pf != null)
-            {
-                Instantiate(pf, transform.position + Vector3.left * 0.8f, Quaternion.identity);
-                Instantiate(pf, transform.position + Vector3.right * 0.8f, Quaternion.identity);
-            }
+            HealthPotion.Spawn(transform.position + Vector3.left * 0.8f, 1);
+            HealthPotion.Spawn(transform.position + Vector3.right * 0.8f, 1);
+            WorldItemPickup.RollDrop(transform.position, true);
         }
         else
         {
             AethelShard.SpawnShards(transform.position, Random.Range(4, 8));
+            WorldItemPickup.RollDrop(transform.position, false, 0.1f);
         }
 
         var co = GetComponent<Collider2D>();
@@ -884,7 +891,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         transform.localScale = Vector3.one * scaleMultiplier;
         totalBossPhases = 3;
         currentBossPhase = 3;
-        phaseMaxHealth = 480;
+        phaseMaxHealth = 1100;
         currentHealth = phaseMaxHealth;
 
         int el = LayerMask.NameToLayer("Enemy");
@@ -950,9 +957,9 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         else
         {
             ai.isBoss = false;
-            ai.maxHealth = 65;
-            ai.currentHealth = 65;
-            ai.attackDamage = 11;
+            ai.maxHealth = 220;
+            ai.currentHealth = 220;
+            ai.attackDamage = 22;
             ai.moveSpeed = 3.6f;
         }
 
