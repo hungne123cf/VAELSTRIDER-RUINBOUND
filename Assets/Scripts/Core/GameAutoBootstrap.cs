@@ -50,6 +50,7 @@ public class GameAutoBootstrap : MonoBehaviour
             // Dang o Map 2: Giu nguyen dia hinh thung lung Map 2, khoi tao UI, Upgrade va Ancient Shrine Tru Da Phat Sang
             MatchTimerUI.EnsureUIExists();
             MinimapHUD.EnsureUIExists();
+            FullscreenMapUI.EnsureUIExists();
             PotionQuickSlotUI.EnsureUIExists();
             GameOverUI.EnsureUIExists();
             EnsureSpecialSkillButton();
@@ -74,6 +75,7 @@ public class GameAutoBootstrap : MonoBehaviour
             // Đang ở Map 3: Giữ nguyên 100% bản đồ bạn tự vẽ, chỉ nạp UI điều khiển và nâng cấp
             MatchTimerUI.EnsureUIExists();
             MinimapHUD.EnsureUIExists();
+            FullscreenMapUI.EnsureUIExists();
             PotionQuickSlotUI.EnsureUIExists();
             GameOverUI.EnsureUIExists();
             EnsureSpecialSkillButton();
@@ -100,9 +102,10 @@ public class GameAutoBootstrap : MonoBehaviour
             DungeonMapBuilder.BuildDungeon();
         }
 
-        // 1. Khoi tao nut Binh Mau, Timer & Minimap tren Canvas
+        // 1. Khoi tao nut Binh Mau, Timer, Minimap & Fullscreen Map tren Canvas
         MatchTimerUI.EnsureUIExists();
         MinimapHUD.EnsureUIExists();
+        FullscreenMapUI.EnsureUIExists();
         PotionQuickSlotUI.EnsureUIExists();
         GameOverUI.EnsureUIExists();
 
@@ -195,7 +198,7 @@ public class GameAutoBootstrap : MonoBehaviour
         {
             if (c == null) continue;
             string cName = c.gameObject.name;
-            if (cName.Contains("InGameInventoryModal") || cName.Contains("SettingsModal") || cName.Contains("CharacterStatsPanel") || cName.Contains("ShrineUpgrade"))
+            if (cName.Contains("InGameInventoryModal") || cName.Contains("SettingsModal") || cName.Contains("CharacterStatsPanel") || cName.Contains("ShrineUpgrade") || cName.Contains("FullscreenMapModal"))
                 continue;
 
             HideChildrenByName(c.transform, hudNames, visible);
@@ -469,6 +472,18 @@ public class GameAutoBootstrap : MonoBehaviour
 
         CharacterManager.EnsureInstance();
         string selectedChar = CharacterManager.Instance.GetSelectedCharacterId();
+        CharacterData charData = CharacterManager.Instance.GetSelectedCharacter();
+
+        var playerHealth = player.GetComponent<PlayerHealth>();
+        if (playerHealth != null && charData != null)
+        {
+            playerHealth.SetBaseMaxHealth(charData.baseHealth);
+        }
+
+        if (charData != null)
+        {
+            player.SetBaseSpeed(charData.baseSpeed);
+        }
 
         EnsurePlayerColliderAndCombat(player, selectedChar);
         if (selectedChar == CharacterManager.CHAR_AZURE_BLADE)
@@ -514,6 +529,10 @@ public class GameAutoBootstrap : MonoBehaviour
             if (azure == null)
             {
                 azure = player.gameObject.AddComponent<AzureBladeSkill>();
+            }
+            if (azure != null)
+            {
+                azure.SetBaseWaveDamage(24);
             }
 
             var btnSpecial = GameObject.Find("Btn_Special");
@@ -579,6 +598,10 @@ public class GameAutoBootstrap : MonoBehaviour
             {
                 ronin = player.gameObject.AddComponent<GaleRoninSkill>();
             }
+            if (ronin != null)
+            {
+                ronin.SetBaseSlashDamage(28);
+            }
 
             var btnSpecial = GameObject.Find("Btn_Special");
             if (btnSpecial != null)
@@ -619,6 +642,12 @@ public class GameAutoBootstrap : MonoBehaviour
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure != null) Object.Destroy(azure);
 
+            var pCombat = player.GetComponent<PlayerCombat>();
+            if (pCombat != null)
+            {
+                pCombat.SetBaseAttackDamage(10, 10);
+            }
+
             var btnSpecial = GameObject.Find("Btn_Special");
             if (btnSpecial != null)
             {
@@ -638,8 +667,13 @@ public class GameAutoBootstrap : MonoBehaviour
         }
 
         var box = player.GetComponent<BoxCollider2D>();
+        var cap = player.GetComponent<CapsuleCollider2D>();
         var rb = player.GetComponent<Rigidbody2D>();
         var sr = player.GetComponent<SpriteRenderer>();
+
+        PhysicsMaterial2D slipMat = new PhysicsMaterial2D("PlayerSlipperyMat");
+        slipMat.friction = 0f;
+        slipMat.bounciness = 0f;
 
         if (sr != null)
         {
@@ -649,6 +683,7 @@ public class GameAutoBootstrap : MonoBehaviour
 
         if (rb != null)
         {
+            rb.sharedMaterial = slipMat;
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         }
@@ -667,13 +702,30 @@ public class GameAutoBootstrap : MonoBehaviour
 
         var tPoint = player.transform.Find("AttackPoint");
 
+        // Align Collider with rounded CapsuleCollider2D to prevent corner sticking
+        if (cap == null && box != null)
+        {
+            Vector2 oldOffset = box.offset;
+            Vector2 oldSize = box.size;
+            UnityEngine.Object.Destroy(box);
+            cap = player.gameObject.AddComponent<CapsuleCollider2D>();
+            cap.offset = oldOffset;
+            cap.size = oldSize;
+        }
+        else if (cap == null && box == null)
+        {
+            cap = player.gameObject.AddComponent<CapsuleCollider2D>();
+        }
+
+        if (cap != null) cap.sharedMaterial = slipMat;
+
         if (selectedChar == CharacterManager.CHAR_AZURE_BLADE)
         {
             // Azure Blade: 64x64 pixel art, pivot (0.5, 0.5)
-            if (box != null)
+            if (cap != null)
             {
-                box.offset = new Vector2(0f, 0f);
-                box.size = new Vector2(0.55f, 0.85f);
+                cap.offset = new Vector2(0f, 0f);
+                cap.size = new Vector2(0.50f, 0.80f);
             }
             if (tPoint != null)
             {
@@ -682,11 +734,11 @@ public class GameAutoBootstrap : MonoBehaviour
         }
         else if (selectedChar == CharacterManager.CHAR_MAID)
         {
-            // Maid: pivot (0.5, 0.5), chan o y=-0.45, dau o y=+0.45
-            if (box != null)
+            // Maid / Ronin: pivot (0.5, 0.5), chan o y=-0.45, dau o y=+0.45
+            if (cap != null)
             {
-                box.offset = new Vector2(0f, -0.05f);
-                box.size = new Vector2(0.55f, 0.8f);
+                cap.offset = new Vector2(0f, -0.05f);
+                cap.size = new Vector2(0.50f, 0.75f);
             }
             if (tPoint != null)
             {
@@ -696,10 +748,10 @@ public class GameAutoBootstrap : MonoBehaviour
         else
         {
             // Adventurer (Player 1): sprite 96x80, pivot (0.5, 0), chan o y=0.72, dau o y=1.94
-            if (box != null)
+            if (cap != null)
             {
-                box.offset = new Vector2(0f, 1.25f);
-                box.size = new Vector2(0.55f, 1.05f);
+                cap.offset = new Vector2(0f, 1.25f);
+                cap.size = new Vector2(0.50f, 0.95f);
             }
             if (tPoint != null)
             {

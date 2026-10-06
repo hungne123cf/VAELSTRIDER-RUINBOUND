@@ -30,6 +30,7 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        try { gameObject.tag = "Enemy"; } catch { }
         sr = GetComponent<SpriteRenderer>();
         if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 5000;

@@ -12,23 +12,28 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private int baseMaxHealth = 100;
     private int bonusMaxHealth = 0;
 
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+
+    public void SetBaseMaxHealth(int newBase)
+    {
+        baseMaxHealth = newBase;
+        RefreshSocketHealthBonus();
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+        PlayerPrefs.Save();
+    }
+
     public void ApplyUpgradeBonus(int bonusHp)
     {
         int oldBonus = bonusMaxHealth;
         bonusMaxHealth = bonusHp;
-        maxHealth = baseMaxHealth + bonusMaxHealth;
-        int diff = bonusMaxHealth - oldBonus;
-        if (diff > 0)
-        {
-            currentHealth = Mathf.Min(currentHealth + diff, maxHealth);
-            PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
-            PlayerPrefs.Save();
-        }
+        RefreshSocketHealthBonus();
     }
 
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
-        private bool isDead = false;
+    private bool isDead = false;
     public bool isInvulnerable = false;
 
     public static Vector3 LastDeathPosition { get; private set; }
@@ -37,35 +42,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     void Awake()
     {
         baseMaxHealth = maxHealth;
-        
-        ArmorShopUI.GetEquippedArmorBonus(out int armorHp, out float _, out float _);
-        if (armorHp > 0)
-        {
-            maxHealth += armorHp;
-            baseMaxHealth += armorHp;
-        }
-
-        string equippedWpnId = PlayerPrefs.GetString("Equipped_Weapon_Id", "");
-        if (!string.IsNullOrEmpty(equippedWpnId))
-        {
-            var def = InventoryItemDatabase.GetItem(equippedWpnId);
-            if (def != null && def.hpBonus > 0)
-            {
-                maxHealth += def.hpBonus;
-                baseMaxHealth += def.hpBonus;
-            }
-        }
-
-        EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out int sockHp, out _, out _, out _, out _, out socketHpRegen);
-        if (sockHp > 0)
-        {
-            maxHealth += sockHp;
-            baseMaxHealth += sockHp;
-        }
+        RefreshSocketHealthBonus();
 
         int savedHp = PlayerPrefs.GetInt("Saved_CurrentHealth", maxHealth);
-        if (savedHp <= 0) savedHp = maxHealth;
-        currentHealth = Mathf.Min(savedHp, maxHealth);
+        if (savedHp <= 0 || savedHp > maxHealth) savedHp = maxHealth;
+        currentHealth = Mathf.Clamp(savedHp, 1, maxHealth);
+
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
@@ -83,13 +65,30 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         int upHp = upgradeMgr != null ? upgradeMgr.GetHealthBonus() : 0;
         ArmorShopUI.GetEquippedArmorBonus(out int armorHp, out float _, out float _);
 
+        int weaponHp = 0;
+        string equippedWpnId = PlayerPrefs.GetString("Equipped_Weapon_Id", "");
+        if (!string.IsNullOrEmpty(equippedWpnId))
+        {
+            var def = InventoryItemDatabase.GetItem(equippedWpnId);
+            if (def != null && def.hpBonus > 0)
+            {
+                weaponHp = def.hpBonus;
+            }
+        }
+
         int oldMax = maxHealth;
-        maxHealth = 100 + upHp + armorHp + sockHp;
-        if (maxHealth > oldMax)
+        maxHealth = baseMaxHealth + upHp + armorHp + weaponHp + sockHp;
+
+        if (currentHealth > maxHealth || currentHealth <= 0)
+        {
+            currentHealth = maxHealth;
+        }
+        else if (maxHealth > oldMax && oldMax > 0)
         {
             currentHealth += (maxHealth - oldMax);
         }
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        currentHealth = Mathf.Clamp(currentHealth, 1, maxHealth);
         PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
         PlayerPrefs.Save();
     }

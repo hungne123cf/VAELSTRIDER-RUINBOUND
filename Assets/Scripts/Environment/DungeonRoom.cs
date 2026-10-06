@@ -37,12 +37,30 @@ public class DungeonRoom : MonoBehaviour
         if (player != null)
         {
             Vector3 pos = player.transform.position;
-            if (roomBounds.Contains(new Vector2(pos.x, pos.y)))
+            if (IsPlayerDeepInside(pos))
             {
                 isEntered = true;
                 DungeonRoomManager.Instance?.OnPlayerEnterRoom(this);
             }
         }
+    }
+
+    public bool IsPlayerDeepInside(Vector3 playerPos)
+    {
+        if (!roomBounds.Contains(new Vector2(playerPos.x, playerPos.y))) return false;
+
+        // Nếu có cửa vào, người chơi phải bước sâu vào trong phòng cách cửa ít nhất 2.0m
+        if (entranceBarrier != null)
+        {
+            Vector3 barrierPos = entranceBarrier.transform.position;
+            float dist = Vector2.Distance(playerPos, barrierPos);
+            if (dist < 2.0f)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public void OnRoomCleared()

@@ -99,23 +99,48 @@ public class ShrineUpgradeUI : MonoBehaviour
             if (descTexts[i] != null) descTexts[i].text = mgr.GetUpgradeDescription(type);
             if (levelTexts[i] != null)
             {
-                levelTexts[i].text = isVi 
-                    ? $"CẤP HIỆN TẠI: <color=#66CCFF>Lv.{lvl}</color>" 
-                    : $"CURRENT LEVEL: <color=#66CCFF>Lv.{lvl}</color>";
+                if (isMax)
+                {
+                    levelTexts[i].text = isVi 
+                        ? $"CẤP HIỆN TẠI: <color=#FFD700>Lv.{lvl} (MAX)</color>" 
+                        : $"CURRENT LEVEL: <color=#FFD700>Lv.{lvl} (MAX)</color>";
+                }
+                else
+                {
+                    levelTexts[i].text = isVi 
+                        ? $"CẤP HIỆN TẠI: <color=#66CCFF>Lv.{lvl}</color>" 
+                        : $"CURRENT LEVEL: <color=#66CCFF>Lv.{lvl}</color>";
+                }
             }
             if (bonusTexts[i] != null)
             {
-                bonusTexts[i].text = isVi 
-                    ? $"Cấp kế tiếp: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>" 
-                    : $"Next Level: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>";
+                if (isMax)
+                {
+                    bonusTexts[i].text = isVi 
+                        ? $"Cấp kế tiếp: <color=#FFD700>MAX</color>" 
+                        : $"Next Level: <color=#FFD700>MAX</color>";
+                }
+                else
+                {
+                    bonusTexts[i].text = isVi 
+                        ? $"Cấp kế tiếp: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>" 
+                        : $"Next Level: <color=#66FF99>{mgr.GetNextBonusString(type)}</color>";
+                }
             }
 
             if (costTexts[i] != null)
             {
-                string costStr = cost >= 10000 ? (cost / 1000.0).ToString("0.#") + "K" : cost.ToString("N0");
-                costTexts[i].text = isVi 
-                    ? $"NÂNG CẤP\n<size=11>{costStr} Mảnh</size>" 
-                    : $"UPGRADE\n<size=11>{costStr} Shards</size>";
+                if (isMax)
+                {
+                    costTexts[i].text = "<size=13>MAX</size>";
+                }
+                else
+                {
+                    string costStr = cost >= 10000 ? (cost / 1000.0).ToString("0.#") + "K" : cost.ToString("N0");
+                    costTexts[i].text = isVi 
+                        ? $"NÂNG CẤP\n<size=11>{costStr} Mảnh</size>" 
+                        : $"UPGRADE\n<size=11>{costStr} Shards</size>";
+                }
                 costTexts[i].enableAutoSizing = true;
                 costTexts[i].fontSizeMin = 8.5f;
                 costTexts[i].fontSizeMax = 12f;
@@ -123,12 +148,21 @@ public class ShrineUpgradeUI : MonoBehaviour
 
             if (upgradeButtons[i] != null)
             {
-                bool canAfford = (mgr.CurrentShards >= cost);
-                upgradeButtons[i].interactable = canAfford;
-                var img = upgradeButtons[i].GetComponent<Image>();
-                if (img != null)
+                if (isMax)
                 {
-                    img.color = canAfford ? new Color(0.18f, 0.55f, 0.38f, 1f) : new Color(0.35f, 0.18f, 0.20f, 0.75f);
+                    upgradeButtons[i].interactable = false;
+                    var img = upgradeButtons[i].GetComponent<Image>();
+                    if (img != null) img.color = new Color(0.22f, 0.25f, 0.28f, 0.65f);
+                }
+                else
+                {
+                    bool canAfford = (mgr.CurrentShards >= cost);
+                    upgradeButtons[i].interactable = canAfford;
+                    var img = upgradeButtons[i].GetComponent<Image>();
+                    if (img != null)
+                    {
+                        img.color = canAfford ? new Color(0.18f, 0.55f, 0.38f, 1f) : new Color(0.35f, 0.18f, 0.20f, 0.75f);
+                    }
                 }
             }
         }

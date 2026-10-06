@@ -5,17 +5,19 @@ using System.Collections.Generic;
 public class GaleRoninSkill : MonoBehaviour
 {
     [Header("Gale Ronin Attack Settings")]
-    [SerializeField] private float slashRadius = 0.95f;
+    [SerializeField] private float slashRadius = 1.30f; // Tăng tầm đánh xa hơn một chút
     [SerializeField] private float slashAngle = 180f; // Góc chém bán nguyệt 180 độ
-    [SerializeField] private int baseSlashDamage = 9;
-    [SerializeField] private float attackCooldown = 0.32f; // Tốc độ chém nhanh
+    [SerializeField] private int baseSlashDamage = 28; // Sát thương uy lực 28 chuẩn 1:1 cho đòn đánh chậm Iaido
+    [SerializeField] private float attackCooldown = 1.20f; // Tốc độ chém chậm hơn rõ rệt (1.2s), đầm tay chuẩn Iaido Samurai
     [SerializeField] private LayerMask targetLayers;
+
+    public void SetBaseSlashDamage(int dmg) => baseSlashDamage = dmg;
 
     [Header("Passive: Wind Mark (Phong Ấn)")]
     [SerializeField] private int maxMarkStacks = 3;
     [SerializeField] private float burstDamageMultiplier = 2.4f;
     [SerializeField] private float vortexDuration = 1.3f;
-    [SerializeField] private float vortexRadius = 3.2f;
+    [SerializeField] private float vortexRadius = 1.6f; // Thu gọn bán kính lốc xoáy cho vừa vặn, chuẩn xác
 
     [Header("Special Skill: Bão Phong Trảm (Phantom Cleave)")]
     [SerializeField] private float specialCooldown = 15.0f;
@@ -38,6 +40,7 @@ public class GaleRoninSkill : MonoBehaviour
 
     public bool IsAttackReady => attackCooldownTimer <= 0f;
     public bool IsSpecialReady => specialCooldownTimer <= 0f;
+    public float SpecialCooldown => specialCooldown;
     public float SpecialCooldownRatio => Mathf.Clamp01(specialCooldownTimer / specialCooldown);
     public float SpecialCooldownRemaining => Mathf.Max(0f, specialCooldownTimer);
 
@@ -53,6 +56,35 @@ public class GaleRoninSkill : MonoBehaviour
         {
             targetLayers = ~0; // Target everything damageable
         }
+        RefreshCooldownStats();
+    }
+
+    void Start()
+    {
+        RefreshCooldownStats();
+    }
+
+    void OnEnable()
+    {
+        RefreshCooldownStats();
+    }
+
+    public void RefreshCooldownStats()
+    {
+        float totalCdr = 0f;
+        var upgradeMgr = PlayerUpgradeManager.EnsureInstance();
+        if (upgradeMgr != null)
+        {
+            totalCdr += upgradeMgr.GetUltiCooldownReduction();
+        }
+
+        EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out _, out float gemCdr, out _, out _);
+        if (gemCdr > 0f)
+        {
+            totalCdr += 15.0f * gemCdr;
+        }
+
+        specialCooldown = Mathf.Max(5.0f, 15.0f - totalCdr);
     }
 
     void Update()
@@ -120,8 +152,8 @@ public class GaleRoninSkill : MonoBehaviour
 
         SoundManager.EnsureInstance()?.PlaySwordSlash();
 
-        // Quét hình quạt 180 độ vừa vặn với hoạt ảnh chém
-        Vector2 origin = (Vector2)transform.position + facingDir * 0.45f;
+        // Quét hình quạt 180 độ vừa vặn với hoạt ảnh chém với tầm vươn xa hơn
+        Vector2 origin = (Vector2)transform.position + facingDir * 0.55f;
         Collider2D[] colliders = Physics2D.OverlapCircleAll(origin, slashRadius, targetLayers);
 
         int totalBaseDamage = baseSlashDamage + bonusAtkDamage;
@@ -134,7 +166,7 @@ public class GaleRoninSkill : MonoBehaviour
             var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
             if (damageable == null || damageable is PlayerHealth) continue;
 
-            GameObject rootObj = col.transform.root.gameObject;
+            GameObject rootObj = (damageable as Component)?.gameObject ?? col.gameObject;
             if (hitRoots.Contains(rootObj)) continue;
             hitRoots.Add(rootObj);
 
@@ -153,14 +185,26 @@ public class GaleRoninSkill : MonoBehaviour
             }
         }
 
-        // Hồi năng lượng & Tích lũy Nội Năng CHỈ KHI chém trúng quái vật thực sự
+        // Hồi năng lượng & Tích lũy 50% Tiến Trình Nội Năng + Giảm 20% Cooldown Tuyệt Kỹ CHỈ KHI chém trúng quái vật thực sự!
         if (hitEnemyCount > 0)
         {
             var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
             if (energySys != null)
             {
-                energySys.RestoreEnergy(8f);
-                energySys.AddInnerEnergy(12f);
+                energySys.RestoreEnergy(15f);
+                energySys.AddInnerEnergy(50f); // +50% tiến trình Nội Năng (2 đòn đánh trúng = 100% nộ)
+            }
+
+            // Giảm 20% Thời gian hồi Chiêu Cuối (Ultimate CD)
+            float cdReduction = specialCooldown * 0.20f;
+            if (specialCooldownTimer > 0f)
+            {
+                specialCooldownTimer = Mathf.Max(0f, specialCooldownTimer - cdReduction);
+                DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "⚡ +50% NỘ | -20% CD ULT!", new Color(0.1f, 1f, 0.85f));
+            }
+            else
+            {
+                DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "⚡ +50% NỘ!", new Color(0.1f, 1f, 0.85f));
             }
 
             if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
@@ -271,26 +315,13 @@ public class GaleRoninSkill : MonoBehaviour
     }
 
     /// <summary>
-    /// Tuyệt Kỹ: Ám Ảnh Trảm (Shadow Execution Strike)
-    /// Dịch chuyển ra sau lưng kẻ địch, tung đòn chém chí mạng rồi biến về vị trí ban đầu.
+    /// Tìm mục tiêu gần nhất hoặc Boss trong bán kính quét
     /// </summary>
-    public void TriggerSpecialSkill()
+    public Transform FindBestTarget(float searchRadius, out IDamageable outDamageable)
     {
-        if (specialCooldownTimer > 0f || isPhantomActive)
-        {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "COOLDOWN!", Color.yellow);
-            return;
-        }
-
-        StartCoroutine(PhantomCleaveRoutine());
-    }
-
-    private IEnumerator PhantomCleaveRoutine()
-    {
-        // 1. Quét tìm mục tiêu phù hợp nhất trong bán kính 10.5m
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 10.5f, targetLayers);
+        outDamageable = null;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, searchRadius, targetLayers);
         Transform targetTransform = null;
-        IDamageable targetDamageable = null;
         float closestDist = float.MaxValue;
         bool isBossTarget = false;
 
@@ -304,37 +335,73 @@ public class GaleRoninSkill : MonoBehaviour
             bool isProp = (col.GetComponent<BreakableProp>() != null || col.GetComponentInParent<BreakableProp>() != null || col.GetComponent<TreasureChest>() != null || col.GetComponentInParent<TreasureChest>() != null);
             if (isProp) continue;
 
-            Transform rootT = col.transform.root;
-            float dist = Vector2.Distance(transform.position, rootT.position);
+            // Lấy chính xác Transform của Enemy (không lấy root vì root có thể là dungeon container)
+            Transform enemyT = (dmg as Component)?.transform ?? col.transform;
+            float dist = Vector2.Distance(transform.position, enemyT.position);
 
-            // Ưu tiên Boss nếu có
-            bool isBoss = rootT.GetComponent<ValleyGolemBossAI>() != null || rootT.GetComponent<SkeletonKingBossAI>() != null || rootT.name.Contains("Boss");
+            bool isBoss = enemyT.GetComponent<ValleyGolemBossAI>() != null || enemyT.GetComponentInParent<ValleyGolemBossAI>() != null || 
+                          enemyT.GetComponent<SkeletonKingBossAI>() != null || enemyT.GetComponentInParent<SkeletonKingBossAI>() != null || 
+                          enemyT.name.Contains("Boss");
             if (isBoss)
             {
                 if (!isBossTarget || dist < closestDist)
                 {
                     isBossTarget = true;
                     closestDist = dist;
-                    targetTransform = rootT;
-                    targetDamageable = dmg;
+                    targetTransform = enemyT;
+                    outDamageable = dmg;
                 }
             }
             else if (!isBossTarget && dist < closestDist)
             {
                 closestDist = dist;
-                targetTransform = rootT;
-                targetDamageable = dmg;
+                targetTransform = enemyT;
+                outDamageable = dmg;
             }
         }
 
-        if (targetTransform == null || targetDamageable == null)
+        return targetTransform;
+    }
+
+    /// <summary>
+    /// Tuyệt Kỹ: Ám Ảnh Trảm (Shadow Execution Strike)
+    /// Dịch chuyển ra sau lưng kẻ địch, tung đòn chém chí mạng rồi biến về vị trí ban đầu.
+    /// </summary>
+    public bool TriggerSpecialSkill()
+    {
+        if (specialCooldownTimer > 0f || isPhantomActive)
+        {
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "COOLDOWN!", Color.yellow);
+            return false;
+        }
+
+        Transform targetT = FindBestTarget(3.5f, out var targetDmg); // Thu gọn tầm khóa mục tiêu về 3.5m (khoảng 3 ô gạch sàn)
+        if (targetT == null || targetDmg == null)
         {
             DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("KHÔNG CÓ MỤC TIÊU GẦN!", "NO TARGET NEARBY!"), Color.yellow);
+            return false;
+        }
+
+        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+        if (energySys != null && !energySys.TryConsumeEnergy(40f))
+        {
+            return false;
+        }
+
+        RefreshCooldownStats();
+        specialCooldownTimer = specialCooldown;
+        StartCoroutine(PhantomCleaveRoutine(targetT, targetDmg));
+        return true;
+    }
+
+    private IEnumerator PhantomCleaveRoutine(Transform targetTransform, IDamageable targetDamageable)
+    {
+        if (targetTransform == null || targetDamageable == null)
+        {
             yield break;
         }
 
         isPhantomActive = true;
-        specialCooldownTimer = specialCooldown;
 
         if (playerHealth != null) playerHealth.isInvulnerable = true;
         if (playerController != null) playerController.SetCanMove(false);
@@ -390,6 +457,7 @@ public class GaleRoninSkill : MonoBehaviour
 
         int totalStrikeDmg = (basePhantomDamage * 3) + (playerCombat != null ? playerCombat.BonusAttackDamage * 2 : 0) + upUltBonus;
 
+        bool targetWasAliveBefore = (targetDamageable != null && targetTransform != null);
         if (targetDamageable != null && targetTransform != null)
         {
             targetDamageable.TakeDamage(totalStrikeDmg);
@@ -403,11 +471,11 @@ public class GaleRoninSkill : MonoBehaviour
             }
         }
 
-        // Gây sát thương quét phụ (Splash Damage) cho quái vật xung quanh mục tiêu chính
-        Collider2D[] splashHits = Physics2D.OverlapCircleAll(targetPos, 2.8f, targetLayers);
+        // Gây sát thương quét phụ (Splash Damage) gọn gàng cho quái vật đứng ngay cạnh mục tiêu chính
+        Collider2D[] splashHits = Physics2D.OverlapCircleAll(targetPos, 1.0f, targetLayers);
         foreach (var sh in splashHits)
         {
-            if (sh == null || sh.gameObject == gameObject || sh.transform.root == targetTransform) continue;
+            if (sh == null || sh.gameObject == gameObject || (targetTransform != null && sh.transform.IsChildOf(targetTransform))) continue;
             var dmg = sh.GetComponent<IDamageable>() ?? sh.GetComponentInParent<IDamageable>();
             if (dmg != null && !(dmg is PlayerHealth))
             {
@@ -419,6 +487,14 @@ public class GaleRoninSkill : MonoBehaviour
                     DamagePopup.Create(sh.transform.position, splashDmg, isCritical: false);
                 }
             }
+        }
+
+        // KIỂM TRA NẾU KẾT LIỄU ĐƯỢC MỤC TIÊU: HỒI NGAY CHIÊU CUỐI!
+        if (targetWasAliveBefore && IsTargetKilled(targetTransform, targetDamageable))
+        {
+            specialCooldownTimer = 0f;
+            SoundManager.EnsureInstance()?.PlayPortalSpawn();
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, "⚡ KẾT LIỄU: HỒI CHIÊU CUỐI! ⚡", new Color(0.2f, 1f, 0.4f));
         }
 
         SoundManager.EnsureInstance()?.PlayHitImpact();
@@ -500,6 +576,31 @@ public class GaleRoninSkill : MonoBehaviour
         }
 
         if (ghostObj != null) Destroy(ghostObj);
+    }
+
+    /// <summary>
+    /// Giảm thời gian hồi Tuyệt Kỹ khi Dash (-2.0s)
+    /// </summary>
+    public void ReduceSpecialCooldown(float seconds)
+    {
+        if (specialCooldownTimer > 0f)
+        {
+            specialCooldownTimer = Mathf.Max(0f, specialCooldownTimer - seconds);
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"⚡ -{seconds:0.#}s CD!", new Color(0.2f, 0.9f, 1f));
+        }
+    }
+
+    private bool IsTargetKilled(Transform targetT, IDamageable targetDmg)
+    {
+        if (targetT == null) return true;
+
+        var comp = targetDmg as Component;
+        if (comp == null || !comp.gameObject.activeInHierarchy) return true;
+
+        var col = targetT.GetComponent<Collider2D>() ?? comp.GetComponent<Collider2D>();
+        if (col == null || !col.enabled) return true;
+
+        return false;
     }
 
     void OnDrawGizmosSelected()

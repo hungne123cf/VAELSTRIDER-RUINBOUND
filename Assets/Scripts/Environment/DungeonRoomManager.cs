@@ -50,22 +50,30 @@ public class DungeonRoomManager : MonoBehaviour
 
             case DungeonRoom.RoomType.SunkenHall:
                 // Lock entrance barrier, start Wave 1
-                if (room.entranceBarrier != null) room.entranceBarrier.Lock();
+                StartCoroutine(LockBarrierWhenSafeRoutine(room.entranceBarrier, room));
                 StartCoroutine(TriggerCombatWaveRoutine(room, 1, 2, false));
                 break;
 
             case DungeonRoom.RoomType.CursedCrypt:
                 // Lock entrance barrier, start Wave 2
-                if (room.entranceBarrier != null) room.entranceBarrier.Lock();
+                StartCoroutine(LockBarrierWhenSafeRoutine(room.entranceBarrier, room));
                 StartCoroutine(TriggerCombatWaveRoutine(room, 2, 4, false));
                 break;
 
             case DungeonRoom.RoomType.TitanSanctum:
                 // Boss Room! Lock barrier, shake camera, start Boss Wave 3
-                if (room.entranceBarrier != null) room.entranceBarrier.Lock();
+                StartCoroutine(LockBarrierWhenSafeRoutine(room.entranceBarrier, room));
                 StartCoroutine(TriggerBossCombatRoutine(room));
                 break;
         }
+    }
+
+    private IEnumerator LockBarrierWhenSafeRoutine(RoomBarrier barrier, DungeonRoom room)
+    {
+        if (barrier == null) yield break;
+
+        yield return new WaitForSeconds(0.4f);
+        barrier.Lock();
     }
 
     private void AnnounceRoom(DungeonRoom room)

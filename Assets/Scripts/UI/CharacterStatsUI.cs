@@ -122,8 +122,32 @@ public class CharacterStatsUI : MonoBehaviour
         int totalAtk = baseAtk + atkBonus + sAtk;
         int totalHp = baseHp + hpBonus + sHp;
         float finalDashCd = Mathf.Max(1.0f, 5.0f - dashCdRed);
-        float baseUltiCd = isAzure ? 18.0f : (isRonin ? 15.0f : 30.0f);
-        float finalUltiCd = Mathf.Max(5.0f, baseUltiCd - ultiCdRed - (30.0f * sCd));
+        float baseUltiCd = isAzure ? 18.0f : (isRonin ? 15.0f : 24.0f);
+        float gemCdSec = baseUltiCd * sCd;
+        float finalUltiCd = Mathf.Max(5.0f, baseUltiCd - ultiCdRed - gemCdSec);
+
+        // Đảm bảo đồng bộ 100% với giá trị Runtime Skill Component thực tế
+        var pcObj = FindAnyObjectByType<PlayerCombat>();
+        if (pcObj != null)
+        {
+            pcObj.RecalculateCombatStats();
+            var roninSkill = pcObj.GetComponent<GaleRoninSkill>();
+            var azureSkill = pcObj.GetComponent<AzureBladeSkill>();
+            if (isRonin && roninSkill != null)
+            {
+                roninSkill.RefreshCooldownStats();
+                finalUltiCd = roninSkill.SpecialCooldown;
+            }
+            else if (isAzure && azureSkill != null)
+            {
+                azureSkill.RefreshCooldownStats();
+                finalUltiCd = azureSkill.SpecialCooldown;
+            }
+            else
+            {
+                finalUltiCd = pcObj.SkillCooldown;
+            }
+        }
 
         // Header Title
         if (characterTitleText != null)
@@ -212,11 +236,30 @@ public class CharacterStatsUI : MonoBehaviour
         }
         if (dashCardDesc != null)
         {
-            dashCardDesc.text = isVi
-                ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
-                  $"• <b>Đặc tính:</b> Lướt nhanh và <color=#55FF88><b>bất tử 0.2s</b></color> né mọi sát thương"
-                : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
-                  $"• <b>Trait:</b> Dash forward with <color=#55FF88><b>0.2s Invincibility</b></color>";
+            if (isRonin)
+            {
+                dashCardDesc.text = isVi
+                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Đặc tính:</b> Lướt né đòn (bất tử 0.2s) & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>"
+                    : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Trait:</b> Dash with 0.2s Invincibility & <color=#FFAA33><b>Reduces Ultimate CD by 2.0s</b></color>";
+            }
+            else if (isAzure)
+            {
+                dashCardDesc.text = isVi
+                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Đặc tính:</b> Lướt né đòn & <color=#55FFFF><b>Hồi ngay đòn đánh thường</b></color>"
+                    : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Trait:</b> Dash forward & <color=#55FFFF><b>Instantly resets basic attack</b></color>";
+            }
+            else
+            {
+                dashCardDesc.text = isVi
+                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Đặc tính:</b> Lướt nhanh và <color=#55FF88><b>bất tử 0.2s</b></color> né mọi sát thương"
+                    : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Trait:</b> Dash forward with <color=#55FF88><b>0.2s Invincibility</b></color>";
+            }
         }
 
         // Card 3: Ulti
@@ -225,9 +268,13 @@ public class CharacterStatsUI : MonoBehaviour
             if (isAzure)
                 ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: BÃO SÓNG KIẾM" : "3. ULTIMATE: CRESCENT TEMPEST";
             else if (isRonin)
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: BÃO PHONG TRẢM" : "3. ULTIMATE: PHANTOM CLEAVE";
+            {
+                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: ÁM ẢNH TRẢM (SHADOW STRIKE)" : "3. ULTIMATE: SHADOW STRIKE";
+            }
             else
+            {
                 ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: CƠN LỐC TÀN TÍCH" : "3. ULTIMATE: RUIN WHIRLWIND";
+            }
         }
         if (ultiCardDesc != null)
         {
@@ -243,9 +290,11 @@ public class CharacterStatsUI : MonoBehaviour
             {
                 ultiCardDesc.text = isVi
                     ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>40 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Hiệu ứng:</b> Ảo ảnh lướt trảm 4 đợt liên hoàn + kích nổ toàn bộ Phong Ấn quái"
+                      $"• <b>Hiệu ứng:</b> Khóa mục tiêu (10.5m) -> Dịch chuyển ra sau lưng trảm cực mạnh rồi biến về vị trí cũ\n" +
+                      $"• <b>Nội tại:</b> <color=#55FF88><b>Kết liễu mục tiêu hồi chiêu Tuyệt Kỹ ngay lập tức!</b></color>"
                     : $"• <b>Cost:</b> <color=#38BDF8><b>40 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Effect:</b> 4-strike phantom dash slashes + detonates all enemy Wind Marks";
+                      $"• <b>Effect:</b> Target lock-on (10.5m) -> Teleports behind enemy for a devastating strike then returns\n" +
+                      $"• <b>Special:</b> <color=#55FF88><b>Executing target instantly resets Ultimate Cooldown!</b></color>";
             }
             else
             {

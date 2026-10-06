@@ -1658,12 +1658,12 @@ public class MainMenuManager : MonoBehaviour
         else if (curChar == CharacterManager.CHAR_GALE_RONIN)
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách", "Gale Ronin");
-            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách (Phong Ấn & Ảo Ảnh)", "Phantom Blade (Wind Marks & Cleave)");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách (Nhất Kích Tất Sát)", "Phantom Blade (Iaido Precision)");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Bão Phong Trảm", "Phantom Cleave");
-            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Đòn chém quét 180° tích Phong Ấn bộc phá bạo kích & lốc xoáy. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "180° cleave stacking Wind Marks for critical bursts & vortex. Special skill unleashes phantom dash slashes across foes!");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Tốc đánh chậm cố định (chuẩn Iaido), chém trúng quái hồi ngay +50% Nộ & giảm -20% hồi chiêu Ulti. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "Fixed slow Iaido strikes: On hit restores +50% Rage & reduces Ulti CD by 20%. Special skill unleashes phantom dash slashes across foes!");
             if (heroStatsSummaryText != null)
             {
-                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 95   CÔNG: 24   TỐC: 5.4", "HP: 95   ATK: 24   SPD: 5.4");
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 95   CÔNG: 28   TỐC: 5.4", "HP: 95   ATK: 28   SPD: 5.4");
             }
         }
         else
@@ -1704,10 +1704,10 @@ public class MainMenuManager : MonoBehaviour
         else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid")
         {
             if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách (Gale Ronin)", "Gale Ronin (Phantom Blade)");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách (Phong Ấn & Ảo Ảnh)", "Phantom Blade (Wind Marks & Cleave)");
-            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 95   CÔNG: 24   TỐC: 5.4", "HP: 95   ATK: 24   SPD: 5.4");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách (Nhất Kích Tất Sát)", "Phantom Blade (Iaido Precision)");
+            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 95   CÔNG: 28   TỐC: 5.4", "HP: 95   ATK: 28   SPD: 5.4");
             if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Bão Phong Trảm", "Special: Phantom Cleave");
-            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Đòn chém quét 180° tích Phong Ấn bộc phá bạo kích & lốc xoáy. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "180° cleave stacking Wind Marks for critical bursts & vortex. Special skill unleashes phantom dash slashes across foes!");
+            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Tốc đánh chậm cố định (chuẩn Iaido), chém trúng quái hồi ngay +50% Nộ & giảm -20% hồi chiêu Ulti. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "Fixed slow Iaido strikes: On hit restores +50% Rage & reduces Ulti CD by 20%. Special skill unleashes phantom dash slashes across foes!");
 
             bool isSelected = (currentSelected == CharacterManager.CHAR_GALE_RONIN);
             if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");

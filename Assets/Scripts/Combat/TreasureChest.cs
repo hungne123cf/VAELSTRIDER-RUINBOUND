@@ -33,6 +33,9 @@ public class TreasureChest : MonoBehaviour, IDamageable
     private bool isLootGenerated = false;
     private List<ChestLootItem> lootItems = new List<ChestLootItem>();
 
+    private Vector3 baseScale = Vector3.one;
+    private Coroutine bounceRoutine = null;
+
     // Mobile & In-Game Interaction Arrow (Giống trụ nâng cấp Ancient Shrine)
     private GameObject arrowIndicatorObj;
     private TextMeshPro arrowTextMesh;
@@ -41,6 +44,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        baseScale = transform.localScale;
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
 
@@ -144,12 +148,15 @@ public class TreasureChest : MonoBehaviour, IDamageable
 
         arrowTextMesh = arrowIndicatorObj.AddComponent<TextMeshPro>();
         arrowTextMesh.text = "▼";
-        arrowTextMesh.fontSize = 5.2f;
+        arrowTextMesh.fontSize = 4.2f;
         arrowTextMesh.fontStyle = FontStyles.Bold;
         arrowTextMesh.alignment = TextAlignmentOptions.Center;
         arrowTextMesh.color = arrowColor;
         arrowTextMesh.sortingLayerID = SortingLayer.NameToID("UI");
         arrowTextMesh.sortingOrder = 500;
+        arrowTextMesh.rectTransform.sizeDelta = new Vector2(1.5f, 1.5f);
+        arrowTextMesh.raycastTarget = false;
+        arrowTextMesh.maskable = false;
 
         arrowIndicatorObj.SetActive(false);
     }
@@ -288,7 +295,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
             boxCollider.isTrigger = false;
         }
 
-        StartCoroutine(BounceLidRoutine());
+        PlayBounceAnimation();
     }
 
     public void OnModalClosed()
@@ -310,7 +317,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
             spriteRenderer.sprite = openSprite;
         }
 
-        StartCoroutine(BounceLidRoutine());
+        PlayBounceAnimation();
 
         var popup = ChestLootPopupUI.EnsureUIExists();
         if (popup != null)
@@ -337,14 +344,23 @@ public class TreasureChest : MonoBehaviour, IDamageable
         OpenChest();
     }
 
+    private void PlayBounceAnimation()
+    {
+        if (bounceRoutine != null)
+        {
+            StopCoroutine(bounceRoutine);
+        }
+        bounceRoutine = StartCoroutine(BounceLidRoutine());
+    }
+
     private IEnumerator BounceLidRoutine()
     {
-        Vector3 orig = transform.localScale;
-        transform.localScale = orig * 1.2f;
+        transform.localScale = baseScale * 1.15f;
         yield return new WaitForSecondsRealtime(0.08f);
-        transform.localScale = orig * 0.95f;
+        transform.localScale = baseScale * 0.95f;
         yield return new WaitForSecondsRealtime(0.06f);
-        transform.localScale = orig;
+        transform.localScale = baseScale;
+        bounceRoutine = null;
     }
 
     public static TreasureChest SpawnChest(Vector3 pos)

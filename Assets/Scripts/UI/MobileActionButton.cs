@@ -42,6 +42,8 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         EnsureCooldownVisuals();
     }
 
+    private const float HOLD_AIM_THRESHOLD = 0.45f;
+
     void Update()
     {
         EnsureTargets();
@@ -60,7 +62,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 if (isPointerDown)
                 {
                     float holdDur = Time.time - pointerDownTime;
-                    if (holdDur >= 0.10f)
+                    if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
                     {
                         Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : azureBlade.GetFacingDirection();
                         azureBlade.UpdateAim(aimDir, holdDur);
@@ -72,6 +74,26 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 if (cooldownOverlay != null && cooldownOverlay.enabled) cooldownOverlay.enabled = false;
                 if (cooldownText != null && cooldownText.enabled) cooldownText.enabled = false;
                 if (legacyCooldownText != null && legacyCooldownText.enabled) legacyCooldownText.enabled = false;
+
+                if (isPointerDown)
+                {
+                    float holdDur = Time.time - pointerDownTime;
+                    if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        Vector2 playerPos = (playerCombat != null) ? (Vector2)playerCombat.transform.position : Vector2.zero;
+                        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+                        
+                        var ronin = (playerCombat != null) ? playerCombat.GetComponent<GaleRoninSkill>() : null;
+                        if (ronin != null && ronin.enabled)
+                        {
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.10f, 180f, new Color(0.2f, 0.9f, 0.7f, 0.85f));
+                        }
+                        else if (playerCombat != null)
+                        {
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.05f, 120f, new Color(1f, 0.85f, 0.2f, 0.85f));
+                        }
+                    }
+                }
             }
         }
         else if (buttonType == ButtonType.Skill)
@@ -81,6 +103,42 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 float norm = playerCombat.GetSkillCooldownNormalized();
                 float rem = playerCombat.GetSkillCooldownRemaining();
                 UpdateCooldownDisplay(norm, rem);
+
+                if (isPointerDown && playerCombat.IsSkillReady())
+                {
+                    float holdDur = Time.time - pointerDownTime;
+                    if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        Vector2 playerPos = (Vector2)playerCombat.transform.position;
+                        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+
+                        var ronin = playerCombat.GetComponent<GaleRoninSkill>();
+                        if (ronin != null && ronin.enabled)
+                        {
+                            ronin.FindBestTarget(3.5f, out IDamageable targetDmg);
+                            Transform targetT = (targetDmg != null) ? (targetDmg as Component)?.transform : null;
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowTargetLockOn(
+                                playerPos, 
+                                3.5f, 
+                                targetT, 
+                                new Color(0.2f, 0.85f, 0.75f, 0.45f), 
+                                (targetT != null) ? new Color(1f, 0.25f, 0.25f, 0.95f) : new Color(0.6f, 0.6f, 0.6f, 0.4f)
+                            );
+                        }
+                        else
+                        {
+                            var azure = playerCombat.GetComponent<AzureBladeSkill>();
+                            if (azure != null && azure.enabled)
+                            {
+                                SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimFan(playerPos, aimDir, 60f, 5, 6.5f, new Color(0.15f, 0.75f, 1f, 0.9f));
+                            }
+                            else
+                            {
+                                SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, 2.4f, new Color(1f, 0.75f, 0.2f, 0.85f));
+                            }
+                        }
+                    }
+                }
             }
         }
         else if (buttonType == ButtonType.Dash)
@@ -90,6 +148,17 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 float norm = playerController.GetDashCooldownNormalized();
                 float rem = playerController.GetDashCooldownRemaining();
                 UpdateCooldownDisplay(norm, rem);
+
+                if (isPointerDown && playerController.IsDashReady())
+                {
+                    float holdDur = Time.time - pointerDownTime;
+                    if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        Vector2 playerPos = (Vector2)playerController.transform.position;
+                        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : playerController.GetFacingDirection();
+                        SkillAimIndicator.EnsureExists(playerController.gameObject)?.ShowAimLine(playerPos, aimDir, 3.8f, new Color(0.2f, 0.85f, 1f, 0.85f));
+                    }
+                }
             }
         }
     }
@@ -350,6 +419,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             playerCombat.BlockAttackThisFrame();
         }
 
+        // Kiểm tra điều kiện hồi chiêu trước khi cho phép giữ/bấm
         if (buttonType == ButtonType.Attack)
         {
             var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
@@ -358,29 +428,47 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 StartCoroutine(ShakeButtonRoutine());
                 return;
             }
+        }
+        else if (buttonType == ButtonType.Dash)
+        {
+            if (playerController != null && !playerController.IsDashReady())
+            {
+                StartCoroutine(ShakeButtonRoutine());
+                return;
+            }
+        }
+        else if (buttonType == ButtonType.Skill)
+        {
+            if (playerCombat != null && !playerCombat.IsSkillReady())
+            {
+                StartCoroutine(ShakeButtonRoutine());
+                return;
+            }
+        }
 
-            isPointerDown = true;
-            pointerDownTime = Time.time;
-            pointerDownPos = eventData.position;
-            currentDragAimDir = Vector2.zero;
+        isPointerDown = true;
+        pointerDownTime = Time.time;
+        pointerDownPos = eventData.position;
+        currentDragAimDir = Vector2.zero;
 
+        if (buttonType == ButtonType.Attack)
+        {
+            var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
             if (azureBlade != null)
             {
                 azureBlade.StartAim(azureBlade.GetFacingDirection());
             }
         }
-        else
-        {
-            ExecuteAction();
-        }
+
+        SkillAimIndicator.EnsureExists((playerCombat != null) ? playerCombat.gameObject : playerController?.gameObject);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (buttonType == ButtonType.Attack && isPointerDown)
+        if (isPointerDown)
         {
             Vector2 delta = eventData.position - pointerDownPos;
-            if (delta.sqrMagnitude > 200f) // Kéo ngắm vượt qua vùng chết
+            if (delta.sqrMagnitude > 150f) // Kéo ngắm vượt qua vùng chết
             {
                 currentDragAimDir = delta.normalized;
             }
@@ -391,25 +479,104 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     {
         transform.localScale = originalScale;
 
-        if (buttonType == ButtonType.Attack && isPointerDown)
-        {
-            EnsureTargets();
-            float holdDur = Time.time - pointerDownTime;
-            var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
+        if (!isPointerDown) return;
+        isPointerDown = false;
 
-            if (azureBlade != null && (holdDur >= 0.10f || currentDragAimDir.sqrMagnitude > 0.01f))
+        if (SkillAimIndicator.Instance != null)
+        {
+            SkillAimIndicator.Instance.Hide();
+        }
+
+        EnsureTargets();
+        float holdDur = Time.time - pointerDownTime;
+        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) 
+            ? currentDragAimDir 
+            : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+
+        if (buttonType == ButtonType.Attack)
+        {
+            var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
+            if (azureBlade != null && (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f))
             {
                 int bonusAtk = (playerCombat != null) ? playerCombat.BonusAttackDamage : 0;
                 azureBlade.ReleaseAimAndFire(bonusAtk);
             }
             else if (playerCombat != null)
             {
-                playerCombat.PerformAttack();
+                if (currentDragAimDir.sqrMagnitude > 0.01f)
+                {
+                    playerCombat.PerformAttackInDirection(currentDragAimDir);
+                }
+                else
+                {
+                    playerCombat.PerformAttack();
+                }
             }
-
-            isPointerDown = false;
-            currentDragAimDir = Vector2.zero;
         }
+        else if (buttonType == ButtonType.Dash)
+        {
+            if (playerController != null)
+            {
+                if (playerController.IsDashReady())
+                {
+                    if (currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        playerController.PerformDashInDirection(currentDragAimDir);
+                    }
+                    else
+                    {
+                        playerController.PerformDash();
+                    }
+                }
+                else
+                {
+                    StartCoroutine(ShakeButtonRoutine());
+                }
+            }
+        }
+        else if (buttonType == ButtonType.Skill)
+        {
+            if (playerCombat != null)
+            {
+                if (playerCombat.IsSkillReady())
+                {
+                    if (currentDragAimDir.sqrMagnitude > 0.01f && playerController != null)
+                    {
+                        playerController.SetFacingDirection(currentDragAimDir);
+                    }
+
+                    // Đối với Gale Ronin: Kiểm tra bắt buộc phải có mục tiêu trong tầm 10.5m
+                    var ronin = playerCombat.GetComponent<GaleRoninSkill>();
+                    if (ronin != null && ronin.enabled)
+                    {
+                        var target = ronin.FindBestTarget(10.5f, out _);
+                        if (target == null)
+                        {
+                            StartCoroutine(ShakeButtonRoutine());
+                            DamagePopup.CreateText(
+                                playerCombat.transform.position + Vector3.up * 1.2f, 
+                                LocalizationManager.T("Không có mục tiêu trong tầm!", "No target in range!"), 
+                                new Color(1f, 0.35f, 0.35f)
+                            );
+                            currentDragAimDir = Vector2.zero;
+                            return;
+                        }
+                    }
+
+                    bool success = playerCombat.PerformSpecialSkill();
+                    if (!success)
+                    {
+                        StartCoroutine(ShakeButtonRoutine());
+                    }
+                }
+                else
+                {
+                    StartCoroutine(ShakeButtonRoutine());
+                }
+            }
+        }
+
+        currentDragAimDir = Vector2.zero;
     }
 
     private void ExecuteAction()

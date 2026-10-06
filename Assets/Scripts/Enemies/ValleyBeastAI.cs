@@ -39,6 +39,7 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        try { gameObject.tag = "Enemy"; } catch { }
         rb = GetComponent<Rigidbody2D>();
         if (rb == null)
         {

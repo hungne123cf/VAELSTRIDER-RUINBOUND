@@ -55,9 +55,9 @@ public class PlayerCombat : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         playerHealth = GetComponent<PlayerHealth>();
 
-        // Bat buoc ap dung chi so can ban Hardcore chuan
-        attack1Damage = 5;
-        attack2Damage = 5;
+        // Bat buoc ap dung chi so can ban Hardcore chuan (Vaelstrider = 10 + 10 = 20)
+        attack1Damage = 10;
+        attack2Damage = 10;
         skillCooldown = 30.0f;
 
         AutoAlignCombat();
@@ -125,17 +125,46 @@ public class PlayerCombat : MonoBehaviour
         {
             upUltiCd = upgradeMgr.GetUltiCooldownReduction();
         }
-        ultiCooldownReduction = upUltiCd + (30.0f * cdReduc);
+
+        string curHero = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        float baseUlti = (curHero == CharacterManager.CHAR_GALE_RONIN || GetComponent<GaleRoninSkill>() != null) ? 15.0f :
+                         (curHero == CharacterManager.CHAR_AZURE_BLADE || GetComponent<AzureBladeSkill>() != null) ? 18.0f : 24.0f;
+
+        ultiCooldownReduction = upUltiCd + (baseUlti * cdReduc);
+        skillCooldown = Mathf.Max(5.0f, baseUlti - ultiCooldownReduction);
 
         var azureBlade = GetComponent<AzureBladeSkill>();
         if (azureBlade != null)
         {
             azureBlade.RefreshCooldownStats();
         }
+
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null)
+        {
+            ronin.RefreshCooldownStats();
+        }
+    }
+
+    public void PerformAttackInDirection(Vector2 direction)
+    {
+        if (direction.sqrMagnitude > 0.01f && playerController != null)
+        {
+            playerController.SetFacingDirection(direction.normalized);
+        }
+        PerformAttack();
     }
 
     public int BonusAttackDamage => bonusAttackDamage;
     public float LifestealPercent => lifestealPercent;
+    public Vector2 BodyCenterOffset => bodyCenterOffset;
+    public float SkillCooldown => skillCooldown;
+
+    public void SetBaseAttackDamage(int hit1, int hit2)
+    {
+        attack1Damage = hit1;
+        attack2Damage = hit2;
+    }
 
     private bool isAttackHolding = false;
     private float attackHoldDuration = 0f;
@@ -181,21 +210,42 @@ public class PlayerCombat : MonoBehaviour
             if (isAttackHolding)
             {
                 attackHoldDuration += Time.deltaTime;
-                if (azureBlade != null && attackHoldDuration >= 0.10f)
+                if (azureBlade != null && attackHoldDuration >= 0.45f)
                 {
                     Vector2 aimDir = GetAimDirectionFromInput();
                     azureBlade.UpdateAim(aimDir, attackHoldDuration);
+                }
+                else if (attackHoldDuration >= 0.45f)
+                {
+                    Vector2 aimDir = GetAimDirectionFromInput();
+                    Vector2 playerPos = (Vector2)transform.position;
+                    var ronin = GetComponent<GaleRoninSkill>();
+                    if (ronin != null && ronin.enabled)
+                    {
+                        SkillAimIndicator.EnsureExists(gameObject)?.ShowAimArc(playerPos, aimDir, 1.30f, 180f, new Color(0.2f, 0.9f, 0.7f, 0.85f));
+                    }
+                    else
+                    {
+                        SkillAimIndicator.EnsureExists(gameObject)?.ShowAimArc(playerPos, aimDir, 1.05f, 120f, new Color(1f, 0.85f, 0.2f, 0.85f));
+                    }
                 }
             }
 
             if (isAttackHolding && (Input.GetKeyUp(KeyCode.J) || Input.GetMouseButtonUp(0)))
             {
+                if (SkillAimIndicator.Instance != null) SkillAimIndicator.Instance.Hide();
+
                 if (azureBlade != null && attackHoldDuration >= 0.10f)
                 {
                     azureBlade.ReleaseAimAndFire(bonusAttackDamage);
                 }
                 else
                 {
+                    Vector2 aimDir = GetAimDirectionFromInput();
+                    if (aimDir.sqrMagnitude > 0.01f && playerController != null)
+                    {
+                        playerController.SetFacingDirection(aimDir);
+                    }
                     PerformAttack();
                 }
                 isAttackHolding = false;
@@ -222,18 +272,6 @@ public class PlayerCombat : MonoBehaviour
         return Vector2.down;
     }
 
-    private void UpdateAttackPointPosition()
-    {
-        if (attackPoint != null && playerController != null)
-        {
-            Vector2 dir = playerController.GetFacingDirection();
-            attackPoint.localPosition = new Vector3(
-                bodyCenterOffset.x + dir.x * attackOffsetDistance,
-                bodyCenterOffset.y + dir.y * attackOffsetDistance,
-                0
-            );
-        }
-    }
 
     public void PerformAttack()
     {
@@ -242,6 +280,31 @@ public class PlayerCombat : MonoBehaviour
 
         if (Time.frameCount == lastAttackFrame) return;
         lastAttackFrame = Time.frameCount;
+
+        // Kich hoat Phong Loi Lang Khach cho Nhan vat 2 (Gale Ronin)
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled)
+        {
+            if (!ronin.IsAttackReady) return; // Toc do danh cham co dinh, khong bi spam nhanh
+
+            lastAttackTime = Time.time;
+            comboStep++;
+            if (comboStep > 2) comboStep = 1;
+
+            if (animator != null)
+            {
+                animator.SetInteger(ComboStepHash, comboStep);
+                animator.SetTrigger(AttackTriggerHash);
+
+                string attackState = (comboStep == 1) ? "Attack1" : "Attack2";
+                animator.Play(attackState, 0, 0f);
+            }
+
+            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
+            int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
+            ronin.PerformAttack(facing, curAtk);
+            return;
+        }
 
         lastAttackTime = Time.time;
         comboStep++;
@@ -255,16 +318,6 @@ public class PlayerCombat : MonoBehaviour
 
             string attackState = (comboStep == 1) ? "Attack1" : "Attack2";
             animator.Play(attackState, 0, 0f);
-        }
-
-        // Kich hoat Phong Loi Lang Khach cho Nhan vat 2 (Gale Ronin)
-        var ronin = GetComponent<GaleRoninSkill>();
-        if (ronin != null && ronin.enabled)
-        {
-            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
-            int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
-            ronin.PerformAttack(facing, curAtk);
-            return;
         }
 
         // Kich hoat Song Kiem cho Nhan vat 3 (Azure Blade)
@@ -286,7 +339,7 @@ public class PlayerCombat : MonoBehaviour
         int damage = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
 
         // Quet toan bo muc tieu trong tam chem (Bao gom ca Quai vat va Vat the chem be BreakableProp)
-        Collider2D[] allHits = Physics2D.OverlapCircleAll(origin, attackRadius + 0.45f);
+        Collider2D[] allHits = Physics2D.OverlapCircleAll(origin, attackRadius);
         var damagedSet = new System.Collections.Generic.HashSet<IDamageable>();
         int enemyCount = 0;
 
@@ -332,7 +385,34 @@ public class PlayerCombat : MonoBehaviour
 
     public bool PerformSpecialSkill()
     {
-        if (skillCooldownTimer > 0f || isUltiActive || (playerController != null && playerController.IsStunned)) return false;
+        if (isUltiActive || (playerController != null && playerController.IsStunned)) return false;
+
+        // Kích hoạt Tuyệt kỹ Gale Ronin (Player 2)
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled)
+        {
+            return ronin.TriggerSpecialSkill();
+        }
+
+        // Kích hoạt Tuyệt kỹ Azure Blade (Player 3)
+        var azureBlade = GetComponent<AzureBladeSkill>();
+        if (azureBlade != null && azureBlade.enabled)
+        {
+            return azureBlade.TriggerSpecialSkill();
+        }
+
+        // Kích hoạt Tuyệt kỹ Sweep The Weak nếu là Maid
+        var sweepSkill = GetComponent<SweepTheWeakSkill>();
+        if (sweepSkill != null && sweepSkill.enabled)
+        {
+            var energySysMaid = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+            if (energySysMaid != null && !energySysMaid.TryConsumeEnergy(50f)) return false;
+            StartCoroutine(sweepSkill.ExecuteSkillRoutine());
+            return true;
+        }
+
+        // Vaelstrider (Player 1)
+        if (skillCooldownTimer > 0f) return false;
 
         var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
         if (energySys != null && !energySys.TryConsumeEnergy(50f))
@@ -343,30 +423,6 @@ public class PlayerCombat : MonoBehaviour
         float effectiveCooldown = Mathf.Max(5.0f, skillCooldown - ultiCooldownReduction);
         skillCooldownTimer = effectiveCooldown;
         lastSpecialSkillFrame = Time.frameCount;
-
-        // Kích hoạt Bão Phong Trảm nếu nhân vật là Gale Ronin (Player 2)
-        var ronin = GetComponent<GaleRoninSkill>();
-        if (ronin != null)
-        {
-            ronin.TriggerSpecialSkill();
-            return true;
-        }
-
-        // Kích hoạt Bão Sóng Kiếm nếu nhân vật là Azure Blade (Player 3)
-        var azureBlade = GetComponent<AzureBladeSkill>();
-        if (azureBlade != null)
-        {
-            azureBlade.TriggerSpecialSkill();
-            return true;
-        }
-
-        // Kích hoạt Quét Tan Kẻ Yếu nếu nhân vật là Maid
-        var sweepSkill = GetComponent<SweepTheWeakSkill>();
-        if (sweepSkill != null)
-        {
-            StartCoroutine(sweepSkill.ExecuteSkillRoutine());
-            return true;
-        }
 
         StartCoroutine(CinematicSpecialSkillRoutine());
         return true;
@@ -533,9 +589,38 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
-    public float GetSkillCooldownNormalized() => (skillCooldown > 0f) ? Mathf.Clamp01(skillCooldownTimer / skillCooldown) : 0f;
-    public float GetSkillCooldownRemaining() => Mathf.Max(0f, skillCooldownTimer);
-    public bool IsSkillReady() => skillCooldownTimer <= 0f && !isUltiActive;
+    public float GetSkillCooldownNormalized()
+    {
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled) return ronin.SpecialCooldownRatio;
+
+        var azure = GetComponent<AzureBladeSkill>();
+        if (azure != null && azure.enabled) return azure.SpecialCooldownRatio;
+
+        return (skillCooldown > 0f) ? Mathf.Clamp01(skillCooldownTimer / skillCooldown) : 0f;
+    }
+
+    public float GetSkillCooldownRemaining()
+    {
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled) return ronin.SpecialCooldownRemaining;
+
+        var azure = GetComponent<AzureBladeSkill>();
+        if (azure != null && azure.enabled) return azure.SpecialCooldownRemaining;
+
+        return Mathf.Max(0f, skillCooldownTimer);
+    }
+
+    public bool IsSkillReady()
+    {
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled) return ronin.IsSpecialReady;
+
+        var azure = GetComponent<AzureBladeSkill>();
+        if (azure != null && azure.enabled) return azure.IsSpecialReady;
+
+        return skillCooldownTimer <= 0f && !isUltiActive;
+    }
 
     
     public void BlockAttackThisFrame()
@@ -561,8 +646,40 @@ public class PlayerCombat : MonoBehaviour
         return false;
     }
 
+    public Vector3 GetBodyCenterWorld()
+    {
+        var col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            return col.bounds.center;
+        }
+
+        string curChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        if (curChar == CharacterManager.CHAR_AZURE_BLADE || GetComponent<AzureBladeSkill>() != null)
+        {
+            return transform.position + new Vector3(0f, 0.05f, 0f);
+        }
+        if (curChar == CharacterManager.CHAR_GALE_RONIN || curChar == CharacterManager.CHAR_MAID || GetComponent<GaleRoninSkill>() != null)
+        {
+            return transform.position + new Vector3(0f, 0.05f, 0f);
+        }
+
+        return transform.position + new Vector3(bodyCenterOffset.x, bodyCenterOffset.y, 0f);
+    }
+
+    private void UpdateAttackPointPosition()
+    {
+        if (attackPoint != null && playerController != null)
+        {
+            Vector2 dir = playerController.GetFacingDirection();
+            Vector3 center = GetBodyCenterWorld();
+            attackPoint.position = center + new Vector3(dir.x * attackOffsetDistance, dir.y * attackOffsetDistance, 0f);
+        }
+    }
+
     private void OnDrawGizmos()
     {
+        Vector3 center = GetBodyCenterWorld();
         Gizmos.color = Color.red;
         if (attackPoint != null)
         {
@@ -570,12 +687,12 @@ public class PlayerCombat : MonoBehaviour
         }
         else
         {
-            Vector3 origin = transform.position + new Vector3(bodyCenterOffset.x, bodyCenterOffset.y, 0) + Vector3.down * attackOffsetDistance;
+            Vector3 origin = center + Vector3.down * attackOffsetDistance;
             Gizmos.DrawWireSphere(origin, attackRadius);
         }
 
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position + new Vector3(bodyCenterOffset.x, bodyCenterOffset.y, 0), skillRadius);
+        Gizmos.DrawWireSphere(center, skillRadius);
     }
 
     public void AutoAlignCombat()
@@ -587,31 +704,31 @@ public class PlayerCombat : MonoBehaviour
 
         if (isRonin)
         {
-            bodyCenterOffset = new Vector2(0f, 0.0f);
-            attackOffsetDistance = 0.45f;
+            bodyCenterOffset = new Vector2(0f, 0.05f);
+            attackOffsetDistance = 0.55f;
             attackRadius = 0.85f;
-            skillRadius = 1.8f;
+            skillRadius = 1.2f;
         }
         else if (isAzure)
         {
             bodyCenterOffset = new Vector2(0f, 0.05f);
-            attackOffsetDistance = 0.55f;
-            attackRadius = 0.95f;
+            attackOffsetDistance = 0.45f;
+            attackRadius = 0.60f;
             skillRadius = 2.0f;
         }
         else if (isVaelstrider)
         {
-            bodyCenterOffset = new Vector2(0f, 0.65f);
-            attackOffsetDistance = 0.75f;
-            attackRadius = 1.05f;
-            skillRadius = 2.4f;
+            bodyCenterOffset = new Vector2(0f, 1.25f);
+            attackOffsetDistance = 0.50f;
+            attackRadius = 0.55f;
+            skillRadius = 2.6f;
         }
         else
         {
-            bodyCenterOffset = new Vector2(0f, 0.05f);
-            attackOffsetDistance = 0.45f;
-            attackRadius = 0.85f;
-            skillRadius = 1.8f;
+            bodyCenterOffset = new Vector2(0f, 0.10f);
+            attackOffsetDistance = 0.50f;
+            attackRadius = 0.55f;
+            skillRadius = 2.0f;
         }
 
         if (attackPoint != null)

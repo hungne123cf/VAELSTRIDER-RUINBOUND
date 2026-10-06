@@ -174,6 +174,31 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
         }
     }
 
+    void LateUpdate()
+    {
+        ClampInsideRoomBounds();
+    }
+
+    private void ClampInsideRoomBounds()
+    {
+        if (isDead) return;
+        var roomMgr = DungeonRoomManager.Instance;
+        if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
+        {
+            Rect b = roomMgr.currentRoom.roomBounds;
+            float padding = 1.0f;
+            Vector3 pos = transform.position;
+            float clampedX = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
+            float clampedY = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
+
+            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            {
+                transform.position = new Vector3(clampedX, clampedY, pos.z);
+                if (rb != null) rb.linearVelocity = Vector2.zero;
+            }
+        }
+    }
+
     // =========================================================================
     // KY NANG PHUN KEN TO NHEN (STUN 2s, COOLDOWN 5s)
     // =========================================================================

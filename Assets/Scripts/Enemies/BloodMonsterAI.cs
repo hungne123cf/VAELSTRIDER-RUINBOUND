@@ -281,6 +281,31 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         SetMoving(true);
     }
 
+    void LateUpdate()
+    {
+        ClampInsideRoomBounds();
+    }
+
+    private void ClampInsideRoomBounds()
+    {
+        if (isDead) return;
+        var roomMgr = DungeonRoomManager.Instance;
+        if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
+        {
+            Rect b = roomMgr.currentRoom.roomBounds;
+            float padding = isBoss ? 1.0f : 0.6f;
+            Vector3 pos = transform.position;
+            float clampedX = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
+            float clampedY = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
+
+            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            {
+                transform.position = new Vector3(clampedX, clampedY, pos.z);
+                if (rb != null) rb.linearVelocity = Vector2.zero;
+            }
+        }
+    }
+
     private bool TryBossPhaseSkill(float distance, Vector2 dir)
     {
         if (attackTimer > 0f) return false;
@@ -347,7 +372,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         return false;
     }
 
-    // ===== CHIÊU 1: DỊCH CHUYỂN RA SAU LƯNG PLAYER (SHADOW BLINK) =====
+    // ===== CHIÊU 1: DỊCH CHUYỂN AN TOÀN (SHADOW BLINK) =====
     private IEnumerator PerformShadowBlinkBehindPlayerRoutine()
     {
         isAttacking = true;
@@ -373,9 +398,9 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
             if (pc != null) playerFacing = pc.GetFacingDirection();
             if (playerFacing == Vector2.zero) playerFacing = Vector2.down;
 
-            // Xuat hien ngay sau lung nguoi choi (cach 1.2m theo huong nguoc lai)
-            Vector3 behindPos = player.position - (Vector3)(playerFacing.normalized * 1.25f);
-            transform.position = behindPos;
+            // Tìm vị trí dịch chuyển an toàn tuyệt đối, không đâm xuyên tường hay rơi ra ngoài Map
+            Vector3 safeBlinkPos = FindSafeBlinkPosition(player.position, playerFacing);
+            transform.position = safeBlinkPos;
 
             // Hieu ung xuat hien tai vi tri moi
             SpawnBlinkSmoke(transform.position);
@@ -405,6 +430,51 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
 
         if (spriteRenderer != null) spriteRenderer.color = originalColor;
         isAttacking = false;
+    }
+
+    private Vector3 FindSafeBlinkPosition(Vector3 playerPos, Vector2 playerFacing)
+    {
+        Vector2[] testOffsets = new Vector2[]
+        {
+            -playerFacing.normalized * 1.25f,
+            Vector2.Perpendicular(playerFacing.normalized) * 1.25f,
+            -Vector2.Perpendicular(playerFacing.normalized) * 1.25f,
+            playerFacing.normalized * 1.25f
+        };
+
+        var roomMgr = DungeonRoomManager.Instance;
+        Rect roomRect = (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
+            ? roomMgr.currentRoom.roomBounds
+            : new Rect(float.MinValue, float.MinValue, float.MaxValue, float.MaxValue);
+
+        float padding = 1.0f;
+
+        foreach (var offset in testOffsets)
+        {
+            Vector3 candidate = playerPos + (Vector3)offset;
+
+            // Kiểm tra va chạm với tường và nằm trọn vẹn trong phòng
+            Collider2D hitWall = Physics2D.OverlapCircle(candidate, 0.6f, LayerMask.GetMask("Default", "Wall", "Obstacle", "Environment"));
+            bool isInsideRoom = (candidate.x >= roomRect.xMin + padding && candidate.x <= roomRect.xMax - padding &&
+                                 candidate.y >= roomRect.yMin + padding && candidate.y <= roomRect.yMax - padding);
+
+            if (hitWall == null && isInsideRoom)
+            {
+                return candidate;
+            }
+        }
+
+        // Nếu sát tường, dịch chuyển theo hướng về tâm phòng
+        if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
+        {
+            Vector3 toCenter = (roomMgr.currentRoom.roomCenter - playerPos).normalized;
+            Vector3 safePos = playerPos + toCenter * 0.95f;
+            float x = Mathf.Clamp(safePos.x, roomRect.xMin + padding, roomRect.xMax - padding);
+            float y = Mathf.Clamp(safePos.y, roomRect.yMin + padding, roomRect.yMax - padding);
+            return new Vector3(x, y, playerPos.z);
+        }
+
+        return playerPos + Vector3.up * 0.5f;
     }
 
     private void SpawnBlinkSmoke(Vector3 pos)

@@ -49,26 +49,16 @@ public class HealthPotion : MonoBehaviour
         isCollected = true;
         Vector3 worldStart = transform.position;
 
-        var inventory = player.GetComponent<PlayerInventory>();
-
-        // Kich hoat hieu ung bay len o dem tren UI
-        if (PotionQuickSlotUI.Instance != null)
+        var inventory = player != null ? player.GetComponent<PlayerInventory>() : null;
+        if (inventory != null)
         {
-            PotionQuickSlotUI.Instance.PlayFlyAnimation(worldStart, () =>
-            {
-                if (inventory != null)
-                {
-                    inventory.AddPotions(potionCount);
-                }
-            });
+            inventory.AddPotions(potionCount);
         }
-        else
+
+        // Kich hoat hieu ung bay len o dem tren UI neu dang hoat dong
+        if (PotionQuickSlotUI.Instance != null && PotionQuickSlotUI.Instance.gameObject.activeInHierarchy)
         {
-            // Fallback neu chua tao UI
-            if (inventory != null)
-            {
-                inventory.AddPotions(potionCount);
-            }
+            PotionQuickSlotUI.Instance.PlayFlyAnimation(worldStart, null);
         }
 
         // Bien mat tren san ngay lap tuc de khong vuong chan Player
@@ -90,6 +80,20 @@ public class HealthPotion : MonoBehaviour
 #endif
         sr.sprite = sprite;
         sr.sortingOrder = 5200;
+
+        // Chuan hoa kich thuoc can bang bang dung vien ngoc Aethel Shard (0.42m)
+        if (sprite != null)
+        {
+            float maxDim = Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y);
+            if (maxDim > 0.001f)
+            {
+                obj.transform.localScale = Vector3.one * (0.42f / maxDim);
+            }
+        }
+        else
+        {
+            obj.transform.localScale = Vector3.one * 0.42f;
+        }
 
         var potion = obj.AddComponent<HealthPotion>();
         potion.potionCount = count;

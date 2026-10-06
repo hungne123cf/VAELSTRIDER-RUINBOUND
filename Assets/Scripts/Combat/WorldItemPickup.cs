@@ -293,6 +293,25 @@ public class WorldItemPickup : MonoBehaviour
         sr.sortingOrder = 5100;
         sr.color = Color.white;
 
+        // Chuẩn hóa kích thước đồng bộ tuyệt đối với viên ngọc Aethel Shard (0.42m)
+        float targetStandardSize = 0.42f;
+        float scaleFactor = 1f;
+        if (iconSprite != null)
+        {
+            float maxDim = Mathf.Max(iconSprite.bounds.size.x, iconSprite.bounds.size.y);
+            if (maxDim > 0.001f)
+            {
+                scaleFactor = targetStandardSize / maxDim;
+            }
+        }
+        else
+        {
+            scaleFactor = targetStandardSize;
+        }
+
+        visualObj.transform.localScale = Vector3.one * scaleFactor;
+        shadowObj.transform.localScale = new Vector3(scaleFactor * 0.9f, scaleFactor * 0.45f, 1f);
+
         // 3. Quầng sáng Glow theo độ hiếm
         GameObject glowObj = new GameObject("Glow");
         glowObj.transform.SetParent(visualObj.transform, false);

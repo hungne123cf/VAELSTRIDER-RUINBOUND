@@ -24,6 +24,12 @@ public class PlayerController : MonoBehaviour
     private float bonusSpeed = 0f;
     private float dashCooldownReduction = 0f;
 
+    public void SetBaseSpeed(float newBaseSpeed)
+    {
+        baseMoveSpeed = newBaseSpeed;
+        moveSpeed = baseMoveSpeed + bonusSpeed;
+    }
+
     public void ApplyUpgradeBonus(float speedBonus, float dashCdReduction)
     {
         bonusSpeed = speedBonus;
@@ -229,7 +235,23 @@ public class PlayerController : MonoBehaviour
             {
                 azureBlade.ResetAttackCooldown();
             }
+
+            // Giảm 2.0s hồi chiêu Tuyệt Kỹ cho Gale Ronin khi Dash
+            var ronin = GetComponent<GaleRoninSkill>();
+            if (ronin != null)
+            {
+                ronin.ReduceSpecialCooldown(2.0f);
+            }
         }
+    }
+
+    public void PerformDashInDirection(Vector2 direction)
+    {
+        if (direction.sqrMagnitude > 0.01f)
+        {
+            SetFacingDirection(direction);
+        }
+        PerformDash();
     }
 
     public float GetDashCooldownNormalized()
@@ -255,6 +277,19 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat(SpeedHash, moveInput.sqrMagnitude);
     }
 
+    public void SetFacingDirection(Vector2 dir)
+    {
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            lastFacingDirection = dir.normalized;
+            if (animator != null)
+            {
+                animator.SetFloat(MoveXHash, lastFacingDirection.x);
+                animator.SetFloat(MoveYHash, lastFacingDirection.y);
+            }
+        }
+    }
+
     public void SetMobileInput(Vector2 input)
     {
         if (input.sqrMagnitude > 0.01f)
@@ -275,23 +310,49 @@ public class PlayerController : MonoBehaviour
 
     public void AutoAlignCollider()
     {
-        var box = GetComponent<BoxCollider2D>();
-        if (box == null) box = gameObject.AddComponent<BoxCollider2D>();
-        var sr = GetComponent<SpriteRenderer>();
+        PhysicsMaterial2D slipMat = new PhysicsMaterial2D("PlayerSlipperyMat");
+        slipMat.friction = 0f;
+        slipMat.bounciness = 0f;
 
+        var box = GetComponent<BoxCollider2D>();
+        var cap = GetComponent<CapsuleCollider2D>();
+
+        if (box != null && cap == null)
+        {
+            Vector2 oldOffset = box.offset;
+            Vector2 oldSize = box.size;
+            Destroy(box);
+            cap = gameObject.AddComponent<CapsuleCollider2D>();
+            cap.offset = oldOffset;
+            cap.size = oldSize;
+        }
+        else if (cap == null)
+        {
+            cap = gameObject.AddComponent<CapsuleCollider2D>();
+        }
+
+        cap.sharedMaterial = slipMat;
+        if (rb != null)
+        {
+            rb.sharedMaterial = slipMat;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        }
+
+        var sr = GetComponent<SpriteRenderer>();
         if (sr != null && sr.sprite != null)
         {
             Bounds b = sr.sprite.bounds;
-            float cy = Mathf.Clamp(b.center.y, 0.35f, 0.55f);
-            float h = Mathf.Max(0.9f, b.size.y * 0.85f);
-            float w = Mathf.Max(0.55f, b.size.x * 0.6f);
-            box.offset = new Vector2(0f, cy);
-            box.size = new Vector2(w, h);
+            float cy = Mathf.Clamp(b.center.y, 0f, 0.55f);
+            float h = Mathf.Max(0.75f, b.size.y * 0.75f);
+            float w = Mathf.Max(0.45f, b.size.x * 0.55f);
+            cap.offset = new Vector2(0f, cy);
+            cap.size = new Vector2(w, h);
         }
         else
         {
-            box.offset = new Vector2(0f, 0.45f);
-            box.size = new Vector2(0.6f, 0.95f);
+            cap.offset = new Vector2(0f, 0f);
+            cap.size = new Vector2(0.48f, 0.75f);
         }
 
         var combat = GetComponent<PlayerCombat>();

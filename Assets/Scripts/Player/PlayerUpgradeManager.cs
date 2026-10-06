@@ -144,6 +144,33 @@ public class PlayerUpgradeManager : MonoBehaviour
         }
     }
 
+    public const float MAX_ULTI_CD_REDUCTION = 15.0f; // Giảm tối đa 15.0s (Tuyệt kỹ còn tối thiểu 5.0s)
+    public const float MAX_DASH_CD_REDUCTION = 4.0f;  // Giảm tối đa 4.0s (Lướt né còn tối thiểu 1.0s)
+    public const float MAX_SPEED_BONUS = 3.2f;        // Tăng tối đa +3.20 tốc độ chạy
+    public const float MAX_WAVE_CD_REDUCTION = 0.75f; // Giảm tối đa 0.75s hồi sóng kiếm (còn tối thiểu 0.45s)
+
+    public int GetMaxLevel(UpgradeType type)
+    {
+        switch (type)
+        {
+            case UpgradeType.Agility:
+                return 80; // Lv.80 đạt trần +3.20 Speed & -4.00s Dash CD
+            case UpgradeType.Attack:
+                return 200;
+            case UpgradeType.Health:
+                return 200;
+            case UpgradeType.Ultimate:
+                return 200;
+            default:
+                return 200;
+        }
+    }
+
+    public bool IsMaxLevel(UpgradeType type)
+    {
+        return GetLevel(type) >= GetMaxLevel(type);
+    }
+
     public string GetDescription(UpgradeType type, int level)
     {
         string hero = GetCurrentHeroKey();
@@ -159,17 +186,35 @@ public class PlayerUpgradeManager : MonoBehaviour
                 return LocalizationManager.T("+" + (level * 15) + " Máu tối đa (+Max HP)", "+" + (level * 15) + " Max Health (+Max HP)");
 
             case UpgradeType.Agility:
+                float spd = Mathf.Min(MAX_SPEED_BONUS, level * 0.08f);
+                float dash = Mathf.Min(MAX_DASH_CD_REDUCTION, level * 0.05f);
+                bool isSpdMax = (level * 0.08f >= MAX_SPEED_BONUS);
+                bool isDashMax = (level * 0.05f >= MAX_DASH_CD_REDUCTION);
+
                 if (isAzure)
                 {
-                    return LocalizationManager.T("+" + (level * 0.08f).ToString("F2") + " Tốc độ | -" + (level * 0.05f).ToString("F2") + "s Lướt | -" + (level * 0.35f).ToString("F2") + "s Hồi Sóng Kiếm",
-                                                 "+" + (level * 0.08f).ToString("F2") + " Speed | -" + (level * 0.05f).ToString("F2") + "s Dash | -" + (level * 0.35f).ToString("F2") + "s Wave CD");
+                    float wave = Mathf.Min(MAX_WAVE_CD_REDUCTION, level * 0.35f);
+                    bool isWaveMax = (level * 0.35f >= MAX_WAVE_CD_REDUCTION);
+                    return LocalizationManager.T(
+                        $"+{spd:F2} Tốc độ{(isSpdMax ? " (MAX)" : "")} | -{dash:F2}s Lướt{(isDashMax ? " (MAX)" : "")} | -{wave:F2}s Sóng Kiếm{(isWaveMax ? " (MAX)" : "")}",
+                        $"+{spd:F2} Speed{(isSpdMax ? " (MAX)" : "")} | -{dash:F2}s Dash{(isDashMax ? " (MAX)" : "")} | -{wave:F2}s Wave CD{(isWaveMax ? " (MAX)" : "")}");
                 }
-                return LocalizationManager.T("+" + (level * 0.08f).ToString("F2") + " Tốc độ | -" + (level * 0.05f).ToString("F2") + "s Lướt né",
-                                             "+" + (level * 0.08f).ToString("F2") + " Speed | -" + (level * 0.05f).ToString("F2") + "s Dash CD");
+                return LocalizationManager.T(
+                    $"+{spd:F2} Tốc độ{(isSpdMax ? " (MAX)" : "")} | -{dash:F2}s Lướt né{(isDashMax ? " (MAX)" : "")}",
+                    $"+{spd:F2} Speed{(isSpdMax ? " (MAX)" : "")} | -{dash:F2}s Dash CD{(isDashMax ? " (MAX)" : "")}");
 
             case UpgradeType.Ultimate:
-                return LocalizationManager.T("-" + (level * 0.6f).ToString("F1") + "s Hồi Tuyệt Kỹ | +" + (level * 8) + " Sát thương",
-                                             "-" + (level * 0.6f).ToString("F1") + "s Ulti CD | +" + (level * 8) + " Damage");
+                float ultiCd = Mathf.Min(MAX_ULTI_CD_REDUCTION, level * 0.6f);
+                int ultiDmg = level * 8;
+                bool isUltiCdMax = (level * 0.6f >= MAX_ULTI_CD_REDUCTION);
+
+                if (isUltiCdMax)
+                {
+                    return LocalizationManager.T($"-{ultiCd:F1}s Hồi Tuyệt Kỹ (MAX) | +{ultiDmg} Sát thương",
+                                                 $"-{ultiCd:F1}s Ulti CD (MAX) | +{ultiDmg} Damage");
+                }
+                return LocalizationManager.T($"-{ultiCd:F1}s Hồi Tuyệt Kỹ | +{ultiDmg} Sát thương",
+                                             $"-{ultiCd:F1}s Ulti CD | +{ultiDmg} Damage");
 
             default:
                 return "";
@@ -178,8 +223,14 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     public string GetNextBonusDescription(UpgradeType type)
     {
+        if (IsMaxLevel(type))
+        {
+            return "MAX";
+        }
+
         string hero = GetCurrentHeroKey();
         bool isAzure = (hero == CharacterManager.CHAR_AZURE_BLADE);
+        int level = GetLevel(type);
 
         switch (type)
         {
@@ -190,11 +241,31 @@ public class PlayerUpgradeManager : MonoBehaviour
                 return LocalizationManager.T("+15 Máu tối đa & Hồi máu", "+15 Max Health & Heal");
 
             case UpgradeType.Agility:
+                bool isSpdMax = (level * 0.08f >= MAX_SPEED_BONUS);
+                bool isDashMax = (level * 0.05f >= MAX_DASH_CD_REDUCTION);
+
+                if (isSpdMax && isDashMax)
+                {
+                    return "MAX";
+                }
+                if (isDashMax)
+                {
+                    return LocalizationManager.T("+0.08 Tốc chạy (Lướt MAX)", "+0.08 Speed (Dash MAX)");
+                }
+                if (isSpdMax)
+                {
+                    return LocalizationManager.T("-0.05s Hồi lướt (Tốc độ MAX)", "-0.05s Dash CD (Speed MAX)");
+                }
                 if (isAzure)
-                    return LocalizationManager.T("+0.08 Tốc chạy | -0.05s Lướt | -0.35s Hồi Sóng Kiếm", "+0.08 Speed | -0.05s Dash | -0.35s Wave CD");
+                    return LocalizationManager.T("+0.08 Tốc chạy | -0.05s Lướt | -0.35s Sóng Kiếm", "+0.08 Speed | -0.05s Dash | -0.35s Wave CD");
                 return LocalizationManager.T("+0.08 Tốc chạy | -0.05s Hồi lướt", "+0.08 Speed | -0.05s Dash CD");
 
             case UpgradeType.Ultimate:
+                bool isCdMaxed = (level * 0.6f >= MAX_ULTI_CD_REDUCTION);
+                if (isCdMaxed)
+                {
+                    return LocalizationManager.T("+8 Sát thương (Hồi chiêu MAX)", "+8 Damage (CD MAX)");
+                }
                 return LocalizationManager.T("-0.6s Hồi chiêu & +8 Sát thương", "-0.6s Cooldown & +8 Damage");
 
             default:
@@ -204,6 +275,7 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     public bool CanUpgrade(UpgradeType type)
     {
+        if (IsMaxLevel(type)) return false;
         FindPlayerComponents();
         if (inventory == null) inventory = FindAnyObjectByType<PlayerInventory>();
         long currentShards = (inventory != null) ? inventory.GetShards() : AccountDatabase.GetAethelShards();
@@ -215,7 +287,7 @@ public class PlayerUpgradeManager : MonoBehaviour
     public bool TryPurchaseUpgrade(UpgradeType type)
     {
         FindPlayerComponents();
-        if (!CanUpgrade(type)) return false;
+        if (IsMaxLevel(type) || !CanUpgrade(type)) return false;
 
         int cost = GetCost(type);
         bool spent = false;
@@ -274,8 +346,8 @@ public class PlayerUpgradeManager : MonoBehaviour
 
         // 3. Agility Bonus
         int agiLevel = GetLevel(UpgradeType.Agility);
-        float bonusSpeed = agiLevel * 0.08f;
-        float bonusDashCd = agiLevel * 0.05f;
+        float bonusSpeed = Mathf.Min(MAX_SPEED_BONUS, agiLevel * 0.08f);
+        float bonusDashCd = Mathf.Min(MAX_DASH_CD_REDUCTION, agiLevel * 0.05f);
         if (playerController != null)
         {
             playerController.ApplyUpgradeBonus(bonusSpeed, bonusDashCd);
@@ -287,11 +359,17 @@ public class PlayerUpgradeManager : MonoBehaviour
         {
             azure.RefreshCooldownStats();
         }
+
+        var ronin = FindAnyObjectByType<GaleRoninSkill>();
+        if (ronin != null)
+        {
+            ronin.RefreshCooldownStats();
+        }
     }
 
     public float GetUltiCooldownReduction()
     {
-        return GetLevel(UpgradeType.Ultimate) * 0.6f;
+        return Mathf.Min(MAX_ULTI_CD_REDUCTION, GetLevel(UpgradeType.Ultimate) * 0.6f);
     }
 
     public int GetUltiDamageBonus()
@@ -301,8 +379,8 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     public int GetAttackBonus() => GetLevel(UpgradeType.Attack) * 2;
     public int GetHealthBonus() => GetLevel(UpgradeType.Health) * 15;
-    public float GetDashCooldownReduction() => GetLevel(UpgradeType.Agility) * 0.05f;
-    public bool IsMaxLevel(UpgradeType type) => false;
+    public float GetDashCooldownReduction() => Mathf.Min(MAX_DASH_CD_REDUCTION, GetLevel(UpgradeType.Agility) * 0.05f);
+    public float GetSpeedBonus() => Mathf.Min(MAX_SPEED_BONUS, GetLevel(UpgradeType.Agility) * 0.08f);
     public string GetUpgradeDescription(UpgradeType type) => GetDescription(type, GetLevel(type));
     public string GetNextBonusString(UpgradeType type) => GetNextBonusDescription(type);
 

@@ -53,6 +53,11 @@ public class MinimapHUD : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.M) || Input.GetKeyDown(KeyCode.Tab))
+        {
+            FullscreenMapUI.EnsureUIExists()?.ToggleMap();
+        }
+
         if (playerTransform == null)
         {
             FindPlayer();
@@ -82,6 +87,56 @@ public class MinimapHUD : MonoBehaviour
     {
         var pc = Object.FindAnyObjectByType<PlayerController>();
         if (pc != null) playerTransform = pc.transform;
+    }
+
+    public static List<GameObject> GetAllEnemies()
+    {
+        HashSet<GameObject> set = new HashSet<GameObject>();
+        try
+        {
+            var tagged = GameObject.FindGameObjectsWithTag("Enemy");
+            foreach (var go in tagged)
+            {
+                if (go != null && go.activeInHierarchy) set.Add(go);
+            }
+        }
+        catch { }
+
+        // Quét toàn bộ AI components để không bao giờ bị sót quái
+        var wheels = Object.FindObjectsByType<BotWheelAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var w in wheels) if (w != null && w.gameObject.activeInHierarchy) set.Add(w.gameObject);
+
+        var golems = Object.FindObjectsByType<ValleyGolemBossAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var g in golems) if (g != null && g.gameObject.activeInHierarchy) set.Add(g.gameObject);
+
+        var kings = Object.FindObjectsByType<SkeletonKingBossAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var k in kings) if (k != null && k.gameObject.activeInHierarchy) set.Add(k.gameObject);
+
+        var bloods = Object.FindObjectsByType<BloodMonsterAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var b in bloods) if (b != null && b.gameObject.activeInHierarchy) set.Add(b.gameObject);
+
+        var slimes = Object.FindObjectsByType<SlimeAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var s in slimes) if (s != null && s.gameObject.activeInHierarchy) set.Add(s.gameObject);
+
+        var skeletons = Object.FindObjectsByType<SkeletonAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var sk in skeletons) if (sk != null && sk.gameObject.activeInHierarchy) set.Add(sk.gameObject);
+
+        var goblins = Object.FindObjectsByType<GoblinAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var gb in goblins) if (gb != null && gb.gameObject.activeInHierarchy) set.Add(gb.gameObject);
+
+        var beasts = Object.FindObjectsByType<ValleyBeastAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var vb in beasts) if (vb != null && vb.gameObject.activeInHierarchy) set.Add(vb.gameObject);
+
+        var spitters = Object.FindObjectsByType<ValleySpitterAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var vs in spitters) if (vs != null && vs.gameObject.activeInHierarchy) set.Add(vs.gameObject);
+
+        var cocoons = Object.FindObjectsByType<BoneEggCocoon>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var c in cocoons) if (c != null && c.gameObject.activeInHierarchy) set.Add(c.gameObject);
+
+        var eggs = Object.FindObjectsByType<BoneEggObstacle>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var e in eggs) if (e != null && e.gameObject.activeInHierarchy) set.Add(e.gameObject);
+
+        return new List<GameObject>(set);
     }
 
     private void UpdateObjectiveCompass()
@@ -114,6 +169,15 @@ public class MinimapHUD : MonoBehaviour
                 targetLabel = LocalizationManager.T("HUYẾT QUÁI CỔ", "BLOOD FIEND");
             }
         }
+        if (priorityTarget == null)
+        {
+            var bossWheel = Object.FindAnyObjectByType<BotWheelAI>();
+            if (bossWheel != null && bossWheel.gameObject.activeInHierarchy && (bossWheel.name.Contains("Boss") || bossWheel.name.Contains("Titan")))
+            {
+                priorityTarget = bossWheel.transform;
+                targetLabel = LocalizationManager.T("CỰ BÁNH XE TITAN", "TITAN WHEEL");
+            }
+        }
 
         // Ưu tiên 2: Cổng Dịch Chuyển (Portal)
         if (priorityTarget == null)
@@ -140,7 +204,7 @@ public class MinimapHUD : MonoBehaviour
         // Ưu tiên 4: Kẻ thù gần nhất
         if (priorityTarget == null)
         {
-            var enemies = GameObject.FindGameObjectsWithTag("Enemy");
+            var enemies = GetAllEnemies();
             float nearestDist = float.MaxValue;
             foreach (var e in enemies)
             {
@@ -196,8 +260,8 @@ public class MinimapHUD : MonoBehaviour
 
         Vector3 playerPos = playerTransform.position;
 
-        // 1. Quét Kẻ Thù (Red Circle Blips)
-        var enemyObjects = GameObject.FindGameObjectsWithTag("Enemy");
+        // 1. Quét Kẻ Thù Toàn Diện (Red Circle / Diamond Blips)
+        var enemyObjects = GetAllEnemies();
         foreach (var enemy in enemyObjects)
         {
             if (enemy == null || !enemy.activeInHierarchy) continue;
@@ -205,9 +269,9 @@ public class MinimapHUD : MonoBehaviour
             float dist = offset.magnitude;
             if (dist > radarRadius) continue;
 
-            bool isBoss = enemy.name.Contains("Boss") || enemy.name.Contains("King") || enemy.name.Contains("Golem") || enemy.name.Contains("Cocoon");
-            Color blipColor = isBoss ? new Color(1f, 0.15f, 0.25f, 1f) : new Color(1f, 0.35f, 0.35f, 0.9f);
-            Vector2 blipSize = isBoss ? new Vector2(14f, 14f) : new Vector2(9f, 9f);
+            bool isBoss = enemy.name.Contains("Boss") || enemy.name.Contains("King") || enemy.name.Contains("Golem") || enemy.name.Contains("Cocoon") || enemy.name.Contains("Titan");
+            Color blipColor = isBoss ? new Color(1f, 0.15f, 0.25f, 1f) : new Color(1f, 0.30f, 0.30f, 0.95f);
+            Vector2 blipSize = isBoss ? new Vector2(15f, 15f) : new Vector2(9f, 9f);
             Sprite blipSprite = isBoss ? diamondSprite : roundDotSprite;
 
             Vector2 uiPos = (offset / radarRadius) * mapUiRadius;
@@ -424,8 +488,8 @@ public class MinimapHUD : MonoBehaviour
         rootRt.anchoredPosition = new Vector2(-20f, -80f); // Không bao giờ đè lên 3 nút trên cùng!
         rootRt.sizeDelta = new Vector2(125f, 155f);
 
-        // 2. Radar Background Disc (115x115 px tròn chống răng cưa)
-        GameObject radarBg = new GameObject("RadarDisc", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        // 2. Radar Background Disc (115x115 px tròn chống răng cưa - Có thể chạm/click để mở Bản đồ Toàn màn hình)
+        GameObject radarBg = new GameObject("RadarDisc", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         radarBg.layer = 5;
         radarBg.transform.SetParent(rootObj.transform, false);
 
@@ -436,6 +500,17 @@ public class MinimapHUD : MonoBehaviour
         Image rImg = radarBg.GetComponent<Image>();
         rImg.sprite = circleDiscSprite;
         rImg.color = Color.white;
+
+        Button rBtn = radarBg.GetComponent<Button>();
+        rBtn.transition = Selectable.Transition.ColorTint;
+        ColorBlock colors = rBtn.colors;
+        colors.highlightedColor = new Color(1.2f, 1.2f, 1.2f, 1f);
+        colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+        rBtn.colors = colors;
+        rBtn.onClick.AddListener(() =>
+        {
+            FullscreenMapUI.EnsureUIExists()?.ToggleMap();
+        });
 
         // Container các chấm Blip
         GameObject bContainer = new GameObject("BlipContainer", typeof(RectTransform));
@@ -457,6 +532,7 @@ public class MinimapHUD : MonoBehaviour
         var pImg = pIconObj.GetComponent<Image>();
         pImg.sprite = arrowSprite;
         pImg.color = new Color(0.18f, 1f, 0.45f);
+        pImg.raycastTarget = false;
 
         // La Bàn: Needle Pointer chạy quanh viền hình tròn
         GameObject needleObj = new GameObject("CompassNeedle", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -469,9 +545,10 @@ public class MinimapHUD : MonoBehaviour
         var nImg = needleObj.GetComponent<Image>();
         nImg.sprite = arrowSprite;
         nImg.color = new Color(1f, 0.85f, 0.25f);
+        nImg.raycastTarget = false;
 
-        // Label Khoảng Cách Mục Tiêu Dưới Radar
-        GameObject distObj = new GameObject("DistanceBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        // Label Khoảng Cách Mục Tiêu Dưới Radar (Bấm vào cũng mở bản đồ)
+        GameObject distObj = new GameObject("DistanceBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         distObj.layer = 5;
         distObj.transform.SetParent(rootObj.transform, false);
         RectTransform dRt = distObj.GetComponent<RectTransform>();
@@ -484,6 +561,12 @@ public class MinimapHUD : MonoBehaviour
         var dOutline = distObj.AddComponent<Outline>();
         dOutline.effectColor = new Color(0.35f, 0.65f, 0.95f, 0.6f);
         dOutline.effectDistance = new Vector2(1f, -1f);
+
+        Button dBtn = distObj.GetComponent<Button>();
+        dBtn.onClick.AddListener(() =>
+        {
+            FullscreenMapUI.EnsureUIExists()?.ToggleMap();
+        });
 
         GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
         txtObj.layer = 5;

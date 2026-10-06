@@ -191,6 +191,9 @@ public class SwordWaveProjectile : MonoBehaviour
         }
     }
 
+    private HashSet<IDamageable> hitDamageables = new HashSet<IDamageable>();
+    private HashSet<int> hitInstanceIds = new HashSet<int>();
+
     private void HandleHit(GameObject hitObj)
     {
         if (hitObj == null) return;
@@ -198,14 +201,16 @@ public class SwordWaveProjectile : MonoBehaviour
         // Bỏ qua Player
         if (hitObj.CompareTag("Player") || hitObj.GetComponent<PlayerController>() != null || hitObj.GetComponentInParent<PlayerController>() != null) return;
 
-        // Kiểm tra đối tượng có thể nhận sát thương (Quái vật, Bình gốm, Boss)
+        // Kiểm tra đối tượng có thể nhận sát thương (Quái vật, Rương, Cỏ cây, Bình gốm, Boss)
         var damageable = hitObj.GetComponent<IDamageable>() ?? hitObj.GetComponentInParent<IDamageable>();
         if (damageable != null && !(damageable is PlayerHealth))
         {
-            GameObject targetRoot = hitObj.transform.root.gameObject;
-            if (!hitEnemies.Contains(targetRoot))
+            int instanceId = (damageable as Component != null) ? (damageable as Component).gameObject.GetInstanceID() : hitObj.GetInstanceID();
+            if (!hitDamageables.Contains(damageable) && !hitInstanceIds.Contains(instanceId))
             {
-                hitEnemies.Add(targetRoot);
+                hitDamageables.Add(damageable);
+                hitInstanceIds.Add(instanceId);
+
                 damageable.TakeDamage(damage);
 
                 // Giảm 50% thời gian hồi chiêu và hồi phục Năng Lượng / Nội Năng khi chém trúng quái vật thực sự
@@ -235,16 +240,30 @@ public class SwordWaveProjectile : MonoBehaviour
         }
         else
         {
-            // Nếu va chạm với tường hoặc chướng ngại vật cản vật lý (không phải trigger)
+            // Chỉ tiêu biến kiếm khí khi đâm vào TƯỜNG CỨNG THỰC SỰ
+            string objName = hitObj.name.ToLower();
+            int wallLayer = LayerMask.NameToLayer("Wall");
+            int obsLayer = LayerMask.NameToLayer("Obstacle");
+
+            bool isTilemapWall = hitObj.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>() != null ||
+                                 hitObj.GetComponent<CompositeCollider2D>() != null;
+
+            bool isBarrier = hitObj.GetComponent<RoomBarrier>() != null || hitObj.GetComponentInParent<RoomBarrier>() != null;
+
+            bool isSolidWall = (wallLayer != -1 && hitObj.layer == wallLayer) ||
+                               (obsLayer != -1 && hitObj.layer == obsLayer) ||
+                               isTilemapWall ||
+                               isBarrier ||
+                               objName.Contains("wall") ||
+                               objName.Contains("dungeon_wall") ||
+                               objName.Contains("dungeonwall") ||
+                               objName.Contains("border") ||
+                               objName.Contains("collision");
+
             var col = hitObj.GetComponent<Collider2D>();
-            if (col != null && !col.isTrigger)
+            if (isSolidWall && col != null && !col.isTrigger)
             {
-                int wallLayer = LayerMask.NameToLayer("Wall");
-                int obsLayer = LayerMask.NameToLayer("Obstacle");
-                if (hitObj.layer == wallLayer || hitObj.layer == obsLayer || hitObj.layer == 0) // 0 = Default layer
-                {
-                    Destroy(gameObject);
-                }
+                Destroy(gameObject);
             }
         }
     }

@@ -33,16 +33,23 @@ public class PlayerShieldVisual : MonoBehaviour
 
     public void UpdatePositionAndScale()
     {
-        var col = GetComponentInParent<BoxCollider2D>();
+        var col = GetComponentInParent<Collider2D>();
         var sr = GetComponentInParent<SpriteRenderer>();
 
-        float centerY = 1.25f; // Mac dinh tam nguc Vaelstrider
-        float height = 2.5f;
+        float centerY = 0.1f;
+        float height = 1.0f;
 
         if (col != null)
         {
             centerY = col.offset.y;
-            height = Mathf.Max(col.size.y, col.size.x);
+            if (col is CapsuleCollider2D cap)
+            {
+                height = Mathf.Max(cap.size.y, cap.size.x);
+            }
+            else if (col is BoxCollider2D box)
+            {
+                height = Mathf.Max(box.size.y, box.size.x);
+            }
         }
         else if (sr != null && sr.sprite != null)
         {

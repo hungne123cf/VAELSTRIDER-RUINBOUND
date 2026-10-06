@@ -97,6 +97,43 @@ public class RoomBarrier : MonoBehaviour
         }
     }
 
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        CheckAndPassPlayerThrough(collision.collider);
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        CheckAndPassPlayerThrough(collision.collider);
+    }
+
+    private void CheckAndPassPlayerThrough(Collider2D otherCol)
+    {
+        if (!isLocked || otherCol == null) return;
+
+        var player = otherCol.GetComponent<PlayerController>() ?? otherCol.GetComponentInParent<PlayerController>();
+        if (player == null) return;
+
+        var roomMgr = DungeonRoomManager.Instance;
+        if (roomMgr != null && roomMgr.currentRoom != null)
+        {
+            var curRoom = roomMgr.currentRoom;
+            Vector3 pPos = player.transform.position;
+            bool isInsideRoom = curRoom.roomBounds.Contains(new Vector2(pPos.x, pPos.y));
+
+            // Nếu người chơi bị kẹt bên ngoài phòng khi cửa đã đóng
+            if (!isInsideRoom)
+            {
+                // Cho phép người chơi bước qua cửa vào sâu trong phòng
+                Vector3 toCenter = (curRoom.roomCenter - transform.position).normalized;
+                Vector3 insidePos = transform.position + toCenter * 1.5f;
+                player.transform.position = new Vector3(insidePos.x, insidePos.y, player.transform.position.z);
+                SoundManager.EnsureInstance()?.PlayPortalSpawn();
+                DamagePopup.CreateText(player.transform.position + Vector3.up * 1.2f, "BƯỚC VÀO PHÒNG ĐẤU!", new Color(0.2f, 0.85f, 1f));
+            }
+        }
+    }
+
     private IEnumerator FadeBarrier(float fromAlpha, float toAlpha, float duration)
     {
         float elapsed = 0f;

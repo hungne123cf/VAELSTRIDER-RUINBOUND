@@ -191,8 +191,13 @@ public class PotionQuickSlotUI : MonoBehaviour
         }
     }
 
-    public void PlayFlyAnimation(Vector3 worldStartPos, Action onComplete)
+    public void PlayFlyAnimation(Vector3 worldStartPos, Action onComplete = null)
     {
+        if (!gameObject.activeInHierarchy)
+        {
+            onComplete?.Invoke();
+            return;
+        }
         StartCoroutine(FlyToSlotRoutine(worldStartPos, onComplete));
     }
 

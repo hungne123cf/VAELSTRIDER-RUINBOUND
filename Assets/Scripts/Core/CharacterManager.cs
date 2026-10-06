@@ -95,7 +95,7 @@ public class CharacterManager : MonoBehaviour
             skillDescVN = "Xoay kiếm 360 độ hút quái và tung đòn kết liễu hất văng.",
             skillDescEN = "Spins 360 degrees pulling enemies, concluding with an explosive blow.",
             baseHealth = 100,
-            baseAttack = 5,
+            baseAttack = 20,
             baseSpeed = 5.0f,
             unlockPrice = 0,
             controllerPath = "Assets/Animation/Player/idle_down_0.controller",
@@ -115,7 +115,7 @@ public class CharacterManager : MonoBehaviour
             skillDescVN = "Đòn chém bán nguyệt quét rộng 180 độ tích tầng Phong Ấn. Tuyệt kỹ dịch chuyển tức thời ra sau lưng kẻ địch, tung đòn chém chí mạng kinh thiên động địa rồi thoắt ẩn thoắt hiện trở về vị trí cũ!",
             skillDescEN = "Wide 180° sweeps applying Wind Marks. Special skill teleports behind the target's back, delivers a devastating decisive execution slash, and seamlessly returns to original position!",
             baseHealth = 95,
-            baseAttack = 6,
+            baseAttack = 28,
             baseSpeed = 5.4f,
             unlockPrice = 0, // Mở khóa sẵn sàng chơi
             controllerPath = "Assets/Animation/Player2/Player2.controller",
@@ -135,7 +135,7 @@ public class CharacterManager : MonoBehaviour
             skillDescVN = "Đòn chém chậm nhưng uy lực, mỗi nhát chém phóng ra sóng kiếm xuyên thấu quái vật. Tuyệt kỹ phóng ra 5 đợt kiếm khí hình nan quạt quét sạch chiến trường!",
             skillDescEN = "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!",
             baseHealth = 110,
-            baseAttack = 6,
+            baseAttack = 24,
             baseSpeed = 4.8f,
             unlockPrice = 0, // Mở khóa sẵn sàng chơi
             controllerPath = "Assets/Animation/Player3/Player3.controller",

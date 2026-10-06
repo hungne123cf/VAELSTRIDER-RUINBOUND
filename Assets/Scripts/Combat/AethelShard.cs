@@ -83,6 +83,20 @@ public class AethelShard : MonoBehaviour
             // Giu mau trang de sprite giu nguyen mau sac tinh the xanh sang dep mat
             sr.color = Color.white;
 
+            // Chuan hoa kich thuoc dong nhat 0.42m nho gon, vua van voi nhan vat
+            if (sprite != null)
+            {
+                float maxDim = Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y);
+                if (maxDim > 0.001f)
+                {
+                    go.transform.localScale = Vector3.one * (0.42f / maxDim);
+                }
+            }
+            else
+            {
+                go.transform.localScale = Vector3.one * 0.42f;
+            }
+
             go.AddComponent<AutoDepthSort>();
 
             var shard = go.AddComponent<AethelShard>();

@@ -6,12 +6,14 @@ public class AzureBladeSkill : MonoBehaviour
     [Header("Azure Blade Combat Settings")]
     [SerializeField] private float attackWindupDelay = 0.08f; // Độ trễ vung kiếm
     [SerializeField] private float waveSpeed = 11.5f;
-    [SerializeField] private int baseWaveDamage = 14;
+    [SerializeField] private int baseWaveDamage = 24; // Sát thương sóng kiếm cơ bản = 24 (Tụ lực max x2.25 = 54)
     [SerializeField] private float baseAttackCooldown = 5.0f; // Cooldown đòn đánh thường cơ bản là 5s
     [SerializeField] private float minAttackCooldown = 0.8f; // Cooldown tối thiểu khi nâng cấp max
     [SerializeField] private float specialCooldown = 18.0f;
     [SerializeField] private int ultiWaveCount = 5;
     [SerializeField] private float ultiSpreadAngle = 60f; // Nan quạt 60 độ
+
+    public void SetBaseWaveDamage(int dmg) => baseWaveDamage = dmg;
 
     [Header("Hold / Aim Settings (0.1s - 1.0s)")]
     [SerializeField] private float minChargeTime = 0.10f; // Ngưỡng bắt đầu tính tụ lực
@@ -37,7 +39,9 @@ public class AzureBladeSkill : MonoBehaviour
     public float AttackCooldownRatio => Mathf.Clamp01(attackCooldownTimer / attackCooldown);
     public float AttackCooldownRemaining => Mathf.Max(0f, attackCooldownTimer);
     public bool IsSpecialReady => specialCooldownTimer <= 0f;
+    public float SpecialCooldown => specialCooldown;
     public float SpecialCooldownRatio => Mathf.Clamp01(specialCooldownTimer / specialCooldown);
+    public float SpecialCooldownRemaining => Mathf.Max(0f, specialCooldownTimer);
     public bool IsAiming => isAiming;
 
     void Awake()
@@ -102,6 +106,11 @@ public class AzureBladeSkill : MonoBehaviour
         }
 
         attackCooldown = Mathf.Max(minAttackCooldown, baseAttackCooldown - totalCdr);
+
+        // 5. Cập nhật Cooldown Tuyệt Kỹ (18s -> min 5s)
+        float ultiUpCd = (upgradeMgr != null) ? upgradeMgr.GetUltiCooldownReduction() : 0f;
+        float ultiGemCd = (gemCdr > 0f) ? 18.0f * gemCdr : 0f;
+        specialCooldown = Mathf.Max(5.0f, 18.0f - ultiUpCd - ultiGemCd);
     }
 
     void Update()
@@ -286,16 +295,23 @@ public class AzureBladeSkill : MonoBehaviour
     /// <summary>
     /// Kỹ năng Tuyệt Kỹ: Bão Sóng Kiếm (Crescent Tempest Wave)
     /// </summary>
-    public void TriggerSpecialSkill()
+    public bool TriggerSpecialSkill()
     {
         if (specialCooldownTimer > 0f)
         {
             DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "COOLDOWN!", Color.yellow);
-            return;
+            return false;
+        }
+
+        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+        if (energySys != null && !energySys.TryConsumeEnergy(50f))
+        {
+            return false;
         }
 
         specialCooldownTimer = specialCooldown;
         StartCoroutine(ExecuteCrescentTempest());
+        return true;
     }
 
     private IEnumerator ExecuteCrescentTempest()
