@@ -72,7 +72,8 @@ public class PlayerInventory : MonoBehaviour
         SaveData();
         Debug.Log($"<color=green>[INVENTORY]</color> Đã lưu +{count} Bình Máu vào túi đồ! Tổng sở hữu: {healthPotions}");
         OnPotionsChanged?.Invoke(healthPotions);
-        DamagePopup.CreateText(transform.position, $"+{count} Potion", new Color(1f, 0.35f, 0.45f));
+        string potionLabel = LocalizationManager.T("Bình Máu", "Potion");
+        DamagePopup.CreateText(transform.position, $"+{count} {potionLabel}", new Color(1f, 0.35f, 0.45f));
     }
 
     public bool UsePotion()
@@ -80,7 +81,7 @@ public class PlayerInventory : MonoBehaviour
         if (healthPotions <= 0)
         {
             Debug.Log("<color=yellow>[INVENTORY]</color> Bạn đã hết bình máu!");
-            DamagePopup.CreateText(transform.position, "No Potions!", Color.yellow);
+            DamagePopup.CreateText(transform.position, LocalizationManager.T("Hết Bình Máu!", "No Potions!"), Color.yellow);
             return false;
         }
 
@@ -90,7 +91,7 @@ public class PlayerInventory : MonoBehaviour
             if (health.IsFullHealth())
             {
                 Debug.Log("<color=yellow>[INVENTORY]</color> Máu đã đầy, không cần uống!");
-                DamagePopup.CreateText(transform.position, "Full HP!", Color.yellow);
+                DamagePopup.CreateText(transform.position, LocalizationManager.T("Máu Đã Đầy!", "Full HP!"), Color.yellow);
                 return false;
             }
 

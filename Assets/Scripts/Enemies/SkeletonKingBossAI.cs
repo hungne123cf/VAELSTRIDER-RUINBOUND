@@ -474,7 +474,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.5f, 0.7f);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 2f, $"PHASE {currentBossPhase} - CUONG NO!", Color.red);
+        DamagePopup.CreateText(transform.position + Vector3.up * 2f, LocalizationManager.T($"GIAI ĐOẠN {currentBossPhase} - CUỒNG NỘ!", $"PHASE {currentBossPhase} - ENRAGED!"), Color.red);
 
         moveSpeed += 0.5f;
         meleeCooldown = Mathf.Max(1.0f, meleeCooldown - 0.2f);

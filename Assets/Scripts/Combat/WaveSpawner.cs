@@ -173,7 +173,7 @@ public class WaveSpawner : MonoBehaviour
     {
         if (currentWave < totalWaves)
         {
-            OnWaveMessage?.Invoke($"WAVE {currentWave} CLEARED!\nPrepare for next wave...");
+            OnWaveMessage?.Invoke(LocalizationManager.T($"HOÀN THÀNH ĐỢT {currentWave}!\nChuẩn bị cho đợt tiếp theo...", $"WAVE {currentWave} CLEARED!\nPrepare for next wave..."));
             yield return new WaitForSeconds(timeBetweenWaves);
             StartNextWave();
         }
@@ -181,7 +181,7 @@ public class WaveSpawner : MonoBehaviour
         {
             allWavesCleared = true;
             Debug.Log("<color=yellow>[VICTORY]</color> ALL WAVES CLEARED!");
-            OnWaveMessage?.Invoke("VICTORY!\nRUINS PURIFIED!");
+            OnWaveMessage?.Invoke(LocalizationManager.T("CHIẾN THẮNG!\nTÀN TÍCH ĐÃ ĐƯỢC THANH TẨY!", "VICTORY!\nRUINS PURIFIED!"));
             OnAllWavesCleared?.Invoke();
 
             AethelShard.SpawnShards(transform.position, 15);

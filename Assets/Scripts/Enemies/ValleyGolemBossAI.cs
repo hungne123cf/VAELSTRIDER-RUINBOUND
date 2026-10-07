@@ -82,7 +82,10 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
         var waveUI = FindAnyObjectByType<WaveUI>();
         if (waveUI != null)
         {
-            waveUI.ShowBanner("BOSS INCOMING: ANCIENT GOLEM!", LocalizationManager.T("Cự Thạch Hộ Vệ Thung Lũng Tàn Tích", "Valley Ruins Ancient Stone Golem"));
+            waveUI.ShowBanner(
+                LocalizationManager.T("CẢNH BÁO: GOLEM CỔ ĐẠI XUẤT HIỆN!", "BOSS INCOMING: ANCIENT GOLEM!"), 
+                LocalizationManager.T("Cự Thạch Hộ Vệ Thung Lũng Tàn Tích", "Valley Ruins Ancient Stone Golem")
+            );
         }
     }
 

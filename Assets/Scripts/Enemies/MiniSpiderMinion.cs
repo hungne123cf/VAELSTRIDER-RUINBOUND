@@ -40,7 +40,7 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        col.radius = 0.5f;
+        col.radius = 0.95f;
         col.offset = Vector2.zero;
         col.isTrigger = false;
 

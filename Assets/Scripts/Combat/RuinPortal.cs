@@ -110,12 +110,12 @@ public class RuinPortal : MonoBehaviour
 
         if (isFinalRealm)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "HEAVENLY GATE OPENED!", new Color(1f, 0.95f, 0.4f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("CỔNG THIÊN ĐƯỜNG ĐÃ MỞ!", "HEAVENLY GATE OPENED!"), new Color(1f, 0.95f, 0.4f));
             SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
         }
         else
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.2f, "PORTAL OPENED!", new Color(0.85f, 0.45f, 1f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.2f, LocalizationManager.T("CỔNG KHÔNG GIAN ĐÃ MỞ!", "PORTAL OPENED!"), new Color(0.85f, 0.45f, 1f));
             SoundManager.EnsureInstance()?.PlayPortalSpawn();
         }
 

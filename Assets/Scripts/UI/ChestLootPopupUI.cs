@@ -40,6 +40,25 @@ public class ChestLootPopupUI : MonoBehaviour
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
     }
 
+    private void OnEnable()
+    {
+        LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
+        LocalizationManager.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        if (titleText != null) titleText.text = LocalizationManager.T("RƯƠNG BÁU TÀN TÍCH", "ANCIENT RUIN CHEST");
+        if (claimAllBtnText != null) claimAllBtnText.text = LocalizationManager.T("LẤY TẤT CẢ", "CLAIM ALL");
+        if (closeBtnText != null) closeBtnText.text = LocalizationManager.T("ĐÓNG", "CLOSE");
+        if (isOpen) RefreshLootItems();
+    }
+
     public static ChestLootPopupUI EnsureUIExists()
     {
         if (instance != null && instance.gameObject != null) return instance;

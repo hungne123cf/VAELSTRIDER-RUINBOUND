@@ -33,6 +33,7 @@ public class CharacterManager : MonoBehaviour
     public const string CHAR_GALE_RONIN = "GaleRonin";
     public const string CHAR_MAID = "GaleRonin"; // Backward compatible alias
     public const string CHAR_AZURE_BLADE = "AzureBlade";
+    public const string CHAR_TITAN_BERSERKER = "TitanBerserker";
 
     private Dictionary<string, CharacterData> characters = new Dictionary<string, CharacterData>();
 
@@ -122,7 +123,7 @@ public class CharacterManager : MonoBehaviour
             spriteSheetPath = "Assets/ART/Player2/_down idle.png"
         };
 
-        // 3. Lam Kiếm Sĩ (Azure Blade)
+        // 3. Lam Kiếm Sĩ (Azure Blade - Player 3)
         characters[CHAR_AZURE_BLADE] = new CharacterData
         {
             id = CHAR_AZURE_BLADE,
@@ -142,10 +143,31 @@ public class CharacterManager : MonoBehaviour
             spriteSheetPath = "Assets/ART/Player3/Sword_Idle.png"
         };
 
+        // 4. Cuồng Chiến Binh Đại Chùy (Titan Berserker - Player 4)
+        characters[CHAR_TITAN_BERSERKER] = new CharacterData
+        {
+            id = CHAR_TITAN_BERSERKER,
+            nameVN = "Cuồng Chiến Binh",
+            nameEN = "Titan Berserker",
+            roleVN = "Đại Chùy Chiến Thần (Tanker & Chấn Địa)",
+            roleEN = "Titan Berserker (Tanker & Cataclysm Slam)",
+            skillNameVN = "Cuồng Nộ Chấn Địa",
+            skillNameEN = "Titan Cataclysm",
+            skillDescVN = "Vung đại chùy nện đất tạo sóng xung kích hình nón càn quét. Nội tại Thể Phách Titan giảm 20% sát thương và tự động tạo Khiên Đất Đá khi đầy nộ. Tuyệt kỹ hút toàn bộ quái vật vào tâm chấn rồi nện búa dung nham hất tung và gây choáng diện rộng!",
+            skillDescEN = "Swings heavy war hammer unleashing conic shockwaves. Innate 20% damage reduction and automatic Titan Bulwark shield. Special skill draws all enemies to the epicenter and slams with a catastrophic volcanic eruption!",
+            baseHealth = 160,
+            baseAttack = 32,
+            baseSpeed = 4.4f,
+            unlockPrice = 0, // Mở khóa sẵn sàng chơi
+            controllerPath = "Assets/Animation/Player4/Player4.controller",
+            spriteSheetPath = "Assets/ART/Player4/Hammer_Idle.png"
+        };
+
         // Mặc định mở khóa
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_VAELSTRIDER, 1);
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_GALE_RONIN, 1);
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_AZURE_BLADE, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_TITAN_BERSERKER, 1);
         PlayerPrefs.Save();
     }
 
@@ -154,11 +176,19 @@ public class CharacterManager : MonoBehaviour
         string selected = PlayerPrefs.GetString(SELECTED_CHAR_KEY, "");
         if (string.IsNullOrEmpty(selected))
         {
-            selected = PlayerPrefs.GetString("SelectedHero", CHAR_AZURE_BLADE);
+            selected = PlayerPrefs.GetString("SelectedHero", CHAR_TITAN_BERSERKER);
         }
 
-        if (string.Equals(selected, "azure", StringComparison.OrdinalIgnoreCase) || 
+        if (string.Equals(selected, "titan", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(selected, "titanberserker", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(selected, "player4", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(selected, CHAR_TITAN_BERSERKER, StringComparison.OrdinalIgnoreCase))
+        {
+            return CHAR_TITAN_BERSERKER;
+        }
+        else if (string.Equals(selected, "azure", StringComparison.OrdinalIgnoreCase) || 
             string.Equals(selected, "azureblade", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(selected, "player3", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(selected, CHAR_AZURE_BLADE, StringComparison.OrdinalIgnoreCase))
         {
             return CHAR_AZURE_BLADE;
@@ -190,7 +220,11 @@ public class CharacterManager : MonoBehaviour
 
     public bool IsCharacterUnlocked(string id)
     {
-        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + id, 0) == 1 || id == CHAR_VAELSTRIDER || id == CHAR_GALE_RONIN || id == CHAR_AZURE_BLADE;
+        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + id, 0) == 1 || 
+               id == CHAR_VAELSTRIDER || 
+               id == CHAR_GALE_RONIN || 
+               id == CHAR_AZURE_BLADE ||
+               id == CHAR_TITAN_BERSERKER;
     }
 
     public bool UnlockCharacter(string id)
@@ -203,8 +237,16 @@ public class CharacterManager : MonoBehaviour
     public void SelectCharacter(string id)
     {
         string normId = CHAR_VAELSTRIDER;
-        if (string.Equals(id, "azure", StringComparison.OrdinalIgnoreCase) || 
+        if (string.Equals(id, "titan", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(id, "titanberserker", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(id, "player4", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(id, CHAR_TITAN_BERSERKER, StringComparison.OrdinalIgnoreCase))
+        {
+            normId = CHAR_TITAN_BERSERKER;
+        }
+        else if (string.Equals(id, "azure", StringComparison.OrdinalIgnoreCase) || 
             string.Equals(id, "azureblade", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(id, "player3", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(id, CHAR_AZURE_BLADE, StringComparison.OrdinalIgnoreCase))
         {
             normId = CHAR_AZURE_BLADE;
@@ -219,7 +261,7 @@ public class CharacterManager : MonoBehaviour
         }
 
         PlayerPrefs.SetString(SELECTED_CHAR_KEY, normId);
-        PlayerPrefs.SetString("SelectedHero", (normId == CHAR_AZURE_BLADE) ? "azure" : (normId == CHAR_GALE_RONIN ? "ronin" : "vael"));
+        PlayerPrefs.SetString("SelectedHero", (normId == CHAR_TITAN_BERSERKER) ? "titan" : ((normId == CHAR_AZURE_BLADE) ? "azure" : (normId == CHAR_GALE_RONIN ? "ronin" : "vael")));
         PlayerPrefs.Save();
         Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {normId}");
     }

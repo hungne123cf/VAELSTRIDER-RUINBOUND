@@ -68,7 +68,8 @@ public class MatchTimerUI : MonoBehaviour
 
         if (timerText != null)
         {
-            timerText.text = $"<color=#FFA502><size=11>TIME</size></color>  <color=#FFFFFF><b>{FormatTime(elapsedTime)}</b></color>";
+            string label = LocalizationManager.T("THỜI GIAN", "TIME");
+            timerText.text = $"<color=#FFA502><size=11>{label}</size></color>  <color=#FFFFFF><b>{FormatTime(elapsedTime)}</b></color>";
         }
     }
 
@@ -86,7 +87,11 @@ public class MatchTimerUI : MonoBehaviour
     {
         elapsedTime = 0f;
         isRunning = true;
-        if (timerText != null) timerText.text = "<color=#FFA502><size=11>TIME</size></color>  <color=#FFFFFF><b>00:00</b></color>";
+        if (timerText != null)
+        {
+            string label = LocalizationManager.T("THỜI GIAN", "TIME");
+            timerText.text = $"<color=#FFA502><size=11>{label}</size></color>  <color=#FFFFFF><b>00:00</b></color>";
+        }
     }
 
     public void StopTimer()

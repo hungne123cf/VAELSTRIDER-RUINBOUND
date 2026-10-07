@@ -76,7 +76,7 @@ public class PlayerEnergySystem : MonoBehaviour
         }
 
         // Thong bao tren man hinh khi khong du nang luong
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "KHONG DU NANG LUONG!", new Color(0.3f, 0.85f, 1f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("KHÔNG ĐỦ NĂNG LƯỢNG!", "NOT ENOUGH ENERGY!"), new Color(0.3f, 0.85f, 1f));
         SoundManager.EnsureInstance()?.PlayMenuHover();
         return false;
     }
@@ -120,7 +120,7 @@ public class PlayerEnergySystem : MonoBehaviour
         }
 
         // Hieu ung thong bao & am thanh hoanh trang
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, "GIAP HO THAN KICH HOAT!", new Color(1f, 0.85f, 0.25f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, LocalizationManager.T("GIÁP HỘ THÂN KÍCH HOẠT!", "SHIELD ACTIVATED!"), new Color(1f, 0.85f, 0.25f));
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         var cam = FindAnyObjectByType<CameraFollow>();
@@ -146,7 +146,8 @@ public class PlayerEnergySystem : MonoBehaviour
         if (currentShieldHealth >= incomingDamage)
         {
             currentShieldHealth -= incomingDamage;
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"[GIAP HO THAN] -{incomingDamage}", new Color(1f, 0.88f, 0.35f));
+            string shieldPrefix = LocalizationManager.T("GIÁP HỘ THÂN", "SHIELD");
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"[{shieldPrefix}] -{incomingDamage}", new Color(1f, 0.88f, 0.35f));
 
             if (currentShieldHealth <= 0)
             {
@@ -157,7 +158,8 @@ public class PlayerEnergySystem : MonoBehaviour
         else
         {
             int remainingDamage = incomingDamage - currentShieldHealth;
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"[GIAP VO] -{currentShieldHealth}", new Color(1f, 0.45f, 0.35f));
+            string shieldBrokenPrefix = LocalizationManager.T("GIÁP VỠ", "SHIELD BROKEN");
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"[{shieldBrokenPrefix}] -{currentShieldHealth}", new Color(1f, 0.45f, 0.35f));
             currentShieldHealth = 0;
             BreakShield(expired: false);
             return remainingDamage; // Phan sat thuong con lai tru vao mau
@@ -183,11 +185,11 @@ public class PlayerEnergySystem : MonoBehaviour
 
         if (expired)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, "GIAP HO THAN HET GIO", new Color(0.7f, 0.75f, 0.85f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, LocalizationManager.T("GIÁP HẾT HẠN", "SHIELD EXPIRED"), new Color(0.7f, 0.75f, 0.85f));
         }
         else
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, "GIAP HO THAN VO TAN!", new Color(1f, 0.35f, 0.4f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, LocalizationManager.T("GIÁP VỠ TAN!", "SHIELD SHATTERED!"), new Color(1f, 0.35f, 0.4f));
             SoundManager.EnsureInstance()?.PlayHitImpact();
         }
 

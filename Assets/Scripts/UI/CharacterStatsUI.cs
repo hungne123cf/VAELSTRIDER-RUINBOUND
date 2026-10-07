@@ -24,10 +24,21 @@ public class CharacterStatsUI : MonoBehaviour
     // 3 Skill & Trait Detail Cards
     [SerializeField] private TextMeshProUGUI attackCardTitle;
     [SerializeField] private TextMeshProUGUI attackCardDesc;
+    [SerializeField] private Image attackCardIcon;
+    [SerializeField] private Outline attackCardOutline;
+    [SerializeField] private Outline attackBadgeOutline;
+
     [SerializeField] private TextMeshProUGUI dashCardTitle;
     [SerializeField] private TextMeshProUGUI dashCardDesc;
+    [SerializeField] private Image dashCardIcon;
+    [SerializeField] private Outline dashCardOutline;
+    [SerializeField] private Outline dashBadgeOutline;
+
     [SerializeField] private TextMeshProUGUI ultiCardTitle;
     [SerializeField] private TextMeshProUGUI ultiCardDesc;
+    [SerializeField] private Image ultiCardIcon;
+    [SerializeField] private Outline ultiCardOutline;
+    [SerializeField] private Outline ultiBadgeOutline;
 
     void Awake()
     {
@@ -98,14 +109,73 @@ public class CharacterStatsUI : MonoBehaviour
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }
 
+    private void EnsureCardReferences()
+    {
+        Transform dialogBox = transform.Find("DialogBox");
+        if (dialogBox == null) return;
+        Transform cardsSection = dialogBox.Find("CardsSection");
+        if (cardsSection == null) return;
+
+        if (attackCardIcon == null)
+        {
+            var t = cardsSection.Find("Card_Attack/IconBadge/Icon");
+            if (t != null) attackCardIcon = t.GetComponent<Image>();
+        }
+        if (attackCardOutline == null)
+        {
+            var t = cardsSection.Find("Card_Attack");
+            if (t != null) attackCardOutline = t.GetComponent<Outline>();
+        }
+        if (attackBadgeOutline == null)
+        {
+            var t = cardsSection.Find("Card_Attack/IconBadge");
+            if (t != null) attackBadgeOutline = t.GetComponent<Outline>();
+        }
+
+        if (dashCardIcon == null)
+        {
+            var t = cardsSection.Find("Card_Dash/IconBadge/Icon");
+            if (t != null) dashCardIcon = t.GetComponent<Image>();
+        }
+        if (dashCardOutline == null)
+        {
+            var t = cardsSection.Find("Card_Dash");
+            if (t != null) dashCardOutline = t.GetComponent<Outline>();
+        }
+        if (dashBadgeOutline == null)
+        {
+            var t = cardsSection.Find("Card_Dash/IconBadge");
+            if (t != null) dashBadgeOutline = t.GetComponent<Outline>();
+        }
+
+        if (ultiCardIcon == null)
+        {
+            var t = cardsSection.Find("Card_Ulti/IconBadge/Icon");
+            if (t != null) ultiCardIcon = t.GetComponent<Image>();
+        }
+        if (ultiCardOutline == null)
+        {
+            var t = cardsSection.Find("Card_Ulti");
+            if (t != null) ultiCardOutline = t.GetComponent<Outline>();
+        }
+        if (ultiBadgeOutline == null)
+        {
+            var t = cardsSection.Find("Card_Ulti/IconBadge");
+            if (t != null) ultiBadgeOutline = t.GetComponent<Outline>();
+        }
+    }
+
     public void RefreshData()
     {
+        EnsureCardReferences();
+
         var upgradeMgr = PlayerUpgradeManager.EnsureInstance();
         var charMgr = CharacterManager.EnsureInstance();
 
         string selectedCharId = charMgr != null ? charMgr.GetSelectedCharacterId() : "Vaelstrider";
-        bool isAzure = (selectedCharId == CharacterManager.CHAR_AZURE_BLADE);
-        bool isRonin = (selectedCharId == CharacterManager.CHAR_GALE_RONIN || selectedCharId == "Maid");
+        bool isTitan = (selectedCharId == CharacterManager.CHAR_TITAN_BERSERKER || selectedCharId.ToLower().Contains("titan") || selectedCharId.ToLower().Contains("player4"));
+        bool isAzure = (selectedCharId == CharacterManager.CHAR_AZURE_BLADE || selectedCharId.ToLower().Contains("azure") || selectedCharId.ToLower().Contains("player3"));
+        bool isRonin = (selectedCharId == CharacterManager.CHAR_GALE_RONIN || selectedCharId.ToLower().Contains("ronin") || selectedCharId.ToLower().Contains("gale") || selectedCharId == "Maid");
         bool isVi = LocalizationManager.IsVietnamese;
 
         int atkBonus = upgradeMgr != null ? upgradeMgr.GetAttackBonus() : 0;
@@ -117,12 +187,12 @@ public class CharacterStatsUI : MonoBehaviour
         // Gem Socket Bonuses
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out int sAtk, out int sHp, out int sDef, out float sLifesteal, out float sCd, out float sShard, out float sRegen);
 
-        int baseAtk = isAzure ? 6 : (isRonin ? 6 : 5);
-        int baseHp = isAzure ? 110 : (isRonin ? 95 : 100);
+        int baseAtk = isTitan ? 8 : (isAzure ? 6 : (isRonin ? 6 : 5));
+        int baseHp = isTitan ? 160 : (isAzure ? 110 : (isRonin ? 95 : 100));
         int totalAtk = baseAtk + atkBonus + sAtk;
         int totalHp = baseHp + hpBonus + sHp;
         float finalDashCd = Mathf.Max(1.0f, 5.0f - dashCdRed);
-        float baseUltiCd = isAzure ? 18.0f : (isRonin ? 15.0f : 24.0f);
+        float baseUltiCd = isTitan ? 12.0f : (isAzure ? 18.0f : (isRonin ? 15.0f : 24.0f));
         float gemCdSec = baseUltiCd * sCd;
         float finalUltiCd = Mathf.Max(5.0f, baseUltiCd - ultiCdRed - gemCdSec);
 
@@ -133,7 +203,12 @@ public class CharacterStatsUI : MonoBehaviour
             pcObj.RecalculateCombatStats();
             var roninSkill = pcObj.GetComponent<GaleRoninSkill>();
             var azureSkill = pcObj.GetComponent<AzureBladeSkill>();
-            if (isRonin && roninSkill != null)
+            var titanSkill = pcObj.GetComponent<TitanBerserkerSkill>();
+            if (isTitan && titanSkill != null)
+            {
+                finalUltiCd = titanSkill.specialCooldown;
+            }
+            else if (isRonin && roninSkill != null)
             {
                 roninSkill.RefreshCooldownStats();
                 finalUltiCd = roninSkill.SpecialCooldown;
@@ -149,19 +224,62 @@ public class CharacterStatsUI : MonoBehaviour
             }
         }
 
+        // Màu viền và icon theo từng tướng
+        Color heroAccent = isTitan ? new Color(1f, 0.65f, 0.2f) : (isAzure ? new Color(0.35f, 0.88f, 1f) : (isRonin ? new Color(0.28f, 1f, 0.75f) : new Color(1f, 0.85f, 0.35f)));
+
+        Sprite sprAttack = null;
+        Sprite sprDash = null;
+        Sprite sprUlti = null;
+
+        if (isRonin)
+        {
+            sprAttack = LoadSprite("Assets/ART/Player2/UI/icon_attack.png", "Player2/UI/icon_attack");
+            sprDash = LoadSprite("Assets/ART/Player2/UI/icon_dash.png", "Player2/UI/icon_dash");
+            sprUlti = LoadSprite("Assets/ART/Player2/UI/icon_ulti.png", "Player2/UI/icon_ulti");
+        }
+        else if (isAzure)
+        {
+            sprAttack = LoadSprite("Assets/ART/Player3/UI/icon_attack.png", "Player3/UI/icon_attack");
+            sprDash = LoadSprite("Assets/ART/Player3/UI/icon_dash.png", "Player3/UI/icon_dash");
+            sprUlti = LoadSprite("Assets/ART/Player3/UI/icon_ulti.png", "Player3/UI/icon_ulti");
+        }
+        else
+        {
+            sprAttack = LoadSprite("Assets/Sprites/UI/Attack.png", "UI/Attack");
+            sprDash = LoadSprite("Assets/Sprites/UI/Dash.png", "UI/Dash");
+            sprUlti = LoadSprite("Assets/Sprites/UI/Ulti.png", "UI/Ulti");
+        }
+
+        // Cập nhật Sprite và Viền
+        if (attackCardIcon != null && sprAttack != null) { attackCardIcon.sprite = sprAttack; attackCardIcon.color = Color.white; }
+        if (dashCardIcon != null && sprDash != null) { dashCardIcon.sprite = sprDash; dashCardIcon.color = Color.white; }
+        if (ultiCardIcon != null && sprUlti != null) { ultiCardIcon.sprite = sprUlti; ultiCardIcon.color = Color.white; }
+
+        if (attackCardOutline != null) attackCardOutline.effectColor = new Color(heroAccent.r, heroAccent.g, heroAccent.b, 0.65f);
+        if (attackBadgeOutline != null) attackBadgeOutline.effectColor = heroAccent;
+        if (dashCardOutline != null) dashCardOutline.effectColor = new Color(heroAccent.r, heroAccent.g, heroAccent.b, 0.65f);
+        if (dashBadgeOutline != null) dashBadgeOutline.effectColor = heroAccent;
+        if (ultiCardOutline != null) ultiCardOutline.effectColor = new Color(heroAccent.r, heroAccent.g, heroAccent.b, 0.65f);
+        if (ultiBadgeOutline != null) ultiBadgeOutline.effectColor = heroAccent;
+
         // Header Title
         if (characterTitleText != null)
         {
-            if (isAzure)
+            if (isTitan)
+                characterTitleText.text = isVi ? "CUỒNG CHIẾN BINH (TITAN BERSERKER)" : "TITAN BERSERKER (HEAVY TANKER)";
+            else if (isAzure)
                 characterTitleText.text = isVi ? "LAM KIẾM SĨ (AZURE BLADE)" : "AZURE BLADE (SWORDSWOMAN)";
             else if (isRonin)
                 characterTitleText.text = isVi ? "PHONG LÔI LÃNG KHÁCH (GALE RONIN)" : "GALE RONIN (PHANTOM BLADE)";
             else
                 characterTitleText.text = isVi ? "HIỆP SĨ VAELSTRIDER" : "KNIGHT VAELSTRIDER";
+            characterTitleText.color = heroAccent;
         }
         if (characterSubtitleText != null)
         {
-            if (isAzure)
+            if (isTitan)
+                characterSubtitleText.text = isVi ? "Phong cách: Đại Chùy Tanker | Nện búa chấn động, Giảm 20% sát thương & Cuồng nộ chấn địa" : "Style: Heavy Titan Tanker | Conic Hammer Smashes, Innate 20% DR & Cataclysm Slam";
+            else if (isAzure)
                 characterSubtitleText.text = isVi ? "Phong cách: Trọng Kiếm Khí | Chém chậm xuất Sóng Kiếm xuyên quái & Bão kiếm nan quạt" : "Style: Heavy Crescent | Slow Slashes with Piercing Waves & Fan Spread Tempest";
             else if (isRonin)
                 characterSubtitleText.text = isVi ? "Phong cách: Bán Nguyệt Phong Ấn | Chém quét 180° tích tầng Phong Ấn bộc phá & Lốc xoáy mini" : "Style: Crescent Wind | 180° Cleave, Wind Marks Stack Burst & Mini Vortex";
@@ -169,7 +287,7 @@ public class CharacterStatsUI : MonoBehaviour
                 characterSubtitleText.text = isVi ? "Phong cách: Kiếm Sĩ Cổ Tộc | Đột kích liên hoàn & Bão kiếm quét rộng" : "Style: Ancient Blade | Multi-slash Combo & Area Storm";
         }
 
-        // 4 Quick Stats Badges (To, ro rang, khong thua chu)
+        // 4 Quick Stats Badges
         if (hpStatText != null)
         {
             string label = isVi ? "MÁU (HP)" : "HEALTH (HP)";
@@ -194,22 +312,32 @@ public class CharacterStatsUI : MonoBehaviour
         // Card 1: Attack
         if (attackCardTitle != null)
         {
-            if (isAzure)
-                attackCardTitle.text = isVi ? "1. TRỌNG KIẾM & SÓNG KIẾM" : "1. HEAVY SLICE & SWORD WAVE";
+            if (isTitan)
+                attackCardTitle.text = isVi ? "1. ĐẠI CHÙY CHẤN ĐỊA (140°)" : "1. TITAN HAMMER SMASH (140°)";
+            else if (isAzure)
+                attackCardTitle.text = isVi ? "1. SONG BĂNG ĐOẢN KIẾM & SÓNG KIẾM" : "1. TWIN FROST BLADES & SWORD WAVE";
             else if (isRonin)
                 attackCardTitle.text = isVi ? "1. PHONG NGUYỆT TRẢM (180°)" : "1. GALE CRESCENT SWEEP";
             else
-                attackCardTitle.text = isVi ? "1. ĐÒN ĐÁNH CƠ BẢN" : "1. BASIC ATTACK";
+                attackCardTitle.text = isVi ? "1. ĐẠI KIẾM HOÀNG KIM" : "1. ANCIENT BROADSWORD";
         }
         if (attackCardDesc != null)
         {
-            if (isAzure)
+            if (isTitan)
             {
                 attackCardDesc.text = isVi
-                    ? $"• <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Phóng <color=#55FFFF><b>Sóng Kiếm</b></color> xuyên quái (Tầm 6.5m)\n" +
-                      $"• <b>Hiệu ứng:</b> Đánh trúng hồi <color=#38BDF8><b>+6 Năng Lượng</b></color>"
-                    : $"• <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Fires <color=#55FFFF><b>Piercing Sword Wave</b></color> (6.5m)\n" +
-                      $"• <b>Effect:</b> Restores <color=#38BDF8><b>+6 Energy</b></color> on hit";
+                    ? $"• <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Nện đất hình nón hất lùi quái\n" +
+                      $"• <b>Nội tại:</b> Tích lũy <b>Cuồng Nộ</b> khi đánh trúng, kích hoạt <b>Khiên Đất Đá</b>"
+                    : $"• <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Conic Shockwave Knockback\n" +
+                      $"• <b>Passive:</b> Builds <b>Berserk Rage</b> on hit, activates <b>Titan Bulwark</b>";
+            }
+            else if (isAzure)
+            {
+                attackCardDesc.text = isVi
+                    ? $"• <b>Sát thương:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Phóng <color=#55FFFF><b>Sóng Kiếm Băng</b></color> xuyên quái (Tầm 6.5m)\n" +
+                      $"• <b>Hiệu ứng:</b> Đánh trúng hồi <color=#38BDF8><b>+6 Năng Lượng</b></color> & Giảm 50% hồi đòn đánh"
+                    : $"• <b>Damage:</b> <color=#FF6677><b>{totalAtk} ATK</b></color> | Fires <color=#55FFFF><b>Frost Sword Waves</b></color> (6.5m)\n" +
+                      $"• <b>Effect:</b> Restores <color=#38BDF8><b>+6 Energy</b></color> & Cuts attack cooldown by 50% on hit";
             }
             else if (isRonin)
             {
@@ -232,11 +360,26 @@ public class CharacterStatsUI : MonoBehaviour
         // Card 2: Dash
         if (dashCardTitle != null)
         {
-            dashCardTitle.text = isVi ? "2. LƯỚT NÉ ĐÒN" : "2. DASH & DODGE";
+            if (isTitan)
+                dashCardTitle.text = isVi ? "2. CHIẾN XA BẠO ĐỘT" : "2. TITAN JUGGERNAUT DASH";
+            else if (isAzure)
+                dashCardTitle.text = isVi ? "2. HÀN BĂNG TRƯỢT TUYẾT" : "2. FROST GLIDE DASH";
+            else if (isRonin)
+                dashCardTitle.text = isVi ? "2. PHONG THIỂM TỐC LƯỚT" : "2. GALE FLASH DASH";
+            else
+                dashCardTitle.text = isVi ? "2. BỤI CỔ TỐC BIẾN" : "2. RUIN DUST DASH";
         }
         if (dashCardDesc != null)
         {
-            if (isRonin)
+            if (isTitan)
+            {
+                dashCardDesc.text = isVi
+                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Đặc tính:</b> Lướt càn quét (bất tử 0.2s) & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>"
+                    : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Trait:</b> Heavy dash with 0.2s Invincibility & <color=#FFAA33><b>Reduces Ultimate CD by 2.0s</b></color>";
+            }
+            else if (isRonin)
             {
                 dashCardDesc.text = isVi
                     ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
@@ -265,43 +408,69 @@ public class CharacterStatsUI : MonoBehaviour
         // Card 3: Ulti
         if (ultiCardTitle != null)
         {
-            if (isAzure)
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: BÃO SÓNG KIẾM" : "3. ULTIMATE: CRESCENT TEMPEST";
+            if (isTitan)
+                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: CUỒNG NỘ CHẤN ĐỊA" : "3. ULTIMATE: TITAN CATACLYSM SLAM";
+            else if (isAzure)
+                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: 5 TIA BĂNG NGUYỆT SÓNG" : "3. ULTIMATE: 5-WAY AZURE TEMPEST";
             else if (isRonin)
-            {
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: ÁM ẢNH TRẢM (SHADOW STRIKE)" : "3. ULTIMATE: SHADOW STRIKE";
-            }
+                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: ÁM ẢNH PHÂN THÂN TRẢM" : "3. ULTIMATE: SHADOW GALE STRIKE";
             else
-            {
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: CƠN LỐC TÀN TÍCH" : "3. ULTIMATE: RUIN WHIRLWIND";
-            }
+                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: BÃO XOÁY CỔ KIẾM" : "3. ULTIMATE: RUIN WHIRLWIND";
         }
         if (ultiCardDesc != null)
         {
-            if (isAzure)
+            if (isTitan)
             {
+                int titanUltiDmg = 95 + (totalAtk * 2) + ultiDmgBonus;
+
                 ultiCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                    ? $"• <b>Sát thương:</b> <color=#FF5566><b>{titanUltiDmg} Sát thương Địa Chấn Dung Nham</b></color>\n" +
+                      $"• <b>Tiêu hao:</b> <color=#38BDF8><b>45 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Hiệu ứng:</b> Hút quái vật (5.5m) -> Nện đại chùy hất tung và gây choáng diện rộng\n" +
+                      $"• <b>Nội tại:</b> <color=#55FF88><b>Kích hoạt ngay Khiên Hộ Thân Đất Đá!</b></color>"
+                    : $"• <b>Damage:</b> <color=#FF6677><b>{titanUltiDmg} Cataclysm Seismic Damage</b></color>\n" +
+                      $"• <b>Cost:</b> <color=#38BDF8><b>45 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Effect:</b> Draws enemies (5.5m) -> Cataclysmic slam launches and stuns all foes\n" +
+                      $"• <b>Special:</b> <color=#55FF88><b>Instantly triggers Titan Bulwark Shield!</b></color>";
+            }
+            else if (isAzure)
+            {
+                int azureWaveDmg = 48 + totalAtk + ultiDmgBonus;
+                int azureTotalDmg = azureWaveDmg * 5;
+
+                ultiCardDesc.text = isVi
+                    ? $"• <b>Sát thương:</b> <color=#FF5566><b>{azureWaveDmg} ATK</b></color> x 5 Tia (Tổng: <color=#FFAA33><b>{azureTotalDmg} Sát thương</b></color>)\n" +
+                      $"• <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
                       $"• <b>Hiệu ứng:</b> Phóng 5 luồng đại kiếm khí nan quạt quét sạch chiến trường"
-                    : $"• <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                    : $"• <b>Damage:</b> <color=#FF5566><b>{azureWaveDmg} ATK</b></color> x 5 Waves (Total: <color=#FFAA33><b>{azureTotalDmg}</b></color>)\n" +
+                      $"• <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
                       $"• <b>Effect:</b> Fires 5 massive fan-spread crescent waves piercing enemies";
             }
             else if (isRonin)
             {
+                int roninUltiDmg = (28 * 3) + (totalAtk * 2) + ultiDmgBonus;
+
                 ultiCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>40 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                    ? $"• <b>Sát thương:</b> <color=#FF5566><b>{roninUltiDmg} Sát thương Bạo Kích Nhất Trảm</b></color>\n" +
+                      $"• <b>Tiêu hao:</b> <color=#38BDF8><b>40 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
                       $"• <b>Hiệu ứng:</b> Khóa mục tiêu (10.5m) -> Dịch chuyển ra sau lưng trảm cực mạnh rồi biến về vị trí cũ\n" +
                       $"• <b>Nội tại:</b> <color=#55FF88><b>Kết liễu mục tiêu hồi chiêu Tuyệt Kỹ ngay lập tức!</b></color>"
-                    : $"• <b>Cost:</b> <color=#38BDF8><b>40 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                    : $"• <b>Damage:</b> <color=#FF5566><b>{roninUltiDmg} Execution Critical Strike</b></color>\n" +
+                      $"• <b>Cost:</b> <color=#38BDF8><b>40 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
                       $"• <b>Effect:</b> Target lock-on (10.5m) -> Teleports behind enemy for a devastating strike then returns\n" +
                       $"• <b>Special:</b> <color=#55FF88><b>Executing target instantly resets Ultimate Cooldown!</b></color>";
             }
             else
             {
+                int vaelFinalHit = 50 + totalAtk + ultiDmgBonus;
+                int vaelTotal = (20 + (int)(totalAtk * 0.4f)) * 2 + (25 + (int)(totalAtk * 0.5f)) + vaelFinalHit;
+
                 ultiCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                    ? $"• <b>Sát thương:</b> <color=#FF5566><b>{vaelTotal}</b></color> (4 Đợt Bão Kiếm, Đòn cuối: <color=#FFAA33><b>{vaelFinalHit}</b></color>)\n" +
+                      $"• <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
                       $"• <b>Hiệu ứng:</b> Triệu hồi bão kiếm quét 4 đợt diện rộng, hút và dồn sát thương"
-                    : $"• <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                    : $"• <b>Damage:</b> <color=#FF5566><b>{vaelTotal}</b></color> (4-Hit Whirlwind, Final: <color=#FFAA33><b>{vaelFinalHit}</b></color>)\n" +
+                      $"• <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
                       $"• <b>Effect:</b> Summons 4-hit area whirlwind pulling and shredding enemies";
             }
         }
@@ -522,9 +691,9 @@ public class CharacterStatsUI : MonoBehaviour
         Sprite sprDash = LoadSprite("Assets/Sprites/UI/Dash.png", "UI/Dash");
         Sprite sprUlti = LoadSprite("Assets/Sprites/UI/Ulti.png", "UI/Ulti");
 
-        CreateSkillCard(cardsSection.transform, "Card_Attack", "1. ĐÒN ĐÁNH CƠ BẢN", sprAttack, new Color(1f, 0.45f, 0.25f), out uiComp.attackCardDesc, out uiComp.attackCardTitle);
-        CreateSkillCard(cardsSection.transform, "Card_Dash", "2. LƯỚT NÉ ĐÒN", sprDash, new Color(0.2f, 0.95f, 0.65f), out uiComp.dashCardDesc, out uiComp.dashCardTitle);
-        CreateSkillCard(cardsSection.transform, "Card_Ulti", "3. TUYỆT KỸ", sprUlti, new Color(0.75f, 0.5f, 1f), out uiComp.ultiCardDesc, out uiComp.ultiCardTitle);
+        CreateSkillCard(cardsSection.transform, "Card_Attack", "1. ĐÒN ĐÁNH CƠ BẢN", sprAttack, new Color(1f, 0.45f, 0.25f), out uiComp.attackCardDesc, out uiComp.attackCardTitle, out uiComp.attackCardIcon, out uiComp.attackCardOutline, out uiComp.attackBadgeOutline);
+        CreateSkillCard(cardsSection.transform, "Card_Dash", "2. LƯỚT NÉ ĐÒN", sprDash, new Color(0.2f, 0.95f, 0.65f), out uiComp.dashCardDesc, out uiComp.dashCardTitle, out uiComp.dashCardIcon, out uiComp.dashCardOutline, out uiComp.dashBadgeOutline);
+        CreateSkillCard(cardsSection.transform, "Card_Ulti", "3. TUYỆT KỸ", sprUlti, new Color(0.75f, 0.5f, 1f), out uiComp.ultiCardDesc, out uiComp.ultiCardTitle, out uiComp.ultiCardIcon, out uiComp.ultiCardOutline, out uiComp.ultiBadgeOutline);
 
         panelObj.SetActive(false);
         return uiComp;
@@ -535,6 +704,14 @@ public class CharacterStatsUI : MonoBehaviour
         Sprite spr = null;
 #if UNITY_EDITOR
         spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        if (spr == null)
+        {
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(assetPath);
+            foreach (var a in all)
+            {
+                if (a is Sprite s) { spr = s; break; }
+            }
+        }
 #endif
         if (spr == null) spr = Resources.Load<Sprite>(resourcePath);
         return spr;
@@ -565,7 +742,7 @@ public class CharacterStatsUI : MonoBehaviour
         return tmp;
     }
 
-    private static void CreateSkillCard(Transform parent, string name, string title, Sprite iconSpr, Color accentCol, out TextMeshProUGUI descTmp, out TextMeshProUGUI titleTmp)
+    private static void CreateSkillCard(Transform parent, string name, string title, Sprite iconSpr, Color accentCol, out TextMeshProUGUI descTmp, out TextMeshProUGUI titleTmp, out Image iconImgOut, out Outline cardOutlineOut, out Outline badgeOutlineOut)
     {
         GameObject cardObj = CreateUIObject(name, parent);
         Image bg = cardObj.AddComponent<Image>();
@@ -574,39 +751,42 @@ public class CharacterStatsUI : MonoBehaviour
         var outline = cardObj.AddComponent<Outline>();
         outline.effectColor = new Color(accentCol.r, accentCol.g, accentCol.b, 0.65f);
         outline.effectDistance = new Vector2(1.5f, -1.5f);
+        cardOutlineOut = outline;
 
         float leftPad = 25f;
-        if (iconSpr != null)
-        {
-            GameObject iconBadgeObj = CreateUIObject("IconBadge", cardObj.transform);
-            RectTransform ibRt = iconBadgeObj.GetComponent<RectTransform>();
-            ibRt.anchorMin = new Vector2(0f, 0.5f);
-            ibRt.anchorMax = new Vector2(0f, 0.5f);
-            ibRt.pivot = new Vector2(0f, 0.5f);
-            ibRt.anchoredPosition = new Vector2(25f, 0f);
-            ibRt.sizeDelta = new Vector2(76f, 76f);
+        badgeOutlineOut = null;
+        iconImgOut = null;
 
-            Image ibBg = iconBadgeObj.AddComponent<Image>();
-            ibBg.color = new Color(0.04f, 0.06f, 0.10f, 0.95f);
-            var ibOutline = iconBadgeObj.AddComponent<Outline>();
-            ibOutline.effectColor = accentCol;
-            ibOutline.effectDistance = new Vector2(2f, -2f);
+        GameObject iconBadgeObj = CreateUIObject("IconBadge", cardObj.transform);
+        RectTransform ibRt = iconBadgeObj.GetComponent<RectTransform>();
+        ibRt.anchorMin = new Vector2(0f, 0.5f);
+        ibRt.anchorMax = new Vector2(0f, 0.5f);
+        ibRt.pivot = new Vector2(0f, 0.5f);
+        ibRt.anchoredPosition = new Vector2(25f, 0f);
+        ibRt.sizeDelta = new Vector2(76f, 76f);
 
-            GameObject iconInner = CreateUIObject("Icon", iconBadgeObj.transform);
-            RectTransform iiRt = iconInner.GetComponent<RectTransform>();
-            iiRt.anchorMin = new Vector2(0.5f, 0.5f);
-            iiRt.anchorMax = new Vector2(0.5f, 0.5f);
-            iiRt.pivot = new Vector2(0.5f, 0.5f);
-            iiRt.anchoredPosition = Vector2.zero;
-            iiRt.sizeDelta = new Vector2(62f, 62f);
+        Image ibBg = iconBadgeObj.AddComponent<Image>();
+        ibBg.color = new Color(0.04f, 0.06f, 0.10f, 0.95f);
+        var ibOutline = iconBadgeObj.AddComponent<Outline>();
+        ibOutline.effectColor = accentCol;
+        ibOutline.effectDistance = new Vector2(2f, -2f);
+        badgeOutlineOut = ibOutline;
 
-            Image iiImg = iconInner.AddComponent<Image>();
-            iiImg.sprite = iconSpr;
-            iiImg.preserveAspect = true;
-            iiImg.raycastTarget = false;
+        GameObject iconInner = CreateUIObject("Icon", iconBadgeObj.transform);
+        RectTransform iiRt = iconInner.GetComponent<RectTransform>();
+        iiRt.anchorMin = new Vector2(0.5f, 0.5f);
+        iiRt.anchorMax = new Vector2(0.5f, 0.5f);
+        iiRt.pivot = new Vector2(0.5f, 0.5f);
+        iiRt.anchoredPosition = Vector2.zero;
+        iiRt.sizeDelta = new Vector2(62f, 62f);
 
-            leftPad = 125f;
-        }
+        Image iiImg = iconInner.AddComponent<Image>();
+        iiImg.sprite = iconSpr;
+        iiImg.preserveAspect = true;
+        iiImg.raycastTarget = false;
+        iconImgOut = iiImg;
+
+        leftPad = 125f;
 
         GameObject tObj = CreateUIObject("Title", cardObj.transform);
         RectTransform tRt = tObj.GetComponent<RectTransform>();

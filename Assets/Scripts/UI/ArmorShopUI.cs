@@ -722,6 +722,14 @@ public class ArmorShopUI : MonoBehaviour
 
     private void RefreshCategoryTabsVisual()
     {
+        (ShopCategory cat, string vi, string en)[] tabs = new[]
+        {
+            (ShopCategory.Minerals, "KHOÁNG THẠCH", "MINERALS & GEMS"),
+            (ShopCategory.Scrolls, "BÙA CHÚ", "SCROLLS & RELICS"),
+            (ShopCategory.Potions, "DƯỢC LIỆU", "POTIONS"),
+            (ShopCategory.Equipment, "TRANG BỊ", "EQUIPMENT")
+        };
+
         for (int i = 0; i < tabBtnImgs.Count; i++)
         {
             bool isSel = (i == (int)currentCategory);
@@ -733,6 +741,7 @@ public class ArmorShopUI : MonoBehaviour
             }
             if (tabBtnTexts[i] != null)
             {
+                if (i < tabs.Length) tabBtnTexts[i].text = LocalizationManager.T(tabs[i].vi, tabs[i].en);
                 tabBtnTexts[i].color = isSel ? Color.white : new Color(0.7f, 0.75f, 0.85f);
             }
         }
@@ -1065,6 +1074,13 @@ public class ArmorShopUI : MonoBehaviour
 
     private void RefreshUI()
     {
+        if (shopTitleText != null)
+        {
+            shopTitleText.text = LocalizationManager.T("TIỆM TIẾP TẾ & KHOÁNG SẢN HOÀNG GIA", "ROYAL SUPPLIES & MINERALS EMPORIUM");
+        }
+
+        RefreshCategoryTabsVisual();
+
         if (gridContent == null) return;
 
         // Filter items
@@ -1086,6 +1102,8 @@ public class ArmorShopUI : MonoBehaviour
 
         if (emptyCategoryNoticeObj != null)
         {
+            var enTmp = emptyCategoryNoticeObj.GetComponent<TextMeshProUGUI>();
+            if (enTmp != null) enTmp.text = LocalizationManager.T("Danh mục này đang được chuẩn bị,\nsẽ sớm cập nhật trong bản tới!", "This category is coming soon in the next update!");
             emptyCategoryNoticeObj.SetActive(currentFilteredItems.Count == 0);
         }
 

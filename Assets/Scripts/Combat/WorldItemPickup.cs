@@ -208,7 +208,7 @@ public class WorldItemPickup : MonoBehaviour
             }
 
             SoundManager.EnsureInstance()?.PlayShardPickup();
-            DamagePopup.CreateText(spawnPopPos, $"+{finalShards:N0} Shards", new Color(0f, 0.85f, 1f));
+            DamagePopup.CreateText(spawnPopPos, $"+{finalShards:N0} " + LocalizationManager.T("Linh Hồn", "Shards"), new Color(0f, 0.85f, 1f));
         }
         else if (itemId == "potion")
         {
@@ -218,7 +218,7 @@ public class WorldItemPickup : MonoBehaviour
                 if (inv != null) inv.AddPotions(quantity);
             }
             SoundManager.EnsureInstance()?.PlayGemSocket();
-            DamagePopup.CreateText(spawnPopPos, $"+{quantity} Potion", new Color(1f, 0.35f, 0.45f));
+            DamagePopup.CreateText(spawnPopPos, $"+{quantity} " + LocalizationManager.T("Bình Máu", "Potion"), new Color(1f, 0.35f, 0.45f));
         }
         else
         {

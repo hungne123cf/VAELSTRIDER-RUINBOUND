@@ -200,11 +200,11 @@ public class GaleRoninSkill : MonoBehaviour
             if (specialCooldownTimer > 0f)
             {
                 specialCooldownTimer = Mathf.Max(0f, specialCooldownTimer - cdReduction);
-                DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "⚡ +50% NỘ | -20% CD ULT!", new Color(0.1f, 1f, 0.85f));
+                DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("⚡ +50% NỘ | -20% HỒI CHIÊU CUỐI!", "⚡ +50% RAGE | -20% ULT CD!"), new Color(0.1f, 1f, 0.85f));
             }
             else
             {
-                DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "⚡ +50% NỘ!", new Color(0.1f, 1f, 0.85f));
+                DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("⚡ +50% NỘ!", "⚡ +50% RAGE!"), new Color(0.1f, 1f, 0.85f));
             }
 
             if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
@@ -236,7 +236,7 @@ public class GaleRoninSkill : MonoBehaviour
 
             Vector3 targetPos = targetRoot.transform.position;
             DamagePopup.Create(targetPos, burstDamage, isCritical: true);
-            DamagePopup.CreateText(targetPos + Vector3.up * 1.3f, "💥 PHONG ẤN BỘC PHÁ!", new Color(0.1f, 1f, 0.75f));
+            DamagePopup.CreateText(targetPos + Vector3.up * 1.3f, LocalizationManager.T("💥 PHONG ẤN BỘC PHÁ!", "💥 SEAL BURST!"), new Color(0.1f, 1f, 0.75f));
 
             // Triệu hồi Lốc Xoáy Phong Lôi (Mini Gale Vortex)
             SpawnMiniGaleVortex(targetPos, Mathf.RoundToInt(damage * 0.6f));
@@ -247,7 +247,9 @@ public class GaleRoninSkill : MonoBehaviour
             damageable.TakeDamage(damage);
             DamagePopup.Create(targetRoot.transform.position, damage, isCritical: false);
 
-            string markText = (currentStacks == 1) ? "🌀 Ấn I" : "🌀🌀 Ấn II";
+            string markText = (currentStacks == 1) 
+                ? LocalizationManager.T("🌀 Ấn I", "🌀 Mark I") 
+                : LocalizationManager.T("🌀🌀 Ấn II", "🌀🌀 Mark II");
             DamagePopup.CreateText(targetRoot.transform.position + Vector3.up * 1.1f, markText, new Color(0.4f, 0.9f, 1f));
         }
 
@@ -371,7 +373,7 @@ public class GaleRoninSkill : MonoBehaviour
     {
         if (specialCooldownTimer > 0f || isPhantomActive)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "COOLDOWN!", Color.yellow);
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("ĐANG HỒI CHIÊU!", "COOLDOWN!"), Color.yellow);
             return false;
         }
 
@@ -432,7 +434,7 @@ public class GaleRoninSkill : MonoBehaviour
             animator.Play("Attack1", 0, 0f); // Chuẩn bị tư thế rút kiếm áp sát
         }
 
-        DamagePopup.CreateText(behindPos + Vector3.up * 1.6f, "★ ÁP SÁT LƯNG ĐỊCH! ★", new Color(0.2f, 1f, 0.9f));
+        DamagePopup.CreateText(behindPos + Vector3.up * 1.6f, LocalizationManager.T("★ ÁP SÁT LƯNG ĐỊCH! ★", "★ BEHIND ENEMY! ★"), new Color(0.2f, 1f, 0.9f));
         if (cam != null) cam.Shake(0.12f, 0.18f);
 
         // DỪNG LẠI 0.35s ĐỂ NGƯỜI CHƠI NHÌN THẤY RÕ RÀNG HÀNH ĐỘNG XUẤT HIỆN SAU LƯNG
@@ -462,7 +464,7 @@ public class GaleRoninSkill : MonoBehaviour
         {
             targetDamageable.TakeDamage(totalStrikeDmg);
             DamagePopup.Create(targetTransform.position, totalStrikeDmg, isCritical: true);
-            DamagePopup.CreateText(targetTransform.position + Vector3.up * 1.8f, "💥 ÁM ẢNH BẠO KÍCH! 💥", new Color(1f, 0.25f, 0.25f));
+            DamagePopup.CreateText(targetTransform.position + Vector3.up * 1.8f, LocalizationManager.T("💥 ÁM ẢNH BẠO KÍCH! 💥", "💥 SHADOW CRIT! 💥"), new Color(1f, 0.25f, 0.25f));
 
             var targetRb = targetTransform.GetComponent<Rigidbody2D>();
             if (targetRb != null)
@@ -494,7 +496,7 @@ public class GaleRoninSkill : MonoBehaviour
         {
             specialCooldownTimer = 0f;
             SoundManager.EnsureInstance()?.PlayPortalSpawn();
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, "⚡ KẾT LIỄU: HỒI CHIÊU CUỐI! ⚡", new Color(0.2f, 1f, 0.4f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, LocalizationManager.T("⚡ KẾT LIỄU: HỒI CHIÊU CUỐI! ⚡", "⚡ EXECUTE: ULT RESET! ⚡"), new Color(0.2f, 1f, 0.4f));
         }
 
         SoundManager.EnsureInstance()?.PlayHitImpact();
@@ -527,7 +529,7 @@ public class GaleRoninSkill : MonoBehaviour
             animator.SetFloat("MoveY", dirToTarget.y);
         }
 
-        DamagePopup.CreateText(startPos + Vector3.up * 1.3f, "THU KIẾM!", new Color(1f, 0.85f, 0.35f));
+        DamagePopup.CreateText(startPos + Vector3.up * 1.3f, LocalizationManager.T("THU KIẾM!", "SHEATHE!"), new Color(1f, 0.85f, 0.35f));
         SoundManager.EnsureInstance()?.PlaySwordSlash();
 
         yield return new WaitForSeconds(0.18f);
@@ -586,7 +588,7 @@ public class GaleRoninSkill : MonoBehaviour
         if (specialCooldownTimer > 0f)
         {
             specialCooldownTimer = Mathf.Max(0f, specialCooldownTimer - seconds);
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"⚡ -{seconds:0.#}s CD!", new Color(0.2f, 0.9f, 1f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, LocalizationManager.T($"⚡ -{seconds:0.#}s HỒI CHIÊU!", $"⚡ -{seconds:0.#}s CD!"), new Color(0.2f, 0.9f, 1f));
         }
     }
 

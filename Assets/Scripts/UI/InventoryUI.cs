@@ -150,6 +150,50 @@ public class InventoryUI : MonoBehaviour
         return spr;
     }
 
+    private static Sprite LoadHeroSkillSprite(string heroId, int skillIdx)
+    {
+        string h = string.IsNullOrEmpty(heroId) ? "vael" : heroId.ToLower();
+        bool isTitan = (h.Contains("titan") || h.Contains("player4"));
+        bool isAzure = (h.Contains("azure") || h.Contains("player3"));
+        bool isRonin = (h.Contains("ronin") || h.Contains("gale") || h.Contains("maid"));
+
+        string fileName = (skillIdx == 0) ? "icon_attack.png" : (skillIdx == 1 ? "icon_dash.png" : "icon_ulti.png");
+        string resourceName = (skillIdx == 0) ? "icon_attack" : (skillIdx == 1 ? "icon_dash" : "icon_ulti");
+
+        Sprite spr = null;
+        if (isTitan)
+        {
+#if UNITY_EDITOR
+            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Player4/UI/{fileName}");
+#endif
+            if (spr == null) spr = Resources.Load<Sprite>($"Player4/UI/{resourceName}");
+        }
+        else if (isRonin)
+        {
+#if UNITY_EDITOR
+            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Player2/UI/{fileName}");
+#endif
+            if (spr == null) spr = Resources.Load<Sprite>($"Player2/UI/{resourceName}");
+        }
+        else if (isAzure)
+        {
+#if UNITY_EDITOR
+            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Player3/UI/{fileName}");
+#endif
+            if (spr == null) spr = Resources.Load<Sprite>($"Player3/UI/{resourceName}");
+        }
+        else
+        {
+            string oldPath = (skillIdx == 0) ? "Assets/Sprites/UI/Attack.png" : (skillIdx == 1 ? "Assets/Sprites/UI/Dash.png" : "Assets/Sprites/UI/Ulti.png");
+            string oldRes = (skillIdx == 0) ? "UI/Attack" : (skillIdx == 1 ? "UI/Dash" : "UI/Ulti");
+#if UNITY_EDITOR
+            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(oldPath);
+#endif
+            if (spr == null) spr = Resources.Load<Sprite>(oldRes);
+        }
+        return spr;
+    }
+
     private static void EnsureItemSprites()
     {
         if (sprItemSlotFrame == null) sprItemSlotFrame = LoadFramedSprite("Border/panel-border-014.png", new Vector4(8, 8, 8, 8));
@@ -231,6 +275,17 @@ public class InventoryUI : MonoBehaviour
             titleText.text = LocalizationManager.T("TÚI ĐỒ & ĐÀI QUAY VẬN MỆNH", "INVENTORY & GACHA VAULT");
         if (subtitleText != null)
             subtitleText.text = LocalizationManager.T("Lưu trữ trang bị, khoáng thạch & Dùng Linh Hồn quay Thần Binh cổ đại", "Store battle gear & spend Aethel Shards to summon mythic artifacts");
+
+        if (tabButtonTexts != null)
+        {
+            string[] tabLabelsVi = new string[] { "TẤT CẢ", "TRANG BỊ", "KHOÁNG THẠCH", "LÕI THẦN BÍ", "QUAY GACHA" };
+            string[] tabLabelsEn = new string[] { "ALL", "EQUIPMENT", "MATERIALS", "ARTIFACTS", "GACHA VAULT" };
+            for (int i = 0; i < tabButtonTexts.Length && i < tabLabelsVi.Length; i++)
+            {
+                if (tabButtonTexts[i] != null)
+                    tabButtonTexts[i].text = LocalizationManager.T(tabLabelsVi[i], tabLabelsEn[i]);
+            }
+        }
 
         if (isOpen)
         {
@@ -1648,8 +1703,30 @@ public class InventoryUI : MonoBehaviour
         float cardH = 245f;
         float spacing = 18f;
         float startX = -((skillCount - 1) * (cardW + spacing)) / 2f;
-        string[] skillNamesVi = new string[] { "[1] ĐÁNH THƯỜNG", "[2] LƯỚT & NÉ", "[3] TUYỆT KỸ" };
-        string[] skillNamesEn = new string[] { "[1] BASIC ATTACK", "[2] DASH & DODGE", "[3] ULTIMATE SKILL" };
+
+        var charMgr = CharacterManager.EnsureInstance();
+        string selectedCharId = charMgr != null ? charMgr.GetSelectedCharacterId().ToLower() : "vaelstrider";
+        bool isAzure = (selectedCharId.Contains("azure") || selectedCharId.Contains("player3"));
+        bool isRonin = (selectedCharId.Contains("ronin") || selectedCharId.Contains("gale") || selectedCharId.Contains("maid"));
+
+        string[] skillNamesVi;
+        string[] skillNamesEn;
+
+        if (isRonin)
+        {
+            skillNamesVi = new string[] { "[1] PHONG NGUYỆT TRẢM", "[2] PHONG THIỂM TỐC LƯỚT", "[3] ÁM ẢNH PHÂN THÂN TRẢM" };
+            skillNamesEn = new string[] { "[1] GALE CRESCENT SWEEP", "[2] GALE FLASH DASH", "[3] SHADOW GALE STRIKE" };
+        }
+        else if (isAzure)
+        {
+            skillNamesVi = new string[] { "[1] SONG BĂNG ĐOẢN KIẾM", "[2] HÀN BĂNG TRƯỢT TUYẾT", "[3] 5 TIA BĂNG NGUYỆT SÓNG" };
+            skillNamesEn = new string[] { "[1] TWIN FROST BLADES", "[2] FROST GLIDE DASH", "[3] 5-WAY AZURE TEMPEST" };
+        }
+        else
+        {
+            skillNamesVi = new string[] { "[1] ĐẠI KIẾM HOÀNG KIM", "[2] BỤI CỔ TỐC BIẾN", "[3] BÃO XOÁY CỔ KIẾM" };
+            skillNamesEn = new string[] { "[1] ANCIENT BROADSWORD", "[2] RUIN DUST DASH", "[3] RUIN WHIRLWIND" };
+        }
 
         for (int i = 0; i < skillCount; i++)
         {
@@ -1706,12 +1783,32 @@ public class InventoryUI : MonoBehaviour
             hRt.anchoredPosition = new Vector2(0f, -8f);
             hRt.sizeDelta = new Vector2(-16f, 38f);
 
-            // Skill Accent Colors & Sprites
-            Sprite skillSpr = (skillIdx == 0) ? sprSkillAttack : (skillIdx == 1) ? sprSkillDash : sprSkillUlti;
-            Color accentCol = (skillIdx == 0) ? new Color(1f, 0.45f, 0.25f, 1f)
-                            : (skillIdx == 1) ? new Color(0.2f, 0.95f, 0.65f, 1f)
-                            : new Color(0.75f, 0.5f, 1f, 1f);
-            string accentHex = (skillIdx == 0) ? "FFA502" : (skillIdx == 1) ? "2ED573" : "A29BFE";
+            // Skill Accent Colors & Sprites for each hero
+            Sprite skillSpr = LoadHeroSkillSprite(selectedCharId, skillIdx);
+            Color accentCol;
+            string accentHex;
+
+            if (isRonin)
+            {
+                accentCol = (skillIdx == 0) ? new Color(0.28f, 1f, 0.75f, 1f)
+                          : (skillIdx == 1) ? new Color(0.18f, 0.85f, 0.45f, 1f)
+                          : new Color(0.44f, 0.63f, 1f, 1f);
+                accentHex = (skillIdx == 0) ? "47FFBF" : (skillIdx == 1) ? "2ED573" : "70A1FF";
+            }
+            else if (isAzure)
+            {
+                accentCol = (skillIdx == 0) ? new Color(0.35f, 0.88f, 1f, 1f)
+                          : (skillIdx == 1) ? new Color(0.44f, 0.63f, 1f, 1f)
+                          : new Color(0.22f, 0.74f, 0.97f, 1f);
+                accentHex = (skillIdx == 0) ? "59E0FF" : (skillIdx == 1) ? "70A1FF" : "38BDF8";
+            }
+            else
+            {
+                accentCol = (skillIdx == 0) ? new Color(1f, 0.85f, 0.35f, 1f)
+                          : (skillIdx == 1) ? new Color(0.2f, 0.95f, 0.65f, 1f)
+                          : new Color(0.75f, 0.5f, 1f, 1f);
+                accentHex = (skillIdx == 0) ? "FFDF66" : (skillIdx == 1) ? "2ED573" : "A29BFE";
+            }
 
             // Framed Skill Icon Badge
             GameObject iconBadgeObj = new GameObject("SkillIconBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -1744,6 +1841,7 @@ public class InventoryUI : MonoBehaviour
 
                 Image iiImg = iconInner.GetComponent<Image>();
                 iiImg.sprite = skillSpr;
+                iiImg.color = Color.white;
                 iiImg.preserveAspect = true;
                 iiImg.raycastTarget = false;
             }

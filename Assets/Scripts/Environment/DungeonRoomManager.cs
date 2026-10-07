@@ -79,9 +79,9 @@ public class DungeonRoomManager : MonoBehaviour
     private void AnnounceRoom(DungeonRoom room)
     {
         var waveUI = FindAnyObjectByType<WaveUI>();
-        if (waveUI != null)
+        if (waveUI != null && room != null)
         {
-            waveUI.ShowBanner(room.roomTitle, room.roomSubtitle);
+            waveUI.ShowBanner(room.GetLocalizedTitle(), room.GetLocalizedSubtitle());
         }
     }
 
@@ -124,19 +124,24 @@ public class DungeonRoomManager : MonoBehaviour
         var waveUI = FindAnyObjectByType<WaveUI>();
         if (waveUI != null)
         {
-                        if (room.roomType == DungeonRoom.RoomType.TitanSanctum)
+            if (room.roomType == DungeonRoom.RoomType.TitanSanctum)
             {
                 PlayerPrefs.SetInt("Map1_Completed", 1);
                 PlayerPrefs.Save();
 
-                bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
-                waveUI.ShowBanner(isVi ? "KHU VUC DA DUOC QUET SACH!" : "REALM PURIFIED!", isVi ? "Cong co tich da mo o phia tren!" : "The Ruin Portal has opened ahead!");
+                waveUI.ShowBanner(
+                    LocalizationManager.T("KHU VỰC ĐÃ ĐƯỢC QUÉT SẠCH!", "REALM PURIFIED!"),
+                    LocalizationManager.T("Cổng cổ tích đã mở ở phía trên!", "The Ruin Portal has opened ahead!")
+                );
                 // Spawn Victory Portal cach vi tri trung tam 2.5m ve phia tren va co tre 1.5s de tranh de len nguoi choi
                 StartCoroutine(SpawnBossPortalDelayed(room.roomCenter + new Vector3(0f, 2.5f, 0f), 1.5f));
             }
             else
             {
-                waveUI.ShowBanner("KHU VỰC ĐÃ DỌN SẠCH!", "Cổng phong ấn đã mở. Hãy tiến lên phía trước!");
+                waveUI.ShowBanner(
+                    LocalizationManager.T("KHU VỰC ĐÃ DỌN SẠCH!", "ROOM CLEARED!"),
+                    LocalizationManager.T("Cổng phong ấn đã mở. Hãy tiến lên phía trước!", "The sealed barrier has opened. Move forward!")
+                );
             }
         }
     }

@@ -486,7 +486,88 @@ public class GameAutoBootstrap : MonoBehaviour
         }
 
         EnsurePlayerColliderAndCombat(player, selectedChar);
-        if (selectedChar == CharacterManager.CHAR_AZURE_BLADE)
+        if (selectedChar == CharacterManager.CHAR_TITAN_BERSERKER)
+        {
+            player.transform.localScale = Vector3.one;
+            var sr = player.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.enabled = true;
+                sr.color = Color.white;
+                sr.material = new Material(Shader.Find("Sprites/Default"));
+#if UNITY_EDITOR
+                var idleObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Idle.png");
+                if (idleObjs != null)
+                {
+                    foreach (var o in idleObjs)
+                    {
+                        if (o is Sprite s)
+                        {
+                            sr.sprite = s;
+                            break;
+                        }
+                    }
+                }
+#endif
+                if (sr.sprite == null)
+                {
+                    var fallbacks = MainMenuManager.LoadSpritesFromPath("Assets/ART/Player4/Hammer_Idle.png", 64, 64);
+                    if (fallbacks != null && fallbacks.Length > 0) sr.sprite = fallbacks[0];
+                }
+            }
+
+            var anim = player.GetComponent<Animator>();
+            if (anim != null) anim.enabled = true;
+#if UNITY_EDITOR
+            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Player4/Player4.controller");
+            if (controller != null && anim != null)
+            {
+                anim.runtimeAnimatorController = controller;
+                anim.Rebind();
+                anim.Update(0f);
+            }
+#endif
+            var sweep = player.GetComponent<SweepTheWeakSkill>();
+            if (sweep != null) Object.Destroy(sweep);
+
+            var ronin = player.GetComponent<GaleRoninSkill>();
+            if (ronin != null) Object.Destroy(ronin);
+
+            var azure = player.GetComponent<AzureBladeSkill>();
+            if (azure != null) Object.Destroy(azure);
+
+            var titan = player.GetComponent<TitanBerserkerSkill>();
+            if (titan == null)
+            {
+                titan = player.gameObject.AddComponent<TitanBerserkerSkill>();
+            }
+
+            var pc = player.GetComponent<PlayerCombat>();
+            if (pc != null)
+            {
+                pc.AutoAlignCombat();
+            }
+
+            var btnSpecial = GameObject.Find("Btn_Special");
+            if (btnSpecial != null)
+            {
+                var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = LocalizationManager.T("CHẤN ĐỊA", "CATACLYSM");
+
+                var btn = btnSpecial.GetComponent<UnityEngine.UI.Button>();
+                if (btn != null)
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => {
+                        var tb = player.GetComponent<TitanBerserkerSkill>();
+                        if (tb != null) tb.TriggerSpecialSkill();
+                    });
+                }
+            }
+
+            Debug.Log("<color=cyan>[CHARACTER]</color> Đã áp dụng nhân vật CUỒNG CHIẾN BINH (TITAN BERSERKER) với Tuyệt kỹ Cuồng Nộ Chấn Địa!");
+        }
+        else if (selectedChar == CharacterManager.CHAR_AZURE_BLADE)
         {
             player.transform.localScale = Vector3.one;
             var sr = player.GetComponent<SpriteRenderer>();
@@ -655,6 +736,9 @@ public class GameAutoBootstrap : MonoBehaviour
                 if (txt != null) txt.text = "WHIRL WIND";
             }
         }
+
+        // Kích hoạt hiệu ứng hào quang hạt pixel hắc ám khi chọn Player 4 (Titan Berserker)
+        PlayerPixelAura.EnsureAuraForPlayer(player.gameObject, selectedChar == CharacterManager.CHAR_TITAN_BERSERKER);
     }
     public static void EnsurePlayerColliderAndCombat(PlayerController player, string selectedChar = "")
     {
@@ -719,7 +803,20 @@ public class GameAutoBootstrap : MonoBehaviour
 
         if (cap != null) cap.sharedMaterial = slipMat;
 
-        if (selectedChar == CharacterManager.CHAR_AZURE_BLADE)
+        if (selectedChar == CharacterManager.CHAR_TITAN_BERSERKER)
+        {
+            // Titan Berserker (Minotaur): chiều cao ~1.4m, tâm ngực Y = 0.65f, collider bao trọn thân
+            if (cap != null)
+            {
+                cap.offset = new Vector2(0f, 0.65f);
+                cap.size = new Vector2(0.90f, 1.30f);
+            }
+            if (tPoint != null)
+            {
+                tPoint.localPosition = new Vector3(0f, 0.65f, 0f);
+            }
+        }
+        else if (selectedChar == CharacterManager.CHAR_AZURE_BLADE)
         {
             // Azure Blade: 64x64 pixel art, pivot (0.5, 0.5)
             if (cap != null)
@@ -758,6 +855,8 @@ public class GameAutoBootstrap : MonoBehaviour
                 tPoint.localPosition = new Vector3(0f, 1.2f, 0f);
             }
         }
+
+        HeroCostumeManager.ApplyCostumeVisual(player.gameObject, selectedChar);
     }
 
     public static void EnsureBreakables()

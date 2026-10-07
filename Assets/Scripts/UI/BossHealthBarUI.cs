@@ -27,6 +27,7 @@ public class BossHealthBarUI : MonoBehaviour
     private BotWheelAI currentBoss;
     private Coroutine ghostRoutine;
     private bool isVisible = false;
+    private int currentPhase = 3;
 
     public bool IsVisible => isVisible;
 
@@ -35,6 +36,22 @@ public class BossHealthBarUI : MonoBehaviour
         Instance = this;
         if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
         if (panelRt == null) panelRt = GetComponent<RectTransform>();
+    }
+
+    private void OnEnable()
+    {
+        LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
+        LocalizationManager.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        UpdatePhaseDisplay(currentPhase);
     }
 
     public static BossHealthBarUI EnsureInstance()
@@ -301,6 +318,7 @@ public class BossHealthBarUI : MonoBehaviour
 
     public void UpdatePhaseDisplay(int phase)
     {
+        currentPhase = phase;
         int idx = Mathf.Clamp(phase - 1, 0, 2);
         if (healthFillImage != null)
         {

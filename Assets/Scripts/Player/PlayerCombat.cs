@@ -6,6 +6,7 @@ public class PlayerCombat : MonoBehaviour
 {
     [Header("Attack Settings")]
     [SerializeField] private Transform attackPoint;
+    public Transform AttackPoint => attackPoint;
     [SerializeField] private float attackRadius = 1.35f;
     [SerializeField] private float attackOffsetDistance = 1.3f;
     [SerializeField] private Vector2 bodyCenterOffset = new Vector2(0f, 0.1f);
@@ -116,7 +117,8 @@ public class PlayerCombat : MonoBehaviour
 
     public void RecalculateCombatStats()
     {
-        bonusAttackDamage = upgradeBonusAtk + weaponBonusAtk + socketBonusAtk;
+        HeroCostumeManager.GetEquippedCostumeBonus(CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "", out _, out int costumeAtk, out _, out _);
+        bonusAttackDamage = upgradeBonusAtk + weaponBonusAtk + socketBonusAtk + costumeAtk;
 
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out lifestealPercent, out float cdReduc, out _, out _);
         float upUltiCd = 0f;
@@ -156,6 +158,9 @@ public class PlayerCombat : MonoBehaviour
     }
 
     public int BonusAttackDamage => bonusAttackDamage;
+    public int Attack1Damage => attack1Damage;
+    public int Attack2Damage => attack2Damage;
+    public int TotalAttackDamage => attack1Damage + bonusAttackDamage;
     public float LifestealPercent => lifestealPercent;
     public Vector2 BodyCenterOffset => bodyCenterOffset;
     public float SkillCooldown => skillCooldown;
@@ -306,6 +311,55 @@ public class PlayerCombat : MonoBehaviour
             return;
         }
 
+        // Kich hoat Dai Chuy cho Nhan vat 4 (Titan Berserker)
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && titan.enabled)
+        {
+            if (!titan.IsAttackReady) return; // Không cho spam ngắt nhịp hoạt ảnh vung đại chùy
+
+            lastAttackTime = Time.time;
+            comboStep = 1;
+
+            if (animator != null)
+            {
+                animator.SetInteger(ComboStepHash, 1);
+                animator.SetTrigger(AttackTriggerHash);
+                animator.Play("Attack1", 0, 0f);
+            }
+
+            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
+            int curAtk = attack1Damage + bonusAttackDamage;
+            titan.OnPerformAttack(facing, curAtk);
+            return;
+        }
+
+        // Kich hoat Song Kiem cho Nhan vat 3 (Azure Blade)
+        var azureBlade = GetComponent<AzureBladeSkill>();
+        if (azureBlade != null && azureBlade.enabled)
+        {
+            if (!azureBlade.IsAttackReady) return;
+
+            lastAttackTime = Time.time;
+            comboStep++;
+            if (comboStep > 2) comboStep = 1;
+            SoundManager.EnsureInstance()?.PlaySwordSlash();
+
+            if (animator != null)
+            {
+                animator.SetInteger(ComboStepHash, comboStep);
+                animator.SetTrigger(AttackTriggerHash);
+                string attackState = (comboStep == 1) ? "Attack1" : "Attack2";
+                animator.Play(attackState, 0, 0f);
+            }
+
+            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
+            int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
+            azureBlade.OnPerformAttack(facing, curAtk);
+            return;
+        }
+
+        // Đòn đánh mặc định (Vaelstrider)
+        if (Time.time - lastAttackTime < 0.22f) return; // Min attack interval to prevent animation glitching
         lastAttackTime = Time.time;
         comboStep++;
         if (comboStep > 2) comboStep = 1;
@@ -318,16 +372,6 @@ public class PlayerCombat : MonoBehaviour
 
             string attackState = (comboStep == 1) ? "Attack1" : "Attack2";
             animator.Play(attackState, 0, 0f);
-        }
-
-        // Kich hoat Song Kiem cho Nhan vat 3 (Azure Blade)
-        var azureBlade = GetComponent<AzureBladeSkill>();
-        if (azureBlade != null && azureBlade.enabled)
-        {
-            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
-            int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
-            azureBlade.OnPerformAttack(facing, curAtk);
-            return;
         }
 
         ExecuteHitDamage();
@@ -399,6 +443,13 @@ public class PlayerCombat : MonoBehaviour
         if (azureBlade != null && azureBlade.enabled)
         {
             return azureBlade.TriggerSpecialSkill();
+        }
+
+        // Kích hoạt Tuyệt kỹ Titan Berserker (Player 4)
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && titan.enabled)
+        {
+            return titan.TriggerSpecialSkill();
         }
 
         // Kích hoạt Tuyệt kỹ Sweep The Weak nếu là Maid
@@ -539,7 +590,8 @@ public class PlayerCombat : MonoBehaviour
 
                 if (isFinal)
                 {
-                    DamagePopup.CreateText(enemy.transform.position, $"RUIN BURST! {damage}", new Color(1f, 0.85f, 0.2f));
+                    string burstText = LocalizationManager.T("BÙNG NỔ TÀN TÍCH!", "RUIN BURST!");
+                    DamagePopup.CreateText(enemy.transform.position, $"{burstText} {damage}", new Color(1f, 0.85f, 0.2f));
                 }
                 else
                 {
@@ -591,6 +643,9 @@ public class PlayerCombat : MonoBehaviour
 
     public float GetSkillCooldownNormalized()
     {
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && titan.enabled) return titan.SpecialCooldownRatio;
+
         var ronin = GetComponent<GaleRoninSkill>();
         if (ronin != null && ronin.enabled) return ronin.SpecialCooldownRatio;
 
@@ -602,6 +657,9 @@ public class PlayerCombat : MonoBehaviour
 
     public float GetSkillCooldownRemaining()
     {
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && titan.enabled) return titan.SpecialCooldownRemaining;
+
         var ronin = GetComponent<GaleRoninSkill>();
         if (ronin != null && ronin.enabled) return ronin.SpecialCooldownRemaining;
 
@@ -613,6 +671,9 @@ public class PlayerCombat : MonoBehaviour
 
     public bool IsSkillReady()
     {
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && titan.enabled) return titan.IsSpecialReady;
+
         var ronin = GetComponent<GaleRoninSkill>();
         if (ronin != null && ronin.enabled) return ronin.IsSpecialReady;
 
@@ -655,6 +716,10 @@ public class PlayerCombat : MonoBehaviour
         }
 
         string curChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        if (curChar == CharacterManager.CHAR_TITAN_BERSERKER || GetComponent<TitanBerserkerSkill>() != null)
+        {
+            return transform.position + new Vector3(0f, 0.65f, 0f);
+        }
         if (curChar == CharacterManager.CHAR_AZURE_BLADE || GetComponent<AzureBladeSkill>() != null)
         {
             return transform.position + new Vector3(0f, 0.05f, 0f);
@@ -698,11 +763,19 @@ public class PlayerCombat : MonoBehaviour
     public void AutoAlignCombat()
     {
         string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        bool isTitan = (curChar == CharacterManager.CHAR_TITAN_BERSERKER || GetComponent<TitanBerserkerSkill>() != null);
         bool isVaelstrider = (curChar == CharacterManager.CHAR_VAELSTRIDER);
         bool isRonin = (curChar == CharacterManager.CHAR_GALE_RONIN || GetComponent<GaleRoninSkill>() != null);
         bool isAzure = (curChar == CharacterManager.CHAR_AZURE_BLADE || GetComponent<AzureBladeSkill>() != null);
 
-        if (isRonin)
+        if (isTitan)
+        {
+            bodyCenterOffset = new Vector2(0f, 0.65f);
+            attackOffsetDistance = 0.85f;
+            attackRadius = 1.35f;
+            skillRadius = 5.5f;
+        }
+        else if (isRonin)
         {
             bodyCenterOffset = new Vector2(0f, 0.05f);
             attackOffsetDistance = 0.55f;

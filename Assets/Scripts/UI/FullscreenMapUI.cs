@@ -145,6 +145,21 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         // Tạm dừng/Làm chậm nhẹ để người chơi quan sát an toàn
         Time.timeScale = 0.05f;
 
+        string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        if (titleText != null)
+        {
+            if (sceneName.Contains("Map2") || sceneName.Contains("Valley"))
+                titleText.text = $"<b>{LocalizationManager.T("TÀN TÍCH THUNG LŨNG", "VALLEY OF THE ANCIENTS")}</b>";
+            else if (sceneName.Contains("Map3") || sceneName.Contains("Forgotten"))
+                titleText.text = $"<b>{LocalizationManager.T("KÝ ỨC BỊ LÃNG QUÊN", "FORGOTTEN MEMORIES")}</b>";
+            else
+                titleText.text = $"<b>{LocalizationManager.T("PHẾ TÍCH NGẬP NƯỚC", "SUNKEN SEPULCHER")}</b>";
+        }
+        if (subtitleText != null)
+        {
+            subtitleText.text = LocalizationManager.T("BẢN ĐỒ TÁC CHIẾN TOÀN CẢNH | TÀN TÍCH CỔ ĐẠI", "TACTICAL OVERVIEW MAP | ANCIENT RUINS");
+        }
+
         // Xây dựng lại layout phòng
         BuildRoomLayout();
 
@@ -276,7 +291,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
                 lblRt.sizeDelta = new Vector2(180f, 30f);
 
                 var tmp = labelObj.AddComponent<TextMeshProUGUI>();
-                tmp.text = $"<b>{r.roomTitle}</b>";
+                tmp.text = $"<b>{r.GetLocalizedTitle()}</b>";
                 tmp.fontSize = 11f;
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.color = isCurrent ? new Color(1f, 0.9f, 0.3f) : new Color(0.85f, 0.85f, 0.85f, 0.8f);

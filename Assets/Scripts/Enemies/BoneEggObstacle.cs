@@ -108,7 +108,7 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
             }
         }
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 1f, "EGG HATCH!", new Color(0.4f, 1f, 0.6f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1f, LocalizationManager.T("TRỨNG NỞ!", "EGG HATCH!"), new Color(0.4f, 1f, 0.6f));
 
         // Roi 1-2 linh hon nho
         AethelShard.SpawnShards(transform.position, Random.Range(1, 3));

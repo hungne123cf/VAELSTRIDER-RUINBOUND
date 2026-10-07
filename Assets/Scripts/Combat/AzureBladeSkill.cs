@@ -177,6 +177,16 @@ public class AzureBladeSkill : MonoBehaviour
     }
 
     /// <summary>
+    /// Hủy ngắm bắn khi kéo vào vùng Hủy Chiêu
+    /// </summary>
+    public void CancelAim()
+    {
+        isAiming = false;
+        currentHoldDuration = 0f;
+        if (aimIndicator != null) aimIndicator.Hide();
+    }
+
+    /// <summary>
     /// Thả tay (Release) để tính toán sát thương theo thời gian nhấn giữ (0.1s -> 1.0s)
     /// </summary>
     public void ReleaseAimAndFire(int bonusAttackDamage)
@@ -207,11 +217,11 @@ public class AzureBladeSkill : MonoBehaviour
         // Hiển thị popup hiệu ứng tụ lực
         if (isFullCharge)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "★ MAX CHARGE (1.0s)!", new Color(1f, 0.9f, 0.2f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("★ TỤ LỰC TỐI ĐA (1.0s)!", "★ MAX CHARGE (1.0s)!"), new Color(1f, 0.9f, 0.2f));
         }
         else if (chargeProgress > 0.25f)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, $"CHARGED +{Mathf.RoundToInt(chargeProgress * 100)}%!", new Color(0.3f, 0.95f, 1f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T($"TỤ LỰC +{Mathf.RoundToInt(chargeProgress * 100)}%!", $"CHARGED +{Mathf.RoundToInt(chargeProgress * 100)}%!"), new Color(0.3f, 0.95f, 1f));
         }
 
         // Vị trí xuất phát kiếm khí
@@ -234,7 +244,7 @@ public class AzureBladeSkill : MonoBehaviour
         {
             float reduction = attackCooldownTimer * 0.5f;
             attackCooldownTimer = Mathf.Max(0f, attackCooldownTimer - reduction);
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, "⚡ CD -50%!", new Color(0.2f, 1f, 0.85f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, LocalizationManager.T("⚡ GIẢM HỒI CHIÊU 50%!", "⚡ CD -50%!"), new Color(0.2f, 1f, 0.85f));
         }
 
         // Tích tụ năng lượng & Nội Năng CHỈ KHI kiếm khí chém trúng quái vật
@@ -261,7 +271,7 @@ public class AzureBladeSkill : MonoBehaviour
         if (attackCooldownTimer > 0f)
         {
             attackCooldownTimer = 0f;
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, "⚡ CD RESET!", new Color(1f, 0.9f, 0.2f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, LocalizationManager.T("⚡ HỒI ĐÒN ĐÁNH!", "⚡ CD RESET!"), new Color(1f, 0.9f, 0.2f));
         }
     }
 
@@ -299,7 +309,7 @@ public class AzureBladeSkill : MonoBehaviour
     {
         if (specialCooldownTimer > 0f)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "COOLDOWN!", Color.yellow);
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("ĐANG HỒI CHIÊU!", "COOLDOWN!"), Color.yellow);
             return false;
         }
 
@@ -320,7 +330,7 @@ public class AzureBladeSkill : MonoBehaviour
         if (facing.sqrMagnitude < 0.001f) facing = Vector2.down;
         facing = facing.normalized;
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, "AZURE TEMPEST!", new Color(0.2f, 0.9f, 1f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, LocalizationManager.T("LAM PHONG HẢI TRIỀU!", "AZURE TEMPEST!"), new Color(0.2f, 0.9f, 1f));
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         if (animator != null)
@@ -336,13 +346,21 @@ public class AzureBladeSkill : MonoBehaviour
         float startAngle = baseAngle - (ultiSpreadAngle / 2f);
         float angleStep = ultiSpreadAngle / (ultiWaveCount - 1);
 
+        int upUltBonus = 0;
+        var upMgr = PlayerUpgradeManager.EnsureInstance();
+        if (upMgr != null) upUltBonus = upMgr.GetUltiDamageBonus();
+
+        if (playerCombat == null) playerCombat = GetComponent<PlayerCombat>();
+        int curAtk = (playerCombat != null) ? (playerCombat.Attack1Damage + playerCombat.BonusAttackDamage) : 24;
+        int waveDamage = (baseWaveDamage * 2) + curAtk + upUltBonus;
+
         for (int i = 0; i < ultiWaveCount; i++)
         {
             float curAngle = startAngle + (i * angleStep);
             float rad = curAngle * Mathf.Deg2Rad;
             Vector2 waveDir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
 
-            SwordWaveProjectile.Spawn(origin, waveDir, baseWaveDamage * 2 + 10, waveSpeed * 1.25f, scaleMultiplier: 1.0f, isUlti: true, isCharged: false, pierceLimit: 15);
+            SwordWaveProjectile.Spawn(origin, waveDir, waveDamage, waveSpeed * 1.25f, scaleMultiplier: 1.0f, isUlti: true, isCharged: false, pierceLimit: 15, ownerSkill: this);
         }
     }
 

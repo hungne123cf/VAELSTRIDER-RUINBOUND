@@ -33,35 +33,44 @@ public class PlayerShieldVisual : MonoBehaviour
 
     public void UpdatePositionAndScale()
     {
-        var col = GetComponentInParent<Collider2D>();
-        var sr = GetComponentInParent<SpriteRenderer>();
-
+        string curChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         float centerY = 0.1f;
         float height = 1.0f;
 
-        if (col != null)
+        if (curChar == CharacterManager.CHAR_TITAN_BERSERKER || GetComponentInParent<TitanBerserkerSkill>() != null)
         {
-            centerY = col.offset.y;
-            if (col is CapsuleCollider2D cap)
-            {
-                height = Mathf.Max(cap.size.y, cap.size.x);
-            }
-            else if (col is BoxCollider2D box)
-            {
-                height = Mathf.Max(box.size.y, box.size.x);
-            }
+            centerY = 0.65f;
+            height = 1.45f;
         }
-        else if (sr != null && sr.sprite != null)
+        else
         {
-            centerY = sr.bounds.center.y - (transform.parent != null ? transform.parent.position.y : 0f);
-            height = sr.bounds.size.y;
+            var col = GetComponentInParent<Collider2D>();
+            var sr = GetComponentInParent<SpriteRenderer>();
+
+            if (col != null)
+            {
+                centerY = col.offset.y;
+                if (col is CapsuleCollider2D cap)
+                {
+                    height = Mathf.Max(cap.size.y, cap.size.x);
+                }
+                else if (col is BoxCollider2D box)
+                {
+                    height = Mathf.Max(box.size.y, box.size.x);
+                }
+            }
+            else if (sr != null && sr.sprite != null)
+            {
+                centerY = sr.bounds.center.y - (transform.parent != null ? transform.parent.position.y : 0f);
+                height = sr.bounds.size.y;
+            }
         }
 
         // Can giua dung tam nguc nhan vat
         transform.localPosition = new Vector3(0f, centerY, 0f);
 
         // Kich thuoc du lon de bao boc tu dinh dau den qua chan
-        baseScale = Mathf.Max(2.2f, height * 1.05f);
+        baseScale = Mathf.Max(2.2f, height * 1.55f);
         transform.localScale = Vector3.one * baseScale;
     }
 

@@ -130,7 +130,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
     void Start()
     {
         breatheRoutine = StartCoroutine(EggBreatheRoutine());
-        DamagePopup.CreateText(transform.position + Vector3.up * 2f, "MUC TIEU: PHA HUY KEN PHONG AN!", Color.yellow);
+        DamagePopup.CreateText(transform.position + Vector3.up * 2f, LocalizationManager.T("MỤC TIÊU: PHÁ HỦY KÉN PHONG ẤN!", "OBJECTIVE: DESTROY THE COCOON!"), Color.yellow);
     }
 
     void Update()
@@ -214,7 +214,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.6f, 0.9f);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 2.2f, "KEN PHONG AN VO VUN!", Color.yellow);
+        DamagePopup.CreateText(transform.position + Vector3.up * 2.2f, LocalizationManager.T("KÉN PHONG ẤN VỠ VỤN!", "COCOON SHATTERED!"), Color.yellow);
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         for (int i = 0; i < 4; i++)

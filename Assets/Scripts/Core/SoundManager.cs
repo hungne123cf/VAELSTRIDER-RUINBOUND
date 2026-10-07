@@ -387,6 +387,8 @@ public class SoundManager : MonoBehaviour
 
     public void PlayItemPickup() => PlayShardPickup();
     public void PlayGemSocket() => PlayShardPickup();
+    public void PlayCoin() => PlayShardPickup();
+    public void PlayButtonBack() => PlayMenuClose();
     public void PlayUpgradeSuccess() => PlayHeavenlyAscension();
     public void PlayUpgradeFail() => PlayPlayerHurt();
     public void PlayChestBreak() => PlayChestOpen();

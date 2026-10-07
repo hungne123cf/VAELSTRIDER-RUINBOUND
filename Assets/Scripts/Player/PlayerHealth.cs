@@ -76,8 +76,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             }
         }
 
+        HeroCostumeManager.GetEquippedCostumeBonus(CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "", out int costumeHp, out _, out _, out _);
+
         int oldMax = maxHealth;
-        maxHealth = baseMaxHealth + upHp + armorHp + weaponHp + sockHp;
+        maxHealth = baseMaxHealth + upHp + armorHp + weaponHp + sockHp + costumeHp;
 
         if (currentHealth > maxHealth || currentHealth <= 0)
         {
@@ -113,10 +115,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (isDead || isInvulnerable) return;
 
-        // Giảm sát thương theo Giáp của trang bị đang mặc + Khảm ngọc (tối đa giảm 65% để người chơi luôn nhận sát thương thực tế)
+        // Giảm sát thương theo Giáp của trang bị đang mặc + Khảm ngọc + Trang phục (tối đa giảm 65% để người chơi luôn nhận sát thương thực tế)
         ArmorShopUI.GetEquippedArmorBonus(out int _, out float armorDef, out float _);
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out int sockDef, out _, out _, out _, out _);
-        float totalDef = Mathf.Min(65f, armorDef + sockDef);
+        HeroCostumeManager.GetEquippedCostumeBonus(CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "", out _, out _, out float costumeDef, out _);
+        float totalDef = Mathf.Min(65f, armorDef + sockDef + costumeDef);
         if (totalDef > 0)
         {
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - totalDef / 100f)));
@@ -153,6 +156,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (anim != null && anim.runtimeAnimatorController != null)
         {
             anim.SetTrigger("HurtTrigger");
+            anim.Play("Hurt", 0, 0f);
         }
 
         if (spriteRenderer != null && currentHealth > 0)
@@ -259,7 +263,28 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         curHero = curHero.ToLowerInvariant();
 
-        if (curHero.Contains("azure") || curHero.Contains("player3") || GetComponent<AzureBladeSkill>() != null)
+        if (curHero.Contains("titan") || curHero.Contains("player4") || GetComponent<TitanBerserkerSkill>() != null)
+        {
+            var anim = GetComponent<Animator>();
+            float moveX = anim != null ? anim.GetFloat("MoveX") : 0f;
+            float moveY = anim != null ? anim.GetFloat("MoveY") : -1f;
+
+#if UNITY_EDITOR
+            var sprites = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Death.png");
+            if (sprites != null)
+            {
+                var list = new List<Sprite>();
+                foreach (var o in sprites) if (o is Sprite s) list.Add(s);
+                if (list.Count > 0)
+                {
+                    return list.OrderByDescending(s => s.rect.y).ThenBy(s => s.rect.x).ToArray();
+                }
+            }
+#endif
+            var res = MainMenuManager.LoadSpritesFromPath("Assets/ART/Player4/Hammer_Death.png", 64, 64);
+            if (res != null && res.Length > 0) return res;
+        }
+        else if (curHero.Contains("azure") || curHero.Contains("player3") || GetComponent<AzureBladeSkill>() != null)
         {
             var anim = GetComponent<Animator>();
             float moveX = anim != null ? anim.GetFloat("MoveX") : 0f;

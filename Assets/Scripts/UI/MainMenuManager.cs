@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem.UI;
@@ -59,6 +60,7 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private Sprite[] maidIdleFrames;
     [SerializeField] private Sprite[] roninIdleFrames;
     [SerializeField] private Sprite[] azureIdleFrames;
+    [SerializeField] private Sprite[] titanIdleFrames;
 
     [Header("Map Select Panel")]
     [SerializeField] private TextMeshProUGUI mapPanelTitleText;
@@ -93,10 +95,12 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private Button cardMaidBtn;
     [SerializeField] private Button cardRoninBtn;
     [SerializeField] private Button cardAzureBtn;
+    [SerializeField] private Button cardTitanBtn;
     [SerializeField] private Image cardVaelAvatarImg;
     [SerializeField] private Image cardMaidAvatarImg;
     [SerializeField] private Image cardRoninAvatarImg;
     [SerializeField] private Image cardAzureAvatarImg;
+    [SerializeField] private Image cardTitanAvatarImg;
     [SerializeField] private TextMeshProUGUI cardVaelTitleText;
     [SerializeField] private TextMeshProUGUI cardVaelSubText;
     [SerializeField] private TextMeshProUGUI cardVaelStatusText;
@@ -109,6 +113,9 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI cardAzureTitleText;
     [SerializeField] private TextMeshProUGUI cardAzureSubText;
     [SerializeField] private TextMeshProUGUI cardAzureStatusText;
+    [SerializeField] private TextMeshProUGUI cardTitanTitleText;
+    [SerializeField] private TextMeshProUGUI cardTitanSubText;
+    [SerializeField] private TextMeshProUGUI cardTitanStatusText;
     [SerializeField] private TextMeshProUGUI cardPlaceholderText;
 
     [Header("Currency / Info Display")]
@@ -135,6 +142,7 @@ public class MainMenuManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        EnsureHeroSprites();
         EnsureInputSystemUIModule();
         EnsureDynamicBackground();
         EnsureBottomNavigationBar();
@@ -149,9 +157,9 @@ public class MainMenuManager : MonoBehaviour
     private void Start()
     {
         AccountDatabase.EnsureActiveSessionLoaded();
+        EnsureHeroSprites();
         EnsureDynamicBackground();
         EnsureBottomNavigationBar();
-        EnsureHeroSprites();
         HideCenterHeroDisplay();
         EnsureRosterPanel();
         InventoryUI.EnsureUIExists();
@@ -857,6 +865,7 @@ public class MainMenuManager : MonoBehaviour
         if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
         if (canvas == null) return;
 
+        EnsureHeroSprites();
         EnsureRosterSprites();
 
         var existing = canvas.transform.Find("RosterModalPanel");
@@ -871,7 +880,10 @@ public class MainMenuManager : MonoBehaviour
             Transform oldMaidCard = existing.Find("RosterBox/HeroSelectionColumn/Card_Maid");
             bool hasOldMaid = oldMaidCard != null;
 
-            if (boxRtExisting == null || boxRtExisting.anchorMax != Vector2.one || rosterHeroNameText == null || hasOldSkillFrame || hasOldBtnFrame || hasOldMaid)
+            Transform titanCardImg = existing.Find("RosterBox/HeroSelectionColumn/Card_titan/AvatarFrame/AvatarImg");
+            bool hasMissingTitanSprite = titanCardImg == null || titanCardImg.GetComponent<Image>() == null || titanCardImg.GetComponent<Image>().sprite == null;
+
+            if (boxRtExisting == null || boxRtExisting.anchorMax != Vector2.one || rosterHeroNameText == null || hasOldSkillFrame || hasOldBtnFrame || hasOldMaid || hasMissingTitanSprite)
             {
                 if (Application.isPlaying)
                     Destroy(existing.gameObject);
@@ -1027,13 +1039,13 @@ public class MainMenuManager : MonoBehaviour
 
         EnsureHeroSprites();
         Sprite vaelAvatar = (vaelIdleFrames != null && vaelIdleFrames.Length > 0) ? vaelIdleFrames[0] : null;
-        cardVaelBtn = CreateAvatarCard(leftCol.transform, "vael", new Vector2(0f, -40f), new Vector2(0f, 140f),
+        cardVaelBtn = CreateAvatarCard(leftCol.transform, "vael", new Vector2(0f, -35f), new Vector2(0f, 105f),
             vaelAvatar, false,
             out cardVaelAvatarImg, out cardVaelTitleText, out cardVaelSubText, out cardVaelStatusText);
         cardVaelBtn.onClick.AddListener(() => InspectHero("vael"));
 
         Sprite roninAvatar = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames[0] : null;
-        cardRoninBtn = CreateAvatarCard(leftCol.transform, "ronin", new Vector2(0f, -190f), new Vector2(0f, 140f),
+        cardRoninBtn = CreateAvatarCard(leftCol.transform, "ronin", new Vector2(0f, -145f), new Vector2(0f, 105f),
             roninAvatar, false,
             out cardRoninAvatarImg, out cardRoninTitleText, out cardRoninSubText, out cardRoninStatusText);
         cardRoninBtn.onClick.AddListener(() => InspectHero("ronin"));
@@ -1044,10 +1056,16 @@ public class MainMenuManager : MonoBehaviour
         cardMaidStatusText = cardRoninStatusText;
 
         Sprite azureAvatar = (azureIdleFrames != null && azureIdleFrames.Length > 0) ? azureIdleFrames[0] : null;
-        cardAzureBtn = CreateAvatarCard(leftCol.transform, "azure", new Vector2(0f, -340f), new Vector2(0f, 140f),
+        cardAzureBtn = CreateAvatarCard(leftCol.transform, "azure", new Vector2(0f, -255f), new Vector2(0f, 105f),
             azureAvatar, false,
             out cardAzureAvatarImg, out cardAzureTitleText, out cardAzureSubText, out cardAzureStatusText);
         cardAzureBtn.onClick.AddListener(() => InspectHero("azure"));
+
+        Sprite titanAvatar = (titanIdleFrames != null && titanIdleFrames.Length > 0) ? titanIdleFrames[0] : null;
+        cardTitanBtn = CreateAvatarCard(leftCol.transform, "titan", new Vector2(0f, -365f), new Vector2(0f, 105f),
+            titanAvatar, false,
+            out cardTitanAvatarImg, out cardTitanTitleText, out cardTitanSubText, out cardTitanStatusText);
+        cardTitanBtn.onClick.AddListener(() => InspectHero("titan"));
 
         // 5. RIGHT COLUMN: Showcase Details Panel (Full-Height Split Right Column)
         GameObject rightCol = new GameObject("ShowcaseDetailsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -1170,15 +1188,60 @@ public class MainMenuManager : MonoBehaviour
         rosterHeroSkillDescText.lineSpacing = 12;
         rosterHeroSkillDescText.color = new Color(0.85f, 0.88f, 0.92f);
 
-        // Action Button (Bottom of Right Column)
+        // Action Button Row (Bottom of Right Column: 2 Buttons side-by-side)
+        GameObject btnRow = new GameObject("ActionBtnRow", typeof(RectTransform));
+        btnRow.transform.SetParent(rightCol.transform, false);
+        RectTransform brRt = btnRow.GetComponent<RectTransform>();
+        brRt.anchorMin = new Vector2(0f, 0f);
+        brRt.anchorMax = new Vector2(1f, 0f);
+        brRt.pivot = new Vector2(0.5f, 0f);
+        brRt.anchoredPosition = new Vector2(0f, 20f);
+        brRt.sizeDelta = new Vector2(-40f, 60f);
+
+        // 1. Costume Wardrobe Button (Left)
+        GameObject cosBtnObj = new GameObject("Btn_RosterCostume", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        cosBtnObj.transform.SetParent(btnRow.transform, false);
+        RectTransform cosRt = cosBtnObj.GetComponent<RectTransform>();
+        cosRt.anchorMin = new Vector2(0f, 0f);
+        cosRt.anchorMax = new Vector2(0.38f, 1f);
+        cosRt.offsetMin = Vector2.zero;
+        cosRt.offsetMax = new Vector2(-6f, 0f);
+
+        Image cosImg = cosBtnObj.GetComponent<Image>();
+        cosImg.color = new Color(0.65f, 0.40f, 0.12f, 1f);
+        var cosOutline = cosBtnObj.AddComponent<Outline>();
+        cosOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.9f);
+        cosOutline.effectDistance = new Vector2(2f, -2f);
+
+        var cosBtn = cosBtnObj.GetComponent<Button>();
+        cosBtn.onClick.AddListener(() =>
+        {
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+            CostumeWardrobeUI.EnsureUIExists()?.Open(inspectedHeroId);
+        });
+
+        GameObject cosTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        cosTxtObj.transform.SetParent(cosBtnObj.transform, false);
+        RectTransform cosTxtRt = cosTxtObj.GetComponent<RectTransform>();
+        cosTxtRt.anchorMin = Vector2.zero;
+        cosTxtRt.anchorMax = Vector2.one;
+        cosTxtRt.sizeDelta = Vector2.zero;
+        var cosTxt = cosTxtObj.AddComponent<TextMeshProUGUI>();
+        cosTxt.text = LocalizationManager.T("👘 TRANG PHỤC", "👘 WARDROBE");
+        cosTxt.fontSize = 17f;
+        cosTxt.fontStyle = FontStyles.Bold;
+        cosTxt.alignment = TextAlignmentOptions.Center;
+        cosTxt.color = Color.white;
+        cosTxt.raycastTarget = false;
+
+        // 2. Main Select Battle Hero Button (Right)
         GameObject actBtnObj = new GameObject("Btn_RosterAction", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-        actBtnObj.transform.SetParent(rightCol.transform, false);
+        actBtnObj.transform.SetParent(btnRow.transform, false);
         RectTransform actRt = actBtnObj.GetComponent<RectTransform>();
-        actRt.anchorMin = new Vector2(0f, 0f);
-        actRt.anchorMax = new Vector2(1f, 0f);
-        actRt.pivot = new Vector2(0.5f, 0f);
-        actRt.anchoredPosition = new Vector2(0f, 25f);
-        actRt.sizeDelta = new Vector2(-60f, 60f);
+        actRt.anchorMin = new Vector2(0.38f, 0f);
+        actRt.anchorMax = new Vector2(1f, 1f);
+        actRt.offsetMin = new Vector2(6f, 0f);
+        actRt.offsetMax = Vector2.zero;
 
         Image actImg = actBtnObj.GetComponent<Image>();
         actImg.color = new Color(0.16f, 0.58f, 0.28f, 1f);
@@ -1198,7 +1261,7 @@ public class MainMenuManager : MonoBehaviour
         actTxtRt.anchorMax = Vector2.one;
         actTxtRt.sizeDelta = Vector2.zero;
         rosterActionBtnText = actTxtObj.AddComponent<TextMeshProUGUI>();
-        rosterActionBtnText.fontSize = 20f;
+        rosterActionBtnText.fontSize = 18f;
         rosterActionBtnText.fontStyle = FontStyles.Bold;
         rosterActionBtnText.alignment = TextAlignmentOptions.Center;
         rosterActionBtnText.color = Color.white;
@@ -1246,6 +1309,10 @@ public class MainMenuManager : MonoBehaviour
         else if (id == "azure" || id == "azureblade" || id == "player3")
         {
             return new Vector3(2.4f, 2.4f, 1f);
+        }
+        else if (id == "titan" || id == "titanberserker" || id == "player4")
+        {
+            return new Vector3(2.2f, 2.2f, 1f);
         }
         return Vector3.one;
     }
@@ -1398,6 +1465,50 @@ public class MainMenuManager : MonoBehaviour
         txtRef.text = LocalizationManager.T("KHÓA - ANH HÙNG TIẾP THEO", "LOCKED - COMING SOON");
     }
 
+    public static Sprite[] LoadSpritesFromPath(string assetPath, int frameW = 64, int frameH = 64)
+    {
+        List<Sprite> list = new List<Sprite>();
+#if UNITY_EDITOR
+        var objects = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(assetPath);
+        if (objects != null)
+        {
+            foreach (var o in objects)
+            {
+                if (o is Sprite s) list.Add(s);
+            }
+            if (list.Count > 0)
+            {
+                return list.OrderByDescending(s => s.rect.y).ThenBy(s => s.rect.x).ToArray();
+            }
+        }
+#endif
+        if (list.Count == 0)
+        {
+            string fullPath = System.IO.Path.Combine(Application.dataPath, assetPath.Replace("Assets/", ""));
+            if (System.IO.File.Exists(fullPath))
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(fullPath);
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                if (tex.LoadImage(bytes))
+                {
+                    tex.filterMode = FilterMode.Point;
+                    int cols = Mathf.Max(1, tex.width / frameW);
+                    int rows = Mathf.Max(1, tex.height / frameH);
+                    for (int r = 0; r < rows; r++)
+                    {
+                        int unityY = (rows - 1 - r) * frameH;
+                        for (int c = 0; c < cols; c++)
+                        {
+                            Sprite s = Sprite.Create(tex, new Rect(c * frameW, unityY, frameW, frameH), new Vector2(0.5f, 0.5f), 64f);
+                            list.Add(s);
+                        }
+                    }
+                }
+            }
+        }
+        return list.ToArray();
+    }
+
     public void EnsureHeroSprites()
     {
         if (heroPreviewImage != null)
@@ -1406,45 +1517,20 @@ public class MainMenuManager : MonoBehaviour
             heroPreviewImage.color = Color.white;
         }
 
-#if UNITY_EDITOR
         if (vaelIdleFrames == null || vaelIdleFrames.Length == 0)
-        {
-            var objects = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player/IDLE/idle_down.png");
-            var list = new List<Sprite>();
-            if (objects != null)
-            {
-                foreach (var o in objects) if (o is Sprite s) list.Add(s);
-            }
-            if (list.Count > 0) vaelIdleFrames = list.ToArray();
-        }
+            vaelIdleFrames = LoadSpritesFromPath("Assets/ART/Player/IDLE/idle_down.png", 64, 64);
 
         if (roninIdleFrames == null || roninIdleFrames.Length == 0)
-        {
-            var objects = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player2/_down idle.png");
-            var list = new List<Sprite>();
-            if (objects != null)
-            {
-                foreach (var o in objects) if (o is Sprite s) list.Add(s);
-            }
-            if (list.Count > 0) roninIdleFrames = list.ToArray();
-        }
+            roninIdleFrames = LoadSpritesFromPath("Assets/ART/Player2/_down idle.png", 64, 64);
 
         if (maidIdleFrames == null || maidIdleFrames.Length == 0)
-        {
             maidIdleFrames = roninIdleFrames;
-        }
 
         if (azureIdleFrames == null || azureIdleFrames.Length == 0)
-        {
-            var objects = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player3/Sword_Idle.png");
-            var list = new List<Sprite>();
-            if (objects != null)
-            {
-                foreach (var o in objects) if (o is Sprite s) list.Add(s);
-            }
-            if (list.Count > 0) azureIdleFrames = list.ToArray();
-        }
-#endif
+            azureIdleFrames = LoadSpritesFromPath("Assets/ART/Player3/Sword_Idle.png", 64, 64);
+
+        if (titanIdleFrames == null || titanIdleFrames.Length == 0)
+            titanIdleFrames = LoadSpritesFromPath("Assets/ART/Player4/Hammer_Idle.png", 64, 64);
     }
 
     private void HookButtons()
@@ -1635,6 +1721,25 @@ public class MainMenuManager : MonoBehaviour
             cardAzureStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
         }
 
+        if (cardTitanTitleText != null) cardTitanTitleText.text = LocalizationManager.T("Cuồng Chiến Binh (Titan)", "Titan Berserker");
+        if (cardTitanSubText != null) cardTitanSubText.text = LocalizationManager.T("Đại Chùy / Tanker", "Heavy War Hammer / Tanker");
+        if (cardTitanStatusText != null)
+        {
+            bool isSel = (currentSelected == CharacterManager.CHAR_TITAN_BERSERKER);
+            cardTitanStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
+        }
+
+        // Đảm bảo toàn bộ Avatar trên thẻ bài không bị trắng
+        EnsureHeroSprites();
+        if (cardVaelAvatarImg != null && cardVaelAvatarImg.sprite == null && vaelIdleFrames != null && vaelIdleFrames.Length > 0)
+            cardVaelAvatarImg.sprite = vaelIdleFrames[0];
+        if (cardRoninAvatarImg != null && cardRoninAvatarImg.sprite == null && roninIdleFrames != null && roninIdleFrames.Length > 0)
+            cardRoninAvatarImg.sprite = roninIdleFrames[0];
+        if (cardAzureAvatarImg != null && cardAzureAvatarImg.sprite == null && azureIdleFrames != null && azureIdleFrames.Length > 0)
+            cardAzureAvatarImg.sprite = azureIdleFrames[0];
+        if (cardTitanAvatarImg != null && cardTitanAvatarImg.sprite == null && titanIdleFrames != null && titanIdleFrames.Length > 0)
+            cardTitanAvatarImg.sprite = titanIdleFrames[0];
+
         UpdateCurrencyDisplay();
         UpdateHeroDetails();
         InspectHero(inspectedHeroId);
@@ -1644,7 +1749,18 @@ public class MainMenuManager : MonoBehaviour
     private void UpdateHeroDetails()
     {
         string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
-        if (curChar == CharacterManager.CHAR_AZURE_BLADE)
+        if (curChar == CharacterManager.CHAR_TITAN_BERSERKER)
+        {
+            if (heroNameText != null) heroNameText.text = LocalizationManager.T("Cuồng Chiến Binh", "Titan Berserker");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Đại Chùy Chiến Thần (Tanker & Chấn Địa)", "Titan Berserker (Tanker & Cataclysm Slam)");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Cuồng Nộ Chấn Địa", "Titan Cataclysm");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Vung đại chùy nện đất tạo sóng xung kích hình nón càn quét. Nội tại Thể Phách Titan giảm 20% sát thương và tự động tạo Khiên Đất Đá khi đầy nộ. Tuyệt kỹ hút toàn bộ quái vật vào tâm chấn rồi nện búa dung nham hất tung và gây choáng diện rộng!", "Swings heavy war hammer unleashing conic shockwaves. Innate 20% damage reduction and automatic Titan Bulwark shield. Special skill draws all enemies to the epicenter and slams with a catastrophic volcanic eruption!");
+            if (heroStatsSummaryText != null)
+            {
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 160   CÔNG: 32   TỐC: 4.4", "HP: 160   ATK: 32   SPD: 4.4");
+            }
+        }
+        else if (curChar == CharacterManager.CHAR_AZURE_BLADE)
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ", "Azure Blade");
             if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí (Sóng Kiếm Tầm Xa)", "Heavy Crescent Blade");
@@ -1681,10 +1797,30 @@ public class MainMenuManager : MonoBehaviour
 
     public void InspectHero(string heroId)
     {
+        EnsureHeroSprites();
         inspectedHeroId = heroId.ToLower();
         string currentSelected = CharacterManager.EnsureInstance().GetSelectedCharacterId();
 
-        if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
+        if (inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
+        {
+            if (rosterHeroPreviewImage != null && titanIdleFrames != null && titanIdleFrames.Length > 0)
+                rosterHeroPreviewImage.sprite = titanIdleFrames[0];
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Cuồng Chiến Binh (Titan Berserker)", "Titan Berserker (War Hammer Tanker)");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Đại Chùy Chiến Thần (Tanker & Chấn Địa)", "Titan Berserker (Tanker & Cataclysm Slam)");
+            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 160   CÔNG: 32   TỐC: 4.4", "HP: 160   ATK: 32   SPD: 4.4");
+            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Cuồng Nộ Chấn Địa", "Special: Titan Cataclysm Slam");
+            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Vung đại chùy nện đất tạo sóng xung kích hình nón càn quét. Nội tại Thể Phách Titan giảm 20% sát thương và tự động tạo Khiên Đất Đá khi đầy nộ. Tuyệt kỹ hút toàn bộ quái vật vào tâm chấn rồi nện búa dung nham hất tung và gây choáng diện rộng!", "Swings heavy war hammer unleashing conic shockwaves. Innate 20% damage reduction and automatic Titan Bulwark shield. Special skill draws all enemies to the epicenter and slams with a catastrophic volcanic eruption!");
+
+            bool isSelected = (currentSelected == CharacterManager.CHAR_TITAN_BERSERKER);
+            if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
+            if (rosterActionBtn != null)
+            {
+                rosterActionBtn.interactable = true;
+                var img = rosterActionBtn.GetComponent<Image>();
+                if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
+            }
+        }
+        else if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
         {
             if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ (Azure Blade)", "Azure Blade");
             if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí (Sóng Kiếm Tầm Xa)", "Heavy Crescent Blade (Ranged Waves)");
@@ -1750,7 +1886,10 @@ public class MainMenuManager : MonoBehaviour
     public void UpdateRosterEquipmentMaterial()
     {
         if (rosterHeroPreviewImage == null) return;
-        if (inspectedHeroId == "maid" || inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
+
+        HeroCostumeManager.ApplyCostumeToImage(rosterHeroPreviewImage, inspectedHeroId);
+
+        if (inspectedHeroId == "maid" || inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "azure" || inspectedHeroId == "azureblade" || inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
         {
             rosterHeroPreviewImage.material = null;
             return;
@@ -1793,7 +1932,12 @@ public class MainMenuManager : MonoBehaviour
         string targetChar = CharacterManager.CHAR_VAELSTRIDER;
         string heroPref = "vael";
 
-        if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
+        if (inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
+        {
+            targetChar = CharacterManager.CHAR_TITAN_BERSERKER;
+            heroPref = "titan";
+        }
+        else if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
         {
             targetChar = CharacterManager.CHAR_AZURE_BLADE;
             heroPref = "azure";
@@ -1853,7 +1997,12 @@ public class MainMenuManager : MonoBehaviour
         string target = CharacterManager.CHAR_VAELSTRIDER;
         string heroPref = "vael";
 
-        if (heroId.ToLower() == "azure" || heroId.ToLower() == "azureblade")
+        if (heroId.ToLower() == "titan" || heroId.ToLower() == "titanberserker" || heroId.ToLower() == "player4")
+        {
+            target = CharacterManager.CHAR_TITAN_BERSERKER;
+            heroPref = "titan";
+        }
+        else if (heroId.ToLower() == "azure" || heroId.ToLower() == "azureblade")
         {
             target = CharacterManager.CHAR_AZURE_BLADE;
             heroPref = "azure";
@@ -1882,21 +2031,24 @@ public class MainMenuManager : MonoBehaviour
     {
         string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
         Sprite[] frames = vaelIdleFrames;
-        if (curChar == CharacterManager.CHAR_AZURE_BLADE) frames = azureIdleFrames;
+        if (curChar == CharacterManager.CHAR_TITAN_BERSERKER) frames = titanIdleFrames;
+        else if (curChar == CharacterManager.CHAR_AZURE_BLADE) frames = azureIdleFrames;
         else if (curChar == CharacterManager.CHAR_GALE_RONIN) frames = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames;
 
         if (heroPreviewImage == null) yield break;
 
         heroPreviewImage.preserveAspect = true;
         heroPreviewImage.color = Color.white;
-        heroPreviewImage.transform.localScale = GetHeroVisualScale(curChar == CharacterManager.CHAR_AZURE_BLADE ? "azure" : (curChar == CharacterManager.CHAR_GALE_RONIN ? "ronin" : "vael"));
+        heroPreviewImage.transform.localScale = GetHeroVisualScale(curChar == CharacterManager.CHAR_TITAN_BERSERKER ? "titan" : (curChar == CharacterManager.CHAR_AZURE_BLADE ? "azure" : (curChar == CharacterManager.CHAR_GALE_RONIN ? "ronin" : "vael")));
 
         if (frames == null || frames.Length == 0)
         {
             EnsureHeroSprites();
-            frames = (curChar == CharacterManager.CHAR_AZURE_BLADE) 
-                ? azureIdleFrames 
-                : (curChar == CharacterManager.CHAR_GALE_RONIN ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : vaelIdleFrames);
+            frames = (curChar == CharacterManager.CHAR_TITAN_BERSERKER)
+                ? titanIdleFrames
+                : ((curChar == CharacterManager.CHAR_AZURE_BLADE) 
+                    ? azureIdleFrames 
+                    : (curChar == CharacterManager.CHAR_GALE_RONIN ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : vaelIdleFrames));
             if (frames == null || frames.Length == 0) yield break;
         }
 
@@ -1920,7 +2072,9 @@ public class MainMenuManager : MonoBehaviour
     private IEnumerator AnimateRosterHeroRoutine()
     {
         Sprite[] frames = vaelIdleFrames;
-        if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
+        if (inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
+            frames = titanIdleFrames;
+        else if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
             frames = azureIdleFrames;
         else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid") 
             frames = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames;
@@ -1933,9 +2087,11 @@ public class MainMenuManager : MonoBehaviour
         if (frames == null || frames.Length == 0)
         {
             EnsureHeroSprites();
-            frames = (inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
-                ? azureIdleFrames 
-                : ((inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid") ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : vaelIdleFrames);
+            frames = (inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
+                ? titanIdleFrames
+                : ((inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
+                    ? azureIdleFrames 
+                    : ((inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid") ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : vaelIdleFrames));
             if (frames == null || frames.Length == 0) yield break;
         }
 

@@ -53,7 +53,7 @@ public class PlayerController : MonoBehaviour
         if (rb != null) rb.linearVelocity = Vector2.zero;
         if (animator != null) animator.SetFloat(SpeedHash, 0f);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "STUNNED! (2s)", new Color(1f, 0.9f, 0.3f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("CHOÁNG! (2s)", "STUNNED! (2s)"), new Color(1f, 0.9f, 0.3f));
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         GameObject webTrap = new GameObject("WebTrapVisual");
@@ -118,6 +118,13 @@ public class PlayerController : MonoBehaviour
                 baseMoveSpeed += def.speedBonus;
                 moveSpeed += def.speedBonus;
             }
+        }
+
+        HeroCostumeManager.GetEquippedCostumeBonus(CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "", out _, out _, out _, out float costumeSpd);
+        if (costumeSpd > 0)
+        {
+            baseMoveSpeed += costumeSpd;
+            moveSpeed += costumeSpd;
         }
 
         // Bat buoc dash cooldown mo dau la 5s
@@ -274,6 +281,14 @@ public class PlayerController : MonoBehaviour
     {
         animator.SetFloat(MoveXHash, lastFacingDirection.x);
         animator.SetFloat(MoveYHash, lastFacingDirection.y);
+
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && titan.IsSpinning)
+        {
+            animator.SetFloat(SpeedHash, 0f);
+            return;
+        }
+
         animator.SetFloat(SpeedHash, moveInput.sqrMagnitude);
     }
 
@@ -340,7 +355,13 @@ public class PlayerController : MonoBehaviour
         }
 
         var sr = GetComponent<SpriteRenderer>();
-        if (sr != null && sr.sprite != null)
+        string curChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        if (curChar == CharacterManager.CHAR_TITAN_BERSERKER || GetComponent<TitanBerserkerSkill>() != null)
+        {
+            cap.offset = new Vector2(0f, 0.65f);
+            cap.size = new Vector2(0.90f, 1.30f);
+        }
+        else if (sr != null && sr.sprite != null)
         {
             Bounds b = sr.sprite.bounds;
             float cy = Mathf.Clamp(b.center.y, 0f, 0.55f);

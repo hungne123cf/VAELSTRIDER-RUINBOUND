@@ -15,6 +15,8 @@ public class SettingsUI : MonoBehaviour
     [Header("Headers & Titles")]
     private TextMeshProUGUI titleText;
     private TextMeshProUGUI subtitleText;
+    private TextMeshProUGUI leftColHeader;
+    private TextMeshProUGUI rightColHeader;
 
     [Header("Volume Controls")]
     private TextMeshProUGUI bgmLabel;
@@ -308,8 +310,8 @@ public class SettingsUI : MonoBehaviour
         lcOutline.effectColor = new Color(0.2f, 0.5f, 0.8f, 0.6f);
         lcOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
-        var lcHeader = CreateLabel(leftCol.transform, "Header", "<b><color=#55EFC4>1. ÂM THANH & NGÔN NGỮ</color></b>", new Vector2(20f, -15f), new Vector2(450f, 28f));
-        lcHeader.fontSize = 17;
+        leftColHeader = CreateLabel(leftCol.transform, "Header", "<b><color=#55EFC4>1. ÂM THANH & NGÔN NGỮ</color></b>", new Vector2(20f, -15f), new Vector2(450f, 28f));
+        leftColHeader.fontSize = 17;
 
         // BGM Slider Row
         bgmLabel = CreateLabel(leftCol.transform, "BGMLabel", "Âm nhạc nền (BGM):", new Vector2(20f, -55f), new Vector2(400f, 26f));
@@ -352,8 +354,8 @@ public class SettingsUI : MonoBehaviour
         rcOutline.effectColor = new Color(0.8f, 0.4f, 0.3f, 0.6f);
         rcOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
-        var rcHeader = CreateLabel(rightCol.transform, "Header", "<b><color=#FFA502>2. TÀI KHOẢN & DỮ LIỆU</color></b>", new Vector2(20f, -15f), new Vector2(450f, 28f));
-        rcHeader.fontSize = 17;
+        rightColHeader = CreateLabel(rightCol.transform, "Header", "<b><color=#FFA502>2. TÀI KHOẢN & DỮ LIỆU</color></b>", new Vector2(20f, -15f), new Vector2(450f, 28f));
+        rightColHeader.fontSize = 17;
 
         // Account Info Box
         GameObject accBox = new GameObject("AccBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -717,6 +719,9 @@ public class SettingsUI : MonoBehaviour
         bool isVi = LocalizationManager.IsVietnamese;
         if (titleText != null) titleText.text = isVi ? "<b>CÀI ĐẶT HỆ THỐNG</b>" : "<b>SYSTEM SETTINGS</b>";
         if (subtitleText != null) subtitleText.text = isVi ? "Âm thanh, Ngôn ngữ, Quản lý tài khoản & Dữ liệu trò chơi" : "Audio, Language, Account Management & Game Data";
+        if (leftColHeader != null) leftColHeader.text = isVi ? "<b><color=#55EFC4>1. ÂM THANH & NGÔN NGỮ</color></b>" : "<b><color=#55EFC4>1. AUDIO & LANGUAGE</color></b>";
+        if (rightColHeader != null) rightColHeader.text = isVi ? "<b><color=#FFA502>2. TÀI KHOẢN & DỮ LIỆU</color></b>" : "<b><color=#FFA502>2. ACCOUNT & DATA</color></b>";
+
         if (bgmLabel != null) bgmLabel.text = isVi ? "Âm nhạc nền (BGM):" : "Music Volume (BGM):";
         if (sfxLabel != null) sfxLabel.text = isVi ? "Hiệu ứng âm thanh (SFX):" : "Sound Effects (SFX):";
         if (languageLabel != null) languageLabel.text = isVi ? "Ngôn ngữ hiển thị (Language):" : "Display Language:";
@@ -734,7 +739,7 @@ public class SettingsUI : MonoBehaviour
                 : $"Account: <color=#FFA502><b>{activeUser.ToUpper()}</b></color>\nStatus: <color=#2ED573>Authenticated</color>";
         }
 
-        if (logoutBtnText != null) logoutBtnText.text = isVi ? "<b>ĐĂNG XUẤT TÀI KHOẢN (LOGOUT)</b>" : "<b>LOGOUT ACCOUNT</b>";
+        if (logoutBtnText != null) logoutBtnText.text = isVi ? "<b>ĐĂNG XUẤT TÀI KHOẢN</b>" : "<b>LOGOUT ACCOUNT</b>";
 
         bool gameplay = isGameplayScene;
         if (restartButton != null) restartButton.gameObject.SetActive(gameplay);
@@ -742,7 +747,7 @@ public class SettingsUI : MonoBehaviour
 
         if (restartBtnText != null) restartBtnText.text = isVi ? "CHƠI LẠI" : "RESTART";
         if (mainMenuBtnText != null) mainMenuBtnText.text = isVi ? "VỀ SẢNH CHÍNH" : "MAIN MENU";
-        if (resetDataBtnText != null) resetDataBtnText.text = isVi ? "XÓA TOÀN BỘ DỮ LIỆU (RESET)" : "RESET ALL DATA";
+        if (resetDataBtnText != null) resetDataBtnText.text = isVi ? "XÓA TOÀN BỘ DỮ LIỆU" : "RESET ALL DATA";
         if (closeBtnText != null) closeBtnText.text = gameplay ? (isVi ? "TIẾP TỤC" : "RESUME") : (isVi ? "QUAY LẠI" : "BACK");
 
         if (resetPromptText != null) resetPromptText.text = isVi ? "Bạn có chắc chắn muốn xóa toàn bộ dữ liệu và bắt đầu lại?" : "Are you sure you want to reset all game data?";

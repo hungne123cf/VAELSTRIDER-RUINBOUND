@@ -129,7 +129,7 @@ public class RoomBarrier : MonoBehaviour
                 Vector3 insidePos = transform.position + toCenter * 1.5f;
                 player.transform.position = new Vector3(insidePos.x, insidePos.y, player.transform.position.z);
                 SoundManager.EnsureInstance()?.PlayPortalSpawn();
-                DamagePopup.CreateText(player.transform.position + Vector3.up * 1.2f, "BƯỚC VÀO PHÒNG ĐẤU!", new Color(0.2f, 0.85f, 1f));
+                DamagePopup.CreateText(player.transform.position + Vector3.up * 1.2f, LocalizationManager.T("BƯỚC VÀO PHÒNG ĐẤU!", "ENTER COMBAT ROOM!"), new Color(0.2f, 0.85f, 1f));
             }
         }
     }

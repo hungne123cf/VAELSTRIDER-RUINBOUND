@@ -384,7 +384,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         // Hieu ung bien mat tai vi tri cu
         SpawnBlinkSmoke(transform.position);
         SoundManager.EnsureInstance()?.PlayBossWarning();
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "HUYET ANH BIEN TE!", new Color(1f, 0.15f, 0.15f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("HUYẾT ẢNH BIẾN THỂ!", "BLOOD PHANTOM!"), new Color(1f, 0.15f, 0.15f));
 
         if (spriteRenderer != null) spriteRenderer.color = new Color(1f, 0f, 0f, 0.2f);
         yield return new WaitForSeconds(0.2f);
@@ -409,7 +409,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
             var cam = FindAnyObjectByType<CameraFollow>();
             if (cam != null) cam.Shake(0.35f, 0.25f);
 
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.6f, "DICH CHUYEN SAU LUNG!", new Color(1f, 0.2f, 0.2f));
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.6f, LocalizationManager.T("DỊCH CHUYỂN SAU LƯNG!", "SHADOW STEP!"), new Color(1f, 0.2f, 0.2f));
             SoundManager.EnsureInstance()?.PlayHitImpact();
 
             yield return new WaitForSeconds(0.15f);
@@ -509,7 +509,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         // Ve VUNG CANH BAO HINH NON chuan theo huong ban ve phia player
         DrawWarningCone(transform.position + Vector3.up * 0.3f, aimDir, 7.5f, 26f);
         SoundManager.EnsureInstance()?.PlayBossWarning();
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.6f, "HUYET NGUYET TRAM!", new Color(1f, 0.1f, 0.2f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.6f, LocalizationManager.T("HUYẾT NGUYỆT TRẢM!", "BLOOD MOON SLASH!"), new Color(1f, 0.1f, 0.2f));
 
         // Canh bao nhap nhay 0.75s
         yield return new WaitForSeconds(0.75f);
@@ -562,7 +562,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         SetMoving(false);
 
         if (animator != null && animator.runtimeAnimatorController != null) animator.SetTrigger(SpecialAttackHash);
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, "HUYET TRAN TRUY HON!", new Color(1f, 0.05f, 0.05f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, LocalizationManager.T("HUYẾT TRẬN TRUY HỒN!", "SOUL HUNT ARRAY!"), new Color(1f, 0.05f, 0.05f));
         SoundManager.EnsureInstance()?.PlayBossWarning();
 
         if (player != null)
@@ -570,7 +570,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
             // GAY CHOANG PLAYER TRONG SUOT THOI GIAN HUT MAU
             float siphonDuration = (currentBossPhase == 1) ? 0.9f : 1.1f;
             StartCoroutine(StunPlayerRoutine(player, siphonDuration));
-            DamagePopup.CreateText(player.position + Vector3.up * 1.4f, "KHOA HON!", new Color(1f, 0.85f, 0f));
+            DamagePopup.CreateText(player.position + Vector3.up * 1.4f, LocalizationManager.T("KHÓA HỒN!", "SOUL LOCK!"), new Color(1f, 0.85f, 0f));
 
             int ticks = (currentBossPhase == 1) ? 4 : 3;
             float tickInterval = siphonDuration / (float)ticks;
@@ -637,7 +637,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         rb.linearVelocity = Vector2.zero;
         SetMoving(false);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.6f, "HUYET DOT KICH!", new Color(1f, 0.1f, 0.1f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.6f, LocalizationManager.T("HUYẾT ĐỘT KÍCH!", "BLOOD POUNCE!"), new Color(1f, 0.1f, 0.1f));
         SoundManager.EnsureInstance()?.PlayBossWarning();
 
         yield return new WaitForSeconds(0.35f);
@@ -676,7 +676,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
                         playerRb.AddForce(knockDir * 18f, ForceMode2D.Impulse);
                     }
                     StartCoroutine(StunPlayerRoutine(player, 0.65f));
-                    DamagePopup.CreateText(player.position + Vector3.up * 1.3f, "CHOANG!", new Color(1f, 0.85f, 0f));
+                    DamagePopup.CreateText(player.position + Vector3.up * 1.3f, LocalizationManager.T("CHOÁNG!", "STUNNED!"), new Color(1f, 0.85f, 0f));
                 }
             }
         }
@@ -884,7 +884,9 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         if (cam != null) cam.Shake(0.55f, 0.65f);
         SoundManager.EnsureInstance()?.PlayPortalSpawn();
 
-        string title = currentBossPhase == 2 ? "PHASE II: HUYET THAN THUC TINH!" : "FINAL PHASE: TAN THE HUYET NGUYET!";
+        string title = currentBossPhase == 2 
+            ? LocalizationManager.T("GIAI ĐOẠN II: HUYẾT THẦN THỨC TỈNH!", "PHASE II: BLOOD GOD AWAKENING!") 
+            : LocalizationManager.T("GIAI ĐOẠN CUỐI: TẬN THẾ HUYẾT NGUYỆT!", "FINAL PHASE: BLOOD MOON ECLIPSE!");
         DamagePopup.CreateText(transform.position + Vector3.up * 2.0f, title, new Color(1f, 0.15f, 0.15f));
 
         moveSpeed *= 1.22f;

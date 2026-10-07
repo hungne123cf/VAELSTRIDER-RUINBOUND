@@ -1,0 +1,3276 @@
+fileFormatVersion: 2
+guid: 061ea68e331b6a841a6cc0529eb053d5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3759352159660525434
+    second: test_cloth_black_0
+  - first:
+      213: 2218490861880120137
+    second: test_cloth_black_1
+  - first:
+      213: 3161654987961842622
+    second: test_cloth_black_2
+  - first:
+      213: -479902624744249107
+    second: test_cloth_black_3
+  - first:
+      213: -781149532819240732
+    second: test_cloth_black_4
+  - first:
+      213: -712703885203241154
+    second: test_cloth_black_5
+  - first:
+      213: 8197184814173401219
+    second: test_cloth_black_6
+  - first:
+      213: 5570012547246694049
+    second: test_cloth_black_7
+  - first:
+      213: -2541216337459105733
+    second: test_cloth_black_8
+  - first:
+      213: -4460716952928052058
+    second: test_cloth_black_9
+  - first:
+      213: -3897516188556740532
+    second: test_cloth_black_10
+  - first:
+      213: -5152457970144349933
+    second: test_cloth_black_11
+  - first:
+      213: -7695563453029920034
+    second: test_cloth_black_12
+  - first:
+      213: 4420216743818146884
+    second: test_cloth_black_13
+  - first:
+      213: -3779095569743585751
+    second: test_cloth_black_14
+  - first:
+      213: -466319471454052277
+    second: test_cloth_black_15
+  - first:
+      213: 2645533236845323974
+    second: test_cloth_black_16
+  - first:
+      213: 8292581973931365482
+    second: test_cloth_black_17
+  - first:
+      213: -305039710912437292
+    second: test_cloth_black_18
+  - first:
+      213: -7636057336032559518
+    second: test_cloth_black_19
+  - first:
+      213: -3371332044303932275
+    second: test_cloth_black_20
+  - first:
+      213: -7087224736782747909
+    second: test_cloth_black_21
+  - first:
+      213: 8507283880846424800
+    second: test_cloth_black_22
+  - first:
+      213: 2888508950512132134
+    second: test_cloth_black_23
+  - first:
+      213: 3352970662369771740
+    second: test_cloth_black_24
+  - first:
+      213: -8261753319020012075
+    second: test_cloth_black_25
+  - first:
+      213: 4465305189340966070
+    second: test_cloth_black_26
+  - first:
+      213: -4340616797923277280
+    second: test_cloth_black_27
+  - first:
+      213: 3321643095946130015
+    second: test_cloth_black_28
+  - first:
+      213: 5291947028798415659
+    second: test_cloth_black_29
+  - first:
+      213: -1720219801205088874
+    second: test_cloth_black_30
+  - first:
+      213: -8469795600627599795
+    second: test_cloth_black_31
+  - first:
+      213: -2874766712694316484
+    second: test_cloth_black_32
+  - first:
+      213: -8919901417426252213
+    second: test_cloth_black_33
+  - first:
+      213: 8505490206040365987
+    second: test_cloth_black_34
+  - first:
+      213: 823913129028729735
+    second: test_cloth_black_35
+  - first:
+      213: -5982742532263307410
+    second: test_cloth_black_36
+  - first:
+      213: 8385413126208781728
+    second: test_cloth_black_37
+  - first:
+      213: 223488046383417856
+    second: test_cloth_black_38
+  - first:
+      213: 336903996371728411
+    second: test_cloth_black_39
+  - first:
+      213: -6433284667616935213
+    second: test_cloth_black_40
+  - first:
+      213: -5037587595843007987
+    second: test_cloth_black_41
+  - first:
+      213: 3594261786687823509
+    second: test_cloth_black_42
+  - first:
+      213: -817545353766194102
+    second: test_cloth_black_43
+  - first:
+      213: -4335574112003048615
+    second: test_cloth_black_44
+  - first:
+      213: 2763691099929189159
+    second: test_cloth_black_45
+  - first:
+      213: -7839568266526752158
+    second: test_cloth_black_46
+  - first:
+      213: -6817176974543800251
+    second: test_cloth_black_47
+  - first:
+      213: 8433004881850470323
+    second: test_cloth_black_48
+  - first:
+      213: 6056504113272446364
+    second: test_cloth_black_49
+  - first:
+      213: -5382735098860845458
+    second: test_cloth_black_50
+  - first:
+      213: -7627969049349398529
+    second: test_cloth_black_51
+  - first:
+      213: -2285527532411364149
+    second: test_cloth_black_52
+  - first:
+      213: -8551186330590876457
+    second: test_cloth_black_53
+  - first:
+      213: 7100387550426307483
+    second: test_cloth_black_54
+  - first:
+      213: -2293083177119630263
+    second: test_cloth_black_55
+  - first:
+      213: -3495290177114323075
+    second: test_cloth_black_56
+  - first:
+      213: -1877268335600328193
+    second: test_cloth_black_57
+  - first:
+      213: -2325751340731184410
+    second: test_cloth_black_58
+  - first:
+      213: 3744336178367690659
+    second: test_cloth_black_59
+  - first:
+      213: -3344129037404615199
+    second: test_cloth_black_60
+  - first:
+      213: 8060103889851203917
+    second: test_cloth_black_61
+  - first:
+      213: 5878350071126848588
+    second: test_cloth_black_62
+  - first:
+      213: 8737358121504973151
+    second: test_cloth_black_63
+  - first:
+      213: -1107418159691126032
+    second: test_cloth_black_64
+  - first:
+      213: 6681545617066058991
+    second: test_cloth_black_65
+  - first:
+      213: 5178131854596058253
+    second: test_cloth_black_66
+  - first:
+      213: -9126669309077738341
+    second: test_cloth_black_67
+  - first:
+      213: 9035327234494049418
+    second: test_cloth_black_68
+  - first:
+      213: 2314980282061073310
+    second: test_cloth_black_69
+  - first:
+      213: 8407017519343896524
+    second: test_cloth_black_70
+  - first:
+      213: 2549392290530557797
+    second: test_cloth_black_71
+  - first:
+      213: -3027272434763527175
+    second: test_cloth_black_72
+  - first:
+      213: -5406505916147803154
+    second: test_cloth_black_73
+  - first:
+      213: -7855284370152536741
+    second: test_cloth_black_74
+  - first:
+      213: 6269455261188982484
+    second: test_cloth_black_75
+  - first:
+      213: -7996562331023444202
+    second: test_cloth_black_76
+  - first:
+      213: 2257951618912926200
+    second: test_cloth_black_77
+  - first:
+      213: -6930008504708383745
+    second: test_cloth_black_78
+  - first:
+      213: -2231843472450984872
+    second: test_cloth_black_79
+  - first:
+      213: 523384942967447683
+    second: test_cloth_black_80
+  - first:
+      213: -6758955461085673066
+    second: test_cloth_black_81
+  - first:
+      213: -3334069732273250148
+    second: test_cloth_black_82
+  - first:
+      213: 8296634311734914158
+    second: test_cloth_black_83
+  - first:
+      213: 922376077725472071
+    second: test_cloth_black_84
+  - first:
+      213: -6030954645991845342
+    second: test_cloth_black_85
+  - first:
+      213: -2901772976986798238
+    second: test_cloth_black_86
+  - first:
+      213: -5376752496962955390
+    second: test_cloth_black_87
+  - first:
+      213: 7662446743695632256
+    second: test_cloth_black_88
+  - first:
+      213: -2299228271006571451
+    second: test_cloth_black_89
+  - first:
+      213: 6154607035651072903
+    second: test_cloth_black_90
+  - first:
+      213: 8282035227681111334
+    second: test_cloth_black_91
+  - first:
+      213: 8437166251200180771
+    second: test_cloth_black_92
+  - first:
+      213: 5623743810675116439
+    second: test_cloth_black_93
+  - first:
+      213: -1777799077617759073
+    second: test_cloth_black_94
+  - first:
+      213: 3581044752690452279
+    second: test_cloth_black_95
+  - first:
+      213: -6863421465767507650
+    second: test_cloth_black_96
+  - first:
+      213: 312656550439820781
+    second: test_cloth_black_97
+  - first:
+      213: -6638389329087579619
+    second: test_cloth_black_98
+  - first:
+      213: 4258742625413250851
+    second: test_cloth_black_99
+  - first:
+      213: -1886266672865512673
+    second: test_cloth_black_100
+  - first:
+      213: -7371128924792814502
+    second: test_cloth_black_101
+  - first:
+      213: 1836758926095736642
+    second: test_cloth_black_102
+  - first:
+      213: 9183376049046593972
+    second: test_cloth_black_103
+  - first:
+      213: -2194978427578722435
+    second: test_cloth_black_104
+  - first:
+      213: 8282196228420430174
+    second: test_cloth_black_105
+  - first:
+      213: -4761590375291011378
+    second: test_cloth_black_106
+  - first:
+      213: -7623688135667773126
+    second: test_cloth_black_107
+  - first:
+      213: 7848343424785026214
+    second: test_cloth_black_108
+  - first:
+      213: -8444673607390417634
+    second: test_cloth_black_109
+  - first:
+      213: 2137351804229830785
+    second: test_cloth_black_110
+  - first:
+      213: 7423789173763552818
+    second: test_cloth_black_111
+  - first:
+      213: 1008959994561328353
+    second: test_cloth_black_112
+  - first:
+      213: 522944016261710216
+    second: test_cloth_black_113
+  - first:
+      213: 109164535163210377
+    second: test_cloth_black_114
+  - first:
+      213: 3102158712032510854
+    second: test_cloth_black_115
+  - first:
+      213: -8589967078510764872
+    second: test_cloth_black_116
+  - first:
+      213: -7334231733096617028
+    second: test_cloth_black_117
+  - first:
+      213: 5761735730715220364
+    second: test_cloth_black_118
+  - first:
+      213: -8194318329774284299
+    second: test_cloth_black_119
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: test_cloth_black_0
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 1855
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a77c92e0fd6eb2430800000000000000
+      internalID: 3759352159660525434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_1
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 1855
+        width: 54
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94390df4fa9a9ce10800000000000000
+      internalID: 2218490861880120137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_2
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 1855
+        width: 54
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebbbecbd57470eb20800000000000000
+      internalID: 3161654987961842622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_3
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 1855
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de8675dfa1b0759f0800000000000000
+      internalID: -479902624744249107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_4
+      rect:
+        serializedVersion: 2
+        x: 411
+        y: 1855
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e8c8db73acc825f0800000000000000
+      internalID: -781149532819240732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_5
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 1761
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e378b6ca797fb16f0800000000000000
+      internalID: -712703885203241154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_6
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 1763
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 380380f682042c170800000000000000
+      internalID: 8197184814173401219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_7
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 1761
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ae9b1986e8ac4d40800000000000000
+      internalID: 5570012547246694049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_8
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 1759
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b30b45c7439cbbcd0800000000000000
+      internalID: -2541216337459105733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_9
+      rect:
+        serializedVersion: 2
+        x: 411
+        y: 1761
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ac1921b0995812c0800000000000000
+      internalID: -4460716952928052058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_10
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 1763
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c48bdba2dad39e9c0800000000000000
+      internalID: -3897516188556740532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_11
+      rect:
+        serializedVersion: 2
+        x: 603
+        y: 1761
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3117a6966cace78b0800000000000000
+      internalID: -5152457970144349933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_12
+      rect:
+        serializedVersion: 2
+        x: 698
+        y: 1759
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed25ca3ffcdd33590800000000000000
+      internalID: -7695563453029920034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_13
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 1663
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 444b38d85b3c75d30800000000000000
+      internalID: 4420216743818146884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_14
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 1663
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 92e5e211a94fd8bc0800000000000000
+      internalID: -3779095569743585751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_15
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 1663
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b40222059ec4789f0800000000000000
+      internalID: -466319471454052277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_16
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 1663
+        width: 58
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c6a7a75672d6b420800000000000000
+      internalID: 2645533236845323974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_17
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 1663
+        width: 60
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a649cfa8e5b251370800000000000000
+      internalID: 8292581973931365482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_18
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 1567
+        width: 58
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d32da4cff744cbf0800000000000000
+      internalID: -305039710912437292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_19
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 1561
+        width: 77
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26e73497f46470690800000000000000
+      internalID: -7636057336032559518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_20
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 1561
+        width: 73
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d846f572e5f9631d0800000000000000
+      internalID: -3371332044303932275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_21
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 1561
+        width: 59
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf6f3b0d6ae15ad90800000000000000
+      internalID: -7087224736782747909
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_22
+      rect:
+        serializedVersion: 2
+        x: 411
+        y: 1562
+        width: 57
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0eaf149bd91ff0670800000000000000
+      internalID: 8507283880846424800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_23
+      rect:
+        serializedVersion: 2
+        x: 507
+        y: 1562
+        width: 57
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 620efc5269b061820800000000000000
+      internalID: 2888508950512132134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_24
+      rect:
+        serializedVersion: 2
+        x: 603
+        y: 1562
+        width: 51
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd04bd87d05288e20800000000000000
+      internalID: 3352970662369771740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_25
+      rect:
+        serializedVersion: 2
+        x: 699
+        y: 1567
+        width: 50
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5dd58e5012b585d80800000000000000
+      internalID: -8261753319020012075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_26
+      rect:
+        serializedVersion: 2
+        x: 795
+        y: 1567
+        width: 54
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bc60685963f7fd30800000000000000
+      internalID: 4465305189340966070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_27
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 1471
+        width: 54
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02680b5150803c3c0800000000000000
+      internalID: -4340616797923277280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_28
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 1471
+        width: 61
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f527f740cc8d81e20800000000000000
+      internalID: 3321643095946130015
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_29
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 1471
+        width: 61
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b23a6b5e8c5c07940800000000000000
+      internalID: 5291947028798415659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_30
+      rect:
+        serializedVersion: 2
+        x: 318
+        y: 1471
+        width: 61
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69dd395743d8028e0800000000000000
+      internalID: -1720219801205088874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_31
+      rect:
+        serializedVersion: 2
+        x: 414
+        y: 1471
+        width: 59
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d46fc60b6cd357a80800000000000000
+      internalID: -8469795600627599795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_32
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 1375
+        width: 40
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c32ecbde7e6ca18d0800000000000000
+      internalID: -2874766712694316484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_33
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 1375
+        width: 40
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4e0ec6abe4263480800000000000000
+      internalID: -8919901417426252213
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_34
+      rect:
+        serializedVersion: 2
+        x: 214
+        y: 1375
+        width: 40
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ab99934742990670800000000000000
+      internalID: 8505490206040365987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_35
+      rect:
+        serializedVersion: 2
+        x: 310
+        y: 1375
+        width: 40
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78bb98520a02f6b00800000000000000
+      internalID: 823913129028729735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_36
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 1375
+        width: 40
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6713d56d5709fca0800000000000000
+      internalID: -5982742532263307410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_37
+      rect:
+        serializedVersion: 2
+        x: 502
+        y: 1375
+        width: 40
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ad729a7fc8fe5470800000000000000
+      internalID: 8385413126208781728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_38
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 1279
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00aca30b13df91300800000000000000
+      internalID: 223488046383417856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_39
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 1279
+        width: 56
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b187523566ceca400800000000000000
+      internalID: 336903996371728411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_40
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 1279
+        width: 56
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d2c9b70ea168b6a0800000000000000
+      internalID: -6433284667616935213
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_41
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 1279
+        width: 70
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0a0dd895c4e61ab0800000000000000
+      internalID: -5037587595843007987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_42
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 1279
+        width: 50
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59ed9414d0261e130800000000000000
+      internalID: 3594261786687823509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_43
+      rect:
+        serializedVersion: 2
+        x: 497
+        y: 1283
+        width: 11
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a44bef015de77a4f0800000000000000
+      internalID: -817545353766194102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_44
+      rect:
+        serializedVersion: 2
+        x: 502
+        y: 1273
+        width: 70
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95bbda4e052f4d3c0800000000000000
+      internalID: -4335574112003048615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_45
+      rect:
+        serializedVersion: 2
+        x: 606
+        y: 1274
+        width: 57
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72b1038a96a9a5620800000000000000
+      internalID: 2763691099929189159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_46
+      rect:
+        serializedVersion: 2
+        x: 702
+        y: 1274
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2628f398232443390800000000000000
+      internalID: -7839568266526752158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_47
+      rect:
+        serializedVersion: 2
+        x: 798
+        y: 1274
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 548385d19a58461a0800000000000000
+      internalID: -6817176974543800251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_48
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 1183
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bf05d3924d080570800000000000000
+      internalID: 8433004881850470323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_49
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 1183
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9ddb4cf6660d0450800000000000000
+      internalID: 6056504113272446364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_50
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 1183
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e664f5052feac45b0800000000000000
+      internalID: -5382735098860845458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_51
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 1087
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fffdad77092042690800000000000000
+      internalID: -7627969049349398529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_52
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 1087
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bccde3a81dc2840e0800000000000000
+      internalID: -2285527532411364149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_53
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 1087
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7dc64f4a655145980800000000000000
+      internalID: -8551186330590876457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_54
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 991
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9b14ce8bd4a98260800000000000000
+      internalID: 7100387550426307483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_55
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 991
+        width: 55
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94c3c5beff45d20e0800000000000000
+      internalID: -2293083177119630263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_56
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 991
+        width: 56
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d77403e4a1c3e7fc0800000000000000
+      internalID: -3495290177114323075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_57
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 990
+        width: 56
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff1247c156a92f5e0800000000000000
+      internalID: -1877268335600328193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_58
+      rect:
+        serializedVersion: 2
+        x: 417
+        y: 990
+        width: 56
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ea44db5a7549bfd0800000000000000
+      internalID: -2325751340731184410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_59
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 990
+        width: 56
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a7ff377aed86f330800000000000000
+      internalID: 3744336178367690659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_60
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 895
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1edcd62cb544791d0800000000000000
+      internalID: -3344129037404615199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_61
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 895
+        width: 54
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d41435798cd3bdf60800000000000000
+      internalID: 8060103889851203917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_62
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 895
+        width: 54
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4478eeae38149150800000000000000
+      internalID: 5878350071126848588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_63
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 895
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f51ada34be4514970800000000000000
+      internalID: 8737358121504973151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_64
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 895
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fa2bc51d09a1a0f0800000000000000
+      internalID: -1107418159691126032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_65
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 801
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe46acf965e99bc50800000000000000
+      internalID: 6681545617066058991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_66
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 803
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8c2551ac7b6cd740800000000000000
+      internalID: 5178131854596058253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_67
+      rect:
+        serializedVersion: 2
+        x: 209
+        y: 801
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9c26f95e9e875180800000000000000
+      internalID: -9126669309077738341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_68
+      rect:
+        serializedVersion: 2
+        x: 304
+        y: 799
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8c2e61af3ee36d70800000000000000
+      internalID: 9035327234494049418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_69
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 801
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9ba84e1d46702020800000000000000
+      internalID: 2314980282061073310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_70
+      rect:
+        serializedVersion: 2
+        x: 494
+        y: 803
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc78afc34e9bba470800000000000000
+      internalID: 8407017519343896524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_71
+      rect:
+        serializedVersion: 2
+        x: 591
+        y: 801
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56f713ee7c2416320800000000000000
+      internalID: 2549392290530557797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_72
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 799
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fb869f72c7fcf5d0800000000000000
+      internalID: -3027272434763527175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_73
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 703
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eeb56ff938b38f4b0800000000000000
+      internalID: -5406505916147803154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_74
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 703
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5541630c7c6cf290800000000000000
+      internalID: -7855284370152536741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_75
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 703
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d68f52d754910750800000000000000
+      internalID: 6269455261188982484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_76
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 703
+        width: 58
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 617f3137de0860190800000000000000
+      internalID: -7996562331023444202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_77
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 703
+        width: 60
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f9b255c80bd55f10800000000000000
+      internalID: 2257951618912926200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_78
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 607
+        width: 58
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffbbb625bf9a3df90800000000000000
+      internalID: -6930008504708383745
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_79
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 601
+        width: 77
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 854e846cf26e601e0800000000000000
+      internalID: -2231843472450984872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_80
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 601
+        width: 73
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 380ec5625df634700800000000000000
+      internalID: 523384942967447683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_81
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 601
+        width: 59
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6994d4191dd5332a0800000000000000
+      internalID: -6758955461085673066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_82
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 602
+        width: 57
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c90a87f3e310bb1d0800000000000000
+      internalID: -3334069732273250148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_83
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 602
+        width: 57
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6ce646f2f0932370800000000000000
+      internalID: 8296634311734914158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_84
+      rect:
+        serializedVersion: 2
+        x: 594
+        y: 602
+        width: 51
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 745152ed720fccc00800000000000000
+      internalID: 922376077725472071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_85
+      rect:
+        serializedVersion: 2
+        x: 691
+        y: 607
+        width: 50
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2221a2de3bebd4ca0800000000000000
+      internalID: -6030954645991845342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_86
+      rect:
+        serializedVersion: 2
+        x: 783
+        y: 607
+        width: 54
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 267cfd70ad4dab7d0800000000000000
+      internalID: -2901772976986798238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_87
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 511
+        width: 54
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 287145d5710f165b0800000000000000
+      internalID: -5376752496962955390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_88
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 511
+        width: 61
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 087a35c47ba765a60800000000000000
+      internalID: 7662446743695632256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_89
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 511
+        width: 61
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5442e11c1108710e0800000000000000
+      internalID: -2299228271006571451
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_90
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 511
+        width: 61
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7832a1c8d7e896550800000000000000
+      internalID: 6154607035651072903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_91
+      rect:
+        serializedVersion: 2
+        x: 391
+        y: 511
+        width: 59
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62d3433d823bfe270800000000000000
+      internalID: 8282035227681111334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_92
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 415
+        width: 40
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32273b1e006d61570800000000000000
+      internalID: 8437166251200180771
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_93
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 415
+        width: 40
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 799871f233d8b0e40800000000000000
+      internalID: 5623743810675116439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_94
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 415
+        width: 40
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9c8398782df357e0800000000000000
+      internalID: -1777799077617759073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_95
+      rect:
+        serializedVersion: 2
+        x: 322
+        y: 415
+        width: 40
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73714e8ba3d62b130800000000000000
+      internalID: 3581044752690452279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_96
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 415
+        width: 40
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3903257a8a30c0a0800000000000000
+      internalID: -6863421465767507650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_97
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 415
+        width: 40
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ded1aa1e977c65400800000000000000
+      internalID: 312656550439820781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_98
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 319
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1abdfea314bfd3a0800000000000000
+      internalID: -6638389329087579619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_99
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 319
+        width: 56
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32f3291aad71a1b30800000000000000
+      internalID: 4258742625413250851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_100
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 319
+        width: 56
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1371347472a2d5e0800000000000000
+      internalID: -1886266672865512673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_101
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 319
+        width: 70
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a540e1cfb4d74b990800000000000000
+      internalID: -7371128924792814502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_102
+      rect:
+        serializedVersion: 2
+        x: 431
+        y: 319
+        width: 50
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24fd6fff28a7d7910800000000000000
+      internalID: 1836758926095736642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_103
+      rect:
+        serializedVersion: 2
+        x: 484
+        y: 313
+        width: 70
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b1a04a6cd7e17f70800000000000000
+      internalID: 9183376049046593972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_104
+      rect:
+        serializedVersion: 2
+        x: 548
+        y: 323
+        width: 11
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d775686efbed981e0800000000000000
+      internalID: -2194978427578722435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_105
+      rect:
+        serializedVersion: 2
+        x: 585
+        y: 314
+        width: 57
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e59641bb69540f270800000000000000
+      internalID: 8282196228420430174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_106
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 314
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ece3cda18ce6bedb0800000000000000
+      internalID: -4761590375291011378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_107
+      rect:
+        serializedVersion: 2
+        x: 786
+        y: 314
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a31992b5808333690800000000000000
+      internalID: -7623688135667773126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_108
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 223
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ac859533caeaec60800000000000000
+      internalID: 7848343424785026214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_109
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 223
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1da06b881e7eca80800000000000000
+      internalID: -8444673607390417634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_110
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 223
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 188c82b442669ad10800000000000000
+      internalID: 2137351804229830785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_111
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 127
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 236319dabe8960760800000000000000
+      internalID: 7423789173763552818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_112
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 127
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e47864f4cb800e00800000000000000
+      internalID: 1008959994561328353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_113
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 127
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88102b6efced14700800000000000000
+      internalID: 522944016261710216
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_114
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 31
+        width: 54
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98a497cf094d38100800000000000000
+      internalID: 109164535163210377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_115
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 31
+        width: 55
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 683c493a9e41d0b20800000000000000
+      internalID: 3102158712032510854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_116
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 31
+        width: 56
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bcd015247e4ac880800000000000000
+      internalID: -8589967078510764872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_117
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 30
+        width: 56
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbbe060e813973a90800000000000000
+      internalID: -7334231733096617028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_118
+      rect:
+        serializedVersion: 2
+        x: 391
+        y: 30
+        width: 56
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c89d4febe1cc5ff40800000000000000
+      internalID: 5761735730715220364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: test_cloth_black_119
+      rect:
+        serializedVersion: 2
+        x: 487
+        y: 30
+        width: 56
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f1e459f4eee74e80800000000000000
+      internalID: -8194318329774284299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      test_cloth_black_0: 3759352159660525434
+      test_cloth_black_1: 2218490861880120137
+      test_cloth_black_10: -3897516188556740532
+      test_cloth_black_100: -1886266672865512673
+      test_cloth_black_101: -7371128924792814502
+      test_cloth_black_102: 1836758926095736642
+      test_cloth_black_103: 9183376049046593972
+      test_cloth_black_104: -2194978427578722435
+      test_cloth_black_105: 8282196228420430174
+      test_cloth_black_106: -4761590375291011378
+      test_cloth_black_107: -7623688135667773126
+      test_cloth_black_108: 7848343424785026214
+      test_cloth_black_109: -8444673607390417634
+      test_cloth_black_11: -5152457970144349933
+      test_cloth_black_110: 2137351804229830785
+      test_cloth_black_111: 7423789173763552818
+      test_cloth_black_112: 1008959994561328353
+      test_cloth_black_113: 522944016261710216
+      test_cloth_black_114: 109164535163210377
+      test_cloth_black_115: 3102158712032510854
+      test_cloth_black_116: -8589967078510764872
+      test_cloth_black_117: -7334231733096617028
+      test_cloth_black_118: 5761735730715220364
+      test_cloth_black_119: -8194318329774284299
+      test_cloth_black_12: -7695563453029920034
+      test_cloth_black_13: 4420216743818146884
+      test_cloth_black_14: -3779095569743585751
+      test_cloth_black_15: -466319471454052277
+      test_cloth_black_16: 2645533236845323974
+      test_cloth_black_17: 8292581973931365482
+      test_cloth_black_18: -305039710912437292
+      test_cloth_black_19: -7636057336032559518
+      test_cloth_black_2: 3161654987961842622
+      test_cloth_black_20: -3371332044303932275
+      test_cloth_black_21: -7087224736782747909
+      test_cloth_black_22: 8507283880846424800
+      test_cloth_black_23: 2888508950512132134
+      test_cloth_black_24: 3352970662369771740
+      test_cloth_black_25: -8261753319020012075
+      test_cloth_black_26: 4465305189340966070
+      test_cloth_black_27: -4340616797923277280
+      test_cloth_black_28: 3321643095946130015
+      test_cloth_black_29: 5291947028798415659
+      test_cloth_black_3: -479902624744249107
+      test_cloth_black_30: -1720219801205088874
+      test_cloth_black_31: -8469795600627599795
+      test_cloth_black_32: -2874766712694316484
+      test_cloth_black_33: -8919901417426252213
+      test_cloth_black_34: 8505490206040365987
+      test_cloth_black_35: 823913129028729735
+      test_cloth_black_36: -5982742532263307410
+      test_cloth_black_37: 8385413126208781728
+      test_cloth_black_38: 223488046383417856
+      test_cloth_black_39: 336903996371728411
+      test_cloth_black_4: -781149532819240732
+      test_cloth_black_40: -6433284667616935213
+      test_cloth_black_41: -5037587595843007987
+      test_cloth_black_42: 3594261786687823509
+      test_cloth_black_43: -817545353766194102
+      test_cloth_black_44: -4335574112003048615
+      test_cloth_black_45: 2763691099929189159
+      test_cloth_black_46: -7839568266526752158
+      test_cloth_black_47: -6817176974543800251
+      test_cloth_black_48: 8433004881850470323
+      test_cloth_black_49: 6056504113272446364
+      test_cloth_black_5: -712703885203241154
+      test_cloth_black_50: -5382735098860845458
+      test_cloth_black_51: -7627969049349398529
+      test_cloth_black_52: -2285527532411364149
+      test_cloth_black_53: -8551186330590876457
+      test_cloth_black_54: 7100387550426307483
+      test_cloth_black_55: -2293083177119630263
+      test_cloth_black_56: -3495290177114323075
+      test_cloth_black_57: -1877268335600328193
+      test_cloth_black_58: -2325751340731184410
+      test_cloth_black_59: 3744336178367690659
+      test_cloth_black_6: 8197184814173401219
+      test_cloth_black_60: -3344129037404615199
+      test_cloth_black_61: 8060103889851203917
+      test_cloth_black_62: 5878350071126848588
+      test_cloth_black_63: 8737358121504973151
+      test_cloth_black_64: -1107418159691126032
+      test_cloth_black_65: 6681545617066058991
+      test_cloth_black_66: 5178131854596058253
+      test_cloth_black_67: -9126669309077738341
+      test_cloth_black_68: 9035327234494049418
+      test_cloth_black_69: 2314980282061073310
+      test_cloth_black_7: 5570012547246694049
+      test_cloth_black_70: 8407017519343896524
+      test_cloth_black_71: 2549392290530557797
+      test_cloth_black_72: -3027272434763527175
+      test_cloth_black_73: -5406505916147803154
+      test_cloth_black_74: -7855284370152536741
+      test_cloth_black_75: 6269455261188982484
+      test_cloth_black_76: -7996562331023444202
+      test_cloth_black_77: 2257951618912926200
+      test_cloth_black_78: -6930008504708383745
+      test_cloth_black_79: -2231843472450984872
+      test_cloth_black_8: -2541216337459105733
+      test_cloth_black_80: 523384942967447683
+      test_cloth_black_81: -6758955461085673066
+      test_cloth_black_82: -3334069732273250148
+      test_cloth_black_83: 8296634311734914158
+      test_cloth_black_84: 922376077725472071
+      test_cloth_black_85: -6030954645991845342
+      test_cloth_black_86: -2901772976986798238
+      test_cloth_black_87: -5376752496962955390
+      test_cloth_black_88: 7662446743695632256
+      test_cloth_black_89: -2299228271006571451
+      test_cloth_black_9: -4460716952928052058
+      test_cloth_black_90: 6154607035651072903
+      test_cloth_black_91: 8282035227681111334
+      test_cloth_black_92: 8437166251200180771
+      test_cloth_black_93: 5623743810675116439
+      test_cloth_black_94: -1777799077617759073
+      test_cloth_black_95: 3581044752690452279
+      test_cloth_black_96: -6863421465767507650
+      test_cloth_black_97: 312656550439820781
+      test_cloth_black_98: -6638389329087579619
+      test_cloth_black_99: 4258742625413250851
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

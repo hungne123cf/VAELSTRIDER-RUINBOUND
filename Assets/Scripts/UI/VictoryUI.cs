@@ -73,6 +73,8 @@ public class VictoryUI : MonoBehaviour
         SkeletonAI.OnEnemyDied += HandleSkeletonDied;
         SlimeAI.OnEnemyDied += HandleSlimeDied;
         SkeletonKingBossAI.OnBossDied += HandleSkeletonKingDied;
+        LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
+        LocalizationManager.OnLanguageChanged += OnLanguageChanged;
     }
 
     void OnDisable()
@@ -83,6 +85,27 @@ public class VictoryUI : MonoBehaviour
         SkeletonAI.OnEnemyDied -= HandleSkeletonDied;
         SlimeAI.OnEnemyDied -= HandleSlimeDied;
         SkeletonKingBossAI.OnBossDied -= HandleSkeletonKingDied;
+        LocalizationManager.OnLanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        if (titleText != null) titleText.text = LocalizationManager.T("CHIẾN THẮNG!", "REALM PURIFIED!");
+        if (subtitleText != null) subtitleText.text = LocalizationManager.T("Tàn tích cổ đại đã được thanh tẩy khỏi sự tha hóa.", "The ancient ruins have been cleansed of corruption.");
+        if (isEnded)
+        {
+            if (enemiesText != null) enemiesText.text = $"{enemiesKilled} " + LocalizationManager.T("Kẻ địch", "Slain");
+            if (playAgainButton != null)
+            {
+                var txt = playAgainButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN");
+            }
+            if (nextRealmButton != null)
+            {
+                var txt = nextRealmButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = LocalizationManager.T("ẢI TIẾP THEO", "NEXT REALM");
+            }
+        }
     }
 
     void Start()

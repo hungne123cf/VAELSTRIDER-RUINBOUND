@@ -18,6 +18,7 @@ public class SwordWaveProjectile : MonoBehaviour
     private AzureBladeSkill ownerSkill;
     private bool isUltiWave = false;
     private bool isChargedWave = false;
+    private float spawnAge = 0f;
 
     private static Sprite[] twinSwordFrames = null;
     private float animationTimer = 0f;
@@ -41,9 +42,10 @@ public class SwordWaveProjectile : MonoBehaviour
 
         List<Sprite> frames = new List<Sprite>();
 #if UNITY_EDITOR
+        // 1. Ưu tiên bộ animation mới nhất trong twin1: Assets/ART/Player3/Twin_sword/twin1/twin_sword_1_0001.png -> 0008.png
         for (int i = 1; i <= 8; i++)
         {
-            string path = $"Assets/ART/Player3/Twin_sword/twin_sword_{i:D4}.png";
+            string path = $"Assets/ART/Player3/Twin_sword/twin1/twin_sword_1_{i:D4}.png";
             var loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
             if (loaded == null)
             {
@@ -55,12 +57,32 @@ public class SwordWaveProjectile : MonoBehaviour
             }
             if (loaded != null) frames.Add(loaded);
         }
+
+        // 2. Fallback sang đường dẫn cũ nếu thiếu file
+        if (frames.Count < 8)
+        {
+            frames.Clear();
+            for (int i = 1; i <= 8; i++)
+            {
+                string path = $"Assets/ART/Player3/Twin_sword/twin_sword_{i:D4}.png";
+                var loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (loaded == null)
+                {
+                    var allAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+                    foreach (var a in allAssets)
+                    {
+                        if (a is Sprite s) { loaded = s; break; }
+                    }
+                }
+                if (loaded != null) frames.Add(loaded);
+            }
+        }
 #endif
         if (frames.Count == 0)
         {
             for (int i = 1; i <= 8; i++)
             {
-                var s = Resources.Load<Sprite>($"Player3/Twin_sword/twin_sword_{i:D4}");
+                var s = Resources.Load<Sprite>($"Player3/Twin_sword/twin1/twin_sword_1_{i:D4}") ?? Resources.Load<Sprite>($"Player3/Twin_sword/twin_sword_{i:D4}");
                 if (s != null) frames.Add(s);
             }
         }
@@ -76,6 +98,7 @@ public class SwordWaveProjectile : MonoBehaviour
         this.ownerSkill = ownerSkill;
         this.isUltiWave = isUlti;
         this.isChargedWave = isCharged;
+        this.spawnAge = 0f;
         moveDirection = direction.normalized;
         if (moveDirection.sqrMagnitude < 0.001f) moveDirection = Vector2.down;
 
@@ -161,7 +184,23 @@ public class SwordWaveProjectile : MonoBehaviour
 
     void Update()
     {
-        transform.position += (Vector3)(moveDirection * speed * Time.deltaTime);
+        spawnAge += Time.deltaTime;
+        Vector3 nextPos = transform.position + (Vector3)(moveDirection * speed * Time.deltaTime);
+
+        // Frame-by-frame active overlap sweep để không bao giờ bị lọt qua quái nhỏ (nhện con, v.v.)
+        Collider2D[] sweptHits = Physics2D.OverlapBoxAll((transform.position + nextPos) * 0.5f, new Vector2(1.2f, 0.8f), transform.eulerAngles.z);
+        if (sweptHits != null && sweptHits.Length > 0)
+        {
+            for (int i = 0; i < sweptHits.Length; i++)
+            {
+                if (sweptHits[i] != null)
+                {
+                    HandleHit(sweptHits[i].gameObject);
+                }
+            }
+        }
+
+        transform.position = nextPos;
 
         // Frame-by-frame animation of hand-drawn Twin_sword sprites
         if (twinSwordFrames != null && twinSwordFrames.Length > 0 && spriteRenderer != null)
@@ -240,7 +279,9 @@ public class SwordWaveProjectile : MonoBehaviour
         }
         else
         {
-            // Chỉ tiêu biến kiếm khí khi đâm vào TƯỜNG CỨNG THỰC SỰ
+            // Không hủy kiếm khí trong 0.12s đầu tiên sau khi spawn (tránh dính tường sau lưng khi đứng sát mép dưới)
+            if (spawnAge < 0.12f) return;
+
             string objName = hitObj.name.ToLower();
             int wallLayer = LayerMask.NameToLayer("Wall");
             int obsLayer = LayerMask.NameToLayer("Obstacle");
@@ -254,15 +295,20 @@ public class SwordWaveProjectile : MonoBehaviour
                                (obsLayer != -1 && hitObj.layer == obsLayer) ||
                                isTilemapWall ||
                                isBarrier ||
-                               objName.Contains("wall") ||
                                objName.Contains("dungeon_wall") ||
                                objName.Contains("dungeonwall") ||
-                               objName.Contains("border") ||
-                               objName.Contains("collision");
+                               (objName.Contains("wall") && !objName.Contains("shadow") && !objName.Contains("ground"));
 
             var col = hitObj.GetComponent<Collider2D>();
             if (isSolidWall && col != null && !col.isTrigger)
             {
+                // Kiểm tra nếu tường ở phía sau hoặc ngang hướng bay thì bỏ qua
+                Vector2 dirToObj = ((Vector2)hitObj.transform.position - (Vector2)transform.position);
+                if (dirToObj.sqrMagnitude > 0.04f && Vector2.Dot(moveDirection, dirToObj.normalized) < -0.2f)
+                {
+                    return;
+                }
+
                 Destroy(gameObject);
             }
         }

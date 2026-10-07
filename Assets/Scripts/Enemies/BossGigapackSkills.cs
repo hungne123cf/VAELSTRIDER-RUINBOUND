@@ -9,6 +9,7 @@ public class BossGigapackSkills : MonoBehaviour
     private class SkillDef
     {
         public string nameVN;
+        public string nameEN;
         public string relativePath; // Relative to Assets/ART/BotWheel/Super Pixel Effects Gigapack (Free Version)/PNG/
         public int damage;
         public float radius;
@@ -16,6 +17,8 @@ public class BossGigapackSkills : MonoBehaviour
         public float animFps;
         public bool targetPlayerPos;
         public Sprite[] cachedFrames;
+
+        public string GetLocalizedName() => LocalizationManager.T(nameVN, string.IsNullOrEmpty(nameEN) ? nameVN : nameEN);
     }
 
     private List<SkillDef> activeSkills = new List<SkillDef>();
@@ -51,27 +54,27 @@ public class BossGigapackSkills : MonoBehaviour
             // BOSS MAP 1: 5 SKILL ĐẶC BIỆT ĐỘC BẢN
             // ==========================================
             activeSkills.Add(new SkillDef {
-                nameVN = "BÃO NỔ CỔ ĐẠI",
+                nameVN = "BÃO NỔ CỔ ĐẠI", nameEN = "ANCIENT BLAST",
                 relativePath = "Explosions/epic_explosion_001/epic_explosion_001_large_orange",
                 damage = 25, radius = 2.8f, speed = 0f, animFps = 16f, targetPlayerPos = true
             });
             activeSkills.Add(new SkillDef {
-                nameVN = "TỨ PHƯƠNG HỦY DIỆT",
+                nameVN = "TỨ PHƯƠNG HỦY DIỆT", nameEN = "FOUR-WAY DESTRUCTION",
                 relativePath = "Explosions/symmetrical_explosion_001/symmetrical_explosion_001_large_orange",
                 damage = 22, radius = 2.6f, speed = 0f, animFps = 14f, targetPlayerPos = false
             });
             activeSkills.Add(new SkillDef {
-                nameVN = "HỐ ĐEN THÔN PHỆ",
+                nameVN = "HỐ ĐEN THÔN PHỆ", nameEN = "VOID BLACK HOLE",
                 relativePath = "Fantasy Spells/spell_absorb_001/spell_absorb_001_large_violet",
                 damage = 20, radius = 2.5f, speed = 0f, animFps = 20f, targetPlayerPos = true
             });
             activeSkills.Add(new SkillDef {
-                nameVN = "HƯ KHÔNG ĐẠI TRẢM",
+                nameVN = "HƯ KHÔNG ĐẠI TRẢM", nameEN = "VOID CLEAVE",
                 relativePath = "Impacts/directional_impact_003/directional_impact_003_large_violet",
                 damage = 22, radius = 2.2f, speed = 7.0f, animFps = 16f, targetPlayerPos = false
             });
             activeSkills.Add(new SkillDef {
-                nameVN = "LINH HỒN ĐOẠT MỆNH",
+                nameVN = "LINH HỒN ĐOẠT MỆNH", nameEN = "SOUL REAPER",
                 relativePath = "Smoke Bursts/stylized_skull_smoke_burst_001/stylized_skull_smoke_burst_001_large_white",
                 damage = 26, radius = 3.0f, speed = 0f, animFps = 16f, targetPlayerPos = true
             });
@@ -81,26 +84,26 @@ public class BossGigapackSkills : MonoBehaviour
             // ==========================================
             // BOSS MAP 2: 20 SKILL ĐẶC BIỆT HẮC ÁM & HỦY DIỆT
             // ==========================================
-            activeSkills.Add(new SkillDef { nameVN = "THẦN THỤ BỘC PHÁ", relativePath = "Explosions/epic_explosion_002/epic_explosion_002_large_yellow", damage = 34, radius = 3.2f, animFps = 16f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "HOÀNG KIM THỂ NỔ", relativePath = "Explosions/stylized_explosion_001/stylized_explosion_001_large_yellow", damage = 26, radius = 2.6f, animFps = 15f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "TỬ THẦN HƯ KHÔNG", relativePath = "Explosions/stylized_explosion_002/stylized_explosion_002_large_violet", damage = 28, radius = 2.8f, animFps = 15f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "HỎA VÂN TÀN PHÁ", relativePath = "Explosions/stylized_explosion_003/stylized_explosion_003_large_yellow", damage = 30, radius = 2.8f, animFps = 16f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "BÁT PHƯƠNG CHẤN NỘ", relativePath = "Explosions/symmetrical_explosion_002/symmetrical_explosion_002_large_orange", damage = 24, radius = 2.6f, animFps = 15f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "TỨ TRẬN HỦY DIỆT", relativePath = "Explosions/symmetrical_explosion_004/symmetrical_explosion_004_large_orange", damage = 26, radius = 2.8f, animFps = 15f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "TỬ THẦN HUYẾT LÂU", relativePath = "Fantasy Spells/spell_death_001/spell_death_001_large_red", damage = 38, radius = 3.2f, animFps = 25f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "ĐẦM LẦY ĂN MÒN", relativePath = "Fantasy Spells/spell_poison_001/spell_poison_001_large_green", damage = 22, radius = 2.8f, animFps = 16f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "HỐ ĐEN THÔN PHỆ", relativePath = "Fantasy Spells/spell_absorb_001/spell_absorb_001_large_violet", damage = 25, radius = 2.8f, animFps = 20f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "HUYẾT MA BỘC PHÁ", relativePath = "Splatters/burst_splatter_001/burst_splatter_001_large_red", damage = 32, radius = 3.0f, animFps = 18f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "LÔI ĐIỆN TỬ VONG", relativePath = "Lightning/lightning_strike_001/lightning_strike_001_large_violet", damage = 35, radius = 2.8f, animFps = 18f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "LÔI CẦU TẬN THẾ", relativePath = "Lightning/lightning_burst_001/lightning_burst_001_large_violet", damage = 30, radius = 2.8f, animFps = 18f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "LÔI BẠO HẮC ÁM", relativePath = "Lightning/lightning_burst_002/lightning_burst_002_large_violet", damage = 32, radius = 2.9f, animFps = 18f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "LINH HỒN ĐOẠT MỆNH", relativePath = "Smoke Bursts/stylized_skull_smoke_burst_001/stylized_skull_smoke_burst_001_large_white", damage = 34, radius = 3.2f, animFps = 16f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "MƯA ĐỘC ĂN MÒN", relativePath = "Fantasy Spells/status_poison_001/status_poison_001_large_green", damage = 20, radius = 2.6f, animFps = 20f, targetPlayerPos = true });
-            activeSkills.Add(new SkillDef { nameVN = "BĂNG THẠCH ĐAO KHÍ", relativePath = "Impacts/directional_impact_002/directional_impact_002_large_white", damage = 26, radius = 2.0f, speed = 6.5f, animFps = 16f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "HƯ KHÔNG ĐẠI TRẢM", relativePath = "Impacts/directional_impact_003/directional_impact_003_large_violet", damage = 28, radius = 2.2f, speed = 7.0f, animFps = 16f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "HUYẾT ĐAO PHI TIỄN", relativePath = "Splatters/directional_splatter_001/directional_splatter_001_large_red", damage = 28, radius = 2.0f, speed = 7.5f, animFps = 18f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "ĐỊA CHẤN VẠN TRỌNG", relativePath = "Impacts/symmetrical_impact_001/symmetrical_impact_001_large_yellow", damage = 28, radius = 2.8f, animFps = 16f, targetPlayerPos = false });
-            activeSkills.Add(new SkillDef { nameVN = "ĐỘC DỊCH VUNG VÃI", relativePath = "Splatters/burst_splatter_003/burst_splatter_003_large_green", damage = 24, radius = 2.8f, animFps = 16f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "THẦN THỤ BỘC PHÁ", nameEN = "SACRED DETONATION", relativePath = "Explosions/epic_explosion_002/epic_explosion_002_large_yellow", damage = 34, radius = 3.2f, animFps = 16f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "HOÀNG KIM THỂ NỔ", nameEN = "GOLDEN BURST", relativePath = "Explosions/stylized_explosion_001/stylized_explosion_001_large_yellow", damage = 26, radius = 2.6f, animFps = 15f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "TỬ THẦN HƯ KHÔNG", nameEN = "VOID REAPER", relativePath = "Explosions/stylized_explosion_002/stylized_explosion_002_large_violet", damage = 28, radius = 2.8f, animFps = 15f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "HỎA VÂN TÀN PHÁ", nameEN = "FIRE CLOUD HAVOC", relativePath = "Explosions/stylized_explosion_003/stylized_explosion_003_large_yellow", damage = 30, radius = 2.8f, animFps = 16f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "BÁT PHƯƠNG CHẤN NỘ", nameEN = "EIGHT-WAY WRATH", relativePath = "Explosions/symmetrical_explosion_002/symmetrical_explosion_002_large_orange", damage = 24, radius = 2.6f, animFps = 15f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "TỨ TRẬN HỦY DIỆT", nameEN = "QUADRUPLE HAVOC", relativePath = "Explosions/symmetrical_explosion_004/symmetrical_explosion_004_large_orange", damage = 26, radius = 2.8f, animFps = 15f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "TỬ THẦN HUYẾT LÂU", nameEN = "BLOOD SKULL REAPER", relativePath = "Fantasy Spells/spell_death_001/spell_death_001_large_red", damage = 38, radius = 3.2f, animFps = 25f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "ĐẦM LẦY ĂN MÒN", nameEN = "CORROSIVE MIRE", relativePath = "Fantasy Spells/spell_poison_001/spell_poison_001_large_green", damage = 22, radius = 2.8f, animFps = 16f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "HỐ ĐEN THÔN PHỆ", nameEN = "VOID BLACK HOLE", relativePath = "Fantasy Spells/spell_absorb_001/spell_absorb_001_large_violet", damage = 25, radius = 2.8f, animFps = 20f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "HUYẾT MA BỘC PHÁ", nameEN = "BLOOD BURST", relativePath = "Splatters/burst_splatter_001/burst_splatter_001_large_red", damage = 32, radius = 3.0f, animFps = 18f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "LÔI ĐIỆN TỬ VONG", nameEN = "DEATH LIGHTNING", relativePath = "Lightning/lightning_strike_001/lightning_strike_001_large_violet", damage = 35, radius = 2.8f, animFps = 18f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "LÔI CẦU TẬN THẾ", nameEN = "DOOM LIGHTNING ORB", relativePath = "Lightning/lightning_burst_001/lightning_burst_001_large_violet", damage = 30, radius = 2.8f, animFps = 18f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "LÔI BẠO HẮC ÁM", nameEN = "DARK THUNDERSTORM", relativePath = "Lightning/lightning_burst_002/lightning_burst_002_large_violet", damage = 32, radius = 2.9f, animFps = 18f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "LINH HỒN ĐOẠT MỆNH", nameEN = "SOUL REAPER", relativePath = "Smoke Bursts/stylized_skull_smoke_burst_001/stylized_skull_smoke_burst_001_large_white", damage = 34, radius = 3.2f, animFps = 16f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "MƯA ĐỘC ĂN MÒN", nameEN = "CORROSIVE POISON RAIN", relativePath = "Fantasy Spells/status_poison_001/status_poison_001_large_green", damage = 20, radius = 2.6f, animFps = 20f, targetPlayerPos = true });
+            activeSkills.Add(new SkillDef { nameVN = "BĂNG THẠCH ĐAO KHÍ", nameEN = "FROST SLASH", relativePath = "Impacts/directional_impact_002/directional_impact_002_large_white", damage = 26, radius = 2.0f, speed = 6.5f, animFps = 16f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "HƯ KHÔNG ĐẠI TRẢM", nameEN = "VOID CLEAVE", relativePath = "Impacts/directional_impact_003/directional_impact_003_large_violet", damage = 28, radius = 2.2f, speed = 7.0f, animFps = 16f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "HUYẾT ĐAO PHI TIỄN", nameEN = "CRIMSON BLADE DART", relativePath = "Splatters/directional_splatter_001/directional_splatter_001_large_red", damage = 28, radius = 2.0f, speed = 7.5f, animFps = 18f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "ĐỊA CHẤN VẠN TRỌNG", nameEN = "SEISMIC QUAKE", relativePath = "Impacts/symmetrical_impact_001/symmetrical_impact_001_large_yellow", damage = 28, radius = 2.8f, animFps = 16f, targetPlayerPos = false });
+            activeSkills.Add(new SkillDef { nameVN = "ĐỘC DỊCH VUNG VÃI", nameEN = "VENOM SPLATTER", relativePath = "Splatters/burst_splatter_003/burst_splatter_003_large_green", damage = 24, radius = 2.8f, animFps = 16f, targetPlayerPos = true });
         }
     }
 
@@ -145,7 +148,7 @@ public class BossGigapackSkills : MonoBehaviour
         // 1. Bao ten skill len dau Boss
         Vector3 popupPos = bossCenter + Vector3.up * 1.6f;
         Color nameCol = isMap2 ? new Color(1f, 0.45f, 0.25f) : new Color(0.95f, 0.85f, 0.35f);
-        DamagePopup.CreateText(popupPos, $"{skill.nameVN}", nameCol);
+        DamagePopup.CreateText(popupPos, $"{skill.GetLocalizedName()}", nameCol);
 
         // 2. Chuan bi vi tri thi trien (khoa vi tri nguoi choi tai thoi diem bao dong)
         Vector3 targetPos = skill.targetPlayerPos && playerTransform != null 

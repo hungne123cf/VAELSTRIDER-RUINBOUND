@@ -545,45 +545,157 @@ public static class EquipmentSocketManager
 
     public static string GetSkillNameVi(int skillIndex)
     {
-        switch (skillIndex)
+        var cm = CharacterManager.EnsureInstance();
+        string heroId = (cm != null) ? cm.GetSelectedCharacterId().ToLower() : "vaelstrider";
+        bool isAzure = (heroId.Contains("azure") || heroId.Contains("player3"));
+        bool isRonin = (heroId.Contains("ronin") || heroId.Contains("gale") || heroId.Contains("maid"));
+
+        if (isRonin)
         {
-            case 0: return "ĐÒN ĐÁNH THƯỜNG";
-            case 1: return "LƯỚT TỐC BIẾN";
-            case 2: return "TUYỆT KỸ CỔ TỘC";
-            default: return $"KỸ NĂNG #{skillIndex + 1}";
+            switch (skillIndex)
+            {
+                case 0: return "PHONG NGUYỆT TRẢM";
+                case 1: return "PHONG THIỂM TỐC LƯỚT";
+                case 2: return "ÁM ẢNH PHÂN THÂN TRẢM";
+                default: return $"KỸ NĂNG #{skillIndex + 1}";
+            }
+        }
+        else if (isAzure)
+        {
+            switch (skillIndex)
+            {
+                case 0: return "SONG BĂNG ĐOẢN KIẾM";
+                case 1: return "HÀN BĂNG TRƯỢT TUYẾT";
+                case 2: return "5 TIA BĂNG NGUYỆT SÓNG";
+                default: return $"KỸ NĂNG #{skillIndex + 1}";
+            }
+        }
+        else
+        {
+            switch (skillIndex)
+            {
+                case 0: return "ĐẠI KIẾM HOÀNG KIM";
+                case 1: return "BỤI CỔ TỐC BIẾN";
+                case 2: return "BÃO XOÁY CỔ KIẾM";
+                default: return $"KỸ NĂNG #{skillIndex + 1}";
+            }
         }
     }
 
     public static string GetSkillNameEn(int skillIndex)
     {
-        switch (skillIndex)
+        var cm = CharacterManager.EnsureInstance();
+        string heroId = (cm != null) ? cm.GetSelectedCharacterId().ToLower() : "vaelstrider";
+        bool isAzure = (heroId.Contains("azure") || heroId.Contains("player3"));
+        bool isRonin = (heroId.Contains("ronin") || heroId.Contains("gale") || heroId.Contains("maid"));
+
+        if (isRonin)
         {
-            case 0: return "BASIC ATTACK";
-            case 1: return "DASH & DODGE";
-            case 2: return "ULTIMATE SKILL";
-            default: return $"SKILL #{skillIndex + 1}";
+            switch (skillIndex)
+            {
+                case 0: return "GALE CRESCENT SWEEP";
+                case 1: return "GALE FLASH DASH";
+                case 2: return "SHADOW GALE STRIKE";
+                default: return $"SKILL #{skillIndex + 1}";
+            }
+        }
+        else if (isAzure)
+        {
+            switch (skillIndex)
+            {
+                case 0: return "TWIN FROST BLADES";
+                case 1: return "FROST GLIDE DASH";
+                case 2: return "5-WAY AZURE TEMPEST";
+                default: return $"SKILL #{skillIndex + 1}";
+            }
+        }
+        else
+        {
+            switch (skillIndex)
+            {
+                case 0: return "ANCIENT BROADSWORD";
+                case 1: return "RUIN DUST DASH";
+                case 2: return "RUIN WHIRLWIND";
+                default: return $"SKILL #{skillIndex + 1}";
+            }
         }
     }
 
     public static string GetSkillDescVi(int skillIndex)
     {
-        switch (skillIndex)
+        var cm = CharacterManager.EnsureInstance();
+        string heroId = (cm != null) ? cm.GetSelectedCharacterId().ToLower() : "vaelstrider";
+        bool isAzure = (heroId.Contains("azure") || heroId.Contains("player3"));
+        bool isRonin = (heroId.Contains("ronin") || heroId.Contains("gale") || heroId.Contains("maid"));
+
+        if (isRonin)
         {
-            case 0: return "Combo 2 nhịp chém | Nhận hiệu ứng từ 3 ngọc khảm";
-            case 1: return "Lướt né bất tử | Nhận hiệu ứng từ 3 ngọc khảm";
-            case 2: return "Bão Kiếm / Trăng Khuyết | Nhận hiệu ứng từ 3 ngọc khảm";
-            default: return "";
+            switch (skillIndex)
+            {
+                case 0: return "Chém xoay 180° nạp Phong Ấn | Nhận hiệu ứng từ 3 ngọc khảm";
+                case 1: return "Tốc lướt né đòn bất tử | Nhận hiệu ứng từ 3 ngọc khảm";
+                case 2: return "Dịch chuyển phân thân trảm sát | Nhận hiệu ứng từ 3 ngọc khảm";
+                default: return "";
+            }
+        }
+        else if (isAzure)
+        {
+            switch (skillIndex)
+            {
+                case 0: return "Song kiếm băng bắn sóng kiếm xuyên thấu | Nhận hiệu ứng từ 3 ngọc khảm";
+                case 1: return "Trượt băng tốc độ cao | Nhận hiệu ứng từ 3 ngọc khảm";
+                case 2: return "Phóng 5 tia kiếm khí quét toàn map | Nhận hiệu ứng từ 3 ngọc khảm";
+                default: return "";
+            }
+        }
+        else
+        {
+            switch (skillIndex)
+            {
+                case 0: return "Combo 2 nhịp chém đại kiếm | Nhận hiệu ứng từ 3 ngọc khảm";
+                case 1: return "Lướt né bất tử | Nhận hiệu ứng từ 3 ngọc khảm";
+                case 2: return "Lốc xoáy bão kiếm hoàng kim | Nhận hiệu ứng từ 3 ngọc khảm";
+                default: return "";
+            }
         }
     }
 
     public static string GetSkillDescEn(int skillIndex)
     {
-        switch (skillIndex)
+        var cm = CharacterManager.EnsureInstance();
+        string heroId = (cm != null) ? cm.GetSelectedCharacterId().ToLower() : "vaelstrider";
+        bool isAzure = (heroId.Contains("azure") || heroId.Contains("player3"));
+        bool isRonin = (heroId.Contains("ronin") || heroId.Contains("gale") || heroId.Contains("maid"));
+
+        if (isRonin)
         {
-            case 0: return "2-Hit Strike Combo | Receives traits from 3 gems";
-            case 1: return "Invincible Dodge | Receives traits from 3 gems";
-            case 2: return "Storm / Crescent Slash | Receives traits from 3 gems";
-            default: return "";
+            switch (skillIndex)
+            {
+                case 0: return "180° Cleave stacking Wind Marks | Receives traits from 3 gems";
+                case 1: return "Invincible Gale Flash Dash | Receives traits from 3 gems";
+                case 2: return "Shadow Clone Execution Strike | Receives traits from 3 gems";
+                default: return "";
+            }
+        }
+        else if (isAzure)
+        {
+            switch (skillIndex)
+            {
+                case 0: return "Twin frost blades with piercing wave | Receives traits from 3 gems";
+                case 1: return "High-speed frost glide | Receives traits from 3 gems";
+                case 2: return "5-Way fan-spread sword tempests | Receives traits from 3 gems";
+                default: return "";
+            }
+        }
+        else
+        {
+            switch (skillIndex)
+            {
+                case 0: return "2-Hit broadsword combo | Receives traits from 3 gems";
+                case 1: return "Invincible Dodge | Receives traits from 3 gems";
+                case 2: return "Golden Ruin Whirlwind | Receives traits from 3 gems";
+                default: return "";
+            }
         }
     }
 

@@ -1,0 +1,1014 @@
+fileFormatVersion: 2
+guid: 3c21334a8b2059248bedff7de1b6ae88
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2377763693046096923
+    second: scratch_cleaned_attack_0
+  - first:
+      213: -4023214741293308605
+    second: scratch_cleaned_attack_1
+  - first:
+      213: -4201526493047027237
+    second: scratch_cleaned_attack_2
+  - first:
+      213: 1701818134458449744
+    second: scratch_cleaned_attack_3
+  - first:
+      213: 2993169156086737444
+    second: scratch_cleaned_attack_4
+  - first:
+      213: 5941477213124687544
+    second: scratch_cleaned_attack_5
+  - first:
+      213: 5268663092447188554
+    second: scratch_cleaned_attack_6
+  - first:
+      213: 4555984941235378702
+    second: scratch_cleaned_attack_7
+  - first:
+      213: -4102874079778259108
+    second: scratch_cleaned_attack_8
+  - first:
+      213: 3220421171549043833
+    second: scratch_cleaned_attack_9
+  - first:
+      213: 1926994981418722808
+    second: scratch_cleaned_attack_10
+  - first:
+      213: 395486894206906981
+    second: scratch_cleaned_attack_11
+  - first:
+      213: -8231872487844861833
+    second: scratch_cleaned_attack_12
+  - first:
+      213: 6110291858415724429
+    second: scratch_cleaned_attack_13
+  - first:
+      213: -7207519790312762190
+    second: scratch_cleaned_attack_14
+  - first:
+      213: -689294464623438439
+    second: scratch_cleaned_attack_15
+  - first:
+      213: -5271579099117605413
+    second: scratch_cleaned_attack_16
+  - first:
+      213: -5113078057869800955
+    second: scratch_cleaned_attack_17
+  - first:
+      213: 3146973037830480588
+    second: scratch_cleaned_attack_18
+  - first:
+      213: 6205495216006557520
+    second: scratch_cleaned_attack_19
+  - first:
+      213: -5384343070827218639
+    second: scratch_cleaned_attack_20
+  - first:
+      213: -2393408283027855921
+    second: scratch_cleaned_attack_21
+  - first:
+      213: -1445167784511359097
+    second: scratch_cleaned_attack_22
+  - first:
+      213: 6466774127271010399
+    second: scratch_cleaned_attack_23
+  - first:
+      213: -3346002274957697110
+    second: scratch_cleaned_attack_24
+  - first:
+      213: -4300028666584598727
+    second: scratch_cleaned_attack_25
+  - first:
+      213: -7751821762842938780
+    second: scratch_cleaned_attack_26
+  - first:
+      213: 3146118489015916523
+    second: scratch_cleaned_attack_27
+  - first:
+      213: 7483024638206782936
+    second: scratch_cleaned_attack_28
+  - first:
+      213: 5710648605956615477
+    second: scratch_cleaned_attack_29
+  - first:
+      213: -3397905287101624025
+    second: scratch_cleaned_attack_30
+  - first:
+      213: 1914766054995480713
+    second: scratch_cleaned_attack_31
+  - first:
+      213: 4146640531157631669
+    second: scratch_cleaned_attack_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_0
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 211
+        width: 15
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1465db1b738ff020800000000000000
+      internalID: 2377763693046096923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_1
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 211
+        width: 18
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 345e81a328baa28c0800000000000000
+      internalID: -4023214741293308605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_2
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 211
+        width: 19
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd90a8b4aed21b5c0800000000000000
+      internalID: -4201526493047027237
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 209
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05fb6b0a3921e9710800000000000000
+      internalID: 1701818134458449744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_4
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 211
+        width: 19
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42aa43d2d7fd98920800000000000000
+      internalID: 2993169156086737444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_5
+      rect:
+        serializedVersion: 2
+        x: 345
+        y: 211
+        width: 20
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b6ff59cb0e547250800000000000000
+      internalID: 5941477213124687544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_6
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 211
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4696820b2d0e1940800000000000000
+      internalID: 5268663092447188554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_7
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 211
+        width: 16
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0a1d585a2c1a3f30800000000000000
+      internalID: 4555984941235378702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_8
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 147
+        width: 14
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5fb8ac23c9af07c0800000000000000
+      internalID: -4102874079778259108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_9
+      rect:
+        serializedVersion: 2
+        x: 89
+        y: 147
+        width: 15
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97cf3553efb31bc20800000000000000
+      internalID: 3220421171549043833
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_10
+      rect:
+        serializedVersion: 2
+        x: 154
+        y: 147
+        width: 17
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f56c67d9bf0eba10800000000000000
+      internalID: 1926994981418722808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_11
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 147
+        width: 17
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56276822c3d0d7500800000000000000
+      internalID: 395486894206906981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_12
+      rect:
+        serializedVersion: 2
+        x: 274
+        y: 147
+        width: 20
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77822bd269382cd80800000000000000
+      internalID: -8231872487844861833
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_13
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 147
+        width: 19
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d87a4de421e1cc450800000000000000
+      internalID: 6110291858415724429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_14
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 147
+        width: 17
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b45fc210feb9fb90800000000000000
+      internalID: -7207519790312762190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_15
+      rect:
+        serializedVersion: 2
+        x: 471
+        y: 147
+        width: 15
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9951a7226522f66f0800000000000000
+      internalID: -689294464623438439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_16
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 87
+        width: 14
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdda8b74db697d6b0800000000000000
+      internalID: -5271579099117605413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_17
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 83
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50a83dbb892ba09b0800000000000000
+      internalID: -5113078057869800955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_18
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 83
+        width: 15
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc22e95fd4b4cab20800000000000000
+      internalID: 3146973037830480588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_19
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 83
+        width: 19
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05fe47555095e1650800000000000000
+      internalID: 6205495216006557520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_20
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 84
+        width: 16
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 139f18a2188f645b0800000000000000
+      internalID: -5384343070827218639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_21
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 83
+        width: 20
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc5a5afe8d7e8ced0800000000000000
+      internalID: -2393408283027855921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_22
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 83
+        width: 18
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 787bc5b8e8bb1fbe0800000000000000
+      internalID: -1445167784511359097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_23
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 83
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f50ecaa6ec89eb950800000000000000
+      internalID: 6466774127271010399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_24
+      rect:
+        serializedVersion: 2
+        x: 474
+        y: 83
+        width: 15
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aaf5f77a8ac9091d0800000000000000
+      internalID: -3346002274957697110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_25
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 19
+        width: 15
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9377a34d5ba3354c0800000000000000
+      internalID: -4300028666584598727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_26
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 19
+        width: 17
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 462ba977d2ffb6490800000000000000
+      internalID: -7751821762842938780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_27
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 19
+        width: 16
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be7151fc81249ab20800000000000000
+      internalID: 3146118489015916523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_28
+      rect:
+        serializedVersion: 2
+        x: 214
+        y: 19
+        width: 17
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ddafcdf24b09d760800000000000000
+      internalID: 7483024638206782936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_29
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 19
+        width: 19
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53daf1b96ac404f40800000000000000
+      internalID: 5710648605956615477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_30
+      rect:
+        serializedVersion: 2
+        x: 339
+        y: 19
+        width: 19
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 721d2ede42738d0d0800000000000000
+      internalID: -3397905287101624025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_31
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 19
+        width: 16
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9805bf7059d929a10800000000000000
+      internalID: 1914766054995480713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scratch_cleaned_attack_32
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 19
+        width: 16
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b243eed793db8930800000000000000
+      internalID: 4146640531157631669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      scratch_cleaned_attack_0: 2377763693046096923
+      scratch_cleaned_attack_1: -4023214741293308605
+      scratch_cleaned_attack_10: 1926994981418722808
+      scratch_cleaned_attack_11: 395486894206906981
+      scratch_cleaned_attack_12: -8231872487844861833
+      scratch_cleaned_attack_13: 6110291858415724429
+      scratch_cleaned_attack_14: -7207519790312762190
+      scratch_cleaned_attack_15: -689294464623438439
+      scratch_cleaned_attack_16: -5271579099117605413
+      scratch_cleaned_attack_17: -5113078057869800955
+      scratch_cleaned_attack_18: 3146973037830480588
+      scratch_cleaned_attack_19: 6205495216006557520
+      scratch_cleaned_attack_2: -4201526493047027237
+      scratch_cleaned_attack_20: -5384343070827218639
+      scratch_cleaned_attack_21: -2393408283027855921
+      scratch_cleaned_attack_22: -1445167784511359097
+      scratch_cleaned_attack_23: 6466774127271010399
+      scratch_cleaned_attack_24: -3346002274957697110
+      scratch_cleaned_attack_25: -4300028666584598727
+      scratch_cleaned_attack_26: -7751821762842938780
+      scratch_cleaned_attack_27: 3146118489015916523
+      scratch_cleaned_attack_28: 7483024638206782936
+      scratch_cleaned_attack_29: 5710648605956615477
+      scratch_cleaned_attack_3: 1701818134458449744
+      scratch_cleaned_attack_30: -3397905287101624025
+      scratch_cleaned_attack_31: 1914766054995480713
+      scratch_cleaned_attack_32: 4146640531157631669
+      scratch_cleaned_attack_4: 2993169156086737444
+      scratch_cleaned_attack_5: 5941477213124687544
+      scratch_cleaned_attack_6: 5268663092447188554
+      scratch_cleaned_attack_7: 4555984941235378702
+      scratch_cleaned_attack_8: -4102874079778259108
+      scratch_cleaned_attack_9: 3220421171549043833
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -116,12 +116,14 @@ public class PlayerUpgradeManager : MonoBehaviour
     public string GetTitle(UpgradeType type)
     {
         string hero = GetCurrentHeroKey();
+        bool isTitan = (hero == CharacterManager.CHAR_TITAN_BERSERKER);
         bool isAzure = (hero == CharacterManager.CHAR_AZURE_BLADE);
         bool isRonin = (hero == CharacterManager.CHAR_GALE_RONIN || hero == "Maid");
 
         switch (type)
         {
             case UpgradeType.Attack:
+                if (isTitan) return LocalizationManager.T("Đại Chùy Titan (Tấn Công)", "Titan Hammer (Attack)");
                 if (isAzure) return LocalizationManager.T("Trọng Kiếm Sóng (Tấn Công)", "Wave Greatsword (Attack)");
                 if (isRonin) return LocalizationManager.T("Phong Nguyệt Đao (Tấn Công)", "Gale Blade (Attack)");
                 return LocalizationManager.T("Kiếm Tàn Tích (Tấn Công)", "Ruin Blade (Attack)");
@@ -400,7 +402,7 @@ public class PlayerUpgradeManager : MonoBehaviour
         PlayerPrefs.DeleteKey("Lost_Shards_Scene");
 
         // Reset nâng cấp cho tất cả các tướng
-        string[] heroes = new string[] { CharacterManager.CHAR_VAELSTRIDER, CharacterManager.CHAR_GALE_RONIN, CharacterManager.CHAR_AZURE_BLADE, "Maid" };
+        string[] heroes = new string[] { CharacterManager.CHAR_VAELSTRIDER, CharacterManager.CHAR_GALE_RONIN, CharacterManager.CHAR_AZURE_BLADE, CharacterManager.CHAR_TITAN_BERSERKER, "Maid" };
         string[] types = new string[] { "Attack", "Health", "Agility", "Ultimate" };
 
         foreach (var h in heroes)

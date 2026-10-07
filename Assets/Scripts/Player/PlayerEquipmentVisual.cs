@@ -90,10 +90,15 @@ public class PlayerEquipmentVisual : MonoBehaviour
     public void RefreshAllEquipmentVisuals()
     {
         string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        HeroCostumeManager.ApplyCostumeVisual(gameObject, curChar);
+
         if (curChar != CharacterManager.CHAR_VAELSTRIDER)
         {
             if (baseSr == null) baseSr = GetComponent<SpriteRenderer>();
-            if (baseSr != null) baseSr.material = new Material(Shader.Find("Sprites/Default"));
+            if (baseSr != null && (baseSr.material == null || baseSr.material.name.Contains("Custom")))
+            {
+                baseSr.material = new Material(Shader.Find("Sprites/Default"));
+            }
             return;
         }
 

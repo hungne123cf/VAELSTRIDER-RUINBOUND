@@ -70,4 +70,28 @@ public class DungeonRoom : MonoBehaviour
         if (exitBarrier != null) exitBarrier.Unlock();
         if (rewardObject != null) rewardObject.SetActive(true);
     }
+
+    public string GetLocalizedTitle()
+    {
+        switch (roomType)
+        {
+            case RoomType.Sanctuary: return LocalizationManager.T("PHÒNG 1: THÁNH ĐỊA KHỞI ĐẦU", "ROOM 1: THE ANCIENT SANCTUARY");
+            case RoomType.SunkenHall: return LocalizationManager.T("PHÒNG 2: ĐẠI SẢNH CHÌM SÂU", "ROOM 2: SUNKEN HALL OF TRIAL");
+            case RoomType.CursedCrypt: return LocalizationManager.T("PHÒNG 3: HẦM MỘ NGUYỀN RỦA", "ROOM 3: CURSED CRYPT OF BONES");
+            case RoomType.TitanSanctum: return LocalizationManager.T("PHÒNG 4: THÁNH ĐIỆN TITAN WHEEL", "ROOM 4: SANCTUM OF TITAN WHEEL");
+            default: return LocalizationManager.T($"PHÒNG {roomIndex}", $"ROOM {roomIndex}");
+        }
+    }
+
+    public string GetLocalizedSubtitle()
+    {
+        switch (roomType)
+        {
+            case RoomType.Sanctuary: return LocalizationManager.T("Khu vực an toàn. Hãy mở rương và cầu nguyện tại Đài Thần Bí.", "Safe zone. Open chest and pray at the Ancient Shrine.");
+            case RoomType.SunkenHall: return LocalizationManager.T("Tiêu diệt toàn bộ bầy quái vật bánh xe thức tỉnh!", "Purge all waking wheel monsters!");
+            case RoomType.CursedCrypt: return LocalizationManager.T("Bẫy phong ấn kích hoạt! Tiêu diệt bầy quái hung tợn.", "Sealed ambush! Slay the enraged swarm.");
+            case RoomType.TitanSanctum: return LocalizationManager.T("ĐẠI CHIẾN BOSS: CHÚA TỂ BÁNH XE KHỔNG LỒ TITAN!", "BOSS BATTLE: THE ANCIENT TITAN WHEEL!");
+            default: return "";
+        }
+    }
 }

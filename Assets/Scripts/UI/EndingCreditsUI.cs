@@ -345,9 +345,9 @@ public class EndingCreditsUI : MonoBehaviour
         topRt.anchoredPosition = new Vector2(-30f, -30f);
         topRt.sizeDelta = new Vector2(340f, 50f);
 
-        ui.btnSpeedUp = CreateSmallButton(topBar.transform, new Vector2(-170f, 0f), "SPEED UP", new Color(0.18f, 0.28f, 0.45f, 0.95f), ui.ToggleSpeedUp);
+        ui.btnSpeedUp = CreateSmallButton(topBar.transform, new Vector2(-170f, 0f), LocalizationManager.T("TĂNG TỐC", "SPEED UP"), new Color(0.18f, 0.28f, 0.45f, 0.95f), ui.ToggleSpeedUp);
         ui.speedUpText = ui.btnSpeedUp.GetComponentInChildren<TextMeshProUGUI>();
-        ui.btnSkip = CreateSmallButton(topBar.transform, new Vector2(0f, 0f), "SKIP", new Color(0.45f, 0.15f, 0.18f, 0.95f), ui.SkipCredits);
+        ui.btnSkip = CreateSmallButton(topBar.transform, new Vector2(0f, 0f), LocalizationManager.T("BỎ QUA", "SKIP"), new Color(0.45f, 0.15f, 0.18f, 0.95f), ui.SkipCredits);
 
         // Stats Window
         GameObject statsObj = new GameObject("FinalStatsCard");

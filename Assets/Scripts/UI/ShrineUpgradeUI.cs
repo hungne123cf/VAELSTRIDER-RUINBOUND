@@ -11,6 +11,7 @@ public class ShrineUpgradeUI : MonoBehaviour
     private static ShrineUpgradeUI instance;
 
     [Header("Upgrade UI References")]
+    private TextMeshProUGUI headerTitleText;
     private TextMeshProUGUI shardsCounterText;
     private GameObject[] cardObjects = new GameObject[4];
     private TextMeshProUGUI[] titleTexts = new TextMeshProUGUI[4];
@@ -80,6 +81,11 @@ public class ShrineUpgradeUI : MonoBehaviour
         if (mgr == null) return;
 
         bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
+
+        if (headerTitleText != null)
+        {
+            headerTitleText.text = isVi ? "BÀN THỜ NÂNG CẤP CỔ ĐẠI" : "ANCIENT UPGRADE ALTAR";
+        }
 
         if (shardsCounterText != null)
         {
@@ -234,11 +240,12 @@ public class ShrineUpgradeUI : MonoBehaviour
         tRt.anchoredPosition = new Vector2(0, -20);
         tRt.sizeDelta = new Vector2(760, 36);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = "BÀN THỜ NÂNG CẤP CỔ ĐẠI";
+        titleTmp.text = LocalizationManager.T("BÀN THỜ NÂNG CẤP CỔ ĐẠI", "ANCIENT UPGRADE ALTAR");
         titleTmp.fontSize = 23;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.alignment = TextAlignmentOptions.Center;
         titleTmp.color = new Color(0.35f, 0.95f, 1f, 1f);
+        instance.headerTitleText = titleTmp;
 
         // Shards Counter
         GameObject shardObj = new GameObject("ShardCounter", typeof(RectTransform));

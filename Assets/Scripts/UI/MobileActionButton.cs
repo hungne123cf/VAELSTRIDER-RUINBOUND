@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -26,6 +27,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     void Awake()
     {
+        cachedHeroActionIcons.Clear();
         originalScale = transform.localScale;
         EnsureTargets();
         EnsureRoundedSprites();
@@ -52,8 +54,27 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
         if (buttonType == ButtonType.Attack)
         {
+            var titan = (playerCombat != null) ? playerCombat.GetComponent<TitanBerserkerSkill>() : null;
             var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
-            if (azureBlade != null)
+            if (titan != null)
+            {
+                float norm = titan.AttackCooldownRatio;
+                float rem = titan.AttackCooldownRemaining;
+                UpdateCooldownDisplay(norm, rem);
+
+                if (isPointerDown)
+                {
+                    float holdDur = Time.time - pointerDownTime;
+                    if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        Vector2 playerPos = (Vector2)playerCombat.transform.position;
+                        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+                        SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.35f, 140f, new Color(1f, 0.55f, 0.1f, 0.9f));
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                    }
+                }
+            }
+            else if (azureBlade != null)
             {
                 float norm = azureBlade.AttackCooldownRatio;
                 float rem = azureBlade.AttackCooldownRemaining;
@@ -66,6 +87,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                     {
                         Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : azureBlade.GetFacingDirection();
                         azureBlade.UpdateAim(aimDir, holdDur);
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
                     }
                 }
             }
@@ -92,6 +114,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         {
                             SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.05f, 120f, new Color(1f, 0.85f, 0.2f, 0.85f));
                         }
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
                     }
                 }
             }
@@ -112,8 +135,15 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         Vector2 playerPos = (Vector2)playerCombat.transform.position;
                         Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
 
+                        var titan = playerCombat.GetComponent<TitanBerserkerSkill>();
                         var ronin = playerCombat.GetComponent<GaleRoninSkill>();
-                        if (ronin != null && ronin.enabled)
+                        var azure = playerCombat.GetComponent<AzureBladeSkill>();
+
+                        if (titan != null && titan.enabled)
+                        {
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, titan.ultimateRadius, new Color(1f, 0.45f, 0.1f, 0.85f));
+                        }
+                        else if (ronin != null && ronin.enabled)
                         {
                             ronin.FindBestTarget(3.5f, out IDamageable targetDmg);
                             Transform targetT = (targetDmg != null) ? (targetDmg as Component)?.transform : null;
@@ -125,18 +155,15 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                                 (targetT != null) ? new Color(1f, 0.25f, 0.25f, 0.95f) : new Color(0.6f, 0.6f, 0.6f, 0.4f)
                             );
                         }
+                        else if (azure != null && azure.enabled)
+                        {
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimFan(playerPos, aimDir, 60f, 5, 6.5f, new Color(0.15f, 0.75f, 1f, 0.9f));
+                        }
                         else
                         {
-                            var azure = playerCombat.GetComponent<AzureBladeSkill>();
-                            if (azure != null && azure.enabled)
-                            {
-                                SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimFan(playerPos, aimDir, 60f, 5, 6.5f, new Color(0.15f, 0.75f, 1f, 0.9f));
-                            }
-                            else
-                            {
-                                SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, 2.4f, new Color(1f, 0.75f, 0.2f, 0.85f));
-                            }
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, 2.4f, new Color(1f, 0.75f, 0.2f, 0.85f));
                         }
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
                     }
                 }
             }
@@ -157,6 +184,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         Vector2 playerPos = (Vector2)playerController.transform.position;
                         Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : playerController.GetFacingDirection();
                         SkillAimIndicator.EnsureExists(playerController.gameObject)?.ShowAimLine(playerPos, aimDir, 3.8f, new Color(0.2f, 0.85f, 1f, 0.85f));
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
                     }
                 }
             }
@@ -328,9 +356,22 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
     }
 
+    private static Dictionary<string, Sprite> cachedHeroActionIcons = new Dictionary<string, Sprite>();
+    private string lastThemedHero = "";
+
     private void EnsureRoundedSprites()
     {
-        // 1. Khung viền (Frame Background)
+        string curHero = "vael";
+        var cm = CharacterManager.EnsureInstance();
+        if (cm != null)
+        {
+            curHero = cm.GetSelectedCharacterId().ToLower();
+        }
+
+        bool isRonin = (curHero.Contains("ronin") || curHero.Contains("gale") || curHero.Contains("maid"));
+        bool isAzure = (curHero.Contains("azure") || curHero.Contains("player3"));
+
+        // 1. Khung viền đổi màu phát sáng theo hệ nguyên tố của tướng
         Sprite frameSprite = null;
 #if UNITY_EDITOR
         frameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/potion_slot_circle.png");
@@ -341,29 +382,31 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         Image btnImg = GetComponent<Image>();
         if (btnImg != null && frameSprite != null)
         {
-            if (btnImg.sprite != frameSprite)
+            btnImg.sprite = frameSprite;
+            if (isAzure)
             {
-                btnImg.sprite = frameSprite;
-                btnImg.color = new Color(0.9f, 0.95f, 1f, 0.95f);
+                btnImg.color = new Color(0.35f, 0.88f, 1f, 1f); // Lam Băng Tinh Thể
+            }
+            else if (isRonin)
+            {
+                btnImg.color = new Color(0.28f, 1f, 0.75f, 1f); // Phong Lôi Ngọc Bích
+            }
+            else
+            {
+                btnImg.color = new Color(1f, 0.88f, 0.40f, 1f); // Hoàng Kim Cổ Tự
             }
         }
 
-        // 2. Icon vẽ tay ở giữa (Attack / Dash / Ulti)
-        Sprite actionSprite = null;
-#if UNITY_EDITOR
-        if (buttonType == ButtonType.Attack)
+        // Cập nhật màu chữ Cooldown theo tướng
+        if (cooldownText != null)
         {
-            actionSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Attack.png");
+            if (isAzure) cooldownText.color = new Color(0.6f, 0.95f, 1f, 1f);
+            else if (isRonin) cooldownText.color = new Color(0.4f, 1f, 0.8f, 1f);
+            else cooldownText.color = new Color(1f, 0.9f, 0.35f, 1f);
         }
-        else if (buttonType == ButtonType.Dash)
-        {
-            actionSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Dash.png");
-        }
-        else if (buttonType == ButtonType.Skill)
-        {
-            actionSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Ulti.png");
-        }
-#endif
+
+        // 2. Icon chuyên biệt độc quyền cho từng nhân vật
+        Sprite actionSprite = GetHeroActionIcon(curHero, buttonType);
 
         Transform actionIconT = transform.Find("ActionIcon");
         Image actionIconImg = null;
@@ -374,8 +417,8 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             iconGo.transform.SetSiblingIndex(0);
 
             RectTransform rt = iconGo.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.18f, 0.18f);
-            rt.anchorMax = new Vector2(0.82f, 0.82f);
+            rt.anchorMin = new Vector2(0.10f, 0.10f);
+            rt.anchorMax = new Vector2(0.90f, 0.90f);
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
@@ -386,6 +429,14 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         else
         {
             actionIconImg = actionIconT.GetComponent<Image>();
+            RectTransform rt = actionIconT.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                rt.anchorMin = new Vector2(0.10f, 0.10f);
+                rt.anchorMax = new Vector2(0.90f, 0.90f);
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+            }
         }
 
         if (actionIconImg != null && actionSprite != null)
@@ -402,6 +453,458 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             iconT.gameObject.SetActive(false);
         }
+    }
+
+    private static Sprite GetHeroActionIcon(string heroId, ButtonType btnType)
+    {
+        string key = $"{heroId}_{btnType}";
+        if (cachedHeroActionIcons.TryGetValue(key, out Sprite cached) && cached != null)
+        {
+            return cached;
+        }
+
+        bool isTitan = (heroId.Contains("titan") || heroId.Contains("player4"));
+        bool isRonin = (heroId.Contains("ronin") || heroId.Contains("gale") || heroId.Contains("maid"));
+        bool isAzure = (heroId.Contains("azure") || heroId.Contains("player3"));
+
+        Sprite result = null;
+
+        if (isTitan)
+        {
+            // Player 4: Titan Berserker (War Hammer, Juggernaut Rush, Cataclysm Volcanic Slam)
+            result = LoadPlayer4CustomIcon(btnType);
+            if (result == null)
+            {
+                if (btnType == ButtonType.Attack)
+                    result = GenerateIcon_RuinSword();
+                else if (btnType == ButtonType.Dash)
+                    result = GenerateIcon_RuinDash();
+                else
+                    result = GenerateIcon_RuinWhirlwind();
+            }
+        }
+        else if (isAzure)
+        {
+            // Player 3: Azure Blade (Độc quyền bộ icon vẽ tay: Lam Nguyệt Sóng Kiếm, Băng Trượt Tốc Lướt, Nan Quạt 5 Tia Kiếm Khí)
+            result = LoadPlayer3CustomIcon(btnType);
+            if (result == null)
+            {
+                if (btnType == ButtonType.Attack)
+                    result = GenerateIcon_TwinBlades();
+                else if (btnType == ButtonType.Dash)
+                    result = GenerateIcon_FrostDash();
+                else
+                    result = GenerateIcon_CrescentWaves();
+            }
+        }
+        else if (isRonin)
+        {
+            // Player 2: Gale Ronin (Độc quyền bộ icon vẽ tay: Trảm Nguyệt Phong Ma, Tốc Lướt Phong Thiểm, Phân Thân Phong Ma Tuyệt Kỹ)
+            result = LoadPlayer2CustomIcon(btnType);
+            if (result == null)
+            {
+                if (btnType == ButtonType.Attack)
+                    result = GenerateIcon_KatanaSlash();
+                else if (btnType == ButtonType.Dash)
+                    result = GenerateIcon_GaleDash();
+                else
+                    result = GenerateIcon_StormCleave();
+            }
+        }
+        else
+        {
+            // Player 1: Vaelstrider (Đại Kiếm Hoàng Kim)
+            if (btnType == ButtonType.Attack)
+                result = GenerateIcon_RuinSword();
+            else if (btnType == ButtonType.Dash)
+                result = GenerateIcon_RuinDash();
+            else
+                result = GenerateIcon_RuinWhirlwind();
+        }
+
+        if (result != null)
+        {
+            cachedHeroActionIcons[key] = result;
+        }
+        return result;
+    }
+
+    private static Sprite LoadPlayer4CustomIcon(ButtonType btnType)
+    {
+        string fileName = (btnType == ButtonType.Attack) ? "icon_attack" : ((btnType == ButtonType.Dash) ? "icon_dash" : "icon_ulti");
+        Sprite loaded = null;
+#if UNITY_EDITOR
+        string path = $"Assets/ART/Player4/UI/{fileName}.png";
+        loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (loaded == null)
+        {
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+            foreach (var a in all)
+            {
+                if (a is Sprite s) { loaded = s; break; }
+            }
+        }
+#endif
+        if (loaded == null)
+        {
+            loaded = Resources.Load<Sprite>($"Player4/UI/{fileName}");
+        }
+        return loaded;
+    }
+
+    private static Sprite LoadPlayer2CustomIcon(ButtonType btnType)
+    {
+        string fileName = (btnType == ButtonType.Attack) ? "icon_attack" : ((btnType == ButtonType.Dash) ? "icon_dash" : "icon_ulti");
+        Sprite loaded = null;
+#if UNITY_EDITOR
+        string path = $"Assets/ART/Player2/UI/{fileName}.png";
+        loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (loaded == null)
+        {
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+            foreach (var a in all)
+            {
+                if (a is Sprite s) { loaded = s; break; }
+            }
+        }
+#endif
+        if (loaded == null)
+        {
+            loaded = Resources.Load<Sprite>($"Player2/UI/{fileName}");
+        }
+        return loaded;
+    }
+
+    private static Sprite LoadPlayer3CustomIcon(ButtonType btnType)
+    {
+        string fileName = (btnType == ButtonType.Attack) ? "icon_attack" : ((btnType == ButtonType.Dash) ? "icon_dash" : "icon_ulti");
+        Sprite loaded = null;
+#if UNITY_EDITOR
+        string path = $"Assets/ART/Player3/UI/{fileName}.png";
+        loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (loaded == null)
+        {
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+            foreach (var a in all)
+            {
+                if (a is Sprite s) { loaded = s; break; }
+            }
+        }
+#endif
+        if (loaded == null)
+        {
+            loaded = Resources.Load<Sprite>($"Player3/UI/{fileName}");
+        }
+        return loaded;
+    }
+
+    // =========================================================================
+    // HỆ THỐNG VẼ ICON PIXEL-VECTOR CHUẨN ĐỘT PHÁ CHO TỪNG TƯỚNG
+    // =========================================================================
+
+    private static Sprite GenerateIcon_RuinSword()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color gold = new Color(1f, 0.85f, 0.25f, 1f);
+        Color blade = new Color(1f, 0.98f, 0.85f, 1f);
+        Color hilt = new Color(0.8f, 0.55f, 0.15f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // Kiếm lớn đặt chéo từ dưới trái lên trên phải
+                float distDiag = Mathf.Abs(x - y) / 1.414f;
+                float progress = (x + y) / (2f * size);
+
+                if (distDiag <= 4f && progress >= 0.35f && progress <= 0.88f)
+                {
+                    tex.SetPixel(x, y, distDiag <= 1.5f ? blade : gold);
+                }
+                else if (progress >= 0.28f && progress <= 0.35f && distDiag <= 10f)
+                {
+                    tex.SetPixel(x, y, hilt); // Chuôi kiếm
+                }
+                else if (progress >= 0.12f && progress < 0.28f && distDiag <= 2.5f)
+                {
+                    tex.SetPixel(x, y, hilt); // Cán kiếm
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_RuinDash()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color gold = new Color(1f, 0.85f, 0.25f, 0.95f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // 3 vệt lướt tốc độ hình mũi tên kép hoàng kim
+                float dy1 = Mathf.Abs(y - size * 0.5f);
+                float dy2 = Mathf.Abs(y - size * 0.32f);
+                float dy3 = Mathf.Abs(y - size * 0.68f);
+
+                bool line1 = (dy1 <= 2.5f && x >= 14 && x <= 46);
+                bool line2 = (dy2 <= 2.0f && x >= 22 && x <= 50);
+                bool line3 = (dy3 <= 2.0f && x >= 22 && x <= 50);
+                bool arrow = (x >= 42 && x <= 54 && Mathf.Abs(y - size * 0.5f) <= (54 - x) * 1.5f);
+
+                if (line1 || line2 || line3 || arrow)
+                    tex.SetPixel(x, y, gold);
+                else
+                    tex.SetPixel(x, y, clear);
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_RuinWhirlwind()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color gold = new Color(1f, 0.88f, 0.3f, 1f);
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                Vector2 pos = new Vector2(x, y);
+                float d = Vector2.Distance(pos, center);
+                float angle = Mathf.Atan2(y - center.y, x - center.x);
+
+                // 3 cánh lốc xoáy 360 độ
+                float spiral = Mathf.Sin(angle * 3f + d * 0.28f);
+                if (d >= 6f && d <= 26f && spiral > 0.45f)
+                {
+                    float alpha = Mathf.Clamp01((spiral - 0.45f) * 3f);
+                    tex.SetPixel(x, y, new Color(gold.r, gold.g, gold.b, alpha));
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_KatanaSlash()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color emerald = new Color(0.15f, 1f, 0.75f, 1f);
+        Color white = new Color(0.9f, 1f, 0.95f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // Vòng chém bán nguyệt Iaido cong vút
+                float normX = (x - size * 0.5f) / (size * 0.45f);
+                float normY = (y - size * 0.5f) / (size * 0.45f);
+                float distCurve = Mathf.Abs(normY - (normX * normX * 0.6f - 0.3f));
+
+                if (distCurve < 0.18f && x >= 10 && x <= 54 && y >= 12 && y <= 52)
+                {
+                    tex.SetPixel(x, y, distCurve < 0.08f ? white : emerald);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_GaleDash()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color emerald = new Color(0.2f, 1f, 0.75f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // 3 nhát chém lướt gió song song sắc lẹm
+                float d1 = Mathf.Abs((x - y * 0.6f) - 12f);
+                float d2 = Mathf.Abs((x - y * 0.6f) - 22f);
+                float d3 = Mathf.Abs((x - y * 0.6f) - 32f);
+
+                if ((d1 <= 2.2f && y >= 14 && y <= 44) ||
+                    (d2 <= 2.8f && y >= 10 && y <= 54) ||
+                    (d3 <= 2.2f && y >= 20 && y <= 50))
+                {
+                    tex.SetPixel(x, y, emerald);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_StormCleave()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color mint = new Color(0.3f, 1f, 0.85f, 1f);
+        Color core = new Color(0.95f, 1f, 0.98f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // Nhát chém chữ X bão phong trảm rực lửa sấm sét
+                float d1 = Mathf.Abs(x - y) / 1.414f;
+                float d2 = Mathf.Abs(x + y - size) / 1.414f;
+
+                if ((d1 <= 3.5f || d2 <= 3.5f) && x >= 12 && x <= 52 && y >= 12 && y <= 52)
+                {
+                    bool isCenter = (d1 <= 1.4f || d2 <= 1.4f);
+                    tex.SetPixel(x, y, isCenter ? core : mint);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_TwinBlades()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color cyan = new Color(0.25f, 0.85f, 1f, 1f);
+        Color ice = new Color(0.9f, 0.98f, 1f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // Song kiếm bắt chéo hình chữ X sắc bén tinh xảo
+                float d1 = Mathf.Abs(x - y * 0.9f - 4f) / 1.414f;
+                float d2 = Mathf.Abs(x + y * 0.9f - size - 4f) / 1.414f;
+
+                if ((d1 <= 3.2f || d2 <= 3.2f) && x >= 14 && x <= 50 && y >= 10 && y <= 54)
+                {
+                    bool isCore = (d1 <= 1.2f || d2 <= 1.2f);
+                    tex.SetPixel(x, y, isCore ? ice : cyan);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_FrostDash()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color cyan = new Color(0.3f, 0.9f, 1f, 1f);
+        Color white = new Color(1f, 1f, 1f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // Đôi cánh lướt băng lam 2 bên
+                float dx = Mathf.Abs(x - size * 0.5f);
+                float dy = y - size * 0.5f;
+
+                if (dx >= 4f && dx <= 26f && dy >= -dx * 0.6f && dy <= dx * 0.6f)
+                {
+                    float edge = Mathf.Abs(dy) / (dx * 0.6f);
+                    tex.SetPixel(x, y, edge > 0.7f ? white : cyan);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_CrescentWaves()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color cyan = new Color(0.2f, 0.85f, 1f, 1f);
+        Color core = new Color(0.9f, 1f, 1f, 1f);
+        Vector2 center = new Vector2(size / 2f, size * 0.25f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // 3 tầng sóng kiếm hình vòng cung tỏa lên trên
+                Vector2 pos = new Vector2(x, y);
+                float d = Vector2.Distance(pos, center);
+                float angle = Mathf.Atan2(y - center.y, x - center.x) * Mathf.Rad2Deg;
+
+                bool inAngle = (angle >= 40f && angle <= 140f);
+                bool wave1 = inAngle && Mathf.Abs(d - 16f) <= 2.2f;
+                bool wave2 = inAngle && Mathf.Abs(d - 27f) <= 2.5f;
+                bool wave3 = inAngle && Mathf.Abs(d - 38f) <= 2.8f;
+
+                if (wave1 || wave2 || wave3)
+                {
+                    tex.SetPixel(x, y, (wave1 || wave2) ? core : cyan);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
     }
 
     private void EnsureTargets()
@@ -471,6 +974,13 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             if (delta.sqrMagnitude > 150f) // Kéo ngắm vượt qua vùng chết
             {
                 currentDragAimDir = delta.normalized;
+                Canvas parentC = GetComponentInParent<Canvas>();
+                SkillCancelZoneUI.EnsureExists(parentC)?.Show();
+            }
+
+            if (SkillCancelZoneUI.Instance != null && SkillCancelZoneUI.Instance.gameObject.activeInHierarchy)
+            {
+                SkillCancelZoneUI.Instance.UpdatePointerPosition(eventData.position);
             }
         }
     }
@@ -482,9 +992,32 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         if (!isPointerDown) return;
         isPointerDown = false;
 
+        bool isCancelled = false;
+        if (SkillCancelZoneUI.Instance != null && SkillCancelZoneUI.Instance.gameObject.activeInHierarchy)
+        {
+            isCancelled = SkillCancelZoneUI.Instance.IsHovered || SkillCancelZoneUI.Instance.CheckIfInside(eventData.position);
+            SkillCancelZoneUI.Instance.Hide();
+        }
+
         if (SkillAimIndicator.Instance != null)
         {
             SkillAimIndicator.Instance.Hide();
+        }
+
+        // Hủy chiêu chuẩn Liên Quân Mobile khi kéo vào vùng chữ X
+        if (isCancelled)
+        {
+            var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
+            if (azureBlade != null)
+            {
+                azureBlade.CancelAim();
+            }
+
+            Vector3 playerPos = (playerCombat != null) ? playerCombat.transform.position : ((playerController != null) ? playerController.transform.position : transform.position);
+            DamagePopup.CreateText(playerPos + Vector3.up * 1.5f, LocalizationManager.T("ĐÃ HỦY CHIÊU", "CANCELLED"), new Color(1f, 0.35f, 0.35f));
+            SoundManager.EnsureInstance()?.PlayMenuHover();
+            currentDragAimDir = Vector2.zero;
+            return;
         }
 
         EnsureTargets();

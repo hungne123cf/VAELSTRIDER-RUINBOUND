@@ -268,12 +268,22 @@ public class LoginManager : MonoBehaviour
         if (tabLoginBg != null) tabLoginBg.color = !isRegisterMode ? new Color(0.24f, 0.50f, 0.90f) : new Color(0.14f, 0.17f, 0.25f);
         if (tabRegisterBg != null) tabRegisterBg.color = isRegisterMode ? new Color(0.85f, 0.50f, 0.15f) : new Color(0.14f, 0.17f, 0.25f);
 
-        if (tabLoginTxt != null) tabLoginTxt.color = !isRegisterMode ? Color.white : new Color(0.65f, 0.70f, 0.80f);
-        if (tabRegisterTxt != null) tabRegisterTxt.color = isRegisterMode ? Color.white : new Color(0.65f, 0.70f, 0.80f);
+        if (tabLoginTxt != null)
+        {
+            tabLoginTxt.text = LocalizationManager.T("ĐĂNG NHẬP", "LOGIN");
+            tabLoginTxt.color = !isRegisterMode ? Color.white : new Color(0.65f, 0.70f, 0.80f);
+        }
+        if (tabRegisterTxt != null)
+        {
+            tabRegisterTxt.text = LocalizationManager.T("ĐĂNG KÝ", "REGISTER");
+            tabRegisterTxt.color = isRegisterMode ? Color.white : new Color(0.65f, 0.70f, 0.80f);
+        }
 
         if (actionSubmitButtonText != null)
         {
-            actionSubmitButtonText.text = isRegisterMode ? "TẠO TÀI KHOẢN MỚI" : "ĐĂNG NHẬP VÀO GAME";
+            actionSubmitButtonText.text = isRegisterMode 
+                ? LocalizationManager.T("TẠO TÀI KHOẢN MỚI", "CREATE NEW ACCOUNT") 
+                : LocalizationManager.T("ĐĂNG NHẬP VÀO GAME", "LOGIN TO GAME");
         }
         if (actionSubmitButton != null)
         {
@@ -289,11 +299,31 @@ public class LoginManager : MonoBehaviour
     {
         if (titleText != null) titleText.text = LocalizationManager.Get("APP_TITLE");
         if (subtitleText != null) subtitleText.text = LocalizationManager.Get("LOGIN_SUBTITLE");
+
+        if (tabLoginTxt != null) tabLoginTxt.text = LocalizationManager.T("ĐĂNG NHẬP", "LOGIN");
+        if (tabRegisterTxt != null) tabRegisterTxt.text = LocalizationManager.T("ĐĂNG KÝ", "REGISTER");
+
+        if (actionSubmitButtonText != null)
+        {
+            actionSubmitButtonText.text = isRegisterMode 
+                ? LocalizationManager.T("TẠO TÀI KHOẢN MỚI", "CREATE NEW ACCOUNT") 
+                : LocalizationManager.T("ĐĂNG NHẬP VÀO GAME", "LOGIN TO GAME");
+        }
+
+        if (switchAccountBtn != null)
+        {
+            var swTmp = switchAccountBtn.GetComponentInChildren<TextMeshProUGUI>();
+            if (swTmp != null) swTmp.text = LocalizationManager.T("ĐỔI TÀI KHOẢN", "SWITCH ACCOUNT");
+        }
+
         if (tapToStartText != null && !isStartingGame)
         {
-            tapToStartText.text = "— CHẠM VÀO MÀN HÌNH ĐỂ BẮT ĐẦU —";
+            tapToStartText.text = LocalizationManager.T("— CHẠM VÀO MÀN HÌNH ĐỂ BẮT ĐẦU —", "— TAP SCREEN TO START —");
         }
-        if (versionText != null) versionText.text = "Phiên bản 1.0.0 (Cloud Sync Enabled)";
+        if (versionText != null)
+        {
+            versionText.text = LocalizationManager.T("Phiên bản 1.0.0 (Cloud Sync)", "Version 1.0.0 (Cloud Sync)");
+        }
     }
 
     [Header("Password Eye Sprites")]

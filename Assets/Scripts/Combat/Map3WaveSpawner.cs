@@ -113,7 +113,7 @@ public class Map3WaveSpawner : MonoBehaviour
         // Quet don lan nua dam bao chi co minh en Boss Nhen tren san dau
         ClearAllNonBossEnemies();
 
-        DamagePopup.CreateText(pos + Vector3.up * 2.5f, "CHUA TE NHEN THUC TINH!", Color.red);
+        DamagePopup.CreateText(pos + Vector3.up * 2.5f, LocalizationManager.T("CHÚA TỂ NHỆN THỨC TỈNH!", "SPIDER LORD AWAKENS!"), Color.red);
         SpawnSkeletonKing(pos);
         bossSpawned = true;
         livingEnemies = 1;

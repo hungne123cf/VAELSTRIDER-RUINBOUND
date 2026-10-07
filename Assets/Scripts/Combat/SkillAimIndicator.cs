@@ -531,6 +531,54 @@ public class SkillAimIndicator : MonoBehaviour
     }
 
     /// <summary>
+    /// Chuyển đổi trạng thái cảnh báo hủy chiêu (Đổi sang sắc đỏ cảnh báo hoặc mờ đi)
+    /// </summary>
+    public void SetCancelHighlight(bool isCancelling)
+    {
+        if (!isVisible) return;
+
+        Color cancelBorder = isCancelling ? new Color(1f, 0.2f, 0.2f, 0.95f) : Color.white;
+        Color cancelInner = isCancelling ? new Color(1f, 0.1f, 0.1f, 0.35f) : Color.white;
+
+        if (perimeterLine != null && perimeterLine.enabled)
+        {
+            if (isCancelling)
+            {
+                perimeterLine.startColor = cancelBorder;
+                perimeterLine.endColor = cancelBorder;
+            }
+        }
+
+        if (directLine != null && directLine.enabled)
+        {
+            if (isCancelling)
+            {
+                directLine.startColor = new Color(1f, 0.2f, 0.2f, 0.95f);
+                directLine.endColor = new Color(1f, 0.2f, 0.2f, 0.35f);
+            }
+        }
+
+        if (circleLine != null && circleLine.enabled)
+        {
+            if (isCancelling)
+            {
+                circleLine.startColor = cancelBorder;
+                circleLine.endColor = cancelBorder;
+            }
+        }
+
+        if (sectorMesh != null && sectorMesh.vertexCount > 0 && isCancelling)
+        {
+            Color[] cols = new Color[sectorMesh.vertexCount];
+            for (int i = 0; i < cols.Length; i++)
+            {
+                cols[i] = (i % 2 == 0) ? new Color(1f, 0.1f, 0.1f, 0.25f) : new Color(1f, 0.15f, 0.15f, 0.55f);
+            }
+            sectorMesh.colors = cols;
+        }
+    }
+
+    /// <summary>
     /// Ẩn toàn bộ chỉ dẫn nhắm
     /// </summary>
     public void Hide()

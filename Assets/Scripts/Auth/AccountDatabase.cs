@@ -297,19 +297,27 @@ public static class AccountDatabase
         string charId = CharacterManager.CHAR_VAELSTRIDER;
         if (!string.IsNullOrEmpty(hero))
         {
-            if (hero.Equals("azure", StringComparison.OrdinalIgnoreCase) || 
+            if (hero.Equals("titan", StringComparison.OrdinalIgnoreCase) ||
+                hero.Equals("titanberserker", StringComparison.OrdinalIgnoreCase) ||
+                hero.Equals(CharacterManager.CHAR_TITAN_BERSERKER, StringComparison.OrdinalIgnoreCase))
+            {
+                charId = CharacterManager.CHAR_TITAN_BERSERKER;
+            }
+            else if (hero.Equals("azure", StringComparison.OrdinalIgnoreCase) || 
                 hero.Equals("azureblade", StringComparison.OrdinalIgnoreCase) || 
                 hero.Equals(CharacterManager.CHAR_AZURE_BLADE, StringComparison.OrdinalIgnoreCase))
             {
                 charId = CharacterManager.CHAR_AZURE_BLADE;
             }
-            else if (hero.Equals("maid", StringComparison.OrdinalIgnoreCase) || 
+            else if (hero.Equals("ronin", StringComparison.OrdinalIgnoreCase) ||
+                     hero.Equals("galeronin", StringComparison.OrdinalIgnoreCase) ||
+                     hero.Equals("maid", StringComparison.OrdinalIgnoreCase) || 
                      hero.Equals(CharacterManager.CHAR_MAID, StringComparison.OrdinalIgnoreCase))
             {
-                charId = CharacterManager.CHAR_MAID;
+                charId = CharacterManager.CHAR_GALE_RONIN;
             }
         }
-        PlayerPrefs.SetString("SelectedHero", (charId == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (charId == CharacterManager.CHAR_MAID ? "maid" : "vael"));
+        PlayerPrefs.SetString("SelectedHero", (charId == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((charId == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (charId == CharacterManager.CHAR_GALE_RONIN || charId == CharacterManager.CHAR_MAID ? "ronin" : "vael")));
         PlayerPrefs.SetString("Selected_Character_ID", charId);
         PlayerPrefs.SetInt("Save_SelectedHeroIndex", acc.selectedHeroIndex);
 
@@ -481,8 +489,8 @@ public static class AccountDatabase
                 acc.map3Completed = PlayerPrefs.GetInt("Map3_Completed", 0) == 1;
                 acc.unlockedMaid = PlayerPrefs.GetInt("Char_Unlocked_Maid", 0) == 1;
                 string activeChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
-                acc.selectedHero = (activeChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (activeChar == CharacterManager.CHAR_MAID ? "maid" : "vael");
-                acc.selectedHeroIndex = (activeChar == CharacterManager.CHAR_AZURE_BLADE) ? 2 : (activeChar == CharacterManager.CHAR_MAID ? 1 : 0);
+                acc.selectedHero = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? "ronin" : "vael"));
+                acc.selectedHeroIndex = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? 2 : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? 1 : 0));
                 acc.equippedArmorId = PlayerPrefs.GetInt("EquippedArmorId", 0);
                 acc.equippedHelmetId = PlayerPrefs.GetInt("Equipped_Slot_Helmet", 0);
                 acc.equippedPantsId = PlayerPrefs.GetInt("Equipped_Slot_Pants", 0);
