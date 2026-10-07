@@ -69,6 +69,8 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
+        attackDamage = MapScalingManager.ScaleDamage(attackDamage);
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
         enemyCol = GetComponent<Collider2D>();
@@ -963,7 +965,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         transform.localScale = Vector3.one * scaleMultiplier;
         totalBossPhases = 3;
         currentBossPhase = 3;
-        phaseMaxHealth = 1100;
+        phaseMaxHealth = MapScalingManager.ScaleHealth(1100);
         currentHealth = phaseMaxHealth;
 
         int el = LayerMask.NameToLayer("Enemy");

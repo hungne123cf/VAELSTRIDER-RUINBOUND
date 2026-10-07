@@ -15,6 +15,8 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
     [Header("Boss Stats")]
     [SerializeField] private int maxHealth = 1400;
     [SerializeField] private int currentHealth;
+    [SerializeField] private int slamDamage = 45;
+    [SerializeField] private int stoneDamage = 12;
     [SerializeField] private float moveSpeed = 1.8f;
     [SerializeField] private float skillCooldown = 4.5f;
 
@@ -69,6 +71,9 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
             myCol = box;
         }
 
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
+        slamDamage = MapScalingManager.ScaleDamage(slamDamage);
+        stoneDamage = MapScalingManager.ScaleDamage(stoneDamage);
         currentHealth = maxHealth;
         CreateWarningCircle();
     }
@@ -244,7 +249,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
         {
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(45);
+                playerHealth.TakeDamage(slamDamage);
                 SoundManager.EnsureInstance()?.PlayPlayerHurt();
             }
         }
@@ -320,7 +325,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
         col.isTrigger = true;
 
         var script = proj.AddComponent<ValleyThornProjectile>();
-        script.Init(dir * 6.5f, 12);
+        script.Init(dir * 6.5f, stoneDamage);
     }
 
     public void TakeDamage(int damage)

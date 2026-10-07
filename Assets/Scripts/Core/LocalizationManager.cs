@@ -100,7 +100,7 @@ public static class LocalizationManager
         { "MAP3_DESC", ("Cung điện thần thánh u ám, nơi chôn giấu sức mạnh tà ác của Huyết Quái.", "Desolate divine palace harboring the corrupt essence of the Blood Fiend.") },
 
         // Characters
-        { "HERO_VAEL_NAME", ("Hiệp Sĩ Cân Bằng", "Balanced Knight (Vael)") },
+        { "HERO_VAEL_NAME", ("Hiệp Sĩ Cân Bằng", "Balanced Knight") },
         { "HERO_VAEL_ROLE", ("Chiến Binh / Kiếm Thuật Cổ Tộc", "Warrior / Blade Master") },
         { "HERO_VAEL_SKILL", ("Tuyệt Kỹ: Cơn Lốc Tàn Tích", "Skill: Ruin Whirlwind") },
         { "HERO_VAEL_SKILL_DESC", ("Vận nội lực xoay kiếm tạo bão quét nát quái xung quanh.", "Spins ancient blade to unleash a storm cleaving nearby foes.") },
@@ -139,6 +139,7 @@ public static class LocalizationManager
         { "GAMEOVER_RESPAWN_AVAILABLE", ("HỒI SINH (CÒN 1 LẦN)", "RESPAWN (1 REMAINING)") },
         { "GAMEOVER_RESPAWN_USED", ("ĐÃ HẾT LƯỢT HỒI SINH", "NO RESPAWNS LEFT") },
         { "GAMEOVER_RESTART_MAP", ("CHƠI LẠI BẢN ĐỒ", "RESTART MAP") },
+        { "GAMEOVER_MAIN_MENU", ("VỀ MENU CHÍNH", "MAIN MENU") },
         { "GAMEOVER_EXIT_LOGIN", ("VỀ MÀN HÌNH ĐĂNG NHẬP", "EXIT TO LOGIN") },
         { "HUD_CLEAR_TIME", ("Thời Gian Hoàn Thành:", "Clear Time:") },
         { "HUD_ENEMIES_SLAIN", ("Kẻ Thù Tiêu Diệt:", "Enemies Slain:") },

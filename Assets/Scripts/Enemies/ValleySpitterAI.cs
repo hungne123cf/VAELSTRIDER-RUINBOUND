@@ -52,6 +52,8 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
             myCol = box;
         }
 
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
+        projectileDamage = MapScalingManager.ScaleDamage(projectileDamage);
         currentHealth = maxHealth;
         SetupTelegraphLine();
     }

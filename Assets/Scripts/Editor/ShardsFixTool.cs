@@ -3,15 +3,9 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-[InitializeOnLoad]
 public static class ShardsFixTool
 {
-    static ShardsFixTool()
-    {
-        EditorApplication.delayCall += ExecuteFix;
-    }
-
-    [MenuItem("Tools/Vaelstrider/Restore 8B Shards")]
+    [MenuItem("Tools/Vaelstrider/Restore 8B Shards (Manual Test Only)")]
     public static void ExecuteFix()
     {
         try

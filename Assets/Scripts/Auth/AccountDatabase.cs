@@ -97,32 +97,78 @@ public static class AccountDatabase
         {
             dbCache = new DatabaseContainer();
         }
+    }
 
-        // Tu dong khoi phuc 8 ty Shards cho nguoi choi neu truoc do bi kep ve int.MaxValue (~2.15B)
-        if (PlayerPrefs.GetInt("Fix_Restored_8B_Shards_V3", 0) == 0)
+    /// <summary>
+    /// Đặt lại toàn bộ tiến trình chơi (Shards, Potions, Nâng cấp, Trang bị, Map) của tài khoản hiện tại về 0 nhưng KHÔNG xóa tài khoản!
+    /// </summary>
+    public static void ResetActiveUserProgress()
+    {
+        EnsureDatabaseLoaded();
+        string activeUser = PlayerPrefs.GetString(PREF_CURRENT_USER, "");
+        if (string.IsNullOrEmpty(activeUser))
         {
-            PlayerPrefs.SetInt("Fix_Restored_8B_Shards_V3", 1);
-            bool updated = false;
+            activeUser = PlayerPrefs.GetString("Player_Name", "");
+        }
+
+        if (!string.IsNullOrEmpty(activeUser) && dbCache != null && dbCache.accounts != null)
+        {
             foreach (var acc in dbCache.accounts)
             {
-                if (acc.aethelShards >= 2140000000L && acc.aethelShards <= 2147483647L)
+                if (string.Equals(acc.username, activeUser, StringComparison.OrdinalIgnoreCase))
                 {
-                    acc.aethelShards = 8000000000L;
-                    updated = true;
+                    acc.aethelShards = 0;
+                    acc.healthPotions = 0;
+                    acc.upgradeAttack = 0;
+                    acc.upgradeHealth = 0;
+                    acc.upgradeAgility = 0;
+                    acc.upgradeUltimate = 0;
+                    acc.map1Completed = false;
+                    acc.map2Completed = false;
+                    acc.map3Completed = false;
+                    acc.equippedArmor = "Iron Armor";
+                    acc.equippedWeapon = "Steel Blade";
+                    acc.equippedArmorId = 0;
+                    acc.equippedHelmetId = 0;
+                    acc.equippedPantsId = 0;
+                    acc.equippedGlovesId = 0;
+                    acc.equippedBootsId = 0;
+                    acc.equippedCloakId = 0;
+                    acc.equippedBagId = 0;
+                    acc.ownedArmorIds = new List<int>();
+                    acc.inventoryItems = new List<InventoryItemEntry>();
+                    SaveDatabase();
+
+                    // Áp dụng lại phiên chơi mới về 0 cho tài khoản này
+                    ApplyAccountToGameSession(acc, false);
+                    break;
                 }
-                else if (string.Equals(acc.username, "WANDERER", StringComparison.OrdinalIgnoreCase) && acc.aethelShards < 8000000000L)
-                {
-                    acc.aethelShards = 8000000000L;
-                    updated = true;
-                }
-            }
-            if (updated)
-            {
-                SaveDatabase();
-                SetAethelShards(8000000000L);
-                Debug.Log("<color=green>[AccountDB]</color> Đã tự động khôi phục 8,000,000,000 (8B) Aethel Shards!");
             }
         }
+        else
+        {
+            ClearTransientGameplayPlayerPrefs();
+            SetAethelShards(0);
+            PlayerPrefs.SetInt("Save_HealthPotions", 0);
+            PlayerPrefs.SetInt("Saved_HealthPotions", 0);
+            PlayerPrefs.SetInt("Player_Health_Potions", 0);
+            PlayerPrefs.Save();
+        }
+
+        // Xóa toàn bộ ngọc đã khảm của tất cả các tướng
+        string[] heroIds = new string[] { CharacterManager.CHAR_VAELSTRIDER, CharacterManager.CHAR_GALE_RONIN, CharacterManager.CHAR_AZURE_BLADE, CharacterManager.CHAR_TITAN_BERSERKER };
+        foreach (var hId in heroIds)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                for (int s = 0; s < 3; s++)
+                {
+                    PlayerPrefs.DeleteKey($"Hero_{hId}_SkillSocket_Skill_{k}_Sub_{s}");
+                }
+            }
+        }
+        PlayerPrefs.Save();
+        Debug.Log($"<color=yellow>[AccountDB]</color> Đã đặt lại tiến trình của tài khoản '{activeUser}' về con số 0 (Không xóa tài khoản).");
     }
 
     public static void SaveDatabase()
@@ -468,6 +514,8 @@ public static class AccountDatabase
     /// <summary>
     /// Lưu tiến trình hiện tại từ game session (PlayerPrefs) vào Database file & Cloud
     /// </summary>
+    public static void SaveActiveSession() => SaveActiveSessionToDatabase();
+
     public static void SaveActiveSessionToDatabase()
     {
         EnsureDatabaseLoaded();

@@ -213,15 +213,15 @@ public class Player4AnimationSetup
         AnimationClip clipAttack2Right = CreateClip("Player4_Attack2_Right", attack2Right, 12f, false, false);
         AnimationClip clipAttack2Up = CreateClip("Player4_Attack2_Up", attack2Up, 12f, false, false);
 
-        AnimationClip clipSkillDown = CreateClip("Player4_Skill_Down", skillDown, 10f, false, false);
-        AnimationClip clipSkillLeft = CreateClip("Player4_Skill_Left", skillLeft, 10f, false, false);
-        AnimationClip clipSkillRight = CreateClip("Player4_Skill_Right", skillRight, 10f, false, false);
-        AnimationClip clipSkillUp = CreateClip("Player4_Skill_Up", skillUp, 10f, false, false);
+        AnimationClip clipSkillDown = CreateClip("Player4_Skill_Down", skillDown, 7.5f, false, false);
+        AnimationClip clipSkillLeft = CreateClip("Player4_Skill_Left", skillLeft, 7.5f, false, false);
+        AnimationClip clipSkillRight = CreateClip("Player4_Skill_Right", skillRight, 7.5f, false, false);
+        AnimationClip clipSkillUp = CreateClip("Player4_Skill_Up", skillUp, 7.5f, false, false);
 
-        AnimationClip clipSpinDown = CreateClip("Player4_Spin_Down", spinDown, 12f, true, false);
-        AnimationClip clipSpinLeft = CreateClip("Player4_Spin_Left", spinLeft, 12f, true, false);
-        AnimationClip clipSpinRight = CreateClip("Player4_Spin_Right", spinRight, 12f, true, false);
-        AnimationClip clipSpinUp = CreateClip("Player4_Spin_Up", spinUp, 12f, true, false);
+        AnimationClip clipSpinDown = CreateClip("Player4_Spin_Down", spinDown, 14f, true, false);
+        AnimationClip clipSpinLeft = CreateClip("Player4_Spin_Left", spinLeft, 14f, true, false);
+        AnimationClip clipSpinRight = CreateClip("Player4_Spin_Right", spinRight, 14f, true, false);
+        AnimationClip clipSpinUp = CreateClip("Player4_Spin_Up", spinUp, 14f, true, false);
 
         AnimationClip clipHurt = CreateClip("Player4_Hurt", hurtSprites.Take(3).ToArray(), 8f, false, false);
         AnimationClip clipDeath = CreateClip("Player4_Death", deathSprites.Take(6).ToArray(), 6f, false, false);

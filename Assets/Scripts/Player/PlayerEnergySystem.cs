@@ -12,7 +12,8 @@ public class PlayerEnergySystem : MonoBehaviour
     [Header("Nang Luong (Energy)")]
     [SerializeField] private float maxEnergy = 100f;
     [SerializeField] private float currentEnergy = 100f;
-    [SerializeField] private float energyRegenRate = 15f; // Hoi 15 NL moi giay
+    [SerializeField] private float energyRegenRate = 3.5f; // Hồi 3.5 NL/s (cơ bản chậm rãi để hạn chế spam chiêu liên tục)
+    private float bonusEnergyRegenRate = 0f;
 
     [Header("Noi Nang (Inner Energy / Qi)")]
     [SerializeField] private float maxInnerEnergy = 100f;
@@ -26,6 +27,13 @@ public class PlayerEnergySystem : MonoBehaviour
     private bool isShieldActive = false;
 
     private PlayerShieldVisual shieldVisual;
+
+    public void SetBonusEnergyRegen(float bonus)
+    {
+        bonusEnergyRegenRate = bonus;
+    }
+
+    public float GetEnergyRegenRate() => energyRegenRate + bonusEnergyRegenRate;
 
     void Awake()
     {
@@ -47,10 +55,11 @@ public class PlayerEnergySystem : MonoBehaviour
 
     void Update()
     {
-        // 1. Tu dong hoi phuc Nang Luong theo thoi gian
+        // 1. Tu dong hoi phuc Nang Luong theo thoi gian (hoi cham de kiem soat spam chieu)
         if (currentEnergy < maxEnergy)
         {
-            currentEnergy = Mathf.Min(maxEnergy, currentEnergy + energyRegenRate * Time.deltaTime);
+            float rate = GetEnergyRegenRate();
+            currentEnergy = Mathf.Min(maxEnergy, currentEnergy + rate * Time.deltaTime);
         }
 
         // 2. Dem thoi gian duy tri Giap Ho Than

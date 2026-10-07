@@ -13,7 +13,8 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
 
     private Vector2 moveInput;
-    private Vector2 lastFacingDirection = Vector2.down;
+    private Vector2 lastFacingDirection = Vector2.right;
+    private float lastHorizontalFacing = 1f;
     private bool isDashing = false;
     private float dashTimer = 0f;
     private float dashCooldownTimer = 0f;
@@ -177,6 +178,10 @@ public class PlayerController : MonoBehaviour
         if (moveInput != Vector2.zero)
         {
             lastFacingDirection = moveInput;
+            if (Mathf.Abs(moveInput.x) > 0.05f)
+            {
+                lastHorizontalFacing = Mathf.Sign(moveInput.x);
+            }
         }
 
         // Bam Space de Luot (Dash tren PC)
@@ -279,14 +284,24 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimations()
     {
-        animator.SetFloat(MoveXHash, lastFacingDirection.x);
-        animator.SetFloat(MoveYHash, lastFacingDirection.y);
+        if (animator == null) return;
 
-        var titan = GetComponent<TitanBerserkerSkill>();
-        if (titan != null && titan.IsSpinning)
+        bool isTitan = GetComponent<TitanBerserkerSkill>() != null;
+        if (isTitan)
         {
-            animator.SetFloat(SpeedHash, 0f);
-            return;
+            animator.SetFloat(MoveXHash, lastHorizontalFacing);
+            animator.SetFloat(MoveYHash, 0f);
+
+            var titan = GetComponent<TitanBerserkerSkill>();
+            if (titan != null && (titan.IsSpinning || titan.IsExecutingCataclysm))
+            {
+                return;
+            }
+        }
+        else
+        {
+            animator.SetFloat(MoveXHash, lastFacingDirection.x);
+            animator.SetFloat(MoveYHash, lastFacingDirection.y);
         }
 
         animator.SetFloat(SpeedHash, moveInput.sqrMagnitude);
@@ -297,10 +312,23 @@ public class PlayerController : MonoBehaviour
         if (dir.sqrMagnitude > 0.01f)
         {
             lastFacingDirection = dir.normalized;
+            if (Mathf.Abs(dir.x) > 0.05f)
+            {
+                lastHorizontalFacing = Mathf.Sign(dir.x);
+            }
             if (animator != null)
             {
-                animator.SetFloat(MoveXHash, lastFacingDirection.x);
-                animator.SetFloat(MoveYHash, lastFacingDirection.y);
+                bool isTitan = GetComponent<TitanBerserkerSkill>() != null;
+                if (isTitan)
+                {
+                    animator.SetFloat(MoveXHash, lastHorizontalFacing);
+                    animator.SetFloat(MoveYHash, 0f);
+                }
+                else
+                {
+                    animator.SetFloat(MoveXHash, lastFacingDirection.x);
+                    animator.SetFloat(MoveYHash, lastFacingDirection.y);
+                }
             }
         }
     }
@@ -312,6 +340,10 @@ public class PlayerController : MonoBehaviour
             isMobileInputActive = true;
             moveInput = input.normalized;
             lastFacingDirection = moveInput;
+            if (Mathf.Abs(moveInput.x) > 0.05f)
+            {
+                lastHorizontalFacing = Mathf.Sign(moveInput.x);
+            }
         }
         else
         {

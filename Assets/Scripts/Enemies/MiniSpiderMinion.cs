@@ -31,6 +31,8 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
+        biteDamage = MapScalingManager.ScaleDamage(biteDamage);
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<CircleCollider2D>();

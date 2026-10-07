@@ -12,6 +12,7 @@ public class DummyEnemy : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
         currentHealth = maxHealth;
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null) originalColor = spriteRenderer.color;

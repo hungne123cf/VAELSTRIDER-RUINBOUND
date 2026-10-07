@@ -3,10 +3,9 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Giao dien HUD hien thi 2 thanh:
-/// 1. Thanh Nang Luong (Energy Slider) mau Xanh Cyan phat quang.
-/// 2. Thanh Noi Nang (Inner Energy Slider) mau Vang Ho Phach (kich hoat Giap Ao khi day).
-/// Can chinh toa do chuan xac ben duoi thanh mau PlayerHealthBar va day ShardsCounter xuong duoi de khong bi chong de.
+/// Giao dien HUD hien thi 2 thanh ben duoi thanh mau chinh:
+/// 1. Thanh Nang Luong (Energy Slider) mau Xanh Cyan (hien thi % voi chu trang vien den ro net).
+/// 2. Thanh Noi Nang / Giap Ho Than (Inner Energy Slider) mau Vang Cam (visual tien do thuan tuy).
 /// </summary>
 public class PlayerEnergyUI : MonoBehaviour
 {
@@ -24,10 +23,12 @@ public class PlayerEnergyUI : MonoBehaviour
     private Outline innerEnergyOutline;
 
     private PlayerEnergySystem energySystem;
+    private RectTransform rootRt;
 
     void Awake()
     {
         Instance = this;
+        rootRt = GetComponent<RectTransform>();
     }
 
     void Start()
@@ -60,16 +61,60 @@ public class PlayerEnergyUI : MonoBehaviour
                 energySystem = player.gameObject.AddComponent<PlayerEnergySystem>();
             }
         }
+
+        float barWidth = (rootRt != null && rootRt.sizeDelta.x > 50f) ? rootRt.sizeDelta.x : 220f;
+
+        if (energySlider == null)
+        {
+            Transform eb = transform.Find("EnergyBar");
+            if (eb != null)
+            {
+                energySlider = eb.GetComponent<Slider>();
+                energyFillImage = eb.Find("FillArea/Fill")?.GetComponent<Image>();
+                energyText = eb.Find("Text")?.GetComponent<TextMeshProUGUI>();
+            }
+            else
+            {
+                energySlider = CreateSubBar(transform, "EnergyBar", 0f, barWidth, 13f, new Color(0.15f, 0.75f, 1f), out energyFillImage, out energyText, out _);
+            }
+        }
+
+        if (innerEnergySlider == null)
+        {
+            Transform ieb = transform.Find("InnerEnergyBar");
+            if (ieb != null)
+            {
+                innerEnergySlider = ieb.GetComponent<Slider>();
+                innerEnergyFillImage = ieb.Find("FillArea/Fill")?.GetComponent<Image>();
+                innerEnergyText = ieb.Find("Text")?.GetComponent<TextMeshProUGUI>();
+                innerEnergyOutline = ieb.GetComponent<Outline>();
+            }
+            else
+            {
+                innerEnergySlider = CreateSubBar(transform, "InnerEnergyBar", -17f, barWidth, 13f, new Color(0.95f, 0.72f, 0.15f), out innerEnergyFillImage, out innerEnergyText, out innerEnergyOutline);
+            }
+        }
+
+        ApplyHighContrastStyle(energyText);
+        if (innerEnergyText != null) innerEnergyText.gameObject.SetActive(false);
+    }
+
+    private void ApplyHighContrastStyle(TextMeshProUGUI tmp)
+    {
+        if (tmp == null) return;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = Color.white; // Chữ trắng sáng
+        tmp.outlineWidth = 0.35f;
+        tmp.outlineColor = Color.black; // Viền đen dày đậm 360 độ cực kỳ dễ nhìn trên nền Cyan
     }
 
     private void RepositionShardsCounter()
     {
-        // Dam bao ShardsCounter khong bao gio bi de len thanh nang luong
         var shardsUI = FindAnyObjectByType<ShardsUI>();
         if (shardsUI != null)
         {
             RectTransform scRt = shardsUI.GetComponent<RectTransform>();
-            if (scRt != null && scRt.anchoredPosition.y > -105f)
+            if (scRt != null && scRt.anchoredPosition.y > -108f)
             {
                 scRt.anchoredPosition = new Vector2(scRt.anchoredPosition.x, -112f);
             }
@@ -88,13 +133,21 @@ public class PlayerEnergyUI : MonoBehaviour
 
         if (energyText != null)
         {
-            energyText.text = $"NL: {(int)current} / {(int)max}";
+            int pct = max > 0 ? Mathf.Clamp(Mathf.RoundToInt((current / max) * 100f), 0, 100) : 0;
+            energyText.text = $"{pct}%";
+            ApplyHighContrastStyle(energyText);
         }
     }
 
     private void UpdateInnerEnergyBar()
     {
         if (innerEnergySlider == null || energySystem == null) return;
+
+        // Bỏ chữ số cho thanh nội năng
+        if (innerEnergyText != null && innerEnergyText.gameObject.activeSelf)
+        {
+            innerEnergyText.gameObject.SetActive(false);
+        }
 
         bool hasShield = energySystem.IsShieldActive();
 
@@ -109,11 +162,6 @@ public class PlayerEnergyUI : MonoBehaviour
             if (innerEnergyFillImage != null)
             {
                 innerEnergyFillImage.color = new Color(1f, 0.92f, 0.35f, 1f); // Vang ruc ro
-            }
-
-            if (innerEnergyText != null)
-            {
-                innerEnergyText.text = $"GIAP HO THAN: {shieldHp}/{maxShield}";
             }
 
             if (innerEnergyOutline != null)
@@ -133,11 +181,6 @@ public class PlayerEnergyUI : MonoBehaviour
             if (innerEnergyFillImage != null)
             {
                 innerEnergyFillImage.color = new Color(0.95f, 0.72f, 0.15f, 0.95f); // Ho phach
-            }
-
-            if (innerEnergyText != null)
-            {
-                innerEnergyText.text = $"NOI NANG: {(int)inner} / {(int)maxInner}";
             }
 
             if (innerEnergyOutline != null)
@@ -161,7 +204,6 @@ public class PlayerEnergyUI : MonoBehaviour
             if (Instance != null) return Instance;
         }
 
-        // Tao Container gan goc tren ben trai
         GameObject rootObj = new GameObject("Player_Energy_Bars_HUD");
         rootObj.transform.SetParent(canvas.transform, false);
 
@@ -170,7 +212,6 @@ public class PlayerEnergyUI : MonoBehaviour
         rootRt.anchorMax = new Vector2(0f, 1f);
         rootRt.pivot = new Vector2(0f, 1f);
 
-        // Can chinh toa do chuan theo PlayerHealthBar
         Transform healthBar = canvas.transform.Find("PlayerHealthBar");
         if (healthBar == null) healthBar = canvas.transform.Find("HealthBar");
 
@@ -194,13 +235,12 @@ public class PlayerEnergyUI : MonoBehaviour
 
         Instance = rootObj.AddComponent<PlayerEnergyUI>();
 
-        // 1. Tao Thanh Nang Luong (Energy Bar) - Mau Cyan
+        // 1. Thanh Nang Luong (Cyan)
         Instance.energySlider = CreateSubBar(rootObj.transform, "EnergyBar", 0f, barWidth, 13f, new Color(0.15f, 0.75f, 1f), out Instance.energyFillImage, out Instance.energyText, out _);
 
-        // 2. Tao Thanh Noi Nang (Inner Energy Bar) - Mau Vang Ho Phach
+        // 2. Thanh Noi Nang (Ho Phach / Vang)
         Instance.innerEnergySlider = CreateSubBar(rootObj.transform, "InnerEnergyBar", -17f, barWidth, 13f, new Color(0.95f, 0.72f, 0.15f), out Instance.innerEnergyFillImage, out Instance.innerEnergyText, out Instance.innerEnergyOutline);
 
-        // Day ShardsCounter xuong duoi de khong chong len
         Instance.RepositionShardsCounter();
 
         return Instance;
@@ -218,7 +258,6 @@ public class PlayerEnergyUI : MonoBehaviour
         rt.anchoredPosition = new Vector2(0f, offsetY);
         rt.sizeDelta = new Vector2(width, height);
 
-        // Nen Bar toi mau sang trong
         Image bgImg = barObj.AddComponent<Image>();
         bgImg.color = new Color(0.06f, 0.08f, 0.12f, 0.95f);
 
@@ -230,7 +269,6 @@ public class PlayerEnergyUI : MonoBehaviour
         slider.interactable = false;
         slider.transition = Selectable.Transition.None;
 
-        // Fill Area
         GameObject fillArea = new GameObject("FillArea");
         fillArea.transform.SetParent(barObj.transform, false);
         RectTransform fillAreaRt = fillArea.AddComponent<RectTransform>();
@@ -238,7 +276,6 @@ public class PlayerEnergyUI : MonoBehaviour
         fillAreaRt.anchorMax = Vector2.one;
         fillAreaRt.sizeDelta = Vector2.zero;
 
-        // Fill
         GameObject fill = new GameObject("Fill");
         fill.transform.SetParent(fillArea.transform, false);
         RectTransform fillRt = fill.AddComponent<RectTransform>();
@@ -250,7 +287,6 @@ public class PlayerEnergyUI : MonoBehaviour
         fillImg.color = fillColor;
         slider.fillRect = fillRt;
 
-        // Text Label
         GameObject textObj = new GameObject("Text");
         textObj.transform.SetParent(barObj.transform, false);
         RectTransform textRt = textObj.AddComponent<RectTransform>();
@@ -259,12 +295,12 @@ public class PlayerEnergyUI : MonoBehaviour
         textRt.sizeDelta = Vector2.zero;
 
         labelText = textObj.AddComponent<TextMeshProUGUI>();
-        labelText.fontSize = 10;
+        labelText.fontSize = 11;
         labelText.fontStyle = FontStyles.Bold;
         labelText.color = Color.white;
         labelText.alignment = TextAlignmentOptions.Center;
         labelText.raycastTarget = false;
-        labelText.outlineWidth = 0.2f;
+        labelText.outlineWidth = 0.35f;
         labelText.outlineColor = Color.black;
 
         return slider;

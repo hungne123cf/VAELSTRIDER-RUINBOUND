@@ -11,6 +11,7 @@ public class SkeletonKingObstacle : MonoBehaviour
 
     void Awake()
     {
+        contactDamage = MapScalingManager.ScaleDamage(contactDamage);
         col = GetComponent<Collider2D>();
         sr = GetComponent<SpriteRenderer>();
 

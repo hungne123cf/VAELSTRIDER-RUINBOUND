@@ -34,6 +34,8 @@ public class GoblinAI : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
+        attackDamage = MapScalingManager.ScaleDamage(attackDamage);
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<CapsuleCollider2D>();

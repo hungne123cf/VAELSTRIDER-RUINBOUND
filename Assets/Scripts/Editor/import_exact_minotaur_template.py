@@ -389,37 +389,13 @@ def main():
             bb = f_crop.getbbox()
             if bb:
                 raw_frame = f_crop.crop(bb)
-                armored_frame = apply_obsidian_dreadnought_armor(raw_frame)
+                armored_frame = apply_silver_knight_armor(raw_frame)
                 frames.append(armored_frame)
         return frames
 
-    def apply_obsidian_dreadnought_armor(frame):
-        w, h = frame.size
-        out = frame.copy()
-        
-        for y in range(h):
-            for x in range(w):
-                r, g, b, a = frame.getpixel((x, y))
-                if a < 30: continue
-                
-                # Phân biệt phần VẢI (Blue cloth / loincloth / pants trong hình gốc):
-                # Các pixel vải màu xanh lam đặc trưng: (45, 106, 197), (40, 93, 170), (37, 81, 144), (47, 84, 137)
-                is_cloth = (b > r + 20 and b > g + 10) or (b > 120 and b > r + 15 and b > g)
-                
-                # CHỈ ĐỔI MÀU PHẦN VẢI -> VẢI ĐEN SIÊU NGẦU (Matte Black Cloth with Charcoal Folds)
-                if is_cloth:
-                    brightness = (r + g + b) / 3.0
-                    if brightness > 110:   # Nếp gấp sáng của vải
-                        out.putpixel((x, y), (58, 65, 76, a)) # Xám than chì làm nổi bật nếp vải
-                    elif brightness > 90:  # Thân vải chính
-                        out.putpixel((x, y), (36, 40, 48, a)) # Đen mờ matte
-                    elif brightness > 70:  # Bóng đổ nếp vải
-                        out.putpixel((x, y), (22, 25, 30, a)) # Đen hắc ám
-                    else:                  # Vùng tối sâu
-                        out.putpixel((x, y), (14, 16, 20, a)) # Đen tuyền
-                
-                # Tất cả các phần còn lại (Lông nâu Minotaur, Sừng ngà, Mắt, Rìu/Búa, Vệt chém VFX) GIỮ NGUYÊN 100% GỐC
-        return out
+    def apply_silver_knight_armor(frame):
+        # Frame already contains high-definition silver armor plates, royal red cape, and gold accents
+        return frame.copy()
 
     # Cell size 128x128 with grounded feet at bottom_padding = 24px
     CELL_W, CELL_H = 128, 128
@@ -449,80 +425,87 @@ def main():
                 sheet.paste(cell, (c_idx * cell_size[0], r_idx * cell_size[1]), cell)
         return sheet
 
-    # 1. Idle (5 frames, Row 0 & Row 10)
+    # Extract rows
     idle_r = extract_row(0)
     idle_l = extract_row(10)
+    walk_r = extract_row(1)
+    walk_l = extract_row(11)
+    run_r = extract_row(2)
+    run_l = extract_row(12)
+    atk_r = extract_row(3)
+    atk_l = extract_row(13)
+    bash_r = extract_row(4)
+    bash_l = extract_row(14)
+    slam_r = extract_row(5)
+    slam_l = extract_row(15)
+    spin_r = extract_row(6)
+    spin_l = extract_row(16)
+    block_r = extract_row(7)
+    block_l = extract_row(17)
+    hurt_r = extract_row(8)
+    death_r = extract_row(9)
+
+    back_frame = spin_r[4]
+
+    # 1. Idle (Row 0: Down->R, Row 1: L, Row 2: R, Row 3: Up->R)
     idle_sheet = make_sheet([idle_r, idle_l, idle_r, idle_r], 5)
     safe_save_image(idle_sheet, f"{p4_dir}/Hammer_Idle.png")
     create_texture_meta(f"{p4_dir}/Hammer_Idle.png", 5, 4, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 2. Walk (8 frames, Row 1 & Row 11) - Heavy steady footsteps
-    walk_r = extract_row(1)
-    walk_l = extract_row(11)
+    # 2. Walk
     walk_sheet = make_sheet([walk_r, walk_l, walk_r, walk_r], 8)
     safe_save_image(walk_sheet, f"{p4_dir}/Hammer_Walk.png")
     create_texture_meta(f"{p4_dir}/Hammer_Walk.png", 8, 4, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 3. Run (5 frames, Row 2 & Row 12) - Aggressive combat charge sprint! (Distinct from Walk)
-    run_r = extract_row(2)
-    run_l = extract_row(12)
+    # 3. Run
     run_sheet = make_sheet([run_r, run_l, run_r, run_r], 5)
     safe_save_image(run_sheet, f"{p4_dir}/Hammer_Run.png")
     create_texture_meta(f"{p4_dir}/Hammer_Run.png", 5, 4, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 4. Attack 1 (9 frames, Row 3 & Row 13) - Massive crescent slash arc!
-    atk_r = extract_row(3)
-    atk_l = extract_row(13)
+    # 4. Attack 1
     atk_sheet = make_sheet([atk_r, atk_l, atk_r, atk_r], 9)
     safe_save_image(atk_sheet, f"{p4_dir}/Hammer_Attack.png")
     create_texture_meta(f"{p4_dir}/Hammer_Attack.png", 9, 4, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 5. Attack 2 / Bash (5 frames, Row 4 & Row 14) - Forward hammer smash / bash thrust
-    bash_r = extract_row(4)
-    bash_l = extract_row(14)
+    # 5. Attack 2 / Bash
     bash_sheet = make_sheet([bash_r, bash_l, bash_r, bash_r], 5)
     safe_save_image(bash_sheet, f"{p4_dir}/Hammer_Attack2.png")
     create_texture_meta(f"{p4_dir}/Hammer_Attack2.png", 5, 4, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 6. Skill (6 frames, Row 5 & Row 15) - High leap into air & earth-shattering ground slam!
-    slam_r = extract_row(5)
-    slam_l = extract_row(15)
+    # 6. Skill
     slam_sheet = make_sheet([slam_r, slam_l, slam_r, slam_r], 6)
     safe_save_image(slam_sheet, f"{p4_dir}/Hammer_Skill.png")
     create_texture_meta(f"{p4_dir}/Hammer_Skill.png", 6, 4, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 7. Spin Whirlwind (9 frames, Row 6 & Row 16) - 360 spin attack
-    spin_r = extract_row(6)
-    spin_l = extract_row(16)
+    # 7. Spin Whirlwind (9 frames)
     spin_sheet = make_sheet([spin_r, spin_l, spin_r, spin_r], 9)
     safe_save_image(spin_sheet, f"{p4_dir}/Hammer_Spin.png")
     create_texture_meta(f"{p4_dir}/Hammer_Spin.png", 9, 4, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 8. Block / Guard (3 frames, Row 7 & Row 17) - Guard stance
-    block_r = extract_row(7)
-    block_l = extract_row(17)
+    # 8. Block / Guard
     block_sheet = make_sheet([block_r, block_l, block_r, block_r], 3)
     safe_save_image(block_sheet, f"{p4_dir}/Hammer_Block.png")
     create_texture_meta(f"{p4_dir}/Hammer_Block.png", 3, 4, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 9. Hurt (3 frames, Row 8)
-    hurt_r = extract_row(8)
+    # 9. Hurt
     hurt_sheet = make_sheet([hurt_r], 3)
     safe_save_image(hurt_sheet, f"{p4_dir}/Hammer_Hurt.png")
     create_texture_meta(f"{p4_dir}/Hammer_Hurt.png", 3, 1, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 10. Death (6 frames, Row 9)
-    death_r = extract_row(9)
+    # 10. Death
     death_sheet = make_sheet([death_r], 6)
     safe_save_image(death_sheet, f"{p4_dir}/Hammer_Death.png")
     create_texture_meta(f"{p4_dir}/Hammer_Death.png", 6, 1, CELL_W, CELL_H, PPU, 0.5, PIVOT_Y)
 
-    # 11. Portrait (128x128 UI Portrait)
+    # 11. Portrait
     portrait_raw = idle_r[0]
-    pw, ph = portrait_raw.size
-    scale = min(110.0 / pw, 110.0 / ph)
-    nw, nh = int(pw * scale), int(ph * scale)
-    scaled_portrait = portrait_raw.resize((nw, nh), Image.Resampling.NEAREST)
+    p_bbox = portrait_raw.getbbox()
+    p_cropped = portrait_raw.crop(p_bbox) if p_bbox else portrait_raw
+    pw, ph = p_cropped.size
+    target_max = 92.0
+    scale = min(target_max / pw, target_max / ph)
+    nw, nh = int(round(pw * scale)), int(round(ph * scale))
+    scaled_portrait = p_cropped.resize((nw, nh), Image.Resampling.NEAREST)
     portrait_canvas = Image.new('RGBA', (128, 128), (0, 0, 0, 0))
     portrait_canvas.paste(scaled_portrait, ((128 - nw) // 2, (128 - nh) // 2), scaled_portrait)
     safe_save_image(portrait_canvas, f"{p4_dir}/UI/Hero_Player4_Portrait.png")
@@ -549,45 +532,45 @@ def main():
         return refs
 
     anims = {
-        "Player4_Idle_Down": (get_refs(guid_idle, "Hammer_Idle", 0, 5), 6.0, True, False),
+        "Player4_Idle_Down": (get_refs(guid_idle, "Hammer_Idle", 2, 5), 6.0, True, False),
         "Player4_Idle_Left": (get_refs(guid_idle, "Hammer_Idle", 1, 5), 6.0, True, False),
         "Player4_Idle_Right": (get_refs(guid_idle, "Hammer_Idle", 2, 5), 6.0, True, False),
-        "Player4_Idle_Up": (get_refs(guid_idle, "Hammer_Idle", 3, 5), 6.0, True, False),
+        "Player4_Idle_Up": (get_refs(guid_idle, "Hammer_Idle", 2, 5), 6.0, True, False),
 
-        "Player4_Walk_Down": (get_refs(guid_walk, "Hammer_Walk", 0, 8), 12.0, True, False),
+        "Player4_Walk_Down": (get_refs(guid_walk, "Hammer_Walk", 2, 8), 12.0, True, False),
         "Player4_Walk_Left": (get_refs(guid_walk, "Hammer_Walk", 1, 8), 12.0, True, False),
         "Player4_Walk_Right": (get_refs(guid_walk, "Hammer_Walk", 2, 8), 12.0, True, False),
-        "Player4_Walk_Up": (get_refs(guid_walk, "Hammer_Walk", 3, 8), 12.0, True, False),
+        "Player4_Walk_Up": (get_refs(guid_walk, "Hammer_Walk", 2, 8), 12.0, True, False),
 
-        "Player4_Run_Down": (get_refs(guid_run, "Hammer_Run", 0, 5), 10.0, True, False),
+        "Player4_Run_Down": (get_refs(guid_run, "Hammer_Run", 2, 5), 10.0, True, False),
         "Player4_Run_Left": (get_refs(guid_run, "Hammer_Run", 1, 5), 10.0, True, False),
         "Player4_Run_Right": (get_refs(guid_run, "Hammer_Run", 2, 5), 10.0, True, False),
-        "Player4_Run_Up": (get_refs(guid_run, "Hammer_Run", 3, 5), 10.0, True, False),
+        "Player4_Run_Up": (get_refs(guid_run, "Hammer_Run", 2, 5), 10.0, True, False),
 
-        "Player4_Attack_Down": (get_refs(guid_attack, "Hammer_Attack", 0, 9), 12.0, False, False),
+        "Player4_Attack_Down": (get_refs(guid_attack, "Hammer_Attack", 2, 9), 12.0, False, False),
         "Player4_Attack_Left": (get_refs(guid_attack, "Hammer_Attack", 1, 9), 12.0, False, False),
         "Player4_Attack_Right": (get_refs(guid_attack, "Hammer_Attack", 2, 9), 12.0, False, False),
-        "Player4_Attack_Up": (get_refs(guid_attack, "Hammer_Attack", 3, 9), 12.0, False, False),
+        "Player4_Attack_Up": (get_refs(guid_attack, "Hammer_Attack", 2, 9), 12.0, False, False),
 
-        "Player4_Attack2_Down": (get_refs(guid_attack2, "Hammer_Attack2", 0, 5), 10.0, False, False),
+        "Player4_Attack2_Down": (get_refs(guid_attack2, "Hammer_Attack2", 2, 5), 10.0, False, False),
         "Player4_Attack2_Left": (get_refs(guid_attack2, "Hammer_Attack2", 1, 5), 10.0, False, False),
         "Player4_Attack2_Right": (get_refs(guid_attack2, "Hammer_Attack2", 2, 5), 10.0, False, False),
-        "Player4_Attack2_Up": (get_refs(guid_attack2, "Hammer_Attack2", 3, 5), 10.0, False, False),
+        "Player4_Attack2_Up": (get_refs(guid_attack2, "Hammer_Attack2", 2, 5), 10.0, False, False),
 
-        "Player4_Skill_Down": (get_refs(guid_skill, "Hammer_Skill", 0, 6), 10.0, False, False),
-        "Player4_Skill_Left": (get_refs(guid_skill, "Hammer_Skill", 1, 6), 10.0, False, False),
-        "Player4_Skill_Right": (get_refs(guid_skill, "Hammer_Skill", 2, 6), 10.0, False, False),
-        "Player4_Skill_Up": (get_refs(guid_skill, "Hammer_Skill", 3, 6), 10.0, False, False),
+        "Player4_Skill_Down": (get_refs(guid_skill, "Hammer_Skill", 2, 6), 7.5, False, False),
+        "Player4_Skill_Left": (get_refs(guid_skill, "Hammer_Skill", 1, 6), 7.5, False, False),
+        "Player4_Skill_Right": (get_refs(guid_skill, "Hammer_Skill", 2, 6), 7.5, False, False),
+        "Player4_Skill_Up": (get_refs(guid_skill, "Hammer_Skill", 2, 6), 7.5, False, False),
 
-        "Player4_Spin_Down": (get_refs(guid_spin, "Hammer_Spin", 0, 9), 7.5, True, False),
-        "Player4_Spin_Left": (get_refs(guid_spin, "Hammer_Spin", 1, 9), 7.5, True, False),
-        "Player4_Spin_Right": (get_refs(guid_spin, "Hammer_Spin", 2, 9), 7.5, True, False),
-        "Player4_Spin_Up": (get_refs(guid_spin, "Hammer_Spin", 3, 9), 7.5, True, False),
+        "Player4_Spin_Down": (get_refs(guid_spin, "Hammer_Spin", 2, 9), 14.0, True, False),
+        "Player4_Spin_Left": (get_refs(guid_spin, "Hammer_Spin", 1, 8), 14.0, True, False),
+        "Player4_Spin_Right": (get_refs(guid_spin, "Hammer_Spin", 2, 9), 14.0, True, False),
+        "Player4_Spin_Up": (get_refs(guid_spin, "Hammer_Spin", 2, 9), 14.0, True, False),
 
-        "Player4_Block_Down": (get_refs(guid_block, "Hammer_Block", 0, 3), 6.0, True, False),
+        "Player4_Block_Down": (get_refs(guid_block, "Hammer_Block", 2, 3), 6.0, True, False),
         "Player4_Block_Left": (get_refs(guid_block, "Hammer_Block", 1, 3), 6.0, True, False),
         "Player4_Block_Right": (get_refs(guid_block, "Hammer_Block", 2, 3), 6.0, True, False),
-        "Player4_Block_Up": (get_refs(guid_block, "Hammer_Block", 3, 3), 6.0, True, False),
+        "Player4_Block_Up": (get_refs(guid_block, "Hammer_Block", 2, 3), 6.0, True, False),
 
         "Player4_Hurt": (get_refs(guid_hurt, "Hammer_Hurt", 0, 3), 8.0, False, False),
         "Player4_Death": (get_refs(guid_death, "Hammer_Death", 0, 6), 8.0, False, False),

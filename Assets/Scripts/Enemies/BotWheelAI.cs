@@ -64,6 +64,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     void Awake()
     {
         try { gameObject.tag = "Enemy"; } catch { }
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
+        attackDamage = MapScalingManager.ScaleDamage(attackDamage);
         currentHealth = maxHealth;
         initialSpawnPosition = transform.position;
         rb = GetComponent<Rigidbody2D>();
@@ -536,10 +538,10 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         initialSpawnPosition = transform.position;
         transform.localScale = transform.localScale * scaleMultiplier;
 
-        // Hệ thống 3 thanh máu: Mỗi thanh 950 HP (Tổng 2850 HP)
+        // Hệ thống 3 thanh máu: Mỗi thanh 950 HP (scale theo Map)
         totalBossPhases = 3;
         currentBossPhase = 3;
-        phaseMaxHealth = 950;
+        phaseMaxHealth = MapScalingManager.ScaleHealth(950);
         currentHealth = phaseMaxHealth;
 
         attackDamage *= damageMultiplier;

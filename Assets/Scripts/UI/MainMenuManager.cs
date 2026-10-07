@@ -1296,23 +1296,19 @@ public class MainMenuManager : MonoBehaviour
         string id = heroId.ToLower();
         if (id == "vael" || id == "vaelstrider")
         {
-            return new Vector3(2.4f, 2.4f, 1f);
+            return new Vector3(1.35f, 1.35f, 1f);
         }
-        else if (id == "ronin" || id == "galeronin" || id == "player2")
+        else if (id == "ronin" || id == "galeronin" || id == "player2" || id == "maid" || id == "elysia")
         {
-            return new Vector3(2.4f, 2.4f, 1f);
-        }
-        else if (id == "maid" || id == "elysia")
-        {
-            return new Vector3(2.4f, 2.4f, 1f);
+            return new Vector3(1.45f, 1.45f, 1f);
         }
         else if (id == "azure" || id == "azureblade" || id == "player3")
         {
-            return new Vector3(2.4f, 2.4f, 1f);
+            return new Vector3(1.7f, 1.7f, 1f);
         }
         else if (id == "titan" || id == "titanberserker" || id == "player4")
         {
-            return new Vector3(2.2f, 2.2f, 1f);
+            return new Vector3(1.35f, 1.35f, 1f);
         }
         return Vector3.one;
     }
@@ -1366,6 +1362,23 @@ public class MainMenuManager : MonoBehaviour
         avatarImgRef.sprite = avatarSprite;
         avatarImgRef.preserveAspect = true;
         avatarImgRef.transform.localScale = GetHeroVisualScale(heroId);
+        string hid = heroId.ToLower();
+        if (hid == "titan" || hid == "titanberserker" || hid == "player4")
+        {
+            aiRt.anchoredPosition = new Vector2(0f, 8f);
+        }
+        else if (hid == "ronin" || hid == "galeronin" || hid == "player2" || hid == "maid" || hid == "elysia")
+        {
+            aiRt.anchoredPosition = new Vector2(0f, 4f);
+        }
+        else if (hid == "vael" || hid == "vaelstrider")
+        {
+            aiRt.anchoredPosition = new Vector2(0f, 8f);
+        }
+        else if (hid == "azure" || hid == "azureblade" || hid == "player3")
+        {
+            aiRt.anchoredPosition = new Vector2(0f, 4f);
+        }
         if (isLocked) avatarImgRef.color = new Color(0.5f, 0.5f, 0.55f, 0.6f);
 
         if (isLocked)
@@ -1530,7 +1543,13 @@ public class MainMenuManager : MonoBehaviour
             azureIdleFrames = LoadSpritesFromPath("Assets/ART/Player3/Sword_Idle.png", 64, 64);
 
         if (titanIdleFrames == null || titanIdleFrames.Length == 0)
-            titanIdleFrames = LoadSpritesFromPath("Assets/ART/Player4/Hammer_Idle.png", 64, 64);
+        {
+            var allFrames = LoadSpritesFromPath("Assets/ART/Player4/Hammer_Idle.png", 128, 128);
+            if (allFrames != null && allFrames.Length > 0)
+            {
+                titanIdleFrames = allFrames.Take(Mathf.Min(5, allFrames.Length)).ToArray();
+            }
+        }
     }
 
     private void HookButtons()
@@ -1713,7 +1732,7 @@ public class MainMenuManager : MonoBehaviour
             }
         }
 
-        if (cardAzureTitleText != null) cardAzureTitleText.text = LocalizationManager.T("Lam Kiếm Sĩ (Azure)", "Azure Blade");
+        if (cardAzureTitleText != null) cardAzureTitleText.text = LocalizationManager.T("Lam Kiếm Sĩ", "Azure Blade");
         if (cardAzureSubText != null) cardAzureSubText.text = LocalizationManager.T("Trọng Kiếm / Sóng Kiếm", "Heavy / Sword Waves");
         if (cardAzureStatusText != null)
         {
@@ -1721,7 +1740,7 @@ public class MainMenuManager : MonoBehaviour
             cardAzureStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
         }
 
-        if (cardTitanTitleText != null) cardTitanTitleText.text = LocalizationManager.T("Cuồng Chiến Binh (Titan)", "Titan Berserker");
+        if (cardTitanTitleText != null) cardTitanTitleText.text = LocalizationManager.T("Cuồng Chiến Binh", "Titan Berserker");
         if (cardTitanSubText != null) cardTitanSubText.text = LocalizationManager.T("Đại Chùy / Tanker", "Heavy War Hammer / Tanker");
         if (cardTitanStatusText != null)
         {
@@ -1752,18 +1771,18 @@ public class MainMenuManager : MonoBehaviour
         if (curChar == CharacterManager.CHAR_TITAN_BERSERKER)
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.T("Cuồng Chiến Binh", "Titan Berserker");
-            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Đại Chùy Chiến Thần (Tanker & Chấn Địa)", "Titan Berserker (Tanker & Cataclysm Slam)");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Đại Chùy Chiến Thần / Tanker & Chấn Địa", "Titan Berserker / Tanker & Cataclysm Slam");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Cuồng Nộ Chấn Địa", "Titan Cataclysm");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Vung đại chùy nện đất tạo sóng xung kích hình nón càn quét. Nội tại Thể Phách Titan giảm 20% sát thương và tự động tạo Khiên Đất Đá khi đầy nộ. Tuyệt kỹ hút toàn bộ quái vật vào tâm chấn rồi nện búa dung nham hất tung và gây choáng diện rộng!", "Swings heavy war hammer unleashing conic shockwaves. Innate 20% damage reduction and automatic Titan Bulwark shield. Special skill draws all enemies to the epicenter and slams with a catastrophic volcanic eruption!");
             if (heroStatsSummaryText != null)
             {
-                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 160   CÔNG: 32   TỐC: 4.4", "HP: 160   ATK: 32   SPD: 4.4");
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 200   CÔNG: 12   TỐC: 4.0", "HP: 200   ATK: 12   SPD: 4.0");
             }
         }
         else if (curChar == CharacterManager.CHAR_AZURE_BLADE)
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ", "Azure Blade");
-            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí (Sóng Kiếm Tầm Xa)", "Heavy Crescent Blade");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí / Sóng Kiếm Tầm Xa", "Heavy Crescent Blade");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Bão Sóng Kiếm", "Crescent Tempest");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Đòn chém chậm nhưng uy lực, mỗi nhát chém phóng ra sóng kiếm xuyên thấu quái vật. Tuyệt kỹ phóng ra 5 đợt kiếm khí hình nan quạt quét sạch chiến trường!", "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!");
             if (heroStatsSummaryText != null)
@@ -1774,7 +1793,7 @@ public class MainMenuManager : MonoBehaviour
         else if (curChar == CharacterManager.CHAR_GALE_RONIN)
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách", "Gale Ronin");
-            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách (Nhất Kích Tất Sát)", "Phantom Blade (Iaido Precision)");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách / Nhất Kích Tất Sát", "Phantom Blade / Iaido Precision");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Bão Phong Trảm", "Phantom Cleave");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Tốc đánh chậm cố định (chuẩn Iaido), chém trúng quái hồi ngay +50% Nộ & giảm -20% hồi chiêu Ulti. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "Fixed slow Iaido strikes: On hit restores +50% Rage & reduces Ulti CD by 20%. Special skill unleashes phantom dash slashes across foes!");
             if (heroStatsSummaryText != null)
@@ -1805,9 +1824,9 @@ public class MainMenuManager : MonoBehaviour
         {
             if (rosterHeroPreviewImage != null && titanIdleFrames != null && titanIdleFrames.Length > 0)
                 rosterHeroPreviewImage.sprite = titanIdleFrames[0];
-            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Cuồng Chiến Binh (Titan Berserker)", "Titan Berserker (War Hammer Tanker)");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Đại Chùy Chiến Thần (Tanker & Chấn Địa)", "Titan Berserker (Tanker & Cataclysm Slam)");
-            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 160   CÔNG: 32   TỐC: 4.4", "HP: 160   ATK: 32   SPD: 4.4");
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Cuồng Chiến Binh", "Titan Berserker");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Đại Chùy Chiến Thần / Tanker & Chấn Địa", "Heavy War Hammer / Tanker");
+            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 200   CÔNG: 12   TỐC: 4.0", "HP: 200   ATK: 12   SPD: 4.0");
             if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Cuồng Nộ Chấn Địa", "Special: Titan Cataclysm Slam");
             if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Vung đại chùy nện đất tạo sóng xung kích hình nón càn quét. Nội tại Thể Phách Titan giảm 20% sát thương và tự động tạo Khiên Đất Đá khi đầy nộ. Tuyệt kỹ hút toàn bộ quái vật vào tâm chấn rồi nện búa dung nham hất tung và gây choáng diện rộng!", "Swings heavy war hammer unleashing conic shockwaves. Innate 20% damage reduction and automatic Titan Bulwark shield. Special skill draws all enemies to the epicenter and slams with a catastrophic volcanic eruption!");
 
@@ -1822,8 +1841,8 @@ public class MainMenuManager : MonoBehaviour
         }
         else if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
         {
-            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ (Azure Blade)", "Azure Blade");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí (Sóng Kiếm Tầm Xa)", "Heavy Crescent Blade (Ranged Waves)");
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ", "Azure Blade");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí / Sóng Kiếm Tầm Xa", "Heavy Crescent Blade / Ranged Waves");
             if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 110   CÔNG: 24   TỐC: 4.8", "HP: 110   ATK: 24   SPD: 4.8");
             if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Bão Sóng Kiếm", "Special: Crescent Tempest");
             if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Đòn chém chậm nhưng uy lực, mỗi nhát chém phóng ra sóng kiếm xuyên thấu quái vật. Tuyệt kỹ phóng ra 5 đợt kiếm khí hình nan quạt quét sạch chiến trường!", "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!");
@@ -1839,8 +1858,8 @@ public class MainMenuManager : MonoBehaviour
         }
         else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid")
         {
-            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách (Gale Ronin)", "Gale Ronin (Phantom Blade)");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách (Nhất Kích Tất Sát)", "Phantom Blade (Iaido Precision)");
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách", "Gale Ronin");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách / Nhất Kích Tất Sát", "Phantom Blade / Iaido Precision");
             if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 95   CÔNG: 28   TỐC: 5.4", "HP: 95   ATK: 28   SPD: 5.4");
             if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Bão Phong Trảm", "Special: Phantom Cleave");
             if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Tốc đánh chậm cố định (chuẩn Iaido), chém trúng quái hồi ngay +50% Nộ & giảm -20% hồi chiêu Ulti. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "Fixed slow Iaido strikes: On hit restores +50% Rage & reduces Ulti CD by 20%. Special skill unleashes phantom dash slashes across foes!");
@@ -1875,6 +1894,30 @@ public class MainMenuManager : MonoBehaviour
         if (rosterHeroPreviewImage != null)
         {
             rosterHeroPreviewImage.transform.localScale = GetHeroVisualScale(inspectedHeroId);
+            RectTransform rt = rosterHeroPreviewImage.rectTransform;
+            if (rt != null)
+            {
+                if (inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
+                {
+                    rt.anchoredPosition = new Vector2(0f, 14f);
+                }
+                else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid" || inspectedHeroId == "elysia")
+                {
+                    rt.anchoredPosition = new Vector2(0f, 4f);
+                }
+                else if (inspectedHeroId == "vael" || inspectedHeroId == "vaelstrider")
+                {
+                    rt.anchoredPosition = new Vector2(0f, 14f);
+                }
+                else if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade" || inspectedHeroId == "player3")
+                {
+                    rt.anchoredPosition = new Vector2(0f, 6f);
+                }
+                else
+                {
+                    rt.anchoredPosition = Vector2.zero;
+                }
+            }
             UpdateRosterEquipmentMaterial();
         }
 
@@ -2040,6 +2083,30 @@ public class MainMenuManager : MonoBehaviour
         heroPreviewImage.preserveAspect = true;
         heroPreviewImage.color = Color.white;
         heroPreviewImage.transform.localScale = GetHeroVisualScale(curChar == CharacterManager.CHAR_TITAN_BERSERKER ? "titan" : (curChar == CharacterManager.CHAR_AZURE_BLADE ? "azure" : (curChar == CharacterManager.CHAR_GALE_RONIN ? "ronin" : "vael")));
+        RectTransform mainRt = heroPreviewImage.rectTransform;
+        if (mainRt != null)
+        {
+            if (curChar == CharacterManager.CHAR_TITAN_BERSERKER)
+            {
+                mainRt.anchoredPosition = new Vector2(0f, 14f);
+            }
+            else if (curChar == CharacterManager.CHAR_GALE_RONIN || curChar == CharacterManager.CHAR_MAID)
+            {
+                mainRt.anchoredPosition = new Vector2(0f, 4f);
+            }
+            else if (curChar == CharacterManager.CHAR_VAELSTRIDER)
+            {
+                mainRt.anchoredPosition = new Vector2(0f, 14f);
+            }
+            else if (curChar == CharacterManager.CHAR_AZURE_BLADE)
+            {
+                mainRt.anchoredPosition = new Vector2(0f, 6f);
+            }
+            else
+            {
+                mainRt.anchoredPosition = Vector2.zero;
+            }
+        }
 
         if (frames == null || frames.Length == 0)
         {

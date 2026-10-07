@@ -98,8 +98,49 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private float socketHpRegen = 0f;
     private float regenTimer = 0f;
 
+    [Header("Virtual Health / Máu Ảo (+50% HP Tuyệt Kỹ)")]
+    private int currentVirtualHealth = 0;
+    private int maxVirtualHealth = 0;
+    private float virtualHealthDuration = 15f;
+    private float virtualHealthTimer = 0f;
+    private bool isVirtualHealthActive = false;
+
+    public void AddVirtualHealth(int amount, float duration = 15f)
+    {
+        if (amount <= 0) return;
+        currentVirtualHealth = amount;
+        maxVirtualHealth = amount;
+        virtualHealthDuration = duration;
+        virtualHealthTimer = duration;
+        isVirtualHealthActive = true;
+
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, LocalizationManager.T($"🛡️ +{amount} MÁU ẢO! 🛡️", $"🛡️ +{amount} BARRIER HP! 🛡️"), new Color(1f, 0.85f, 0.2f));
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+    }
+
+    public int GetVirtualHealth() => currentVirtualHealth;
+    public int GetMaxVirtualHealth() => maxVirtualHealth;
+    public float GetVirtualHealthTimer() => virtualHealthTimer;
+    public float GetVirtualHealthDuration() => virtualHealthDuration;
+    public bool IsVirtualHealthActive() => isVirtualHealthActive && currentVirtualHealth > 0;
+    public bool IsVirtualHealthExpiringSoon() => isVirtualHealthActive && virtualHealthTimer <= 3.5f;
+
     void Update()
     {
+        // 1. Đếm thời gian duy trì Lớp Máu Ảo
+        if (isVirtualHealthActive)
+        {
+            virtualHealthTimer -= Time.deltaTime;
+            if (virtualHealthTimer <= 0f)
+            {
+                isVirtualHealthActive = false;
+                currentVirtualHealth = 0;
+                maxVirtualHealth = 0;
+                DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, LocalizationManager.T("MÁU ẢO HẾT HẠN", "BARRIER EXPIRED"), new Color(0.7f, 0.75f, 0.85f));
+            }
+        }
+
+        // 2. Hồi phục HP theo ngọc khảm
         if (socketHpRegen > 0f && !isDead && currentHealth < maxHealth)
         {
             regenTimer += Time.deltaTime;
@@ -125,7 +166,32 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - totalDef / 100f)));
         }
 
-        // 1. Kiểm tra và hấp thụ sát thương bằng Lớp Giáp Ảo Hộ Thân nếu đang kích hoạt
+        // 1. Kiểm tra và trừ vào Lớp Máu Ảo trước (Virtual Health Barrier)
+        if (isVirtualHealthActive && currentVirtualHealth > 0)
+        {
+            if (currentVirtualHealth >= damage)
+            {
+                currentVirtualHealth -= damage;
+                DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"[{LocalizationManager.T("MÁU ẢO", "BARRIER")}] -{damage}", new Color(1f, 0.88f, 0.35f));
+                if (currentVirtualHealth <= 0)
+                {
+                    isVirtualHealthActive = false;
+                    DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, LocalizationManager.T("MÁU ẢO VỠ!", "BARRIER BROKEN!"), new Color(1f, 0.4f, 0.3f));
+                }
+                return; // Đã hấp thụ toàn bộ đòn đánh bằng máu ảo!
+            }
+            else
+            {
+                int absorbed = currentVirtualHealth;
+                damage -= absorbed;
+                currentVirtualHealth = 0;
+                isVirtualHealthActive = false;
+                DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"[{LocalizationManager.T("MÁU ẢO", "BARRIER")}] -{absorbed}", new Color(1f, 0.88f, 0.35f));
+                DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, LocalizationManager.T("MÁU ẢO VỠ!", "BARRIER BROKEN!"), new Color(1f, 0.4f, 0.3f));
+            }
+        }
+
+        // 2. Kiểm tra và hấp thụ sát thương bằng Lớp Giáp Hộ Thân (Energy System Shield) nếu có
         var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
         if (energySys != null && energySys.IsShieldActive())
         {
@@ -151,12 +217,17 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.12f, 0.15f);
 
-        // Kích hoạt Hurt animation trên Animator
+        // Kích hoạt Hurt animation trên Animator (Có Super Armor khi đang Xoay búa hoặc Tuyệt kỹ)
         var anim = GetComponent<Animator>();
         if (anim != null && anim.runtimeAnimatorController != null)
         {
-            anim.SetTrigger("HurtTrigger");
-            anim.Play("Hurt", 0, 0f);
+            var titan = GetComponent<TitanBerserkerSkill>();
+            bool isSuperArmor = (titan != null && (titan.IsSpinning || titan.IsExecutingCataclysm));
+            if (!isSuperArmor)
+            {
+                anim.SetTrigger("HurtTrigger");
+                anim.Play("Hurt", 0, 0f);
+            }
         }
 
         if (spriteRenderer != null && currentHealth > 0)

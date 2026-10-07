@@ -28,6 +28,7 @@ public class TitanBerserkerSkill : MonoBehaviour
     public float ultimateRadius = 5.5f;
     public int baseCataclysmDamage = 95;
     private bool isExecutingCataclysm = false;
+    public bool IsExecutingCataclysm => isExecutingCataclysm;
 
     [Header("--- TARGETING LAYERS ---")]
     public LayerMask enemyLayers;
@@ -106,9 +107,9 @@ public class TitanBerserkerSkill : MonoBehaviour
         }
         else
         {
-            // Đòn thứ 4: CƠN LỐC CUỒNG NỘ (SPIN WHIRLWIND 360°) - VỪA XOAY VỪA TỰ DO DI CHUYỂN
+            // Đòn thứ 4: CƠN LỐC CUỒNG NỘ (SPIN WHIRLWIND 360°) - XOAY 1 VÒNG CÀN QUÉT KHỚP SOUND (0.75s)
             comboStep = 0;
-            attackCooldownTimer = 3.35f;
+            attackCooldownTimer = 0.85f;
             StartCoroutine(SpinWhirlwindRoutine(bonusAtkDamage));
         }
 
@@ -168,7 +169,7 @@ public class TitanBerserkerSkill : MonoBehaviour
     }
 
     /// <summary>
-    /// Đòn thứ 4: Cơn Lốc Cuồng Nộ Xoay Búa 360° - Vừa Xoay Vừa Di Chuyển Càn Quét
+    /// Đòn thứ 4: Cơn Lốc Cuồng Nộ Xoay Búa 360° - Xoay quét dứt khoát khớp chuẩn âm thanh (0.75s)
     /// </summary>
     private IEnumerator SpinWhirlwindRoutine(int bonusAtk)
     {
@@ -183,22 +184,25 @@ public class TitanBerserkerSkill : MonoBehaviour
         DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, LocalizationManager.T("⚔ CUỒNG NỘ LỐC XOÁY! ⚔", "⚔ TITAN WHIRLWIND! ⚔"), new Color(1f, 0.55f, 0.1f));
         SoundManager.EnsureInstance()?.PlaySwordSlash();
 
-        float spinDuration = 3.2f;
-        float tickInterval = 0.22f;
+        float spinDuration = 0.75f;
+        float tickInterval = 0.25f;
         float elapsed = 0f;
         float spinRadius = 2.4f;
 
         while (elapsed < spinDuration)
         {
             elapsed += tickInterval;
-            SoundManager.EnsureInstance()?.PlaySwordSlash();
 
             Vector3 center = (playerCombat != null) ? playerCombat.GetBodyCenterWorld() : (transform.position + Vector3.up * 0.65f);
             Collider2D[] hits = Physics2D.OverlapCircleAll(center, spinRadius, enemyLayers);
 
             bool isLastTick = elapsed >= spinDuration;
             int tickDmg = Mathf.RoundToInt((baseHammerDamage * 0.55f) + (bonusAtk * 0.4f));
-            if (isLastTick) tickDmg = Mathf.RoundToInt(baseHammerDamage * 1.35f + bonusAtk);
+            if (isLastTick)
+            {
+                tickDmg = Mathf.RoundToInt(baseHammerDamage * 1.35f + bonusAtk);
+                SoundManager.EnsureInstance()?.PlayHitImpact();
+            }
 
             int hitCount = 0;
             foreach (var col in hits)
@@ -235,15 +239,17 @@ public class TitanBerserkerSkill : MonoBehaviour
             {
                 AddBerserkRage(10f * hitCount);
                 var cam = Object.FindAnyObjectByType<CameraFollow>();
-                if (cam != null) cam.Shake(isLastTick ? 0.25f : 0.10f, 0.12f);
+                if (cam != null) cam.Shake(isLastTick ? 0.22f : 0.08f, 0.10f);
             }
 
             yield return new WaitForSeconds(tickInterval);
         }
 
+        // Hết vòng xoay & hết sound -> Ngắt ngay hoạt ảnh và trả về trạng thái bình thường
         isSpinning = false;
         if (animator != null)
         {
+            animator.ResetTrigger("SpinTrigger");
             animator.Play("Idle", 0, 0f);
         }
     }
@@ -322,11 +328,18 @@ public class TitanBerserkerSkill : MonoBehaviour
         if (playerHealth != null) playerHealth.isInvulnerable = true;
         if (playerController != null) playerController.SetCanMove(false);
 
+        // Kích hoạt ngay toàn bộ chuỗi hoạt ảnh Hammer_Skill (Vung đại chùy tích năng lượng -> Nhảy lên -> Nện đất bộc phá)
+        if (animator != null)
+        {
+            animator.SetTrigger("SkillTrigger");
+            animator.Play("Skill", 0, 0f);
+        }
+
         DamagePopup.CreateText(transform.position + Vector3.up * 2.0f, LocalizationManager.T("CUỒNG NỘ CHẤN ĐỊA!", "TITAN CATACLYSM!"), new Color(1f, 0.4f, 0.1f));
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
-        // 1. TÂM CHẤN HÚT KẺ ĐỊCH VÀO TÂM TRONG 0.4s
-        float pullDuration = 0.45f;
+        // 1. GIAI ĐOẠN TÍCH TỤ & VUNG BÚA LÊN CAO: TÂM CHẤN HÚT KẺ ĐỊCH VÀO TRONG 0.48s
+        float pullDuration = 0.48f;
         float elapsed = 0f;
         Vector3 slamCenter = transform.position;
 
@@ -341,18 +354,13 @@ public class TitanBerserkerSkill : MonoBehaviour
                 if (dmg != null && !(dmg is PlayerHealth))
                 {
                     Vector2 pullDir = ((Vector2)slamCenter - (Vector2)col.transform.position).normalized;
-                    col.transform.position = Vector3.MoveTowards(col.transform.position, slamCenter, 6.5f * Time.deltaTime);
+                    col.transform.position = Vector3.MoveTowards(col.transform.position, slamCenter, 7.5f * Time.deltaTime);
                 }
             }
             yield return null;
         }
 
-        // 2. NỆN ĐẠI CHÙY DUNG NHAM BỘC PHÁ DIỆN RỘNG (AREA SLAM)
-        if (animator != null)
-        {
-            animator.SetTrigger("SkillTrigger");
-        }
-
+        // 2. THỜI ĐIỂM BÚA CHẠM ĐẤT: NỆN ĐẠI CHÙY DUNG NHAM BỘC PHÁ DIỆN RỘNG (CATACLYSM EXPLOSION IMPACT)
         SoundManager.EnsureInstance()?.PlayHitImpact();
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.45f, 0.6f);
@@ -379,19 +387,32 @@ public class TitanBerserkerSkill : MonoBehaviour
                 {
                     Vector2 burstDir = ((Vector2)col.transform.position - (Vector2)slamCenter).normalized;
                     if (burstDir.sqrMagnitude < 0.01f) burstDir = Vector2.up;
-                    rb.AddForce(burstDir * 11.0f, ForceMode2D.Impulse);
+                    rb.AddForce(burstDir * 12.0f, ForceMode2D.Impulse);
                 }
             }
         }
 
         AddBerserkRage(MAX_BERSERK_RAGE); // Kích hoạt ngay khiên hộ thân
 
-        yield return new WaitForSeconds(0.25f);
+        // Cơ chế mới: Nhận thêm 50% Máu hiện tại thành 1 lớp Máu Ảo (Barrier) tồn tại trong suốt thời gian của khiên nội năng
+        if (playerHealth != null)
+        {
+            int curHp = playerHealth.CurrentHealth;
+            int bonusVirtualHp = Mathf.Max(1, Mathf.RoundToInt(curHp * 0.50f));
+            playerHealth.AddVirtualHealth(bonusVirtualHp, duration: 15.0f);
+        }
+
+        // Chờ hoạt ảnh vung nện kết thúc trọn vẹn (frame 5 recovery)
+        yield return new WaitForSeconds(0.35f);
 
         if (playerHealth != null) playerHealth.isInvulnerable = false;
         if (playerController != null) playerController.SetCanMove(true);
 
         isExecutingCataclysm = false;
+        if (animator != null)
+        {
+            animator.Play("Idle", 0, 0f);
+        }
     }
 
     /// <summary>

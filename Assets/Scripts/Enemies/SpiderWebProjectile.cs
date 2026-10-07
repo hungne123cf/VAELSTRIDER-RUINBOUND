@@ -28,6 +28,7 @@ public class SpiderWebProjectile : MonoBehaviour
     public void Init(Vector2 dir)
     {
         direction = dir.normalized;
+        damage = MapScalingManager.ScaleDamage(damage);
 
         sr = gameObject.AddComponent<SpriteRenderer>();
         bulletSprites = SpiderWebSpriteFactory.GetBulletSprites();

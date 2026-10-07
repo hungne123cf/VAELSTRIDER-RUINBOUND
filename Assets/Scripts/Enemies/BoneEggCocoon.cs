@@ -30,6 +30,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
         currentHealth = maxHealth;
         sr = GetComponent<SpriteRenderer>();
         col = GetComponent<CircleCollider2D>();

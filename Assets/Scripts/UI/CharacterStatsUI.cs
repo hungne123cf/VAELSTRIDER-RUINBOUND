@@ -187,8 +187,8 @@ public class CharacterStatsUI : MonoBehaviour
         // Gem Socket Bonuses
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out int sAtk, out int sHp, out int sDef, out float sLifesteal, out float sCd, out float sShard, out float sRegen);
 
-        int baseAtk = isTitan ? 8 : (isAzure ? 6 : (isRonin ? 6 : 5));
-        int baseHp = isTitan ? 160 : (isAzure ? 110 : (isRonin ? 95 : 100));
+        int baseAtk = isTitan ? 12 : (isAzure ? 6 : (isRonin ? 6 : 5));
+        int baseHp = isTitan ? 200 : (isAzure ? 110 : (isRonin ? 95 : 100));
         int totalAtk = baseAtk + atkBonus + sAtk;
         int totalHp = baseHp + hpBonus + sHp;
         float finalDashCd = Mathf.Max(1.0f, 5.0f - dashCdRed);
@@ -231,7 +231,13 @@ public class CharacterStatsUI : MonoBehaviour
         Sprite sprDash = null;
         Sprite sprUlti = null;
 
-        if (isRonin)
+        if (isTitan)
+        {
+            sprAttack = LoadSprite("Assets/ART/Player4/UI/icon_attack.png", "Player4/UI/icon_attack");
+            sprDash = LoadSprite("Assets/ART/Player4/UI/icon_dash.png", "Player4/UI/icon_dash");
+            sprUlti = LoadSprite("Assets/ART/Player4/UI/icon_ulti.png", "Player4/UI/icon_ulti");
+        }
+        else if (isRonin)
         {
             sprAttack = LoadSprite("Assets/ART/Player2/UI/icon_attack.png", "Player2/UI/icon_attack");
             sprDash = LoadSprite("Assets/ART/Player2/UI/icon_dash.png", "Player2/UI/icon_dash");

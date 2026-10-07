@@ -318,15 +318,6 @@ public class PlayerCombat : MonoBehaviour
             if (!titan.IsAttackReady) return; // Không cho spam ngắt nhịp hoạt ảnh vung đại chùy
 
             lastAttackTime = Time.time;
-            comboStep = 1;
-
-            if (animator != null)
-            {
-                animator.SetInteger(ComboStepHash, 1);
-                animator.SetTrigger(AttackTriggerHash);
-                animator.Play("Attack1", 0, 0f);
-            }
-
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
             int curAtk = attack1Damage + bonusAttackDamage;
             titan.OnPerformAttack(facing, curAtk);

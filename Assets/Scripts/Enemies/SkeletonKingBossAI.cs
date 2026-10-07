@@ -18,6 +18,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
     [SerializeField] private float moveSpeed = 3.2f;
     [SerializeField] private int meleeDamage = 38;
     [SerializeField] private int slamDamage = 55;
+    [SerializeField] private int earthquakeDamage = 20;
     [SerializeField] private float meleeRange = 2.4f;
     [SerializeField] private float meleeCooldown = 1.5f;
     [SerializeField] private float skillCooldown = 6.0f;
@@ -46,6 +47,10 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        phaseMaxHealth = MapScalingManager.ScaleHealth(phaseMaxHealth);
+        meleeDamage = MapScalingManager.ScaleDamage(meleeDamage);
+        slamDamage = MapScalingManager.ScaleDamage(slamDamage);
+        earthquakeDamage = MapScalingManager.ScaleDamage(earthquakeDamage);
         currentHealth = phaseMaxHealth;
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<CapsuleCollider2D>();
@@ -393,7 +398,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
             if (player != null && Vector2.Distance(targetPos, player.position) <= 2.5f)
             {
                 var target = player.GetComponent<IDamageable>();
-                if (target != null) target.TakeDamage(20);
+                if (target != null) target.TakeDamage(earthquakeDamage);
             }
 
             // Sinh Trung Nhen no ra Nhen Con Mini

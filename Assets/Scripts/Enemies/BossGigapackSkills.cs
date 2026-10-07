@@ -105,6 +105,12 @@ public class BossGigapackSkills : MonoBehaviour
             activeSkills.Add(new SkillDef { nameVN = "ĐỊA CHẤN VẠN TRỌNG", nameEN = "SEISMIC QUAKE", relativePath = "Impacts/symmetrical_impact_001/symmetrical_impact_001_large_yellow", damage = 28, radius = 2.8f, animFps = 16f, targetPlayerPos = false });
             activeSkills.Add(new SkillDef { nameVN = "ĐỘC DỊCH VUNG VÃI", nameEN = "VENOM SPLATTER", relativePath = "Splatters/burst_splatter_003/burst_splatter_003_large_green", damage = 24, radius = 2.8f, animFps = 16f, targetPlayerPos = true });
         }
+
+        // Tự động scale sát thương của toàn bộ Skill Gigapack theo từng Map
+        foreach (var skill in activeSkills)
+        {
+            skill.damage = MapScalingManager.ScaleDamage(skill.damage);
+        }
     }
 
     void Update()

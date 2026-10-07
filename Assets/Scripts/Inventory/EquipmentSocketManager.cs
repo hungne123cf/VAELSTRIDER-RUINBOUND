@@ -699,32 +699,66 @@ public static class EquipmentSocketManager
         }
     }
 
-    private static string GetSubSocketKey(int skillIndex, int subSlotIndex)
+    public static string GetActiveHeroId()
     {
-        return $"SkillSocket_Skill_{skillIndex}_Sub_{subSlotIndex}";
+        string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId();
+        if (string.IsNullOrEmpty(curHero))
+        {
+            curHero = PlayerPrefs.GetString("Selected_Character_ID", PlayerPrefs.GetString("SelectedHero", CharacterManager.CHAR_VAELSTRIDER));
+        }
+        if (curHero.Equals("titan", StringComparison.OrdinalIgnoreCase) || curHero.Equals("titanberserker", StringComparison.OrdinalIgnoreCase)) return CharacterManager.CHAR_TITAN_BERSERKER;
+        if (curHero.Equals("azure", StringComparison.OrdinalIgnoreCase) || curHero.Equals("azureblade", StringComparison.OrdinalIgnoreCase)) return CharacterManager.CHAR_AZURE_BLADE;
+        if (curHero.Equals("ronin", StringComparison.OrdinalIgnoreCase) || curHero.Equals("galeronin", StringComparison.OrdinalIgnoreCase) || curHero.Equals("maid", StringComparison.OrdinalIgnoreCase)) return CharacterManager.CHAR_GALE_RONIN;
+        return CharacterManager.CHAR_VAELSTRIDER;
     }
 
-    public static bool GetSkillSubSocketGem(int skillIndex, int subSlotIndex, out string gemId, out int level)
+    private static string GetSubSocketKey(int skillIndex, int subSlotIndex, string heroId = null)
+    {
+        if (string.IsNullOrEmpty(heroId))
+        {
+            heroId = GetActiveHeroId();
+        }
+        return $"Hero_{heroId}_SkillSocket_Skill_{skillIndex}_Sub_{subSlotIndex}";
+    }
+
+    public static bool GetSkillSubSocketGem(int skillIndex, int subSlotIndex, out string gemId, out int level, string heroId = null)
     {
         gemId = "";
         level = 1;
         if (skillIndex < 0 || skillIndex >= SKILL_COUNT || subSlotIndex < 0 || subSlotIndex >= SUB_SOCKETS_PER_SKILL)
             return false;
 
-        string key = GetSubSocketKey(skillIndex, subSlotIndex);
+        if (string.IsNullOrEmpty(heroId))
+        {
+            heroId = GetActiveHeroId();
+        }
+
+        string key = GetSubSocketKey(skillIndex, subSlotIndex, heroId);
         string raw = PlayerPrefs.GetString(key, "");
 
-        // Backward compatibility: Migrate from legacy single-slot key if empty
-        if (string.IsNullOrEmpty(raw) && subSlotIndex == 0)
+        // Backward compatibility: Migrate from legacy global key if empty for default hero
+        if (string.IsNullOrEmpty(raw))
         {
-            string legacyKey = $"SkillSocket_Slot_{skillIndex}";
-            string legacyGem = PlayerPrefs.GetString(legacyKey, "");
-            if (!string.IsNullOrEmpty(legacyGem))
+            string legacyGlobalKey = $"SkillSocket_Skill_{skillIndex}_Sub_{subSlotIndex}";
+            string legacyRaw = PlayerPrefs.GetString(legacyGlobalKey, "");
+            if (!string.IsNullOrEmpty(legacyRaw) && heroId == CharacterManager.CHAR_VAELSTRIDER)
             {
-                raw = legacyGem + ":1";
+                raw = legacyRaw;
                 PlayerPrefs.SetString(key, raw);
-                PlayerPrefs.DeleteKey(legacyKey);
+                PlayerPrefs.DeleteKey(legacyGlobalKey);
                 PlayerPrefs.Save();
+            }
+            else if (string.IsNullOrEmpty(legacyRaw) && subSlotIndex == 0)
+            {
+                string legacySingleKey = $"SkillSocket_Slot_{skillIndex}";
+                string legacyGem = PlayerPrefs.GetString(legacySingleKey, "");
+                if (!string.IsNullOrEmpty(legacyGem) && heroId == CharacterManager.CHAR_VAELSTRIDER)
+                {
+                    raw = legacyGem + ":1";
+                    PlayerPrefs.SetString(key, raw);
+                    PlayerPrefs.DeleteKey(legacySingleKey);
+                    PlayerPrefs.Save();
+                }
             }
         }
 

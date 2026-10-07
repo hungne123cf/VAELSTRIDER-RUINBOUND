@@ -21,6 +21,7 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        health = MapScalingManager.ScaleHealth(health);
         sr = GetComponent<SpriteRenderer>();
         col = GetComponent<CircleCollider2D>();
 
@@ -99,12 +100,13 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
         if (col != null) col.enabled = false;
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.8f);
+        int explodeDmg = MapScalingManager.ScaleDamage(22);
         foreach (var h in hits)
         {
             if (h.CompareTag("Player"))
             {
                 var target = h.GetComponent<IDamageable>();
-                if (target != null) target.TakeDamage(22);
+                if (target != null) target.TakeDamage(explodeDmg);
             }
         }
 

@@ -18,14 +18,14 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private CanvasGroup canvasGroup;
     [SerializeField] private Button respawnButton;
     [SerializeField] private Button restartButton;
-    [SerializeField] private Button exitButton;
+    [SerializeField] private Button mainMenuButton;
 
     [Header("Texts")]
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI subtitleText;
     [SerializeField] private TextMeshProUGUI respawnBtnText;
     [SerializeField] private TextMeshProUGUI restartBtnText;
-    [SerializeField] private TextMeshProUGUI exitBtnText;
+    [SerializeField] private TextMeshProUGUI mainMenuBtnText;
     [SerializeField] private TextMeshProUGUI respawnStatusText;
 
     private bool isShown = false;
@@ -138,15 +138,15 @@ public class GameOverUI : MonoBehaviour
             restartBtnText.text = LocalizationManager.Get("GAMEOVER_RESTART_MAP");
         }
 
-        // 3. Nut Thoat ve trang dang nhap
-        if (exitButton != null)
+        // 3. Nut Ve Main Menu (Menu Chinh / Sanctuary)
+        if (mainMenuButton != null)
         {
-            exitButton.onClick.RemoveAllListeners();
-            exitButton.onClick.AddListener(OnExitToLoginClicked);
+            mainMenuButton.onClick.RemoveAllListeners();
+            mainMenuButton.onClick.AddListener(OnReturnToMainMenuClicked);
         }
-        if (exitBtnText != null)
+        if (mainMenuBtnText != null)
         {
-            exitBtnText.text = LocalizationManager.Get("GAMEOVER_EXIT_LOGIN");
+            mainMenuBtnText.text = LocalizationManager.Get("GAMEOVER_MAIN_MENU");
         }
     }
 
@@ -235,6 +235,25 @@ public class GameOverUI : MonoBehaviour
     }
 
     /// <summary>
+    /// Ve Menu Chinh (Sanctuary / Main Menu Scene)
+    /// </summary>
+    public void OnReturnToMainMenuClicked()
+    {
+        RespawnsUsedInCurrentMap = 0;
+        Time.timeScale = 1f;
+
+        var inv = UnityEngine.Object.FindAnyObjectByType<PlayerInventory>();
+        if (inv != null)
+        {
+            inv.SaveData();
+        }
+        AccountDatabase.SaveActiveSessionToDatabase();
+
+        Debug.Log("<color=cyan>[MAIN MENU]</color> Tro ve MainMenuScene (Giu nguyen du lieu/Shards)...");
+        SceneManager.LoadScene("MainMenuScene");
+    }
+
+    /// <summary>
     /// Thoat ve trang dang nhap
     /// </summary>
     public void OnExitToLoginClicked()
@@ -247,6 +266,7 @@ public class GameOverUI : MonoBehaviour
         {
             inv.SaveData();
         }
+        AccountDatabase.SaveActiveSessionToDatabase();
 
         Debug.Log("<color=yellow>[EXIT]</color> Tro ve trang LoginScene (Giu nguyen linh hon/Shards)...");
         SceneManager.LoadScene("LoginScene");
@@ -254,16 +274,23 @@ public class GameOverUI : MonoBehaviour
 
     public static GameOverUI EnsureUIExists()
     {
-        if (Instance != null) return Instance;
-
         Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
         if (rootCanvas == null) return null;
 
         Transform existing = rootCanvas.transform.Find("GameOverPanel");
         if (existing != null)
         {
-            Instance = existing.GetComponent<GameOverUI>();
-            if (Instance != null) return Instance;
+            GameOverUI ui = existing.GetComponent<GameOverUI>();
+            Transform box = existing.Find("CenterBox");
+            if (ui != null && ui.mainMenuButton != null && box != null && box.Find("Btn_ExitLogin") == null)
+            {
+                Instance = ui;
+                return Instance;
+            }
+
+            // Old version detected -> Destroy to regenerate clean 3-button UI
+            Destroy(existing.gameObject);
+            Instance = null;
         }
 
         // Tao Container UI Panel
@@ -299,7 +326,7 @@ public class GameOverUI : MonoBehaviour
         boxObj.layer = 5;
         boxObj.transform.SetParent(panelObj.transform, false);
         RectTransform boxRect = boxObj.GetComponent<RectTransform>();
-        boxRect.sizeDelta = new Vector2(620, 500);
+        boxRect.sizeDelta = new Vector2(620, 490);
         boxRect.anchoredPosition = Vector2.zero;
 
         Image boxBg = boxObj.GetComponent<Image>();
@@ -313,11 +340,11 @@ public class GameOverUI : MonoBehaviour
         titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRect = titleObj.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, 190);
-        titleRect.sizeDelta = new Vector2(580, 60);
+        titleRect.anchoredPosition = new Vector2(0, 180);
+        titleRect.sizeDelta = new Vector2(580, 55);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = "YOU DIED";
-        titleTmp.fontSize = 46;
+        titleTmp.fontSize = 44;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = new Color(0.95f, 0.22f, 0.25f);
         titleTmp.alignment = TextAlignmentOptions.Center;
@@ -328,11 +355,11 @@ public class GameOverUI : MonoBehaviour
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRect = subObj.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 135);
+        subRect.anchoredPosition = new Vector2(0, 130);
         subRect.sizeDelta = new Vector2(560, 35);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         subTmp.text = "Chuyen hanh trinh cua ban da tam dung...";
-        subTmp.fontSize = 17;
+        subTmp.fontSize = 16;
         subTmp.color = new Color(0.85f, 0.75f, 0.78f);
         subTmp.alignment = TextAlignmentOptions.Center;
         Instance.subtitleText = subTmp;
@@ -342,8 +369,8 @@ public class GameOverUI : MonoBehaviour
         statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
         RectTransform statusRect = statusObj.GetComponent<RectTransform>();
-        statusRect.anchoredPosition = new Vector2(0, 85);
-        statusRect.sizeDelta = new Vector2(560, 32);
+        statusRect.anchoredPosition = new Vector2(0, 82);
+        statusRect.sizeDelta = new Vector2(560, 30);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
         statusTmp.fontSize = 15;
         statusTmp.fontStyle = FontStyles.Bold;
@@ -351,13 +378,13 @@ public class GameOverUI : MonoBehaviour
         Instance.respawnStatusText = statusTmp;
 
         // 1. Button: RESPAWN
-        Instance.respawnButton = CreateButton(boxObj.transform, "Btn_Respawn", "HỒI SINH TẠI CHỖ (1/1)", new Vector2(0, 18), new Vector2(500, 54), new Color(0.18f, 0.65f, 0.45f), 20, out Instance.respawnBtnText);
+        Instance.respawnButton = CreateButton(boxObj.transform, "Btn_Respawn", "HỒI SINH TẠI CHỖ (1/1)", new Vector2(0, 16), new Vector2(500, 50), new Color(0.18f, 0.65f, 0.45f), 19, out Instance.respawnBtnText);
 
         // 2. Button: RESTART MAP
-        Instance.restartButton = CreateButton(boxObj.transform, "Btn_RestartMap", "CHƠI LẠI TỪ ĐẦU", new Vector2(0, -50), new Vector2(500, 54), new Color(0.85f, 0.45f, 0.15f), 20, out Instance.restartBtnText);
+        Instance.restartButton = CreateButton(boxObj.transform, "Btn_RestartMap", "CHƠI LẠI TỪ ĐẦU", new Vector2(0, -48), new Vector2(500, 50), new Color(0.85f, 0.45f, 0.15f), 19, out Instance.restartBtnText);
 
-        // 3. Button: EXIT TO LOGIN
-        Instance.exitButton = CreateButton(boxObj.transform, "Btn_ExitLogin", "VỀ TRANG ĐĂNG NHẬP", new Vector2(0, -118), new Vector2(500, 50), new Color(0.65f, 0.22f, 0.25f), 18, out Instance.exitBtnText);
+        // 3. Button: RETURN TO MAIN MENU
+        Instance.mainMenuButton = CreateButton(boxObj.transform, "Btn_MainMenu", "VỀ MENU CHÍNH", new Vector2(0, -112), new Vector2(500, 50), new Color(0.18f, 0.48f, 0.85f), 19, out Instance.mainMenuBtnText);
 
         return Instance;
     }

@@ -851,10 +851,12 @@ public class SettingsUI : MonoBehaviour
     private void OnConfirmResetYes()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        PlayerPrefs.DeleteAll();
-        PlayerPrefs.Save();
-        Time.timeScale = 1.0f;
-        SceneManager.LoadScene("LoginScene");
+        AccountDatabase.ResetActiveUserProgress();
+        if (resetConfirmModal != null) resetConfirmModal.SetActive(false);
+        CloseSettings();
+
+        // Reload MainMenuScene cleanly so all UI elements display 0 shards & fresh start
+        SceneManager.LoadScene("MainMenuScene");
     }
 
     private void OnConfirmResetNo()

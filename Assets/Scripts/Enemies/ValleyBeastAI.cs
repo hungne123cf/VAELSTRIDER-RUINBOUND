@@ -61,6 +61,8 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
             myCol = box;
         }
 
+        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
+        attackDamage = MapScalingManager.ScaleDamage(attackDamage);
         currentHealth = maxHealth;
         LoadSprites();
 
