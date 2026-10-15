@@ -63,7 +63,7 @@ public static class LocalizationManager
         { "BTN_MAP_SELECT", ("CHỌN BẢN ĐỒ", "SELECT MAP") },
         { "BTN_ROSTER", ("NHÂN VẬT", "HEROES") },
         { "BTN_SKILLS", ("KỸ NĂNG", "SKILLS") },
-        { "BTN_INVENTORY", ("TÚI ĐỒ", "INVENTORY") },
+        { "BTN_INVENTORY", ("TÚI ĐỒ", "BAG") },
         { "BTN_SHOP", ("CỬA HÀNG", "SHOP") },
         { "BTN_UPGRADE", ("NÂNG CẤP", "UPGRADES") },
         { "BTN_SETTINGS", ("CÀI ĐẶT", "SETTINGS") },
@@ -100,25 +100,30 @@ public static class LocalizationManager
         { "MAP3_DESC", ("Cung điện thần thánh u ám, nơi chôn giấu sức mạnh tà ác của Huyết Quái.", "Desolate divine palace harboring the corrupt essence of the Blood Fiend.") },
 
         // Characters
-        { "HERO_VAEL_NAME", ("Hiệp Sĩ Cân Bằng", "Balanced Knight") },
-        { "HERO_VAEL_ROLE", ("Chiến Binh / Kiếm Thuật Cổ Tộc", "Warrior / Blade Master") },
+        { "HERO_VAEL_NAME", ("Hiệp Sĩ Tiên Phong", "Holy Vanguard") },
+        { "HERO_VAEL_ROLE", ("Đấu Sĩ / Thánh Kiếm Cổ Tộc", "Warrior / Holy Blade Master") },
         { "HERO_VAEL_SKILL", ("Tuyệt Kỹ: Cơn Lốc Tàn Tích", "Skill: Ruin Whirlwind") },
-        { "HERO_VAEL_SKILL_DESC", ("Vận nội lực xoay kiếm tạo bão quét nát quái xung quanh.", "Spins ancient blade to unleash a storm cleaving nearby foes.") },
+        { "HERO_VAEL_SKILL_DESC", ("Nhấn Giữ thủ Kiếm Thuẫn: Đỡ đòn hoàn hảo chặn 100% sát thương và phản kích x3.0 sát thương! Tuyệt kỹ bão lốc xoay kiếm hút quái nổ tung.", "Hold attack for Divine Parry: blocks 100% damage & retaliates with x3.0 Crit DMG! Special skill spins 360° storm pulling enemies.") },
 
         { "HERO_RONIN_NAME", ("Phong Lôi Lãng Khách", "Gale Ronin") },
-        { "HERO_RONIN_ROLE", ("Bạch Dạ Kiếm Khách / Phong Ấn & Ảo Ảnh", "Phantom Blade / Wind Marks & Phantom Cleave") },
+        { "HERO_RONIN_ROLE", ("Sát Thủ / Phong Ấn & Ảo Ảnh", "Assassin / Phantom Blade") },
         { "HERO_RONIN_SKILL", ("Tuyệt Kỹ: Bão Phong Trảm", "Skill: Phantom Cleave") },
         { "HERO_RONIN_SKILL_DESC", ("Đòn chém quét 180° tích Phong Ấn bộc phá bạo kích & lốc xoáy. Tuyệt kỹ lướt ảo ảnh chém liên hoàn.", "180° cleave stacking Wind Marks for critical bursts & vortex. Special skill unleashes phantom dash slashes.") },
 
         { "HERO_MAID_NAME", ("Phong Lôi Lãng Khách", "Gale Ronin") },
-        { "HERO_MAID_ROLE", ("Bạch Dạ Kiếm Khách / Phong Ấn & Ảo Ảnh", "Phantom Blade / Wind Marks & Phantom Cleave") },
+        { "HERO_MAID_ROLE", ("Sát Thủ / Phong Ấn & Ảo Ảnh", "Assassin / Phantom Blade") },
         { "HERO_MAID_SKILL", ("Tuyệt Kỹ: Bão Phong Trảm", "Skill: Phantom Cleave") },
         { "HERO_MAID_SKILL_DESC", ("Đòn chém quét 180° tích Phong Ấn bộc phá bạo kích & lốc xoáy. Tuyệt kỹ lướt ảo ảnh chém liên hoàn.", "180° cleave stacking Wind Marks for critical bursts & vortex. Special skill unleashes phantom dash slashes.") },
 
         { "HERO_AZURE_NAME", ("Lam Kiếm Sĩ", "Azure Blade") },
-        { "HERO_AZURE_ROLE", ("Trọng Kiếm Khí / Sóng Kiếm Tầm Xa", "Heavy Crescent / Piercing Waves") },
+        { "HERO_AZURE_ROLE", ("Xạ Thủ / Sóng Kiếm Băng Tầm Xa", "Marksman / Ranged Frost Waves") },
         { "HERO_AZURE_SKILL", ("Tuyệt Kỹ: Bão Sóng Kiếm", "Skill: Crescent Tempest") },
         { "HERO_AZURE_SKILL_DESC", ("Chém xuất sóng kiếm xuyên thấu quái. Tuyệt kỹ phóng 5 luồng đại kiếm khí nan quạt.", "Slashes unleash piercing waves. Special skill fires 5 massive crescent waves in a fan spread.") },
+
+        { "HERO_MAGE_NAME", ("Pháp Sư Tinh Tú", "Celestial Mage") },
+        { "HERO_MAGE_ROLE", ("Pháp Sư / Tinh Vân & Thiên Thạch", "Mage / Arcane & Meteor Tempest") },
+        { "HERO_MAGE_SKILL", ("Tuyệt Kỹ: Thiên Thạch Ma Trận", "Skill: Meteor Apocalypse") },
+        { "HERO_MAGE_SKILL_DESC", ("Phóng 3 cầu ma pháp tự định hướng bộc phá sét lan. Khiên ma trận hấp thụ sát thương và bão thiên thạch hủy diệt diện rộng.", "Fires 3 homing arcane orbs with chain lightning. Arcane barrier absorbs damage and summons a cataclysmic meteor storm.") },
 
         { "STAT_HP", ("MÁU", "HP") },
         { "STAT_ATK", ("TẤN CÔNG", "ATK") },

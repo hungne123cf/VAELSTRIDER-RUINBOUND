@@ -82,6 +82,13 @@ public class SkeletonAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+        if (PlayerHealth.IsPlayerDead)
+        {
+            rb.linearVelocity = Vector2.zero;
+            if (animator != null) animator.SetBool(IsMovingHash, false);
+            return;
+        }
+
         if (player == null)
         {
             FindPlayer();
@@ -120,7 +127,7 @@ public class SkeletonAI : MonoBehaviour, IDamageable
 
     private void FixedUpdate()
     {
-        if (isDead || isKnockedBack || isAttacking || player == null) return;
+        if (isDead || isKnockedBack || isAttacking || player == null || PlayerHealth.IsPlayerDead) return;
 
         float dist = Vector2.Distance(transform.position, player.position);
         if (dist > meleeRange)
@@ -140,7 +147,7 @@ public class SkeletonAI : MonoBehaviour, IDamageable
 
         yield return new WaitForSeconds(0.25f);
 
-        if (isDead) yield break;
+        if (isDead || PlayerHealth.IsPlayerDead) { isAttacking = false; yield break; }
 
         if (player != null && Vector2.Distance(transform.position, player.position) <= meleeRange + 0.6f)
         {

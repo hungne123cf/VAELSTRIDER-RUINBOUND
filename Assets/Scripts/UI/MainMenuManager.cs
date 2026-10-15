@@ -61,6 +61,8 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private Sprite[] roninIdleFrames;
     [SerializeField] private Sprite[] azureIdleFrames;
     [SerializeField] private Sprite[] titanIdleFrames;
+    [SerializeField] private Sprite[] duneIdleFrames;
+    [SerializeField] private Sprite[] mageIdleFrames;
 
     [Header("Map Select Panel")]
     [SerializeField] private TextMeshProUGUI mapPanelTitleText;
@@ -85,10 +87,39 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI rosterHeroStatsText;
     [SerializeField] private TextMeshProUGUI rosterHeroSkillTitleText;
     [SerializeField] private TextMeshProUGUI rosterHeroSkillDescText;
+
+    [Header("Roster 3-Skill Breakdown Cards")]
+    [SerializeField] private Image rosterSkill1IconImg;
+    [SerializeField] private TextMeshProUGUI rosterSkill1TagText;
+    [SerializeField] private TextMeshProUGUI rosterSkill1CdText;
+    [SerializeField] private TextMeshProUGUI rosterSkill1TitleText;
+    [SerializeField] private TextMeshProUGUI rosterSkill1DescText;
+
+    [SerializeField] private Image rosterSkill2IconImg;
+    [SerializeField] private TextMeshProUGUI rosterSkill2TagText;
+    [SerializeField] private TextMeshProUGUI rosterSkill2CdText;
+    [SerializeField] private TextMeshProUGUI rosterSkill2TitleText;
+    [SerializeField] private TextMeshProUGUI rosterSkill2DescText;
+
+    [SerializeField] private Image rosterSkill3IconImg;
+    [SerializeField] private TextMeshProUGUI rosterSkill3TagText;
+    [SerializeField] private TextMeshProUGUI rosterSkill3CdText;
+    [SerializeField] private TextMeshProUGUI rosterSkill3TitleText;
+    [SerializeField] private TextMeshProUGUI rosterSkill3DescText;
+
     [SerializeField] private Button rosterActionBtn;
     [SerializeField] private TextMeshProUGUI rosterActionBtnText;
     [SerializeField] private Button rosterBackBtn;
     [SerializeField] private TextMeshProUGUI rosterBackBtnText;
+
+    [Header("Roster 6-Socket & Bag System")]
+    private List<GameObject> rosterHeroSocketSlotObjs = new List<GameObject>();
+    private List<Image> rosterSocketConduitLines = new List<Image>();
+    private List<GameObject> rosterBagItemCardObjs = new List<GameObject>();
+    [SerializeField] private TextMeshProUGUI rosterBagSectionHeaderText;
+    [SerializeField] private Button rosterAutoMergeBtn;
+    [SerializeField] private TextMeshProUGUI rosterAutoMergeBtnText;
+    [SerializeField] private Transform rosterBagContainer;
 
     [Header("Roster Avatar Cards")]
     [SerializeField] private Button cardVaelBtn;
@@ -96,11 +127,15 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private Button cardRoninBtn;
     [SerializeField] private Button cardAzureBtn;
     [SerializeField] private Button cardTitanBtn;
+    [SerializeField] private Button cardDuneBtn;
+    [SerializeField] private Button cardMageBtn;
     [SerializeField] private Image cardVaelAvatarImg;
     [SerializeField] private Image cardMaidAvatarImg;
     [SerializeField] private Image cardRoninAvatarImg;
     [SerializeField] private Image cardAzureAvatarImg;
     [SerializeField] private Image cardTitanAvatarImg;
+    [SerializeField] private Image cardDuneAvatarImg;
+    [SerializeField] private Image cardMageAvatarImg;
     [SerializeField] private TextMeshProUGUI cardVaelTitleText;
     [SerializeField] private TextMeshProUGUI cardVaelSubText;
     [SerializeField] private TextMeshProUGUI cardVaelStatusText;
@@ -116,7 +151,20 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI cardTitanTitleText;
     [SerializeField] private TextMeshProUGUI cardTitanSubText;
     [SerializeField] private TextMeshProUGUI cardTitanStatusText;
+    [SerializeField] private TextMeshProUGUI cardDuneTitleText;
+    [SerializeField] private TextMeshProUGUI cardDuneSubText;
+    [SerializeField] private TextMeshProUGUI cardDuneStatusText;
+    [SerializeField] private TextMeshProUGUI cardMageTitleText;
+    [SerializeField] private TextMeshProUGUI cardMageSubText;
+    [SerializeField] private TextMeshProUGUI cardMageStatusText;
     [SerializeField] private TextMeshProUGUI cardPlaceholderText;
+
+    // Hero Role Category Filter System
+    public enum HeroRoleType { All = 0, Tank = 1, Warrior = 2, Marksman = 3, Assassin = 4, Mage = 5 }
+    private HeroRoleType currentHeroRoleFilter = HeroRoleType.All;
+    private List<Button> heroRoleTabButtons = new List<Button>();
+    private List<Image> heroRoleTabBgList = new List<Image>();
+    private List<TextMeshProUGUI> heroRoleTabTextList = new List<TextMeshProUGUI>();
 
     [Header("Currency / Info Display")]
     [SerializeField] private TextMeshProUGUI aethelShardsDisplay;
@@ -372,18 +420,22 @@ public class MainMenuManager : MonoBehaviour
 
         if (navParent == null) return;
 
-        // 2. Ensure 6 Navigation Buttons:
-        // [ XUẤT TRẬN / BATTLE ]  [ NHÂN VẬT / HEROES ]  [ KỸ NĂNG / SKILLS ]  [ TÚI ĐỒ / INVENTORY ]  [ CỬA HÀNG / SHOP ]  [ CÀI ĐẶT / SETTINGS ]
-        float btnWidth = 165f;
-        float btnHeight = 52f;
+        // 2. Ensure 5 Navigation Buttons (Skills merged into Heroes):
+        // [ XUẤT TRẬN / BATTLE ]  [ ANH HÙNG / HEROES ]  [ TÚI ĐỒ / INVENTORY ]  [ CỬA HÀNG / SHOP ]  [ CÀI ĐẶT / SETTINGS ]
+        float btnWidth = 188f;
+        float btnHeight = 54f;
         float posY = 50f;
 
-        playButton = EnsureNavButton(navParent, playButton, "Btn_Play", LocalizationManager.Get("BTN_PLAY"), new Vector2(-425f, posY), new Vector2(btnWidth, btnHeight), new Color(0.85f, 0.55f, 0.15f, 1f), out playBtnText);
-        rosterButton = EnsureNavButton(navParent, rosterButton, "Btn_Hero", LocalizationManager.Get("BTN_ROSTER"), new Vector2(-255f, posY), new Vector2(btnWidth, btnHeight), new Color(0.22f, 0.48f, 0.82f, 1f), out rosterBtnText);
-        skillButton = EnsureNavButton(navParent, skillButton, "Btn_Skills", LocalizationManager.Get("BTN_SKILLS"), new Vector2(-85f, posY), new Vector2(btnWidth, btnHeight), new Color(0.12f, 0.55f, 0.85f, 1f), out skillBtnText);
-        inventoryButton = EnsureNavButton(navParent, inventoryButton, "Btn_Inventory", LocalizationManager.Get("BTN_INVENTORY"), new Vector2(85f, posY), new Vector2(btnWidth, btnHeight), new Color(0.55f, 0.28f, 0.82f, 1f), out inventoryBtnText);
-        shopButton = EnsureNavButton(navParent, shopButton, "Btn_Shop", LocalizationManager.Get("BTN_SHOP"), new Vector2(255f, posY), new Vector2(btnWidth, btnHeight), new Color(0.22f, 0.65f, 0.42f, 1f), out shopBtnText);
-        settingsButton = EnsureNavButton(navParent, settingsButton, "Btn_Settings", LocalizationManager.Get("BTN_SETTINGS"), new Vector2(425f, posY), new Vector2(btnWidth, btnHeight), new Color(0.42f, 0.46f, 0.56f, 1f), out settingsBtnText);
+        playButton = EnsureNavButton(navParent, playButton, "Btn_Play", LocalizationManager.Get("BTN_PLAY"), new Vector2(-400f, posY), new Vector2(btnWidth, btnHeight), new Color(0.85f, 0.55f, 0.15f, 1f), out playBtnText);
+        rosterButton = EnsureNavButton(navParent, rosterButton, "Btn_Hero", LocalizationManager.Get("BTN_ROSTER"), new Vector2(-200f, posY), new Vector2(btnWidth, btnHeight), new Color(0.22f, 0.48f, 0.82f, 1f), out rosterBtnText);
+        inventoryButton = EnsureNavButton(navParent, inventoryButton, "Btn_Inventory", LocalizationManager.Get("BTN_INVENTORY"), new Vector2(0f, posY), new Vector2(btnWidth, btnHeight), new Color(0.55f, 0.28f, 0.82f, 1f), out inventoryBtnText);
+        shopButton = EnsureNavButton(navParent, shopButton, "Btn_Shop", LocalizationManager.Get("BTN_SHOP"), new Vector2(200f, posY), new Vector2(btnWidth, btnHeight), new Color(0.22f, 0.65f, 0.42f, 1f), out shopBtnText);
+        settingsButton = EnsureNavButton(navParent, settingsButton, "Btn_Settings", LocalizationManager.Get("BTN_SETTINGS"), new Vector2(400f, posY), new Vector2(btnWidth, btnHeight), new Color(0.42f, 0.46f, 0.56f, 1f), out settingsBtnText);
+
+        // Hide old standalone skill button if present in scene
+        if (skillButton != null) skillButton.gameObject.SetActive(false);
+        var oldSkillsBtn = navParent.Find("Btn_Skills");
+        if (oldSkillsBtn != null) oldSkillsBtn.gameObject.SetActive(false);
 
         HookButtons();
         UpdateAllTexts();
@@ -750,7 +802,7 @@ public class MainMenuManager : MonoBehaviour
         tRt.sizeDelta = new Vector2(-20f, 40f);
 
         titleTxt = tObj.AddComponent<TextMeshProUGUI>();
-        titleTxt.fontSize = 18;
+        titleTxt.fontSize = 20;
         titleTxt.fontStyle = FontStyles.Bold;
         titleTxt.alignment = TextAlignmentOptions.Center;
         titleTxt.color = new Color(1f, 0.85f, 0.45f);
@@ -767,7 +819,8 @@ public class MainMenuManager : MonoBehaviour
         dRt.sizeDelta = new Vector2(-30f, -140f);
 
         descTxt = dObj.AddComponent<TextMeshProUGUI>();
-        descTxt.fontSize = 14;
+        descTxt.fontSize = 15.5f;
+        descTxt.lineSpacing = 2f;
         descTxt.alignment = TextAlignmentOptions.Center;
         descTxt.color = new Color(0.8f, 0.85f, 0.9f);
         descTxt.text = LocalizationManager.Get(descKey);
@@ -780,7 +833,7 @@ public class MainMenuManager : MonoBehaviour
         bRt.anchorMax = new Vector2(0.5f, 0f);
         bRt.pivot = new Vector2(0.5f, 0f);
         bRt.anchoredPosition = new Vector2(0f, 20f);
-        bRt.sizeDelta = new Vector2(200f, 44f);
+        bRt.sizeDelta = new Vector2(210f, 46f);
 
         Image bImg = bObj.GetComponent<Image>();
         bImg.color = new Color(0.72f, 0.22f, 0.18f, 1f);
@@ -803,7 +856,7 @@ public class MainMenuManager : MonoBehaviour
         btRt.sizeDelta = Vector2.zero;
 
         var btTmp = btObj.AddComponent<TextMeshProUGUI>();
-        btTmp.fontSize = 16;
+        btTmp.fontSize = 17.5f;
         btTmp.fontStyle = FontStyles.Bold;
         btTmp.alignment = TextAlignmentOptions.Center;
         btTmp.color = Color.white;
@@ -883,7 +936,16 @@ public class MainMenuManager : MonoBehaviour
             Transform titanCardImg = existing.Find("RosterBox/HeroSelectionColumn/Card_titan/AvatarFrame/AvatarImg");
             bool hasMissingTitanSprite = titanCardImg == null || titanCardImg.GetComponent<Image>() == null || titanCardImg.GetComponent<Image>().sprite == null;
 
-            if (boxRtExisting == null || boxRtExisting.anchorMax != Vector2.one || rosterHeroNameText == null || hasOldSkillFrame || hasOldBtnFrame || hasOldMaid || hasMissingTitanSprite)
+            Transform duneCard = existing.Find("RosterBox/HeroSelectionColumn/Card_dune");
+            bool hasMissingDuneCard = duneCard == null;
+
+            Transform skill1Card = existing.Find("RosterBox/ShowcaseDetailsPanel/SkillBox/SkillCard_0");
+            bool hasMissingSkill1Card = skill1Card == null;
+            bool hasAccidentalOverlayBtn = existing.GetComponent<Button>() != null;
+            Transform tsTrans = existing.Find("RosterBox/ShowcaseDetailsPanel/TopHeroSection");
+            bool hasOldTopHeight = tsTrans != null && tsTrans.GetComponent<RectTransform>() != null && tsTrans.GetComponent<RectTransform>().sizeDelta.y < 235f;
+
+            if (boxRtExisting == null || boxRtExisting.anchorMax != Vector2.one || rosterHeroNameText == null || rosterSkill1TitleText == null || rosterSkill1CdText == null || hasOldSkillFrame || hasOldBtnFrame || hasOldMaid || hasMissingTitanSprite || hasMissingDuneCard || hasMissingSkill1Card || hasAccidentalOverlayBtn || hasOldTopHeight)
             {
                 if (Application.isPlaying)
                     Destroy(existing.gameObject);
@@ -898,8 +960,8 @@ public class MainMenuManager : MonoBehaviour
             }
         }
 
-        // 1. Root Modal Overlay
-        rosterPanel = new GameObject("RosterModalPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        // 1. Root Modal Overlay (Solid Raycast Blocker - No accidental background click closing)
+        rosterPanel = new GameObject("RosterModalPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rosterPanel.layer = 5;
         rosterPanel.transform.SetParent(canvas.transform, false);
 
@@ -910,12 +972,7 @@ public class MainMenuManager : MonoBehaviour
 
         Image overlayImg = rosterPanel.GetComponent<Image>();
         overlayImg.color = new Color(0.02f, 0.03f, 0.06f, 0.92f);
-        overlayImg.raycastTarget = true;
-
-        Button overlayBtn = rosterPanel.GetComponent<Button>();
-        overlayBtn.targetGraphic = overlayImg;
-        overlayBtn.onClick.RemoveAllListeners();
-        overlayBtn.onClick.AddListener(CloseRosterPanel);
+        overlayImg.raycastTarget = true; // Blocks clicks from hitting main menu underneath
 
         // 2. Main Dialog Box - 100% Edge-to-Edge Full Screen
         GameObject dialogBox = new GameObject("RosterBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -932,10 +989,7 @@ public class MainMenuManager : MonoBehaviour
         Image boxImg = dialogBox.GetComponent<Image>();
         boxImg.color = new Color(0.04f, 0.05f, 0.09f, 1f);
         boxImg.raycastTarget = true;
-
-        var outline = dialogBox.AddComponent<Outline>();
-        outline.effectColor = new Color(0.85f, 0.65f, 0.25f, 0.95f);
-        outline.effectDistance = new Vector2(2.5f, -2.5f);
+        WhiteIconLoader.ApplyGothicFrame(dialogBox, new Color(0.85f, 0.72f, 0.38f, 0.90f), 0.35f);
 
         // 3. Header Title & Subtitle
         GameObject titleObj = new GameObject("RosterPanelTitle", typeof(RectTransform), typeof(CanvasRenderer));
@@ -986,29 +1040,13 @@ public class MainMenuManager : MonoBehaviour
         closeImg.color = new Color(0.75f, 0.22f, 0.25f, 1f);
         closeImg.raycastTarget = true;
 
-        var closeOutline = closeBtnObj.AddComponent<Outline>();
-        closeOutline.effectColor = new Color(1f, 0.85f, 0.4f, 0.9f);
-        closeOutline.effectDistance = new Vector2(2f, -2f);
+        WhiteIconLoader.ApplyGothicFrame(closeBtnObj, new Color(1f, 0.85f, 0.4f, 0.95f), 0.5f);
 
         Button closeBtn = closeBtnObj.GetComponent<Button>();
         closeBtn.targetGraphic = closeImg;
         closeBtn.onClick.RemoveAllListeners();
         closeBtn.onClick.AddListener(CloseRosterPanel);
-
-        GameObject closeTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        closeTxtObj.layer = 5;
-        closeTxtObj.transform.SetParent(closeBtnObj.transform, false);
-        RectTransform closeTxtRt = closeTxtObj.GetComponent<RectTransform>();
-        closeTxtRt.anchorMin = Vector2.zero;
-        closeTxtRt.anchorMax = Vector2.one;
-        closeTxtRt.sizeDelta = Vector2.zero;
-        var closeTmp = closeTxtObj.AddComponent<TextMeshProUGUI>();
-        closeTmp.text = "X";
-        closeTmp.fontSize = 24;
-        closeTmp.fontStyle = FontStyles.Bold;
-        closeTmp.alignment = TextAlignmentOptions.Center;
-        closeTmp.color = Color.white;
-        closeTmp.raycastTarget = false;
+        WhiteIconLoader.ReplaceTextWithIcon(closeBtn, "Cross", Color.white, new Vector2(24f, 24f));
 
         rosterBackBtn = closeBtn;
         rosterBackBtnText = null;
@@ -1018,10 +1056,10 @@ public class MainMenuManager : MonoBehaviour
         leftCol.transform.SetParent(dialogBox.transform, false);
         RectTransform lRt = leftCol.GetComponent<RectTransform>();
         lRt.anchorMin = new Vector2(0f, 0f);
-        lRt.anchorMax = new Vector2(0.48f, 1f);
+        lRt.anchorMax = new Vector2(0.38f, 1f);
         lRt.pivot = new Vector2(0f, 1f);
         lRt.offsetMin = new Vector2(40f, 30f);
-        lRt.offsetMax = new Vector2(-15f, -110f);
+        lRt.offsetMax = new Vector2(-10f, -110f);
 
         GameObject lHeaderObj = new GameObject("ColHeader", typeof(RectTransform), typeof(CanvasRenderer));
         lHeaderObj.transform.SetParent(leftCol.transform, false);
@@ -1030,22 +1068,25 @@ public class MainMenuManager : MonoBehaviour
         lhRt.anchorMax = new Vector2(1f, 1f);
         lhRt.pivot = new Vector2(0f, 1f);
         lhRt.anchoredPosition = new Vector2(0f, 0f);
-        lhRt.sizeDelta = new Vector2(0f, 30f);
+        lhRt.sizeDelta = new Vector2(0f, 26f);
         leftColHeaderText = lHeaderObj.AddComponent<TextMeshProUGUI>();
-        leftColHeaderText.fontSize = 18;
+        leftColHeaderText.fontSize = 20;
         leftColHeaderText.fontStyle = FontStyles.Bold;
         leftColHeaderText.color = new Color(0.85f, 0.90f, 0.95f);
         leftColHeaderText.text = LocalizationManager.T("CHỌN ANH HÙNG", "HERO SELECTION");
 
+        // Role Category Filter Tabs Bar (Horizontal Row)
+        BuildHeroRoleTabs(leftCol.transform);
+
         EnsureHeroSprites();
         Sprite vaelAvatar = (vaelIdleFrames != null && vaelIdleFrames.Length > 0) ? vaelIdleFrames[0] : null;
-        cardVaelBtn = CreateAvatarCard(leftCol.transform, "vael", new Vector2(0f, -35f), new Vector2(0f, 105f),
+        cardVaelBtn = CreateAvatarCard(leftCol.transform, "vael", new Vector2(0f, -78f), new Vector2(0f, 102f),
             vaelAvatar, false,
             out cardVaelAvatarImg, out cardVaelTitleText, out cardVaelSubText, out cardVaelStatusText);
         cardVaelBtn.onClick.AddListener(() => InspectHero("vael"));
 
         Sprite roninAvatar = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames[0] : null;
-        cardRoninBtn = CreateAvatarCard(leftCol.transform, "ronin", new Vector2(0f, -145f), new Vector2(0f, 105f),
+        cardRoninBtn = CreateAvatarCard(leftCol.transform, "ronin", new Vector2(0f, -186f), new Vector2(0f, 102f),
             roninAvatar, false,
             out cardRoninAvatarImg, out cardRoninTitleText, out cardRoninSubText, out cardRoninStatusText);
         cardRoninBtn.onClick.AddListener(() => InspectHero("ronin"));
@@ -1056,49 +1097,115 @@ public class MainMenuManager : MonoBehaviour
         cardMaidStatusText = cardRoninStatusText;
 
         Sprite azureAvatar = (azureIdleFrames != null && azureIdleFrames.Length > 0) ? azureIdleFrames[0] : null;
-        cardAzureBtn = CreateAvatarCard(leftCol.transform, "azure", new Vector2(0f, -255f), new Vector2(0f, 105f),
+        cardAzureBtn = CreateAvatarCard(leftCol.transform, "azure", new Vector2(0f, -294f), new Vector2(0f, 102f),
             azureAvatar, false,
             out cardAzureAvatarImg, out cardAzureTitleText, out cardAzureSubText, out cardAzureStatusText);
         cardAzureBtn.onClick.AddListener(() => InspectHero("azure"));
 
         Sprite titanAvatar = (titanIdleFrames != null && titanIdleFrames.Length > 0) ? titanIdleFrames[0] : null;
-        cardTitanBtn = CreateAvatarCard(leftCol.transform, "titan", new Vector2(0f, -365f), new Vector2(0f, 105f),
+        cardTitanBtn = CreateAvatarCard(leftCol.transform, "titan", new Vector2(0f, -402f), new Vector2(0f, 102f),
             titanAvatar, false,
             out cardTitanAvatarImg, out cardTitanTitleText, out cardTitanSubText, out cardTitanStatusText);
         cardTitanBtn.onClick.AddListener(() => InspectHero("titan"));
+
+        Sprite duneAvatar = (duneIdleFrames != null && duneIdleFrames.Length > 0) ? duneIdleFrames[0] : null;
+        cardDuneBtn = CreateAvatarCard(leftCol.transform, "dune", new Vector2(0f, -510f), new Vector2(0f, 102f),
+            duneAvatar, false,
+            out cardDuneAvatarImg, out cardDuneTitleText, out cardDuneSubText, out cardDuneStatusText);
+        cardDuneBtn.onClick.AddListener(() => InspectHero("dune"));
+
+        Sprite mageAvatar = (mageIdleFrames != null && mageIdleFrames.Length > 0) ? mageIdleFrames[0] : null;
+        cardMageBtn = CreateAvatarCard(leftCol.transform, "mage", new Vector2(0f, -618f), new Vector2(0f, 102f),
+            mageAvatar, false,
+            out cardMageAvatarImg, out cardMageTitleText, out cardMageSubText, out cardMageStatusText);
+        cardMageBtn.onClick.AddListener(() => InspectHero("mage"));
+
+        ApplyHeroRoleFilter(currentHeroRoleFilter);
 
         // 5. RIGHT COLUMN: Showcase Details Panel (Full-Height Split Right Column)
         GameObject rightCol = new GameObject("ShowcaseDetailsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rightCol.transform.SetParent(dialogBox.transform, false);
         RectTransform rRt = rightCol.GetComponent<RectTransform>();
-        rRt.anchorMin = new Vector2(0.48f, 0f);
+        rRt.anchorMin = new Vector2(0.38f, 0f);
         rRt.anchorMax = new Vector2(1f, 1f);
         rRt.pivot = new Vector2(1f, 1f);
-        rRt.offsetMin = new Vector2(15f, 30f);
-        rRt.offsetMax = new Vector2(-40f, -110f);
+        rRt.offsetMin = new Vector2(15f, 25f);
+        rRt.offsetMax = new Vector2(-30f, -100f);
 
         Image rcImg = rightCol.GetComponent<Image>();
-        rcImg.color = new Color(0.09f, 0.12f, 0.18f, 0.96f);
+        rcImg.color = new Color(0.06f, 0.08f, 0.13f, 0.98f);
+        WhiteIconLoader.ApplyGothicFrame(rightCol, new Color(0.35f, 0.45f, 0.60f, 0.65f), 0.50f);
 
-        var rcOutline = rightCol.AddComponent<Outline>();
-        rcOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.6f);
-        rcOutline.effectDistance = new Vector2(2f, -2f);
+        // TOP SECTION: HERO STAGE (Avatar + 6 Sockets) & STATS (Expanded to 240px for vertical stats)
+        GameObject topSection = new GameObject("TopHeroSection", typeof(RectTransform));
+        topSection.transform.SetParent(rightCol.transform, false);
+        RectTransform tsRt = topSection.GetComponent<RectTransform>();
+        tsRt.anchorMin = new Vector2(0f, 1f);
+        tsRt.anchorMax = new Vector2(1f, 1f);
+        tsRt.pivot = new Vector2(0.5f, 1f);
+        tsRt.anchoredPosition = new Vector2(0f, -10f);
+        tsRt.sizeDelta = new Vector2(-24f, 240f);
 
-        // Animation Showcase Box (with RectMask2D)
-        GameObject animBox = new GameObject("ShowcaseAnimBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D));
-        animBox.transform.SetParent(rightCol.transform, false);
+        // Hero Center Stage (Avatar + 6 Sockets)
+        GameObject stageBox = new GameObject("HeroStageBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        stageBox.transform.SetParent(topSection.transform, false);
+        RectTransform sbRt = stageBox.GetComponent<RectTransform>();
+        sbRt.anchorMin = new Vector2(0f, 0.5f);
+        sbRt.anchorMax = new Vector2(0f, 0.5f);
+        sbRt.pivot = new Vector2(0f, 0.5f);
+        sbRt.anchoredPosition = new Vector2(6f, 0f);
+        sbRt.sizeDelta = new Vector2(350f, 225f);
+
+        Image sbImg = stageBox.GetComponent<Image>();
+        sbImg.color = new Color(0.04f, 0.06f, 0.10f, 0.95f);
+        WhiteIconLoader.ApplyGothicFrame(stageBox, new Color(0.85f, 0.72f, 0.38f, 0.70f), 0.45f);
+
+        // 6 Socket Slot Positions spread out with clean vertical spacing (no overlap)
+        Vector2[] socketPositions = new Vector2[]
+        {
+            new Vector2(-130f, 75f),   // Slot 0: Vũ Khí (Top-Left)
+            new Vector2(-136f, 0f),    // Slot 1: Áo Giáp (Mid-Left)
+            new Vector2(-130f, -75f),  // Slot 2: Giày (Bot-Left)
+            new Vector2(130f, 75f),    // Slot 3: Mũ Nón (Top-Right)
+            new Vector2(136f, 0f),     // Slot 4: Nhẫn (Mid-Right)
+            new Vector2(130f, -75f)    // Slot 5: Hộ Phù (Bot-Right)
+        };
+
+        // 6 Glowing Conduit Lines connecting 6 sockets to center Avatar (rendered underneath)
+        rosterSocketConduitLines.Clear();
+        for (int s = 0; s < EquipmentSocketManager.HERO_SOCKET_COUNT; s++)
+        {
+            Vector2 sPos = socketPositions[s];
+            Vector2 mid = sPos * 0.5f;
+            float dist = sPos.magnitude;
+            float angle = Mathf.Atan2(sPos.y, sPos.x) * Mathf.Rad2Deg;
+
+            GameObject lineObj = new GameObject($"ConduitLine_{s}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            lineObj.layer = 5;
+            lineObj.transform.SetParent(stageBox.transform, false);
+            RectTransform lineRt = lineObj.GetComponent<RectTransform>();
+            lineRt.anchorMin = new Vector2(0.5f, 0.5f);
+            lineRt.anchorMax = new Vector2(0.5f, 0.5f);
+            lineRt.pivot = new Vector2(0.5f, 0.5f);
+            lineRt.anchoredPosition = mid;
+            lineRt.sizeDelta = new Vector2(dist, 2.5f);
+            lineRt.localRotation = Quaternion.Euler(0f, 0f, angle);
+
+            Image lineImg = lineObj.GetComponent<Image>();
+            lineImg.color = new Color(0.85f, 0.72f, 0.35f, 0.30f);
+            lineImg.raycastTarget = false;
+            rosterSocketConduitLines.Add(lineImg);
+        }
+
+        // Center Avatar Box (Clean seamless container, no extra solid box or outline behind hero)
+        GameObject animBox = new GameObject("ShowcaseAnimBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(RectMask2D));
+        animBox.transform.SetParent(stageBox.transform, false);
         RectTransform aRt = animBox.GetComponent<RectTransform>();
-        aRt.anchorMin = new Vector2(0f, 1f);
-        aRt.anchorMax = new Vector2(0f, 1f);
-        aRt.pivot = new Vector2(0f, 1f);
-        aRt.anchoredPosition = new Vector2(30f, -30f);
-        aRt.sizeDelta = new Vector2(160f, 160f);
-
-        Image abImg = animBox.GetComponent<Image>();
-        abImg.color = new Color(0.06f, 0.08f, 0.12f, 1f);
-        var abOutline = animBox.AddComponent<Outline>();
-        abOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.95f);
-        abOutline.effectDistance = new Vector2(2f, -2f);
+        aRt.anchorMin = new Vector2(0.5f, 0.5f);
+        aRt.anchorMax = new Vector2(0.5f, 0.5f);
+        aRt.pivot = new Vector2(0.5f, 0.5f);
+        aRt.anchoredPosition = Vector2.zero;
+        aRt.sizeDelta = new Vector2(120f, 180f);
 
         GameObject animImgObj = new GameObject("HeroLiveSprite", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         animImgObj.transform.SetParent(animBox.transform, false);
@@ -1110,108 +1217,114 @@ public class MainMenuManager : MonoBehaviour
         rosterHeroPreviewImage.preserveAspect = true;
         rosterHeroPreviewImage.transform.localScale = GetHeroVisualScale("vael");
 
-        // Info Row beside AnimBox
+        rosterHeroSocketSlotObjs.Clear();
+        for (int s = 0; s < EquipmentSocketManager.HERO_SOCKET_COUNT; s++)
+        {
+            int slotIdx = s;
+            GameObject sObj = new GameObject($"RosterSlot_{slotIdx}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            sObj.layer = 5;
+            sObj.transform.SetParent(stageBox.transform, false);
+            rosterHeroSocketSlotObjs.Add(sObj);
+
+            RectTransform sRt = sObj.GetComponent<RectTransform>();
+            sRt.anchorMin = new Vector2(0.5f, 0.5f);
+            sRt.anchorMax = new Vector2(0.5f, 0.5f);
+            sRt.pivot = new Vector2(0.5f, 0.5f);
+            sRt.anchoredPosition = socketPositions[slotIdx];
+            sRt.sizeDelta = new Vector2(58f, 58f);
+
+            Image sImg = sObj.GetComponent<Image>();
+            sImg.color = new Color(0.08f, 0.11f, 0.18f, 0.95f);
+            var sOutline = sObj.AddComponent<Outline>();
+            sOutline.effectColor = new Color(0.40f, 0.50f, 0.65f, 0.70f);
+            sOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            var dropTarget = sObj.AddComponent<UIDropSocketTarget>();
+            dropTarget.socketSlotIndex = slotIdx;
+            dropTarget.onGemDropped = (droppedGemId, targetSlot) =>
+            {
+                if (EquipmentSocketManager.SocketGemToHeroSlot(targetSlot, droppedGemId, out _, out _, inspectedHeroId))
+                {
+                    SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+                    InspectHero(inspectedHeroId);
+                }
+            };
+        }
+
+        // Info & Stats Panel beside StageBox
+        GameObject infoGroup = new GameObject("InfoGroup", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        infoGroup.transform.SetParent(topSection.transform, false);
+        RectTransform igRt = infoGroup.GetComponent<RectTransform>();
+        igRt.anchorMin = Vector2.zero;
+        igRt.anchorMax = Vector2.one;
+        igRt.offsetMin = new Vector2(362f, 0f);
+        igRt.offsetMax = new Vector2(-6f, 0f);
+
+        Image igImg = infoGroup.GetComponent<Image>();
+        igImg.color = new Color(0.04f, 0.06f, 0.10f, 0.95f);
+        WhiteIconLoader.ApplyGothicFrame(infoGroup, new Color(0.35f, 0.45f, 0.60f, 0.60f), 0.45f);
+
         GameObject nameObj = new GameObject("RosterHeroName", typeof(RectTransform), typeof(CanvasRenderer));
-        nameObj.transform.SetParent(rightCol.transform, false);
+        nameObj.transform.SetParent(infoGroup.transform, false);
         RectTransform nRt = nameObj.GetComponent<RectTransform>();
         nRt.anchorMin = new Vector2(0f, 1f);
         nRt.anchorMax = new Vector2(1f, 1f);
         nRt.pivot = new Vector2(0f, 1f);
-        nRt.anchoredPosition = new Vector2(215f, -30f);
-        nRt.sizeDelta = new Vector2(-235f, 36f);
+        nRt.anchoredPosition = new Vector2(12f, -6f);
+        nRt.sizeDelta = new Vector2(-24f, 26f);
         rosterHeroNameText = nameObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroNameText.fontSize = 26;
+        rosterHeroNameText.fontSize = 24f;
         rosterHeroNameText.fontStyle = FontStyles.Bold;
         rosterHeroNameText.color = new Color(1f, 0.88f, 0.45f);
 
         GameObject roleObj = new GameObject("RosterHeroRole", typeof(RectTransform), typeof(CanvasRenderer));
-        roleObj.transform.SetParent(rightCol.transform, false);
+        roleObj.transform.SetParent(infoGroup.transform, false);
         RectTransform rlRt = roleObj.GetComponent<RectTransform>();
         rlRt.anchorMin = new Vector2(0f, 1f);
         rlRt.anchorMax = new Vector2(1f, 1f);
         rlRt.pivot = new Vector2(0f, 1f);
-        rlRt.anchoredPosition = new Vector2(215f, -75f);
-        rlRt.sizeDelta = new Vector2(-235f, 26f);
+        rlRt.anchoredPosition = new Vector2(12f, -32f);
+        rlRt.sizeDelta = new Vector2(-24f, 20f);
         rosterHeroRoleText = roleObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroRoleText.fontSize = 16f;
+        rosterHeroRoleText.fontSize = 15.5f;
         rosterHeroRoleText.color = new Color(0.6f, 0.85f, 1f);
 
         GameObject statsObj = new GameObject("RosterHeroStats", typeof(RectTransform), typeof(CanvasRenderer));
-        statsObj.transform.SetParent(rightCol.transform, false);
+        statsObj.transform.SetParent(infoGroup.transform, false);
         RectTransform stRt = statsObj.GetComponent<RectTransform>();
         stRt.anchorMin = new Vector2(0f, 1f);
         stRt.anchorMax = new Vector2(1f, 1f);
         stRt.pivot = new Vector2(0f, 1f);
-        stRt.anchoredPosition = new Vector2(215f, -115f);
-        stRt.sizeDelta = new Vector2(-235f, 30f);
+        stRt.anchoredPosition = new Vector2(12f, -54f);
+        stRt.sizeDelta = new Vector2(-24f, 138f);
         rosterHeroStatsText = statsObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroStatsText.fontSize = 16;
+        rosterHeroStatsText.fontSize = 15f;
+        rosterHeroStatsText.lineSpacing = 1.15f;
         rosterHeroStatsText.fontStyle = FontStyles.Bold;
         rosterHeroStatsText.color = new Color(0.95f, 0.95f, 0.95f);
 
-        // Special Skill Section - Spacious Stretched Box
-        GameObject skillBox = new GameObject("SkillBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        skillBox.transform.SetParent(rightCol.transform, false);
-        RectTransform skRt = skillBox.GetComponent<RectTransform>();
-        skRt.anchorMin = new Vector2(0f, 0f);
-        skRt.anchorMax = new Vector2(1f, 1f);
-        skRt.pivot = new Vector2(0.5f, 1f);
-        skRt.offsetMin = new Vector2(30f, 105f);
-        skRt.offsetMax = new Vector2(-30f, -210f);
-        Image skImg = skillBox.GetComponent<Image>();
-        skImg.color = new Color(0.06f, 0.08f, 0.12f, 0.92f);
-        var skOutline = skillBox.AddComponent<Outline>();
-        skOutline.effectColor = new Color(0.40f, 0.45f, 0.55f, 0.5f);
-
-        GameObject skTitleObj = new GameObject("SkillTitle", typeof(RectTransform), typeof(CanvasRenderer));
-        skTitleObj.transform.SetParent(skillBox.transform, false);
-        RectTransform sktRt = skTitleObj.GetComponent<RectTransform>();
-        sktRt.anchorMin = new Vector2(0f, 1f);
-        sktRt.anchorMax = new Vector2(1f, 1f);
-        sktRt.pivot = new Vector2(0.5f, 1f);
-        sktRt.anchoredPosition = new Vector2(20f, -16f);
-        sktRt.sizeDelta = new Vector2(-40f, 30f);
-        rosterHeroSkillTitleText = skTitleObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroSkillTitleText.fontSize = 18;
-        rosterHeroSkillTitleText.fontStyle = FontStyles.Bold;
-        rosterHeroSkillTitleText.color = new Color(1f, 0.85f, 0.35f);
-
-        GameObject skDescObj = new GameObject("SkillDesc", typeof(RectTransform), typeof(CanvasRenderer));
-        skDescObj.transform.SetParent(skillBox.transform, false);
-        RectTransform skdRt = skDescObj.GetComponent<RectTransform>();
-        skdRt.anchorMin = Vector2.zero;
-        skdRt.anchorMax = Vector2.one;
-        skdRt.anchoredPosition = new Vector2(20f, -54f);
-        skdRt.sizeDelta = new Vector2(-40f, -70f);
-        rosterHeroSkillDescText = skDescObj.AddComponent<TextMeshProUGUI>();
-        rosterHeroSkillDescText.fontSize = 15f;
-        rosterHeroSkillDescText.lineSpacing = 12;
-        rosterHeroSkillDescText.color = new Color(0.85f, 0.88f, 0.92f);
-
-        // Action Button Row (Bottom of Right Column: 2 Buttons side-by-side)
+        // Action Buttons Row inside Top Section
         GameObject btnRow = new GameObject("ActionBtnRow", typeof(RectTransform));
-        btnRow.transform.SetParent(rightCol.transform, false);
+        btnRow.transform.SetParent(infoGroup.transform, false);
         RectTransform brRt = btnRow.GetComponent<RectTransform>();
         brRt.anchorMin = new Vector2(0f, 0f);
         brRt.anchorMax = new Vector2(1f, 0f);
         brRt.pivot = new Vector2(0.5f, 0f);
-        brRt.anchoredPosition = new Vector2(0f, 20f);
-        brRt.sizeDelta = new Vector2(-40f, 60f);
+        brRt.anchoredPosition = new Vector2(0f, 6f);
+        brRt.sizeDelta = new Vector2(-20f, 38f);
 
         // 1. Costume Wardrobe Button (Left)
         GameObject cosBtnObj = new GameObject("Btn_RosterCostume", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         cosBtnObj.transform.SetParent(btnRow.transform, false);
         RectTransform cosRt = cosBtnObj.GetComponent<RectTransform>();
         cosRt.anchorMin = new Vector2(0f, 0f);
-        cosRt.anchorMax = new Vector2(0.38f, 1f);
+        cosRt.anchorMax = new Vector2(0.35f, 1f);
         cosRt.offsetMin = Vector2.zero;
-        cosRt.offsetMax = new Vector2(-6f, 0f);
+        cosRt.offsetMax = new Vector2(-4f, 0f);
 
         Image cosImg = cosBtnObj.GetComponent<Image>();
         cosImg.color = new Color(0.65f, 0.40f, 0.12f, 1f);
-        var cosOutline = cosBtnObj.AddComponent<Outline>();
-        cosOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.9f);
-        cosOutline.effectDistance = new Vector2(2f, -2f);
+        WhiteIconLoader.ApplyGothicFrame(cosBtnObj, new Color(1f, 0.85f, 0.35f, 0.85f), 0.35f);
 
         var cosBtn = cosBtnObj.GetComponent<Button>();
         cosBtn.onClick.AddListener(() =>
@@ -1227,8 +1340,8 @@ public class MainMenuManager : MonoBehaviour
         cosTxtRt.anchorMax = Vector2.one;
         cosTxtRt.sizeDelta = Vector2.zero;
         var cosTxt = cosTxtObj.AddComponent<TextMeshProUGUI>();
-        cosTxt.text = LocalizationManager.T("👘 TRANG PHỤC", "👘 WARDROBE");
-        cosTxt.fontSize = 17f;
+        cosTxt.text = LocalizationManager.T("TRANG PHỤC", "WARDROBE");
+        cosTxt.fontSize = 16.5f;
         cosTxt.fontStyle = FontStyles.Bold;
         cosTxt.alignment = TextAlignmentOptions.Center;
         cosTxt.color = Color.white;
@@ -1238,16 +1351,14 @@ public class MainMenuManager : MonoBehaviour
         GameObject actBtnObj = new GameObject("Btn_RosterAction", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         actBtnObj.transform.SetParent(btnRow.transform, false);
         RectTransform actRt = actBtnObj.GetComponent<RectTransform>();
-        actRt.anchorMin = new Vector2(0.38f, 0f);
+        actRt.anchorMin = new Vector2(0.35f, 0f);
         actRt.anchorMax = new Vector2(1f, 1f);
-        actRt.offsetMin = new Vector2(6f, 0f);
+        actRt.offsetMin = new Vector2(4f, 0f);
         actRt.offsetMax = Vector2.zero;
 
         Image actImg = actBtnObj.GetComponent<Image>();
         actImg.color = new Color(0.16f, 0.58f, 0.28f, 1f);
-        var actOutline = actBtnObj.AddComponent<Outline>();
-        actOutline.effectColor = new Color(0.95f, 0.82f, 0.35f, 0.9f);
-        actOutline.effectDistance = new Vector2(2f, -2f);
+        WhiteIconLoader.ApplyGothicFrame(actBtnObj, new Color(0.95f, 0.82f, 0.35f, 0.85f), 0.40f);
 
         rosterActionBtn = actBtnObj.GetComponent<Button>();
         rosterActionBtn.targetGraphic = actImg;
@@ -1261,11 +1372,215 @@ public class MainMenuManager : MonoBehaviour
         actTxtRt.anchorMax = Vector2.one;
         actTxtRt.sizeDelta = Vector2.zero;
         rosterActionBtnText = actTxtObj.AddComponent<TextMeshProUGUI>();
-        rosterActionBtnText.fontSize = 18f;
+        rosterActionBtnText.fontSize = 16.5f;
         rosterActionBtnText.fontStyle = FontStyles.Bold;
         rosterActionBtnText.alignment = TextAlignmentOptions.Center;
         rosterActionBtnText.color = Color.white;
         rosterActionBtnText.raycastTarget = false;
+
+        // MIDDLE SECTION: 3 COMBAT SKILL CARDS (Adjusted cleanly to not overlap topSection or bagBox)
+        GameObject skillBox = new GameObject("SkillBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        skillBox.transform.SetParent(rightCol.transform, false);
+        RectTransform skRt = skillBox.GetComponent<RectTransform>();
+        skRt.anchorMin = new Vector2(0f, 0f);
+        skRt.anchorMax = new Vector2(1f, 1f);
+        skRt.pivot = new Vector2(0.5f, 1f);
+        skRt.offsetMin = new Vector2(15f, 166f);
+        skRt.offsetMax = new Vector2(-15f, -255f);
+        Image skImg = skillBox.GetComponent<Image>();
+        skImg.color = new Color(0.04f, 0.06f, 0.10f, 0.92f);
+        WhiteIconLoader.ApplyGothicFrame(skillBox, new Color(0.35f, 0.45f, 0.60f, 0.60f), 0.50f);
+
+        GameObject skTitleObj = new GameObject("SkillTitle", typeof(RectTransform), typeof(CanvasRenderer));
+        skTitleObj.transform.SetParent(skillBox.transform, false);
+        RectTransform sktRt = skTitleObj.GetComponent<RectTransform>();
+        sktRt.anchorMin = new Vector2(0f, 1f);
+        sktRt.anchorMax = new Vector2(1f, 1f);
+        sktRt.pivot = new Vector2(0.5f, 1f);
+        sktRt.anchoredPosition = new Vector2(12f, -5f);
+        sktRt.sizeDelta = new Vector2(-24f, 22f);
+        rosterHeroSkillTitleText = skTitleObj.AddComponent<TextMeshProUGUI>();
+        rosterHeroSkillTitleText.fontSize = 16.5f;
+        rosterHeroSkillTitleText.fontStyle = FontStyles.Bold;
+        rosterHeroSkillTitleText.color = new Color(1f, 0.85f, 0.35f);
+
+        // 3 Skill Breakdown Cards (Attack, Dash, Ultimate)
+        CreateSkillRowCard(skillBox.transform, 0, -28f, 66f,
+            out rosterSkill1IconImg, out rosterSkill1TagText, out rosterSkill1CdText, out rosterSkill1TitleText, out rosterSkill1DescText);
+        CreateSkillRowCard(skillBox.transform, 1, -96f, 66f,
+            out rosterSkill2IconImg, out rosterSkill2TagText, out rosterSkill2CdText, out rosterSkill2TitleText, out rosterSkill2DescText);
+        CreateSkillRowCard(skillBox.transform, 2, -164f, 70f,
+            out rosterSkill3IconImg, out rosterSkill3TagText, out rosterSkill3CdText, out rosterSkill3TitleText, out rosterSkill3DescText);
+        rosterHeroSkillDescText = rosterSkill1DescText;
+
+        // BOTTOM SECTION: BAG ITEMS & MINERALS/GEMS (Direct Drag & Drop to 6 Slots) - ENLARGED FOR MOBILE
+        GameObject bagBox = new GameObject("RosterBagBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        bagBox.transform.SetParent(rightCol.transform, false);
+        RectTransform bbRt = bagBox.GetComponent<RectTransform>();
+        bbRt.anchorMin = new Vector2(0f, 0f);
+        bbRt.anchorMax = new Vector2(1f, 0f);
+        bbRt.pivot = new Vector2(0.5f, 0f);
+        bbRt.anchoredPosition = new Vector2(0f, 10f);
+        bbRt.sizeDelta = new Vector2(-30f, 150f);
+
+        Image bbImg = bagBox.GetComponent<Image>();
+        bbImg.color = new Color(0.04f, 0.06f, 0.10f, 0.95f);
+        WhiteIconLoader.ApplyGothicFrame(bagBox, new Color(0.35f, 0.45f, 0.60f, 0.60f), 0.45f);
+
+        // Bag Header Bar (Aligned with padding and right-margin for AutoMerge button)
+        GameObject bhObj = new GameObject("BagHeader", typeof(RectTransform), typeof(CanvasRenderer));
+        bhObj.transform.SetParent(bagBox.transform, false);
+        RectTransform bhRt = bhObj.GetComponent<RectTransform>();
+        bhRt.anchorMin = new Vector2(0f, 1f);
+        bhRt.anchorMax = new Vector2(1f, 1f);
+        bhRt.pivot = new Vector2(0f, 1f);
+        bhRt.anchoredPosition = new Vector2(12f, -8f);
+        bhRt.sizeDelta = new Vector2(-235f, 26f);
+
+        rosterBagSectionHeaderText = bhObj.AddComponent<TextMeshProUGUI>();
+        rosterBagSectionHeaderText.fontSize = 15f;
+        rosterBagSectionHeaderText.fontStyle = FontStyles.Bold;
+        rosterBagSectionHeaderText.color = new Color(0.85f, 0.90f, 1f);
+        rosterBagSectionHeaderText.enableWordWrapping = false;
+        rosterBagSectionHeaderText.overflowMode = TextOverflowModes.Ellipsis;
+        rosterBagSectionHeaderText.text = LocalizationManager.T("VẬT PHẨM & TRANG BỊ TRONG TÚI (KÉO VÀO 6 Ô TRÊN ĐỂ TRANG BỊ)", "ITEMS & GEAR IN BAG (DRAG INTO THE 6 SLOTS TO EQUIP)");
+
+        // Auto Merge Button (Cleanly nested inside BagBox with proper padding from border and header text)
+        GameObject ambObj = new GameObject("Btn_AutoMerge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        ambObj.transform.SetParent(bagBox.transform, false);
+        RectTransform ambRt = ambObj.GetComponent<RectTransform>();
+        ambRt.anchorMin = new Vector2(1f, 1f);
+        ambRt.anchorMax = new Vector2(1f, 1f);
+        ambRt.pivot = new Vector2(1f, 1f);
+        ambRt.anchoredPosition = new Vector2(-12f, -6f);
+        ambRt.sizeDelta = new Vector2(205f, 28f);
+
+        Image ambImg = ambObj.GetComponent<Image>();
+        ambImg.color = new Color(0.72f, 0.45f, 0.12f, 1f);
+        WhiteIconLoader.ApplyGothicFrame(ambObj, new Color(1f, 0.85f, 0.40f, 0.85f), 0.35f);
+
+        rosterAutoMergeBtn = ambObj.GetComponent<Button>();
+        rosterAutoMergeBtn.onClick.AddListener(() =>
+        {
+            int gained = EquipmentSocketManager.AutoMergeAllMatchingGems(out int upgradedSlots, out int levelsGained, inspectedHeroId);
+            if (gained > 0)
+            {
+                SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+                InspectHero(inspectedHeroId);
+            }
+        });
+
+        GameObject amTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        amTxtObj.transform.SetParent(ambObj.transform, false);
+        RectTransform amtRt = amTxtObj.GetComponent<RectTransform>();
+        amtRt.anchorMin = Vector2.zero;
+        amtRt.anchorMax = Vector2.one;
+        amtRt.sizeDelta = Vector2.zero;
+        rosterAutoMergeBtnText = amTxtObj.AddComponent<TextMeshProUGUI>();
+        rosterAutoMergeBtnText.fontSize = 15.5f;
+        rosterAutoMergeBtnText.fontStyle = FontStyles.Bold;
+        rosterAutoMergeBtnText.alignment = TextAlignmentOptions.Center;
+        rosterAutoMergeBtnText.color = Color.white;
+        rosterAutoMergeBtnText.text = LocalizationManager.T("HẤP THU TOÀN BỘ", "AUTO MERGE ALL");
+
+        // Bag Scroll Container (Mobile-Optimized Smooth Scrolling)
+        GameObject scrollObj = new GameObject("BagScrollRect", typeof(RectTransform), typeof(CanvasRenderer), typeof(ScrollRect), typeof(RectMask2D));
+        scrollObj.transform.SetParent(bagBox.transform, false);
+        RectTransform scrRt = scrollObj.GetComponent<RectTransform>();
+        scrRt.anchorMin = new Vector2(0f, 0f);
+        scrRt.anchorMax = new Vector2(1f, 1f);
+        scrRt.offsetMin = new Vector2(38f, 8f);
+        scrRt.offsetMax = new Vector2(-38f, -32f);
+
+        ScrollRect sRect = scrollObj.GetComponent<ScrollRect>();
+        sRect.horizontal = true;
+        sRect.vertical = false;
+        sRect.movementType = ScrollRect.MovementType.Elastic;
+        sRect.elasticity = 0.1f;
+        sRect.inertia = true;
+        sRect.decelerationRate = 0.135f;
+        sRect.scrollSensitivity = 35f;
+
+        // Left Navigation Arrow Button for Mobile
+        GameObject leftBtnObj = new GameObject("Btn_ScrollLeft", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        leftBtnObj.transform.SetParent(bagBox.transform, false);
+        RectTransform lbRt = leftBtnObj.GetComponent<RectTransform>();
+        lbRt.anchorMin = new Vector2(0f, 0.5f);
+        lbRt.anchorMax = new Vector2(0f, 0.5f);
+        lbRt.pivot = new Vector2(0f, 0.5f);
+        lbRt.anchoredPosition = new Vector2(4f, -14f);
+        lbRt.sizeDelta = new Vector2(30f, 100f);
+        Image lbImg = leftBtnObj.GetComponent<Image>();
+        lbImg.color = new Color(0.10f, 0.14f, 0.22f, 0.92f);
+        WhiteIconLoader.ApplyGothicFrame(leftBtnObj, new Color(0.45f, 0.55f, 0.70f, 0.70f), 0.35f);
+        var lbBtn = leftBtnObj.GetComponent<Button>();
+        lbBtn.onClick.AddListener(() =>
+        {
+            sRect.horizontalNormalizedPosition = Mathf.Clamp01(sRect.horizontalNormalizedPosition - 0.25f);
+            SoundManager.EnsureInstance()?.PlayMenuHover();
+        });
+        GameObject ltObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        ltObj.transform.SetParent(leftBtnObj.transform, false);
+        RectTransform ltRt = ltObj.GetComponent<RectTransform>();
+        ltRt.anchorMin = Vector2.zero; ltRt.anchorMax = Vector2.one; ltRt.sizeDelta = Vector2.zero;
+        var ltTmp = ltObj.AddComponent<TextMeshProUGUI>();
+        ltTmp.text = "<";
+        ltTmp.fontSize = 20f;
+        ltTmp.fontStyle = FontStyles.Bold;
+        ltTmp.alignment = TextAlignmentOptions.Center;
+        ltTmp.color = new Color(0.85f, 0.90f, 1f);
+
+        // Right Navigation Arrow Button for Mobile
+        GameObject rightBtnObj = new GameObject("Btn_ScrollRight", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        rightBtnObj.transform.SetParent(bagBox.transform, false);
+        RectTransform rbRt = rightBtnObj.GetComponent<RectTransform>();
+        rbRt.anchorMin = new Vector2(1f, 0.5f);
+        rbRt.anchorMax = new Vector2(1f, 0.5f);
+        rbRt.pivot = new Vector2(1f, 0.5f);
+        rbRt.anchoredPosition = new Vector2(-4f, -14f);
+        rbRt.sizeDelta = new Vector2(30f, 100f);
+        Image rbImg = rightBtnObj.GetComponent<Image>();
+        rbImg.color = new Color(0.10f, 0.14f, 0.22f, 0.92f);
+        WhiteIconLoader.ApplyGothicFrame(rightBtnObj, new Color(0.45f, 0.55f, 0.70f, 0.70f), 0.35f);
+        var rbBtn = rightBtnObj.GetComponent<Button>();
+        rbBtn.onClick.AddListener(() =>
+        {
+            sRect.horizontalNormalizedPosition = Mathf.Clamp01(sRect.horizontalNormalizedPosition + 0.25f);
+            SoundManager.EnsureInstance()?.PlayMenuHover();
+        });
+        GameObject rtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        rtObj.transform.SetParent(rightBtnObj.transform, false);
+        RectTransform rtRt = rtObj.GetComponent<RectTransform>();
+        rtRt.anchorMin = Vector2.zero; rtRt.anchorMax = Vector2.one; rtRt.sizeDelta = Vector2.zero;
+        var rtTmp = rtObj.AddComponent<TextMeshProUGUI>();
+        rtTmp.text = ">";
+        rtTmp.fontSize = 20f;
+        rtTmp.fontStyle = FontStyles.Bold;
+        rtTmp.alignment = TextAlignmentOptions.Center;
+        rtTmp.color = new Color(0.85f, 0.90f, 1f);
+
+        GameObject contentObj = new GameObject("BagContent", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
+        contentObj.transform.SetParent(scrollObj.transform, false);
+        RectTransform contRt = contentObj.GetComponent<RectTransform>();
+        contRt.anchorMin = new Vector2(0f, 0.5f);
+        contRt.anchorMax = new Vector2(0f, 0.5f);
+        contRt.pivot = new Vector2(0f, 0.5f);
+        contRt.anchoredPosition = Vector2.zero;
+        contRt.sizeDelta = new Vector2(0f, 105f);
+
+        var hlg = contentObj.GetComponent<HorizontalLayoutGroup>();
+        hlg.childControlWidth = false;
+        hlg.childControlHeight = false;
+        hlg.childForceExpandWidth = false;
+        hlg.childForceExpandHeight = false;
+        hlg.spacing = 10f;
+
+        var csf = contentObj.GetComponent<ContentSizeFitter>();
+        csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        csf.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+        sRect.content = contRt;
+        rosterBagContainer = contRt;
 
         rosterPanel.SetActive(false);
     }
@@ -1292,25 +1607,315 @@ public class MainMenuManager : MonoBehaviour
 
     public static Vector3 GetHeroVisualScale(string heroId)
     {
-        if (string.IsNullOrEmpty(heroId)) return Vector3.one;
+        if (string.IsNullOrEmpty(heroId)) return new Vector3(2.35f, 2.35f, 1f);
         string id = heroId.ToLower();
         if (id == "vael" || id == "vaelstrider")
         {
-            return new Vector3(1.35f, 1.35f, 1f);
+            return new Vector3(2.35f, 2.35f, 1f);
         }
         else if (id == "ronin" || id == "galeronin" || id == "player2" || id == "maid" || id == "elysia")
         {
-            return new Vector3(1.45f, 1.45f, 1f);
+            return new Vector3(2.45f, 2.45f, 1f);
         }
         else if (id == "azure" || id == "azureblade" || id == "player3")
         {
-            return new Vector3(1.7f, 1.7f, 1f);
+            return new Vector3(2.75f, 2.75f, 1f);
         }
         else if (id == "titan" || id == "titanberserker" || id == "player4")
         {
-            return new Vector3(1.35f, 1.35f, 1f);
+            return new Vector3(2.35f, 2.35f, 1f);
         }
-        return Vector3.one;
+        else if (id == "dune" || id == "duneassassin" || id == "player5")
+        {
+            return new Vector3(1.0f, 1.0f, 1f);
+        }
+        else if (id == "mage" || id == "celestialmage" || id == "player6")
+        {
+            return new Vector3(1.05f, 1.05f, 1f);
+        }
+        return new Vector3(2.0f, 2.0f, 1f);
+    }
+
+    private static float[] GetHeroBaseCooldowns(string heroId)
+    {
+        string h = (heroId ?? "").ToLower();
+        if (h.Contains("mage") || h.Contains("celestial") || h.Contains("player6"))
+            return new float[] { 0.75f, 4.0f, 15.0f };
+        if (h.Contains("dune") || h.Contains("player5"))
+            return new float[] { 0f, 3.5f, 13.0f };
+        if (h.Contains("titan") || h.Contains("player4"))
+            return new float[] { 5.0f, 4.5f, 24.0f };
+        if (h.Contains("azure") || h.Contains("player3"))
+            return new float[] { 5.0f, 4.5f, 18.0f };
+        if (h.Contains("ronin") || h.Contains("gale") || h.Contains("maid") || h.Contains("elysia"))
+            return new float[] { 0f, 4.0f, 15.0f };
+        // Default (Knight Vaelstrider / Warrior)
+        return new float[] { 5.0f, 5.0f, 24.0f };
+    }
+
+    private GameObject CreateSkillRowCard(Transform parent, int skillIndex, float yOffset, float height,
+        out Image iconImg, out TextMeshProUGUI tagTxt, out TextMeshProUGUI cdTxt, out TextMeshProUGUI titleTxt, out TextMeshProUGUI descTxt)
+    {
+        GameObject card = new GameObject($"SkillCard_{skillIndex}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        card.transform.SetParent(parent, false);
+        RectTransform cRt = card.GetComponent<RectTransform>();
+        cRt.anchorMin = new Vector2(0f, 1f);
+        cRt.anchorMax = new Vector2(1f, 1f);
+        cRt.pivot = new Vector2(0.5f, 1f);
+        cRt.anchoredPosition = new Vector2(0f, yOffset);
+        cRt.sizeDelta = new Vector2(-20f, height);
+
+        Image cImg = card.GetComponent<Image>();
+        cImg.color = new Color(0.04f, 0.06f, 0.10f, 0.90f);
+        Color outlineCol = (skillIndex == 0) ? new Color(1f, 0.85f, 0.35f, 0.65f)
+                         : (skillIndex == 1 ? new Color(0.35f, 0.90f, 0.65f, 0.65f) : new Color(0.95f, 0.45f, 0.45f, 0.65f));
+        WhiteIconLoader.ApplyGothicFrame(card, outlineCol, 0.50f);
+
+        // Icon Badge Container (48x48) with Gothic frame
+        GameObject iconBadge = new GameObject("IconBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        iconBadge.transform.SetParent(card.transform, false);
+        RectTransform ibRt = iconBadge.GetComponent<RectTransform>();
+        ibRt.anchorMin = new Vector2(0f, 0.5f);
+        ibRt.anchorMax = new Vector2(0f, 0.5f);
+        ibRt.pivot = new Vector2(0f, 0.5f);
+        ibRt.anchoredPosition = new Vector2(10f, 0f);
+        ibRt.sizeDelta = new Vector2(48f, 48f);
+
+        Image ibImg = iconBadge.GetComponent<Image>();
+        ibImg.color = new Color(0.07f, 0.10f, 0.16f, 1f);
+        WhiteIconLoader.ApplyGothicFrame(iconBadge, outlineCol, 0.35f);
+
+        // Icon Image inside badge
+        GameObject iconInner = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        iconInner.transform.SetParent(iconBadge.transform, false);
+        RectTransform iiRt = iconInner.GetComponent<RectTransform>();
+        iiRt.anchorMin = Vector2.zero;
+        iiRt.anchorMax = Vector2.one;
+        iiRt.sizeDelta = new Vector2(-6f, -6f);
+        iconImg = iconInner.GetComponent<Image>();
+        iconImg.preserveAspect = true;
+        iconImg.raycastTarget = false;
+
+        // Nhóm Header góc phải của chiêu: Tag Badge + Cooldown Badge
+        float badgeW = 75f;
+        float cdW = 80f;
+        float topGroupW = badgeW + cdW + 4f;
+
+        GameObject topGroup = new GameObject("TopRightGroup", typeof(RectTransform));
+        topGroup.transform.SetParent(card.transform, false);
+        RectTransform trRt = topGroup.GetComponent<RectTransform>();
+        trRt.anchorMin = new Vector2(1f, 1f);
+        trRt.anchorMax = new Vector2(1f, 1f);
+        trRt.pivot = new Vector2(1f, 1f);
+        trRt.anchoredPosition = new Vector2(-10f, -4f);
+        trRt.sizeDelta = new Vector2(topGroupW, 22f);
+
+        // 1. Tag badge
+        GameObject tagBadge = new GameObject("TagBadge", typeof(RectTransform));
+        tagBadge.transform.SetParent(topGroup.transform, false);
+        RectTransform tRt = tagBadge.GetComponent<RectTransform>();
+        tRt.anchorMin = new Vector2(0f, 0.5f);
+        tRt.anchorMax = new Vector2(0f, 0.5f);
+        tRt.pivot = new Vector2(0f, 0.5f);
+        tRt.anchoredPosition = Vector2.zero;
+        tRt.sizeDelta = new Vector2(badgeW, 22f);
+
+        Sprite bracketSpr = WhiteIconLoader.GetGothicBracketSprite();
+
+        // Left Gothic bracket [
+        GameObject leftB = new GameObject("LeftBracket", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        leftB.transform.SetParent(tagBadge.transform, false);
+        RectTransform lbRt = leftB.GetComponent<RectTransform>();
+        lbRt.anchorMin = new Vector2(0f, 0.5f);
+        lbRt.anchorMax = new Vector2(0f, 0.5f);
+        lbRt.pivot = new Vector2(0.5f, 0.5f);
+        lbRt.anchoredPosition = new Vector2(7f, 0f);
+        lbRt.sizeDelta = new Vector2(14f, 16f);
+        lbRt.localScale = new Vector3(-1f, 1f, 1f);
+        Image lbImg = leftB.GetComponent<Image>();
+        lbImg.sprite = bracketSpr;
+        lbImg.color = outlineCol;
+        lbImg.preserveAspect = true;
+        lbImg.raycastTarget = false;
+
+        // Tag text in center (unobstructed)
+        GameObject tagObj = new GameObject("TagText", typeof(RectTransform), typeof(CanvasRenderer));
+        tagObj.transform.SetParent(tagBadge.transform, false);
+        RectTransform ttRt2 = tagObj.GetComponent<RectTransform>();
+        ttRt2.anchorMin = Vector2.zero;
+        ttRt2.anchorMax = Vector2.one;
+        ttRt2.offsetMin = new Vector2(12f, 0f);
+        ttRt2.offsetMax = new Vector2(-12f, 0f);
+        tagTxt = tagObj.AddComponent<TextMeshProUGUI>();
+        tagTxt.fontSize = 13f;
+        tagTxt.fontStyle = FontStyles.Bold;
+        tagTxt.alignment = TextAlignmentOptions.Center;
+        tagTxt.color = outlineCol;
+        tagTxt.enableWordWrapping = false;
+        tagTxt.raycastTarget = false;
+
+        // Right Gothic bracket ]
+        GameObject rightB = new GameObject("RightBracket", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        rightB.transform.SetParent(tagBadge.transform, false);
+        RectTransform rbRt = rightB.GetComponent<RectTransform>();
+        rbRt.anchorMin = new Vector2(1f, 0.5f);
+        rbRt.anchorMax = new Vector2(1f, 0.5f);
+        rbRt.pivot = new Vector2(0.5f, 0.5f);
+        rbRt.anchoredPosition = new Vector2(-7f, 0f);
+        rbRt.sizeDelta = new Vector2(14f, 16f);
+        rbRt.localScale = new Vector3(1f, 1f, 1f);
+        Image rbImg = rightB.GetComponent<Image>();
+        rbImg.sprite = bracketSpr;
+        rbImg.color = outlineCol;
+        rbImg.preserveAspect = true;
+        rbImg.raycastTarget = false;
+
+        // 2. Cooldown Badge ở góc phải
+        GameObject cdBadge = new GameObject("CooldownBadge", typeof(RectTransform));
+        cdBadge.transform.SetParent(topGroup.transform, false);
+        RectTransform cdRt = cdBadge.GetComponent<RectTransform>();
+        cdRt.anchorMin = new Vector2(1f, 0.5f);
+        cdRt.anchorMax = new Vector2(1f, 0.5f);
+        cdRt.pivot = new Vector2(1f, 0.5f);
+        cdRt.anchoredPosition = Vector2.zero;
+        cdRt.sizeDelta = new Vector2(cdW, 22f);
+
+        GameObject cdObj = new GameObject("CDText", typeof(RectTransform), typeof(CanvasRenderer));
+        cdObj.transform.SetParent(cdBadge.transform, false);
+        RectTransform cdtRt = cdObj.GetComponent<RectTransform>();
+        cdtRt.anchorMin = Vector2.zero;
+        cdtRt.anchorMax = Vector2.one;
+        cdtRt.sizeDelta = Vector2.zero;
+        cdTxt = cdObj.AddComponent<TextMeshProUGUI>();
+        cdTxt.fontSize = 13.5f;
+        cdTxt.fontStyle = FontStyles.Bold;
+        cdTxt.alignment = TextAlignmentOptions.MidlineRight;
+        cdTxt.enableWordWrapping = false;
+        cdTxt.raycastTarget = false;
+        cdTxt.text = "<color=#94A3B8><b>CD: 0s</b></color>";
+
+        // Text Group (Right side, dừng trước topGroup)
+        GameObject textGroup = new GameObject("TextGroup", typeof(RectTransform));
+        textGroup.transform.SetParent(card.transform, false);
+        RectTransform tgRt = textGroup.GetComponent<RectTransform>();
+        tgRt.anchorMin = Vector2.zero;
+        tgRt.anchorMax = Vector2.one;
+        tgRt.offsetMin = new Vector2(68f, 3f);
+        tgRt.offsetMax = new Vector2(-(topGroupW + 16f), -3f);
+
+        // Title text
+        GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
+        titleObj.transform.SetParent(textGroup.transform, false);
+        RectTransform ttRt = titleObj.GetComponent<RectTransform>();
+        ttRt.anchorMin = new Vector2(0f, 1f);
+        ttRt.anchorMax = new Vector2(1f, 1f);
+        ttRt.pivot = new Vector2(0f, 1f);
+        ttRt.anchoredPosition = new Vector2(0f, -2f);
+        ttRt.sizeDelta = new Vector2(0f, 24f);
+        titleTxt = titleObj.AddComponent<TextMeshProUGUI>();
+        titleTxt.fontSize = 17.5f;
+        titleTxt.fontStyle = FontStyles.Bold;
+        titleTxt.alignment = TextAlignmentOptions.Left;
+        titleTxt.enableWordWrapping = false;
+        titleTxt.overflowMode = TextOverflowModes.Ellipsis;
+        titleTxt.raycastTarget = false;
+
+        // Desc text
+        GameObject descObj = new GameObject("Desc", typeof(RectTransform), typeof(CanvasRenderer));
+        descObj.transform.SetParent(textGroup.transform, false);
+        RectTransform dtRt = descObj.GetComponent<RectTransform>();
+        dtRt.anchorMin = Vector2.zero;
+        dtRt.anchorMax = Vector2.one;
+        dtRt.offsetMin = new Vector2(0f, 2f);
+        dtRt.offsetMax = new Vector2(0f, -24f);
+        descTxt = descObj.AddComponent<TextMeshProUGUI>();
+        descTxt.fontSize = 15f;
+        descTxt.lineSpacing = 2.5f;
+        descTxt.enableWordWrapping = true;
+        descTxt.overflowMode = TextOverflowModes.Ellipsis;
+        descTxt.color = new Color(0.85f, 0.88f, 0.92f);
+        descTxt.raycastTarget = false;
+
+        return card;
+    }
+
+    private void SetHeroSkillCard(int cardIdx, Sprite icon, string tag, string title, string desc, float baseCd = 0f, float finalCd = 0f, float upDashCd = 0f, float upUltiCd = 0f)
+    {
+        Color tagCol = Color.white;
+        string upperTag = string.IsNullOrEmpty(tag) ? "" : tag.ToUpper();
+        if (upperTag.Contains("AP") || upperTag.Contains("PHÉP") || upperTag.Contains("MAGIC")) tagCol = new Color(0.72f, 0.35f, 1f); // Tím AP
+        else if (upperTag.Contains("TD") || upperTag.Contains("CHUẨN") || upperTag.Contains("TRUE")) tagCol = new Color(0.92f, 0.95f, 1f); // Trắng Bạc TD
+        else if (upperTag.Contains("ATK") || upperTag.Contains("VẬT LÝ") || upperTag.Contains("PHYS") || upperTag.Contains("V.LÝ")) tagCol = new Color(1f, 0.23f, 0.23f); // Đỏ ATK
+        else if (upperTag.Contains("LƯỚT") || upperTag.Contains("DASH") || upperTag.Contains("TỐC BIẾN") || upperTag.Contains("BLINK") || upperTag.Contains("WARP") || upperTag.Contains("ẢO ẢNH")) tagCol = new Color(0.35f, 0.90f, 0.65f); // Xanh Ngọc Cơ Động
+        else tagCol = new Color(1f, 0.85f, 0.35f);
+
+        string cleanTag = string.IsNullOrEmpty(tag) ? "" : tag.Trim('[', ']', ' ');
+
+        // Tính toán Cooldown động cập nhật theo ngọc khảm và nâng cấp
+        float effCd = 0f;
+        if (baseCd > 0.05f)
+        {
+            float clampedCdr = Mathf.Clamp(finalCd, 0f, 0.60f);
+            if (cardIdx == 0) effCd = Mathf.Max(0.5f, baseCd * (1f - clampedCdr));
+            else if (cardIdx == 1) effCd = Mathf.Max(1.0f, (baseCd * (1f - clampedCdr)) - upDashCd);
+            else effCd = Mathf.Max(3.0f, (baseCd * (1f - clampedCdr)) - upUltiCd);
+        }
+        string cdStr = (effCd > 0f) ? $"<color=#38BDF8><b>CD: {effCd:0.#}s</b></color>" : "<color=#94A3B8><b>CD: 0s</b></color>";
+
+        if (cardIdx == 0)
+        {
+            if (rosterSkill1IconImg != null)
+            {
+                rosterSkill1IconImg.sprite = icon;
+                rosterSkill1IconImg.color = (icon != null) ? Color.white : new Color(1f, 1f, 1f, 0f);
+            }
+            if (rosterSkill1TagText != null) 
+            { 
+                rosterSkill1TagText.text = cleanTag; 
+                rosterSkill1TagText.color = tagCol;
+                var imgs = rosterSkill1TagText.transform.parent.GetComponentsInChildren<Image>(true);
+                foreach (var img in imgs) img.color = tagCol;
+            }
+            if (rosterSkill1CdText != null) rosterSkill1CdText.text = cdStr;
+            if (rosterSkill1TitleText != null) rosterSkill1TitleText.text = title;
+            if (rosterSkill1DescText != null) rosterSkill1DescText.text = desc;
+        }
+        else if (cardIdx == 1)
+        {
+            if (rosterSkill2IconImg != null)
+            {
+                rosterSkill2IconImg.sprite = icon;
+                rosterSkill2IconImg.color = (icon != null) ? Color.white : new Color(1f, 1f, 1f, 0f);
+            }
+            if (rosterSkill2TagText != null) 
+            { 
+                rosterSkill2TagText.text = cleanTag; 
+                rosterSkill2TagText.color = tagCol;
+                var imgs = rosterSkill2TagText.transform.parent.GetComponentsInChildren<Image>(true);
+                foreach (var img in imgs) img.color = tagCol;
+            }
+            if (rosterSkill2CdText != null) rosterSkill2CdText.text = cdStr;
+            if (rosterSkill2TitleText != null) rosterSkill2TitleText.text = title;
+            if (rosterSkill2DescText != null) rosterSkill2DescText.text = desc;
+        }
+        else if (cardIdx == 2)
+        {
+            if (rosterSkill3IconImg != null)
+            {
+                rosterSkill3IconImg.sprite = icon;
+                rosterSkill3IconImg.color = (icon != null) ? Color.white : new Color(1f, 1f, 1f, 0f);
+            }
+            if (rosterSkill3TagText != null) 
+            { 
+                rosterSkill3TagText.text = cleanTag; 
+                rosterSkill3TagText.color = tagCol;
+                var imgs = rosterSkill3TagText.transform.parent.GetComponentsInChildren<Image>(true);
+                foreach (var img in imgs) img.color = tagCol;
+            }
+            if (rosterSkill3CdText != null) rosterSkill3CdText.text = cdStr;
+            if (rosterSkill3TitleText != null) rosterSkill3TitleText.text = title;
+            if (rosterSkill3DescText != null) rosterSkill3DescText.text = desc;
+        }
     }
 
     private Button CreateAvatarCard(Transform parent, string heroId, Vector2 pos, Vector2 size, Sprite avatarSprite, bool isLocked, out Image avatarImgRef, out TextMeshProUGUI titleTxtRef, out TextMeshProUGUI subTxtRef, out TextMeshProUGUI statusTxtRef)
@@ -1326,11 +1931,10 @@ public class MainMenuManager : MonoBehaviour
         rt.sizeDelta = size;
 
         Image img = card.GetComponent<Image>();
-        img.color = isLocked ? new Color(0.10f, 0.11f, 0.16f, 0.90f) : new Color(0.12f, 0.16f, 0.24f, 0.95f);
+        img.color = isLocked ? new Color(0.06f, 0.07f, 0.11f, 0.90f) : new Color(0.06f, 0.08f, 0.13f, 0.95f);
 
-        var outline = card.AddComponent<Outline>();
-        outline.effectColor = isLocked ? new Color(0.40f, 0.40f, 0.45f, 0.5f) : new Color(0.85f, 0.72f, 0.35f, 0.85f);
-        outline.effectDistance = new Vector2(1.5f, -1.5f);
+        Color borderCol = isLocked ? new Color(0.40f, 0.40f, 0.45f, 0.5f) : new Color(0.85f, 0.72f, 0.35f, 0.85f);
+        WhiteIconLoader.ApplyGothicFrame(card, borderCol, 0.65f);
 
         Button btn = card.GetComponent<Button>();
         btn.targetGraphic = img;
@@ -1379,6 +1983,14 @@ public class MainMenuManager : MonoBehaviour
         {
             aiRt.anchoredPosition = new Vector2(0f, 4f);
         }
+        else if (hid == "dune" || hid == "duneassassin" || hid == "player5")
+        {
+            aiRt.anchoredPosition = new Vector2(0f, 0f);
+        }
+        else if (hid == "mage" || hid == "celestialmage" || hid == "player6")
+        {
+            aiRt.anchoredPosition = new Vector2(0f, 0f);
+        }
         if (isLocked) avatarImgRef.color = new Color(0.5f, 0.5f, 0.55f, 0.6f);
 
         if (isLocked)
@@ -1399,7 +2011,7 @@ public class MainMenuManager : MonoBehaviour
             liRt.sizeDelta = Vector2.zero;
             var liTmp = lockIcon.AddComponent<TextMeshProUGUI>();
             liTmp.text = LocalizationManager.T("KHÓA", "LOCKED");
-            liTmp.fontSize = 12;
+            liTmp.fontSize = 15f;
             liTmp.fontStyle = FontStyles.Bold;
             liTmp.alignment = TextAlignmentOptions.Center;
             liTmp.color = new Color(1f, 0.85f, 0.4f);
@@ -1412,10 +2024,10 @@ public class MainMenuManager : MonoBehaviour
         tRt.anchorMin = new Vector2(0f, 1f);
         tRt.anchorMax = new Vector2(1f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.anchoredPosition = new Vector2(120f, -16f);
+        tRt.anchoredPosition = new Vector2(120f, -14f);
         tRt.sizeDelta = new Vector2(-130f, 26f);
         titleTxtRef = tObj.AddComponent<TextMeshProUGUI>();
-        titleTxtRef.fontSize = 17f;
+        titleTxtRef.fontSize = 18.5f;
         titleTxtRef.fontStyle = FontStyles.Bold;
         titleTxtRef.color = isLocked ? new Color(0.75f, 0.75f, 0.8f) : new Color(1f, 0.88f, 0.45f);
         titleTxtRef.raycastTarget = false;
@@ -1426,10 +2038,10 @@ public class MainMenuManager : MonoBehaviour
         sRt.anchorMin = new Vector2(0f, 1f);
         sRt.anchorMax = new Vector2(1f, 1f);
         sRt.pivot = new Vector2(0f, 1f);
-        sRt.anchoredPosition = new Vector2(120f, -46f);
-        sRt.sizeDelta = new Vector2(-130f, 22f);
+        sRt.anchoredPosition = new Vector2(120f, -44f);
+        sRt.sizeDelta = new Vector2(-130f, 24f);
         subTxtRef = sObj.AddComponent<TextMeshProUGUI>();
-        subTxtRef.fontSize = 13.5f;
+        subTxtRef.fontSize = 15.5f;
         subTxtRef.color = new Color(0.6f, 0.85f, 1f);
         subTxtRef.raycastTarget = false;
 
@@ -1439,14 +2051,284 @@ public class MainMenuManager : MonoBehaviour
         stRt.anchorMin = new Vector2(0f, 0f);
         stRt.anchorMax = new Vector2(1f, 0f);
         stRt.pivot = new Vector2(0f, 0f);
-        stRt.anchoredPosition = new Vector2(120f, 16f);
-        stRt.sizeDelta = new Vector2(-130f, 22f);
+        stRt.anchoredPosition = new Vector2(120f, 14f);
+        stRt.sizeDelta = new Vector2(-130f, 24f);
         statusTxtRef = stObj.AddComponent<TextMeshProUGUI>();
-        statusTxtRef.fontSize = 13f;
+        statusTxtRef.fontSize = 15.5f;
         statusTxtRef.fontStyle = FontStyles.Bold;
         statusTxtRef.raycastTarget = false;
 
+        // Role Badge Tag (Top-Right of card)
+        GameObject badgeObj = new GameObject("RoleBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        badgeObj.transform.SetParent(card.transform, false);
+        RectTransform bRt = badgeObj.GetComponent<RectTransform>();
+        bRt.anchorMin = new Vector2(1f, 1f);
+        bRt.anchorMax = new Vector2(1f, 1f);
+        bRt.pivot = new Vector2(1f, 1f);
+        bRt.anchoredPosition = new Vector2(-12f, -10f);
+        bRt.sizeDelta = new Vector2(96f, 24f);
+
+        Image bImg = badgeObj.GetComponent<Image>();
+        string bTextVi, bTextEn;
+        Color bBgCol, bTextCol;
+        GetHeroRoleBadgeInfo(heroId, out bTextVi, out bTextEn, out bBgCol, out bTextCol);
+        bImg.color = bBgCol;
+
+        var bOutline = badgeObj.AddComponent<Outline>();
+        bOutline.effectColor = bTextCol;
+        bOutline.effectDistance = new Vector2(1f, -1f);
+
+        GameObject bTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        bTxtObj.transform.SetParent(badgeObj.transform, false);
+        RectTransform btRt = bTxtObj.GetComponent<RectTransform>();
+        btRt.anchorMin = Vector2.zero;
+        btRt.anchorMax = Vector2.one;
+        btRt.sizeDelta = Vector2.zero;
+
+        var bTmp = bTxtObj.AddComponent<TextMeshProUGUI>();
+        bTmp.text = LocalizationManager.T(bTextVi, bTextEn);
+        bTmp.fontSize = 12.5f;
+        bTmp.fontStyle = FontStyles.Bold;
+        bTmp.alignment = TextAlignmentOptions.Center;
+        bTmp.color = bTextCol;
+        bTmp.raycastTarget = false;
+
         return btn;
+    }
+
+    private void BuildHeroRoleTabs(Transform parent)
+    {
+        heroRoleTabButtons.Clear();
+        heroRoleTabBgList.Clear();
+        heroRoleTabTextList.Clear();
+
+        GameObject barObj = new GameObject("HeroRoleTabBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(HorizontalLayoutGroup));
+        barObj.transform.SetParent(parent, false);
+        RectTransform barRt = barObj.GetComponent<RectTransform>();
+        barRt.anchorMin = new Vector2(0f, 1f);
+        barRt.anchorMax = new Vector2(1f, 1f);
+        barRt.pivot = new Vector2(0.5f, 1f);
+        barRt.anchoredPosition = new Vector2(0f, -34f);
+        barRt.sizeDelta = new Vector2(0f, 36f);
+
+        Image barBg = barObj.GetComponent<Image>();
+        barBg.color = new Color(0.04f, 0.06f, 0.10f, 0.90f);
+
+        var barOutline = barObj.AddComponent<Outline>();
+        barOutline.effectColor = new Color(0.25f, 0.35f, 0.5f, 0.5f);
+        barOutline.effectDistance = new Vector2(1f, -1f);
+
+        var hlg = barObj.GetComponent<HorizontalLayoutGroup>();
+        hlg.childControlWidth = true;
+        hlg.childControlHeight = true;
+        hlg.childForceExpandWidth = true;
+        hlg.childForceExpandHeight = true;
+        hlg.spacing = 4f;
+        hlg.padding = new RectOffset(4, 4, 3, 3);
+
+        string[] tabNamesVi = new string[] { "TẤT CẢ", "ĐỠ ĐÒN", "ĐẤU SĨ", "XẠ THỦ", "SÁT THỦ", "PHÁP SƯ" };
+        string[] tabNamesEn = new string[] { "ALL", "TANK", "WARRIOR", "MARKSMAN", "ASSASSIN", "MAGE" };
+        HeroRoleType[] tabRoles = new HeroRoleType[] { HeroRoleType.All, HeroRoleType.Tank, HeroRoleType.Warrior, HeroRoleType.Marksman, HeroRoleType.Assassin, HeroRoleType.Mage };
+
+        for (int i = 0; i < tabRoles.Length; i++)
+        {
+            int idx = i;
+            HeroRoleType rType = tabRoles[i];
+
+            GameObject tObj = new GameObject($"RoleTab_{rType}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            tObj.transform.SetParent(barObj.transform, false);
+
+            Image tImg = tObj.GetComponent<Image>();
+            tImg.color = (rType == currentHeroRoleFilter) ? new Color(0.18f, 0.45f, 0.75f, 1f) : new Color(0.08f, 0.11f, 0.17f, 0.95f);
+
+            var tOutline = tObj.AddComponent<Outline>();
+            tOutline.effectColor = (rType == currentHeroRoleFilter) ? new Color(1f, 0.85f, 0.35f, 0.9f) : new Color(0.3f, 0.4f, 0.55f, 0.4f);
+            tOutline.effectDistance = new Vector2(1f, -1f);
+
+            Button tBtn = tObj.GetComponent<Button>();
+            tBtn.targetGraphic = tImg;
+            tBtn.onClick.AddListener(() =>
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                ApplyHeroRoleFilter(rType);
+            });
+
+            GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+            txtObj.transform.SetParent(tObj.transform, false);
+            RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+            txtRt.anchorMin = Vector2.zero;
+            txtRt.anchorMax = Vector2.one;
+            txtRt.sizeDelta = Vector2.zero;
+
+            var tmp = txtObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = LocalizationManager.T(tabNamesVi[i], tabNamesEn[i]);
+            tmp.fontSize = 13f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = (rType == currentHeroRoleFilter) ? Color.white : new Color(0.7f, 0.75f, 0.85f);
+            tmp.raycastTarget = false;
+
+            heroRoleTabButtons.Add(tBtn);
+            heroRoleTabBgList.Add(tImg);
+            heroRoleTabTextList.Add(tmp);
+        }
+    }
+
+    private void UpdateHeroRoleTabVisuals()
+    {
+        HeroRoleType[] tabRoles = new HeroRoleType[] { HeroRoleType.All, HeroRoleType.Tank, HeroRoleType.Warrior, HeroRoleType.Marksman, HeroRoleType.Assassin, HeroRoleType.Mage };
+        string[] tabNamesVi = new string[] { "TẤT CẢ", "ĐỠ ĐÒN", "ĐẤU SĨ", "XẠ THỦ", "SÁT THỦ", "PHÁP SƯ" };
+        string[] tabNamesEn = new string[] { "ALL", "TANK", "WARRIOR", "MARKSMAN", "ASSASSIN", "MAGE" };
+
+        for (int i = 0; i < heroRoleTabButtons.Count && i < tabRoles.Length; i++)
+        {
+            bool isSelected = (tabRoles[i] == currentHeroRoleFilter);
+            if (i < heroRoleTabBgList.Count && heroRoleTabBgList[i] != null)
+            {
+                heroRoleTabBgList[i].color = isSelected ? new Color(0.20f, 0.48f, 0.82f, 1f) : new Color(0.08f, 0.11f, 0.17f, 0.95f);
+                var outl = heroRoleTabBgList[i].GetComponent<Outline>();
+                if (outl != null)
+                {
+                    outl.effectColor = isSelected ? new Color(1f, 0.85f, 0.35f, 0.95f) : new Color(0.3f, 0.4f, 0.55f, 0.4f);
+                }
+            }
+            if (i < heroRoleTabTextList.Count && heroRoleTabTextList[i] != null)
+            {
+                heroRoleTabTextList[i].text = LocalizationManager.T(tabNamesVi[i], tabNamesEn[i]);
+                heroRoleTabTextList[i].color = isSelected ? new Color(1f, 0.95f, 0.6f) : new Color(0.7f, 0.75f, 0.85f);
+            }
+        }
+    }
+
+    public void ApplyHeroRoleFilter(HeroRoleType role)
+    {
+        currentHeroRoleFilter = role;
+        UpdateHeroRoleTabVisuals();
+
+        float startY = -78f;
+        float cardHeight = 102f;
+        float spacing = 6f;
+        int visibleIndex = 0;
+
+        // Vael (Warrior)
+        bool showVael = (role == HeroRoleType.All || role == HeroRoleType.Warrior);
+        if (cardVaelBtn != null)
+        {
+            cardVaelBtn.gameObject.SetActive(showVael);
+            if (showVael)
+            {
+                RectTransform rt = cardVaelBtn.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(0f, startY - (visibleIndex * (cardHeight + spacing)));
+                visibleIndex++;
+            }
+        }
+
+        // Ronin (Assassin)
+        bool showRonin = (role == HeroRoleType.All || role == HeroRoleType.Assassin);
+        if (cardRoninBtn != null)
+        {
+            cardRoninBtn.gameObject.SetActive(showRonin);
+            if (showRonin)
+            {
+                RectTransform rt = cardRoninBtn.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(0f, startY - (visibleIndex * (cardHeight + spacing)));
+                visibleIndex++;
+            }
+        }
+
+        // Azure (Marksman)
+        bool showAzure = (role == HeroRoleType.All || role == HeroRoleType.Marksman);
+        if (cardAzureBtn != null)
+        {
+            cardAzureBtn.gameObject.SetActive(showAzure);
+            if (showAzure)
+            {
+                RectTransform rt = cardAzureBtn.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(0f, startY - (visibleIndex * (cardHeight + spacing)));
+                visibleIndex++;
+            }
+        }
+
+        // Titan (Tank)
+        bool showTitan = (role == HeroRoleType.All || role == HeroRoleType.Tank);
+        if (cardTitanBtn != null)
+        {
+            cardTitanBtn.gameObject.SetActive(showTitan);
+            if (showTitan)
+            {
+                RectTransform rt = cardTitanBtn.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(0f, startY - (visibleIndex * (cardHeight + spacing)));
+                visibleIndex++;
+            }
+        }
+
+        // Dune (Assassin)
+        bool showDune = (role == HeroRoleType.All || role == HeroRoleType.Assassin);
+        if (cardDuneBtn != null)
+        {
+            cardDuneBtn.gameObject.SetActive(showDune);
+            if (showDune)
+            {
+                RectTransform rt = cardDuneBtn.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(0f, startY - (visibleIndex * (cardHeight + spacing)));
+                visibleIndex++;
+            }
+        }
+
+        // Mage (Mage)
+        bool showMage = (role == HeroRoleType.All || role == HeroRoleType.Mage);
+        if (cardMageBtn != null)
+        {
+            cardMageBtn.gameObject.SetActive(showMage);
+            if (showMage)
+            {
+                RectTransform rt = cardMageBtn.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(0f, startY - (visibleIndex * (cardHeight + spacing)));
+                visibleIndex++;
+            }
+        }
+
+        // Auto inspect visible hero if current inspected hero is hidden
+        if (role == HeroRoleType.Tank && inspectedHeroId != "titan") InspectHero("titan");
+        else if (role == HeroRoleType.Warrior && inspectedHeroId != "vael") InspectHero("vael");
+        else if (role == HeroRoleType.Marksman && inspectedHeroId != "azure") InspectHero("azure");
+        else if (role == HeroRoleType.Assassin && inspectedHeroId != "ronin" && inspectedHeroId != "dune") InspectHero("ronin");
+        else if (role == HeroRoleType.Mage && inspectedHeroId != "mage") InspectHero("mage");
+    }
+
+    private static void GetHeroRoleBadgeInfo(string heroId, out string textVi, out string textEn, out Color bgCol, out Color textCol)
+    {
+        string hid = string.IsNullOrEmpty(heroId) ? "" : heroId.ToLower();
+        if (hid == "titan" || hid == "titanberserker" || hid == "player4")
+        {
+            textVi = "ĐỠ ĐÒN"; textEn = "TANKER";
+            bgCol = new Color(0.48f, 0.24f, 0.05f, 0.95f);
+            textCol = new Color(1f, 0.78f, 0.25f, 1f);
+        }
+        else if (hid == "azure" || hid == "azureblade" || hid == "player3")
+        {
+            textVi = "XẠ THỦ"; textEn = "MARKSMAN";
+            bgCol = new Color(0.04f, 0.28f, 0.42f, 0.95f);
+            textCol = new Color(0.25f, 0.90f, 1f, 1f);
+        }
+        else if (hid == "ronin" || hid == "galeronin" || hid == "player2" || hid == "maid" || hid == "dune" || hid == "duneassassin" || hid == "player5")
+        {
+            textVi = "SÁT THỦ"; textEn = "ASSASSIN";
+            bgCol = new Color(0.38f, 0.12f, 0.52f, 0.95f);
+            textCol = new Color(0.88f, 0.55f, 1f, 1f);
+        }
+        else if (hid == "mage" || hid == "celestialmage" || hid == "player6")
+        {
+            textVi = "PHÁP SƯ"; textEn = "MAGE";
+            bgCol = new Color(0.38f, 0.12f, 0.58f, 0.95f);
+            textCol = new Color(0.92f, 0.55f, 1f, 1f);
+        }
+        else // vael
+        {
+            textVi = "ĐẤU SĨ"; textEn = "WARRIOR";
+            bgCol = new Color(0.52f, 0.12f, 0.16f, 0.95f);
+            textCol = new Color(1f, 0.45f, 0.50f, 1f);
+        }
     }
 
     private void CreateLockedPlaceholderCard(Transform parent, Vector2 pos, Vector2 size, out TextMeshProUGUI txtRef)
@@ -1472,7 +2354,7 @@ public class MainMenuManager : MonoBehaviour
         txtRt.sizeDelta = Vector2.zero;
 
         txtRef = txtObj.AddComponent<TextMeshProUGUI>();
-        txtRef.fontSize = 14;
+        txtRef.fontSize = 15f;
         txtRef.alignment = TextAlignmentOptions.Center;
         txtRef.color = new Color(0.5f, 0.55f, 0.65f, 0.7f);
         txtRef.text = LocalizationManager.T("KHÓA - ANH HÙNG TIẾP THEO", "LOCKED - COMING SOON");
@@ -1549,6 +2431,27 @@ public class MainMenuManager : MonoBehaviour
             {
                 titanIdleFrames = allFrames.Take(Mathf.Min(5, allFrames.Length)).ToArray();
             }
+        }
+
+        if (duneIdleFrames == null || duneIdleFrames.Length == 0)
+        {
+            List<Sprite> list = new List<Sprite>();
+            for (int i = 1; i <= 8; i++)
+            {
+                string p = $"Assets/ART/Player5/PNG/idle/idle_{i}.png";
+#if UNITY_EDITOR
+                var s = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(p);
+                if (s != null) { list.Add(s); continue; }
+#endif
+                var fallbacks = LoadSpritesFromPath(p, 64, 64);
+                if (fallbacks != null && fallbacks.Length > 0) list.Add(fallbacks[0]);
+            }
+            if (list.Count > 0) duneIdleFrames = list.ToArray();
+        }
+
+        if (mageIdleFrames == null || mageIdleFrames.Length == 0)
+        {
+            mageIdleFrames = LoadSpritesFromPath("Assets/ART/Player6/sample(idle&walk)/idle/sprite sheets/idle.png", 64, 64);
         }
     }
 
@@ -1680,13 +2583,33 @@ public class MainMenuManager : MonoBehaviour
         if (playerTitleText != null) playerTitleText.text = LocalizationManager.Get("LBL_PLAYER_TITLE");
         if (logoutBtnText != null) logoutBtnText.text = LocalizationManager.Get("BTN_LOGOUT");
 
-        if (playBtnText != null) playBtnText.text = LocalizationManager.Get("BTN_PLAY");
+        if (playBtnText != null)
+        {
+            playBtnText.text = LocalizationManager.Get("BTN_PLAY");
+            if (playButton != null) WhiteIconLoader.SetButtonIconAndText(playButton, "Play", playBtnText.text, Color.white, Color.white, true);
+        }
         if (mapSelectBtnText != null) mapSelectBtnText.text = LocalizationManager.Get("BTN_MAP_SELECT");
-        if (rosterBtnText != null) rosterBtnText.text = LocalizationManager.Get("BTN_ROSTER");
+        if (rosterBtnText != null)
+        {
+            rosterBtnText.text = LocalizationManager.Get("BTN_ROSTER");
+            if (rosterButton != null) WhiteIconLoader.SetButtonIconAndText(rosterButton, "Hero", rosterBtnText.text, Color.white, Color.white, true);
+        }
         if (skillBtnText != null) skillBtnText.text = LocalizationManager.Get("BTN_SKILLS");
-        if (inventoryBtnText != null) inventoryBtnText.text = LocalizationManager.Get("BTN_INVENTORY");
-        if (shopBtnText != null) shopBtnText.text = LocalizationManager.Get("BTN_SHOP");
-        if (settingsBtnText != null) settingsBtnText.text = LocalizationManager.Get("BTN_SETTINGS");
+        if (inventoryBtnText != null)
+        {
+            inventoryBtnText.text = LocalizationManager.Get("BTN_INVENTORY");
+            if (inventoryButton != null) WhiteIconLoader.SetButtonIconAndText(inventoryButton, "Bag", inventoryBtnText.text, Color.white, Color.white, true);
+        }
+        if (shopBtnText != null)
+        {
+            shopBtnText.text = LocalizationManager.Get("BTN_SHOP");
+            if (shopButton != null) WhiteIconLoader.SetButtonIconAndText(shopButton, "Cart", shopBtnText.text, Color.white, Color.white, true);
+        }
+        if (settingsBtnText != null)
+        {
+            settingsBtnText.text = LocalizationManager.Get("BTN_SETTINGS");
+            if (settingsButton != null) WhiteIconLoader.SetButtonIconAndText(settingsButton, "Gear", settingsBtnText.text, Color.white, Color.white, true);
+        }
         if (exitBtnText != null) exitBtnText.text = LocalizationManager.Get("BTN_EXIT");
 
         // Map Select panel
@@ -1697,17 +2620,21 @@ public class MainMenuManager : MonoBehaviour
         if (map2DescText != null) map2DescText.text = LocalizationManager.Get("MAP2_DESC");
         if (map3TitleText != null) map3TitleText.text = LocalizationManager.Get("MAP3_NAME");
         if (map3DescText != null) map3DescText.text = LocalizationManager.Get("MAP3_DESC");
-        if (mapBackBtnText != null) mapBackBtnText.text = LocalizationManager.Get("BTN_BACK");
+        if (mapBackBtnText != null)
+        {
+            mapBackBtnText.text = LocalizationManager.Get("BTN_BACK");
+            if (mapBackBtn != null) WhiteIconLoader.SetButtonIconAndText(mapBackBtn, "SolidArrow-Left", mapBackBtnText.text, Color.white, Color.white, true);
+        }
 
         // Roster panel titles & Card texts
         if (rosterPanelTitleText != null) rosterPanelTitleText.text = LocalizationManager.Get("BTN_ROSTER");
         if (leftColHeaderText != null) leftColHeaderText.text = LocalizationManager.T("CHỌN ANH HÙNG", "HERO SELECTION");
-        if (rosterBackBtnText != null) rosterBackBtnText.text = LocalizationManager.Get("BTN_BACK");
+        if (rosterBackBtn != null) WhiteIconLoader.ReplaceTextWithIcon(rosterBackBtn, "Cross", Color.white, new Vector2(24f, 24f));
 
         string currentSelected = CharacterManager.EnsureInstance().GetSelectedCharacterId();
 
         if (cardVaelTitleText != null) cardVaelTitleText.text = LocalizationManager.Get("HERO_VAEL_NAME");
-        if (cardVaelSubText != null) cardVaelSubText.text = LocalizationManager.Get("HERO_VAEL_ROLE");
+        if (cardVaelSubText != null) cardVaelSubText.text = LocalizationManager.T("Đấu Sĩ / Thánh Kiếm", "Warrior / Holy Blade");
         if (cardVaelStatusText != null)
         {
             bool isSel = (currentSelected == CharacterManager.CHAR_VAELSTRIDER);
@@ -1715,7 +2642,7 @@ public class MainMenuManager : MonoBehaviour
         }
 
         if (cardRoninTitleText != null) cardRoninTitleText.text = LocalizationManager.Get("HERO_RONIN_NAME");
-        if (cardRoninSubText != null) cardRoninSubText.text = LocalizationManager.Get("HERO_RONIN_ROLE");
+        if (cardRoninSubText != null) cardRoninSubText.text = LocalizationManager.T("Sát Thủ / Phong Ấn & Ảo Ảnh", "Assassin / Phantom Blade");
         if (cardRoninStatusText != null)
         {
             bool isSel = (currentSelected == CharacterManager.CHAR_GALE_RONIN);
@@ -1724,7 +2651,7 @@ public class MainMenuManager : MonoBehaviour
         else if (cardMaidTitleText != null)
         {
             cardMaidTitleText.text = LocalizationManager.Get("HERO_RONIN_NAME");
-            if (cardMaidSubText != null) cardMaidSubText.text = LocalizationManager.Get("HERO_RONIN_ROLE");
+            if (cardMaidSubText != null) cardMaidSubText.text = LocalizationManager.T("Sát Thủ / Phong Ấn & Ảo Ảnh", "Assassin / Phantom Blade");
             if (cardMaidStatusText != null)
             {
                 bool isSel = (currentSelected == CharacterManager.CHAR_GALE_RONIN);
@@ -1733,7 +2660,7 @@ public class MainMenuManager : MonoBehaviour
         }
 
         if (cardAzureTitleText != null) cardAzureTitleText.text = LocalizationManager.T("Lam Kiếm Sĩ", "Azure Blade");
-        if (cardAzureSubText != null) cardAzureSubText.text = LocalizationManager.T("Trọng Kiếm / Sóng Kiếm", "Heavy / Sword Waves");
+        if (cardAzureSubText != null) cardAzureSubText.text = LocalizationManager.T("Xạ Thủ / Sóng Kiếm Băng", "Marksman / Frost Waves");
         if (cardAzureStatusText != null)
         {
             bool isSel = (currentSelected == CharacterManager.CHAR_AZURE_BLADE);
@@ -1741,11 +2668,27 @@ public class MainMenuManager : MonoBehaviour
         }
 
         if (cardTitanTitleText != null) cardTitanTitleText.text = LocalizationManager.T("Cuồng Chiến Binh", "Titan Berserker");
-        if (cardTitanSubText != null) cardTitanSubText.text = LocalizationManager.T("Đại Chùy / Tanker", "Heavy War Hammer / Tanker");
+        if (cardTitanSubText != null) cardTitanSubText.text = LocalizationManager.T("Đỡ Đòn / Đại Chùy", "Tanker / Heavy Hammer");
         if (cardTitanStatusText != null)
         {
             bool isSel = (currentSelected == CharacterManager.CHAR_TITAN_BERSERKER);
             cardTitanStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
+        }
+
+        if (cardDuneTitleText != null) cardDuneTitleText.text = LocalizationManager.T("Sa Mạc Thích Khách", "Dune Assassin");
+        if (cardDuneSubText != null) cardDuneSubText.text = LocalizationManager.T("Sát Thủ / Song Đoản Đao", "Assassin / Dual Scimitars");
+        if (cardDuneStatusText != null)
+        {
+            bool isSel = (currentSelected == CharacterManager.CHAR_DUNE_ASSASSIN);
+            cardDuneStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
+        }
+
+        if (cardMageTitleText != null) cardMageTitleText.text = LocalizationManager.Get("HERO_MAGE_NAME");
+        if (cardMageSubText != null) cardMageSubText.text = LocalizationManager.T("Pháp Sư / Tinh Vân & Thiên Thạch", "Mage / Arcane & Meteor");
+        if (cardMageStatusText != null)
+        {
+            bool isSel = (currentSelected == CharacterManager.CHAR_CELESTIAL_MAGE);
+            cardMageStatusText.text = isSel ? LocalizationManager.T("<color=#55FF55>ĐANG CHỌN</color>", "<color=#55FF55>SELECTED</color>") : LocalizationManager.T("<color=#88CCFF>SẴN SÀNG</color>", "<color=#88CCFF>READY</color>");
         }
 
         // Đảm bảo toàn bộ Avatar trên thẻ bài không bị trắng
@@ -1758,7 +2701,12 @@ public class MainMenuManager : MonoBehaviour
             cardAzureAvatarImg.sprite = azureIdleFrames[0];
         if (cardTitanAvatarImg != null && cardTitanAvatarImg.sprite == null && titanIdleFrames != null && titanIdleFrames.Length > 0)
             cardTitanAvatarImg.sprite = titanIdleFrames[0];
+        if (cardDuneAvatarImg != null && cardDuneAvatarImg.sprite == null && duneIdleFrames != null && duneIdleFrames.Length > 0)
+            cardDuneAvatarImg.sprite = duneIdleFrames[0];
+        if (cardMageAvatarImg != null && cardMageAvatarImg.sprite == null && mageIdleFrames != null && mageIdleFrames.Length > 0)
+            cardMageAvatarImg.sprite = mageIdleFrames[0];
 
+        UpdateHeroRoleTabVisuals();
         UpdateCurrencyDisplay();
         UpdateHeroDetails();
         InspectHero(inspectedHeroId);
@@ -1771,20 +2719,49 @@ public class MainMenuManager : MonoBehaviour
         if (curChar == CharacterManager.CHAR_TITAN_BERSERKER)
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.T("Cuồng Chiến Binh", "Titan Berserker");
-            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Đại Chùy Chiến Thần / Tanker & Chấn Địa", "Titan Berserker / Tanker & Cataclysm Slam");
-            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Cuồng Nộ Chấn Địa", "Titan Cataclysm");
-            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Vung đại chùy nện đất tạo sóng xung kích hình nón càn quét. Nội tại Thể Phách Titan giảm 20% sát thương và tự động tạo Khiên Đất Đá khi đầy nộ. Tuyệt kỹ hút toàn bộ quái vật vào tâm chấn rồi nện búa dung nham hất tung và gây choáng diện rộng!", "Swings heavy war hammer unleashing conic shockwaves. Innate 20% damage reduction and automatic Titan Bulwark shield. Special skill draws all enemies to the epicenter and slams with a catastrophic volcanic eruption!");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#FFA502>[ĐỠ ĐÒN]</color> Đại Chùy Chiến Thần / Tanker & Chấn Địa", "<color=#FFA502>[TANKER]</color> Heavy War Hammer / Tanker & CC");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: CUỒNG CHIẾN ĐẠI CHÙY", "SKILLSET: TITAN WAR HAMMER");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
+                "• <b>Đòn Đánh & Gồng Địa Chấn:</b> Nện đại chùy càn quét diện rộng (Nội tại: Giảm 20% sát thương). Nhấn Giữ gồng Thế Thủ: <color=#55FF88><b>Bất tử 100%</b></color>, thả tay nện đất bộc phá gây <color=#FFAA33><b>Choáng 1.0s</b></color>!\n" +
+                "• <b>Lướt (Chiến Xa Xoay Búa 360°):</b> Lướt tốc độ cao xoay búa 360° chém quét mọi kẻ địch trên đường lướt & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>.\n" +
+                "• <b>Tuyệt Kỹ (Cuồng Nộ Chấn Địa):</b> Hút toàn bộ quái vật vào tâm chấn, bật nhảy nện búa dung nham bộc phát chấn động hủy diệt hất tung toàn bộ kẻ địch.",
+                "• <b>Attack & Earthshaker:</b> Massive hammer smashes (Innate 20% DR). Hold attack for Earthshaker Stance: <color=#55FF88><b>100% Invulnerable</b></color>, release to smash the ground and <color=#FFAA33><b>Stun for 1.0s</b></color>!\n" +
+                "• <b>Dash (Juggernaut 360° Spin):</b> Heavy spin dash slashing all enemies along the path & <color=#FFAA33><b>Reduces Ultimate CD by 2.0s</b></color>.\n" +
+                "• <b>Ultimate (Cataclysm Slam):</b> Pulls enemies into the vortex epicenter and leaps to smash down volcanic cataclysmic shockwaves.");
             if (heroStatsSummaryText != null)
             {
-                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 200   CÔNG: 12   TỐC: 4.0", "HP: 200   ATK: 12   SPD: 4.0");
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 200   CÔNG: 32   TỐC: 4.0", "HP: 200   ATK: 32   SPD: 4.0");
+            }
+        }
+        else if (curChar == CharacterManager.CHAR_DUNE_ASSASSIN)
+        {
+            if (heroNameText != null) heroNameText.text = LocalizationManager.T("Sa Mạc Thích Khách", "Dune Assassin");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#A855F7>[SÁT THỦ]</color> Song Đoản Đao / Tốc Biến & Phản Đòn", "<color=#A855F7>[ASSASSIN]</color> Dual Scimitars / Speed & Counter");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: SA MẠC THÍCH KHÁCH", "SKILLSET: DUNE SHADOW ASSASSIN");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
+                "• <b>Đòn Đánh & Thủ Phản Kích:</b> Combo 3 đòn song đao chém lướt bạo kích cao. Nhấn Giữ vào Thế Thủ Sa Mạc: Giảm 70% sát thương và tung đòn <color=#FFAA33><b>Phản Kích Kiếm Khí Choáng 1.2s</b></color>!\n" +
+                "• <b>Lướt (Ảo Ảnh Sa Lướt):</b> Tích lũy tối đa <color=#55FFFF><b>3 lần lướt liên hoàn</b></color> cực cơ động, tạo tàn ảnh cát & <color=#FFAA33><b>Giảm 1.5s hồi Tuyệt Kỹ</b></color> mỗi lần lướt.\n" +
+                "• <b>Tuyệt Kỹ (Cuồng Bão Sa Ảnh X-Rend):</b> Tạo lốc xoáy bão cát vây hãm và trảm kích chữ X xé toạc chiến trường gây sát thương cực lớn và hiệu ứng <b>Chảy Máu Sa Mạc</b>.",
+                "• <b>Attack & Mirage Counter:</b> Fast 3-hit dagger combos with high crit chance. Hold attack for Mirage Defend: reduces damage by 70% and unleashes an Air Slash Counter (<color=#FFAA33><b>1.2s Stun</b></color>)!\n" +
+                "• <b>Dash (Triple Sand Mirage):</b> Stores up to <color=#55FFFF><b>3 Consecutive Dash Charges</b></color>, leaves sand mirages & <color=#FFAA33><b>Reduces Ultimate CD by 1.5s</b></color> per dash.\n" +
+                "• <b>Ultimate (Sandstorm X-Rend):</b> Summons a sand vortex and executes a devastating Cross-X Slash with Sand Bleed.");
+            if (heroStatsSummaryText != null)
+            {
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 110   CÔNG: 18   TỐC: 4.8", "HP: 110   ATK: 18   SPD: 4.8");
             }
         }
         else if (curChar == CharacterManager.CHAR_AZURE_BLADE)
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ", "Azure Blade");
-            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí / Sóng Kiếm Tầm Xa", "Heavy Crescent Blade");
-            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Bão Sóng Kiếm", "Crescent Tempest");
-            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Đòn chém chậm nhưng uy lực, mỗi nhát chém phóng ra sóng kiếm xuyên thấu quái vật. Tuyệt kỹ phóng ra 5 đợt kiếm khí hình nan quạt quét sạch chiến trường!", "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#00D2FF>[XẠ THỦ]</color> Trọng Kiếm Khí / Sóng Kiếm Băng Tầm Xa", "<color=#00D2FF>[MARKSMAN]</color> Heavy Crescent Blade / Ranged Waves");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: TRỌNG KIẾM BĂNG KHÍ", "SKILLSET: AZURE CRESCENT BLADE");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
+                "• <b>Đòn Đánh & Sóng Kiếm:</b> Đòn chém uy lực phóng <color=#55FFFF><b>Sóng Kiếm Băng</b></color> xuyên thấu quái vật (tầm 6.5m), trúng đích hồi <color=#38BDF8><b>+6 Mana</b></color> & giảm 50% thời gian chờ đòn đánh.\n" +
+                "• <b>Lướt (Hàn Băng Trượt Tuyết):</b> Lướt né đòn và <color=#55FFFF><b>Hồi ngay lập tức đòn đánh thường</b></color> kế tiếp.\n" +
+                "• <b>Tuyệt Kỹ (Bão Sóng Kiếm Nan Quạt):</b> Tụ khí phóng 5 đợt kiếm khí hình nan quạt khổng lồ quét sạch toàn bộ chiến trường.",
+                "• <b>Attack & Frost Wave:</b> Heavy slashes unleashing <color=#55FFFF><b>Frost Sword Waves</b></color> piercing enemies (6.5m), restores <color=#38BDF8><b>+6 Mana</b></color> & cuts attack cooldown by 50% on hit.\n" +
+                "• <b>Dash (Frost Glide):</b> Swift dash dodging attacks & <color=#55FFFF><b>Instantly resets basic attack</b></color>.\n" +
+                "• <b>Ultimate (Crescent Tempest):</b> Releases 5 massive crescent sword waves in a fan spread across the battlefield.");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 110   CÔNG: 24   TỐC: 4.8", "HP: 110   ATK: 24   SPD: 4.8");
@@ -1793,20 +2770,49 @@ public class MainMenuManager : MonoBehaviour
         else if (curChar == CharacterManager.CHAR_GALE_RONIN)
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách", "Gale Ronin");
-            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách / Nhất Kích Tất Sát", "Phantom Blade / Iaido Precision");
-            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("Bão Phong Trảm", "Phantom Cleave");
-            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T("Tốc đánh chậm cố định (chuẩn Iaido), chém trúng quái hồi ngay +50% Nộ & giảm -20% hồi chiêu Ulti. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "Fixed slow Iaido strikes: On hit restores +50% Rage & reduces Ulti CD by 20%. Special skill unleashes phantom dash slashes across foes!");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#A855F7>[SÁT THỦ]</color> Bạch Dạ Kiếm Khách / Nhất Kích Tất Sát", "<color=#A855F7>[ASSASSIN]</color> Phantom Blade / Iaido Precision");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: PHONG LÔI KIẾM THUẬT", "SKILLSET: GALE PHANTOM BLADE");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
+                "• <b>Đòn Đánh & Phong Trảm:</b> Chém quét bán nguyệt 180° siêu nhanh tích <color=#55FFFF><b>Phong Ấn</b></color> (3 tầng nổ <color=#FFAA33><b>240% Crit</b></color> + Lốc Xoáy hút quái). Khi có Khiên Nội Năng: Nhấn Giữ Tụ Lực chém rách không gian & phóng Nguyệt Kiếm Khí <color=#FFAA33><b>x2.85 Crit DMG</b></color>!\n" +
+                "• <b>Lướt (Tàn Ảnh Tốc Biến - Murad Style):</b> Nhịp 1 tốc biến 4.8m tới trước & cắm lại <b>Tàn Ảnh Bóng Ma</b> (4.5s). Nhịp 2 (Bấm lại) lập tức Teleport quay về vị trí bóng & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>!\n" +
+                "• <b>Tuyệt Kỹ (Ảo Ảnh Trảm Sát):</b> Lướt ảo ảnh chớp nhoáng trảm sát liên hoàn toàn bộ kẻ địch trong không gian, <color=#55FF88><b>Bất tử hoàn toàn</b></color> trong lúc xuất chiêu.",
+                "• <b>Attack & Wind Marks:</b> Fast 180° crescent cleave stacking <color=#55FFFF><b>Wind Marks</b></color> (3 stacks bursts for <color=#FFAA33><b>240% Crit</b></color> + Vacuum Vortex). When Inner Energy Shield is active: Hold attack to charge Iaido Spatial Slash & shoot Gale Crescent Wave (<color=#FFAA33><b>x2.85 Crit DMG</b></color>)!\n" +
+                "• <b>Dash (Shadow Phantom Warp):</b> Stage 1 warps 4.8m forward leaving a <b>Shadow Clone</b> (4.5s). Stage 2 (Cast again) instantly Warps back to clone & <color=#FFAA33><b>Cuts Ultimate CD by 2.0s</b></color>!\n" +
+                "• <b>Ultimate (Phantom Flash Cleave):</b> Executes blinding phantom dash slashes cutting all enemies in space with <color=#55FF88><b>Complete Invincibility</b></color>.");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 95   CÔNG: 28   TỐC: 5.4", "HP: 95   ATK: 28   SPD: 5.4");
             }
         }
+        else if (curChar == CharacterManager.CHAR_CELESTIAL_MAGE)
+        {
+            if (heroNameText != null) heroNameText.text = LocalizationManager.Get("HERO_MAGE_NAME");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#E056FD>[PHÁP SƯ]</color> Tinh Vân Ma Pháp / Triệu Hồi Thiên Thạch & Hộ Thể", "<color=#E056FD>[MAGE]</color> Arcane Sorcery / Meteor Tempest & Barrier");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: TINH VÂN MA PHÁP", "SKILLSET: CELESTIAL ARCANE");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
+                "• <b>Đòn Đánh & Cầu Ma Pháp:</b> Phóng 3 cầu ma pháp tinh tú tự dẫn đường và bộc phát sét lan. <color=#FFDF66>Nhấn Giữ Hộ Thể Ma Trận:</color> Hấp thụ 80% sát thương, bộc phá sóng năng lượng đẩy lùi & hồi <color=#38BDF8><b>+10 Mana</b></color>!\n" +
+                "• <b>Lướt (Tốc Biến Hư Không):</b> Dịch chuyển tức thời trong làn khói ma pháp (<color=#55FF88><b>Bất tử</b></color>) & hồi phục <color=#38BDF8><b>+12 Mana</b></color>.\n" +
+                "• <b>Tuyệt Kỹ (Thiên Thạch Ma Trận):</b> Mở đại pháp trận tinh tú giáng mưa thiên thạch ma pháp hủy diệt toàn màn hình.",
+                "• <b>Attack & Arcane Orbs:</b> Fires 3 homing arcane star orbs chaining lightning. <color=#FFDF66>Hold attack for Barrier:</color> absorbs 80% damage, bursts back enemies & grants <color=#38BDF8><b>+10 Mana</b></color>!\n" +
+                "• <b>Dash (Arcane Blink):</b> Instantly warps in mystical mist with <color=#55FF88><b>Invulnerability</b></color> & restores <color=#38BDF8><b>+12 Mana</b></color>.\n" +
+                "• <b>Ultimate (Meteor Apocalypse):</b> Opens celestial magic circles summoning a devastating meteor storm across the battlefield.");
+            if (heroStatsSummaryText != null)
+            {
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 90   CÔNG: 30   TỐC: 4.5", "HP: 90   ATK: 30   SPD: 4.5");
+            }
+        }
         else
         {
             if (heroNameText != null) heroNameText.text = LocalizationManager.Get("HERO_VAEL_NAME");
-            if (heroRoleText != null) heroRoleText.text = LocalizationManager.Get("HERO_VAEL_ROLE");
-            if (heroSkillText != null) heroSkillText.text = LocalizationManager.Get("HERO_VAEL_SKILL");
-            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.Get("HERO_VAEL_SKILL_DESC");
+            if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#FF4757>[ĐẤU SĨ]</color> Hiệp Sĩ Tiên Phong / Thánh Kiếm Cổ Tộc", "<color=#FF4757>[WARRIOR]</color> Holy Vanguard / Ancient Blade Master");
+            if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: THÁNH QUANG HIỆP SĨ", "SKILLSET: HOLY VANGUARD");
+            if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
+                "• <b>Đòn Đánh & Thế Thủ Phản Kích:</b> Chém kiếm 3 nhịp liên hoàn (hồi <color=#38BDF8><b>+8 Mana</b></color>). Nhấn Giữ gồng Thế Thủ: Giảm 20% sát thương, thả tay bộc phá <color=#FFAA33><b>Thần Kiếm Phản Kích (x3.2 Crit DMG)</b></color> phóng cột sóng thánh quang xuyên phá!\n" +
+                "• <b>Lướt (Thánh Thuẫn Phản Đòn):</b> Lướt nhanh với vòng Thánh Quang (<color=#55FF88><b>Bất tử khi lướt</b></color>). Lướt qua quái hoặc đỡ đòn thành công sẽ <color=#FFAA33><b>Hồi 50% CD Lướt</b></color>, hồi <color=#38BDF8><b>+15 Mana</b></color> & phóng <b>3 luồng Thánh Kiếm Khí</b> phản công!\n" +
+                "• <b>Tuyệt Kỹ (Thánh Kiếm Thiên Nham):</b> Xoay bão lốc kiếm 360° hút quái vật vào tâm bão và triệu hồi Thánh Kiếm Thiên Nham giáng thế từ không trung hủy diệt diện rộng.",
+                "• <b>Attack & Divine Parry:</b> 3-hit sword combo (restores <color=#38BDF8><b>+8 Mana</b></color>). Hold attack for Parry Stance: 20% DR, release to unleash <color=#FFAA33><b>Divine Riposte (x3.2 Crit DMG)</b></color> firing holy shockwave pillars!\n" +
+                "• <b>Dash (Radiant Riposte Dash):</b> Swift dash with holy aegis (<color=#55FF88><b>Invulnerable during dash</b></color>). Dashing through enemies or deflecting attacks <color=#FFAA33><b>Refunds 50% Dash CD</b></color>, restores <color=#38BDF8><b>+15 Mana</b></color> & fires <b>3 Holy Sword Waves</b>!\n" +
+                "• <b>Ultimate (Holy Sword Tempest):</b> 360° sword vortex storm pulling enemies and summons a gigantic Holy Sword of the Heavens slamming down with massive AoE damage.");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 100   CÔNG: 20   TỐC: 5.0", "HP: 100   ATK: 20   SPD: 5.0");
@@ -1820,32 +2826,68 @@ public class MainMenuManager : MonoBehaviour
         inspectedHeroId = heroId.ToLower();
         string currentSelected = CharacterManager.EnsureInstance().GetSelectedCharacterId();
 
+        EquipmentSocketManager.GetTotalHeroSocketBonus(
+            out _, out _, out _, out _,
+            out _, out _,
+            out _, out float sCd, out _, out _,
+            out _, out _,
+            out _, out _, out _,
+            inspectedHeroId);
+
+        float upDashCd = PlayerUpgradeManager.EnsureInstance()?.GetDashCooldownReduction(inspectedHeroId) ?? 0f;
+        float upUltiCd = PlayerUpgradeManager.EnsureInstance()?.GetUltiCooldownReduction(inspectedHeroId) ?? 0f;
+        float[] baseCds = GetHeroBaseCooldowns(inspectedHeroId);
+
         if (inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
         {
             if (rosterHeroPreviewImage != null && titanIdleFrames != null && titanIdleFrames.Length > 0)
                 rosterHeroPreviewImage.sprite = titanIdleFrames[0];
-            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Cuồng Chiến Binh", "Titan Berserker");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Đại Chùy Chiến Thần / Tanker & Chấn Địa", "Heavy War Hammer / Tanker");
-            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 200   CÔNG: 12   TỐC: 4.0", "HP: 200   ATK: 12   SPD: 4.0");
-            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Cuồng Nộ Chấn Địa", "Special: Titan Cataclysm Slam");
-            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Vung đại chùy nện đất tạo sóng xung kích hình nón càn quét. Nội tại Thể Phách Titan giảm 20% sát thương và tự động tạo Khiên Đất Đá khi đầy nộ. Tuyệt kỹ hút toàn bộ quái vật vào tâm chấn rồi nện búa dung nham hất tung và gây choáng diện rộng!", "Swings heavy war hammer unleashing conic shockwaves. Innate 20% damage reduction and automatic Titan Bulwark shield. Special skill draws all enemies to the epicenter and slams with a catastrophic volcanic eruption!");
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Cuồng Chiến Binh (Titan Berserker)", "Titan Berserker (Heavy Tanker)");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("<color=#FFA502>[ĐỠ ĐÒN]</color> Đại Chùy Chiến Thần / Tanker & Chấn Địa", "<color=#FFA502>[TANKER]</color> Heavy War Hammer / Tanker & CC");
+            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 200   CÔNG: 32   TỐC: 4.0", "HP: 200   ATK: 32   SPD: 4.0");
+            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("BỘ KỸ NĂNG: CUỒNG CHIẾN ĐẠI CHÙY", "SKILLSET: TITAN WAR HAMMER");
 
-            bool isSelected = (currentSelected == CharacterManager.CHAR_TITAN_BERSERKER);
-            if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
-            if (rosterActionBtn != null)
-            {
-                rosterActionBtn.interactable = true;
-                var img = rosterActionBtn.GetComponent<Image>();
-                if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
-            }
-        }
-        else if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
-        {
-            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ", "Azure Blade");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Trọng Kiếm Khí / Sóng Kiếm Tầm Xa", "Heavy Crescent Blade / Ranged Waves");
-            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 110   CÔNG: 24   TỐC: 4.8", "HP: 110   ATK: 24   SPD: 4.8");
-            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Bão Sóng Kiếm", "Special: Crescent Tempest");
-            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Đòn chém chậm nhưng uy lực, mỗi nhát chém phóng ra sóng kiếm xuyên thấu quái vật. Tuyệt kỹ phóng ra 5 đợt kiếm khí hình nan quạt quét sạch chiến trường!", "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!");
+            SetHeroSkillCard(0, MobileActionButton.GetHeroActionIcon("titan", MobileActionButton.ButtonType.Attack),
+                "ATK",
+                LocalizationManager.T("1. ĐẠI CHÙY & THẾ THỦ NỆN ĐẤT", "1. WAR HAMMER & EARTHSHAKER"),
+                LocalizationManager.T("Nện đại chùy càn quét gây <color=#FF3B30><b>ATK</b></color> (Nội tại: Giảm 20% sát thương). <color=#FFDF66>Nhấn Giữ gồng Thế Thủ:</color> <color=#55FF88><b>Bất tử 100%</b></color>, thả tay nện đất bộc phá gây <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>Choáng 1.0s</b></color>!",
+                                     "Massive hammer smashes inflicting <color=#FF3B30><b>ATK</b></color> (Innate 20% DR). <color=#FFDF66>Hold attack for Earthshaker:</color> <color=#55FF88><b>100% Invulnerable</b></color>, release to smash ground inflicting <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>Stun 1.0s</b></color>!"),
+                baseCds[0], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(1, MobileActionButton.GetHeroActionIcon("titan", MobileActionButton.ButtonType.Dash),
+                LocalizationManager.T("LƯỚT", "DASH"),
+                LocalizationManager.T("2. CHIẾN XA XOAY BÚA 360°", "2. JUGGERNAUT 360° SPIN"),
+                LocalizationManager.T("Lướt tốc độ cao xoay búa 360° càn quét gây <color=#FF3B30><b>ATK</b></color> & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>.",
+                                     "Heavy spin dash slashing all enemies along path with <color=#FF3B30><b>ATK</b></color> & <color=#FFAA33><b>Reduces Ultimate CD by 2.0s</b></color>."),
+                baseCds[1], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(2, MobileActionButton.GetHeroActionIcon("titan", MobileActionButton.ButtonType.Skill),
+                "ATK",
+                LocalizationManager.T("3. CUỒNG NỘ CHẤN ĐỊA DUNG NHAM", "3. VOLCANIC CATACLYSM SLAM"),
+                LocalizationManager.T("Hút toàn bộ quái vật vào tâm chấn, bật nhảy nện búa dung nham bộc phát chấn động gây <color=#FF3B30><b>ATK cực đại</b></color> & hất tung kẻ địch.",
+                                     "Pulls enemies into epicenter and leaps to smash down volcanic cataclysmic shockwaves with massive <color=#FF3B30><b>ATK</b></color>."),
+                baseCds[2], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(0, MobileActionButton.GetHeroActionIcon("azure", MobileActionButton.ButtonType.Attack),
+                "AP",
+                LocalizationManager.T("1. TRỌNG KIẾM & SÓNG BĂNG KIẾM KHÍ", "1. FROST SWORD WAVES"),
+                LocalizationManager.T("Chém phóng <color=#55FFFF><b>Sóng Kiếm Băng</b></color> gây <color=#B84DFF><b>AP</b></color> xuyên thấu kẻ địch (tầm 6.5m), trúng đích hồi <color=#38BDF8><b>+6 Mana</b></color> & giảm 50% thời gian chờ đòn đánh.",
+                                     "Heavy slashes unleashing <color=#55FFFF><b>Frost Sword Waves</b></color> piercing enemies with <color=#B84DFF><b>AP</b></color> (6.5m), restores <color=#38BDF8><b>+6 Mana</b></color> & cuts attack cooldown 50%."),
+                baseCds[0], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(1, MobileActionButton.GetHeroActionIcon("azure", MobileActionButton.ButtonType.Dash),
+                LocalizationManager.T("LƯỚT", "DASH"),
+                LocalizationManager.T("2. HÀN BĂNG TRƯỢT TUYẾT", "2. FROST GLIDE DASH"),
+                LocalizationManager.T("Lướt né đòn trên dải băng tuyết & <color=#55FFFF><b>Hồi ngay lập tức đòn đánh thường</b></color> kế tiếp.",
+                                     "Swift glide dash dodging attacks & <color=#55FFFF><b>Instantly resets basic attack cooldown</b></color>."),
+                baseCds[1], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(2, MobileActionButton.GetHeroActionIcon("azure", MobileActionButton.ButtonType.Skill),
+                "AP",
+                LocalizationManager.T("3. BÃO SÓNG KIẾM NAN QUẠT", "3. CRESCENT TEMPEST"),
+                LocalizationManager.T("Tụ nội lực phóng 5 đợt kiếm khí băng lam nan quạt khổng lồ gây <color=#B84DFF><b>AP diện rộng</b></color> quét sạch toàn bộ chiến trường.",
+                                     "Releases 5 massive crescent frost sword waves in a fan spread across the battlefield inflicting devastating AoE <color=#B84DFF><b>AP</b></color>."),
+                baseCds[2], sCd, upDashCd, upUltiCd);
 
             bool isSelected = (currentSelected == CharacterManager.CHAR_AZURE_BLADE);
             if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
@@ -1858,11 +2900,33 @@ public class MainMenuManager : MonoBehaviour
         }
         else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid")
         {
-            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách", "Gale Ronin");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("Bạch Dạ Kiếm Khách / Nhất Kích Tất Sát", "Phantom Blade / Iaido Precision");
+            if (rosterHeroPreviewImage != null && roninIdleFrames != null && roninIdleFrames.Length > 0)
+                rosterHeroPreviewImage.sprite = roninIdleFrames[0];
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách (Gale Ronin)", "Gale Ronin (Phantom Blade)");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("<color=#A855F7>[SÁT THỦ]</color> Bạch Dạ Kiếm Khách / Nhất Kích Tất Sát", "<color=#A855F7>[ASSASSIN]</color> Phantom Blade / Iaido Precision");
             if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 95   CÔNG: 28   TỐC: 5.4", "HP: 95   ATK: 28   SPD: 5.4");
-            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("Tuyệt Kỹ: Bão Phong Trảm", "Special: Phantom Cleave");
-            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.T("Tốc đánh chậm cố định (chuẩn Iaido), chém trúng quái hồi ngay +50% Nộ & giảm -20% hồi chiêu Ulti. Tuyệt kỹ lướt ảo ảnh chớp nhoáng trảm sát toàn bộ kẻ địch!", "Fixed slow Iaido strikes: On hit restores +50% Rage & reduces Ulti CD by 20%. Special skill unleashes phantom dash slashes across foes!");
+            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("BỘ KỸ NĂNG: PHONG LÔI KIẾM THUẬT", "SKILLSET: GALE PHANTOM BLADE");
+
+            SetHeroSkillCard(0, MobileActionButton.GetHeroActionIcon("ronin", MobileActionButton.ButtonType.Attack),
+                "ATK / AP",
+                LocalizationManager.T("1. PHONG NGUYỆT TRẢM & TỤ LỰC IAIDO", "1. GALE CRESCENT SWEEP & IAIDO"),
+                LocalizationManager.T("Chém 180° gây <color=#FF3B30><b>ATK</b></color> tích <color=#55FFFF><b>Phong Ấn</b></color> (3 tầng nổ <color=#B84DFF><b>AP 240% Crit</b></color> + Lốc Xoáy). Khi có Khiên: Gồng chém rách không gian phóng Nguyệt Kiếm Khí <color=#FF3B30><b>x2.85 Crit ATK</b></color>!",
+                                     "180° slashes dealing <color=#FF3B30><b>ATK</b></color> & stacking <color=#55FFFF><b>Wind Marks</b></color> (3 stacks bursts for <color=#B84DFF><b>AP 240% Crit</b></color> + Vortex). When Shielded: Charge for <color=#FF3B30><b>x2.85 Crit ATK</b></color>!"),
+                baseCds[0], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(1, MobileActionButton.GetHeroActionIcon("ronin", MobileActionButton.ButtonType.Dash),
+                LocalizationManager.T("TỐC BIẾN", "WARP"),
+                LocalizationManager.T("2. TÀN ẢNH TỐC BIẾN (MURAD STYLE)", "2. SHADOW PHANTOM WARP"),
+                LocalizationManager.T("Nhịp 1 tốc biến 4.8m tới trước (<color=#55FF88><b>Bất tử</b></color>) cắm bóng. Nhịp 2 Teleport quay về bóng & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>!",
+                                     "Stage 1 warps 4.8m forward leaving clone (<color=#55FF88><b>Invincible</b></color>). Stage 2 Warps back to clone & <color=#FFAA33><b>Cuts Ulti CD by 2.0s</b></color>!"),
+                baseCds[1], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(2, MobileActionButton.GetHeroActionIcon("ronin", MobileActionButton.ButtonType.Skill),
+                "TD",
+                LocalizationManager.T("3. ÁM ẢNH PHÂN THÂN TRẢM", "3. PHANTOM FLASH CLEAVE"),
+                LocalizationManager.T("Lướt ảo ảnh chớp nhoáng trảm sát liên hoàn mọi kẻ địch trong không gian gây <color=#E2E8F0><b>TD (bỏ qua giáp)</b></color>, <color=#55FF88><b>Bất tử hoàn toàn</b></color> trong lúc xuất chiêu.",
+                                     "Executes blinding phantom dash slashes dealing devastating <color=#E2E8F0><b>TD (ignores defense)</b></color> with <color=#55FF88><b>Complete Invincibility</b></color>."),
+                baseCds[2], sCd, upDashCd, upUltiCd);
 
             bool isSelected = (currentSelected == CharacterManager.CHAR_GALE_RONIN);
             if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
@@ -1873,13 +2937,113 @@ public class MainMenuManager : MonoBehaviour
                 if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
             }
         }
+        else if (inspectedHeroId == "dune" || inspectedHeroId == "duneassassin" || inspectedHeroId == "player5")
+        {
+            if (rosterHeroPreviewImage != null && duneIdleFrames != null && duneIdleFrames.Length > 0)
+                rosterHeroPreviewImage.sprite = duneIdleFrames[0];
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Sa Mạc Thích Khách (Dune Assassin)", "Dune Assassin (Dual Scimitars)");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("<color=#A855F7>[SÁT THỦ]</color> Song Đoản Đao / Tốc Biến & Phản Đòn", "<color=#A855F7>[ASSASSIN]</color> Dual Scimitars / Speed & Counter");
+            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 110   CÔNG: 18   TỐC: 4.8", "HP: 110   ATK: 18   SPD: 4.8");
+            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("BỘ KỸ NĂNG: SA MẠC THÍCH KHÁCH", "SKILLSET: DUNE SHADOW ASSASSIN");
+
+            SetHeroSkillCard(0, MobileActionButton.GetHeroActionIcon("dune", MobileActionButton.ButtonType.Attack),
+                "ATK / TD",
+                LocalizationManager.T("1. SONG ĐAO & THẾ THỦ PHẢN KÍCH", "1. DUAL DAGGERS & MIRAGE PARRY"),
+                LocalizationManager.T("Combo 3 đòn song đao gây <color=#FF3B30><b>ATK</b></color> bạo kích cao. <color=#FFDF66>Nhấn Giữ Thế Thủ:</color> Giảm 70% sát thương và tung đòn Phản Kích Kiếm Khí gây <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>Choáng 1.2s</b></color>!",
+                                     "Fast 3-hit combos dealing <color=#FF3B30><b>ATK</b></color>. <color=#FFDF66>Hold attack for Mirage Defend:</color> 70% DR & unleashes Air Slash Counter inflicting <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>1.2s Stun</b></color>!"),
+                baseCds[0], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(1, MobileActionButton.GetHeroActionIcon("dune", MobileActionButton.ButtonType.Dash),
+                LocalizationManager.T("ẢO ẢNH", "MIRAGE"),
+                LocalizationManager.T("2. ẢO ẢNH SA LƯỚT (3 LẦN LIÊN HOÀN)", "2. TRIPLE SAND MIRAGE DASH"),
+                LocalizationManager.T("Tích lũy tối đa <color=#55FFFF><b>3 lần lướt liên hoàn</b></color> cực cơ động, tạo tàn ảnh cát & <color=#FFAA33><b>Giảm 1.5s hồi Tuyệt Kỹ</b></color> mỗi lần lướt.",
+                                     "Stores up to <color=#55FFFF><b>3 Consecutive Dash Charges</b></color>, leaves mirages & <color=#FFAA33><b>Reduces Ulti CD 1.5s</b></color> per dash."),
+                baseCds[1], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(2, MobileActionButton.GetHeroActionIcon("dune", MobileActionButton.ButtonType.Skill),
+                "TD",
+                LocalizationManager.T("3. CUỒNG BÃO SA ẢNH X-REND", "3. SANDSTORM X-REND"),
+                LocalizationManager.T("Tạo lốc xoáy cát hút quái và trảm kích chữ X xé toạc chiến trường gây <color=#E2E8F0><b>TD cực lớn</b></color> cùng hiệu ứng <color=#FF6B6B><b>Chảy Máu Sa Mạc</b></color>.",
+                                     "Summons sand vortex and executes a devastating Cross-X Slash inflicting massive <color=#E2E8F0><b>TD</b></color> with continuous <color=#FF6B6B><b>Sand Bleed</b></color>."),
+                baseCds[2], sCd, upDashCd, upUltiCd);
+
+            bool isSelected = (currentSelected == CharacterManager.CHAR_DUNE_ASSASSIN);
+            if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
+            if (rosterActionBtn != null)
+            {
+                rosterActionBtn.interactable = true;
+                var img = rosterActionBtn.GetComponent<Image>();
+                if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
+            }
+        }
+        else if (inspectedHeroId == "mage" || inspectedHeroId == "celestialmage" || inspectedHeroId == "player6")
+        {
+            if (rosterHeroPreviewImage != null && mageIdleFrames != null && mageIdleFrames.Length > 0)
+                rosterHeroPreviewImage.sprite = mageIdleFrames[0];
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Pháp Sư Tinh Tú (Celestial Mage)", "Celestial Mage (Arcane Sorcerer)");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("<color=#E056FD>[PHÁP SƯ]</color> Tinh Vân Ma Pháp / Triệu Hồi Thiên Thạch & Hộ Thể", "<color=#E056FD>[MAGE]</color> Arcane Sorcery / Meteor Tempest & Barrier");
+            if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 90   CÔNG: 30   TỐC: 4.5", "HP: 90   ATK: 30   SPD: 4.5");
+            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("BỘ KỸ NĂNG: TINH VÂN MA PHÁP", "SKILLSET: CELESTIAL ARCANE");
+
+            SetHeroSkillCard(0, MobileActionButton.GetHeroActionIcon("mage", MobileActionButton.ButtonType.Attack),
+                "AP",
+                LocalizationManager.T("1. CẦU MA PHÁP & HỘ THỂ MA TRẬN", "1. ARCANE ORBS & BARRIER"),
+                LocalizationManager.T("Bắn 3 cầu ma pháp tự dẫn đường gây <color=#B84DFF><b>AP</b></color> nổ sét lan. <color=#FFDF66>Nhấn Giữ:</color> Tạo khiên hấp thụ 80% sát thương, bộc phá đẩy lùi phản đòn <color=#B84DFF><b>AP</b></color> & hồi <color=#38BDF8><b>+10 Mana</b></color>!",
+                                     "Fires 3 homing arcane orbs inflicting <color=#B84DFF><b>AP</b></color> with chain lightning. <color=#FFDF66>Hold attack:</color> Barrier absorbs 80% damage, bursts back enemies with <color=#B84DFF><b>AP</b></color> & restores <color=#38BDF8><b>+10 Mana</b></color>!"),
+                baseCds[0], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(1, MobileActionButton.GetHeroActionIcon("mage", MobileActionButton.ButtonType.Dash),
+                LocalizationManager.T("TỐC BIẾN", "BLINK"),
+                LocalizationManager.T("2. TỐC BIẾN HƯ KHÔNG (BLINK)", "2. ARCANE BLINK DASH"),
+                LocalizationManager.T("Dịch chuyển tức thời (<color=#55FF88><b>Bất tử</b></color>), để lại tàn ảnh ma pháp & hồi <color=#38BDF8><b>+12 Mana</b></color>.",
+                                     "Instant warp (<color=#55FF88><b>Invulnerable</b></color>), leaves arcane clone & restores <color=#38BDF8><b>+12 Mana</b></color>."),
+                baseCds[1], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(2, MobileActionButton.GetHeroActionIcon("mage", MobileActionButton.ButtonType.Skill),
+                "AP",
+                LocalizationManager.T("3. THIÊN THẠCH MA TRẬN", "3. METEOR APOCALYPSE"),
+                LocalizationManager.T("Mở đại pháp trận tinh tú triệu hồi 5 đợt mưa thiên thạch ma pháp gây <color=#B84DFF><b>AP diện rộng</b></color> toàn bộ kẻ địch trên bản đồ.",
+                                     "Opens celestial circles summoning 5 waves of devastating meteor strikes inflicting catastrophic AoE <color=#B84DFF><b>AP</b></color> across the battlefield."),
+                baseCds[2], sCd, upDashCd, upUltiCd);
+
+            bool isSelected = (currentSelected == CharacterManager.CHAR_CELESTIAL_MAGE);
+            if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
+            if (rosterActionBtn != null)
+            {
+                rosterActionBtn.interactable = true;
+                var img = rosterActionBtn.GetComponent<Image>();
+                if (img != null) img.color = isSelected ? new Color(0.18f, 0.55f, 0.28f, 1f) : new Color(0.18f, 0.45f, 0.75f, 1f);
+            }
+        }
         else
         {
-            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.Get("HERO_VAEL_NAME");
-            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.Get("HERO_VAEL_ROLE");
+            if (rosterHeroPreviewImage != null && vaelIdleFrames != null && vaelIdleFrames.Length > 0)
+                rosterHeroPreviewImage.sprite = vaelIdleFrames[0];
+            if (rosterHeroNameText != null) rosterHeroNameText.text = LocalizationManager.T("Hiệp Sĩ Vaelstrider (Balanced Knight)", "Knight Vaelstrider (Holy Vanguard)");
+            if (rosterHeroRoleText != null) rosterHeroRoleText.text = LocalizationManager.T("<color=#FF4757>[ĐẤU SĨ]</color> Hiệp Sĩ Tiên Phong / Thánh Kiếm & Phản Đòn", "<color=#FF4757>[WARRIOR]</color> Holy Vanguard / Ancient Blade Master");
             if (rosterHeroStatsText != null) rosterHeroStatsText.text = LocalizationManager.T("MÁU: 100   CÔNG: 20   TỐC: 5.0", "HP: 100   ATK: 20   SPD: 5.0");
-            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.Get("HERO_VAEL_SKILL");
-            if (rosterHeroSkillDescText != null) rosterHeroSkillDescText.text = LocalizationManager.Get("HERO_VAEL_SKILL_DESC");
+            if (rosterHeroSkillTitleText != null) rosterHeroSkillTitleText.text = LocalizationManager.T("BỘ KỸ NĂNG: THÁNH QUANG HIỆP SĨ", "SKILLSET: HOLY VANGUARD");
+
+            SetHeroSkillCard(0, MobileActionButton.GetHeroActionIcon("vael", MobileActionButton.ButtonType.Attack),
+                "ATK",
+                LocalizationManager.T("1. ĐẠI KIẾM & THẾ THỦ PHẢN KÍCH", "1. ANCIENT SWORD & DIVINE PARRY"),
+                LocalizationManager.T("Chém kiếm 3 nhịp gây <color=#FF3B30><b>ATK</b></color> (hồi <color=#38BDF8><b>+8 Mana</b></color>). <color=#FFDF66>Nhấn Giữ Thế Thủ:</color> Giảm 20% sát thương, thả tay bộc phá Thần Kiếm Phản Kích gây <color=#FF3B30><b>x3.2 Crit ATK</b></color>!",
+                                     "3-hit combo dealing <color=#FF3B30><b>ATK</b></color> (restores <color=#38BDF8><b>+8 Mana</b></color>). <color=#FFDF66>Hold attack for Parry:</color> 20% DR, release to unleash Divine Riposte dealing <color=#FF3B30><b>x3.2 Crit ATK</b></color>!"),
+                baseCds[0], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(1, MobileActionButton.GetHeroActionIcon("vael", MobileActionButton.ButtonType.Dash),
+                LocalizationManager.T("THÁNH THUẪN", "SHIELD"),
+                LocalizationManager.T("2. THÁNH THUẪN PHẢN ĐÒN", "2. RADIANT RIPOSTE DASH"),
+                LocalizationManager.T("Lướt né đòn (<color=#55FF88><b>Bất tử khi lướt</b></color>). Lướt qua quái/đỡ đòn sẽ <color=#FFAA33><b>Hồi 50% CD Lướt</b></color>, hồi <color=#38BDF8><b>+15 Mana</b></color> & phóng 3 Thánh Kiếm Khí gây <color=#FF3B30><b>ATK</b></color>!",
+                                     "Holy aegis dash (<color=#55FF88><b>Invulnerable</b></color>). Deflecting attacks <color=#FFAA33><b>Refunds 50% Dash CD</b></color>, restores <color=#38BDF8><b>+15 Mana</b></color> & fires 3 Holy Waves with <color=#FF3B30><b>ATK</b></color>!"),
+                baseCds[1], sCd, upDashCd, upUltiCd);
+
+            SetHeroSkillCard(2, MobileActionButton.GetHeroActionIcon("vael", MobileActionButton.ButtonType.Skill),
+                "ATK",
+                LocalizationManager.T("3. THÁNH KIẾM THIÊN NHAM", "3. HOLY SWORD TEMPEST"),
+                LocalizationManager.T("Xoay bão lốc kiếm 360° hút quái vật và triệu hồi Cự Kiếm Thiên Nham giáng thế gây <color=#FF3B30><b>ATK cực đại</b></color> diện rộng.",
+                                     "360° sword vortex storm pulling enemies and summons a gigantic Holy Sword slamming down with massive AoE <color=#FF3B30><b>ATK</b></color>."),
+                baseCds[2], sCd, upDashCd, upUltiCd);
 
             bool isSelected = (currentSelected == CharacterManager.CHAR_VAELSTRIDER);
             if (rosterActionBtnText != null) rosterActionBtnText.text = isSelected ? LocalizationManager.T("ĐANG CHỌN XUẤT TRẬN", "SELECTED FOR BATTLE") : LocalizationManager.T("CHỌN XUẤT TRẬN", "SELECT FOR BATTLE");
@@ -1913,6 +3077,14 @@ public class MainMenuManager : MonoBehaviour
                 {
                     rt.anchoredPosition = new Vector2(0f, 6f);
                 }
+                else if (inspectedHeroId == "dune" || inspectedHeroId == "duneassassin" || inspectedHeroId == "player5")
+                {
+                    rt.anchoredPosition = new Vector2(0f, 0f);
+                }
+                else if (inspectedHeroId == "mage" || inspectedHeroId == "celestialmage" || inspectedHeroId == "player6")
+                {
+                    rt.anchoredPosition = new Vector2(0f, 0f);
+                }
                 else
                 {
                     rt.anchoredPosition = Vector2.zero;
@@ -1921,7 +3093,385 @@ public class MainMenuManager : MonoBehaviour
             UpdateRosterEquipmentMaterial();
         }
 
+        RefreshRosterSocketsAndBag();
         StartRosterHeroAnimation();
+    }
+
+    public void RefreshRosterSocketsAndBag()
+    {
+        RenderRosterHeroSockets();
+        RenderRosterBagItems();
+    }
+
+    private void RenderRosterHeroSockets()
+    {
+        if (rosterHeroSocketSlotObjs == null || rosterHeroSocketSlotObjs.Count == 0) return;
+
+        bool isVi = LocalizationManager.IsVietnamese;
+        string hero = inspectedHeroId;
+
+        // Calculate live stats with 6 sockets
+        EquipmentSocketManager.GetTotalHeroSocketBonus(
+            out int sAtk, out int sPhysAtk, out int sMagicAtk, out int sTrueAtk,
+            out int sHp, out int sDef,
+            out float sLife, out float sCd, out float sShard, out float sRegen,
+            out float sMaxEn, out float sEnRegen,
+            out float sPhysLife, out float sSpellVamp, out float sCrit,
+            hero);
+
+        int baseHp = 100;
+        int baseAtk = 20;
+
+        if (hero == "titan" || hero == "titanberserker" || hero == "player4")
+        {
+            baseHp = 200; baseAtk = 32;
+        }
+        else if (hero == "azure" || hero == "azureblade" || hero == "player3")
+        {
+            baseHp = 110; baseAtk = 24;
+        }
+        else if (hero == "ronin" || hero == "galeronin" || hero == "player2" || hero == "maid")
+        {
+            baseHp = 95; baseAtk = 28;
+        }
+        else if (hero == "dune" || hero == "duneassassin" || hero == "player5")
+        {
+            baseHp = 110; baseAtk = 18;
+        }
+        else if (hero == "mage" || hero == "celestialmage" || hero == "player6")
+        {
+            baseHp = 90; baseAtk = 30;
+        }
+
+        int upHp = PlayerUpgradeManager.EnsureInstance()?.GetHealthBonus(hero) ?? 0;
+        int upAtk = PlayerUpgradeManager.EnsureInstance()?.GetAttackBonus(hero) ?? 0;
+        float upDashCd = PlayerUpgradeManager.EnsureInstance()?.GetDashCooldownReduction(hero) ?? 0f;
+        float upUltiCd = PlayerUpgradeManager.EnsureInstance()?.GetUltiCooldownReduction(hero) ?? 0f;
+
+        int totalHp = baseHp + upHp + sHp;
+        int totalAtk = baseAtk + upAtk + sAtk;
+
+        if (rosterHeroStatsText != null)
+        {
+            string hpAdd = (upHp + sHp > 0) ? $" <color=#22C55E>(+{upHp + sHp})</color>" : "";
+            string defAdd = sDef > 0 ? $" <color=#38BDF8>(+{sDef})</color>" : "";
+            string regenStr = sRegen > 0f ? $"   <b>{(isVi ? "HỒI:" : "REGEN:")}</b> <color=#10B981>+{sRegen:0.#} HP/s</color>" : "";
+
+            string atkAdd = (upAtk + sAtk > 0) ? $" <color=#FF3B30>(+{upAtk + sAtk})</color>" : "";
+
+            string manaAdd = sMaxEn > 0 ? $" <color=#00E5FF>(+{(int)sMaxEn})</color>" : "";
+            string manaRegenStr = sEnRegen > 0f ? $" <color=#06B6D4>(+{sEnRegen:0.#}/s)</color>" : "";
+
+            // Phân loại sát thương gốc, trụ nâng cấp và ngọc khảm cho từng tướng
+            bool isMagicHero = (hero == "azure" || hero == "azureblade" || hero == "player3" || hero == "mage" || hero == "celestialmage" || hero == "player6");
+            int totalPhys = (!isMagicHero ? (baseAtk + upAtk) : 0) + sPhysAtk;
+            int totalMagic = (isMagicHero ? (baseAtk + upAtk) : 0) + sMagicAtk;
+            int totalTrue = sTrueAtk;
+
+            List<string> dmgTags = new List<string>();
+            if (totalPhys > 0) dmgTags.Add($"<color=#FF3B30>{totalPhys} ATK</color>");
+            if (totalMagic > 0) dmgTags.Add($"<color=#B84DFF>{totalMagic} AP</color>");
+            if (totalTrue > 0) dmgTags.Add($"<color=#E2E8F0>{totalTrue} TD</color>");
+            string dmgBreakdownStr = string.Join(" | ", dmgTags);
+
+            // Tính toán Chí mạng, Hút máu, Giảm hồi chiêu và Thưởng Shard
+            int totalCritPct = 20 + Mathf.RoundToInt(sCrit * 100);
+            string critBonusStr = sCrit > 0f ? $" <color=#F59E0B>(+{Mathf.RoundToInt(sCrit * 100)}%)</color>" : "";
+
+            int physLife = Mathf.RoundToInt((sPhysLife > 0f ? sPhysLife : sLife) * 100);
+            int spellVamp = Mathf.RoundToInt(sSpellVamp * 100);
+            int cdPct = Mathf.RoundToInt(sCd * 100);
+            int shardPct = Mathf.RoundToInt(sShard * 100);
+
+            string cdTag = "";
+            if (cdPct > 0) cdTag += $"-{cdPct}%";
+            if (upDashCd > 0f)
+            {
+                string dashStr = isVi ? $"-{upDashCd:0.#}s Lướt" : $"-{upDashCd:0.#}s Dash";
+                cdTag = string.IsNullOrEmpty(cdTag) ? dashStr : $"{cdTag} | {dashStr}";
+            }
+            if (string.IsNullOrEmpty(cdTag)) cdTag = "-0%";
+
+            // Từng dòng thông số xếp thành hàng dọc với gạch đầu dòng rõ ràng, font lớn dễ đọc trên mobile
+            List<string> statLines = new List<string>
+            {
+                $"<color=#E2E8F0>•</color> <b>{(isVi ? "SINH LỰC (HP):" : "HEALTH (HP):")}</b> <color=#22C55E>{totalHp}</color>{hpAdd}{regenStr}",
+                $"<color=#E2E8F0>•</color> <b>{(isVi ? "GIÁP PHÒNG THỦ:" : "DEFENSE (DEF):")}</b> <color=#38BDF8>{sDef}</color>{defAdd}",
+                $"<color=#E2E8F0>•</color> <b>{(isVi ? "TỔNG CÔNG KÍCH:" : "TOTAL ATTACK:")}</b> <color=#FF3B30>{totalAtk}</color>{atkAdd}",
+                $"<color=#E2E8F0>•</color> <b>{(isVi ? "PHÂN LOẠI SÁT THƯƠNG:" : "DAMAGE TYPE:")}</b> {dmgBreakdownStr}",
+                $"<color=#E2E8F0>•</color> <b>{(isVi ? "CHÍ MẠNG / BẠO KÍCH:" : "CRITICAL STATS:")}</b> <color=#F59E0B>{totalCritPct}%</color>{critBonusStr} | <color=#F59E0B>x1.75</color>",
+                $"<color=#E2E8F0>•</color> <b>{(isVi ? "NĂNG LƯỢNG (MANA):" : "ENERGY (MANA):")}</b> <color=#00E5FF>{100 + (int)sMaxEn}</color>{manaAdd}{manaRegenStr}",
+                $"<color=#E2E8F0>•</color> <b>{(isVi ? "HÚT MÁU / HỒI PHỤC:" : "VAMP & HEALING:")}</b> <color=#F43F5E>{physLife}% {(isVi ? "VL" : "Phys")}</color> | <color=#E879F9>{spellVamp}% {(isVi ? "Phép" : "Spell")}</color>",
+                $"<color=#E2E8F0>•</color> <b>{(isVi ? "GIẢM COOLDOWN:" : "CD REDUCTION:")}</b> <color=#C084FC>{cdTag}</color>" + (shardPct > 0 ? $" | <b>SHARD:</b> <color=#FBBF24>+{shardPct}%</color>" : "")
+            };
+
+            rosterHeroStatsText.text = string.Join("\n", statLines);
+        }
+
+        for (int s = 0; s < EquipmentSocketManager.HERO_SOCKET_COUNT && s < rosterHeroSocketSlotObjs.Count; s++)
+        {
+            int slotIdx = s;
+            var sObj = rosterHeroSocketSlotObjs[slotIdx];
+            if (sObj == null) continue;
+
+            // Clear dynamic children
+            foreach (Transform ch in sObj.transform) Destroy(ch.gameObject);
+
+            bool hasItem = EquipmentSocketManager.GetHeroSocketGem(slotIdx, out string gemId, out int itemLevel, hero);
+            var sImg = sObj.GetComponent<Image>();
+            var sOutline = sObj.GetComponent<Outline>();
+
+            if (hasItem)
+            {
+                var itemDef = InventoryItemDatabase.GetItem(gemId);
+                var gemEff = EquipmentSocketManager.GetGemEffect(gemId);
+                Color rarityCol = gemEff.HasValue ? gemEff.Value.gemColor : Color.cyan;
+
+                if (slotIdx < rosterSocketConduitLines.Count && rosterSocketConduitLines[slotIdx] != null)
+                {
+                    rosterSocketConduitLines[slotIdx].color = new Color(rarityCol.r, rarityCol.g, rarityCol.b, 0.90f);
+                }
+
+                if (sImg != null) sImg.color = new Color(0.12f, 0.16f, 0.24f, 1f);
+                if (sOutline != null)
+                {
+                    sOutline.effectColor = rarityCol;
+                    sOutline.effectDistance = new Vector2(1.5f, -1.5f);
+                }
+
+                // Item Icon
+                GameObject icObj = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                icObj.transform.SetParent(sObj.transform, false);
+                RectTransform icRt = icObj.GetComponent<RectTransform>();
+                icRt.anchorMin = Vector2.zero;
+                icRt.anchorMax = Vector2.one;
+                icRt.sizeDelta = new Vector2(-6f, -6f);
+                var icImg = icObj.GetComponent<Image>();
+                if (itemDef != null && itemDef.Icon != null) icImg.sprite = itemDef.Icon;
+                icImg.preserveAspect = true;
+                icImg.raycastTarget = false;
+
+                // Level Badge (Góc dưới phải gọn gàng, nền tối mờ không che item)
+                GameObject lvObj = new GameObject("LevelBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                lvObj.transform.SetParent(sObj.transform, false);
+                RectTransform lvRt = lvObj.GetComponent<RectTransform>();
+                lvRt.anchorMin = new Vector2(1f, 0f);
+                lvRt.anchorMax = new Vector2(1f, 0f);
+                lvRt.pivot = new Vector2(1f, 0f);
+                lvRt.anchoredPosition = new Vector2(-1f, 1f);
+                lvRt.sizeDelta = new Vector2(30f, 14f);
+                Image lvImg = lvObj.GetComponent<Image>();
+                lvImg.color = new Color(0.04f, 0.06f, 0.10f, 0.85f);
+                lvImg.raycastTarget = false;
+
+                GameObject lvTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+                lvTxtObj.transform.SetParent(lvObj.transform, false);
+                RectTransform lvtRt = lvTxtObj.GetComponent<RectTransform>();
+                lvtRt.anchorMin = Vector2.zero; lvtRt.anchorMax = Vector2.one; lvtRt.sizeDelta = Vector2.zero;
+                var lvTmp = lvTxtObj.AddComponent<TextMeshProUGUI>();
+                lvTmp.text = $"Lv.{itemLevel}";
+                lvTmp.fontSize = 10f;
+                lvTmp.fontStyle = FontStyles.Bold;
+                lvTmp.alignment = TextAlignmentOptions.Center;
+                lvTmp.color = new Color(0.3f, 1f, 0.5f);
+                lvTmp.raycastTarget = false;
+
+                // Drag Drop Handler for Equipped Item
+                var sDrag = sObj.GetComponent<UIDragDropItem>();
+                if (sDrag == null) sDrag = sObj.AddComponent<UIDragDropItem>();
+                sDrag.itemId = gemId;
+                sDrag.itemIcon = itemDef?.Icon;
+                sDrag.itemColor = rarityCol;
+                sDrag.isSocketedGem = true;
+                sDrag.sourceSocketIndex = slotIdx;
+                sDrag.onDragOutOfSocket = (unslotIdx) =>
+                {
+                    EquipmentSocketManager.UnsocketHeroSlot(unslotIdx, inspectedHeroId);
+                    SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+                    InspectHero(inspectedHeroId);
+                };
+                sDrag.onMoveSocket = (fromS, toS) =>
+                {
+                    EquipmentSocketManager.MoveOrSwapHeroSlot(fromS, toS, inspectedHeroId);
+                    SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+                    InspectHero(inspectedHeroId);
+                };
+            }
+            else
+            {
+                if (slotIdx < rosterSocketConduitLines.Count && rosterSocketConduitLines[slotIdx] != null)
+                {
+                    rosterSocketConduitLines[slotIdx].color = new Color(0.85f, 0.72f, 0.35f, 0.25f);
+                }
+
+                if (sImg != null) sImg.color = new Color(0.04f, 0.06f, 0.10f, 0.90f);
+                if (sOutline != null)
+                {
+                    sOutline.effectColor = new Color(0.35f, 0.45f, 0.60f, 0.5f);
+                    sOutline.effectDistance = new Vector2(1f, -1f);
+                }
+
+                // Slot Label
+                GameObject lblObj = new GameObject("SlotLabel", typeof(RectTransform), typeof(CanvasRenderer));
+                lblObj.transform.SetParent(sObj.transform, false);
+                RectTransform lblRt = lblObj.GetComponent<RectTransform>();
+                lblRt.anchorMin = Vector2.zero;
+                lblRt.anchorMax = Vector2.one;
+                lblRt.offsetMin = new Vector2(2f, 2f);
+                lblRt.offsetMax = new Vector2(-2f, -2f);
+                var lblTmp = lblObj.AddComponent<TextMeshProUGUI>();
+                string sName = isVi ? EquipmentSocketManager.SlotNamesVi[slotIdx] : EquipmentSocketManager.SlotNamesEn[slotIdx];
+                lblTmp.text = $"<size=10><color=#94A3B8><b>{sName}</b></color></size>\n<size=14><color=#64748B>+</color></size>";
+                lblTmp.fontSize = 10f;
+                lblTmp.fontStyle = FontStyles.Bold;
+                lblTmp.alignment = TextAlignmentOptions.Center;
+                lblTmp.lineSpacing = -8f;
+                lblTmp.enableWordWrapping = false;
+                lblTmp.overflowMode = TextOverflowModes.Truncate;
+                lblTmp.raycastTarget = false;
+
+                var sDrag = sObj.GetComponent<UIDragDropItem>();
+                if (sDrag != null) Destroy(sDrag);
+            }
+
+            // Xóa khung dày Gothic đè che mất icon item
+            Transform gfb = sObj.transform.Find("GothicFrameBorder");
+            if (gfb != null) Destroy(gfb.gameObject);
+        }
+    }
+
+    private void RenderRosterBagItems()
+    {
+        if (rosterBagContainer == null) return;
+
+        foreach (var o in rosterBagItemCardObjs) if (o != null) Destroy(o);
+        rosterBagItemCardObjs.Clear();
+
+        int mergeCount = EquipmentSocketManager.GetTotalAvailableMergeGemsCount(inspectedHeroId);
+        if (rosterAutoMergeBtnText != null)
+        {
+            string compactMerge = FormatCompactNumber(mergeCount);
+            rosterAutoMergeBtnText.text = LocalizationManager.T(
+                mergeCount > 0 ? $"HẤP THU TOÀN BỘ (+{compactMerge})" : "HẤP THU TOÀN BỘ",
+                mergeCount > 0 ? $"AUTO MERGE ALL (+{compactMerge})" : "AUTO MERGE ALL");
+            if (rosterAutoMergeBtn != null)
+            {
+                rosterAutoMergeBtn.interactable = (mergeCount > 0);
+            }
+        }
+
+        var invItems = AccountDatabase.GetActiveUserInventory();
+        List<AccountDatabase.InventoryItemEntry> validItems = new List<AccountDatabase.InventoryItemEntry>();
+        foreach (var it in invItems)
+        {
+            if (it.quantity > 0 && EquipmentSocketManager.IsGem(it.itemId))
+            {
+                validItems.Add(it);
+            }
+        }
+
+        if (validItems.Count == 0)
+        {
+            GameObject emptyMsgObj = new GameObject("EmptyBagMsg", typeof(RectTransform), typeof(CanvasRenderer));
+            Transform parentContainer = (rosterBagContainer.parent != null) ? rosterBagContainer.parent : rosterBagContainer;
+            emptyMsgObj.transform.SetParent(parentContainer, false);
+            rosterBagItemCardObjs.Add(emptyMsgObj);
+            RectTransform emRt = emptyMsgObj.GetComponent<RectTransform>();
+            emRt.anchorMin = Vector2.zero;
+            emRt.anchorMax = Vector2.one;
+            emRt.pivot = new Vector2(0.5f, 0.5f);
+            emRt.offsetMin = new Vector2(40f, 10f);
+            emRt.offsetMax = new Vector2(-40f, -10f);
+            var emTmp = emptyMsgObj.AddComponent<TextMeshProUGUI>();
+            emTmp.text = LocalizationManager.T("Chưa có khoáng thạch / đá quý trong túi đồ.", "No minerals or gems in bag yet.");
+            emTmp.fontSize = 19f;
+            emTmp.fontStyle = FontStyles.Bold;
+            emTmp.color = new Color(0.75f, 0.80f, 0.90f);
+            emTmp.alignment = TextAlignmentOptions.Center;
+            return;
+        }
+
+        for (int i = 0; i < validItems.Count; i++)
+        {
+            var itemEntry = validItems[i];
+            var def = InventoryItemDatabase.GetItem(itemEntry.itemId);
+            var gemEff = EquipmentSocketManager.GetGemEffect(itemEntry.itemId);
+            if (def == null || !gemEff.HasValue) continue;
+
+            GameObject cardObj = new GameObject($"BagCard_{itemEntry.itemId}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            cardObj.transform.SetParent(rosterBagContainer, false);
+            rosterBagItemCardObjs.Add(cardObj);
+
+            RectTransform cRt = cardObj.GetComponent<RectTransform>();
+            cRt.sizeDelta = new Vector2(250f, 106f);
+
+            Image cImg = cardObj.GetComponent<Image>();
+            cImg.color = new Color(0.06f, 0.08f, 0.12f, 0.95f);
+            WhiteIconLoader.ApplyGothicFrame(cardObj, gemEff.Value.gemColor * 0.85f, 0.45f);
+
+            var drag = cardObj.AddComponent<UIDragDropItem>();
+            drag.itemId = itemEntry.itemId;
+            drag.itemIcon = def.Icon;
+            drag.itemColor = gemEff.Value.gemColor;
+            drag.parentScrollRect = rosterBagContainer.GetComponentInParent<ScrollRect>();
+            string targetGemId = itemEntry.itemId;
+            drag.onClick = () =>
+            {
+                if (EquipmentSocketManager.SocketGemToHeroSlot(-1, targetGemId, out _, out _, inspectedHeroId))
+                {
+                    SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+                    InspectHero(inspectedHeroId);
+                }
+            };
+
+            // Icon box (Enlarged for Mobile)
+            GameObject ibObj = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            ibObj.transform.SetParent(cardObj.transform, false);
+            RectTransform ibRt = ibObj.GetComponent<RectTransform>();
+            ibRt.anchorMin = new Vector2(0f, 0.5f);
+            ibRt.anchorMax = new Vector2(0f, 0.5f);
+            ibRt.pivot = new Vector2(0f, 0.5f);
+            ibRt.anchoredPosition = new Vector2(8f, 0f);
+            ibRt.sizeDelta = new Vector2(58f, 58f);
+            var ibImg = ibObj.GetComponent<Image>();
+            ibImg.sprite = def.Icon;
+            ibImg.preserveAspect = true;
+            ibImg.raycastTarget = false;
+
+            // Text info (Enlarged for Mobile)
+            GameObject infoObj = new GameObject("Info", typeof(RectTransform), typeof(CanvasRenderer));
+            infoObj.transform.SetParent(cardObj.transform, false);
+            RectTransform infoRt = infoObj.GetComponent<RectTransform>();
+            infoRt.anchorMin = Vector2.zero;
+            infoRt.anchorMax = Vector2.one;
+            infoRt.offsetMin = new Vector2(72f, 4f);
+            infoRt.offsetMax = new Vector2(-6f, -4f);
+
+            var vlg = infoObj.AddComponent<VerticalLayoutGroup>();
+            vlg.childControlHeight = false;
+            vlg.childControlWidth = true;
+            vlg.spacing = 2f;
+
+            GameObject tObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
+            tObj.transform.SetParent(infoObj.transform, false);
+            var tTmp = tObj.AddComponent<TextMeshProUGUI>();
+            string gName = LocalizationManager.IsVietnamese ? gemEff.Value.nameVi : gemEff.Value.nameEn;
+            tTmp.text = $"<b>{gName}</b> <color=#00FF88>x{itemEntry.quantity}</color>";
+            tTmp.fontSize = 15.5f;
+            tTmp.color = Color.white;
+            tTmp.raycastTarget = false;
+
+            GameObject bObj = new GameObject("Buff", typeof(RectTransform), typeof(CanvasRenderer));
+            bObj.transform.SetParent(infoObj.transform, false);
+            var bTmp = bObj.AddComponent<TextMeshProUGUI>();
+            string effSum = LocalizationManager.IsVietnamese ? gemEff.Value.effectSummaryVi : gemEff.Value.effectSummaryEn;
+            bTmp.text = EquipmentSocketManager.FormatColoredStatSummary(effSum);
+            bTmp.fontSize = 13.5f;
+            bTmp.lineSpacing = 1.2f;
+            bTmp.color = Color.white;
+            bTmp.enableWordWrapping = true;
+            bTmp.raycastTarget = false;
+        }
     }
 
     private Material rosterHeroMat;
@@ -1932,7 +3482,7 @@ public class MainMenuManager : MonoBehaviour
 
         HeroCostumeManager.ApplyCostumeToImage(rosterHeroPreviewImage, inspectedHeroId);
 
-        if (inspectedHeroId == "maid" || inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "azure" || inspectedHeroId == "azureblade" || inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
+        if (inspectedHeroId == "maid" || inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "azure" || inspectedHeroId == "azureblade" || inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4" || inspectedHeroId == "dune" || inspectedHeroId == "duneassassin" || inspectedHeroId == "player5" || inspectedHeroId == "mage" || inspectedHeroId == "celestialmage" || inspectedHeroId == "player6")
         {
             rosterHeroPreviewImage.material = null;
             return;
@@ -1989,6 +3539,16 @@ public class MainMenuManager : MonoBehaviour
         {
             targetChar = CharacterManager.CHAR_GALE_RONIN;
             heroPref = "ronin";
+        }
+        else if (inspectedHeroId == "dune" || inspectedHeroId == "duneassassin" || inspectedHeroId == "player5")
+        {
+            targetChar = CharacterManager.CHAR_DUNE_ASSASSIN;
+            heroPref = "dune";
+        }
+        else if (inspectedHeroId == "mage" || inspectedHeroId == "celestialmage" || inspectedHeroId == "player6")
+        {
+            targetChar = CharacterManager.CHAR_CELESTIAL_MAGE;
+            heroPref = "mage";
         }
 
         CharacterManager.EnsureInstance().SelectCharacter(targetChar);
@@ -2055,6 +3615,16 @@ public class MainMenuManager : MonoBehaviour
             target = CharacterManager.CHAR_GALE_RONIN;
             heroPref = "ronin";
         }
+        else if (heroId.ToLower() == "dune" || heroId.ToLower() == "duneassassin" || heroId.ToLower() == "player5")
+        {
+            target = CharacterManager.CHAR_DUNE_ASSASSIN;
+            heroPref = "dune";
+        }
+        else if (heroId.ToLower() == "mage" || heroId.ToLower() == "celestialmage" || heroId.ToLower() == "player6")
+        {
+            target = CharacterManager.CHAR_CELESTIAL_MAGE;
+            heroPref = "mage";
+        }
 
         CharacterManager.EnsureInstance().SelectCharacter(target);
         PlayerPrefs.SetString("SelectedHero", heroPref);
@@ -2077,12 +3647,14 @@ public class MainMenuManager : MonoBehaviour
         if (curChar == CharacterManager.CHAR_TITAN_BERSERKER) frames = titanIdleFrames;
         else if (curChar == CharacterManager.CHAR_AZURE_BLADE) frames = azureIdleFrames;
         else if (curChar == CharacterManager.CHAR_GALE_RONIN) frames = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames;
+        else if (curChar == CharacterManager.CHAR_DUNE_ASSASSIN) frames = duneIdleFrames;
+        else if (curChar == CharacterManager.CHAR_CELESTIAL_MAGE) frames = mageIdleFrames;
 
         if (heroPreviewImage == null) yield break;
 
         heroPreviewImage.preserveAspect = true;
         heroPreviewImage.color = Color.white;
-        heroPreviewImage.transform.localScale = GetHeroVisualScale(curChar == CharacterManager.CHAR_TITAN_BERSERKER ? "titan" : (curChar == CharacterManager.CHAR_AZURE_BLADE ? "azure" : (curChar == CharacterManager.CHAR_GALE_RONIN ? "ronin" : "vael")));
+        heroPreviewImage.transform.localScale = GetHeroVisualScale(curChar == CharacterManager.CHAR_TITAN_BERSERKER ? "titan" : (curChar == CharacterManager.CHAR_AZURE_BLADE ? "azure" : (curChar == CharacterManager.CHAR_GALE_RONIN ? "ronin" : (curChar == CharacterManager.CHAR_DUNE_ASSASSIN ? "dune" : (curChar == CharacterManager.CHAR_CELESTIAL_MAGE ? "mage" : "vael")))));
         RectTransform mainRt = heroPreviewImage.rectTransform;
         if (mainRt != null)
         {
@@ -2102,6 +3674,14 @@ public class MainMenuManager : MonoBehaviour
             {
                 mainRt.anchoredPosition = new Vector2(0f, 6f);
             }
+            else if (curChar == CharacterManager.CHAR_DUNE_ASSASSIN)
+            {
+                mainRt.anchoredPosition = new Vector2(0f, 0f);
+            }
+            else if (curChar == CharacterManager.CHAR_CELESTIAL_MAGE)
+            {
+                mainRt.anchoredPosition = new Vector2(0f, 0f);
+            }
             else
             {
                 mainRt.anchoredPosition = Vector2.zero;
@@ -2115,7 +3695,7 @@ public class MainMenuManager : MonoBehaviour
                 ? titanIdleFrames
                 : ((curChar == CharacterManager.CHAR_AZURE_BLADE) 
                     ? azureIdleFrames 
-                    : (curChar == CharacterManager.CHAR_GALE_RONIN ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : vaelIdleFrames));
+                    : (curChar == CharacterManager.CHAR_GALE_RONIN ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : (curChar == CharacterManager.CHAR_DUNE_ASSASSIN ? duneIdleFrames : (curChar == CharacterManager.CHAR_CELESTIAL_MAGE ? mageIdleFrames : vaelIdleFrames))));
             if (frames == null || frames.Length == 0) yield break;
         }
 
@@ -2145,6 +3725,10 @@ public class MainMenuManager : MonoBehaviour
             frames = azureIdleFrames;
         else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid") 
             frames = (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames;
+        else if (inspectedHeroId == "dune" || inspectedHeroId == "duneassassin" || inspectedHeroId == "player5")
+            frames = duneIdleFrames;
+        else if (inspectedHeroId == "mage" || inspectedHeroId == "celestialmage" || inspectedHeroId == "player6")
+            frames = mageIdleFrames;
 
         if (rosterHeroPreviewImage == null) yield break;
 
@@ -2158,7 +3742,7 @@ public class MainMenuManager : MonoBehaviour
                 ? titanIdleFrames
                 : ((inspectedHeroId == "azure" || inspectedHeroId == "azureblade") 
                     ? azureIdleFrames 
-                    : ((inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid") ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : vaelIdleFrames));
+                    : ((inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid") ? ((roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames) : (inspectedHeroId == "dune" || inspectedHeroId == "duneassassin" || inspectedHeroId == "player5" ? duneIdleFrames : (inspectedHeroId == "mage" || inspectedHeroId == "celestialmage" || inspectedHeroId == "player6" ? mageIdleFrames : vaelIdleFrames))));
             if (frames == null || frames.Length == 0) yield break;
         }
 
@@ -2367,6 +3951,7 @@ public class MainMenuManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(sceneName) || sceneName == "SampleScene") sceneName = "Map1_Thestart";
 
+        PlayerInventory.ResetRunShards();
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         Time.timeScale = 1.0f;
         SceneManager.LoadScene(sceneName);

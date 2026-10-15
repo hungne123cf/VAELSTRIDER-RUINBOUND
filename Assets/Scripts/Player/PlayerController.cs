@@ -18,12 +18,31 @@ public class PlayerController : MonoBehaviour
     private bool isDashing = false;
     private float dashTimer = 0f;
     private float dashCooldownTimer = 0f;
-        private bool isMobileInputActive = false;
+
+    // Hệ thống tích trữ lần lướt (3 Stored Dash Charges) cho Player 5
+    private int currentDashCharges = 3;
+    private float dashChargeRechargeTimer = 0f;
+    private float dashIntervalTimer = 0f;
+
+    private bool isMobileInputActive = false;
+    private Vector2 rawMobileInput = Vector2.zero;
     private bool canMove = true;
     private float baseMoveSpeed = 5f;
     private float baseDashCooldown = 5.0f;
     private float bonusSpeed = 0f;
     private float dashCooldownReduction = 0f;
+
+    public float DashDuration => dashDuration;
+    public bool IsDuneAssassin => (GetComponent<DuneAssassinSkill>() != null && GetComponent<DuneAssassinSkill>().enabled);
+    public int GetCurrentDashCharges() => IsDuneAssassin ? currentDashCharges : (dashCooldownTimer <= 0 ? 1 : 0);
+    public int GetMaxDashCharges() => IsDuneAssassin ? 3 : 1;
+    public float GetDashChargeRechargeProgress()
+    {
+        if (!IsDuneAssassin) return (dashCooldownTimer <= 0) ? 1f : (1f - (dashCooldownTimer / dashCooldown));
+        if (currentDashCharges >= 3) return 1f;
+        float chargeCd = Mathf.Max(1.5f, 3.5f - dashCooldownReduction);
+        return Mathf.Clamp01(dashChargeRechargeTimer / chargeCd);
+    }
 
     public void SetBaseSpeed(float newBaseSpeed)
     {
@@ -35,15 +54,34 @@ public class PlayerController : MonoBehaviour
     {
         bonusSpeed = speedBonus;
         dashCooldownReduction = dashCdReduction;
-        moveSpeed = baseMoveSpeed + bonusSpeed;
+        moveSpeed = baseMoveSpeed + bonusSpeed + augSpeedBonus;
         dashCooldown = Mathf.Max(1.0f, baseDashCooldown - dashCooldownReduction);
     }
+
+    // ─── Augment speed bonus ───────────────────────────────────────────────────
+    private float augSpeedBonus = 0f;
+
+    public void ApplyAugmentBonus(float speedBonusFraction)
+    {
+        augSpeedBonus = baseMoveSpeed * speedBonusFraction;
+        moveSpeed = baseMoveSpeed + bonusSpeed + augSpeedBonus;
+    }
+
 
         public bool IsStunned => isStunned;
     private bool isStunned = false;
 
     public void ApplyStun(float duration)
     {
+        var ph = GetComponent<PlayerHealth>();
+        if (ph != null && ph.isInvulnerable) return;
+
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && titan.IsChargingEarthshaker) return;
+
+        var combat = GetComponent<PlayerCombat>();
+        if (combat != null && combat.IsParrying) return;
+
         StartCoroutine(StunRoutine(duration));
     }
 
@@ -54,7 +92,6 @@ public class PlayerController : MonoBehaviour
         if (rb != null) rb.linearVelocity = Vector2.zero;
         if (animator != null) animator.SetFloat(SpeedHash, 0f);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("CHOÁNG! (2s)", "STUNNED! (2s)"), new Color(1f, 0.9f, 0.3f));
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         GameObject webTrap = new GameObject("WebTrapVisual");
@@ -149,11 +186,65 @@ public class PlayerController : MonoBehaviour
         GameAutoBootstrap.ApplySelectedCharacterToPlayer();
     }
 
+    public bool IsMovementBlocked()
+    {
+        var ph = GetComponent<PlayerHealth>();
+        if (ph != null && ph.IsDead) return true;
+
+        if (!canMove || isStunned) return true;
+
+        var combat = GetComponent<PlayerCombat>();
+        if (combat != null && (combat.IsParrying || combat.IsAttackHolding)) return true;
+
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && (titan.IsChargingEarthshaker || titan.IsExecutingCataclysm)) return true;
+
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.IsChargingIaido) return true;
+
+        var azure = GetComponent<AzureBladeSkill>();
+        if (azure != null && azure.IsAiming) return true;
+
+        var dune = GetComponent<DuneAssassinSkill>();
+        if (dune != null && (dune.IsDefending || dune.IsExecutingSkill || dune.IsAttacking)) return true;
+
+        var mage = GetComponent<CelestialMageSkill>();
+        if (mage != null && (mage.IsChargingBarrier || mage.IsExecutingSkill)) return true;
+
+        return false;
+    }
+
     void Update()
     {
+        var ph = GetComponent<PlayerHealth>();
+        if (ph != null && ph.IsDead) return;
+
         if (dashCooldownTimer > 0)
         {
             dashCooldownTimer -= Time.deltaTime;
+        }
+
+        if (dashIntervalTimer > 0)
+        {
+            dashIntervalTimer -= Time.deltaTime;
+        }
+
+        if (IsDuneAssassin)
+        {
+            float chargeCd = Mathf.Max(1.5f, 3.5f - dashCooldownReduction);
+            if (currentDashCharges < 3)
+            {
+                dashChargeRechargeTimer += Time.deltaTime;
+                if (dashChargeRechargeTimer >= chargeCd)
+                {
+                    dashChargeRechargeTimer = 0f;
+                    currentDashCharges = Mathf.Min(3, currentDashCharges + 1);
+                }
+            }
+            else
+            {
+                dashChargeRechargeTimer = 0f;
+            }
         }
 
         if (isDashing)
@@ -166,26 +257,36 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Ban phim PC WASD / Mui ten
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-        
-        if (!isMobileInputActive)
-        {
-            moveInput = new Vector2(h, v).normalized;
-        }
+        bool isBlocked = IsMovementBlocked();
 
-        if (moveInput != Vector2.zero)
+        if (isMobileInputActive && rawMobileInput.sqrMagnitude > 0.01f)
         {
-            lastFacingDirection = moveInput;
-            if (Mathf.Abs(moveInput.x) > 0.05f)
+            lastFacingDirection = rawMobileInput.normalized;
+            if (Mathf.Abs(rawMobileInput.x) > 0.05f)
             {
-                lastHorizontalFacing = Mathf.Sign(moveInput.x);
+                lastHorizontalFacing = Mathf.Sign(rawMobileInput.x);
             }
+            moveInput = isBlocked ? Vector2.zero : rawMobileInput.normalized;
+        }
+        else
+        {
+            // Ban phim PC WASD / Mui ten
+            float h = Input.GetAxisRaw("Horizontal");
+            float v = Input.GetAxisRaw("Vertical");
+            Vector2 rawKbd = new Vector2(h, v);
+            if (rawKbd.sqrMagnitude > 0.01f)
+            {
+                lastFacingDirection = rawKbd.normalized;
+                if (Mathf.Abs(rawKbd.x) > 0.05f)
+                {
+                    lastHorizontalFacing = Mathf.Sign(rawKbd.x);
+                }
+            }
+            moveInput = isBlocked ? Vector2.zero : rawKbd.normalized;
         }
 
         // Bam Space de Luot (Dash tren PC)
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !isBlocked)
         {
             PerformDash();
         }
@@ -202,19 +303,67 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!canMove)
+        if (IsMovementBlocked())
         {
             rb.linearVelocity = Vector2.zero;
             return;
         }
         if (isDashing)
         {
-            rb.linearVelocity = lastFacingDirection * dashSpeed;
+            var titan = GetComponent<TitanBerserkerSkill>();
+            float speed = (titan != null && titan.enabled) ? 13.5f : dashSpeed;
+            rb.linearVelocity = lastFacingDirection * speed;
         }
         else
         {
             rb.linearVelocity = moveInput * moveSpeed;
         }
+    }
+
+    public void RefreshMoveInput()
+    {
+        if (IsMovementBlocked())
+        {
+            moveInput = Vector2.zero;
+            if (rb != null) rb.linearVelocity = Vector2.zero;
+            if (animator != null) animator.SetFloat(SpeedHash, 0f);
+            return;
+        }
+
+        if (isMobileInputActive && rawMobileInput.sqrMagnitude > 0.01f)
+        {
+            moveInput = rawMobileInput.normalized;
+            lastFacingDirection = rawMobileInput.normalized;
+            if (Mathf.Abs(rawMobileInput.x) > 0.05f)
+            {
+                lastHorizontalFacing = Mathf.Sign(rawMobileInput.x);
+            }
+        }
+        else
+        {
+            float h = Input.GetAxisRaw("Horizontal");
+            float v = Input.GetAxisRaw("Vertical");
+            Vector2 rawKbd = new Vector2(h, v);
+            if (rawKbd.sqrMagnitude > 0.01f)
+            {
+                moveInput = rawKbd.normalized;
+                lastFacingDirection = rawKbd.normalized;
+                if (Mathf.Abs(rawKbd.x) > 0.05f)
+                {
+                    lastHorizontalFacing = Mathf.Sign(rawKbd.x);
+                }
+            }
+            else
+            {
+                moveInput = Vector2.zero;
+            }
+        }
+
+        if (rb != null)
+        {
+            rb.linearVelocity = moveInput * moveSpeed;
+        }
+        UpdateAnimations();
     }
 
     public void SetCanMove(bool enable)
@@ -224,22 +373,102 @@ public class PlayerController : MonoBehaviour
         {
             moveInput = Vector2.zero;
             if (rb != null) rb.linearVelocity = Vector2.zero;
+            if (animator != null) animator.SetFloat(SpeedHash, 0f);
         }
+        else
+        {
+            RefreshMoveInput();
+        }
+    }
+
+    public void TriggerDashCooldown()
+    {
+        dashCooldownTimer = Mathf.Max(1.0f, dashCooldown - dashCooldownReduction);
     }
 
     public void PerformDash()
     {
-        if (dashCooldownTimer <= 0 && lastFacingDirection != Vector2.zero && !isDashing)
+        // 1. Cơ chế Tàn Ảnh Tốc Biến & Thu Hồi Bóng (Murad S1 Style) cho Phong Lôi Lãng Khách (Player 2)
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled)
+        {
+            if (ronin.HasActiveShadowClone)
+            {
+                // Nhịp 2: Bấm lại là lập tức Teleport quay ngược về vị trí chiếc bóng ban đầu (miễn phí năng lượng!)
+                ronin.RecallToShadowClone();
+                TriggerDashCooldown();
+                return;
+            }
+            else
+            {
+                // Nhịp 1: Tốc biến 4.8m tới trước & cắm lại bóng tại vị trí xuất phát
+                if (dashCooldownTimer > 0f || isDashing) return;
+                var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+                if (energySys != null && !energySys.TryConsumeEnergy(15f)) return;
+
+                ronin.PerformTeleportDash(lastFacingDirection);
+                return;
+            }
+        }
+
+        // Cơ chế Tốc Biến Hư Không (Void Blink) cho Pháp Sư Tinh Tú (Player 6)
+        var mage = GetComponent<CelestialMageSkill>();
+        if (mage != null && mage.enabled)
+        {
+            if (dashCooldownTimer > 0f || isDashing) return;
+            var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+            if (energySys != null && !energySys.TryConsumeEnergy(15f)) return;
+
+            mage.OnPerformBlink(lastFacingDirection);
+            TriggerDashCooldown();
+            return;
+        }
+
+        bool canDash = false;
+        if (IsDuneAssassin)
+        {
+            canDash = (currentDashCharges > 0 && dashIntervalTimer <= 0f && lastFacingDirection != Vector2.zero && !isDashing);
+        }
+        else
+        {
+            canDash = (dashCooldownTimer <= 0 && lastFacingDirection != Vector2.zero && !isDashing);
+        }
+
+        if (canDash)
         {
             var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
-            if (energySys != null && !energySys.TryConsumeEnergy(20f))
+            if (!IsDuneAssassin && energySys != null && !energySys.TryConsumeEnergy(20f))
             {
                 return; // Khong du nang luong de luot
             }
 
             isDashing = true;
-            dashTimer = dashDuration;
-            dashCooldownTimer = dashCooldown;
+            var titan = GetComponent<TitanBerserkerSkill>();
+            dashTimer = (titan != null && titan.enabled) ? 0.38f : dashDuration;
+
+            if (IsDuneAssassin)
+            {
+                currentDashCharges = Mathf.Max(0, currentDashCharges - 1);
+                dashIntervalTimer = 0.22f; // Giãn cách ngắn giữa 2 lần lướt liên hoàn
+
+                // TIÊU HAO 4% MÁU TỐI ĐA KHI LƯỚT CHO PLAYER 5 (DUNE ASSASSIN)
+                var pHealth = GetComponent<PlayerHealth>();
+                if (pHealth != null && !pHealth.IsDead)
+                {
+                    pHealth.ConsumeHealthPercent(0.04f); // 4% Max HP
+                }
+
+                var duneSkill = GetComponent<DuneAssassinSkill>();
+                if (duneSkill != null)
+                {
+                    duneSkill.OnSkillCast();
+                    duneSkill.ReduceSpecialCooldown(1.5f);
+                }
+            }
+            else
+            {
+                dashCooldownTimer = dashCooldown;
+            }
 
             // Hồi ngay đòn đánh thường cho Lam Kiếm Sĩ khi Dash
             var azureBlade = GetComponent<AzureBladeSkill>();
@@ -248,13 +477,24 @@ public class PlayerController : MonoBehaviour
                 azureBlade.ResetAttackCooldown();
             }
 
-            // Giảm 2.0s hồi chiêu Tuyệt Kỹ cho Gale Ronin khi Dash
-            var ronin = GetComponent<GaleRoninSkill>();
-            if (ronin != null)
+            // Kích hoạt lốc xoáy chém xoay 360 độ khi Dash cho Cuồng Chiến Binh Titan (Player 4)
+            if (titan != null && titan.enabled)
             {
-                ronin.ReduceSpecialCooldown(2.0f);
+                titan.TriggerDashSpin();
+            }
+
+            // Kích hoạt Thánh Thuẫn Phản Đòn cho Hiệp Sĩ Vaelstrider (Player 1)
+            var combat = GetComponent<PlayerCombat>();
+            if (combat != null && combat.enabled && (titan == null || !titan.enabled) && (azureBlade == null || !azureBlade.enabled) && !IsDuneAssassin)
+            {
+                combat.TriggerRadiantRiposteDash(lastFacingDirection);
             }
         }
+    }
+
+    public void ReduceDashCooldown(float factor)
+    {
+        dashCooldownTimer = Mathf.Max(0f, dashCooldownTimer * (1f - factor));
     }
 
     public void PerformDashInDirection(Vector2 direction)
@@ -268,17 +508,48 @@ public class PlayerController : MonoBehaviour
 
     public float GetDashCooldownNormalized()
     {
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled && ronin.HasActiveShadowClone)
+        {
+            return 1f - ronin.ShadowCloneRatio; // Vòng tròn đếm ngược thời gian hồi bóng 4.5s
+        }
+        if (IsDuneAssassin)
+        {
+            if (currentDashCharges >= 3) return 0f;
+            float chargeCd = Mathf.Max(1.5f, 3.5f - dashCooldownReduction);
+            return (currentDashCharges == 0) ? (1f - (dashChargeRechargeTimer / chargeCd)) : 0f;
+        }
         if (dashCooldown <= 0f) return 0f;
         return Mathf.Clamp01(dashCooldownTimer / dashCooldown);
     }
 
     public float GetDashCooldownRemaining()
     {
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled && ronin.HasActiveShadowClone)
+        {
+            return ronin.ShadowCloneTimeRemaining;
+        }
+        if (IsDuneAssassin)
+        {
+            if (currentDashCharges > 0) return 0f;
+            float chargeCd = Mathf.Max(1.5f, 3.5f - dashCooldownReduction);
+            return Mathf.Max(0f, chargeCd - dashChargeRechargeTimer);
+        }
         return Mathf.Max(0f, dashCooldownTimer);
     }
 
     public bool IsDashReady()
     {
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.enabled && ronin.HasActiveShadowClone)
+        {
+            return true; // Sẵn sàng bấm nhịp 2 để thu hồi về bóng
+        }
+        if (IsDuneAssassin)
+        {
+            return currentDashCharges > 0 && dashIntervalTimer <= 0f && !isDashing;
+        }
         return dashCooldownTimer <= 0f && !isDashing;
     }
 
@@ -286,17 +557,19 @@ public class PlayerController : MonoBehaviour
     {
         if (animator == null) return;
 
-        bool isTitan = GetComponent<TitanBerserkerSkill>() != null;
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && (titan.IsSpinning || titan.IsExecutingCataclysm || titan.IsChargingEarthshaker))
+        {
+            return;
+        }
+
+        bool isBlocked = IsMovementBlocked();
+
+        bool isTitan = (titan != null);
         if (isTitan)
         {
             animator.SetFloat(MoveXHash, lastHorizontalFacing);
             animator.SetFloat(MoveYHash, 0f);
-
-            var titan = GetComponent<TitanBerserkerSkill>();
-            if (titan != null && (titan.IsSpinning || titan.IsExecutingCataclysm))
-            {
-                return;
-            }
         }
         else
         {
@@ -304,7 +577,8 @@ public class PlayerController : MonoBehaviour
             animator.SetFloat(MoveYHash, lastFacingDirection.y);
         }
 
-        animator.SetFloat(SpeedHash, moveInput.sqrMagnitude);
+        float animSpeed = isBlocked ? 0f : moveInput.sqrMagnitude;
+        animator.SetFloat(SpeedHash, animSpeed);
     }
 
     public void SetFacingDirection(Vector2 dir)
@@ -316,9 +590,13 @@ public class PlayerController : MonoBehaviour
             {
                 lastHorizontalFacing = Mathf.Sign(dir.x);
             }
+
+            var titan = GetComponent<TitanBerserkerSkill>();
+            if (titan != null && titan.IsChargingEarthshaker) return;
+
             if (animator != null)
             {
-                bool isTitan = GetComponent<TitanBerserkerSkill>() != null;
+                bool isTitan = (titan != null);
                 if (isTitan)
                 {
                     animator.SetFloat(MoveXHash, lastHorizontalFacing);
@@ -335,25 +613,31 @@ public class PlayerController : MonoBehaviour
 
     public void SetMobileInput(Vector2 input)
     {
+        rawMobileInput = input;
         if (input.sqrMagnitude > 0.01f)
         {
             isMobileInputActive = true;
-            moveInput = input.normalized;
-            lastFacingDirection = moveInput;
-            if (Mathf.Abs(moveInput.x) > 0.05f)
+            lastFacingDirection = input.normalized;
+            if (Mathf.Abs(input.x) > 0.05f)
             {
-                lastHorizontalFacing = Mathf.Sign(moveInput.x);
+                lastHorizontalFacing = Mathf.Sign(input.x);
             }
+            bool isBlocked = IsMovementBlocked();
+            moveInput = isBlocked ? Vector2.zero : input.normalized;
         }
         else
         {
             isMobileInputActive = false;
+            rawMobileInput = Vector2.zero;
             moveInput = Vector2.zero;
         }
     }
 
     public Vector2 GetFacingDirection() => lastFacingDirection;
+    public float GetLastHorizontalFacing() => lastHorizontalFacing;
     public bool IsDashing() => isDashing;
+    public bool IsMoving => moveInput.sqrMagnitude > 0.01f;
+    public Vector2 MoveInput => moveInput;
 
     public void AutoAlignCollider()
     {
@@ -392,6 +676,11 @@ public class PlayerController : MonoBehaviour
         {
             cap.offset = new Vector2(0f, 0.65f);
             cap.size = new Vector2(0.90f, 1.30f);
+        }
+        else if (curChar == CharacterManager.CHAR_DUNE_ASSASSIN || GetComponent<DuneAssassinSkill>() != null)
+        {
+            cap.offset = new Vector2(0f, 0f);
+            cap.size = new Vector2(0.48f, 0.72f);
         }
         else if (sr != null && sr.sprite != null)
         {

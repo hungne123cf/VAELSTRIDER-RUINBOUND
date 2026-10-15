@@ -139,36 +139,70 @@ public static class AccountDatabase
                     acc.inventoryItems = new List<InventoryItemEntry>();
                     SaveDatabase();
 
-                    // Áp dụng lại phiên chơi mới về 0 cho tài khoản này
                     ApplyAccountToGameSession(acc, false);
                     break;
                 }
             }
         }
-        else
-        {
-            ClearTransientGameplayPlayerPrefs();
-            SetAethelShards(0);
-            PlayerPrefs.SetInt("Save_HealthPotions", 0);
-            PlayerPrefs.SetInt("Saved_HealthPotions", 0);
-            PlayerPrefs.SetInt("Player_Health_Potions", 0);
-            PlayerPrefs.Save();
-        }
 
-        // Xóa toàn bộ ngọc đã khảm của tất cả các tướng
-        string[] heroIds = new string[] { CharacterManager.CHAR_VAELSTRIDER, CharacterManager.CHAR_GALE_RONIN, CharacterManager.CHAR_AZURE_BLADE, CharacterManager.CHAR_TITAN_BERSERKER };
-        foreach (var hId in heroIds)
+        // Luôn xóa sạch toàn bộ PlayerPrefs tiến trình gameplay
+        ClearTransientGameplayPlayerPrefs();
+        SetAethelShards(0);
+        PlayerPrefs.SetInt("Save_HealthPotions", 0);
+        PlayerPrefs.SetInt("Saved_HealthPotions", 0);
+        PlayerPrefs.SetInt("Player_Health_Potions", 0);
+
+        // Xóa triệt để nâng cấp của tất cả các tướng (bao gồm Vael, Ronin, Azure, Titan, Dune, Mage và các key alias)
+        string[] allHeroes = new string[]
         {
+            CharacterManager.CHAR_VAELSTRIDER, CharacterManager.CHAR_GALE_RONIN,
+            CharacterManager.CHAR_AZURE_BLADE, CharacterManager.CHAR_TITAN_BERSERKER,
+            CharacterManager.CHAR_DUNE_ASSASSIN, CharacterManager.CHAR_CELESTIAL_MAGE,
+            "vael", "ronin", "azure", "titan", "dune", "mage", "Maid",
+            "Vaelstrider", "GaleRonin", "AzureBlade", "TitanBerserker", "DuneAssassin", "CelestialMage",
+            "Player1", "Player2", "Player3", "Player4", "Player5", "Player6",
+            "player1", "player2", "player3", "player4", "player5", "player6"
+        };
+        string[] upTypes = new string[] { "Attack", "Health", "Agility", "Ultimate" };
+        foreach (var h in allHeroes)
+        {
+            foreach (var t in upTypes)
+            {
+                PlayerPrefs.DeleteKey($"Upgrade_{h}_{t}_Level");
+            }
+            for (int i = 0; i < 6; i++)
+            {
+                PlayerPrefs.DeleteKey($"Hero_{h}_GearSlot_{i}");
+            }
             for (int k = 0; k < 3; k++)
             {
                 for (int s = 0; s < 3; s++)
                 {
-                    PlayerPrefs.DeleteKey($"Hero_{hId}_SkillSocket_Skill_{k}_Sub_{s}");
+                    PlayerPrefs.DeleteKey($"Hero_{h}_SkillSocket_Skill_{k}_Sub_{s}");
                 }
             }
         }
+        foreach (var t in upTypes)
+        {
+            PlayerPrefs.DeleteKey($"Upgrade_{t}_Level");
+        }
+
         PlayerPrefs.Save();
-        Debug.Log($"<color=yellow>[AccountDB]</color> Đã đặt lại tiến trình của tài khoản '{activeUser}' về con số 0 (Không xóa tài khoản).");
+
+        // Cập nhật lại logic bộ nhớ runtime nếu đang ở trong scene
+        if (PlayerUpgradeManager.Instance != null)
+        {
+            PlayerUpgradeManager.Instance.ApplyAllUpgrades();
+        }
+        var ph = UnityEngine.Object.FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.RefreshSocketHealthBonus();
+        var pc = UnityEngine.Object.FindAnyObjectByType<PlayerCombat>();
+        if (pc != null) pc.RefreshEquipmentBonuses();
+
+        PlayerLevelSystem.Instance?.ResetForNewBattle();
+        AugmentManager.Instance?.ResetForNewBattle();
+
+        Debug.Log($"<color=yellow>[AccountDB]</color> Đã đặt lại tiến trình của tài khoản '{activeUser}' về con số 0 toàn diện.");
     }
 
     public static void SaveDatabase()
@@ -362,8 +396,22 @@ public static class AccountDatabase
             {
                 charId = CharacterManager.CHAR_GALE_RONIN;
             }
+            else if (hero.Equals("dune", StringComparison.OrdinalIgnoreCase) ||
+                     hero.Equals("duneassassin", StringComparison.OrdinalIgnoreCase) ||
+                     hero.Equals("player5", StringComparison.OrdinalIgnoreCase) ||
+                     hero.Equals(CharacterManager.CHAR_DUNE_ASSASSIN, StringComparison.OrdinalIgnoreCase))
+            {
+                charId = CharacterManager.CHAR_DUNE_ASSASSIN;
+            }
+            else if (hero.Equals("mage", StringComparison.OrdinalIgnoreCase) ||
+                     hero.Equals("celestialmage", StringComparison.OrdinalIgnoreCase) ||
+                     hero.Equals("player6", StringComparison.OrdinalIgnoreCase) ||
+                     hero.Equals(CharacterManager.CHAR_CELESTIAL_MAGE, StringComparison.OrdinalIgnoreCase))
+            {
+                charId = CharacterManager.CHAR_CELESTIAL_MAGE;
+            }
         }
-        PlayerPrefs.SetString("SelectedHero", (charId == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((charId == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (charId == CharacterManager.CHAR_GALE_RONIN || charId == CharacterManager.CHAR_MAID ? "ronin" : "vael")));
+        PlayerPrefs.SetString("SelectedHero", (charId == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((charId == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (charId == CharacterManager.CHAR_GALE_RONIN || charId == CharacterManager.CHAR_MAID ? "ronin" : (charId == CharacterManager.CHAR_DUNE_ASSASSIN ? "dune" : (charId == CharacterManager.CHAR_CELESTIAL_MAGE ? "mage" : "vael")))));
         PlayerPrefs.SetString("Selected_Character_ID", charId);
         PlayerPrefs.SetInt("Save_SelectedHeroIndex", acc.selectedHeroIndex);
 
@@ -537,8 +585,8 @@ public static class AccountDatabase
                 acc.map3Completed = PlayerPrefs.GetInt("Map3_Completed", 0) == 1;
                 acc.unlockedMaid = PlayerPrefs.GetInt("Char_Unlocked_Maid", 0) == 1;
                 string activeChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
-                acc.selectedHero = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? "ronin" : "vael"));
-                acc.selectedHeroIndex = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? 2 : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? 1 : 0));
+                acc.selectedHero = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? "ronin" : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? "dune" : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? "mage" : "vael"))));
+                acc.selectedHeroIndex = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? 2 : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? 1 : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? 4 : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? 5 : 0))));
                 acc.equippedArmorId = PlayerPrefs.GetInt("EquippedArmorId", 0);
                 acc.equippedHelmetId = PlayerPrefs.GetInt("Equipped_Slot_Helmet", 0);
                 acc.equippedPantsId = PlayerPrefs.GetInt("Equipped_Slot_Pants", 0);

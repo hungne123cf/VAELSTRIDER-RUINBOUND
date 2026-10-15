@@ -58,6 +58,14 @@ public class DungeonLightingManager : MonoBehaviour
         {
             SetupPlayerLantern();
         }
+        else if (playerLight.transform.parent != null)
+        {
+            var pc = playerLight.transform.parent.GetComponent<PlayerCombat>();
+            if (pc != null)
+            {
+                playerLight.transform.localPosition = pc.GetBodyCenterWorld() - playerLight.transform.parent.position;
+            }
+        }
 
         // Dinh ky kiem tra vat lieu Lit cho quai moi sinh
         if (autoApplyLitMaterials && Time.time >= nextMaterialCheck)
@@ -109,27 +117,48 @@ public class DungeonLightingManager : MonoBehaviour
         var player = FindAnyObjectByType<PlayerController>();
         if (player == null) return;
 
+        Vector3 localCenter = new Vector3(0f, 0.65f, 0f);
+        var pc = player.GetComponent<PlayerCombat>();
+        if (pc != null)
+        {
+            localCenter = pc.GetBodyCenterWorld() - player.transform.position;
+        }
+        else
+        {
+            var sr = player.GetComponent<SpriteRenderer>();
+            if (sr != null && sr.sprite != null)
+            {
+                localCenter = sr.bounds.center - player.transform.position;
+            }
+        }
+
         Transform existing = player.transform.Find("PlayerLanternLight2D");
         if (existing != null)
         {
+            existing.localPosition = localCenter;
             playerLight = existing.GetComponent<Light2D>();
-            if (playerLight != null) return;
+            if (playerLight != null)
+            {
+                playerLight.pointLightInnerRadius = 1.2f;
+                playerLight.pointLightOuterRadius = 5.5f;
+                return;
+            }
         }
 
         GameObject lightObj = new GameObject("PlayerLanternLight2D");
         lightObj.transform.SetParent(player.transform, false);
-        lightObj.transform.localPosition = new Vector3(0, 0.8f, 0);
+        lightObj.transform.localPosition = localCenter;
 
         playerLight = lightObj.AddComponent<Light2D>();
         playerLight.lightType = Light2D.LightType.Point;
         playerLight.color = playerLanternColor;
         playerLight.intensity = 1.4f;
-        playerLight.pointLightInnerRadius = 1.0f;
-        playerLight.pointLightOuterRadius = 4.8f;
+        playerLight.pointLightInnerRadius = 1.2f;
+        playerLight.pointLightOuterRadius = 5.5f;
 
         // Subtle gentle breathing
         lightObj.AddComponent<TorchFlicker>();
-        Debug.Log("<color=cyan>[LIGHTING]</color> Đã gắn Đèn Lồng 2D cho người chơi Vaelstrider!");
+        Debug.Log("<color=cyan>[LIGHTING]</color> Đã gắn Đèn Lồng 2D đồng tâm chuẩn xác cho người chơi!");
     }
 
     public void ApplyLitMaterialsToWorld()

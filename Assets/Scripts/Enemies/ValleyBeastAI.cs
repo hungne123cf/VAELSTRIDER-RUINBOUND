@@ -82,6 +82,14 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+        if (PlayerHealth.IsPlayerDead)
+        {
+            rb.linearVelocity = Vector2.zero;
+            isMoving = false;
+            UpdateAnimation();
+            return;
+        }
+
         if (player == null)
         {
             FindPlayer();

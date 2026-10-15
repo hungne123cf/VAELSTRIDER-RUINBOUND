@@ -44,20 +44,20 @@ public class PlayerPixelAura : MonoBehaviour
         main.loop = true;
         main.playOnAwake = true;
         main.simulationSpace = ParticleSystemSimulationSpace.World; // Hạt trôi tự nhiên theo chuyển động của Player
-        main.startLifetime = new ParticleSystem.MinMaxCurve(1.2f, 2.4f);
-        main.startSpeed = new ParticleSystem.MinMaxCurve(0.25f, 0.75f);
-        main.startSize = new ParticleSystem.MinMaxCurve(0.07f, 0.14f);
-        main.maxParticles = 60;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(1.2f, 2.2f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.18f, 0.55f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.06f, 0.13f);
+        main.maxParticles = 75;
         main.scalingMode = ParticleSystemScalingMode.Hierarchy;
 
-        // Màu sắc hạt: Hắc ám Obsidian kết hợp Đốm lửa đỏ Huyết Nguyệt (Crimson Shadow)
+        // Màu sắc hạt: Tinh thể Băng Giá Cực Bắc & Hơi sương lạnh giá (Glacial Diamond Frost)
         var grad = new Gradient();
         grad.SetKeys(
             new GradientColorKey[] {
-                new GradientColorKey(new Color(1f, 0.2f, 0.15f), 0.0f),   // Đỏ rực
-                new GradientColorKey(new Color(0.9f, 0.1f, 0.3f), 0.4f),   // Đỏ sẫm
-                new GradientColorKey(new Color(0.12f, 0.14f, 0.18f), 0.8f),// Đen than hắc ám
-                new GradientColorKey(new Color(0.05f, 0.05f, 0.08f), 1.0f) // Đen tuyền
+                new GradientColorKey(new Color(0.95f, 1.0f, 1.0f), 0.0f),   // Trắng tuyết lấp lánh
+                new GradientColorKey(new Color(0.40f, 0.88f, 1.0f), 0.35f),  // Lam băng tinh khiết
+                new GradientColorKey(new Color(0.15f, 0.65f, 0.98f), 0.70f), // Xanh băng buốt giá
+                new GradientColorKey(new Color(0.65f, 0.92f, 1.0f), 1.0f)   // Hơi sương băng mờ ảo
             },
             new GradientAlphaKey[] {
                 new GradientAlphaKey(0f, 0.0f),
@@ -71,35 +71,35 @@ public class PlayerPixelAura : MonoBehaviour
         // Cấu hình Emission
         var emission = particleSys.emission;
         emission.enabled = true;
-        emission.rateOverTime = 16f; // Số hạt sinh ra mỗi giây
+        emission.rateOverTime = 20f; // Số hạt sinh ra mỗi giây
 
         // Cấu hình Shape (Vùng bao quanh ngực và thân của Minotaur)
         var shape = particleSys.shape;
         shape.enabled = true;
         shape.shapeType = ParticleSystemShapeType.Box;
-        shape.position = new Vector3(0f, 0.65f, 0f);
-        shape.scale = new Vector3(0.7f, 0.9f, 0.2f);
+        shape.position = new Vector3(0f, 0.55f, 0f);
+        shape.scale = new Vector3(0.75f, 0.85f, 0.2f);
 
-        // Vận tốc bay lên và xoáy nhẹ (Velocity over Lifetime)
+        // Vận tốc bay lên và xoáy nhẹ như sương lạnh (Velocity over Lifetime)
         var vel = particleSys.velocityOverLifetime;
         vel.enabled = true;
         vel.space = ParticleSystemSimulationSpace.World;
-        vel.y = new ParticleSystem.MinMaxCurve(0.35f, 0.95f); // Bay bốc lên từ từ
-        vel.x = new ParticleSystem.MinMaxCurve(-0.25f, 0.25f); // Dao động ngang nhẹ
+        vel.y = new ParticleSystem.MinMaxCurve(0.28f, 0.80f); // Hơi lạnh bốc lên từ từ
+        vel.x = new ParticleSystem.MinMaxCurve(-0.25f, 0.25f); // Gió thổi đung đưa nhẹ
         vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
-        // Hạt xoay nhẹ theo thời gian
+        // Hạt xoay nhẹ theo thời gian mô phỏng bông tuyết / mảnh băng trôi
         var rot = particleSys.rotationOverLifetime;
         rot.enabled = true;
-        rot.z = new ParticleSystem.MinMaxCurve(-90f * Mathf.Deg2Rad, 90f * Mathf.Deg2Rad);
+        rot.z = new ParticleSystem.MinMaxCurve(-60f * Mathf.Deg2Rad, 60f * Mathf.Deg2Rad);
 
         // Kích thước thu nhỏ dần khi tan biến (Size over Lifetime)
         var sizeOverLife = particleSys.sizeOverLifetime;
         sizeOverLife.enabled = true;
         AnimationCurve sizeCurve = new AnimationCurve();
-        sizeCurve.AddKey(0f, 0.4f);
-        sizeCurve.AddKey(0.2f, 1.1f);
-        sizeCurve.AddKey(0.8f, 0.9f);
+        sizeCurve.AddKey(0f, 0.3f);
+        sizeCurve.AddKey(0.25f, 1.15f);
+        sizeCurve.AddKey(0.75f, 0.9f);
         sizeCurve.AddKey(1f, 0f);
         sizeOverLife.size = new ParticleSystem.MinMaxCurve(1f, sizeCurve);
 
@@ -116,10 +116,10 @@ public class PlayerPixelAura : MonoBehaviour
     {
         if (pixelParticleMaterial != null) return;
 
-        // Tạo Texture 8x8 Pixel vuông vức sắc cạnh chuẩn Pixel Art
+        // Tạo Texture 8x8 Tinh thể Băng hình thoi sắc nét (Diamond Frost Crystal)
         int size = 8;
         Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
-        tex.filterMode = FilterMode.Point; // QUAN TRỌNG: Point Filter giữ nét vuông sắc cạnh
+        tex.filterMode = FilterMode.Point; // Point Filter giữ nét hạt pixel art sắc cạnh
         tex.wrapMode = TextureWrapMode.Clamp;
 
         Color[] pixels = new Color[size * size];
@@ -127,14 +127,22 @@ public class PlayerPixelAura : MonoBehaviour
         {
             for (int x = 0; x < size; x++)
             {
-                // Hình vuông pixel đặc ruột với viền nhẹ
-                if (x >= 1 && x <= 6 && y >= 1 && y <= 6)
+                int distManhattan = Mathf.Abs(x - 3) + Mathf.Abs(y - 3); // Hình thoi tinh thể băng
+                if (distManhattan <= 1)
                 {
-                    pixels[y * size + x] = Color.white;
+                    pixels[y * size + x] = new Color(1f, 1f, 1f, 1f); // Lõi tinh thể sáng trắng
+                }
+                else if (distManhattan <= 2)
+                {
+                    pixels[y * size + x] = new Color(0.75f, 0.95f, 1f, 0.85f); // Viền lam băng
+                }
+                else if (distManhattan <= 3)
+                {
+                    pixels[y * size + x] = new Color(0.40f, 0.85f, 1f, 0.35f); // Hào quang sương lạnh
                 }
                 else
                 {
-                    pixels[y * size + x] = new Color(1f, 1f, 1f, 0.4f);
+                    pixels[y * size + x] = Color.clear;
                 }
             }
         }
@@ -143,7 +151,7 @@ public class PlayerPixelAura : MonoBehaviour
 
         pixelParticleSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
 
-        // Tạo Shader Sprites/Default để hạt sáng rõ trong môi trường 2D
+        // Tạo Shader Sprites/Default để hạt phát sáng lạnh rõ nét trong môi trường 2D
         Shader s = Shader.Find("Sprites/Default");
         if (s == null) s = Shader.Find("Particles/Standard Unlit");
         if (s == null) s = Shader.Find("Legacy Shaders/Particles/Alpha Blended");

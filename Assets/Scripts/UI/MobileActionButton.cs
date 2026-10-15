@@ -13,11 +13,16 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     [Header("Gan truc tiep Player vao day (hoac de tu tim)")]
     [SerializeField] private PlayerCombat playerCombat;
     [SerializeField] private PlayerController playerController;
+    private PlayerHealth playerHealth;
 
     [Header("Hien thi Cooldown (Danh cho Skill va Dash)")]
     [SerializeField] private Image cooldownOverlay;
     [SerializeField] private TextMeshProUGUI cooldownText;
     [SerializeField] private Text legacyCooldownText;
+    // === Dash Charge Pip UI (3 dots, modern style) ===
+    private Image[] chargePips;          // 3 pip images
+    private float[] pipPulseTimer;       // per-pip pulse animation time
+    private int lastKnownCharges = -1;
 
     private Vector3 originalScale;
     private bool isPointerDown = false;
@@ -49,6 +54,12 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     void Update()
     {
         EnsureTargets();
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            isPointerDown = false;
+            return;
+        }
+
         EnsureRoundedSprites();
         EnsureCooldownVisuals();
 
@@ -56,25 +67,89 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             var titan = (playerCombat != null) ? playerCombat.GetComponent<TitanBerserkerSkill>() : null;
             var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
-            if (titan != null)
+            var ronin = (playerCombat != null) ? playerCombat.GetComponent<GaleRoninSkill>() : null;
+            var dune = (playerCombat != null) ? playerCombat.GetComponent<DuneAssassinSkill>() : null;
+            var mage = (playerCombat != null) ? playerCombat.GetComponent<CelestialMageSkill>() : null;
+
+            if (mage != null && mage.enabled)
             {
-                float norm = titan.AttackCooldownRatio;
-                float rem = titan.AttackCooldownRemaining;
+                float norm = mage.AttackCooldownRatio;
+                float rem = mage.AttackCooldownRemaining;
                 UpdateCooldownDisplay(norm, rem);
 
                 if (isPointerDown)
                 {
                     float holdDur = Time.time - pointerDownTime;
-                    if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                    Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+                    if (holdDur >= 0.15f || currentDragAimDir.sqrMagnitude > 0.01f)
                     {
+                        if (playerController != null) playerController.SetFacingDirection(aimDir);
+                        if (!mage.IsChargingBarrier && mage.IsAttackReady)
+                        {
+                            mage.StartBarrierCharge(aimDir);
+                        }
+                        mage.UpdateBarrierCharge(aimDir, holdDur);
+
                         Vector2 playerPos = (Vector2)playerCombat.transform.position;
-                        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
-                        SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.35f, 140f, new Color(1f, 0.55f, 0.1f, 0.9f));
+                        float novaRadius = 2.6f + Mathf.Clamp01(holdDur / mage.maxChargeDuration) * 1.6f;
+                        SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, novaRadius, new Color(0.85f, 0.35f, 1f, 0.85f));
                         SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
                     }
                 }
             }
-            else if (azureBlade != null)
+            else if (dune != null && dune.enabled)
+            {
+                if (isPointerDown)
+                {
+                    float holdDur = Time.time - pointerDownTime;
+                    Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+                    if (holdDur >= 0.15f || currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        if (!dune.IsAimingTornado && dune.IsAttackReady)
+                        {
+                            dune.StartTornadoAim(aimDir);
+                        }
+                        dune.UpdateTornadoAim(aimDir, holdDur);
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                    }
+                }
+            }
+            else if (titan != null && titan.enabled)
+            {
+                float norm = (titan.ChargeCooldownRemaining > 0.05f) ? titan.ChargeCooldownRatio : 0f;
+                float rem = titan.ChargeCooldownRemaining;
+                UpdateCooldownDisplay(norm, rem);
+
+                if (isPointerDown)
+                {
+                    float holdDur = Time.time - pointerDownTime;
+                    Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+                    
+                    if (titan.CanUseEarthshakerCharge && (holdDur >= 0.15f || currentDragAimDir.sqrMagnitude > 0.01f))
+                    {
+                        if (!titan.IsChargingEarthshaker && titan.IsAttackReady)
+                        {
+                            titan.StartEarthshakerCharge(aimDir);
+                        }
+                        titan.UpdateEarthshakerCharge(aimDir, holdDur);
+                        if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                        {
+                            SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                        }
+                    }
+                    else if (!titan.CanUseEarthshakerCharge)
+                    {
+                        if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                        {
+                            Vector2 playerPos = (Vector2)playerCombat.transform.position;
+                            if (playerController != null) playerController.SetFacingDirection(aimDir);
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.4f, 120f, new Color(1f, 0.85f, 0.2f, 0.85f));
+                            SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                        }
+                    }
+                }
+            }
+            else if (azureBlade != null && azureBlade.enabled)
             {
                 float norm = azureBlade.AttackCooldownRatio;
                 float rem = azureBlade.AttackCooldownRemaining;
@@ -91,30 +166,69 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                     }
                 }
             }
-            else
+            else if (ronin != null && ronin.enabled)
             {
-                if (cooldownOverlay != null && cooldownOverlay.enabled) cooldownOverlay.enabled = false;
-                if (cooldownText != null && cooldownText.enabled) cooldownText.enabled = false;
-                if (legacyCooldownText != null && legacyCooldownText.enabled) legacyCooldownText.enabled = false;
+                float norm = ronin.AttackCooldownRatio;
+                float rem = ronin.AttackCooldownRemaining;
+                UpdateCooldownDisplay(norm, rem);
 
-                if (isPointerDown)
+                if (isPointerDown && ronin.IsAttackReady)
                 {
                     float holdDur = Time.time - pointerDownTime;
-                    if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                    Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+
+                    if (ronin.CanUseIaidoCharge)
                     {
-                        Vector2 playerPos = (playerCombat != null) ? (Vector2)playerCombat.transform.position : Vector2.zero;
-                        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
-                        
-                        var ronin = (playerCombat != null) ? playerCombat.GetComponent<GaleRoninSkill>() : null;
-                        if (ronin != null && ronin.enabled)
-                        {
-                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.10f, 180f, new Color(0.2f, 0.9f, 0.7f, 0.85f));
-                        }
-                        else if (playerCombat != null)
-                        {
-                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.05f, 120f, new Color(1f, 0.85f, 0.2f, 0.85f));
-                        }
+                        ronin.UpdateIaidoCharge(aimDir, holdDur);
                         SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                    }
+                    else
+                    {
+                        if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                        {
+                            Vector2 playerPos = (Vector2)playerCombat.transform.position;
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, ronin.SlashRadius, 180f, new Color(0.15f, 0.95f, 0.85f, 0.85f));
+                            SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Player 1: Vaelstrider (Thế Thủ Kiếm Thuẫn & Sóng Kiếm Hoàng Kim)
+                if (playerCombat != null)
+                {
+                    float norm = (playerCombat.ParryCooldownRemaining > 0.05f) ? playerCombat.ParryCooldownRatio : 0f;
+                    float rem = playerCombat.ParryCooldownRemaining;
+                    UpdateCooldownDisplay(norm, rem);
+
+                    if (isPointerDown)
+                    {
+                        float holdDur = Time.time - pointerDownTime;
+                        Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+
+                        if (playerCombat.CanUseParryCharge && (holdDur >= 0.15f || currentDragAimDir.sqrMagnitude > 0.01f))
+                        {
+                            if (!playerCombat.IsParrying)
+                            {
+                                playerCombat.StartParryStance(aimDir);
+                            }
+                            playerCombat.UpdateParryStance(aimDir, holdDur);
+                            if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                            {
+                                SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                            }
+                        }
+                        else if (!playerCombat.CanUseParryCharge)
+                        {
+                            if (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f)
+                            {
+                                Vector2 playerPos = (Vector2)playerCombat.transform.position;
+                                if (playerController != null) playerController.SetFacingDirection(aimDir);
+                                SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimArc(playerPos, aimDir, 1.35f, 120f, new Color(1f, 0.85f, 0.2f, 0.85f));
+                                SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                            }
+                        }
                     }
                 }
             }
@@ -138,8 +252,18 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         var titan = playerCombat.GetComponent<TitanBerserkerSkill>();
                         var ronin = playerCombat.GetComponent<GaleRoninSkill>();
                         var azure = playerCombat.GetComponent<AzureBladeSkill>();
+                        var dune = playerCombat.GetComponent<DuneAssassinSkill>();
+                        var mage = playerCombat.GetComponent<CelestialMageSkill>();
 
-                        if (titan != null && titan.enabled)
+                        if (mage != null && mage.enabled)
+                        {
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, 5.0f, new Color(0.85f, 0.35f, 1f, 0.85f));
+                        }
+                        else if (dune != null && dune.enabled)
+                        {
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, dune.ultimateRadius, new Color(1f, 0.80f, 0.20f, 0.85f));
+                        }
+                        else if (titan != null && titan.enabled)
                         {
                             SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, titan.ultimateRadius, new Color(1f, 0.45f, 0.1f, 0.85f));
                         }
@@ -176,6 +300,17 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 float rem = playerController.GetDashCooldownRemaining();
                 UpdateCooldownDisplay(norm, rem);
 
+                if (playerController.GetMaxDashCharges() > 1)
+                {
+                    EnsureChargePips(playerController.GetMaxDashCharges());
+                    UpdateChargePips(playerController.GetCurrentDashCharges(),
+                                     playerController.GetDashChargeRechargeProgress());
+                }
+                else
+                {
+                    HideChargePips();
+                }
+
                 if (isPointerDown && playerController.IsDashReady())
                 {
                     float holdDur = Time.time - pointerDownTime;
@@ -194,6 +329,11 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     private void UpdateCooldownDisplay(float norm, float rem)
     {
         bool onCooldown = (rem > 0.05f);
+
+        if (cooldownOverlay == null && onCooldown)
+        {
+            EnsureCooldownVisuals();
+        }
 
         if (cooldownOverlay != null)
         {
@@ -233,11 +373,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     private void EnsureCooldownVisuals()
     {
-        bool supportsCooldown = (buttonType == ButtonType.Skill || buttonType == ButtonType.Dash);
-        if (buttonType == ButtonType.Attack && playerCombat != null && playerCombat.GetComponent<AzureBladeSkill>() != null)
-        {
-            supportsCooldown = true;
-        }
+        bool supportsCooldown = (buttonType == ButtonType.Skill || buttonType == ButtonType.Dash || buttonType == ButtonType.Attack);
         if (!supportsCooldown) return;
 
         Sprite circleSprite = Resources.Load<Sprite>("Combat/circle_fill");
@@ -356,6 +492,136 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Pip / Dot charge display (Genshin / Valorant style)
+    // ─────────────────────────────────────────────────────────────
+    private static readonly Color PIP_LIT   = new Color(0.30f, 0.95f, 1.00f, 1.00f); // cyan glow
+    private static readonly Color PIP_DIM   = new Color(0.15f, 0.25f, 0.30f, 0.75f); // dark empty
+    private static readonly Color PIP_PULSE = new Color(0.55f, 1.00f, 0.70f, 1.00f); // green flash on refill
+
+    private void EnsureChargePips(int maxCharges)
+    {
+        if (chargePips != null && chargePips.Length == maxCharges) return;
+
+        // Destroy old pip container if any
+        Transform oldCon = transform.Find("ChargePipContainer");
+        if (oldCon != null) Destroy(oldCon.gameObject);
+
+        chargePips      = new Image[maxCharges];
+        pipPulseTimer   = new float[maxCharges];
+        lastKnownCharges = -1;
+
+        // Container: row of pips, anchored bottom-center of the button
+        GameObject con = new GameObject("ChargePipContainer", typeof(RectTransform));
+        con.transform.SetParent(transform, false);
+        RectTransform conRt = con.GetComponent<RectTransform>();
+        conRt.anchorMin  = new Vector2(0f, -0.32f);
+        conRt.anchorMax  = new Vector2(1f, -0.05f);
+        conRt.offsetMin  = Vector2.zero;
+        conRt.offsetMax  = Vector2.zero;
+
+        float spacing  = 1f / maxCharges;
+        float pipW     = Mathf.Min(0.22f, spacing * 0.68f);
+
+        for (int i = 0; i < maxCharges; i++)
+        {
+            GameObject pipGo = new GameObject("Pip" + i,
+                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            pipGo.transform.SetParent(con.transform, false);
+
+            float centerX = spacing * i + spacing * 0.5f;
+            RectTransform rt = pipGo.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(centerX - pipW * 0.5f, 0.05f);
+            rt.anchorMax = new Vector2(centerX + pipW * 0.5f, 0.95f);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            Image img = pipGo.GetComponent<Image>();
+            img.raycastTarget = false;
+            img.color = PIP_LIT;
+
+            // Try to load a circle sprite (same as cooldown)
+            Sprite circ = Resources.Load<Sprite>("Combat/circle_fill");
+#if UNITY_EDITOR
+            if (circ == null)
+                circ = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
+#endif
+            if (circ != null) img.sprite = circ;
+
+            chargePips[i] = img;
+        }
+        con.transform.SetAsLastSibling();
+    }
+
+    private void UpdateChargePips(int currentCharges, float rechargeProgress)
+    {
+        if (chargePips == null) return;
+
+        int maxCharges = chargePips.Length;
+        bool chargesJustRestored = (currentCharges > lastKnownCharges && lastKnownCharges >= 0);
+
+        for (int i = 0; i < maxCharges; i++)
+        {
+            if (chargePips[i] == null) continue;
+
+            bool pipLit = (i < currentCharges);
+
+            // Pulse animation: the next-to-recharge pip (first dim one) flashes while recharging
+            bool isRechargingPip = (!pipLit && i == currentCharges && currentCharges < maxCharges);
+
+            if (chargesJustRestored && i == currentCharges - 1)
+            {
+                // Flash the newly restored pip
+                pipPulseTimer[i] = 0.45f;
+            }
+
+            if (pipPulseTimer[i] > 0f)
+            {
+                pipPulseTimer[i] -= Time.deltaTime;
+                float t = 1f - Mathf.Clamp01(pipPulseTimer[i] / 0.45f);
+                chargePips[i].color = Color.Lerp(PIP_PULSE, PIP_LIT, t);
+                float s = Mathf.Lerp(1.35f, 1f, t);
+                chargePips[i].transform.localScale = new Vector3(s, s, 1f);
+            }
+            else if (pipLit)
+            {
+                // Lit pip: solid cyan, gentle breathe
+                float breathe = 0.05f * Mathf.Sin(Time.time * 3.5f + i * 1.1f);
+                Color c = PIP_LIT;
+                c.r = Mathf.Clamp01(c.r + breathe);
+                c.g = Mathf.Clamp01(c.g + breathe);
+                c.b = Mathf.Clamp01(c.b + breathe);
+                chargePips[i].color = c;
+                chargePips[i].transform.localScale = Vector3.one;
+            }
+            else if (isRechargingPip)
+            {
+                // Recharging pip: pulse dim->brighter based on rechargeProgress
+                float pulse = Mathf.Lerp(0f, 0.8f, rechargeProgress);
+                float flicker = 0.12f * Mathf.Abs(Mathf.Sin(Time.time * 6f));
+                Color c = Color.Lerp(PIP_DIM, PIP_LIT, pulse + flicker);
+                chargePips[i].color = c;
+                float s = 0.75f + 0.25f * rechargeProgress;
+                chargePips[i].transform.localScale = new Vector3(s, s, 1f);
+            }
+            else
+            {
+                // Empty pip: dark
+                chargePips[i].color = PIP_DIM;
+                chargePips[i].transform.localScale = Vector3.one * 0.75f;
+            }
+        }
+
+        lastKnownCharges = currentCharges;
+    }
+
+    private void HideChargePips()
+    {
+        if (chargePips == null) return;
+        foreach (var p in chargePips)
+            if (p != null) p.gameObject.SetActive(false);
+    }
+
     private static Dictionary<string, Sprite> cachedHeroActionIcons = new Dictionary<string, Sprite>();
     private string lastThemedHero = "";
 
@@ -370,6 +636,8 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
         bool isRonin = (curHero.Contains("ronin") || curHero.Contains("gale") || curHero.Contains("maid"));
         bool isAzure = (curHero.Contains("azure") || curHero.Contains("player3"));
+        bool isDune = (curHero.Contains("dune") || curHero.Contains("player5"));
+        bool isMage = (curHero.Contains("mage") || curHero.Contains("celestial") || curHero.Contains("player6"));
 
         // 1. Khung viền đổi màu phát sáng theo hệ nguyên tố của tướng
         Sprite frameSprite = null;
@@ -383,13 +651,21 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         if (btnImg != null && frameSprite != null)
         {
             btnImg.sprite = frameSprite;
-            if (isAzure)
+            if (isMage)
+            {
+                btnImg.color = new Color(0.85f, 0.35f, 1f, 1f); // Tinh Vân Tử Quang
+            }
+            else if (isAzure)
             {
                 btnImg.color = new Color(0.35f, 0.88f, 1f, 1f); // Lam Băng Tinh Thể
             }
             else if (isRonin)
             {
                 btnImg.color = new Color(0.28f, 1f, 0.75f, 1f); // Phong Lôi Ngọc Bích
+            }
+            else if (isDune)
+            {
+                btnImg.color = new Color(0.98f, 0.72f, 0.22f, 1f); // Sa Mạc Hoàng Kim
             }
             else
             {
@@ -400,8 +676,10 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         // Cập nhật màu chữ Cooldown theo tướng
         if (cooldownText != null)
         {
-            if (isAzure) cooldownText.color = new Color(0.6f, 0.95f, 1f, 1f);
+            if (isMage) cooldownText.color = new Color(0.9f, 0.5f, 1f, 1f);
+            else if (isAzure) cooldownText.color = new Color(0.6f, 0.95f, 1f, 1f);
             else if (isRonin) cooldownText.color = new Color(0.4f, 1f, 0.8f, 1f);
+            else if (isDune) cooldownText.color = new Color(1f, 0.85f, 0.35f, 1f);
             else cooldownText.color = new Color(1f, 0.9f, 0.35f, 1f);
         }
 
@@ -455,7 +733,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
     }
 
-    private static Sprite GetHeroActionIcon(string heroId, ButtonType btnType)
+    public static Sprite GetHeroActionIcon(string heroId, ButtonType btnType)
     {
         string key = $"{heroId}_{btnType}";
         if (cachedHeroActionIcons.TryGetValue(key, out Sprite cached) && cached != null)
@@ -466,10 +744,40 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         bool isTitan = (heroId.Contains("titan") || heroId.Contains("player4"));
         bool isRonin = (heroId.Contains("ronin") || heroId.Contains("gale") || heroId.Contains("maid"));
         bool isAzure = (heroId.Contains("azure") || heroId.Contains("player3"));
+        bool isDune = (heroId.Contains("dune") || heroId.Contains("player5"));
+        bool isMage = (heroId.Contains("mage") || heroId.Contains("player6") || heroId.Contains("celestial"));
 
         Sprite result = null;
 
-        if (isTitan)
+        if (isMage)
+        {
+            // Player 6: Celestial Mage (Cầu Ma Pháp, Tốc Biến Hư Không, Mưa Thiên Thạch)
+            result = LoadPlayer6CustomIcon(btnType);
+            if (result == null)
+            {
+                if (btnType == ButtonType.Attack)
+                    result = GenerateIcon_ArcaneOrbs();
+                else if (btnType == ButtonType.Dash)
+                    result = GenerateIcon_ArcaneBlink();
+                else
+                    result = GenerateIcon_MeteorApocalypse();
+            }
+        }
+        else if (isDune)
+        {
+            // Player 5: Dune Assassin (Song Đoản Đao Sa Mạc, Tốc Lướt Ảo Ảnh, Cuồng Bão Sa Ảnh X-Rend)
+            result = LoadPlayer5CustomIcon(btnType);
+            if (result == null)
+            {
+                if (btnType == ButtonType.Attack)
+                    result = GenerateIcon_DuneDaggers();
+                else if (btnType == ButtonType.Dash)
+                    result = GenerateIcon_SandDash();
+                else
+                    result = GenerateIcon_SandstormXRend();
+            }
+        }
+        else if (isTitan)
         {
             // Player 4: Titan Berserker (War Hammer, Juggernaut Rush, Cataclysm Volcanic Slam)
             result = LoadPlayer4CustomIcon(btnType);
@@ -514,12 +822,16 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         else
         {
             // Player 1: Vaelstrider (Đại Kiếm Hoàng Kim)
-            if (btnType == ButtonType.Attack)
-                result = GenerateIcon_RuinSword();
-            else if (btnType == ButtonType.Dash)
-                result = GenerateIcon_RuinDash();
-            else
-                result = GenerateIcon_RuinWhirlwind();
+            result = LoadPlayer1CustomIcon(btnType);
+            if (result == null)
+            {
+                if (btnType == ButtonType.Attack)
+                    result = GenerateIcon_RuinSword();
+                else if (btnType == ButtonType.Dash)
+                    result = GenerateIcon_RuinDash();
+                else
+                    result = GenerateIcon_RuinWhirlwind();
+            }
         }
 
         if (result != null)
@@ -527,6 +839,46 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             cachedHeroActionIcons[key] = result;
         }
         return result;
+    }
+
+    private static Sprite LoadPlayer1CustomIcon(ButtonType btnType)
+    {
+        string fileName = (btnType == ButtonType.Attack) ? "icon_attack" : ((btnType == ButtonType.Dash) ? "icon_dash" : "icon_ulti");
+        Sprite loaded = null;
+#if UNITY_EDITOR
+        string path = $"Assets/ART/Player/UI/{fileName}.png";
+        loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (loaded == null)
+        {
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+            foreach (var a in all)
+            {
+                if (a is Sprite s) { loaded = s; break; }
+            }
+        }
+        if (loaded == null)
+        {
+            path = $"Assets/ART/Player1/UI/{fileName}.png";
+            loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (loaded == null)
+            {
+                var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+                foreach (var a in all)
+                {
+                    if (a is Sprite s) { loaded = s; break; }
+                }
+            }
+        }
+#endif
+        if (loaded == null)
+        {
+            loaded = Resources.Load<Sprite>($"Player/UI/{fileName}");
+        }
+        if (loaded == null)
+        {
+            loaded = Resources.Load<Sprite>($"Player1/UI/{fileName}");
+        }
+        return loaded;
     }
 
     private static Sprite LoadPlayer4CustomIcon(ButtonType btnType)
@@ -594,6 +946,62 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         if (loaded == null)
         {
             loaded = Resources.Load<Sprite>($"Player3/UI/{fileName}");
+        }
+        return loaded;
+    }
+
+    private static Sprite LoadPlayer5CustomIcon(ButtonType btnType)
+    {
+        string fileName = (btnType == ButtonType.Attack) ? "icon_attack" : ((btnType == ButtonType.Dash) ? "icon_dash" : "icon_ulti");
+        Sprite loaded = null;
+#if UNITY_EDITOR
+        string path = $"Assets/ART/Player5/UI/{fileName}.png";
+        loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (loaded == null)
+        {
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+            foreach (var a in all)
+            {
+                if (a is Sprite s) { loaded = s; break; }
+            }
+        }
+#endif
+        if (loaded == null)
+        {
+            loaded = Resources.Load<Sprite>($"Player5/UI/{fileName}");
+        }
+        return loaded;
+    }
+
+    private static Sprite LoadPlayer6CustomIcon(ButtonType btnType)
+    {
+        if (btnType == ButtonType.Attack)
+        {
+#if UNITY_EDITOR
+            var attackIcon = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Player6/VFX/NovaBurst/frame0001.png");
+            if (attackIcon != null) return attackIcon;
+#endif
+            var direct = MainMenuManager.LoadSpritesFromPath("Assets/ART/Player6/VFX/NovaBurst/frame0001.png", 64, 64);
+            if (direct != null && direct.Length > 0) return direct[0];
+        }
+
+        string fileName = (btnType == ButtonType.Attack) ? "icon_attack" : ((btnType == ButtonType.Dash) ? "icon_dash" : "icon_ulti");
+        Sprite loaded = null;
+#if UNITY_EDITOR
+        string path = $"Assets/ART/Player6/UI/{fileName}.png";
+        loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (loaded == null)
+        {
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+            foreach (var a in all)
+            {
+                if (a is Sprite s) { loaded = s; break; }
+            }
+        }
+#endif
+        if (loaded == null)
+        {
+            loaded = Resources.Load<Sprite>($"Player6/UI/{fileName}");
         }
         return loaded;
     }
@@ -907,16 +1315,271 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
     }
 
+    private static Sprite GenerateIcon_DuneDaggers()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color gold = new Color(1f, 0.82f, 0.25f, 1f);
+        Color amber = new Color(0.92f, 0.55f, 0.12f, 1f);
+        Color core = new Color(1f, 0.96f, 0.75f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // Song đoản đao cong lưỡi liềm bắt chéo hình chữ X
+                float d1 = Mathf.Abs((x - y) * 0.707f);
+                float d2 = Mathf.Abs((x + y - size) * 0.707f);
+
+                bool blade1 = (d1 <= 2.5f) && (x >= 12 && x <= 52 && y >= 12 && y <= 52);
+                bool blade2 = (d2 <= 2.5f) && (x >= 12 && x <= 52 && y >= 12 && y <= 52);
+                bool curveGlow = (Mathf.Abs(Vector2.Distance(new Vector2(x, y), new Vector2(size / 2f, size / 2f)) - 18f) <= 1.8f);
+
+                if (blade1 || blade2)
+                {
+                    bool isCore = (d1 <= 1.2f || d2 <= 1.2f);
+                    tex.SetPixel(x, y, isCore ? core : gold);
+                }
+                else if (curveGlow)
+                {
+                    tex.SetPixel(x, y, amber);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_SandDash()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color amber = new Color(0.98f, 0.70f, 0.22f, 1f);
+        Color white = new Color(1f, 0.95f, 0.7f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // Mũi tên lướt tốc biến với các vệt cát ảo ảnh song song
+                float dy = Mathf.Abs(y - size * 0.5f);
+                float arrowX = size * 0.75f - dy * 1.3f;
+                bool arrowHead = (x >= arrowX - 3.5f && x <= arrowX && dy <= 16f);
+                bool trail1 = (y >= 26 && y <= 29 && x >= 10 && x <= 38);
+                bool trail2 = (y >= 35 && y <= 38 && x >= 16 && x <= 42);
+                bool trail3 = (y >= 18 && y <= 21 && x >= 20 && x <= 34);
+
+                if (arrowHead)
+                {
+                    tex.SetPixel(x, y, white);
+                }
+                else if (trail1 || trail2 || trail3)
+                {
+                    tex.SetPixel(x, y, amber);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_SandstormXRend()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color gold = new Color(1f, 0.85f, 0.30f, 1f);
+        Color amber = new Color(0.95f, 0.50f, 0.10f, 1f);
+        Color core = new Color(1f, 1f, 0.85f, 1f);
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                Vector2 pos = new Vector2(x, y);
+                float dist = Vector2.Distance(pos, center);
+                float angle = Mathf.Atan2(y - center.y, x - center.x);
+
+                // Lốc xoáy 4 cánh chữ X xoay tròn
+                float spiral = Mathf.Sin(angle * 4f + dist * 0.45f);
+                bool isVortexArm = (dist >= 5f && dist <= 26f && spiral > 0.55f);
+                bool isEye = (dist <= 4.5f);
+
+                if (isEye)
+                {
+                    tex.SetPixel(x, y, core);
+                }
+                else if (isVortexArm)
+                {
+                    tex.SetPixel(x, y, (spiral > 0.85f) ? gold : amber);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_ArcaneOrbs()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color orbCore = new Color(0.95f, 0.98f, 1f, 1f);
+        Color orbPlasma = new Color(0.88f, 0.35f, 1f, 1f);
+        Color outerGlow = new Color(0.55f, 0.12f, 0.85f, 0.95f);
+        Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x, y), center);
+                float dx = Mathf.Abs(x - center.x);
+                float dy = Mathf.Abs(y - center.y);
+
+                // 4-pointed radiant star spikes
+                bool isStarRay = (dx <= 2f && dy <= 22f) || (dy <= 2f && dx <= 22f);
+
+                if (d <= 6f)
+                {
+                    tex.SetPixel(x, y, orbCore);
+                }
+                else if (d <= 15f)
+                {
+                    float t = (d - 6f) / 9f;
+                    tex.SetPixel(x, y, Color.Lerp(orbCore, orbPlasma, t));
+                }
+                else if (isStarRay)
+                {
+                    float t = Mathf.Max(dx, dy) / 22f;
+                    tex.SetPixel(x, y, Color.Lerp(orbCore, orbPlasma, t));
+                }
+                else if (d <= 22f)
+                {
+                    float t = (d - 15f) / 7f;
+                    float a = Mathf.Clamp01(1f - t);
+                    tex.SetPixel(x, y, new Color(outerGlow.r, outerGlow.g, outerGlow.b, a));
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_ArcaneBlink()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color flashCore = new Color(1f, 1f, 1f, 1f);
+        Color flashViolet = new Color(0.88f, 0.4f, 1f, 1f);
+        Color flashDeep = new Color(0.45f, 0.1f, 0.75f, 1f);
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = Mathf.Abs(x - center.x);
+                float dy = Mathf.Abs(y - center.y);
+                float starDist = Mathf.Min(dx, dy) + Mathf.Max(dx, dy) * 0.3f;
+                float diag = Mathf.Abs(dx - dy);
+
+                if (dx <= 2f && dy <= 22f || dy <= 2f && dx <= 22f)
+                {
+                    tex.SetPixel(x, y, (dx <= 1f && dy <= 12f || dy <= 1f && dx <= 12f) ? flashCore : flashViolet);
+                }
+                else if (diag <= 2.5f && (dx + dy) <= 24f)
+                {
+                    tex.SetPixel(x, y, flashDeep);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    private static Sprite GenerateIcon_MeteorApocalypse()
+    {
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        Color clear = new Color(0, 0, 0, 0);
+        Color meteorCore = new Color(1f, 0.95f, 0.85f, 1f);
+        Color flamePink = new Color(1f, 0.4f, 0.7f, 1f);
+        Color flamePurple = new Color(0.6f, 0.15f, 0.9f, 1f);
+
+        Vector2 meteorCenter = new Vector2(size * 0.35f, size * 0.35f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                Vector2 pos = new Vector2(x, y);
+                float distToHead = Vector2.Distance(pos, meteorCenter);
+                float tailProgress = ((x - meteorCenter.x) + (y - meteorCenter.y)) / (1.414f * size);
+                float distDiag = Mathf.Abs((x - meteorCenter.x) - (y - meteorCenter.y)) / 1.414f;
+
+                if (distToHead <= 6f)
+                {
+                    tex.SetPixel(x, y, distToHead <= 3f ? meteorCore : flamePink);
+                }
+                else if (tailProgress > 0f && tailProgress <= 0.55f && distDiag <= (8f * (1f - tailProgress * 1.4f)))
+                {
+                    tex.SetPixel(x, y, distDiag <= 2.5f ? flamePink : flamePurple);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, clear);
+                }
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
     private void EnsureTargets()
     {
         if (playerCombat == null) playerCombat = FindAnyObjectByType<PlayerCombat>();
         if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
+        if (playerHealth == null && playerCombat != null) playerHealth = playerCombat.GetComponent<PlayerHealth>();
+        if (playerHealth == null) playerHealth = FindAnyObjectByType<PlayerHealth>();
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        transform.localScale = originalScale * 0.85f;
         EnsureTargets();
+        if (playerHealth != null && playerHealth.IsDead) return;
+
+        transform.localScale = originalScale * 0.85f;
         if (playerCombat != null)
         {
             playerCombat.BlockAttackThisFrame();
@@ -956,10 +1619,23 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
         if (buttonType == ButtonType.Attack)
         {
+            var titanSkill = (playerCombat != null) ? playerCombat.GetComponent<TitanBerserkerSkill>() : null;
             var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
-            if (azureBlade != null)
+            var roninSkill = (playerCombat != null) ? playerCombat.GetComponent<GaleRoninSkill>() : null;
+
+            if (titanSkill != null && titanSkill.enabled)
+            {
+                // KHÔNG gọi StartEarthshakerCharge ngay lập tức khi vừa chạm (frame 0) để không ngắt hoạt ảnh combo đánh thường!
+                // Gồng tụ lực sẽ được kích hoạt trong Update() khi người chơi thực sự giữ nút (holdDur >= 0.15s)
+            }
+            else if (azureBlade != null && azureBlade.enabled)
             {
                 azureBlade.StartAim(azureBlade.GetFacingDirection());
+            }
+            else if (roninSkill != null && roninSkill.enabled && roninSkill.IsAttackReady && roninSkill.CanUseIaidoCharge)
+            {
+                Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
+                roninSkill.StartIaidoCharge(facing);
             }
         }
 
@@ -968,6 +1644,13 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public void OnDrag(PointerEventData eventData)
     {
+        EnsureTargets();
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            isPointerDown = false;
+            return;
+        }
+
         if (isPointerDown)
         {
             Vector2 delta = eventData.position - pointerDownPos;
@@ -992,6 +1675,9 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         if (!isPointerDown) return;
         isPointerDown = false;
 
+        EnsureTargets();
+        if (playerHealth != null && playerHealth.IsDead) return;
+
         bool isCancelled = false;
         if (SkillCancelZoneUI.Instance != null && SkillCancelZoneUI.Instance.gameObject.activeInHierarchy)
         {
@@ -1007,20 +1693,44 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         // Hủy chiêu chuẩn Liên Quân Mobile khi kéo vào vùng chữ X
         if (isCancelled)
         {
+            var titanSkill = (playerCombat != null) ? playerCombat.GetComponent<TitanBerserkerSkill>() : null;
+            if (titanSkill != null && titanSkill.IsChargingEarthshaker)
+            {
+                titanSkill.CancelEarthshakerCharge();
+            }
             var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
             if (azureBlade != null)
             {
                 azureBlade.CancelAim();
             }
+            var roninSkill = (playerCombat != null) ? playerCombat.GetComponent<GaleRoninSkill>() : null;
+            if (roninSkill != null)
+            {
+                roninSkill.CancelIaidoCharge();
+            }
+            var duneSkill = (playerCombat != null) ? playerCombat.GetComponent<DuneAssassinSkill>() : null;
+            if (duneSkill != null && (duneSkill.IsDefending || duneSkill.IsAimingTornado))
+            {
+                duneSkill.CancelTornadoAim();
+            }
+            if (playerCombat != null && playerCombat.IsParrying)
+            {
+                playerCombat.CancelParryStance();
+            }
+            var mageSkillCancel = (playerCombat != null) ? playerCombat.GetComponent<CelestialMageSkill>() : null;
+            if (mageSkillCancel != null && mageSkillCancel.IsChargingBarrier)
+            {
+                mageSkillCancel.ReleaseBarrierCharge(Vector2.zero, 0);
+            }
 
-            Vector3 playerPos = (playerCombat != null) ? playerCombat.transform.position : ((playerController != null) ? playerController.transform.position : transform.position);
-            DamagePopup.CreateText(playerPos + Vector3.up * 1.5f, LocalizationManager.T("ĐÃ HỦY CHIÊU", "CANCELLED"), new Color(1f, 0.35f, 0.35f));
+            if (playerCombat != null) playerCombat.CancelAttackHold();
             SoundManager.EnsureInstance()?.PlayMenuHover();
             currentDragAimDir = Vector2.zero;
             return;
         }
 
         EnsureTargets();
+        if (playerCombat != null) playerCombat.CancelAttackHold();
         float holdDur = Time.time - pointerDownTime;
         Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) 
             ? currentDragAimDir 
@@ -1028,23 +1738,94 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
         if (buttonType == ButtonType.Attack)
         {
+            var titanSkill = (playerCombat != null) ? playerCombat.GetComponent<TitanBerserkerSkill>() : null;
             var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
-            if (azureBlade != null && (holdDur >= HOLD_AIM_THRESHOLD || currentDragAimDir.sqrMagnitude > 0.01f))
+            var roninSkill = (playerCombat != null) ? playerCombat.GetComponent<GaleRoninSkill>() : null;
+            var duneSkill = (playerCombat != null) ? playerCombat.GetComponent<DuneAssassinSkill>() : null;
+            var mageSkill = (playerCombat != null) ? playerCombat.GetComponent<CelestialMageSkill>() : null;
+            int bonusAtk = (playerCombat != null) ? playerCombat.BonusAttackDamage : 0;
+
+            if (mageSkill != null && mageSkill.enabled)
             {
-                int bonusAtk = (playerCombat != null) ? playerCombat.BonusAttackDamage : 0;
-                azureBlade.ReleaseAimAndFire(bonusAtk);
-            }
-            else if (playerCombat != null)
-            {
-                if (currentDragAimDir.sqrMagnitude > 0.01f)
+                if (mageSkill.IsChargingBarrier)
                 {
-                    playerCombat.PerformAttackInDirection(currentDragAimDir);
+                    mageSkill.ReleaseBarrierCharge(aimDir, bonusAtk);
                 }
                 else
                 {
+                    if (currentDragAimDir.sqrMagnitude > 0.01f && playerController != null)
+                    {
+                        playerController.SetFacingDirection(currentDragAimDir);
+                    }
                     playerCombat.PerformAttack();
                 }
             }
+            else if (duneSkill != null && duneSkill.enabled)
+            {
+                if (duneSkill.IsAimingTornado || duneSkill.IsDefending)
+                {
+                    duneSkill.ReleaseTornadoAim(aimDir, bonusAtk);
+                }
+                else
+                {
+                    if (currentDragAimDir.sqrMagnitude > 0.01f && playerController != null)
+                    {
+                        playerController.SetFacingDirection(currentDragAimDir);
+                    }
+                    playerCombat.PerformAttack();
+                }
+            }
+            else if (titanSkill != null && titanSkill.enabled)
+            {
+                if (titanSkill.IsChargingEarthshaker)
+                {
+                    titanSkill.ReleaseEarthshakerCharge(aimDir, bonusAtk);
+                }
+                else
+                {
+                    if (currentDragAimDir.sqrMagnitude > 0.01f && playerController != null)
+                    {
+                        playerController.SetFacingDirection(currentDragAimDir);
+                    }
+                    playerCombat.PerformAttack();
+                }
+            }
+            else if (azureBlade != null && azureBlade.enabled && (azureBlade.IsAiming || holdDur >= 0.15f || currentDragAimDir.sqrMagnitude > 0.01f))
+            {
+                azureBlade.ReleaseAimAndFire(bonusAtk);
+            }
+            else if (roninSkill != null && roninSkill.enabled)
+            {
+                if (roninSkill.CanUseIaidoCharge && roninSkill.IsChargingIaido)
+                {
+                    roninSkill.ReleaseIaidoCharge(aimDir, bonusAtk);
+                }
+                else
+                {
+                    if (currentDragAimDir.sqrMagnitude > 0.01f && playerController != null)
+                    {
+                        playerController.SetFacingDirection(currentDragAimDir);
+                    }
+                    playerCombat.PerformAttack();
+                }
+            }
+            else if (playerCombat != null)
+            {
+                if (playerCombat.IsParrying)
+                {
+                    playerCombat.ReleaseParryStance(aimDir, bonusAtk);
+                }
+                else
+                {
+                    if (currentDragAimDir.sqrMagnitude > 0.01f && playerController != null)
+                    {
+                        playerController.SetFacingDirection(currentDragAimDir);
+                    }
+                    playerCombat.PerformAttack();
+                }
+            }
+
+            if (playerController != null) playerController.RefreshMoveInput();
         }
         else if (buttonType == ButtonType.Dash)
         {
@@ -1086,11 +1867,6 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         if (target == null)
                         {
                             StartCoroutine(ShakeButtonRoutine());
-                            DamagePopup.CreateText(
-                                playerCombat.transform.position + Vector3.up * 1.2f, 
-                                LocalizationManager.T("Không có mục tiêu trong tầm!", "No target in range!"), 
-                                new Color(1f, 0.35f, 0.35f)
-                            );
                             currentDragAimDir = Vector2.zero;
                             return;
                         }
@@ -1115,6 +1891,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     private void ExecuteAction()
     {
         EnsureTargets();
+        if (playerHealth != null && playerHealth.IsDead) return;
         EnsureRoundedSprites();
 
         if (buttonType == ButtonType.Attack)

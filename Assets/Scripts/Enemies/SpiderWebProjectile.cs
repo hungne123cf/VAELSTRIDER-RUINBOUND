@@ -152,7 +152,6 @@ public class SpiderWebProjectile : MonoBehaviour
             hasHit = true;
             SpiderWebSpriteFactory.SpawnWebBreakVFX(transform.position);
             SoundManager.EnsureInstance()?.PlayHitImpact();
-            DamagePopup.CreateText(transform.position + Vector3.up * 0.5f, LocalizationManager.T("*CHẶN ĐÒN*", "*BLOCKED*"), new Color(0.85f, 0.95f, 1f));
             Destroy(gameObject);
         }
     }

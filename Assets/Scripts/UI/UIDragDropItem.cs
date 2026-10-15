@@ -28,6 +28,7 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     private static RectTransform dragAvatarRt = null;
     private Canvas rootCanvas = null;
     private bool isDragging = false;
+    private bool isScrolling = false;
 
     void Awake()
     {
@@ -63,7 +64,7 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (!isDragging)
+        if (!isDragging && !isScrolling)
         {
             onClick?.Invoke();
         }
@@ -71,20 +72,45 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // Neu vuot doc manh trong scroll view thi uu tien scroll
         float dx = Mathf.Abs(eventData.delta.x);
         float dy = Mathf.Abs(eventData.delta.y);
-        if (parentScrollRect != null && dy > dx * 1.5f)
+
+        // Smart gesture resolution for Mobile:
+        // If inside a ScrollRect (e.g. Bag container) and not already in a hero socket:
+        if (parentScrollRect != null && !isSocketedGem)
         {
-            parentScrollRect.OnBeginDrag(eventData);
-            return;
+            // If the ScrollRect is Horizontal:
+            if (parentScrollRect.horizontal && !parentScrollRect.vertical)
+            {
+                // User is swiping horizontally -> Prioritize smooth mobile list scrolling!
+                if (dx > dy * 0.6f || (dy < 12f && dx > 2f))
+                {
+                    isScrolling = true;
+                    isDragging = false;
+                    parentScrollRect.OnBeginDrag(eventData);
+                    return;
+                }
+            }
+            // If the ScrollRect is Vertical:
+            else if (parentScrollRect.vertical && !parentScrollRect.horizontal)
+            {
+                // User is swiping vertically -> Prioritize vertical list scrolling!
+                if (dy > dx * 0.6f || (dx < 12f && dy > 2f))
+                {
+                    isScrolling = true;
+                    isDragging = false;
+                    parentScrollRect.OnBeginDrag(eventData);
+                    return;
+                }
+            }
         }
 
+        isScrolling = false;
         isDragging = true;
         Canvas canvas = GetRootCanvas();
         if (canvas == null) return;
 
-        // Tao Ghost Icon bay theo ngon tay tren Root Canvas
+        // Create Ghost Icon floating with finger across the Canvas
         if (dragAvatarObj != null) Destroy(dragAvatarObj);
 
         dragAvatarObj = new GameObject("DragAvatar_Item", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(CanvasGroup));
@@ -104,7 +130,6 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         outline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
         outline.effectDistance = new Vector2(2f, -2f);
 
-        // Khong chan raycast de drop target ben duoi nhan duoc OnDrop
         CanvasGroup cg = dragAvatarObj.GetComponent<CanvasGroup>();
         cg.blocksRaycasts = false;
         cg.alpha = 0.88f;
@@ -114,22 +139,29 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (!isDragging)
+        if (isScrolling)
         {
             if (parentScrollRect != null) parentScrollRect.OnDrag(eventData);
             return;
         }
 
-        UpdateAvatarPosition(eventData);
+        if (isDragging)
+        {
+            UpdateAvatarPosition(eventData);
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (!isDragging)
+        if (isScrolling)
         {
             if (parentScrollRect != null) parentScrollRect.OnEndDrag(eventData);
+            isScrolling = false;
+            transform.localScale = Vector3.one;
             return;
         }
+
+        if (!isDragging) return;
 
         isDragging = false;
         transform.localScale = Vector3.one;

@@ -110,6 +110,13 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
     {
         if (isDead || isPhaseTransitioning) return;
 
+        if (PlayerHealth.IsPlayerDead)
+        {
+            rb.linearVelocity = Vector2.zero;
+            if (animator != null) animator.SetBool(IsMovingHash, false);
+            return;
+        }
+
         if (player == null)
         {
             FindPlayer();

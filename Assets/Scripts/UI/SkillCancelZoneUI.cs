@@ -13,7 +13,7 @@ using TMPro;
 public class SkillCancelZoneUI : MonoBehaviour
 {
     private static SkillCancelZoneUI instance;
-    public static SkillCancelZoneUI Instance => instance;
+    public static SkillCancelZoneUI Instance => instance != null ? instance : null;
 
     [Header("UI Components")]
     [SerializeField] private RectTransform zoneRect;
@@ -53,6 +53,14 @@ public class SkillCancelZoneUI : MonoBehaviour
     {
         instance = this;
         if (zoneRect == null) SetupUI();
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
     }
 
     private void SetupUI()
@@ -118,10 +126,13 @@ public class SkillCancelZoneUI : MonoBehaviour
         labelRect.sizeDelta = Vector2.zero;
         labelText = labelGo.AddComponent<TextMeshProUGUI>();
         labelText.text = LocalizationManager.T("HỦY CHIÊU", "CANCEL");
-        labelText.fontSize = 11f;
+        labelText.fontSize = 14f;
         labelText.fontStyle = FontStyles.Bold;
         labelText.alignment = TextAlignmentOptions.Center;
         labelText.color = new Color(1f, 0.85f, 0.85f, 0.9f);
+        labelText.enableAutoSizing = true;
+        labelText.fontSizeMin = 12f;
+        labelText.fontSizeMax = 15f;
         labelText.raycastTarget = false;
 
         gameObject.SetActive(false);
@@ -145,13 +156,14 @@ public class SkillCancelZoneUI : MonoBehaviour
 
     public void Show()
     {
+        if (this == null) return;
         isVisible = true;
         isHovered = false;
         targetScale = 1.0f;
         currentScale = 0.5f;
         transform.localScale = Vector3.one * currentScale;
         if (labelText != null) labelText.text = LocalizationManager.T("HỦY CHIÊU", "CANCEL");
-        gameObject.SetActive(true);
+        if (gameObject != null) gameObject.SetActive(true);
 
         if (canvasGroup != null)
         {
@@ -163,13 +175,14 @@ public class SkillCancelZoneUI : MonoBehaviour
 
     public void Hide()
     {
+        if (this == null) return;
         isVisible = false;
         isHovered = false;
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;
         }
-        gameObject.SetActive(false);
+        if (gameObject != null) gameObject.SetActive(false);
     }
 
     /// <summary>

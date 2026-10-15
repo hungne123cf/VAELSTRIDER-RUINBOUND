@@ -145,6 +145,13 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+        if (PlayerHealth.IsPlayerDead)
+        {
+            rb.linearVelocity = Vector2.zero;
+            SetMoving(false);
+            return;
+        }
+
         if (attackCooldownTimer > 0)
         {
             attackCooldownTimer -= Time.deltaTime;

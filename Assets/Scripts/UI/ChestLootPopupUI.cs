@@ -122,11 +122,8 @@ public class ChestLootPopupUI : MonoBehaviour
         boxRt.anchoredPosition = Vector2.zero;
 
         Image boxImg = boxObj.GetComponent<Image>();
-        boxImg.color = new Color(0.08f, 0.10f, 0.16f, 0.98f);
-
-        var outline = boxObj.AddComponent<Outline>();
-        outline.effectColor = new Color(1f, 0.82f, 0.32f, 0.95f);
-        outline.effectDistance = new Vector2(2f, -2f);
+        boxImg.color = new Color(0.04f, 0.05f, 0.09f, 0.98f);
+        WhiteIconLoader.ApplyGothicFrame(boxObj, new Color(0.85f, 0.72f, 0.38f, 0.90f), 0.35f);
 
         // 2. Header Icon
         GameObject iconObj = new GameObject("HeaderChestIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -154,7 +151,7 @@ public class ChestLootPopupUI : MonoBehaviour
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = LocalizationManager.T("RƯƠNG BÁU TÀN TÍCH", "ANCIENT RUIN CHEST");
-        titleText.fontSize = 22;
+        titleText.fontSize = 24;
         titleText.fontStyle = FontStyles.Bold;
         titleText.color = new Color(1f, 0.88f, 0.35f);
         titleText.alignment = TextAlignmentOptions.Center;
@@ -169,7 +166,7 @@ public class ChestLootPopupUI : MonoBehaviour
 
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = LocalizationManager.T("Chọn vật phẩm muốn nhặt hoặc nhấn Lấy Tất Cả:", "Select items to take or tap Claim All:");
-        subtitleText.fontSize = 13f;
+        subtitleText.fontSize = 14.5f;
         subtitleText.color = new Color(0.75f, 0.8f, 0.9f);
         subtitleText.alignment = TextAlignmentOptions.Center;
 
@@ -391,12 +388,10 @@ public class ChestLootPopupUI : MonoBehaviour
         le.minHeight = 74f;
 
         Image bg = rowObj.GetComponent<Image>();
-        bg.color = new Color(0.12f, 0.14f, 0.22f, 0.95f);
+        bg.color = new Color(0.06f, 0.08f, 0.13f, 0.95f);
 
         Color rarityCol = GetRarityColor(item.rarity);
-        var outline = rowObj.AddComponent<Outline>();
-        outline.effectColor = rarityCol;
-        outline.effectDistance = new Vector2(1.2f, -1.2f);
+        WhiteIconLoader.ApplyGothicFrame(rowObj, rarityCol, 0.65f);
 
         // Icon Box
         GameObject ibObj = new GameObject("IconBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -485,7 +480,7 @@ public class ChestLootPopupUI : MonoBehaviour
         nLe.minHeight = 24f;
         var nTmp = nameObj.AddComponent<TextMeshProUGUI>();
         nTmp.text = LocalizationManager.IsVietnamese ? item.nameVi : item.nameEn;
-        nTmp.fontSize = 15f;
+        nTmp.fontSize = 16f;
         nTmp.fontStyle = FontStyles.Bold;
         nTmp.color = Color.white;
         nTmp.alignment = TextAlignmentOptions.Left;
@@ -503,7 +498,7 @@ public class ChestLootPopupUI : MonoBehaviour
         string qtyStr = item.quantity > 1 ? $" x{item.quantity}" : "";
         if (item.id == "shards") qtyStr = $" +{item.quantity:N0} {LocalizationManager.T("Linh Hồn", "Shards")}";
         tTmp.text = $"<color=#{ColorUtility.ToHtmlStringRGB(rarityCol)}>[ {GetRarityLabel(item.rarity)} ]</color>{qtyStr}";
-        tTmp.fontSize = 12f;
+        tTmp.fontSize = 13.5f;
         tTmp.fontStyle = FontStyles.Bold;
         tTmp.color = new Color(0.85f, 0.88f, 0.95f);
         tTmp.alignment = TextAlignmentOptions.Left;
@@ -536,7 +531,7 @@ public class ChestLootPopupUI : MonoBehaviour
 
         var bTmp = bTxtObj.AddComponent<TextMeshProUGUI>();
         bTmp.text = LocalizationManager.T("NHẬN", "LOOT");
-        bTmp.fontSize = 13.5f;
+        bTmp.fontSize = 15f;
         bTmp.fontStyle = FontStyles.Bold;
         bTmp.color = Color.white;
         bTmp.alignment = TextAlignmentOptions.Center;

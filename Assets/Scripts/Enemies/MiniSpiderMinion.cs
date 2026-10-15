@@ -22,6 +22,8 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
     private int walkFrame = 0;
     private float animTimer = 0f;
 
+    public static event System.Action<MiniSpiderMinion> OnEnemyDied;
+
     public static MiniSpiderMinion Spawn(Vector3 pos)
     {
         GameObject go = new GameObject("MiniSpider_Minion");
@@ -83,6 +85,12 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
     void Update()
     {
         if (isDead) return;
+
+        if (PlayerHealth.IsPlayerDead)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
 
         if (player == null)
         {
@@ -158,6 +166,7 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
 
         if (deathSprite != null) sr.sprite = deathSprite;
         SoundManager.EnsureInstance()?.PlayHitImpact();
+        OnEnemyDied?.Invoke(this);
 
         // Roi Linh Hon & Vat pham ngau nhien
         AethelShard.SpawnShards(transform.position, Random.Range(1, 3));

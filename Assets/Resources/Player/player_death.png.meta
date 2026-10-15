@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: db80133f0d30484db3e83eb2e4117595
+guid: 48108fba10aa3c346a5dec5bbd022015
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -17,6 +17,9 @@ TextureImporter:
   - first:
       213: 1100000000000000005
     second: player_death_4
+  - first:
+      213: 1100000000000000006
+    second: player_death_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -61,8 +64,8 @@ TextureImporter:
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
+  alignment: 7
+  spritePivot: {x: 0.5, y: 0}
   spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
@@ -104,12 +107,11 @@ TextureImporter:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 96
-        height: 80
+        width: 64
+        height: 64
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
@@ -124,14 +126,13 @@ TextureImporter:
       name: player_death_1
       rect:
         serializedVersion: 2
-        x: 96
+        x: 64
         y: 0
-        width: 96
-        height: 80
+        width: 64
+        height: 64
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
@@ -146,14 +147,13 @@ TextureImporter:
       name: player_death_2
       rect:
         serializedVersion: 2
-        x: 192
+        x: 128
         y: 0
-        width: 96
-        height: 80
+        width: 64
+        height: 64
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
@@ -168,14 +168,13 @@ TextureImporter:
       name: player_death_3
       rect:
         serializedVersion: 2
-        x: 288
+        x: 192
         y: 0
-        width: 96
-        height: 80
+        width: 64
+        height: 64
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
@@ -190,20 +189,40 @@ TextureImporter:
       name: player_death_4
       rect:
         serializedVersion: 2
-        x: 384
+        x: 256
         y: 0
-        width: 96
-        height: 80
+        width: 64
+        height: 64
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
       spriteID: 1b11088e52fa41f0a21386a5ba448e65
       internalID: 1100000000000000005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_death_5
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 0
+        width: 64
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a22088e52fa41f0a21386a5ba448e66
+      internalID: 1100000000000000006
       vertices: []
       indices: 
       edges: []
@@ -226,6 +245,7 @@ TextureImporter:
       player_death_2: 1100000000000000003
       player_death_3: 1100000000000000004
       player_death_4: 1100000000000000005
+      player_death_5: 1100000000000000006
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -175,16 +175,15 @@ public class VictoryUI : MonoBehaviour
         float elapsed = MatchTimerUI.LastFinalClearTime > 0f ? MatchTimerUI.LastFinalClearTime : (Time.time - runStartTime);
         string timeStr = MatchTimerUI.GetFormattedLastClearTime();
 
-        long totalShards = 0;
-        var player = Object.FindAnyObjectByType<PlayerController>();
-        if (player != null)
-        {
-            var inv = player.GetComponent<PlayerInventory>();
-            if (inv != null) totalShards = inv.GetShards();
-        }
+        long totalShards = PlayerInventory.GetCurrentRunShards();
         if (totalShards == 0)
         {
-            totalShards = AccountDatabase.GetAethelShards();
+            var player = Object.FindAnyObjectByType<PlayerController>();
+            if (player != null)
+            {
+                var inv = player.GetComponent<PlayerInventory>();
+                if (inv != null) totalShards = inv.GetShards();
+            }
         }
 
         string rank = "S RANK";
@@ -196,7 +195,7 @@ public class VictoryUI : MonoBehaviour
 
         if (timeText != null) timeText.text = timeStr;
         if (enemiesText != null) enemiesText.text = $"{enemiesKilled} " + LocalizationManager.T("Kẻ địch", "Slain");
-        if (shardsText != null) shardsText.text = $"{MainMenuManager.FormatCompactNumber(totalShards)} " + LocalizationManager.T("Linh hồn", "Shards");
+        if (shardsText != null) shardsText.text = $"+{MainMenuManager.FormatCompactNumber(totalShards)} " + LocalizationManager.T("Linh hồn", "Shards");
         if (rankText != null) rankText.text = rank;
 
         GameAutoBootstrap.SetGameplayHUDVisible(false);
@@ -222,6 +221,7 @@ public class VictoryUI : MonoBehaviour
 
     public void RestartRun()
     {
+        PlayerInventory.ResetRunShards();
         Time.timeScale = 1f;
         runStartTime = 0f;
         enemiesKilled = 0;
@@ -344,6 +344,9 @@ public class VictoryUI : MonoBehaviour
 
         var playBtn = CreateBtn(btnContainer.transform, "Btn_PlayAgain", LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Vector2(-115, 0), new Color(0.25f, 0.35f, 0.7f));
         var nextBtn = CreateBtn(btnContainer.transform, "Btn_NextRealm", LocalizationManager.T("ẢI TIẾP THEO", "NEXT REALM"), new Vector2(115, 0), new Color(0.85f, 0.45f, 0.15f));
+
+        WhiteIconLoader.SetButtonIconAndText(playBtn, "Repeat-Right", LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Color(0.4f, 0.85f, 1f), Color.white, true);
+        WhiteIconLoader.SetButtonIconAndText(nextBtn, "Play", LocalizationManager.T("ẢI TIẾP THEO", "NEXT REALM"), new Color(1f, 0.85f, 0.35f), Color.white, true);
 
         playBtn.onClick.AddListener(victoryComp.RestartRun);
         nextBtn.onClick.AddListener(victoryComp.GoToNextRealm);

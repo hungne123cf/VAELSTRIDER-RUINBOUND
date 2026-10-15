@@ -15,7 +15,7 @@ using System.Collections.Generic;
 public class SkillAimIndicator : MonoBehaviour
 {
     private static SkillAimIndicator instance;
-    public static SkillAimIndicator Instance => instance;
+    public static SkillAimIndicator Instance => instance != null ? instance : null;
 
     [Header("Mesh Renderers for Filled Areas")]
     [SerializeField] private MeshFilter sectorMf;
@@ -50,6 +50,14 @@ public class SkillAimIndicator : MonoBehaviour
         instance = this;
         InitializeComponents();
         Hide();
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
     }
 
     private void InitializeComponents()
@@ -168,6 +176,12 @@ public class SkillAimIndicator : MonoBehaviour
 
     private Vector3 GetPlayerCenter(Vector2 origin)
     {
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null)
+        {
+            return titan.GetAimCenter();
+        }
+
         var pc = GetComponent<PlayerCombat>();
         if (pc != null)
         {
@@ -180,7 +194,12 @@ public class SkillAimIndicator : MonoBehaviour
             return col.bounds.center;
         }
 
-        return (Vector3)origin + new Vector3(0f, 0.05f, 0f);
+        if (origin != Vector2.zero)
+        {
+            return new Vector3(origin.x, origin.y + 0.40f, transform.position.z);
+        }
+
+        return transform.position + new Vector3(0f, 0.40f, 0f);
     }
 
     private Sprite GenerateLockOnSprite()
@@ -334,9 +353,9 @@ public class SkillAimIndicator : MonoBehaviour
     }
 
     /// <summary>
-    /// Hiển thị ĐƯỜNG THẲNG ĐỊNH HƯỚNG LƯỚT (Dash Line) thanh thoát, không có đầu mũi tên
+    /// Hiển thị ĐƯỜNG THẲNG ĐỊNH HƯỚNG (Aim Line / Trajectory) thanh thoát, sắc nét
     /// </summary>
-    public void ShowAimLine(Vector2 origin, Vector2 direction, float length, Color color)
+    public void ShowAimLine(Vector2 origin, Vector2 direction, float length, Color color, float width = 0.16f, float startOffset = 0.45f)
     {
         Hide();
         isVisible = true;
@@ -345,17 +364,17 @@ public class SkillAimIndicator : MonoBehaviour
         if (direction.sqrMagnitude < 0.001f) direction = Vector2.down;
 
         Vector3 centerPos = GetPlayerCenter(origin);
-        float offsetDist = 0.40f; // Khoảng cách cách xa thân nhân vật
+        float offsetDist = startOffset; // Khoảng cách cách xa thân nhân vật
         Vector3 startPt = centerPos + (Vector3)(direction * offsetDist);
         Vector3 endPt = startPt + (Vector3)(direction * length);
 
         if (directLine != null)
         {
             directLine.enabled = true;
-            directLine.startColor = new Color(color.r, color.g, color.b, 0.90f);
-            directLine.endColor = new Color(color.r, color.g, color.b, 0.30f);
-            directLine.startWidth = 0.16f;
-            directLine.endWidth = 0.16f;
+            directLine.startColor = new Color(color.r, color.g, color.b, 0.95f);
+            directLine.endColor = new Color(color.r, color.g, color.b, 0.35f);
+            directLine.startWidth = width;
+            directLine.endWidth = width * 0.85f;
 
             directLine.positionCount = 2;
             directLine.SetPosition(0, startPt);
@@ -583,6 +602,7 @@ public class SkillAimIndicator : MonoBehaviour
     /// </summary>
     public void Hide()
     {
+        if (this == null) return;
         isVisible = false;
         if (sectorMr != null) sectorMr.enabled = false;
         if (sectorMesh != null) sectorMesh.Clear();

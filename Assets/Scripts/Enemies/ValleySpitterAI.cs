@@ -68,6 +68,12 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+        if (PlayerHealth.IsPlayerDead)
+        {
+            if (telegraphLine != null) telegraphLine.enabled = false;
+            return;
+        }
+
         if (player == null)
         {
             FindPlayer();

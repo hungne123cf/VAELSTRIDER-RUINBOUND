@@ -292,7 +292,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
 
                 var tmp = labelObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = $"<b>{r.GetLocalizedTitle()}</b>";
-                tmp.fontSize = 11f;
+                tmp.fontSize = 14f;
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.color = isCurrent ? new Color(1f, 0.9f, 0.3f) : new Color(0.85f, 0.85f, 0.85f, 0.8f);
 
@@ -446,10 +446,10 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
             tRt.anchorMax = new Vector2(0.5f, 0f);
             tRt.pivot = new Vector2(0.5f, 1f);
             tRt.anchoredPosition = new Vector2(0f, -2f);
-            tRt.sizeDelta = new Vector2(120f, 16f);
+            tRt.sizeDelta = new Vector2(140f, 20f);
 
             var tTmp = txtObj.AddComponent<TextMeshProUGUI>();
-            tTmp.fontSize = 9.5f;
+            tTmp.fontSize = 12.5f;
             tTmp.alignment = TextAlignmentOptions.Center;
             tTmp.fontStyle = FontStyles.Bold;
         }
@@ -639,7 +639,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         tRt.offsetMax = new Vector2(-80f, -4f);
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = "<b>PHẾ TÍCH NGẬP NƯỚC</b>";
-        titleText.fontSize = 18f;
+        titleText.fontSize = 20f;
         titleText.color = new Color(1f, 0.85f, 0.3f);
         titleText.alignment = TextAlignmentOptions.Left;
 
@@ -654,7 +654,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         sRt.offsetMax = new Vector2(-80f, 0f);
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = "TẦNG 1 - TÀN TÍCH CỔ ĐẠI | KHÁM PHÁ TOÀN CẢNH";
-        subtitleText.fontSize = 10.5f;
+        subtitleText.fontSize = 15.5f;
         subtitleText.color = new Color(0.7f, 0.85f, 1f, 0.75f);
         subtitleText.alignment = TextAlignmentOptions.Left;
 
@@ -672,19 +672,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         cImg.color = new Color(0.85f, 0.2f, 0.2f, 0.9f);
         Button cBtn = closeObj.GetComponent<Button>();
         cBtn.onClick.AddListener(CloseMap);
-
-        GameObject cTxtObj = new GameObject("XText", typeof(RectTransform), typeof(CanvasRenderer));
-        cTxtObj.layer = 5;
-        cTxtObj.transform.SetParent(closeObj.transform, false);
-        RectTransform cxRt = cTxtObj.GetComponent<RectTransform>();
-        cxRt.anchorMin = Vector2.zero;
-        cxRt.anchorMax = Vector2.one;
-        cxRt.sizeDelta = Vector2.zero;
-        var cxTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
-        cxTmp.text = "<b>✕</b>";
-        cxTmp.fontSize = 18f;
-        cxTmp.alignment = TextAlignmentOptions.Center;
-        cxTmp.color = Color.white;
+        WhiteIconLoader.ReplaceTextWithIcon(cBtn, "Cross", Color.white, new Vector2(20f, 20f));
 
         // 4. Khu Vực Viewport Bản Đồ (Có Mask cắt góc)
         GameObject viewportObj = new GameObject("MapViewport", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Mask));
@@ -760,7 +748,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         stRt.anchorMax = new Vector2(0f, 0f);
         stRt.pivot = new Vector2(0f, 0f);
         stRt.anchoredPosition = new Vector2(25f, 25f);
-        stRt.sizeDelta = new Vector2(240f, 75f);
+        stRt.sizeDelta = new Vector2(280f, 95f);
         Image stImg = statsPanel.GetComponent<Image>();
         stImg.color = new Color(0.05f, 0.08f, 0.14f, 0.92f);
         var stOutline = statsPanel.AddComponent<Outline>();
@@ -775,7 +763,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         stTxtRt.offsetMin = new Vector2(12f, 6f);
         stTxtRt.offsetMax = new Vector2(-12f, -6f);
         statsText = stTxtObj.AddComponent<TextMeshProUGUI>();
-        statsText.fontSize = 11.5f;
+        statsText.fontSize = 15.5f;
         statsText.color = Color.white;
         statsText.lineSpacing = 4f;
 
@@ -788,7 +776,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         hntRt.anchorMax = new Vector2(1f, 0f);
         hntRt.pivot = new Vector2(1f, 0f);
         hntRt.anchoredPosition = new Vector2(-25f, 25f);
-        hntRt.sizeDelta = new Vector2(300f, 75f);
+        hntRt.sizeDelta = new Vector2(360f, 95f);
         Image hntImg = hintPanel.GetComponent<Image>();
         hntImg.color = new Color(0.05f, 0.08f, 0.14f, 0.92f);
         var hntOutline = hintPanel.AddComponent<Outline>();
@@ -803,7 +791,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         hntTxtRt.offsetMin = new Vector2(12f, 6f);
         hntTxtRt.offsetMax = new Vector2(-12f, -6f);
         hintText = hntTxtObj.AddComponent<TextMeshProUGUI>();
-        hintText.fontSize = 11f;
+        hintText.fontSize = 15f;
         hintText.color = Color.white;
 
         // 8. Cụm Nút Điều Khiển Bản Đồ (Zoom In, Zoom Out, Focus Player)

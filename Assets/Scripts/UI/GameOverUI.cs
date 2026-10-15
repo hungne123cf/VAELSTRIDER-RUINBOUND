@@ -31,6 +31,20 @@ public class GameOverUI : MonoBehaviour
     private bool isShown = false;
     public bool IsShown() => isShown || (canvasGroup != null && canvasGroup.alpha > 0.05f);
 
+    // Cache sprites
+    private static Sprite _frameSprite;
+    private static Sprite _dividerSprite;
+
+    // ─── Neutral Dark Color Palette ────────────────────────────────────────────
+    private static readonly Color ColorOverlayBg      = new Color(0.015f, 0.018f, 0.024f, 0.94f);
+    private static readonly Color ColorBoxBg          = new Color(0.065f, 0.070f, 0.080f, 0.98f);
+    private static readonly Color ColorBoxFrame       = new Color(0.650f, 0.700f, 0.800f, 0.90f);
+    private static readonly Color ColorDividerLine    = new Color(0.500f, 0.550f, 0.650f, 0.55f);
+
+    private static readonly Color ColorBtnRestartBg   = new Color(0.140f, 0.150f, 0.180f, 1.00f);
+    private static readonly Color ColorBtnMainMenuBg  = new Color(0.120f, 0.130f, 0.160f, 1.00f);
+    private static readonly Color ColorBtnFrame       = new Color(0.600f, 0.650f, 0.750f, 0.90f);
+
     void Awake()
     {
         Instance = this;
@@ -88,46 +102,33 @@ public class GameOverUI : MonoBehaviour
 
     public void UpdateButtonsAndTexts()
     {
-        bool canRespawn = RespawnsUsedInCurrentMap < MAX_RESPAWNS_PER_MAP;
+        bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
 
-        if (titleText != null) titleText.text = LocalizationManager.Get("GAMEOVER_TITLE");
-        if (subtitleText != null) subtitleText.text = LocalizationManager.Get("GAMEOVER_SUBTITLE");
+        if (titleText != null) 
+            titleText.text = isVi ? "CHUYẾN PHIÊU LƯU KẾT THÚC" : "EXPEDITION FAILED";
+        if (subtitleText != null) 
+            subtitleText.text = isVi ? "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này." : "Your journey ends here. Battle levels and augments only exist within this run.";
 
-        // 1. Nut Respawn (Gioi han 1 lan/map)
+        // Game 1 mạng: Ẩn nút Respawn hồi sinh tại chỗ
         if (respawnButton != null)
         {
-            respawnButton.interactable = canRespawn;
-            var img = respawnButton.GetComponent<Image>();
-            if (img != null)
-            {
-                img.color = canRespawn ? new Color(0.18f, 0.65f, 0.45f) : new Color(0.25f, 0.26f, 0.32f);
-            }
-
-            respawnButton.onClick.RemoveAllListeners();
-            if (canRespawn)
-            {
-                respawnButton.onClick.AddListener(OnRespawnClicked);
-            }
+            respawnButton.gameObject.SetActive(false);
         }
 
-        if (respawnBtnText != null)
-        {
-            respawnBtnText.text = canRespawn 
-                ? LocalizationManager.Get("GAMEOVER_RESPAWN_AVAILABLE") 
-                : LocalizationManager.Get("GAMEOVER_RESPAWN_USED");
-            respawnBtnText.color = canRespawn ? Color.white : new Color(0.7f, 0.7f, 0.7f);
-        }
-
+        // Run Summary: Hiển thị cấp độ, số lõi nâng cấp và linh hồn thu thập được
         if (respawnStatusText != null)
         {
-            bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
-            respawnStatusText.text = canRespawn 
-                ? (isVi ? "- Bạn còn 1 lần hồi sinh trong bản đồ này -" : "- You have 1 respawn left for this realm -")
-                : (isVi ? "- Đã hết lượt hồi sinh cho map này (Tối đa: 1/1) -" : "- Out of respawns for this map (Max: 1/1) -");
-            respawnStatusText.color = canRespawn ? new Color(0.3f, 0.95f, 0.65f) : new Color(0.95f, 0.45f, 0.45f);
+            int lv = PlayerLevelSystem.Instance != null ? PlayerLevelSystem.Instance.CurrentLevel : 1;
+            int augCount = AugmentManager.Instance != null ? AugmentManager.Instance.SelectedAugmentCount : 0;
+            long shards = AccountDatabase.GetAethelShards();
+
+            respawnStatusText.text = isVi 
+                ? $"<color=#FFD700><b>CẤP ĐẠT ĐƯỢC: {lv}</b></color>  |  <color=#38BDF8><b>LÕI NÂNG CẤP: {augCount}</b></color>  |  <color=#00FFFF><b>LINH HỒN: {shards:N0}</b></color>"
+                : $"<color=#FFD700><b>REACHED LEVEL: {lv}</b></color>  |  <color=#38BDF8><b>AUGMENTS: {augCount}</b></color>  |  <color=#00FFFF><b>AETHEL SHARDS: {shards:N0}</b></color>";
+            respawnStatusText.color = Color.white;
         }
 
-        // 2. Nut Choi lai tu dau map
+        // 1. Nút Chơi lại run mới từ đầu
         if (restartButton != null)
         {
             restartButton.onClick.RemoveAllListeners();
@@ -135,10 +136,15 @@ public class GameOverUI : MonoBehaviour
         }
         if (restartBtnText != null)
         {
-            restartBtnText.text = LocalizationManager.Get("GAMEOVER_RESTART_MAP");
+            restartBtnText.text = isVi ? "HỒI SINH & CHƠI LẠI RUN MỚI (MAP 1)" : "REVIVE & START NEW RUN (MAP 1)";
+            if (restartButton != null)
+            {
+                WhiteIconLoader.SetButtonIconAndText(restartButton, "Repeat-Right", restartBtnText.text, new Color(1f, 0.85f, 0.35f), Color.white, true);
+                restartButton.transform.Find("FrameBorder")?.SetAsLastSibling();
+            }
         }
 
-        // 3. Nut Ve Main Menu (Menu Chinh / Sanctuary)
+        // 2. Nút Về Main Menu (Sảnh Sanctuary)
         if (mainMenuButton != null)
         {
             mainMenuButton.onClick.RemoveAllListeners();
@@ -146,7 +152,19 @@ public class GameOverUI : MonoBehaviour
         }
         if (mainMenuBtnText != null)
         {
-            mainMenuBtnText.text = LocalizationManager.Get("GAMEOVER_MAIN_MENU");
+            mainMenuBtnText.text = isVi ? "VỀ SẢNH CHÍNH (SANCTUARY)" : "RETURN TO SANCTUARY";
+            if (mainMenuButton != null)
+            {
+                WhiteIconLoader.SetButtonIconAndText(mainMenuButton, "Home", mainMenuBtnText.text, new Color(0.4f, 0.85f, 1f), Color.white, true);
+                mainMenuButton.transform.Find("FrameBorder")?.SetAsLastSibling();
+            }
+        }
+
+        // Đảm bảo khung ngoài CenterBox luôn ở trên cùng
+        Transform box = transform.Find("CenterBox");
+        if (box != null)
+        {
+            box.Find("FrameBorder")?.SetAsLastSibling();
         }
     }
 
@@ -229,9 +247,22 @@ public class GameOverUI : MonoBehaviour
         {
             inv.SaveData();
         }
+        AccountDatabase.SaveActiveSessionToDatabase();
 
-        Debug.Log("<color=cyan>[RESTART MAP]</color> Choi lai tu dau map (Giu nguyen linh hon/Shards)!");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        PlayerInventory.ResetRunShards();
+        PlayerLevelSystem.Instance?.ResetForNewBattle();
+        AugmentManager.Instance?.ResetForNewBattle();
+        LevelUpChoiceUI.ResetUI();
+
+        Debug.Log("<color=cyan>[RESTART MAP]</color> Bat dau run moi tu dau (Map 1 - Level 1)!");
+        if (Application.CanStreamedLevelBeLoaded("Map1_Thestart"))
+        {
+            SceneManager.LoadScene("Map1_Thestart");
+        }
+        else
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 
     /// <summary>
@@ -249,7 +280,12 @@ public class GameOverUI : MonoBehaviour
         }
         AccountDatabase.SaveActiveSessionToDatabase();
 
-        Debug.Log("<color=cyan>[MAIN MENU]</color> Tro ve MainMenuScene (Giu nguyen du lieu/Shards)...");
+        PlayerInventory.ResetRunShards();
+        PlayerLevelSystem.Instance?.ResetForNewBattle();
+        AugmentManager.Instance?.ResetForNewBattle();
+        LevelUpChoiceUI.ResetUI();
+
+        Debug.Log("<color=cyan>[MAIN MENU]</color> Tro ve MainMenuScene voi toan bo Linh Hon thu thap duoc...");
         SceneManager.LoadScene("MainMenuScene");
     }
 
@@ -272,6 +308,85 @@ public class GameOverUI : MonoBehaviour
         SceneManager.LoadScene("LoginScene");
     }
 
+    // ─── Asset Loaders ─────────────────────────────────────────────────────────
+    private static Sprite GetFrameSprite()
+    {
+        if (_frameSprite != null) return _frameSprite;
+
+#if UNITY_EDITOR
+        _frameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/frame_gothic_border.png");
+        if (_frameSprite != null) return _frameSprite;
+#endif
+
+        _frameSprite = Resources.Load<Sprite>("UI/frame_gothic_border");
+        if (_frameSprite != null) return _frameSprite;
+
+        string[] candidates = new string[]
+        {
+            System.IO.Path.Combine(Application.dataPath, "Sprites/UI/frame_gothic_border.png"),
+            System.IO.Path.Combine(Application.dataPath, "Resources/UI/frame_gothic_border.png"),
+            System.IO.Path.Combine(Application.dataPath, "ART/UI/Default/Border/panel-border-004.png")
+        };
+
+        foreach (var path in candidates)
+        {
+            if (System.IO.File.Exists(path))
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(path);
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                if (tex.LoadImage(bytes))
+                {
+                    tex.filterMode = FilterMode.Point;
+                    tex.wrapMode = TextureWrapMode.Clamp;
+                    _frameSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+                        new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(14, 14, 14, 14));
+                    break;
+                }
+            }
+        }
+
+        return _frameSprite;
+    }
+
+    private static Sprite GetDividerSprite()
+    {
+        if (_dividerSprite != null) return _dividerSprite;
+
+#if UNITY_EDITOR
+        _dividerSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/divider_fade_004.png");
+        if (_dividerSprite != null) return _dividerSprite;
+#endif
+
+        _dividerSprite = Resources.Load<Sprite>("UI/divider_fade_004");
+        if (_dividerSprite != null) return _dividerSprite;
+
+        string[] candidates = new string[]
+        {
+            System.IO.Path.Combine(Application.dataPath, "Sprites/UI/divider_fade_004.png"),
+            System.IO.Path.Combine(Application.dataPath, "Resources/UI/divider_fade_004.png"),
+            System.IO.Path.Combine(Application.dataPath, "ART/UI/Default/Divider Fade/divider-fade-004.png")
+        };
+
+        foreach (var path in candidates)
+        {
+            if (System.IO.File.Exists(path))
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(path);
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                if (tex.LoadImage(bytes))
+                {
+                    tex.filterMode = FilterMode.Point;
+                    tex.wrapMode = TextureWrapMode.Clamp;
+                    _dividerSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+                        new Vector2(0.5f, 0.5f), 100f);
+                    break;
+                }
+            }
+        }
+
+        return _dividerSprite;
+    }
+
     public static GameOverUI EnsureUIExists()
     {
         Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
@@ -282,18 +397,18 @@ public class GameOverUI : MonoBehaviour
         {
             GameOverUI ui = existing.GetComponent<GameOverUI>();
             Transform box = existing.Find("CenterBox");
-            if (ui != null && ui.mainMenuButton != null && box != null && box.Find("Btn_ExitLogin") == null)
+            if (ui != null && ui.mainMenuButton != null && box != null && box.Find("FrameBorder") != null)
             {
                 Instance = ui;
                 return Instance;
             }
 
-            // Old version detected -> Destroy to regenerate clean 3-button UI
+            // Phiên bản cũ chưa có FrameBorder -> huỷ để tạo mới chuẩn Gothic
             Destroy(existing.gameObject);
             Instance = null;
         }
 
-        // Tao Container UI Panel
+        // Tạo Container UI Panel phủ toàn màn hình
         GameObject panelObj = new GameObject("GameOverPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(CanvasGroup));
         panelObj.layer = 5;
         panelObj.transform.SetParent(rootCanvas.transform, false);
@@ -305,12 +420,12 @@ public class GameOverUI : MonoBehaviour
         panelRect.offsetMax = Vector2.zero;
 
         Image panelBg = panelObj.GetComponent<Image>();
-        panelBg.color = new Color(0.06f, 0.02f, 0.02f, 0.94f); // Dark death vignette
+        panelBg.color = ColorOverlayBg;
 
-        // Overriding canvas de dam bao luon o tren cung
+        // Overriding canvas để đảm bảo luôn ở trên cùng
         Canvas panelCanvas = panelObj.AddComponent<Canvas>();
         panelCanvas.overrideSorting = true;
-        panelCanvas.sortingOrder = 9999;
+        panelCanvas.sortingOrder = 31000;
         panelObj.AddComponent<GraphicRaycaster>();
 
         CanvasGroup cg = panelObj.GetComponent<CanvasGroup>();
@@ -321,75 +436,101 @@ public class GameOverUI : MonoBehaviour
         Instance = panelObj.AddComponent<GameOverUI>();
         Instance.canvasGroup = cg;
 
-        // Center Card Box
+        // ─── Center Box (Khung Gothic chạm khắc) ───────────────────────────────
         GameObject boxObj = new GameObject("CenterBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         boxObj.layer = 5;
         boxObj.transform.SetParent(panelObj.transform, false);
         RectTransform boxRect = boxObj.GetComponent<RectTransform>();
-        boxRect.sizeDelta = new Vector2(620, 490);
+        boxRect.sizeDelta = new Vector2(680, 480);
         boxRect.anchoredPosition = Vector2.zero;
 
         Image boxBg = boxObj.GetComponent<Image>();
-        boxBg.color = new Color(0.10f, 0.11f, 0.16f, 0.98f);
-        var outline = boxObj.AddComponent<Outline>();
-        outline.effectColor = new Color(0.7f, 0.18f, 0.2f, 0.9f);
-        outline.effectDistance = new Vector2(2.5f, -2.5f);
+        boxBg.color = ColorBoxBg;
 
-        // Title: YOU DIED
+        // Khung viền Gothic bao quanh CenterBox
+        GameObject boxFrame = new GameObject("FrameBorder", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        boxFrame.layer = 5;
+        boxFrame.transform.SetParent(boxObj.transform, false);
+        RectTransform frameRt = boxFrame.GetComponent<RectTransform>();
+        frameRt.anchorMin = Vector2.zero;
+        frameRt.anchorMax = Vector2.one;
+        frameRt.offsetMin = Vector2.zero;
+        frameRt.offsetMax = Vector2.zero;
+
+        Image frameImg = boxFrame.GetComponent<Image>();
+        frameImg.sprite = GetFrameSprite();
+        frameImg.type = Image.Type.Sliced;
+        frameImg.pixelsPerUnitMultiplier = 0.40f;
+        frameImg.color = ColorBoxFrame;
+        frameImg.raycastTarget = false;
+
+        // ─── Title: EXPEDITION FAILED ──────────────────────────────────────────
         GameObject titleObj = new GameObject("Title", typeof(RectTransform));
         titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRect = titleObj.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, 180);
-        titleRect.sizeDelta = new Vector2(580, 55);
+        titleRect.anchoredPosition = new Vector2(0, 168);
+        titleRect.sizeDelta = new Vector2(500, 50);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = "YOU DIED";
-        titleTmp.fontSize = 44;
+        titleTmp.text = "CHUYẾN PHIÊU LƯU KẾT THÚC";
+        titleTmp.fontSize = 35;
         titleTmp.fontStyle = FontStyles.Bold;
-        titleTmp.color = new Color(0.95f, 0.22f, 0.25f);
+        titleTmp.color = new Color(0.95f, 0.28f, 0.32f);
         titleTmp.alignment = TextAlignmentOptions.Center;
         Instance.titleText = titleTmp;
 
-        // Subtitle
+        // Title Flanking Wings
+        CreateDividerWing(boxObj.transform, "TitleLeftWing", new Vector2(-260, 168), new Vector2(90, 14), new Color(0.95f, 0.35f, 0.38f, 0.75f), false);
+        CreateDividerWing(boxObj.transform, "TitleRightWing", new Vector2(260, 168), new Vector2(90, 14), new Color(0.95f, 0.35f, 0.38f, 0.75f), true);
+
+        // Title Bottom Symmetric Divider
+        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 138), new Vector2(540, 12), new Color(0.55f, 0.60f, 0.70f, 0.65f));
+
+        // ─── Subtitle ──────────────────────────────────────────────────────────
         GameObject subObj = new GameObject("Subtitle", typeof(RectTransform));
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRect = subObj.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 130);
-        subRect.sizeDelta = new Vector2(560, 35);
+        subRect.anchoredPosition = new Vector2(0, 104);
+        subRect.sizeDelta = new Vector2(580, 35);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
-        subTmp.text = "Chuyen hanh trinh cua ban da tam dung...";
-        subTmp.fontSize = 16;
-        subTmp.color = new Color(0.85f, 0.75f, 0.78f);
+        subTmp.text = "Sinh mệnh đã cạn. Cấp độ và các lõi nâng cấp chỉ lưu giữ trong chuyến đi này.";
+        subTmp.fontSize = 15;
+        subTmp.color = new Color(0.75f, 0.78f, 0.86f);
         subTmp.alignment = TextAlignmentOptions.Center;
         Instance.subtitleText = subTmp;
 
-        // Respawn Status Indicator
+        // ─── Run Summary Indicator ─────────────────────────────────────────────
         GameObject statusObj = new GameObject("RespawnStatus", typeof(RectTransform));
         statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
         RectTransform statusRect = statusObj.GetComponent<RectTransform>();
-        statusRect.anchoredPosition = new Vector2(0, 82);
-        statusRect.sizeDelta = new Vector2(560, 30);
+        statusRect.anchoredPosition = new Vector2(0, 52);
+        statusRect.sizeDelta = new Vector2(600, 36);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
-        statusTmp.fontSize = 15;
+        statusTmp.fontSize = 15.5f;
         statusTmp.fontStyle = FontStyles.Bold;
         statusTmp.alignment = TextAlignmentOptions.Center;
         Instance.respawnStatusText = statusTmp;
 
-        // 1. Button: RESPAWN
-        Instance.respawnButton = CreateButton(boxObj.transform, "Btn_Respawn", "HỒI SINH TẠI CHỖ (1/1)", new Vector2(0, 16), new Vector2(500, 50), new Color(0.18f, 0.65f, 0.45f), 19, out Instance.respawnBtnText);
+        // Section Divider before buttons
+        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, 20), new Vector2(540, 10), ColorDividerLine);
 
-        // 2. Button: RESTART MAP
-        Instance.restartButton = CreateButton(boxObj.transform, "Btn_RestartMap", "CHƠI LẠI TỪ ĐẦU", new Vector2(0, -48), new Vector2(500, 50), new Color(0.85f, 0.45f, 0.15f), 19, out Instance.restartBtnText);
+        // ─── 1. Button: START NEW RUN (LEVEL 1) ────────────────────────────────
+        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI (MAP 1)",
+            new Vector2(0, -32), new Vector2(520, 54), ColorBtnRestartBg, ColorBtnFrame, 18, out Instance.restartBtnText);
 
-        // 3. Button: RETURN TO MAIN MENU
-        Instance.mainMenuButton = CreateButton(boxObj.transform, "Btn_MainMenu", "VỀ MENU CHÍNH", new Vector2(0, -112), new Vector2(500, 50), new Color(0.18f, 0.48f, 0.85f), 19, out Instance.mainMenuBtnText);
+        // ─── 2. Button: RETURN TO SANCTUARY ────────────────────────────────────
+        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH (SANCTUARY)",
+            new Vector2(0, -100), new Vector2(520, 54), ColorBtnMainMenuBg, ColorBtnFrame, 18, out Instance.mainMenuBtnText);
+
+        // Đảm bảo khung ngoài của CenterBox luôn hiển thị trên cùng không bị che
+        boxFrame.transform.SetAsLastSibling();
 
         return Instance;
     }
 
-    private static Button CreateButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, float fontSize, out TextMeshProUGUI btnTxt)
+    private static Button CreateFramedButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, Color frameColor, float fontSize, out TextMeshProUGUI btnTxt)
     {
         GameObject obj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         obj.layer = 5;
@@ -405,6 +546,30 @@ public class GameOverUI : MonoBehaviour
         var btn = obj.GetComponent<Button>();
         btn.targetGraphic = img;
 
+        var colors = btn.colors;
+        colors.normalColor = bgColor;
+        colors.highlightedColor = new Color(bgColor.r + 0.08f, bgColor.g + 0.09f, bgColor.b + 0.12f, 1f);
+        colors.pressedColor = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        btn.colors = colors;
+
+        // Khung viền Gothic cho button
+        var frameObj = new GameObject("FrameBorder", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        frameObj.layer = 5;
+        frameObj.transform.SetParent(obj.transform, false);
+        var frameRt = frameObj.GetComponent<RectTransform>();
+        frameRt.anchorMin = Vector2.zero;
+        frameRt.anchorMax = Vector2.one;
+        frameRt.offsetMin = Vector2.zero;
+        frameRt.offsetMax = Vector2.zero;
+
+        var frameImg = frameObj.GetComponent<Image>();
+        frameImg.sprite = GetFrameSprite();
+        frameImg.type = Image.Type.Sliced;
+        frameImg.pixelsPerUnitMultiplier = 0.65f;
+        frameImg.color = frameColor;
+        frameImg.raycastTarget = false;
+
         GameObject txtObj = new GameObject("Text", typeof(RectTransform));
         txtObj.layer = 5;
         txtObj.transform.SetParent(obj.transform, false);
@@ -412,7 +577,8 @@ public class GameOverUI : MonoBehaviour
         var tRt = txtObj.GetComponent<RectTransform>();
         tRt.anchorMin = Vector2.zero;
         tRt.anchorMax = Vector2.one;
-        tRt.sizeDelta = Vector2.zero;
+        tRt.offsetMin = Vector2.zero;
+        tRt.offsetMax = Vector2.zero;
 
         btnTxt = txtObj.AddComponent<TextMeshProUGUI>();
         btnTxt.text = text;
@@ -421,6 +587,69 @@ public class GameOverUI : MonoBehaviour
         btnTxt.color = Color.white;
         btnTxt.alignment = TextAlignmentOptions.Center;
         btnTxt.raycastTarget = false;
+
+        frameObj.transform.SetAsLastSibling();
         return btn;
+    }
+
+    private static GameObject CreateDividerWing(Transform parent, string name, Vector2 pos, Vector2 size, Color color, bool flipHorizontal)
+    {
+        var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        go.layer = 5;
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = size;
+
+        if (flipHorizontal)
+        {
+            rt.localScale = new Vector3(-1f, 1f, 1f);
+        }
+
+        var img = go.GetComponent<Image>();
+        img.sprite = GetDividerSprite();
+        img.color = color;
+        img.raycastTarget = false;
+
+        return go;
+    }
+
+    private static GameObject CreateOrnamentDivider(Transform parent, string name, Vector2 pos, Vector2 size, Color color)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.layer = 5;
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = size;
+
+        // Left half
+        var left = new GameObject("Left", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        left.layer = 5;
+        left.transform.SetParent(go.transform, false);
+        var leftRT = left.GetComponent<RectTransform>();
+        leftRT.anchorMin = new Vector2(0f, 0f);
+        leftRT.anchorMax = new Vector2(0.5f, 1f);
+        leftRT.offsetMin = leftRT.offsetMax = Vector2.zero;
+        var leftImg = left.GetComponent<Image>();
+        leftImg.sprite = GetDividerSprite();
+        leftImg.color = color;
+        leftImg.raycastTarget = false;
+
+        // Right half (flipped)
+        var right = new GameObject("Right", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        right.layer = 5;
+        right.transform.SetParent(go.transform, false);
+        var rightRT = right.GetComponent<RectTransform>();
+        rightRT.anchorMin = new Vector2(0.5f, 0f);
+        rightRT.anchorMax = new Vector2(1f, 1f);
+        rightRT.offsetMin = rightRT.offsetMax = Vector2.zero;
+        rightRT.localScale = new Vector3(-1f, 1f, 1f);
+        var rightImg = right.GetComponent<Image>();
+        rightImg.sprite = GetDividerSprite();
+        rightImg.color = color;
+        rightImg.raycastTarget = false;
+
+        return go;
     }
 }

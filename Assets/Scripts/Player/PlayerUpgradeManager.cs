@@ -30,6 +30,33 @@ public class PlayerUpgradeManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        // Xóa sạch triệt để toàn bộ key nâng cấp trụ cũ để chuyển đổi 100% sang chế độ Roguelike
+        string[] allHeroes = new string[]
+        {
+            CharacterManager.CHAR_VAELSTRIDER, CharacterManager.CHAR_GALE_RONIN,
+            CharacterManager.CHAR_AZURE_BLADE, CharacterManager.CHAR_TITAN_BERSERKER,
+            CharacterManager.CHAR_DUNE_ASSASSIN, CharacterManager.CHAR_CELESTIAL_MAGE,
+            "vael", "ronin", "azure", "titan", "dune", "mage", "Maid",
+            "Vaelstrider", "GaleRonin", "AzureBlade", "TitanBerserker", "DuneAssassin", "CelestialMage",
+            "Player1", "Player2", "Player3", "Player4", "Player5", "Player6"
+        };
+        string[] upTypes = new string[] { "Attack", "Health", "Agility", "Ultimate" };
+        bool modified = false;
+        foreach (var h in allHeroes)
+        {
+            foreach (var t in upTypes)
+            {
+                string k = $"Upgrade_{h}_{t}_Level";
+                if (PlayerPrefs.HasKey(k)) { PlayerPrefs.DeleteKey(k); modified = true; }
+            }
+        }
+        foreach (var t in upTypes)
+        {
+            string k = $"Upgrade_{t}_Level";
+            if (PlayerPrefs.HasKey(k)) { PlayerPrefs.DeleteKey(k); modified = true; }
+        }
+        if (modified) PlayerPrefs.Save();
     }
 
     void Start()
@@ -59,12 +86,25 @@ public class PlayerUpgradeManager : MonoBehaviour
         if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
     }
 
+    public static string NormalizeHeroKey(string heroId)
+    {
+        if (string.IsNullOrEmpty(heroId)) return CharacterManager.CHAR_VAELSTRIDER;
+        string h = heroId.Trim().ToLower();
+        if (h.Contains("titan") || h.Contains("player4")) return CharacterManager.CHAR_TITAN_BERSERKER;
+        if (h.Contains("azure") || h.Contains("player3")) return CharacterManager.CHAR_AZURE_BLADE;
+        if (h.Contains("ronin") || h.Contains("gale") || h.Contains("maid") || h.Contains("elysia") || h.Contains("player2")) return CharacterManager.CHAR_GALE_RONIN;
+        if (h.Contains("dune") || h.Contains("player5")) return CharacterManager.CHAR_DUNE_ASSASSIN;
+        if (h.Contains("mage") || h.Contains("celestial") || h.Contains("player6")) return CharacterManager.CHAR_CELESTIAL_MAGE;
+        return CharacterManager.CHAR_VAELSTRIDER;
+    }
+
     public string GetCurrentHeroKey()
     {
         var cm = CharacterManager.EnsureInstance();
-        string heroId = (cm != null) ? cm.GetSelectedCharacterId() : "Vaelstrider";
+        string heroId = (cm != null) ? cm.GetSelectedCharacterId() : "";
+        if (string.IsNullOrEmpty(heroId)) heroId = PlayerPrefs.GetString("SelectedHero", "");
         if (string.IsNullOrEmpty(heroId)) heroId = "Vaelstrider";
-        return heroId;
+        return NormalizeHeroKey(heroId);
     }
 
     public long CurrentShards
@@ -83,21 +123,18 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     public int GetLevel(UpgradeType type, string heroId = null)
     {
-        string heroKey = !string.IsNullOrEmpty(heroId) ? heroId : GetCurrentHeroKey();
-        string key = $"Upgrade_{heroKey}_{type}_Level";
-
-        // Tương thích ngược: Nếu là Vaelstrider mà key mới chưa có, đọc key cũ
-        if (!PlayerPrefs.HasKey(key) && (heroKey == CharacterManager.CHAR_VAELSTRIDER || heroKey == "Vaelstrider"))
-        {
-            return PlayerPrefs.GetInt("Upgrade_" + type.ToString() + "_Level", 0);
-        }
-
-        return PlayerPrefs.GetInt(key, 0);
+        // Chế độ Roguelike (1 mạng): Toàn bộ nâng cấp diễn ra trong trận qua Level & Lõi Nâng Cấp (Augments), không còn buff tĩnh vĩnh viễn từ trụ cũ
+        return 0;
     }
 
     public int GetCost(UpgradeType type)
     {
         int level = GetLevel(type);
+        return GetCostAtLevel(type, level);
+    }
+
+    public static int GetCostAtLevel(UpgradeType type, int level)
+    {
         switch (type)
         {
             case UpgradeType.Attack:
@@ -110,6 +147,40 @@ public class PlayerUpgradeManager : MonoBehaviour
                 return 5 + level * 6; // 5, 11, 17, ...
             default:
                 return 5 + level * 5;
+        }
+    }
+
+    public void GetCostAndLevelsForMultiplier(UpgradeType type, int multiplier, out int buyCount, out long totalCost)
+    {
+        int curLevel = GetLevel(type);
+        long curShards = CurrentShards;
+
+        if (multiplier <= 0) // Chế độ MAX: Mua tối đa có thể với số Shards hiện có
+        {
+            buyCount = 0;
+            totalCost = 0;
+            while (true)
+            {
+                long nextCost = GetCostAtLevel(type, curLevel + buyCount);
+                if (totalCost + nextCost > curShards) break;
+                totalCost += nextCost;
+                buyCount++;
+                if (buyCount >= 50000) break;
+            }
+            if (buyCount == 0)
+            {
+                buyCount = 1;
+                totalCost = GetCostAtLevel(type, curLevel);
+            }
+        }
+        else // Chế độ cố định (x1, x10, x50...)
+        {
+            buyCount = multiplier;
+            totalCost = 0;
+            for (int i = 0; i < buyCount; i++)
+            {
+                totalCost += GetCostAtLevel(type, curLevel + i);
+            }
         }
     }
 
@@ -182,10 +253,14 @@ public class PlayerUpgradeManager : MonoBehaviour
         switch (type)
         {
             case UpgradeType.Attack:
-                return LocalizationManager.T("+" + (level * 2) + " Sát thương (+ATK)", "+" + (level * 2) + " Attack Damage (+ATK)");
+            {
+                bool isMage = (hero == CharacterManager.CHAR_CELESTIAL_MAGE || hero.ToLower().Contains("mage") || hero.ToLower().Contains("player6") || hero.ToLower().Contains("celestial"));
+                string dmgUnit = (isMage || isAzure) ? "<color=#B84DFF>AP</color>" : "<color=#FF3B30>ATK</color>";
+                return $"+{level * 2} {dmgUnit}";
+            }
 
             case UpgradeType.Health:
-                return LocalizationManager.T("+" + (level * 15) + " Máu tối đa (+Max HP)", "+" + (level * 15) + " Max Health (+Max HP)");
+                return LocalizationManager.T("+" + (level * 15) + " Máu tối đa (+HP)", "+" + (level * 15) + " Max Health (+HP)");
 
             case UpgradeType.Agility:
                 float spd = Mathf.Min(MAX_SPEED_BONUS, level * 0.08f);
@@ -206,24 +281,28 @@ public class PlayerUpgradeManager : MonoBehaviour
                     $"+{spd:F2} Speed{(isSpdMax ? " (MAX)" : "")} | -{dash:F2}s Dash CD{(isDashMax ? " (MAX)" : "")}");
 
             case UpgradeType.Ultimate:
+            {
                 float ultiCd = Mathf.Min(MAX_ULTI_CD_REDUCTION, level * 0.6f);
                 int ultiDmg = level * 8;
                 bool isUltiCdMax = (level * 0.6f >= MAX_ULTI_CD_REDUCTION);
+                bool isMage = (hero == CharacterManager.CHAR_CELESTIAL_MAGE || hero.ToLower().Contains("mage") || hero.ToLower().Contains("player6") || hero.ToLower().Contains("celestial"));
+                string ultiDmgUnit = (isMage || isAzure) ? "<color=#B84DFF>AP</color>" : "<color=#FF3B30>ATK</color>";
 
                 if (isUltiCdMax)
                 {
-                    return LocalizationManager.T($"-{ultiCd:F1}s Hồi Tuyệt Kỹ (MAX) | +{ultiDmg} Sát thương",
-                                                 $"-{ultiCd:F1}s Ulti CD (MAX) | +{ultiDmg} Damage");
+                    return LocalizationManager.T($"-{ultiCd:F1}s Hồi Tuyệt Kỹ (MAX) | +{ultiDmg} {ultiDmgUnit}",
+                                                 $"-{ultiCd:F1}s Ulti CD (MAX) | +{ultiDmg} {ultiDmgUnit}");
                 }
-                return LocalizationManager.T($"-{ultiCd:F1}s Hồi Tuyệt Kỹ | +{ultiDmg} Sát thương",
-                                             $"-{ultiCd:F1}s Ulti CD | +{ultiDmg} Damage");
+                return LocalizationManager.T($"-{ultiCd:F1}s Hồi Tuyệt Kỹ | +{ultiDmg} {ultiDmgUnit}",
+                                             $"-{ultiCd:F1}s Ulti CD | +{ultiDmg} {ultiDmgUnit}");
+            }
 
             default:
                 return "";
         }
     }
 
-    public string GetNextBonusDescription(UpgradeType type)
+    public string GetNextBonusDescription(UpgradeType type, int count = 1)
     {
         if (IsMaxLevel(type))
         {
@@ -231,47 +310,94 @@ public class PlayerUpgradeManager : MonoBehaviour
         }
 
         string hero = GetCurrentHeroKey();
-        bool isAzure = (hero == CharacterManager.CHAR_AZURE_BLADE);
+        bool isAzure = (hero == CharacterManager.CHAR_AZURE_BLADE || hero.ToLower().Contains("azure") || hero.ToLower().Contains("player3"));
+        bool isMage = (hero == CharacterManager.CHAR_CELESTIAL_MAGE || hero.ToLower().Contains("mage") || hero.ToLower().Contains("player6") || hero.ToLower().Contains("celestial"));
         int level = GetLevel(type);
 
-        switch (type)
+        if (count <= 1)
         {
-            case UpgradeType.Attack:
-                return LocalizationManager.T("+2 Sát thương", "+2 Strike Damage");
+            switch (type)
+            {
+                case UpgradeType.Attack:
+                    return (isMage || isAzure) ? "<color=#B84DFF>+2 AP</color>" : "<color=#FF3B30>+2 ATK</color>";
 
-            case UpgradeType.Health:
-                return LocalizationManager.T("+15 Máu tối đa & Hồi máu", "+15 Max Health & Heal");
+                case UpgradeType.Health:
+                    return LocalizationManager.T("+15 Máu tối đa & Hồi máu", "+15 Max Health & Heal");
 
-            case UpgradeType.Agility:
-                bool isSpdMax = (level * 0.08f >= MAX_SPEED_BONUS);
-                bool isDashMax = (level * 0.05f >= MAX_DASH_CD_REDUCTION);
+                case UpgradeType.Agility:
+                    bool isSpdMax = (level * 0.08f >= MAX_SPEED_BONUS);
+                    bool isDashMax = (level * 0.05f >= MAX_DASH_CD_REDUCTION);
 
-                if (isSpdMax && isDashMax)
+                    if (isSpdMax && isDashMax)
+                    {
+                        return "MAX";
+                    }
+                    if (isDashMax)
+                    {
+                        return LocalizationManager.T("+0.08 Tốc chạy (Lướt MAX)", "+0.08 Speed (Dash MAX)");
+                    }
+                    if (isSpdMax)
+                    {
+                        return LocalizationManager.T("-0.05s Hồi lướt (Tốc độ MAX)", "-0.05s Dash CD (Speed MAX)");
+                    }
+                    if (isAzure)
+                        return LocalizationManager.T("+0.08 Tốc chạy | -0.05s Lướt | -0.35s Sóng Kiếm", "+0.08 Speed | -0.05s Dash | -0.35s Wave CD");
+                    return LocalizationManager.T("+0.08 Tốc chạy | -0.05s Hồi lướt", "+0.08 Speed | -0.05s Dash CD");
+
+                case UpgradeType.Ultimate:
                 {
-                    return "MAX";
+                    bool isCdMaxed = (level * 0.6f >= MAX_ULTI_CD_REDUCTION);
+                    string nextUltiUnit = (isMage || isAzure) ? "<color=#B84DFF>AP</color>" : "<color=#FF3B30>ATK</color>";
+                    if (isCdMaxed)
+                    {
+                        return LocalizationManager.T($"+8 {nextUltiUnit} (Hồi chiêu MAX)", $"+8 {nextUltiUnit} (CD MAX)");
+                    }
+                    return LocalizationManager.T($"-0.6s Hồi chiêu & +8 {nextUltiUnit}", $"-0.6s Cooldown & +8 {nextUltiUnit}");
                 }
-                if (isDashMax)
-                {
-                    return LocalizationManager.T("+0.08 Tốc chạy (Lướt MAX)", "+0.08 Speed (Dash MAX)");
-                }
-                if (isSpdMax)
-                {
-                    return LocalizationManager.T("-0.05s Hồi lướt (Tốc độ MAX)", "-0.05s Dash CD (Speed MAX)");
-                }
-                if (isAzure)
-                    return LocalizationManager.T("+0.08 Tốc chạy | -0.05s Lướt | -0.35s Sóng Kiếm", "+0.08 Speed | -0.05s Dash | -0.35s Wave CD");
-                return LocalizationManager.T("+0.08 Tốc chạy | -0.05s Hồi lướt", "+0.08 Speed | -0.05s Dash CD");
 
-            case UpgradeType.Ultimate:
-                bool isCdMaxed = (level * 0.6f >= MAX_ULTI_CD_REDUCTION);
-                if (isCdMaxed)
+                default:
+                    return "";
+            }
+        }
+        else
+        {
+            switch (type)
+            {
+                case UpgradeType.Attack:
                 {
-                    return LocalizationManager.T("+8 Sát thương (Hồi chiêu MAX)", "+8 Damage (CD MAX)");
+                    int add = count * 2;
+                    return (isMage || isAzure) ? $"<color=#B84DFF>+{add} AP</color>" : $"<color=#FF3B30>+{add} ATK</color>";
                 }
-                return LocalizationManager.T("-0.6s Hồi chiêu & +8 Sát thương", "-0.6s Cooldown & +8 Damage");
 
-            default:
-                return "";
+                case UpgradeType.Health:
+                {
+                    int add = count * 15;
+                    return LocalizationManager.T($"+{add} Máu tối đa & Hồi máu", $"+{add} Max Health & Heal");
+                }
+
+                case UpgradeType.Agility:
+                {
+                    float addSpd = count * 0.08f;
+                    float addDash = count * 0.05f;
+                    if (isAzure)
+                    {
+                        float addWave = count * 0.35f;
+                        return LocalizationManager.T($"+{addSpd:F2} Tốc | -{addDash:F2}s Lướt | -{addWave:F2}s Sóng", $"+{addSpd:F2} Spd | -{addDash:F2}s Dash | -{addWave:F2}s Wave");
+                    }
+                    return LocalizationManager.T($"+{addSpd:F2} Tốc chạy | -{addDash:F2}s Hồi lướt", $"+{addSpd:F2} Speed | -{addDash:F2}s Dash CD");
+                }
+
+                case UpgradeType.Ultimate:
+                {
+                    int addDmg = count * 8;
+                    float addCd = count * 0.6f;
+                    string nextUltiUnit = (isMage || isAzure) ? "<color=#B84DFF>AP</color>" : "<color=#FF3B30>ATK</color>";
+                    return LocalizationManager.T($"-{addCd:F1}s Hồi chiêu & +{addDmg} {nextUltiUnit}", $"-{addCd:F1}s Cooldown & +{addDmg} {nextUltiUnit}");
+                }
+
+                default:
+                    return "";
+            }
         }
     }
 
@@ -288,24 +414,44 @@ public class PlayerUpgradeManager : MonoBehaviour
 
     public bool TryPurchaseUpgrade(UpgradeType type)
     {
-        FindPlayerComponents();
-        if (IsMaxLevel(type) || !CanUpgrade(type)) return false;
+        return TryPurchaseUpgradeMulti(type, 1);
+    }
 
-        int cost = GetCost(type);
+    public bool TryPurchaseUpgradeMulti(UpgradeType type, int count)
+    {
+        if (count <= 0) return false;
+        FindPlayerComponents();
+        if (IsMaxLevel(type)) return false;
+
+        string heroKey = GetCurrentHeroKey();
+        int curLevel = GetLevel(type, heroKey);
+        long curShards = CurrentShards;
+
+        int actualCount = 0;
+        long totalCost = 0;
+        for (int i = 0; i < count; i++)
+        {
+            long nextCost = GetCostAtLevel(type, curLevel + i);
+            if (totalCost + nextCost > curShards) break;
+            totalCost += nextCost;
+            actualCount++;
+        }
+
+        if (actualCount <= 0 || totalCost <= 0) return false;
+
         bool spent = false;
         if (inventory != null)
         {
-            spent = inventory.SpendShards(cost);
+            spent = inventory.SpendShards(totalCost);
         }
         else
         {
-            spent = AccountDatabase.SpendAethelShards(cost);
+            spent = AccountDatabase.SpendAethelShards(totalCost);
         }
 
         if (spent)
         {
-            string heroKey = GetCurrentHeroKey();
-            int nextLevel = GetLevel(type, heroKey) + 1;
+            int nextLevel = curLevel + actualCount;
             PlayerPrefs.SetInt($"Upgrade_{heroKey}_{type}_Level", nextLevel);
 
             if (heroKey == CharacterManager.CHAR_VAELSTRIDER || heroKey == "Vaelstrider")
@@ -313,33 +459,98 @@ public class PlayerUpgradeManager : MonoBehaviour
                 PlayerPrefs.SetInt("Upgrade_" + type.ToString() + "_Level", nextLevel);
             }
             PlayerPrefs.Save();
-
             AccountDatabase.SaveActiveSessionToDatabase();
 
             ApplyAllUpgrades();
             OnUpgradesChanged?.Invoke();
 
-            Debug.Log($"<color=yellow>[UPGRADE SUCCESS]</color> Đã nâng cấp {type} cho {heroKey} lên Cấp {nextLevel}!");
+            Debug.Log($"<color=yellow>[UPGRADE SUCCESS]</color> Đã nâng cấp {type} (+{actualCount} Cấp) cho {heroKey} lên Cấp {nextLevel}!");
             return true;
         }
 
         return false;
     }
 
+    public int UpgradeAllMax()
+    {
+        FindPlayerComponents();
+        long curShards = CurrentShards;
+        if (curShards <= 0) return 0;
+
+        string heroKey = GetCurrentHeroKey();
+        int[] levels = new int[4];
+        for (int i = 0; i < 4; i++) levels[i] = GetLevel((UpgradeType)i, heroKey);
+
+        long spentTotal = 0;
+        int upgradesBought = 0;
+
+        while (true)
+        {
+            int bestType = -1;
+            long lowestCost = long.MaxValue;
+
+            for (int i = 0; i < 4; i++)
+            {
+                long cost = GetCostAtLevel((UpgradeType)i, levels[i]);
+                if (cost < lowestCost)
+                {
+                    lowestCost = cost;
+                    bestType = i;
+                }
+            }
+
+            if (bestType == -1 || spentTotal + lowestCost > curShards) break;
+
+            spentTotal += lowestCost;
+            levels[bestType]++;
+            upgradesBought++;
+
+            if (upgradesBought >= 100000) break;
+        }
+
+        if (upgradesBought > 0 && spentTotal > 0)
+        {
+            bool spent = false;
+            if (inventory != null) spent = inventory.SpendShards(spentTotal);
+            else spent = AccountDatabase.SpendAethelShards(spentTotal);
+
+            if (spent)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    var type = (UpgradeType)i;
+                    PlayerPrefs.SetInt($"Upgrade_{heroKey}_{type}_Level", levels[i]);
+                    if (heroKey == CharacterManager.CHAR_VAELSTRIDER || heroKey == "Vaelstrider")
+                    {
+                        PlayerPrefs.SetInt("Upgrade_" + type.ToString() + "_Level", levels[i]);
+                    }
+                }
+                PlayerPrefs.Save();
+                AccountDatabase.SaveActiveSessionToDatabase();
+
+                ApplyAllUpgrades();
+                OnUpgradesChanged?.Invoke();
+                return upgradesBought;
+            }
+        }
+        return 0;
+    }
+
     public void ApplyAllUpgrades()
     {
         FindPlayerComponents();
+        string heroKey = GetCurrentHeroKey();
 
         // 1. Attack Bonus (+2 per level)
-        int atkLevel = GetLevel(UpgradeType.Attack);
+        int atkLevel = GetLevel(UpgradeType.Attack, heroKey);
         int bonusAtk = atkLevel * 2;
         if (playerCombat != null)
         {
-            playerCombat.ApplyUpgradeBonus(bonusAtk, GetUltiCooldownReduction(), GetUltiDamageBonus());
+            playerCombat.ApplyUpgradeBonus(bonusAtk, GetUltiCooldownReduction(heroKey), GetUltiDamageBonus(heroKey));
         }
 
         // 2. Health Bonus (+15 HP per level)
-        int hpLevel = GetLevel(UpgradeType.Health);
+        int hpLevel = GetLevel(UpgradeType.Health, heroKey);
         int bonusHp = hpLevel * 15;
         if (playerHealth != null)
         {
@@ -347,7 +558,7 @@ public class PlayerUpgradeManager : MonoBehaviour
         }
 
         // 3. Agility Bonus
-        int agiLevel = GetLevel(UpgradeType.Agility);
+        int agiLevel = GetLevel(UpgradeType.Agility, heroKey);
         float bonusSpeed = Mathf.Min(MAX_SPEED_BONUS, agiLevel * 0.08f);
         float bonusDashCd = Mathf.Min(MAX_DASH_CD_REDUCTION, agiLevel * 0.05f);
         if (playerController != null)
@@ -369,20 +580,12 @@ public class PlayerUpgradeManager : MonoBehaviour
         }
     }
 
-    public float GetUltiCooldownReduction()
-    {
-        return Mathf.Min(MAX_ULTI_CD_REDUCTION, GetLevel(UpgradeType.Ultimate) * 0.6f);
-    }
-
-    public int GetUltiDamageBonus()
-    {
-        return GetLevel(UpgradeType.Ultimate) * 8;
-    }
-
-    public int GetAttackBonus() => GetLevel(UpgradeType.Attack) * 2;
-    public int GetHealthBonus() => GetLevel(UpgradeType.Health) * 15;
-    public float GetDashCooldownReduction() => Mathf.Min(MAX_DASH_CD_REDUCTION, GetLevel(UpgradeType.Agility) * 0.05f);
-    public float GetSpeedBonus() => Mathf.Min(MAX_SPEED_BONUS, GetLevel(UpgradeType.Agility) * 0.08f);
+    public float GetUltiCooldownReduction(string heroId = null) => 0f;
+    public int GetUltiDamageBonus(string heroId = null) => 0;
+    public int GetAttackBonus(string heroId = null) => 0;
+    public int GetHealthBonus(string heroId = null) => 0;
+    public float GetDashCooldownReduction(string heroId = null) => 0f;
+    public float GetSpeedBonus(string heroId = null) => 0f;
     public string GetUpgradeDescription(UpgradeType type) => GetDescription(type, GetLevel(type));
     public string GetNextBonusString(UpgradeType type) => GetNextBonusDescription(type);
 
@@ -402,7 +605,15 @@ public class PlayerUpgradeManager : MonoBehaviour
         PlayerPrefs.DeleteKey("Lost_Shards_Scene");
 
         // Reset nâng cấp cho tất cả các tướng
-        string[] heroes = new string[] { CharacterManager.CHAR_VAELSTRIDER, CharacterManager.CHAR_GALE_RONIN, CharacterManager.CHAR_AZURE_BLADE, CharacterManager.CHAR_TITAN_BERSERKER, "Maid" };
+        string[] heroes = new string[]
+        {
+            CharacterManager.CHAR_VAELSTRIDER, CharacterManager.CHAR_GALE_RONIN,
+            CharacterManager.CHAR_AZURE_BLADE, CharacterManager.CHAR_TITAN_BERSERKER,
+            CharacterManager.CHAR_DUNE_ASSASSIN, CharacterManager.CHAR_CELESTIAL_MAGE,
+            "vael", "ronin", "azure", "titan", "dune", "mage", "Maid",
+            "Vaelstrider", "GaleRonin", "AzureBlade", "TitanBerserker", "DuneAssassin", "CelestialMage",
+            "Player1", "Player2", "Player3", "Player4", "Player5", "Player6"
+        };
         string[] types = new string[] { "Attack", "Health", "Agility", "Ultimate" };
 
         foreach (var h in heroes)
@@ -410,6 +621,10 @@ public class PlayerUpgradeManager : MonoBehaviour
             foreach (var t in types)
             {
                 PlayerPrefs.DeleteKey($"Upgrade_{h}_{t}_Level");
+            }
+            for (int i = 0; i < 6; i++)
+            {
+                PlayerPrefs.DeleteKey($"Hero_{h}_GearSlot_{i}");
             }
         }
         foreach (var t in types)

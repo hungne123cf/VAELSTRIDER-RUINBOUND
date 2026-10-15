@@ -346,7 +346,7 @@ public class UltiCinematicUI : MonoBehaviour
             canvasObj = new GameObject("UltiCinematicCanvas");
             canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 99999;
+            canvas.sortingOrder = 31800;
 
             CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;

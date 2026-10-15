@@ -10,10 +10,12 @@ public class PlayerEnergySystem : MonoBehaviour
     public static PlayerEnergySystem Instance { get; private set; }
 
     [Header("Nang Luong (Energy)")]
+    [SerializeField] private float baseMaxEnergy = 100f;
+    [SerializeField] private float bonusMaxEnergy = 0f;
     [SerializeField] private float maxEnergy = 100f;
     [SerializeField] private float currentEnergy = 100f;
-    [SerializeField] private float energyRegenRate = 3.5f; // Hồi 3.5 NL/s (cơ bản chậm rãi để hạn chế spam chiêu liên tục)
-    private float bonusEnergyRegenRate = 0f;
+    [SerializeField] private float baseEnergyRegenRate = 3.5f; // Hồi 3.5 NL/s cơ bản
+    [SerializeField] private float bonusEnergyRegenRate = 0f;
 
     [Header("Noi Nang (Inner Energy / Qi)")]
     [SerializeField] private float maxInnerEnergy = 100f;
@@ -33,17 +35,55 @@ public class PlayerEnergySystem : MonoBehaviour
         bonusEnergyRegenRate = bonus;
     }
 
-    public float GetEnergyRegenRate() => energyRegenRate + bonusEnergyRegenRate;
+    public float GetEnergyRegenRate() => baseEnergyRegenRate + bonusEnergyRegenRate;
+
+    public void RefreshSocketAndEquipmentEnergyBonus()
+    {
+        // 1. Chỉ số từ ngọc khảm (Gem Sockets)
+        EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out _, out _, out _, out _, out float sockMaxEnergy, out float sockEnergyRegen);
+
+        // 2. Chỉ số từ trang bị (Equipped Armor)
+        ArmorShopUI.GetEquippedArmorBonus(out _, out _, out _, out float armorMaxEnergy, out float armorEnergyRegen);
+
+        // 3. Chỉ số từ vũ khí (Equipped Weapon)
+        float weaponMaxEnergy = 0f;
+        float weaponEnergyRegen = 0f;
+        string equippedWpnId = PlayerPrefs.GetString("Equipped_Weapon_Id", "");
+        if (!string.IsNullOrEmpty(equippedWpnId))
+        {
+            var def = InventoryItemDatabase.GetItem(equippedWpnId);
+            if (def != null)
+            {
+                weaponMaxEnergy = def.manaBonus;
+                weaponEnergyRegen = def.manaRegenBonus;
+            }
+        }
+
+        bonusMaxEnergy = sockMaxEnergy + armorMaxEnergy + weaponMaxEnergy;
+        bonusEnergyRegenRate = sockEnergyRegen + armorEnergyRegen + weaponEnergyRegen;
+
+        float oldMax = maxEnergy;
+        maxEnergy = baseMaxEnergy + bonusMaxEnergy;
+
+        if (maxEnergy > oldMax && oldMax > 0)
+        {
+            currentEnergy += (maxEnergy - oldMax);
+        }
+        currentEnergy = Mathf.Clamp(currentEnergy, 0f, maxEnergy);
+    }
 
     void Awake()
     {
         Instance = this;
+        baseMaxEnergy = 100f;
+        RefreshSocketAndEquipmentEnergyBonus();
         currentEnergy = maxEnergy;
         currentInnerEnergy = 0f;
     }
 
     void Start()
     {
+        RefreshSocketAndEquipmentEnergyBonus();
         shieldVisual = GetComponentInChildren<PlayerShieldVisual>();
         if (shieldVisual == null)
         {
@@ -84,8 +124,6 @@ public class PlayerEnergySystem : MonoBehaviour
             return true;
         }
 
-        // Thong bao tren man hinh khi khong du nang luong
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("KHÔNG ĐỦ NĂNG LƯỢNG!", "NOT ENOUGH ENERGY!"), new Color(0.3f, 0.85f, 1f));
         SoundManager.EnsureInstance()?.PlayMenuHover();
         return false;
     }
@@ -99,19 +137,49 @@ public class PlayerEnergySystem : MonoBehaviour
     }
 
     /// <summary>
-    /// Tich tu Noi Nang trong giao tranh. Khi day 100%, tu dong bung Giap Ho Than.
+    /// <summary>
+    /// Tích tụ Nội Năng trong giao tranh.
+    /// - Với Player 6: Đầy 100% kích hoạt trạng thái Bùng Nổ Thiên Quang (Hồi chiêu cuối 1s liên tục, không có giáp vàng).
+    /// - Với các nhân vật khác: Đầy 100% tự động bung Giáp Hộ Thân màu vàng.
     /// </summary>
     public void AddInnerEnergy(float amount)
     {
+        // Riêng Player 6 (Celestial Mage): Không bật khiên vàng, dùng để kích hoạt trạng thái Hồi Siêu Tốc Chiêu Cuối (Overdrive)
+        var mage = GetComponent<CelestialMageSkill>() 
+            ?? GetComponentInChildren<CelestialMageSkill>() 
+            ?? GetComponentInParent<CelestialMageSkill>() 
+            ?? FindAnyObjectByType<CelestialMageSkill>();
+
+        if (mage != null && mage.enabled)
+        {
+            if (mage.IsOverdriveActive) return; // Đang trong lúc Overdrive thì không cộng thêm
+            currentInnerEnergy = Mathf.Clamp(currentInnerEnergy + amount, 0f, maxInnerEnergy);
+            Debug.Log($"<color=magenta>[INNER ENERGY (PLAYER 6)]</color> +{amount} -> {currentInnerEnergy}/{maxInnerEnergy}");
+            if (currentInnerEnergy >= maxInnerEnergy)
+            {
+                mage.ActivateCelestialOverdrive();
+            }
+            return;
+        }
+
         if (isShieldActive) return; // Khi dang co giap thi khong can tich them
 
         currentInnerEnergy = Mathf.Clamp(currentInnerEnergy + amount, 0f, maxInnerEnergy);
+        Debug.Log($"<color=yellow>[INNER ENERGY]</color> +{amount} -> {currentInnerEnergy}/{maxInnerEnergy}");
 
         // Kiem tra neu day noi nang -> Kich hoat giap ao
         if (currentInnerEnergy >= maxInnerEnergy)
         {
             ActivateShield();
         }
+    }
+
+    /// <summary>
+    /// Đặt trực tiếp giá trị Nội Năng (dùng khi rút dần thanh nội năng trong chế độ Overdrive)
+    /// </summary>
+    public void SetInnerEnergy(float val)
+    {
+        currentInnerEnergy = Mathf.Clamp(val, 0f, maxInnerEnergy);
     }
 
     /// <summary>
@@ -128,8 +196,6 @@ public class PlayerEnergySystem : MonoBehaviour
             shieldVisual.ShowShield(true);
         }
 
-        // Hieu ung thong bao & am thanh hoanh trang
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, LocalizationManager.T("GIÁP HỘ THÂN KÍCH HOẠT!", "SHIELD ACTIVATED!"), new Color(1f, 0.85f, 0.25f));
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         var cam = FindAnyObjectByType<CameraFollow>();
@@ -144,6 +210,10 @@ public class PlayerEnergySystem : MonoBehaviour
     /// </summary>
     public int AbsorbDamage(int incomingDamage)
     {
+        // Riêng Player 6 không dùng cơ chế giáp vàng
+        var mage = GetComponent<CelestialMageSkill>();
+        if (mage != null && mage.enabled) return incomingDamage;
+
         if (!isShieldActive || incomingDamage <= 0) return incomingDamage;
 
         // Am thanh & hieu ung giap chan don
@@ -155,8 +225,6 @@ public class PlayerEnergySystem : MonoBehaviour
         if (currentShieldHealth >= incomingDamage)
         {
             currentShieldHealth -= incomingDamage;
-            string shieldPrefix = LocalizationManager.T("GIÁP HỘ THÂN", "SHIELD");
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"[{shieldPrefix}] -{incomingDamage}", new Color(1f, 0.88f, 0.35f));
 
             if (currentShieldHealth <= 0)
             {
@@ -167,8 +235,6 @@ public class PlayerEnergySystem : MonoBehaviour
         else
         {
             int remainingDamage = incomingDamage - currentShieldHealth;
-            string shieldBrokenPrefix = LocalizationManager.T("GIÁP VỠ", "SHIELD BROKEN");
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, $"[{shieldBrokenPrefix}] -{currentShieldHealth}", new Color(1f, 0.45f, 0.35f));
             currentShieldHealth = 0;
             BreakShield(expired: false);
             return remainingDamage; // Phan sat thuong con lai tru vao mau
@@ -192,13 +258,8 @@ public class PlayerEnergySystem : MonoBehaviour
             shieldVisual.PlayBreakVFX();
         }
 
-        if (expired)
+        if (!expired)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, LocalizationManager.T("GIÁP HẾT HẠN", "SHIELD EXPIRED"), new Color(0.7f, 0.75f, 0.85f));
-        }
-        else
-        {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, LocalizationManager.T("GIÁP VỠ TAN!", "SHIELD SHATTERED!"), new Color(1f, 0.35f, 0.4f));
             SoundManager.EnsureInstance()?.PlayHitImpact();
         }
 

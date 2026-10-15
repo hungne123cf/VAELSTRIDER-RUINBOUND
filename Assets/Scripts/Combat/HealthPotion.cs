@@ -36,6 +36,15 @@ public class HealthPotion : MonoBehaviour
         {
             TriggerPickup();
         }
+        else if (dist <= 3.8f)
+        {
+            // Tự động hút nhanh về phía người chơi (tốc độ cao để thu thập ngay lập tức, không lơ lửng)
+            transform.position = Vector3.MoveTowards(transform.position, player.position, 14f * Time.deltaTime);
+            if (Vector2.Distance(transform.position, player.position) <= pickupRadius)
+            {
+                TriggerPickup();
+            }
+        }
         else
         {
             // Bap benh nhe nhang tren san

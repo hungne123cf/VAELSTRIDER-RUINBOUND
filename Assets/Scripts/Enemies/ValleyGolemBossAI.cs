@@ -98,6 +98,12 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+        if (PlayerHealth.IsPlayerDead)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
         if (player == null)
         {
             FindPlayer();

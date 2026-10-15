@@ -44,6 +44,19 @@ public class BossGigapackSkills : MonoBehaviour
         if (p != null) playerTransform = p.transform;
     }
 
+    void OnDisable()
+    {
+        StopAllCoroutines();
+        isCasting = false;
+        ClearAllWarningZonesAndEffects();
+    }
+
+    void OnDestroy()
+    {
+        StopAllCoroutines();
+        ClearAllWarningZonesAndEffects();
+    }
+
     private void InitializeSkillList()
     {
         activeSkills.Clear();
@@ -116,6 +129,7 @@ public class BossGigapackSkills : MonoBehaviour
     void Update()
     {
         if (bossAI == null || !bossAI.IsBoss || bossAI.IsDead) return;
+        if (PlayerHealth.IsPlayerDead) return;
         if (bossAI.IsPurpleRingActive) return; // Đang tụ đòn ma trận đạn tím thì không tung chiêu khác!
 
         if (playerTransform == null)
@@ -304,6 +318,10 @@ public class BossGigapackSkills : MonoBehaviour
             fxObj.transform.localScale = Vector3.one * fxScale;
         }
 
+        // Tự động hủy sau thời lượng hoạt ảnh phòng khi Boss chết/ngắt chiêu giữa chừng
+        float animDuration = (skill.cachedFrames.Length / Mathf.Max(1f, skill.animFps)) + 0.15f;
+        Destroy(fxObj, animDuration);
+
         // Rung man hinh nhe
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.2f, 0.35f);
@@ -311,32 +329,36 @@ public class BossGigapackSkills : MonoBehaviour
         float frameDelay = 1f / skill.animFps;
         bool hasDealtDamage = false;
 
-        for (int i = 0; i < skill.cachedFrames.Length; i++)
+        try
         {
-            if (fxObj == null) yield break;
-            if (bossAI != null && bossAI.IsDead)
+            for (int i = 0; i < skill.cachedFrames.Length; i++)
             {
-                if (fxObj != null) Destroy(fxObj);
-                yield break;
-            }
-            sr.sprite = skill.cachedFrames[i];
+                if (fxObj == null) yield break;
+                if (bossAI != null && bossAI.IsDead)
+                {
+                    yield break;
+                }
+                sr.sprite = skill.cachedFrames[i];
 
-            if (isProjectile)
-            {
-                fxObj.transform.position += (Vector3)(direction * skill.speed * frameDelay);
-            }
+                if (isProjectile)
+                {
+                    fxObj.transform.position += (Vector3)(direction * skill.speed * frameDelay);
+                }
 
-            // Gay dame o giua hoat anh
-            if (!hasDealtDamage && i >= skill.cachedFrames.Length / 3)
-            {
-                hasDealtDamage = true;
-                CheckAndDealDamage(fxObj.transform.position, skill.radius, skill.damage);
-            }
+                // Gay dame o giua hoat anh
+                if (!hasDealtDamage && i >= skill.cachedFrames.Length / 3)
+                {
+                    hasDealtDamage = true;
+                    CheckAndDealDamage(fxObj.transform.position, skill.radius, skill.damage);
+                }
 
-            yield return new WaitForSeconds(frameDelay);
+                yield return new WaitForSeconds(frameDelay);
+            }
         }
-
-        if (fxObj != null) Destroy(fxObj);
+        finally
+        {
+            if (fxObj != null) Destroy(fxObj);
+        }
     }
 
     private void CheckAndDealDamage(Vector3 center, float radius, int damage)
@@ -393,17 +415,7 @@ public class BossGigapackSkills : MonoBehaviour
         return sprites.ToArray();
     }
 
-    void OnDisable()
-    {
-        StopAllCoroutines();
-        isCasting = false;
-    }
 
-    void OnDestroy()
-    {
-        StopAllCoroutines();
-        ClearAllWarningZonesAndEffects();
-    }
 
     public static void ClearAllWarningZonesAndEffects()
     {

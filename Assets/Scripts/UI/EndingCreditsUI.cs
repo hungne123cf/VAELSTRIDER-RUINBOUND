@@ -234,6 +234,7 @@ public class EndingCreditsUI : MonoBehaviour
 
     public void OnClickPlayAgain()
     {
+        PlayerInventory.ResetRunShards();
         Time.timeScale = 1f;
         if (Application.CanStreamedLevelBeLoaded("Map1_Thestart"))
         {
@@ -247,6 +248,7 @@ public class EndingCreditsUI : MonoBehaviour
 
     public void OnClickMainMenu()
     {
+        PlayerInventory.ResetRunShards();
         Time.timeScale = 1f;
         if (Application.CanStreamedLevelBeLoaded("MainMenuScene"))
         {
@@ -267,7 +269,7 @@ public class EndingCreditsUI : MonoBehaviour
             canvasObj = new GameObject("EndingCreditsCanvas");
             canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 99998;
+            canvas.sortingOrder = 31500;
             var scaler = canvasObj.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
@@ -279,7 +281,7 @@ public class EndingCreditsUI : MonoBehaviour
             canvas = canvasObj.GetComponent<Canvas>();
             if (canvas == null) canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 99998;
+            canvas.sortingOrder = 31500;
         }
 
         Transform existing = canvas.transform.Find("EndingCreditsPanel");

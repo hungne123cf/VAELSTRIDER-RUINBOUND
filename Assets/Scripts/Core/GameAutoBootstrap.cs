@@ -59,14 +59,16 @@ public class GameAutoBootstrap : MonoBehaviour
             InGameInventoryUI.EnsureUIExists();
             PlayerEnergyUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
-            ShrineUpgradeUI.EnsureUIExists();
             ChestLootPopupUI.EnsureUIExists();
-            EnsureAncientShrine(new Vector3(-5.5f, 2.8f, 0f));
+            RemoveAncientShrine();
+            PlayerLevelSystem.EnsureInstance();
+            AugmentManager.EnsureInstance();
+            PlayerExpBarUI.EnsureUIExists();
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
             MapSpiritSparksManager.EnsureInstance();
-            Debug.Log("<color=green>[BOOTSTRAP]</color> Dang o Map 2 (Valley Ruin)! Da khoi tao Ancient Shrine Tru Da Phat Sang va UI.");
+            Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 2 (Valley Ruin)! Đã khởi tạo Hệ thống Level Farm & Lõi TFT.");
             return;
         }
 
@@ -84,9 +86,11 @@ public class GameAutoBootstrap : MonoBehaviour
             InGameInventoryUI.EnsureUIExists();
             PlayerEnergyUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
-            ShrineUpgradeUI.EnsureUIExists();
             ChestLootPopupUI.EnsureUIExists();
-            EnsureAncientShrine(new Vector3(-1.5f, -5.0f, 0f));
+            RemoveAncientShrine();
+            PlayerLevelSystem.EnsureInstance();
+            AugmentManager.EnsureInstance();
+            PlayerExpBarUI.EnsureUIExists();
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
@@ -128,15 +132,17 @@ public class GameAutoBootstrap : MonoBehaviour
         // 5. Khoi tao Ruong Kho Bau trong phong (TreasureChest)
         EnsureTreasureChest();
 
-        // 6. He thong Ban Tho Nang Cap Co Dai (Ancient Shrine)
-        EnsureAncientShrine();
+        // 6. Gỡ bỏ Trụ Nâng Cấp cũ, thay bằng Hệ thống Level & Lõi TFT
+        RemoveAncientShrine();
+        PlayerLevelSystem.EnsureInstance();
+        AugmentManager.EnsureInstance();
+        PlayerExpBarUI.EnsureUIExists();
 
         // 7. He thong Anh Sang URP 2D Dark Fantasy
         EnsureDungeonLighting();
 
         // 8. Dam bao Player Upgrade Manager va UI
         PlayerUpgradeManager.EnsureInstance();
-        ShrineUpgradeUI.EnsureUIExists();
         MapSpiritSparksManager.EnsureInstance();
 
         // 9. Co che Dark Souls: Kiem tra va tai sinh Vung Hon (Lost Shards Grave) tai vi tri tu tran cu
@@ -163,6 +169,18 @@ public class GameAutoBootstrap : MonoBehaviour
         var joyBg = GameObject.Find("JoystickBackground");
         if (joyBg != null) joyBg.SetActive(visible);
 
+        // 1.1 All Mobile Action Buttons directly
+        var actionButtons = Object.FindObjectsByType<MobileActionButton>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var b in actionButtons)
+        {
+            if (b != null && b.gameObject != null) b.gameObject.SetActive(visible);
+        }
+
+        if (!visible && SkillCancelZoneUI.Instance != null)
+        {
+            SkillCancelZoneUI.Instance.Hide();
+        }
+
         // 2. All Minimap components & roots
         var minimaps = Object.FindObjectsByType<MinimapHUD>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var m in minimaps)
@@ -184,12 +202,15 @@ public class GameAutoBootstrap : MonoBehaviour
         if (PlayerEnergyUI.Instance != null && PlayerEnergyUI.Instance.gameObject != null)
             PlayerEnergyUI.Instance.gameObject.SetActive(visible);
 
+        if (PlayerExpBarUI.Instance != null && PlayerExpBarUI.Instance.gameObject != null)
+            PlayerExpBarUI.Instance.SetVisible(visible);
+
         // 5. Hide / Show all specific HUD objects across ALL Canvases
         string[] hudNames = new string[]
         {
             "Btn_Attack", "Btn_Dash", "Btn_Special", "Btn_Potion",
             "Btn_InGameBag", "Btn_CharacterStats", "Btn_SettingsGear", "Btn_InGameSettings", "Btn_InGameInfo",
-            "PlayerHealthBar", "PlayerHealthUI", "ShardsCounter", "WaveBanner", "MatchTimerPanel", "RuinRadarCompass",
+            "PlayerHealthBar", "PlayerHealthUI", "PlayerExpBarHUD", "ExpBarHUD", "ShardsCounter", "WaveBanner", "MatchTimerPanel", "RuinRadarCompass",
             "Minimap_Compass_HUD", "RadarDisc", "CompassNeedle", "RuinPortalDistanceText"
         };
 
@@ -198,7 +219,7 @@ public class GameAutoBootstrap : MonoBehaviour
         {
             if (c == null) continue;
             string cName = c.gameObject.name;
-            if (cName.Contains("InGameInventoryModal") || cName.Contains("SettingsModal") || cName.Contains("CharacterStatsPanel") || cName.Contains("ShrineUpgrade") || cName.Contains("FullscreenMapModal"))
+            if (cName.Contains("InGameInventoryModal") || cName.Contains("SettingsModal") || cName.Contains("CharacterStatsPanel") || cName.Contains("ShrineUpgrade") || cName.Contains("FullscreenMapModal") || cName.Contains("LevelUpRoot") || cName.Contains("LevelUpChoiceUI"))
                 continue;
 
             HideChildrenByName(c.transform, hudNames, visible);
@@ -417,31 +438,30 @@ public class GameAutoBootstrap : MonoBehaviour
         return chest;
     }
 
-    public static AncientShrine EnsureAncientShrine(Vector3? customPos = null)
+    public static void RemoveAncientShrine()
     {
-        var shrine = Object.FindAnyObjectByType<AncientShrine>();
-        if (shrine != null)
+        var shrines = Object.FindObjectsByType<AncientShrine>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var s in shrines)
         {
-            shrine.EnsurePillarVisuals();
-            return shrine;
-        }
-
-        Vector3 spawnPos = customPos.HasValue ? customPos.Value : new Vector3(-3.2f, 1.6f, 0f);
-        if (!customPos.HasValue)
-        {
-            var player = Object.FindAnyObjectByType<PlayerController>();
-            if (player != null)
+            if (s != null && s.gameObject != null)
             {
-                spawnPos = player.transform.position + new Vector3(-3.2f, 1.6f, 0f);
+                Object.Destroy(s.gameObject);
             }
         }
+        var shrineUIs = Object.FindObjectsByType<ShrineUpgradeUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var ui in shrineUIs)
+        {
+            if (ui != null && ui.gameObject != null)
+            {
+                Object.Destroy(ui.gameObject);
+            }
+        }
+    }
 
-        shrine = AncientShrine.SpawnShrine(spawnPos);
-        PlayerUpgradeManager.EnsureInstance();
-        ShrineUpgradeUI.EnsureUIExists();
-
-        Debug.Log("<color=green>[BOOTSTRAP]</color> Da tao Ancient Shrine (Tru Da Phat Sang) tai: " + spawnPos);
-        return shrine;
+    public static AncientShrine EnsureAncientShrine(Vector3? customPos = null)
+    {
+        RemoveAncientShrine();
+        return null;
     }
 
     public static DungeonLightingManager EnsureDungeonLighting()
@@ -536,11 +556,28 @@ public class GameAutoBootstrap : MonoBehaviour
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure != null) Object.Destroy(azure);
 
+            var mage = player.GetComponent<CelestialMageSkill>();
+            if (mage != null) Object.Destroy(mage);
+
             var titan = player.GetComponent<TitanBerserkerSkill>();
             if (titan == null)
             {
                 titan = player.gameObject.AddComponent<TitanBerserkerSkill>();
             }
+#if UNITY_EDITOR
+            var attackObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Attack.png");
+            if (attackObjs != null)
+            {
+                foreach (var o in attackObjs)
+                {
+                    if (o is Sprite s && s.name == "Hammer_Attack_0_0")
+                    {
+                        titan.chargePoseSprite = s;
+                        break;
+                    }
+                }
+            }
+#endif
 
             var pc = player.GetComponent<PlayerCombat>();
             if (pc != null)
@@ -600,11 +637,17 @@ public class GameAutoBootstrap : MonoBehaviour
                 anim.Update(0f);
             }
 #endif
+            var titan = player.GetComponent<TitanBerserkerSkill>();
+            if (titan != null) Object.Destroy(titan);
+
             var sweep = player.GetComponent<SweepTheWeakSkill>();
             if (sweep != null) Object.Destroy(sweep);
 
             var ronin = player.GetComponent<GaleRoninSkill>();
             if (ronin != null) Object.Destroy(ronin);
+
+            var mage = player.GetComponent<CelestialMageSkill>();
+            if (mage != null) Object.Destroy(mage);
 
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure == null)
@@ -668,11 +711,17 @@ public class GameAutoBootstrap : MonoBehaviour
                 anim.Update(0f);
             }
 #endif
+            var titan = player.GetComponent<TitanBerserkerSkill>();
+            if (titan != null) Object.Destroy(titan);
+
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure != null) Object.Destroy(azure);
 
             var sweep = player.GetComponent<SweepTheWeakSkill>();
             if (sweep != null) Object.Destroy(sweep);
+
+            var mage = player.GetComponent<CelestialMageSkill>();
+            if (mage != null) Object.Destroy(mage);
 
             var ronin = player.GetComponent<GaleRoninSkill>();
             if (ronin == null)
@@ -703,6 +752,115 @@ public class GameAutoBootstrap : MonoBehaviour
 
             Debug.Log("<color=green>[CHARACTER]</color> Đã áp dụng nhân vật PHONG LÔI LÃNG KHÁCH (GALE RONIN) với Tuyệt kỹ Ám Ảnh Trảm (Shadow Strike)!");
         }
+        else if (selectedChar == CharacterManager.CHAR_DUNE_ASSASSIN)
+        {
+            player.transform.localScale = Vector3.one;
+            var sr = player.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.material = new Material(Shader.Find("Sprites/Default"));
+#if UNITY_EDITOR
+                var idleSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Player5/PNG/idle/idle_1.png");
+                if (idleSpr != null) sr.sprite = idleSpr;
+#endif
+            }
+
+            var titan = player.GetComponent<TitanBerserkerSkill>();
+            if (titan != null) Object.Destroy(titan);
+
+            var sweep = player.GetComponent<SweepTheWeakSkill>();
+            if (sweep != null) Object.Destroy(sweep);
+
+            var ronin = player.GetComponent<GaleRoninSkill>();
+            if (ronin != null) Object.Destroy(ronin);
+
+            var azure = player.GetComponent<AzureBladeSkill>();
+            if (azure != null) Object.Destroy(azure);
+
+            var dune = player.GetComponent<DuneAssassinSkill>();
+            if (dune == null)
+            {
+                dune = player.gameObject.AddComponent<DuneAssassinSkill>();
+            }
+
+            var btnSpecial = GameObject.Find("Btn_Special");
+            if (btnSpecial != null)
+            {
+                var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = "SANDSTORM X";
+
+                var btn = btnSpecial.GetComponent<UnityEngine.UI.Button>();
+                if (btn != null)
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => {
+                        var d = player.GetComponent<DuneAssassinSkill>();
+                        if (d != null) d.TriggerSpecialSkill();
+                    });
+                }
+            }
+
+            var mage = player.GetComponent<CelestialMageSkill>();
+            if (mage != null) Object.Destroy(mage);
+
+            Debug.Log("<color=yellow>[CHARACTER]</color> Đã áp dụng nhân vật SA MẠC THÍCH KHÁCH (DUNE ASSASSIN) với Tuyệt kỹ Cuồng Bão Sa Ảnh!");
+        }
+        else if (selectedChar == CharacterManager.CHAR_CELESTIAL_MAGE)
+        {
+            player.transform.localScale = new Vector3(0.62f, 0.62f, 1f);
+            var sr = player.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.material = new Material(Shader.Find("Sprites/Default"));
+            }
+
+            var anim = player.GetComponent<Animator>();
+            if (anim != null) anim.enabled = false;
+
+            var titan = player.GetComponent<TitanBerserkerSkill>();
+            if (titan != null) Object.Destroy(titan);
+
+            var sweep = player.GetComponent<SweepTheWeakSkill>();
+            if (sweep != null) Object.Destroy(sweep);
+
+            var ronin = player.GetComponent<GaleRoninSkill>();
+            if (ronin != null) Object.Destroy(ronin);
+
+            var azure = player.GetComponent<AzureBladeSkill>();
+            if (azure != null) Object.Destroy(azure);
+
+            var dune = player.GetComponent<DuneAssassinSkill>();
+            if (dune != null) Object.Destroy(dune);
+
+            var mage = player.GetComponent<CelestialMageSkill>();
+            if (mage == null)
+            {
+                mage = player.gameObject.AddComponent<CelestialMageSkill>();
+            }
+            if (mage != null)
+            {
+                mage.baseOrbDamage = 26;
+            }
+
+            var btnSpecial = GameObject.Find("Btn_Special");
+            if (btnSpecial != null)
+            {
+                var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = "METEOR APOCALYPSE";
+
+                var btn = btnSpecial.GetComponent<UnityEngine.UI.Button>();
+                if (btn != null)
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => {
+                        var cm = player.GetComponent<CelestialMageSkill>();
+                        if (cm != null) cm.TriggerSpecialSkill();
+                    });
+                }
+            }
+
+            Debug.Log("<color=magenta>[CHARACTER]</color> Đã áp dụng nhân vật PHÁP SƯ TINH TÚ (CELESTIAL MAGE) với Tuyệt kỹ Thiên Thạch Ma Trận!");
+        }
         else
         {
             player.transform.localScale = Vector3.one;
@@ -714,6 +872,9 @@ public class GameAutoBootstrap : MonoBehaviour
                 anim.runtimeAnimatorController = controller;
             }
 #endif
+            var titan = player.GetComponent<TitanBerserkerSkill>();
+            if (titan != null) Object.Destroy(titan);
+
             var sweep = player.GetComponent<SweepTheWeakSkill>();
             if (sweep != null) Object.Destroy(sweep);
 
@@ -722,6 +883,12 @@ public class GameAutoBootstrap : MonoBehaviour
 
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure != null) Object.Destroy(azure);
+
+            var dune = player.GetComponent<DuneAssassinSkill>();
+            if (dune != null) Object.Destroy(dune);
+
+            var mage = player.GetComponent<CelestialMageSkill>();
+            if (mage != null) Object.Destroy(mage);
 
             var pCombat = player.GetComponent<PlayerCombat>();
             if (pCombat != null)
@@ -829,7 +996,33 @@ public class GameAutoBootstrap : MonoBehaviour
                 tPoint.localPosition = new Vector3(0f, 0.1f, 0f);
             }
         }
-        else if (selectedChar == CharacterManager.CHAR_MAID)
+        else if (selectedChar == CharacterManager.CHAR_DUNE_ASSASSIN)
+        {
+            // Dune Assassin (Player 5): 36x39 sprite, pivot (0.5, 0.5), centered perfectly on body
+            if (cap != null)
+            {
+                cap.offset = new Vector2(0f, 0f);
+                cap.size = new Vector2(0.48f, 0.72f);
+            }
+            if (tPoint != null)
+            {
+                tPoint.localPosition = new Vector3(0f, 0.05f, 0f);
+            }
+        }
+        else if (selectedChar == CharacterManager.CHAR_CELESTIAL_MAGE)
+        {
+            // Celestial Mage (Player 6): 64x64 floating sprite, centered
+            if (cap != null)
+            {
+                cap.offset = new Vector2(0f, 0f);
+                cap.size = new Vector2(0.48f, 0.75f);
+            }
+            if (tPoint != null)
+            {
+                tPoint.localPosition = new Vector3(0f, 0.1f, 0f);
+            }
+        }
+        else if (selectedChar == CharacterManager.CHAR_GALE_RONIN || selectedChar == CharacterManager.CHAR_MAID)
         {
             // Maid / Ronin: pivot (0.5, 0.5), chan o y=-0.45, dau o y=+0.45
             if (cap != null)
@@ -852,7 +1045,7 @@ public class GameAutoBootstrap : MonoBehaviour
             }
             if (tPoint != null)
             {
-                tPoint.localPosition = new Vector3(0f, 1.2f, 0f);
+                tPoint.localPosition = new Vector3(0f, 1.25f, 0f);
             }
         }
 

@@ -114,22 +114,61 @@ public class PlayerEnergyUI : MonoBehaviour
         if (shardsUI != null)
         {
             RectTransform scRt = shardsUI.GetComponent<RectTransform>();
-            if (scRt != null && scRt.anchoredPosition.y > -108f)
+            if (scRt != null && scRt.anchoredPosition.y > -130f)
             {
-                scRt.anchoredPosition = new Vector2(scRt.anchoredPosition.x, -112f);
+                scRt.anchoredPosition = new Vector2(scRt.anchoredPosition.x, -135f);
             }
         }
     }
 
+    private DuneAssassinSkill duneSkill;
+
     private void UpdateEnergyBar()
     {
-        if (energySlider == null || energySystem == null) return;
+        if (energySlider == null) return;
+
+        if (duneSkill == null && energySystem != null)
+        {
+            duneSkill = energySystem.GetComponent<DuneAssassinSkill>();
+        }
+
+        if (duneSkill != null && duneSkill.enabled)
+        {
+            float curRage = duneSkill.CurrentRage;
+            float maxRage = duneSkill.MaxRage;
+
+            energySlider.maxValue = maxRage;
+            energySlider.value = curRage;
+
+            bool isFull = duneSkill.IsRageFull;
+            if (energyFillImage != null)
+            {
+                energyFillImage.color = isFull 
+                    ? new Color(1f, 0.15f, 0.15f, 1f) 
+                    : new Color(0.95f, 0.35f, 0.15f, 1f);
+            }
+
+            if (energyText != null)
+            {
+                int pct = maxRage > 0 ? Mathf.Clamp(Mathf.RoundToInt((curRage / maxRage) * 100f), 0, 100) : 0;
+                energyText.text = $"{pct}%";
+                ApplyHighContrastStyle(energyText);
+            }
+            return;
+        }
+
+        if (energySystem == null) return;
 
         float current = energySystem.GetEnergy();
         float max = energySystem.GetMaxEnergy();
 
         energySlider.maxValue = max;
         energySlider.value = current;
+
+        if (energyFillImage != null)
+        {
+            energyFillImage.color = new Color(0.15f, 0.75f, 1f); // Cyan
+        }
 
         if (energyText != null)
         {
@@ -141,12 +180,61 @@ public class PlayerEnergyUI : MonoBehaviour
 
     private void UpdateInnerEnergyBar()
     {
-        if (innerEnergySlider == null || energySystem == null) return;
+        if (innerEnergySlider == null) return;
+
+        if (!innerEnergySlider.gameObject.activeSelf)
+        {
+            innerEnergySlider.gameObject.SetActive(true);
+        }
+
+        if (energySystem == null) return;
 
         // Bỏ chữ số cho thanh nội năng
         if (innerEnergyText != null && innerEnergyText.gameObject.activeSelf)
         {
             innerEnergyText.gameObject.SetActive(false);
+        }
+
+        // Kiểm tra riêng cho Player 6 (Celestial Mage): Không có lớp giáp vàng, màu Tím Tinh Tú huyền ảo
+        var mage = (energySystem != null) 
+            ? (energySystem.GetComponent<CelestialMageSkill>() ?? energySystem.GetComponentInChildren<CelestialMageSkill>() ?? energySystem.GetComponentInParent<CelestialMageSkill>() ?? FindAnyObjectByType<CelestialMageSkill>()) 
+            : null;
+        if (mage != null && mage.enabled)
+        {
+            float inner = energySystem.GetInnerEnergy();
+            float maxInner = energySystem.GetMaxInnerEnergy();
+
+            innerEnergySlider.maxValue = maxInner;
+            innerEnergySlider.value = inner;
+
+            if (innerEnergyFillImage != null)
+            {
+                if (mage.IsOverdriveActive)
+                {
+                    // Chớp sáng tím dạ quang báo hiệu đang xả chiêu cuối 1s liên tục!
+                    float pulse = 0.85f + Mathf.PingPong(Time.time * 5f, 0.15f);
+                    innerEnergyFillImage.color = new Color(0.95f, 0.45f, 1f, pulse);
+                }
+                else
+                {
+                    // Tím Tinh Vân
+                    innerEnergyFillImage.color = new Color(0.78f, 0.38f, 0.98f, 0.95f);
+                }
+            }
+
+            if (innerEnergyOutline != null)
+            {
+                if (mage.IsOverdriveActive)
+                {
+                    float pulse = 0.5f + Mathf.Sin(Time.time * 8f) * 0.5f;
+                    innerEnergyOutline.effectColor = new Color(1f, 0.4f, 1f, pulse);
+                }
+                else
+                {
+                    innerEnergyOutline.effectColor = new Color(0.35f, 0.15f, 0.45f, 0.5f);
+                }
+            }
+            return;
         }
 
         bool hasShield = energySystem.IsShieldActive();
@@ -295,7 +383,7 @@ public class PlayerEnergyUI : MonoBehaviour
         textRt.sizeDelta = Vector2.zero;
 
         labelText = textObj.AddComponent<TextMeshProUGUI>();
-        labelText.fontSize = 11;
+        labelText.fontSize = 13.5f;
         labelText.fontStyle = FontStyles.Bold;
         labelText.color = Color.white;
         labelText.alignment = TextAlignmentOptions.Center;

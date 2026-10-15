@@ -191,7 +191,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         hnRt.anchorMax = new Vector2(1, 0.42f);
         hnRt.offsetMin = new Vector2(10, 0); hnRt.offsetMax = new Vector2(-10, 0);
         heroNameText = hnGo.GetComponent<TextMeshProUGUI>();
-        heroNameText.fontSize = 18;
+        heroNameText.fontSize = 20;
         heroNameText.fontStyle = FontStyles.Bold;
         heroNameText.alignment = TextAlignmentOptions.Center;
         heroNameText.color = Color.white;
@@ -203,7 +203,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         hcnRt.anchorMax = new Vector2(1, 0.33f);
         hcnRt.offsetMin = new Vector2(10, 0); hcnRt.offsetMax = new Vector2(-10, 0);
         heroCostumeNameText = hcnGo.GetComponent<TextMeshProUGUI>();
-        heroCostumeNameText.fontSize = 15;
+        heroCostumeNameText.fontSize = 16.5f;
         heroCostumeNameText.fontStyle = FontStyles.Bold;
         heroCostumeNameText.alignment = TextAlignmentOptions.Center;
         heroCostumeNameText.color = new Color(1f, 0.85f, 0.3f, 1f);
@@ -215,7 +215,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         hcbRt.anchorMax = new Vector2(1, 0.24f);
         hcbRt.offsetMin = new Vector2(12, 0); hcbRt.offsetMax = new Vector2(-12, 0);
         heroCostumeBuffsText = hcbGo.GetComponent<TextMeshProUGUI>();
-        heroCostumeBuffsText.fontSize = 13;
+        heroCostumeBuffsText.fontSize = 15f;
         heroCostumeBuffsText.alignment = TextAlignmentOptions.TopLeft;
         heroCostumeBuffsText.color = new Color(0.6f, 1f, 0.6f, 1f);
 
@@ -432,7 +432,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         nRt.offsetMin = new Vector2(14, 0); nRt.offsetMax = new Vector2(0, -6);
         var nTmp = nameGo.GetComponent<TextMeshProUGUI>();
         nTmp.text = $"<color=#{ColorUtility.ToHtmlStringRGB(data.GetRarityColor())}>[{data.GetRarityName()}]</color> {data.GetLocalizedName()}";
-        nTmp.fontSize = 15;
+        nTmp.fontSize = 16;
         nTmp.fontStyle = FontStyles.Bold;
         nTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -451,7 +451,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         if (data.bonusDefPercent > 0) buffLine += $" +{data.bonusDefPercent:0}% DEF";
 
         dTmp.text = $"{data.GetLocalizedDesc()}\n<color=#66FF88><b>{buffLine}</b></color>";
-        dTmp.fontSize = 12;
+        dTmp.fontSize = 15f;
         dTmp.alignment = TextAlignmentOptions.TopLeft;
         dTmp.color = new Color(0.80f, 0.85f, 0.90f, 1f);
 
@@ -472,7 +472,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         RectTransform btRt = btnTxtGo.GetComponent<RectTransform>();
         btRt.anchorMin = Vector2.zero; btRt.anchorMax = Vector2.one;
         var btTmp = btnTxtGo.GetComponent<TextMeshProUGUI>();
-        btTmp.fontSize = 13;
+        btTmp.fontSize = 16.5f;
         btTmp.fontStyle = FontStyles.Bold;
         btTmp.alignment = TextAlignmentOptions.Center;
 

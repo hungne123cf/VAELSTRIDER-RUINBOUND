@@ -12,12 +12,36 @@ public class PlayerInventory : MonoBehaviour
     public event Action<long> OnShardsChanged;
     public event Action<int> OnPotionsChanged;
 
+    private static long currentRunShards = 0;
+
+    public static bool IsBattleScene()
+    {
+        string s = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        if (string.IsNullOrEmpty(s)) return false;
+        return s.Contains("Map") || s.Contains("Valley") || s.Contains("Forgotten") || s == "SampleScene";
+    }
+
+    public static void ResetRunShards()
+    {
+        currentRunShards = 0;
+    }
+
+    public static long GetCurrentRunShards() => currentRunShards;
+
     void Awake()
     {
         AccountDatabase.EnsureActiveSessionLoaded();
 
-        // Load saved shards and potions from Database / PlayerPrefs
-        aethelShards = AccountDatabase.GetAethelShards();
+        // Trong trận đấu, hiển thị số linh hồn kiếm được trong trận (bắt đầu từ 0)
+        if (IsBattleScene())
+        {
+            aethelShards = currentRunShards;
+        }
+        else
+        {
+            currentRunShards = 0;
+            aethelShards = AccountDatabase.GetAethelShards();
+        }
 
         int defaultPotions = PlayerPrefs.GetInt("Saved_HealthPotions", healthPotions);
         healthPotions = PlayerPrefs.GetInt("Save_HealthPotions", defaultPotions);
@@ -45,9 +69,23 @@ public class PlayerInventory : MonoBehaviour
     public void AddShards(long amount)
     {
         if (amount <= 0) return;
-        aethelShards += amount;
-        SaveData();
-        Debug.Log($"<color=cyan>[INVENTORY]</color> Nhặt được +{amount} Aethel Shards! Tổng sở hữu: {aethelShards}");
+
+        if (IsBattleScene())
+        {
+            currentRunShards += amount;
+            aethelShards = currentRunShards;
+            AccountDatabase.AddAethelShards(amount);
+            AccountDatabase.SaveActiveSessionToDatabase();
+        }
+        else
+        {
+            aethelShards += amount;
+            AccountDatabase.SetAethelShards(aethelShards);
+            AccountDatabase.SaveActiveSessionToDatabase();
+        }
+
+        SavePotionsData();
+        Debug.Log($"<color=cyan>[INVENTORY]</color> Nhặt được +{amount} Aethel Shards! Trong trận: {currentRunShards} | Tổng tài khoản: {AccountDatabase.GetAethelShards()}");
         OnShardsChanged?.Invoke(aethelShards);
     }
 
@@ -57,7 +95,18 @@ public class PlayerInventory : MonoBehaviour
         if (aethelShards >= amount)
         {
             aethelShards -= amount;
-            SaveData();
+            if (IsBattleScene())
+            {
+                currentRunShards = Math.Max(0, currentRunShards - amount);
+                AccountDatabase.AddAethelShards(-amount);
+                AccountDatabase.SaveActiveSessionToDatabase();
+            }
+            else
+            {
+                AccountDatabase.SetAethelShards(aethelShards);
+                AccountDatabase.SaveActiveSessionToDatabase();
+            }
+            SavePotionsData();
             OnShardsChanged?.Invoke(aethelShards);
             return true;
         }
@@ -81,17 +130,21 @@ public class PlayerInventory : MonoBehaviour
         if (healthPotions <= 0)
         {
             Debug.Log("<color=yellow>[INVENTORY]</color> Bạn đã hết bình máu!");
-            DamagePopup.CreateText(transform.position, LocalizationManager.T("Hết Bình Máu!", "No Potions!"), Color.yellow);
             return false;
         }
 
-        var health = GetComponent<PlayerHealth>();
+        var health = GetComponent<PlayerHealth>() ?? FindAnyObjectByType<PlayerHealth>();
         if (health != null)
         {
+            if (health.IsDead || health.CurrentHealth <= 0)
+            {
+                Debug.LogWarning("<color=red>[INVENTORY]</color> Nhân vật đã tử trận, không thể sử dụng bình máu!");
+                return false;
+            }
+
             if (health.IsFullHealth())
             {
                 Debug.Log("<color=yellow>[INVENTORY]</color> Máu đã đầy, không cần uống!");
-                DamagePopup.CreateText(transform.position, LocalizationManager.T("Máu Đã Đầy!", "Full HP!"), Color.yellow);
                 return false;
             }
 
@@ -108,21 +161,29 @@ public class PlayerInventory : MonoBehaviour
 
     public void SaveData()
     {
-        // Luu dong bo tat ca cac key de dam bao MainMenu, Shop, Ingame va Upgrade deu nhat quan
-        AccountDatabase.SetAethelShards(aethelShards);
+        // Chỉ ghi đè Aethel Shards tổng của tài khoản khi đang ở menu
+        if (!IsBattleScene())
+        {
+            AccountDatabase.SetAethelShards(aethelShards);
+        }
+        SavePotionsData();
+    }
 
+    public void SavePotionsData()
+    {
         PlayerPrefs.SetInt("Save_HealthPotions", healthPotions);
         PlayerPrefs.SetInt("Saved_HealthPotions", healthPotions);
         PlayerPrefs.SetInt("Player_Health_Potions", healthPotions);
         PlayerPrefs.Save();
 
         // Dong bo vao Database tai khoan hien tai
-        AccountDatabase.UpdateCurrentAccountShardsAndPotions(aethelShards, healthPotions);
+        AccountDatabase.UpdateCurrentAccountShardsAndPotions(AccountDatabase.GetAethelShards(), healthPotions);
     }
 
     public void ResetInventory(long shards = 0, int potions = 0)
     {
         aethelShards = shards;
+        currentRunShards = shards;
         healthPotions = potions;
         SaveData();
         OnShardsChanged?.Invoke(aethelShards);
@@ -138,9 +199,16 @@ public class PlayerInventory : MonoBehaviour
     /// </summary>
     public void DropAllShardsOnDeath(Vector3 deathPos, string sceneName)
     {
-        long dropped = aethelShards;
+        long dropped = currentRunShards;
         aethelShards = 0;
-        SaveData();
+        currentRunShards = 0;
+
+        if (dropped > 0)
+        {
+            AccountDatabase.AddAethelShards(-dropped);
+            AccountDatabase.SaveActiveSessionToDatabase();
+        }
+        SavePotionsData();
         OnShardsChanged?.Invoke(0);
 
         if (dropped > 0)

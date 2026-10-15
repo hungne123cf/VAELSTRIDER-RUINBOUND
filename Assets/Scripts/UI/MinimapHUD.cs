@@ -578,7 +578,7 @@ public class MinimapHUD : MonoBehaviour
 
         var dTmp = txtObj.AddComponent<TextMeshProUGUI>();
         dTmp.text = "<b>--</b>";
-        dTmp.fontSize = 10.5f;
+        dTmp.fontSize = 12.5f;
         dTmp.color = Color.white;
         dTmp.alignment = TextAlignmentOptions.Center;
 

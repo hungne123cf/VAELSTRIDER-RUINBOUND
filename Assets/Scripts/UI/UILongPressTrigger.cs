@@ -122,15 +122,15 @@ public class UILongPressTrigger : MonoBehaviour, IPointerDownHandler, IPointerUp
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         string rewardStr = InventoryUI.FormatCompactNumber(shardReward);
-        tmp.text = $"<size=15><b>X</b></size>\n<size=8>+{rewardStr}</size>";
-        tmp.fontSize = 11;
+        tmp.text = $"<size=17><b>X</b></size>\n<size=12>+{rewardStr}</size>";
+        tmp.fontSize = 14;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.enableAutoSizing = true;
-        tmp.fontSizeMin = 7f;
-        tmp.fontSizeMax = 11f;
-        tmp.lineSpacing = -20f;
+        tmp.fontSizeMin = 11f;
+        tmp.fontSizeMax = 15f;
+        tmp.lineSpacing = -10f;
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
     }

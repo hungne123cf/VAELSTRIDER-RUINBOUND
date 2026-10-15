@@ -40,8 +40,13 @@ public static class InventoryItemDatabase
         public int sellPrice = 10;
         public int hpBonus = 0;
         public int atkBonus = 0;
+        public int physAtkBonus = 0;
+        public int magicAtkBonus = 0;
+        public int trueAtkBonus = 0;
         public int defBonus = 0;
         public float speedBonus = 0f;
+        public float manaBonus = 0f;
+        public float manaRegenBonus = 0f;
         public string sourceVi;
         public string sourceEn;
         public bool isUsable = false;
@@ -396,6 +401,8 @@ public static class InventoryItemDatabase
             sourceVi = "Vòng Quay Gacha Thần Binh",
             sourceEn = "Mythic Weapon Gacha",
             atkBonus = 45,
+            physAtkBonus = 30,
+            trueAtkBonus = 15,
             hpBonus = 30,
             sellPrice = 300
         });
@@ -413,6 +420,8 @@ public static class InventoryItemDatabase
             sourceVi = "Boss Skeleton King Drop / Gacha",
             sourceEn = "Skeleton King Drop / Gacha",
             atkBonus = 32,
+            physAtkBonus = 16,
+            magicAtkBonus = 16,
             sellPrice = 180
         });
 
@@ -429,6 +438,7 @@ public static class InventoryItemDatabase
             sourceVi = "Rơi từ Boss BotWheel (Map 2)",
             sourceEn = "BotWheel Boss Drop (Map 2)",
             atkBonus = 24,
+            physAtkBonus = 24,
             speedBonus = 0.5f,
             sellPrice = 120
         });
@@ -446,6 +456,8 @@ public static class InventoryItemDatabase
             sourceVi = "Phần Thưởng Tân Thủ / Shop",
             sourceEn = "Starter Gift / Armor Shop",
             atkBonus = 18,
+            physAtkBonus = 12,
+            magicAtkBonus = 6,
             hpBonus = 20,
             sellPrice = 75
         });

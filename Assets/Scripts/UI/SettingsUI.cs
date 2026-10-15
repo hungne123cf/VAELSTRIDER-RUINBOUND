@@ -163,20 +163,6 @@ public class SettingsUI : MonoBehaviour
                 outline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.8f);
                 outline.effectDistance = new Vector2(1.5f, -1.5f);
 
-                GameObject txtObj = new GameObject("GearIcon", typeof(RectTransform), typeof(CanvasRenderer));
-                txtObj.layer = 5;
-                txtObj.transform.SetParent(btnObj.transform, false);
-                RectTransform txtRt = txtObj.GetComponent<RectTransform>();
-                txtRt.anchorMin = Vector2.zero;
-                txtRt.anchorMax = Vector2.one;
-                txtRt.sizeDelta = Vector2.zero;
-
-                var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-                tmp.text = "<size=24>⚙</size>";
-                tmp.alignment = TextAlignmentOptions.Center;
-                tmp.color = new Color(1f, 0.85f, 0.4f);
-                tmp.raycastTarget = false;
-
                 Button btn = btnObj.GetComponent<Button>();
                 btn.targetGraphic = btnImg;
                 btn.onClick.AddListener(() =>
@@ -184,6 +170,8 @@ public class SettingsUI : MonoBehaviour
                     if (Instance != null) Instance.OpenSettings();
                     else EnsureUIExists()?.OpenSettings();
                 });
+
+                WhiteIconLoader.ReplaceTextWithIcon(btn, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(28f, 28f));
             }
         }
 
@@ -256,11 +244,8 @@ public class SettingsUI : MonoBehaviour
         boxRt.sizeDelta = new Vector2(1060f, 600f);
 
         Image boxImg = dialogBox.GetComponent<Image>();
-        boxImg.color = new Color(0.07f, 0.09f, 0.14f, 0.98f);
-
-        var outline = dialogBox.AddComponent<Outline>();
-        outline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.95f);
-        outline.effectDistance = new Vector2(2.5f, -2.5f);
+        boxImg.color = new Color(0.04f, 0.05f, 0.09f, 0.98f);
+        WhiteIconLoader.ApplyGothicFrame(dialogBox, new Color(0.85f, 0.72f, 0.38f, 0.90f), 0.35f);
 
         // 2. Header Title & Subtitle
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer));
@@ -289,7 +274,7 @@ public class SettingsUI : MonoBehaviour
         subRt.sizeDelta = new Vector2(0f, 24f);
 
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
-        subtitleText.fontSize = 14f;
+        subtitleText.fontSize = 15.5f;
         subtitleText.alignment = TextAlignmentOptions.Center;
         subtitleText.color = new Color(0.6f, 0.85f, 1f);
         subtitleText.text = "Âm thanh, Ngôn ngữ, Quản lý tài khoản & Dữ liệu trò chơi";
@@ -305,37 +290,35 @@ public class SettingsUI : MonoBehaviour
         lcRt.offsetMax = new Vector2(-15f, -95f);
 
         Image lcImg = leftCol.GetComponent<Image>();
-        lcImg.color = new Color(0.09f, 0.12f, 0.18f, 0.95f);
-        var lcOutline = leftCol.AddComponent<Outline>();
-        lcOutline.effectColor = new Color(0.2f, 0.5f, 0.8f, 0.6f);
-        lcOutline.effectDistance = new Vector2(1.5f, -1.5f);
+        lcImg.color = new Color(0.06f, 0.08f, 0.13f, 0.95f);
+        WhiteIconLoader.ApplyGothicFrame(leftCol, new Color(0.35f, 0.55f, 0.75f, 0.70f), 0.55f);
 
         leftColHeader = CreateLabel(leftCol.transform, "Header", "<b><color=#55EFC4>1. ÂM THANH & NGÔN NGỮ</color></b>", new Vector2(20f, -15f), new Vector2(450f, 28f));
-        leftColHeader.fontSize = 17;
+        leftColHeader.fontSize = 18;
 
         // BGM Slider Row
         bgmLabel = CreateLabel(leftCol.transform, "BGMLabel", "Âm nhạc nền (BGM):", new Vector2(20f, -55f), new Vector2(400f, 26f));
-        bgmLabel.fontSize = 15;
+        bgmLabel.fontSize = 16;
         bgmSlider = CreateSlider(leftCol.transform, "BGMSlider", new Vector2(20f, -88f), new Vector2(360f, 28f));
         bgmValueText = CreateLabel(leftCol.transform, "BGMVal", "80%", new Vector2(395f, -88f), new Vector2(75f, 28f));
-        bgmValueText.fontSize = 16;
+        bgmValueText.fontSize = 17;
         bgmValueText.fontStyle = FontStyles.Bold;
         bgmValueText.color = new Color(1f, 0.85f, 0.35f);
 
         // SFX Slider Row
         sfxLabel = CreateLabel(leftCol.transform, "SFXLabel", "Hiệu ứng âm thanh (SFX):", new Vector2(20f, -145f), new Vector2(400f, 26f));
-        sfxLabel.fontSize = 15;
+        sfxLabel.fontSize = 16;
         sfxSlider = CreateSlider(leftCol.transform, "SFXSlider", new Vector2(20f, -178f), new Vector2(360f, 28f));
         sfxValueText = CreateLabel(leftCol.transform, "SFXVal", "80%", new Vector2(395f, -178f), new Vector2(75f, 28f));
-        sfxValueText.fontSize = 16;
+        sfxValueText.fontSize = 17;
         sfxValueText.fontStyle = FontStyles.Bold;
         sfxValueText.color = new Color(1f, 0.85f, 0.35f);
 
         // Language Row
         languageLabel = CreateLabel(leftCol.transform, "LangLabel", "Ngôn ngữ hiển thị (Language):", new Vector2(20f, -240f), new Vector2(450f, 26f));
-        languageLabel.fontSize = 15;
+        languageLabel.fontSize = 16;
         languageToggleButton = CreateStyledButton(leftCol.transform, "Btn_LanguageToggle", new Vector2(20f, -275f), new Vector2(450f, 52f), new Color(0.16f, 0.24f, 0.38f), out languageButtonText);
-        languageButtonText.fontSize = 16;
+        languageButtonText.fontSize = 17;
         languageButtonText.text = LocalizationManager.IsVietnamese ? "TIẾNG VIỆT (VIETNAMESE)" : "ENGLISH";
 
         // 4. RIGHT COLUMN: Account & Data
@@ -349,13 +332,11 @@ public class SettingsUI : MonoBehaviour
         rcRt.offsetMax = new Vector2(-30f, -95f);
 
         Image rcImg = rightCol.GetComponent<Image>();
-        rcImg.color = new Color(0.09f, 0.12f, 0.18f, 0.95f);
-        var rcOutline = rightCol.AddComponent<Outline>();
-        rcOutline.effectColor = new Color(0.8f, 0.4f, 0.3f, 0.6f);
-        rcOutline.effectDistance = new Vector2(1.5f, -1.5f);
+        rcImg.color = new Color(0.06f, 0.08f, 0.13f, 0.95f);
+        WhiteIconLoader.ApplyGothicFrame(rightCol, new Color(0.65f, 0.45f, 0.40f, 0.70f), 0.55f);
 
         rightColHeader = CreateLabel(rightCol.transform, "Header", "<b><color=#FFA502>2. TÀI KHOẢN & DỮ LIỆU</color></b>", new Vector2(20f, -15f), new Vector2(450f, 28f));
-        rightColHeader.fontSize = 17;
+        rightColHeader.fontSize = 18;
 
         // Account Info Box
         GameObject accBox = new GameObject("AccBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -367,36 +348,39 @@ public class SettingsUI : MonoBehaviour
         abRt.anchoredPosition = new Vector2(0f, -50f);
         abRt.sizeDelta = new Vector2(-40f, 75f);
         Image abImg = accBox.GetComponent<Image>();
-        abImg.color = new Color(0.05f, 0.07f, 0.12f, 0.95f);
-        var abOutline = accBox.AddComponent<Outline>();
-        abOutline.effectColor = new Color(0.3f, 0.4f, 0.55f, 0.6f);
+        abImg.color = new Color(0.04f, 0.05f, 0.09f, 0.95f);
+        WhiteIconLoader.ApplyGothicFrame(accBox, new Color(0.35f, 0.45f, 0.60f, 0.60f), 0.65f);
 
         string initUser = PlayerPrefs.GetString(AccountDatabase.PREF_CURRENT_USER,
             PlayerPrefs.GetString("Player_Name", "WANDERER")).ToUpper();
         accountInfoText = CreateLabel(accBox.transform, "AccText",
             $"Tài khoản: <color=#FFA502><b>{initUser}</b></color>\nTrạng thái: <color=#2ED573>Đã đăng nhập</color>",
             new Vector2(15f, -12f), new Vector2(420f, 50f));
-        accountInfoText.fontSize = 15;
+        accountInfoText.fontSize = 16;
         accountInfoText.lineSpacing = 10;
 
         // 1. LOGOUT BUTTON
         logoutButton = CreateStyledButton(rightCol.transform, "Btn_Logout", new Vector2(20f, -140f), new Vector2(450f, 50f), new Color(0.72f, 0.16f, 0.20f), out logoutBtnText);
-        logoutBtnText.fontSize = 16;
+        logoutBtnText.fontSize = 17;
         logoutBtnText.text = "<b>ĐĂNG XUẤT TÀI KHOẢN (LOGOUT)</b>";
+        WhiteIconLoader.SetButtonIconAndText(logoutButton, "Exit", logoutBtnText.text, Color.white, Color.white, true);
 
         // 2. RESET DATA BUTTON
         resetDataButton = CreateStyledButton(rightCol.transform, "Btn_ResetData", new Vector2(20f, -200f), new Vector2(450f, 46f), new Color(0.38f, 0.14f, 0.16f), out resetDataBtnText);
-        resetDataBtnText.fontSize = 15;
+        resetDataBtnText.fontSize = 16;
         resetDataBtnText.text = LocalizationManager.Get("BTN_RESET_DATA");
+        WhiteIconLoader.SetButtonIconAndText(resetDataButton, "Exclamation", resetDataBtnText.text, new Color(1f, 0.4f, 0.4f), Color.white, true);
 
         // 3. Gameplay In-Game Action Buttons
         restartButton = CreateStyledButton(rightCol.transform, "Btn_Restart", new Vector2(20f, -260f), new Vector2(215f, 48f), new Color(0.2f, 0.25f, 0.35f), out restartBtnText);
-        restartBtnText.fontSize = 15;
+        restartBtnText.fontSize = 16.5f;
         restartBtnText.text = LocalizationManager.Get("BTN_RESTART");
+        WhiteIconLoader.SetButtonIconAndText(restartButton, "Repeat-Right", restartBtnText.text, new Color(0.4f, 0.85f, 1f), Color.white, true);
 
         mainMenuButton = CreateStyledButton(rightCol.transform, "Btn_MainMenu", new Vector2(255f, -260f), new Vector2(215f, 48f), new Color(0.2f, 0.25f, 0.35f), out mainMenuBtnText);
-        mainMenuBtnText.fontSize = 15;
+        mainMenuBtnText.fontSize = 16.5f;
         mainMenuBtnText.text = LocalizationManager.Get("BTN_MAIN_MENU");
+        WhiteIconLoader.SetButtonIconAndText(mainMenuButton, "Home", mainMenuBtnText.text, new Color(1f, 0.85f, 0.35f), Color.white, true);
 
         // 5. BOTTOM ROW: CLOSE BUTTON
         closeButton = CreateStyledButton(dialogBox.transform, "Btn_Close", Vector2.zero, new Vector2(360f, 48f), new Color(0.12f, 0.48f, 0.24f), out closeBtnText);
@@ -405,8 +389,9 @@ public class SettingsUI : MonoBehaviour
         cbRt.anchorMax = new Vector2(0.5f, 0f);
         cbRt.pivot = new Vector2(0.5f, 0.5f);
         cbRt.anchoredPosition = new Vector2(0f, 42f);
-        closeBtnText.fontSize = 18;
+        closeBtnText.fontSize = 19;
         closeBtnText.text = LocalizationManager.Get("BTN_BACK");
+        WhiteIconLoader.SetButtonIconAndText(closeButton, "SolidArrow-Left", closeBtnText.text, Color.white, Color.white, true);
 
         // 6. Reset Confirmation Modal
         BuildResetConfirmModal(dialogBox.transform);
@@ -468,6 +453,7 @@ public class SettingsUI : MonoBehaviour
         yRt.pivot = new Vector2(0f, 0f);
         resetYesBtnText.fontSize = 16;
         resetYesBtnText.text = "XÁC NHẬN XÓA";
+        WhiteIconLoader.SetButtonIconAndText(resetConfirmYesBtn, "Tick", resetYesBtnText.text, new Color(1f, 0.4f, 0.4f), Color.white, true);
 
         resetConfirmNoBtn = CreateStyledButton(box.transform, "Btn_No", new Vector2(-40f, 30f), new Vector2(230f, 50f), new Color(0.2f, 0.25f, 0.35f), out resetNoBtnText);
         RectTransform nRt = resetConfirmNoBtn.GetComponent<RectTransform>();
@@ -476,6 +462,7 @@ public class SettingsUI : MonoBehaviour
         nRt.pivot = new Vector2(1f, 0f);
         resetNoBtnText.fontSize = 16;
         resetNoBtnText.text = "HỦY BỎ";
+        WhiteIconLoader.SetButtonIconAndText(resetConfirmNoBtn, "Cross", resetNoBtnText.text, Color.white, Color.white, true);
 
         resetConfirmModal.SetActive(false);
     }
@@ -729,6 +716,10 @@ public class SettingsUI : MonoBehaviour
         if (languageButtonText != null)
         {
             languageButtonText.text = isVi ? "TIẾNG VIỆT (VIETNAMESE)" : "ENGLISH";
+            if (languageToggleButton != null)
+            {
+                WhiteIconLoader.SetButtonIconAndText(languageToggleButton, "Language_Globe", languageButtonText.text, new Color(0.4f, 0.85f, 1f), Color.white, true);
+            }
         }
 
         string activeUser = PlayerPrefs.GetString(AccountDatabase.PREF_CURRENT_USER, PlayerPrefs.GetString("Player_Name", "WANDERER"));
@@ -739,20 +730,52 @@ public class SettingsUI : MonoBehaviour
                 : $"Account: <color=#FFA502><b>{activeUser.ToUpper()}</b></color>\nStatus: <color=#2ED573>Authenticated</color>";
         }
 
-        if (logoutBtnText != null) logoutBtnText.text = isVi ? "<b>ĐĂNG XUẤT TÀI KHOẢN</b>" : "<b>LOGOUT ACCOUNT</b>";
+        if (logoutBtnText != null)
+        {
+            logoutBtnText.text = isVi ? "<b>ĐĂNG XUẤT TÀI KHOẢN</b>" : "<b>LOGOUT ACCOUNT</b>";
+            if (logoutButton != null) WhiteIconLoader.SetButtonIconAndText(logoutButton, "Exit", logoutBtnText.text, Color.white, Color.white, true);
+        }
 
         bool gameplay = isGameplayScene;
         if (restartButton != null) restartButton.gameObject.SetActive(gameplay);
         if (mainMenuButton != null) mainMenuButton.gameObject.SetActive(gameplay);
 
-        if (restartBtnText != null) restartBtnText.text = isVi ? "CHƠI LẠI" : "RESTART";
-        if (mainMenuBtnText != null) mainMenuBtnText.text = isVi ? "VỀ SẢNH CHÍNH" : "MAIN MENU";
-        if (resetDataBtnText != null) resetDataBtnText.text = isVi ? "XÓA TOÀN BỘ DỮ LIỆU" : "RESET ALL DATA";
-        if (closeBtnText != null) closeBtnText.text = gameplay ? (isVi ? "TIẾP TỤC" : "RESUME") : (isVi ? "QUAY LẠI" : "BACK");
+        if (restartBtnText != null)
+        {
+            restartBtnText.text = isVi ? "CHƠI LẠI" : "RESTART";
+            if (restartButton != null) WhiteIconLoader.SetButtonIconAndText(restartButton, "Repeat-Right", restartBtnText.text, new Color(0.4f, 0.85f, 1f), Color.white, true);
+        }
+        if (mainMenuBtnText != null)
+        {
+            mainMenuBtnText.text = isVi ? "VỀ SẢNH CHÍNH" : "MAIN MENU";
+            if (mainMenuButton != null) WhiteIconLoader.SetButtonIconAndText(mainMenuButton, "Home", mainMenuBtnText.text, new Color(1f, 0.85f, 0.35f), Color.white, true);
+        }
+        if (resetDataBtnText != null)
+        {
+            resetDataBtnText.text = isVi ? "XÓA TOÀN BỘ DỮ LIỆU" : "RESET ALL DATA";
+            if (resetDataButton != null) WhiteIconLoader.SetButtonIconAndText(resetDataButton, "Exclamation", resetDataBtnText.text, new Color(1f, 0.4f, 0.4f), Color.white, true);
+        }
+        if (closeBtnText != null)
+        {
+            closeBtnText.text = gameplay ? (isVi ? "TIẾP TỤC" : "RESUME") : (isVi ? "QUAY LẠI" : "BACK");
+            if (closeButton != null)
+            {
+                string cIcon = gameplay ? "Play" : "SolidArrow-Left";
+                WhiteIconLoader.SetButtonIconAndText(closeButton, cIcon, closeBtnText.text, Color.white, Color.white, true);
+            }
+        }
 
         if (resetPromptText != null) resetPromptText.text = isVi ? "Bạn có chắc chắn muốn xóa toàn bộ dữ liệu và bắt đầu lại?" : "Are you sure you want to reset all game data?";
-        if (resetYesBtnText != null) resetYesBtnText.text = isVi ? "XÁC NHẬN XÓA" : "CONFIRM";
-        if (resetNoBtnText != null) resetNoBtnText.text = isVi ? "HỦY BỎ" : "CANCEL";
+        if (resetYesBtnText != null)
+        {
+            resetYesBtnText.text = isVi ? "XÁC NHẬN XÓA" : "CONFIRM";
+            if (resetConfirmYesBtn != null) WhiteIconLoader.SetButtonIconAndText(resetConfirmYesBtn, "Tick", resetYesBtnText.text, new Color(1f, 0.4f, 0.4f), Color.white, true);
+        }
+        if (resetNoBtnText != null)
+        {
+            resetNoBtnText.text = isVi ? "HỦY BỎ" : "CANCEL";
+            if (resetConfirmNoBtn != null) WhiteIconLoader.SetButtonIconAndText(resetConfirmNoBtn, "Cross", resetNoBtnText.text, Color.white, Color.white, true);
+        }
     }
 
     public void OpenSettings()

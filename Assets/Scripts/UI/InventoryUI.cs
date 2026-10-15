@@ -153,45 +153,9 @@ public class InventoryUI : MonoBehaviour
     private static Sprite LoadHeroSkillSprite(string heroId, int skillIdx)
     {
         string h = string.IsNullOrEmpty(heroId) ? "vael" : heroId.ToLower();
-        bool isTitan = (h.Contains("titan") || h.Contains("player4"));
-        bool isAzure = (h.Contains("azure") || h.Contains("player3"));
-        bool isRonin = (h.Contains("ronin") || h.Contains("gale") || h.Contains("maid"));
-
-        string fileName = (skillIdx == 0) ? "icon_attack.png" : (skillIdx == 1 ? "icon_dash.png" : "icon_ulti.png");
-        string resourceName = (skillIdx == 0) ? "icon_attack" : (skillIdx == 1 ? "icon_dash" : "icon_ulti");
-
-        Sprite spr = null;
-        if (isTitan)
-        {
-#if UNITY_EDITOR
-            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Player4/UI/{fileName}");
-#endif
-            if (spr == null) spr = Resources.Load<Sprite>($"Player4/UI/{resourceName}");
-        }
-        else if (isRonin)
-        {
-#if UNITY_EDITOR
-            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Player2/UI/{fileName}");
-#endif
-            if (spr == null) spr = Resources.Load<Sprite>($"Player2/UI/{resourceName}");
-        }
-        else if (isAzure)
-        {
-#if UNITY_EDITOR
-            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Player3/UI/{fileName}");
-#endif
-            if (spr == null) spr = Resources.Load<Sprite>($"Player3/UI/{resourceName}");
-        }
-        else
-        {
-            string oldPath = (skillIdx == 0) ? "Assets/Sprites/UI/Attack.png" : (skillIdx == 1 ? "Assets/Sprites/UI/Dash.png" : "Assets/Sprites/UI/Ulti.png");
-            string oldRes = (skillIdx == 0) ? "UI/Attack" : (skillIdx == 1 ? "UI/Dash" : "UI/Ulti");
-#if UNITY_EDITOR
-            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(oldPath);
-#endif
-            if (spr == null) spr = Resources.Load<Sprite>(oldRes);
-        }
-        return spr;
+        var btnType = (skillIdx == 0) ? MobileActionButton.ButtonType.Attack 
+                    : (skillIdx == 1 ? MobileActionButton.ButtonType.Dash : MobileActionButton.ButtonType.Skill);
+        return MobileActionButton.GetHeroActionIcon(h, btnType);
     }
 
     private static void EnsureItemSprites()
@@ -419,7 +383,7 @@ public class InventoryUI : MonoBehaviour
 
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = LocalizationManager.T("Lưu trữ trang bị, khoáng thạch & Dùng Linh Hồn quay Thần Binh cổ đại", "Store battle gear & spend Aethel Shards to summon mythic artifacts");
-        subtitleText.fontSize = 15;
+        subtitleText.fontSize = 17f;
         subtitleText.color = new Color(0.7f, 0.75f, 0.85f);
         subtitleText.alignment = TextAlignmentOptions.Center;
 
@@ -481,7 +445,7 @@ public class InventoryUI : MonoBehaviour
             tabRt.anchorMax = new Vector2(0.5f, 1f);
             tabRt.pivot = new Vector2(0.5f, 1f);
             tabRt.anchoredPosition = new Vector2(startX + (i * spacing), -108f);
-            tabRt.sizeDelta = new Vector2(215f, 44f);
+            tabRt.sizeDelta = new Vector2(218f, 46f);
 
             Image img = tabObj.GetComponent<Image>();
             img.color = (i == count - 1) ? new Color(0.55f, 0.18f, 0.72f, 1f) : new Color(0.12f, 0.15f, 0.22f, 0.95f);
@@ -504,7 +468,7 @@ public class InventoryUI : MonoBehaviour
 
             var tmp = txtObj.AddComponent<TextMeshProUGUI>();
             tmp.text = LocalizationManager.T(tabLabelsVi[i], tabLabelsEn[i]);
-            tmp.fontSize = 15;
+            tmp.fontSize = 17f;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.color = Color.white;
@@ -586,11 +550,11 @@ public class InventoryUI : MonoBehaviour
         rightInspectorObj.transform.SetParent(parent, false);
 
         RectTransform rt = rightInspectorObj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.62f, 0f);
+        rt.anchorMin = new Vector2(0.60f, 0f);
         rt.anchorMax = new Vector2(1f, 1f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.offsetMin = new Vector2(15f, 30f);
-        rt.offsetMax = new Vector2(-40f, -170f);
+        rt.offsetMin = new Vector2(15f, 25f);
+        rt.offsetMax = new Vector2(-30f, -165f);
 
         Image img = rightInspectorObj.GetComponent<Image>();
         img.color = new Color(0.05f, 0.06f, 0.10f, 0.98f);
@@ -599,13 +563,16 @@ public class InventoryUI : MonoBehaviour
         rightOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.75f);
         rightOutline.effectDistance = new Vector2(2f, -2f);
 
-        // 1. Icon Box with Framed Sprite
+        // 1. Icon Box with Framed Sprite (Top anchored, large & glorious)
         GameObject iconBox = new GameObject("IconBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         iconBox.layer = 5;
         iconBox.transform.SetParent(rightInspectorObj.transform, false);
         RectTransform iconBoxRt = iconBox.GetComponent<RectTransform>();
-        iconBoxRt.anchoredPosition = new Vector2(0f, 172f);
-        iconBoxRt.sizeDelta = new Vector2(76f, 76f);
+        iconBoxRt.anchorMin = new Vector2(0.5f, 1f);
+        iconBoxRt.anchorMax = new Vector2(0.5f, 1f);
+        iconBoxRt.pivot = new Vector2(0.5f, 1f);
+        iconBoxRt.anchoredPosition = new Vector2(0f, -20f);
+        iconBoxRt.sizeDelta = new Vector2(120f, 120f);
         
         detailIconBoxImg = iconBox.GetComponent<Image>();
         if (sprItemSlotFrame != null)
@@ -621,7 +588,7 @@ public class InventoryUI : MonoBehaviour
         RectTransform iconRt = iconObj.GetComponent<RectTransform>();
         iconRt.anchorMin = Vector2.zero;
         iconRt.anchorMax = Vector2.one;
-        iconRt.sizeDelta = new Vector2(-16f, -16f);
+        iconRt.sizeDelta = new Vector2(-18f, -18f);
         detailIconImg = iconObj.GetComponent<Image>();
         detailIconImg.preserveAspect = true;
 
@@ -630,10 +597,13 @@ public class InventoryUI : MonoBehaviour
         nameObj.layer = 5;
         nameObj.transform.SetParent(rightInspectorObj.transform, false);
         RectTransform nameRt = nameObj.GetComponent<RectTransform>();
-        nameRt.anchoredPosition = new Vector2(0f, 120f);
-        nameRt.sizeDelta = new Vector2(350f, 26f);
+        nameRt.anchorMin = new Vector2(0f, 1f);
+        nameRt.anchorMax = new Vector2(1f, 1f);
+        nameRt.pivot = new Vector2(0.5f, 1f);
+        nameRt.anchoredPosition = new Vector2(0f, -152f);
+        nameRt.sizeDelta = new Vector2(0f, 38f);
         detailNameText = nameObj.AddComponent<TextMeshProUGUI>();
-        detailNameText.fontSize = 16;
+        detailNameText.fontSize = 28;
         detailNameText.fontStyle = FontStyles.Bold;
         detailNameText.alignment = TextAlignmentOptions.Center;
         detailNameText.color = new Color(1f, 0.9f, 0.45f);
@@ -645,10 +615,13 @@ public class InventoryUI : MonoBehaviour
         tierObj.layer = 5;
         tierObj.transform.SetParent(rightInspectorObj.transform, false);
         RectTransform tierRt = tierObj.GetComponent<RectTransform>();
-        tierRt.anchoredPosition = new Vector2(0f, 96f);
-        tierRt.sizeDelta = new Vector2(350f, 20f);
+        tierRt.anchorMin = new Vector2(0f, 1f);
+        tierRt.anchorMax = new Vector2(1f, 1f);
+        tierRt.pivot = new Vector2(0.5f, 1f);
+        tierRt.anchoredPosition = new Vector2(0f, -194f);
+        tierRt.sizeDelta = new Vector2(0f, 28f);
         detailTierBadgeText = tierObj.AddComponent<TextMeshProUGUI>();
-        detailTierBadgeText.fontSize = 11.5f;
+        detailTierBadgeText.fontSize = 18f;
         detailTierBadgeText.fontStyle = FontStyles.Bold;
         detailTierBadgeText.alignment = TextAlignmentOptions.Center;
         detailTierBadgeText.color = new Color(0.3f, 0.8f, 1f);
@@ -658,21 +631,26 @@ public class InventoryUI : MonoBehaviour
         srcObj.layer = 5;
         srcObj.transform.SetParent(rightInspectorObj.transform, false);
         RectTransform srcRt = srcObj.GetComponent<RectTransform>();
-        srcRt.anchoredPosition = new Vector2(0f, 75f);
-        srcRt.sizeDelta = new Vector2(350f, 18f);
+        srcRt.anchorMin = new Vector2(0f, 1f);
+        srcRt.anchorMax = new Vector2(1f, 1f);
+        srcRt.pivot = new Vector2(0.5f, 1f);
+        srcRt.anchoredPosition = new Vector2(0f, -226f);
+        srcRt.sizeDelta = new Vector2(0f, 26f);
         detailSourceText = srcObj.AddComponent<TextMeshProUGUI>();
-        detailSourceText.fontSize = 10.5f;
+        detailSourceText.fontSize = 16.5f;
         detailSourceText.alignment = TextAlignmentOptions.Center;
         detailSourceText.color = new Color(0.6f, 0.7f, 0.85f);
         detailSourceText.enableWordWrapping = false;
 
-        // 5. Middle Info Card (Dark Slate Container with border)
+        // 5. Middle Info Card (Expands across middle vertical space)
         GameObject cardObj = new GameObject("InfoCard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         cardObj.layer = 5;
         cardObj.transform.SetParent(rightInspectorObj.transform, false);
         RectTransform cardRt = cardObj.GetComponent<RectTransform>();
-        cardRt.anchoredPosition = new Vector2(0f, -8f);
-        cardRt.sizeDelta = new Vector2(350f, 138f);
+        cardRt.anchorMin = new Vector2(0.05f, 0.22f);
+        cardRt.anchorMax = new Vector2(0.95f, 0.61f);
+        cardRt.offsetMin = Vector2.zero;
+        cardRt.offsetMax = Vector2.zero;
         Image cardImg = cardObj.GetComponent<Image>();
         cardImg.color = new Color(0.03f, 0.04f, 0.07f, 0.92f);
 
@@ -685,14 +663,16 @@ public class InventoryUI : MonoBehaviour
         statsObj.layer = 5;
         statsObj.transform.SetParent(cardObj.transform, false);
         RectTransform statsRt = statsObj.GetComponent<RectTransform>();
-        statsRt.anchoredPosition = new Vector2(0f, 30f);
-        statsRt.sizeDelta = new Vector2(330f, 54f);
+        statsRt.anchorMin = new Vector2(0f, 0.50f);
+        statsRt.anchorMax = new Vector2(1f, 1f);
+        statsRt.offsetMin = new Vector2(14f, 4f);
+        statsRt.offsetMax = new Vector2(-14f, -8f);
         detailStatsText = statsObj.AddComponent<TextMeshProUGUI>();
-        detailStatsText.fontSize = 11f;
+        detailStatsText.fontSize = 18f;
         detailStatsText.fontStyle = FontStyles.Bold;
         detailStatsText.alignment = TextAlignmentOptions.Center;
         detailStatsText.color = new Color(0.25f, 1f, 0.65f);
-        detailStatsText.lineSpacing = -3f;
+        detailStatsText.lineSpacing = 3f;
         detailStatsText.enableWordWrapping = true;
         detailStatsText.overflowMode = TextOverflowModes.Truncate;
 
@@ -701,39 +681,47 @@ public class InventoryUI : MonoBehaviour
         descObj.layer = 5;
         descObj.transform.SetParent(cardObj.transform, false);
         RectTransform descRt = descObj.GetComponent<RectTransform>();
-        descRt.anchoredPosition = new Vector2(0f, -30f);
-        descRt.sizeDelta = new Vector2(330f, 52f);
+        descRt.anchorMin = new Vector2(0f, 0f);
+        descRt.anchorMax = new Vector2(1f, 0.50f);
+        descRt.offsetMin = new Vector2(14f, 8f);
+        descRt.offsetMax = new Vector2(-14f, -4f);
         detailDescText = descObj.AddComponent<TextMeshProUGUI>();
-        detailDescText.fontSize = 10f;
+        detailDescText.fontSize = 16.5f;
         detailDescText.alignment = TextAlignmentOptions.Center;
         detailDescText.color = new Color(0.80f, 0.85f, 0.92f);
-        detailDescText.lineSpacing = -2f;
+        detailDescText.lineSpacing = 3f;
         detailDescText.enableWordWrapping = true;
         detailDescText.overflowMode = TextOverflowModes.Truncate;
 
-        // 6. Quantity counter
+        // 6. Quantity counter (Anchored above action buttons)
         GameObject qtyObj = new GameObject("QuantityText", typeof(RectTransform), typeof(CanvasRenderer));
         qtyObj.layer = 5;
         qtyObj.transform.SetParent(rightInspectorObj.transform, false);
         RectTransform qtyRt = qtyObj.GetComponent<RectTransform>();
-        qtyRt.anchoredPosition = new Vector2(0f, -96f);
-        qtyRt.sizeDelta = new Vector2(340f, 22f);
+        qtyRt.anchorMin = new Vector2(0f, 0f);
+        qtyRt.anchorMax = new Vector2(1f, 0f);
+        qtyRt.pivot = new Vector2(0.5f, 0f);
+        qtyRt.anchoredPosition = new Vector2(0f, 96f);
+        qtyRt.sizeDelta = new Vector2(0f, 34f);
         detailQuantityText = qtyObj.AddComponent<TextMeshProUGUI>();
-        detailQuantityText.fontSize = 13f;
+        detailQuantityText.fontSize = 22f;
         detailQuantityText.fontStyle = FontStyles.Bold;
         detailQuantityText.alignment = TextAlignmentOptions.Center;
         detailQuantityText.color = new Color(1f, 0.85f, 0.3f);
         detailQuantityText.enableAutoSizing = true;
-        detailQuantityText.fontSizeMin = 9.5f;
-        detailQuantityText.fontSizeMax = 13f;
+        detailQuantityText.fontSizeMin = 16f;
+        detailQuantityText.fontSizeMax = 22f;
 
-        // 7. Action Button
+        // 7. Action Button (Bottom anchored)
         GameObject actionObj = new GameObject("ActionButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         actionObj.layer = 5;
         actionObj.transform.SetParent(rightInspectorObj.transform, false);
         RectTransform actionRt = actionObj.GetComponent<RectTransform>();
-        actionRt.anchoredPosition = new Vector2(0f, -145f);
-        actionRt.sizeDelta = new Vector2(300f, 44f);
+        actionRt.anchorMin = new Vector2(0.5f, 0f);
+        actionRt.anchorMax = new Vector2(0.5f, 0f);
+        actionRt.pivot = new Vector2(0.5f, 0f);
+        actionRt.anchoredPosition = new Vector2(0f, 25f);
+        actionRt.sizeDelta = new Vector2(380f, 56f);
 
         actionBtnImg = actionObj.GetComponent<Image>();
         actionBtnImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);
@@ -755,13 +743,13 @@ public class InventoryUI : MonoBehaviour
         actTxtRt.sizeDelta = Vector2.zero;
         actionBtnText = actTxtObj.AddComponent<TextMeshProUGUI>();
         actionBtnText.text = LocalizationManager.T("SỬ DỤNG", "USE");
-        actionBtnText.fontSize = 13.5f;
+        actionBtnText.fontSize = 20f;
         actionBtnText.fontStyle = FontStyles.Bold;
         actionBtnText.color = Color.white;
         actionBtnText.alignment = TextAlignmentOptions.Center;
         actionBtnText.enableAutoSizing = true;
-        actionBtnText.fontSizeMin = 8.5f;
-        actionBtnText.fontSizeMax = 13.5f;
+        actionBtnText.fontSizeMin = 16f;
+        actionBtnText.fontSizeMax = 20f;
         actionBtnText.enableWordWrapping = false;
         actionBtnText.overflowMode = TextOverflowModes.Ellipsis;
         actionBtnText.margin = new Vector4(4f, 2f, 4f, 2f);
@@ -771,8 +759,11 @@ public class InventoryUI : MonoBehaviour
         openAllObj.layer = 5;
         openAllObj.transform.SetParent(rightInspectorObj.transform, false);
         RectTransform openAllRt = openAllObj.GetComponent<RectTransform>();
-        openAllRt.anchoredPosition = new Vector2(92f, -145f);
-        openAllRt.sizeDelta = new Vector2(176f, 44f);
+        openAllRt.anchorMin = new Vector2(0.5f, 0f);
+        openAllRt.anchorMax = new Vector2(0.5f, 0f);
+        openAllRt.pivot = new Vector2(0.5f, 0f);
+        openAllRt.anchoredPosition = new Vector2(105f, 25f);
+        openAllRt.sizeDelta = new Vector2(200f, 56f);
 
         openAllBtnImg = openAllObj.GetComponent<Image>();
         openAllBtnImg.color = new Color(0.9f, 0.55f, 0.12f, 1f);
@@ -794,13 +785,13 @@ public class InventoryUI : MonoBehaviour
         oTxtRt.sizeDelta = Vector2.zero;
         openAllBtnText = oTxtObj.AddComponent<TextMeshProUGUI>();
         openAllBtnText.text = LocalizationManager.T("MỞ TẤT CẢ", "OPEN ALL");
-        openAllBtnText.fontSize = 13f;
+        openAllBtnText.fontSize = 20f;
         openAllBtnText.fontStyle = FontStyles.Bold;
         openAllBtnText.color = Color.white;
         openAllBtnText.alignment = TextAlignmentOptions.Center;
         openAllBtnText.enableAutoSizing = true;
-        openAllBtnText.fontSizeMin = 8.5f;
-        openAllBtnText.fontSizeMax = 13f;
+        openAllBtnText.fontSizeMin = 16f;
+        openAllBtnText.fontSizeMax = 20f;
         openAllBtnText.enableWordWrapping = false;
         openAllBtnText.overflowMode = TextOverflowModes.Ellipsis;
         openAllBtnText.margin = new Vector4(4f, 2f, 4f, 2f);
@@ -814,11 +805,11 @@ public class InventoryUI : MonoBehaviour
         gachaAltarObj.transform.SetParent(parent, false);
 
         RectTransform rt = gachaAltarObj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0f, 0f);
-        rt.anchorMax = new Vector2(1f, 1f);
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.offsetMin = new Vector2(40f, 30f);
-        rt.offsetMax = new Vector2(-40f, -170f);
+        rt.offsetMin = new Vector2(30f, 25f);
+        rt.offsetMax = new Vector2(-30f, -165f);
 
         Image img = gachaAltarObj.GetComponent<Image>();
         img.color = new Color(0.06f, 0.07f, 0.12f, 0.98f);
@@ -832,11 +823,14 @@ public class InventoryUI : MonoBehaviour
         titleObj.layer = 5;
         titleObj.transform.SetParent(gachaAltarObj.transform, false);
         RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchoredPosition = new Vector2(0f, 190f);
-        titleRt.sizeDelta = new Vector2(900f, 36f);
+        titleRt.anchorMin = new Vector2(0f, 1f);
+        titleRt.anchorMax = new Vector2(1f, 1f);
+        titleRt.pivot = new Vector2(0.5f, 1f);
+        titleRt.anchoredPosition = new Vector2(0f, -20f);
+        titleRt.sizeDelta = new Vector2(0f, 44f);
         var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
         tTmp.text = LocalizationManager.T("ĐÀI TRIỆU HỒI VẬN MỆNH CỔ ĐẠI", "ANCIENT GACHA SUMMON ALTAR");
-        tTmp.fontSize = 22;
+        tTmp.fontSize = 32;
         tTmp.fontStyle = FontStyles.Bold;
         tTmp.color = new Color(1f, 0.85f, 0.35f);
         tTmp.alignment = TextAlignmentOptions.Center;
@@ -846,11 +840,14 @@ public class InventoryUI : MonoBehaviour
         subObj.layer = 5;
         subObj.transform.SetParent(gachaAltarObj.transform, false);
         RectTransform subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchoredPosition = new Vector2(0f, 155f);
-        subRt.sizeDelta = new Vector2(900f, 26f);
+        subRt.anchorMin = new Vector2(0f, 1f);
+        subRt.anchorMax = new Vector2(1f, 1f);
+        subRt.pivot = new Vector2(0.5f, 1f);
+        subRt.anchoredPosition = new Vector2(0f, -68f);
+        subRt.sizeDelta = new Vector2(0f, 30f);
         var sTmp = subObj.AddComponent<TextMeshProUGUI>();
         sTmp.text = LocalizationManager.T("Bỏ Linh Hồn hoặc Bùa Triệu Hồi để quay ngẫu nhiên Thần Khí, Vũ Khí và Đá Quý", "Spend Aethel Shards or Summon Scrolls to roll for Mythic Blades & Relics");
-        sTmp.fontSize = 13;
+        sTmp.fontSize = 17.5f;
         sTmp.color = new Color(0.75f, 0.8f, 0.9f);
         sTmp.alignment = TextAlignmentOptions.Center;
 
@@ -859,8 +856,11 @@ public class InventoryUI : MonoBehaviour
         balanceObj.layer = 5;
         balanceObj.transform.SetParent(gachaAltarObj.transform, false);
         RectTransform balRt = balanceObj.GetComponent<RectTransform>();
-        balRt.anchoredPosition = new Vector2(0f, 115f);
-        balRt.sizeDelta = new Vector2(700f, 38f);
+        balRt.anchorMin = new Vector2(0.5f, 1f);
+        balRt.anchorMax = new Vector2(0.5f, 1f);
+        balRt.pivot = new Vector2(0.5f, 1f);
+        balRt.anchoredPosition = new Vector2(0f, -112f);
+        balRt.sizeDelta = new Vector2(880f, 48f);
         Image balImg = balanceObj.GetComponent<Image>();
         balImg.color = new Color(0.04f, 0.05f, 0.08f, 0.85f);
 
@@ -876,7 +876,7 @@ public class InventoryUI : MonoBehaviour
         sRt.anchorMax = new Vector2(0.5f, 1f);
         sRt.sizeDelta = Vector2.zero;
         gachaShardsBalanceText = shardsTxtObj.AddComponent<TextMeshProUGUI>();
-        gachaShardsBalanceText.fontSize = 15;
+        gachaShardsBalanceText.fontSize = 20f;
         gachaShardsBalanceText.fontStyle = FontStyles.Bold;
         gachaShardsBalanceText.color = new Color(0.3f, 0.85f, 1f);
         gachaShardsBalanceText.alignment = TextAlignmentOptions.Center;
@@ -889,23 +889,25 @@ public class InventoryUI : MonoBehaviour
         scRt.anchorMax = new Vector2(1f, 1f);
         scRt.sizeDelta = Vector2.zero;
         gachaScrollsBalanceText = scrollTxtObj.AddComponent<TextMeshProUGUI>();
-        gachaScrollsBalanceText.fontSize = 15;
+        gachaScrollsBalanceText.fontSize = 20f;
         gachaScrollsBalanceText.fontStyle = FontStyles.Bold;
         gachaScrollsBalanceText.color = new Color(1f, 0.85f, 0.3f);
         gachaScrollsBalanceText.alignment = TextAlignmentOptions.Center;
 
-        // Drop Rate Guide Box
+        // Drop Rate Guide Box (Proportionally filling the vast middle space)
         GameObject rateBox = new GameObject("RateBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rateBox.layer = 5;
         rateBox.transform.SetParent(gachaAltarObj.transform, false);
         RectTransform rateRt = rateBox.GetComponent<RectTransform>();
-        rateRt.anchoredPosition = new Vector2(0f, 25f);
-        rateRt.sizeDelta = new Vector2(900f, 120f);
+        rateRt.anchorMin = new Vector2(0.04f, 0.22f);
+        rateRt.anchorMax = new Vector2(0.96f, 0.76f);
+        rateRt.offsetMin = Vector2.zero;
+        rateRt.offsetMax = Vector2.zero;
         Image rateImg = rateBox.GetComponent<Image>();
-        rateImg.color = new Color(0.08f, 0.1f, 0.16f, 0.85f);
+        rateImg.color = new Color(0.08f, 0.1f, 0.16f, 0.90f);
 
         var rateOutline = rateBox.AddComponent<Outline>();
-        rateOutline.effectColor = new Color(0.3f, 0.35f, 0.5f, 0.6f);
+        rateOutline.effectColor = new Color(0.3f, 0.35f, 0.5f, 0.7f);
         rateOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
         GameObject rateTxtObj = new GameObject("RateText", typeof(RectTransform), typeof(CanvasRenderer));
@@ -914,8 +916,8 @@ public class InventoryUI : MonoBehaviour
         RectTransform rRt = rateTxtObj.GetComponent<RectTransform>();
         rRt.anchorMin = Vector2.zero;
         rRt.anchorMax = Vector2.one;
-        rRt.offsetMin = new Vector2(15f, 10f);
-        rRt.offsetMax = new Vector2(-15f, -10f);
+        rRt.offsetMin = new Vector2(25f, 18f);
+        rRt.offsetMax = new Vector2(-25f, -18f);
         var rTmp = rateTxtObj.AddComponent<TextMeshProUGUI>();
         rTmp.text = LocalizationManager.T(
             "<b>TỶ LỆ TRIỆU HỒI VẬN MỆNH:</b>\n" +
@@ -930,20 +932,20 @@ public class InventoryUI : MonoBehaviour
             "- <color=#9B59B6>[EPIC 25%]</color>: Shadow Katana, Relic Chest, Bloodstone Crystal\n" +
             "- <color=#3742FA>[RARE 35%]</color>: Paladin Blade, Royal Shield, Amethyst, Jade, Gold Node, Tin Ore\n" +
             "- <color=#CED6E0>[COMMON 25%]</color>: Forge Stone, Keepstone, Copper Ore, Dark Iron Ore");
-        rTmp.fontSize = 12;
-        rTmp.lineSpacing = 1.2f;
+        rTmp.fontSize = 17.5f;
+        rTmp.lineSpacing = 6f;
         rTmp.alignment = TextAlignmentOptions.TopLeft;
 
-        // Roll 1 Button
+        // Roll 1 Button (Anchored to bottom)
         gachaSingleRollBtn = CreateGachaButton(gachaAltarObj.transform, "Btn_GachaSingle",
-            LocalizationManager.T("QUAY 1 LẦN\n<size=13><color=#FFD700>100 Linh Hồn / 1 Bùa</color></size>", "ROLL 1x\n<size=13><color=#FFD700>100 Shards / 1 Scroll</color></size>"),
-            new Vector2(-220f, -145f), new Vector2(340f, 65f), new Color(0.2f, 0.5f, 0.85f, 1f));
+            LocalizationManager.T("QUAY 1 LẦN\n<size=17><color=#FFD700>100 Linh Hồn / 1 Bùa</color></size>", "ROLL 1x\n<size=17><color=#FFD700>100 Shards / 1 Scroll</color></size>"),
+            new Vector2(-260f, 25f), new Vector2(460f, 85f), new Color(0.2f, 0.5f, 0.85f, 1f));
         gachaSingleRollBtn.onClick.AddListener(() => PerformGachaRoll(1));
 
-        // Roll 10 Button
+        // Roll 10 Button (Anchored to bottom)
         gachaMultiRollBtn = CreateGachaButton(gachaAltarObj.transform, "Btn_GachaMulti",
-            LocalizationManager.T("QUAY 10 LẦN (TIẾT KIỆM 10%)\n<size=13><color=#FFD700>900 Linh Hồn / 10 Bùa</color></size>", "ROLL 10x (SAVE 10%)\n<size=13><color=#FFD700>900 Shards / 10 Scrolls</color></size>"),
-            new Vector2(220f, -145f), new Vector2(380f, 65f), new Color(0.85f, 0.45f, 0.15f, 1f));
+            LocalizationManager.T("QUAY 10 LẦN (TIẾT KIỆM 10%)\n<size=17><color=#FFD700>900 Linh Hồn / 10 Bùa</color></size>", "ROLL 10x (SAVE 10%)\n<size=17><color=#FFD700>900 Shards / 10 Scrolls</color></size>"),
+            new Vector2(260f, 25f), new Vector2(500f, 85f), new Color(0.85f, 0.45f, 0.15f, 1f));
         gachaMultiRollBtn.onClick.AddListener(() => PerformGachaRoll(10));
 
         gachaAltarObj.SetActive(false);
@@ -956,6 +958,9 @@ public class InventoryUI : MonoBehaviour
         obj.transform.SetParent(parent, false);
 
         RectTransform rt = obj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0f);
+        rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.pivot = new Vector2(0.5f, 0f);
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
 
@@ -979,7 +984,7 @@ public class InventoryUI : MonoBehaviour
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         tmp.text = text;
-        tmp.fontSize = 16;
+        tmp.fontSize = 22f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = Color.white;
@@ -1094,7 +1099,7 @@ public class InventoryUI : MonoBehaviour
         tRt.sizeDelta = new Vector2(700f, 40f);
         chestRewardTitleText = tObj.AddComponent<TextMeshProUGUI>();
         chestRewardTitleText.text = LocalizationManager.T("MỞ RƯƠNG TÀN TÍCH THÀNH CÔNG!", "ANCIENT CHEST OPENED!");
-        chestRewardTitleText.fontSize = 20;
+        chestRewardTitleText.fontSize = 24;
         chestRewardTitleText.fontStyle = FontStyles.Bold;
         chestRewardTitleText.color = new Color(1f, 0.88f, 0.35f);
         chestRewardTitleText.alignment = TextAlignmentOptions.Center;
@@ -1118,7 +1123,7 @@ public class InventoryUI : MonoBehaviour
         sRt.sizeDelta = new Vector2(700f, 24f);
         chestRewardSubText = subObj.AddComponent<TextMeshProUGUI>();
         chestRewardSubText.text = LocalizationManager.T("Bạn đã nhận được các vật phẩm sau:", "You have acquired the following rewards:");
-        chestRewardSubText.fontSize = 13;
+        chestRewardSubText.fontSize = 15.5f;
         chestRewardSubText.color = new Color(0.75f, 0.8f, 0.9f);
         chestRewardSubText.alignment = TextAlignmentOptions.Center;
 
@@ -1214,7 +1219,7 @@ public class InventoryUI : MonoBehaviour
         tRt.sizeDelta = new Vector2(600f, 40f);
         var tTmp = tObj.AddComponent<TextMeshProUGUI>();
         tTmp.text = LocalizationManager.T("XÁC NHẬN BÙ SHARDS QUAY 10 LẦN", "10x SUMMON SHARD TOP-UP");
-        tTmp.fontSize = 20;
+        tTmp.fontSize = 22;
         tTmp.fontStyle = FontStyles.Bold;
         tTmp.color = new Color(1f, 0.85f, 0.35f);
         tTmp.alignment = TextAlignmentOptions.Center;
@@ -1242,8 +1247,8 @@ public class InventoryUI : MonoBehaviour
         pRt.offsetMin = new Vector2(20f, 15f);
         pRt.offsetMax = new Vector2(-20f, -15f);
         gachaHybridPromptText = pObj.AddComponent<TextMeshProUGUI>();
-        gachaHybridPromptText.fontSize = 15;
-        gachaHybridPromptText.lineSpacing = 1.25f;
+        gachaHybridPromptText.fontSize = 16.5f;
+        gachaHybridPromptText.lineSpacing = 2f;
         gachaHybridPromptText.alignment = TextAlignmentOptions.Center;
         gachaHybridPromptText.color = Color.white;
 
@@ -1337,7 +1342,7 @@ public class InventoryUI : MonoBehaviour
         tRt.anchoredPosition = new Vector2(0f, -25f);
         tRt.sizeDelta = new Vector2(0f, 38f);
         var tTmp = tObj.AddComponent<TextMeshProUGUI>();
-        tTmp.text = LocalizationManager.T("LÒ KHẢM KHOÁNG THẠCH & ĐÁ QUÝ", "RUIN GEM & MINERAL FORGE");
+        tTmp.text = LocalizationManager.T("KHO THẦN KHÍ & NGỌC BỔ TRỢ", "GEAR & RUNIC GEM VAULT");
         tTmp.fontSize = 26;
         tTmp.fontStyle = FontStyles.Bold;
         tTmp.color = new Color(1f, 0.85f, 0.35f);
@@ -1354,9 +1359,9 @@ public class InventoryUI : MonoBehaviour
         sRt.anchoredPosition = new Vector2(0f, -62f);
         sRt.sizeDelta = new Vector2(0f, 22f);
         var sTmp = sObj.AddComponent<TextMeshProUGUI>();
-        sTmp.text = LocalizationManager.T("Cầm và kéo thả trực tiếp khoáng thạch vào lỗ khảm hoặc bấm nút Khảm bên dưới.",
-            "Touch & drag gemstones directly into socket slots, or click the Socket button below.");
-        sTmp.fontSize = 14f;
+        sTmp.text = LocalizationManager.T("Kéo thả trang bị hoặc ngọc vào 6 ô xung quanh Anh Hùng để gia tăng sức mạnh.",
+            "Drag gear or gems into the 6 Hero slots to boost attributes.");
+        sTmp.fontSize = 15.5f;
         sTmp.color = new Color(0.4f, 0.85f, 1f);
         sTmp.alignment = TextAlignmentOptions.Center;
 
@@ -1391,19 +1396,7 @@ public class InventoryUI : MonoBehaviour
                 RefreshGrid();
             }
         });
-        GameObject cTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        cTxtObj.layer = 5;
-        cTxtObj.transform.SetParent(cBtnObj.transform, false);
-        RectTransform ctRt = cTxtObj.GetComponent<RectTransform>();
-        ctRt.anchorMin = Vector2.zero;
-        ctRt.anchorMax = Vector2.one;
-        ctRt.sizeDelta = Vector2.zero;
-        var ctTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
-        ctTmp.text = "X";
-        ctTmp.fontSize = 24;
-        ctTmp.fontStyle = FontStyles.Bold;
-        ctTmp.color = Color.white;
-        ctTmp.alignment = TextAlignmentOptions.Center;
+        WhiteIconLoader.ReplaceTextWithIcon(cbBtn, "Cross", Color.white, new Vector2(24f, 24f));
 
         // TOP SECTION: 3-Skill Cards Container
         GameObject topSection = new GameObject("TopSection", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -1420,24 +1413,6 @@ public class InventoryUI : MonoBehaviour
         var tsOutline = topSection.AddComponent<Outline>();
         tsOutline.effectColor = new Color(0.25f, 0.35f, 0.5f, 0.6f);
 
-        // Total Socket Buff Summary Text Banner
-        GameObject wBuffObj = new GameObject("TotalBuffBanner", typeof(RectTransform), typeof(CanvasRenderer));
-        wBuffObj.layer = 5;
-        wBuffObj.transform.SetParent(topSection.transform, false);
-        RectTransform wbRt = wBuffObj.GetComponent<RectTransform>();
-        wbRt.anchorMin = new Vector2(0f, 1f);
-        wbRt.anchorMax = new Vector2(1f, 1f);
-        wbRt.pivot = new Vector2(0f, 1f);
-        wbRt.anchoredPosition = new Vector2(15f, -8f);
-        wbRt.sizeDelta = new Vector2(-280f, 28f);
-        socketModalStatsBonusText = wBuffObj.AddComponent<TextMeshProUGUI>();
-        socketModalStatsBonusText.fontSize = 13.5f;
-        socketModalStatsBonusText.fontStyle = FontStyles.Bold;
-        socketModalStatsBonusText.color = new Color(0.2f, 1f, 0.45f);
-        socketModalStatsBonusText.alignment = TextAlignmentOptions.Left;
-        socketModalStatsBonusText.enableWordWrapping = false;
-        socketModalStatsBonusText.overflowMode = TextOverflowModes.Ellipsis;
-
         // Auto Merge All Button (Top-Right)
         GameObject autoMergeObj = new GameObject("Btn_AutoMergeAll", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         autoMergeObj.layer = 5;
@@ -1446,7 +1421,7 @@ public class InventoryUI : MonoBehaviour
         amRt.anchorMin = new Vector2(1f, 1f);
         amRt.anchorMax = new Vector2(1f, 1f);
         amRt.pivot = new Vector2(1f, 1f);
-        amRt.anchoredPosition = new Vector2(-15f, -6f);
+        amRt.anchoredPosition = new Vector2(-15f, -8f);
         amRt.sizeDelta = new Vector2(250f, 32f);
 
         Image amImg = autoMergeObj.GetComponent<Image>();
@@ -1468,7 +1443,7 @@ public class InventoryUI : MonoBehaviour
         amtRt.sizeDelta = Vector2.zero;
 
         autoMergeAllBtnText = amTxtObj.AddComponent<TextMeshProUGUI>();
-        autoMergeAllBtnText.fontSize = 13f;
+        autoMergeAllBtnText.fontSize = 15.5f;
         autoMergeAllBtnText.fontStyle = FontStyles.Bold;
         autoMergeAllBtnText.color = Color.white;
         autoMergeAllBtnText.alignment = TextAlignmentOptions.Center;
@@ -1483,7 +1458,7 @@ public class InventoryUI : MonoBehaviour
         scRt.anchorMax = new Vector2(1f, 1f);
         scRt.pivot = new Vector2(0.5f, 0.5f);
         scRt.offsetMin = new Vector2(10f, 8f);
-        scRt.offsetMax = new Vector2(-10f, -40f);
+        scRt.offsetMax = new Vector2(-10f, -8f);
         socketSlotsContainer = socketsContObj.transform;
 
         // BOTTOM SECTION: Gem Inventory Scroll Area
@@ -1513,9 +1488,9 @@ public class InventoryUI : MonoBehaviour
         avhRt.sizeDelta = new Vector2(-20f, 26f);
         var avhTmp = avHeaderObj.AddComponent<TextMeshProUGUI>();
         avhTmp.text = LocalizationManager.T(
-            "KHOÁNG THẠCH & ĐÁ QUÝ (CHẠM/KÉO VÀO ĐỂ KHẢM • KÉO RA NGOÀI ĐỂ THÁO)",
-            "MINERALS & GEMS (TAP/DRAG INTO SLOT TO SOCKET • DRAG OUT TO UNSOCKET)");
-        avhTmp.fontSize = 14f;
+            "TRANG BỊ & NGỌC TRONG TÚI (CHẠM/KÉO ĐỂ TRANG BỊ • KÉO RA ĐỂ THÁO)",
+            "EQUIPMENT & GEMS (TAP/DRAG TO EQUIP • DRAG OUT TO UNEQUIP)");
+        avhTmp.fontSize = 15.5f;
         avhTmp.fontStyle = FontStyles.Bold;
         avhTmp.color = new Color(1f, 0.85f, 0.35f);
         avhTmp.alignment = TextAlignmentOptions.Center;
@@ -1634,22 +1609,36 @@ public class InventoryUI : MonoBehaviour
     private void RefreshGemSocketModal()
     {
         bool isVi = LocalizationManager.IsVietnamese;
+        string curHero = EquipmentSocketManager.GetActiveHeroId();
 
         // Set Header Title
         if (socketModalWeaponTitle != null)
         {
             socketModalWeaponTitle.text = isVi
-                ? "LÒ KHẢM 3 CHIÊU THỨC (KIẾM, KHIÊN & ĐÁ QUÝ)"
-                : "3-SKILL SOCKET FORGE (SWORDS, SHIELDS & GEMS)";
+                ? "TRANG BỊ & NGỌC ANH HÙNG (6 Ô TRANG BỊ)"
+                : "HERO GEAR & RUNIC GEMS (6 SLOTS)";
         }
 
-        // Calculate and Show Total Active 3-Skill Socket Bonuses
-        EquipmentSocketManager.GetActiveEquippedSocketBonus(out int sAtk, out int sHp, out int sDef, out float sLifesteal, out float sCd, out float sShard, out float sRegen);
+        // Calculate and Show Total Active 6-Socket Bonuses
+        EquipmentSocketManager.GetTotalHeroSocketBonus(
+            out int sAtk, out int sPhysAtk, out int sMagicAtk, out int sTrueAtk,
+            out int sHp, out int sDef,
+            out float sLifesteal, out float sCd, out float sShard, out float sRegen,
+            out float sMaxEnergy, out float sEnergyRegen,
+            curHero);
+
         List<string> bonuses = new List<string>();
-        if (sAtk > 0) bonuses.Add($"<color=#FFCC00>+{sAtk} ATK</color>");
+        if (sPhysAtk > 0) bonuses.Add($"<color=#FF3B30>+{sPhysAtk} ATK</color>");
+        if (sMagicAtk > 0) bonuses.Add($"<color=#B84DFF>+{sMagicAtk} AP</color>");
+        if (sTrueAtk > 0) bonuses.Add($"<color=#E2E8F0>+{sTrueAtk} TD</color>");
+        if (sPhysAtk == 0 && sMagicAtk == 0 && sTrueAtk == 0 && sAtk > 0)
+            bonuses.Add($"<color=#FF3B30>+{sAtk} ATK</color>");
+
         if (sHp > 0) bonuses.Add($"<color=#22C55E>+{sHp} HP</color>");
         if (sDef > 0) bonuses.Add($"<color=#38BDF8>+{sDef} DEF</color>");
-        if (sLifesteal > 0) bonuses.Add($"<color=#F43F5E>+{Mathf.RoundToInt(sLifesteal * 100)}% Hút Máu</color>");
+        if (sMaxEnergy > 0) bonuses.Add($"<color=#00E5FF>+{Mathf.RoundToInt(sMaxEnergy)} Mana</color>");
+        if (sEnergyRegen > 0) bonuses.Add($"<color=#06B6D4>+{sEnergyRegen:0.#} Mana/s</color>");
+        if (sLifesteal > 0) bonuses.Add($"<color=#F43F5E>+{Mathf.RoundToInt(sLifesteal * 100)}% {(isVi ? "Hút Máu" : "Lifesteal")}</color>");
         if (sCd > 0) bonuses.Add($"<color=#C084FC>-{Mathf.RoundToInt(sCd * 100)}% CD</color>");
         if (sShard > 0) bonuses.Add($"<color=#FBBF24>+{Mathf.RoundToInt(sShard * 100)}% Shard</color>");
         if (sRegen > 0) bonuses.Add($"<color=#10B981>+{sRegen} HP/s</color>");
@@ -1657,13 +1646,13 @@ public class InventoryUI : MonoBehaviour
         if (socketModalStatsBonusText != null)
         {
             socketModalStatsBonusText.text = (bonuses.Count > 0)
-                ? $"{LocalizationManager.T("Tổng Buff 3 Chiêu:", "Total Active Buffs:")} {string.Join(" | ", bonuses)}"
-                : LocalizationManager.T("<color=#888888>Chưa khảm vật phẩm nào vào 3 chiêu thức. Hãy chọn ô và nhấn khảm kiếm, khiên hoặc ngọc bên dưới!</color>",
-                    "<color=#888888>No items socketed into skills. Select a slot and choose a weapon, shield or gem below!</color>");
+                ? $"{LocalizationManager.T("Tổng Buff 6 Ô:", "Total Active Buffs:")} {string.Join(" | ", bonuses)}"
+                : LocalizationManager.T("<color=#888888>Chưa lắp trang bị vào 6 ô. Chọn ô và nhấn trang bị kiếm, khiên hoặc ngọc bên dưới!</color>",
+                    "<color=#888888>No gear equipped in the 6 slots. Select a slot and choose an item below!</color>");
         }
 
         // Update Auto Merge All Button State
-        int mergeableCount = EquipmentSocketManager.GetTotalAvailableMergeGemsCount();
+        int mergeableCount = EquipmentSocketManager.GetTotalAvailableMergeGemsCount(curHero);
         if (autoMergeAllBtnText != null)
         {
             if (mergeableCount > 0)
@@ -1689,51 +1678,26 @@ public class InventoryUI : MonoBehaviour
             }
         }
 
-        // Render 3 Skill Cards with 3 Sub-Slots Each
+        // Render 6 Hero Socket Cards
         foreach (var obj in socketSlotObjs)
         {
             if (obj != null) Destroy(obj);
         }
         socketSlotObjs.Clear();
 
-        int skillCount = EquipmentSocketManager.SKILL_COUNT;
-        int subCount = EquipmentSocketManager.SUB_SOCKETS_PER_SKILL;
+        int socketCount = EquipmentSocketManager.HERO_SOCKET_COUNT;
+        float cardW = 220f;
+        float cardH = 220f;
+        float spacing = 16f;
+        float startX = -((socketCount - 1) * (cardW + spacing)) / 2f;
 
-        float cardW = 480f;
-        float cardH = 245f;
-        float spacing = 18f;
-        float startX = -((skillCount - 1) * (cardW + spacing)) / 2f;
-
-        var charMgr = CharacterManager.EnsureInstance();
-        string selectedCharId = charMgr != null ? charMgr.GetSelectedCharacterId().ToLower() : "vaelstrider";
-        bool isAzure = (selectedCharId.Contains("azure") || selectedCharId.Contains("player3"));
-        bool isRonin = (selectedCharId.Contains("ronin") || selectedCharId.Contains("gale") || selectedCharId.Contains("maid"));
-
-        string[] skillNamesVi;
-        string[] skillNamesEn;
-
-        if (isRonin)
+        for (int i = 0; i < socketCount; i++)
         {
-            skillNamesVi = new string[] { "[1] PHONG NGUYỆT TRẢM", "[2] PHONG THIỂM TỐC LƯỚT", "[3] ÁM ẢNH PHÂN THÂN TRẢM" };
-            skillNamesEn = new string[] { "[1] GALE CRESCENT SWEEP", "[2] GALE FLASH DASH", "[3] SHADOW GALE STRIKE" };
-        }
-        else if (isAzure)
-        {
-            skillNamesVi = new string[] { "[1] SONG BĂNG ĐOẢN KIẾM", "[2] HÀN BĂNG TRƯỢT TUYẾT", "[3] 5 TIA BĂNG NGUYỆT SÓNG" };
-            skillNamesEn = new string[] { "[1] TWIN FROST BLADES", "[2] FROST GLIDE DASH", "[3] 5-WAY AZURE TEMPEST" };
-        }
-        else
-        {
-            skillNamesVi = new string[] { "[1] ĐẠI KIẾM HOÀNG KIM", "[2] BỤI CỔ TỐC BIẾN", "[3] BÃO XOÁY CỔ KIẾM" };
-            skillNamesEn = new string[] { "[1] ANCIENT BROADSWORD", "[2] RUIN DUST DASH", "[3] RUIN WHIRLWIND" };
-        }
+            int slotIdx = i;
+            bool isSelected = (slotIdx == selectedSocketSlotIndex);
+            bool hasItem = EquipmentSocketManager.GetHeroSocketGem(slotIdx, out string itemId, out int itemLevel, curHero);
 
-        for (int i = 0; i < skillCount; i++)
-        {
-            int skillIdx = i;
-            bool isSelected = (skillIdx == selectedSocketSlotIndex);
-
-            GameObject cardObj = new GameObject($"SkillCard_{skillIdx}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            GameObject cardObj = new GameObject($"HeroSocketCard_{slotIdx}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             cardObj.layer = 5;
             cardObj.transform.SetParent(socketSlotsContainer, false);
             socketSlotObjs.Add(cardObj);
@@ -1754,16 +1718,16 @@ public class InventoryUI : MonoBehaviour
             cBtn.onClick.AddListener(() =>
             {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-                selectedSocketSlotIndex = skillIdx;
+                selectedSocketSlotIndex = slotIdx;
                 RefreshGemSocketModal();
             });
 
             // Card Drop Target
             var cardDrop = cardObj.AddComponent<UIDropSocketTarget>();
-            cardDrop.socketSlotIndex = skillIdx;
+            cardDrop.socketSlotIndex = slotIdx;
             cardDrop.onGemDropped = (droppedGemId, targetSlot) =>
             {
-                if (EquipmentSocketManager.SocketGemToSkill(targetSlot, -1, droppedGemId, out _, out _))
+                if (EquipmentSocketManager.SocketGemToHeroSlot(targetSlot, droppedGemId, out _, out _, curHero))
                 {
                     if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
                     RefreshGemSocketModal();
@@ -1772,8 +1736,8 @@ public class InventoryUI : MonoBehaviour
                 }
             };
 
-            // 1. Skill Header Container (Shape of Dreams Style: Skill Icon Badge + Title + Subtitle)
-            GameObject headerObj = new GameObject("SkillHeader", typeof(RectTransform), typeof(CanvasRenderer));
+            // Slot Header (Slot Name e.g. VŨ KHÍ, ÁO GIÁP...)
+            GameObject headerObj = new GameObject("SlotHeader", typeof(RectTransform), typeof(CanvasRenderer));
             headerObj.layer = 5;
             headerObj.transform.SetParent(cardObj.transform, false);
             RectTransform hRt = headerObj.GetComponent<RectTransform>();
@@ -1781,306 +1745,171 @@ public class InventoryUI : MonoBehaviour
             hRt.anchorMax = new Vector2(1f, 1f);
             hRt.pivot = new Vector2(0.5f, 1f);
             hRt.anchoredPosition = new Vector2(0f, -8f);
-            hRt.sizeDelta = new Vector2(-16f, 38f);
+            hRt.sizeDelta = new Vector2(-16f, 28f);
 
-            // Skill Accent Colors & Sprites for each hero
-            Sprite skillSpr = LoadHeroSkillSprite(selectedCharId, skillIdx);
-            Color accentCol;
-            string accentHex;
+            var titleTmp = headerObj.AddComponent<TextMeshProUGUI>();
+            string sName = isVi ? EquipmentSocketManager.SlotNamesVi[slotIdx] : EquipmentSocketManager.SlotNamesEn[slotIdx];
+            titleTmp.text = $"<b><color=#FFDF66>{sName}</color></b>";
+            titleTmp.fontSize = 16.5f;
+            titleTmp.fontStyle = FontStyles.Bold;
+            titleTmp.color = Color.white;
+            titleTmp.alignment = TextAlignmentOptions.Center;
 
-            if (isRonin)
+            // Center Slot Box
+            GameObject centerBoxObj = new GameObject("CenterSlotBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            centerBoxObj.layer = 5;
+            centerBoxObj.transform.SetParent(cardObj.transform, false);
+            RectTransform cbRt = centerBoxObj.GetComponent<RectTransform>();
+            cbRt.anchorMin = new Vector2(0.5f, 0.5f);
+            cbRt.anchorMax = new Vector2(0.5f, 0.5f);
+            cbRt.pivot = new Vector2(0.5f, 0.5f);
+            cbRt.anchoredPosition = new Vector2(0f, 6f);
+            cbRt.sizeDelta = new Vector2(110f, 110f);
+
+            Image cbImg = centerBoxObj.GetComponent<Image>();
+            if (sprItemSlotFrame != null) { cbImg.sprite = sprItemSlotFrame; cbImg.type = Image.Type.Sliced; }
+            var cbOutline = centerBoxObj.AddComponent<Outline>();
+
+            if (!hasItem)
             {
-                accentCol = (skillIdx == 0) ? new Color(0.28f, 1f, 0.75f, 1f)
-                          : (skillIdx == 1) ? new Color(0.18f, 0.85f, 0.45f, 1f)
-                          : new Color(0.44f, 0.63f, 1f, 1f);
-                accentHex = (skillIdx == 0) ? "47FFBF" : (skillIdx == 1) ? "2ED573" : "70A1FF";
-            }
-            else if (isAzure)
-            {
-                accentCol = (skillIdx == 0) ? new Color(0.35f, 0.88f, 1f, 1f)
-                          : (skillIdx == 1) ? new Color(0.44f, 0.63f, 1f, 1f)
-                          : new Color(0.22f, 0.74f, 0.97f, 1f);
-                accentHex = (skillIdx == 0) ? "59E0FF" : (skillIdx == 1) ? "70A1FF" : "38BDF8";
+                cbImg.color = new Color(0.18f, 0.22f, 0.32f, 0.65f);
+                cbOutline.effectColor = new Color(0.35f, 0.45f, 0.6f, 0.5f);
+                cbOutline.effectDistance = new Vector2(1f, -1f);
+
+                GameObject plusObj = new GameObject("PlusText", typeof(RectTransform), typeof(CanvasRenderer));
+                plusObj.layer = 5;
+                plusObj.transform.SetParent(centerBoxObj.transform, false);
+                RectTransform pRt = plusObj.GetComponent<RectTransform>();
+                pRt.anchorMin = Vector2.zero;
+                pRt.anchorMax = Vector2.one;
+                pRt.sizeDelta = Vector2.zero;
+                var pTmp = plusObj.AddComponent<TextMeshProUGUI>();
+                pTmp.text = $"<color=#557799><size=30>+</size>\n<size=13.5>{sName}</size></color>";
+                pTmp.alignment = TextAlignmentOptions.Center;
+                pTmp.raycastTarget = false;
             }
             else
             {
-                accentCol = (skillIdx == 0) ? new Color(1f, 0.85f, 0.35f, 1f)
-                          : (skillIdx == 1) ? new Color(0.2f, 0.95f, 0.65f, 1f)
-                          : new Color(0.75f, 0.5f, 1f, 1f);
-                accentHex = (skillIdx == 0) ? "FFDF66" : (skillIdx == 1) ? "2ED573" : "A29BFE";
-            }
+                var itemDef = InventoryItemDatabase.GetItem(itemId);
+                var itemEff = EquipmentSocketManager.GetGemEffect(itemId);
+                Color itemCol = itemEff.HasValue ? itemEff.Value.gemColor : Color.white;
 
-            // Framed Skill Icon Badge
-            GameObject iconBadgeObj = new GameObject("SkillIconBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            iconBadgeObj.layer = 5;
-            iconBadgeObj.transform.SetParent(headerObj.transform, false);
-            RectTransform ibRt = iconBadgeObj.GetComponent<RectTransform>();
-            ibRt.anchorMin = new Vector2(0f, 0.5f);
-            ibRt.anchorMax = new Vector2(0f, 0.5f);
-            ibRt.pivot = new Vector2(0f, 0.5f);
-            ibRt.anchoredPosition = new Vector2(6f, 0f);
-            ibRt.sizeDelta = new Vector2(34f, 34f);
+                cbImg.color = new Color(itemCol.r * 0.3f, itemCol.g * 0.3f, itemCol.b * 0.3f, 0.95f);
+                cbOutline.effectColor = itemCol;
+                cbOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
-            Image ibImg = iconBadgeObj.GetComponent<Image>();
-            ibImg.color = new Color(0.04f, 0.06f, 0.11f, 0.95f);
-            var ibOutline = iconBadgeObj.AddComponent<Outline>();
-            ibOutline.effectColor = isSelected ? new Color(0f, 0.9f, 1f, 1f) : accentCol;
-            ibOutline.effectDistance = new Vector2(1.5f, -1.5f);
+                // Item Icon
+                GameObject gIcon = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                gIcon.layer = 5;
+                gIcon.transform.SetParent(centerBoxObj.transform, false);
+                RectTransform gicRt = gIcon.GetComponent<RectTransform>();
+                gicRt.anchorMin = new Vector2(0.5f, 0.5f);
+                gicRt.anchorMax = new Vector2(0.5f, 0.5f);
+                gicRt.pivot = new Vector2(0.5f, 0.5f);
+                gicRt.anchoredPosition = new Vector2(0f, 4f);
+                gicRt.sizeDelta = new Vector2(60f, 60f);
+                Image gicImg = gIcon.GetComponent<Image>();
+                gicImg.sprite = itemDef != null ? itemDef.Icon : null;
+                gicImg.preserveAspect = true;
+                gicImg.raycastTarget = false;
 
-            if (skillSpr != null)
-            {
-                GameObject iconInner = new GameObject("SkillIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-                iconInner.layer = 5;
-                iconInner.transform.SetParent(iconBadgeObj.transform, false);
-                RectTransform iiRt = iconInner.GetComponent<RectTransform>();
-                iiRt.anchorMin = new Vector2(0.5f, 0.5f);
-                iiRt.anchorMax = new Vector2(0.5f, 0.5f);
-                iiRt.pivot = new Vector2(0.5f, 0.5f);
-                iiRt.anchoredPosition = Vector2.zero;
-                iiRt.sizeDelta = new Vector2(26f, 26f);
+                // Level Tag at bottom
+                GameObject lvObj = new GameObject("LvTag", typeof(RectTransform), typeof(CanvasRenderer));
+                lvObj.layer = 5;
+                lvObj.transform.SetParent(centerBoxObj.transform, false);
+                RectTransform lvRt = lvObj.GetComponent<RectTransform>();
+                lvRt.anchorMin = new Vector2(0f, 0f);
+                lvRt.anchorMax = new Vector2(1f, 0f);
+                lvRt.pivot = new Vector2(0.5f, 0f);
+                lvRt.anchoredPosition = new Vector2(0f, 4f);
+                lvRt.sizeDelta = new Vector2(-6f, 18f);
+                var lvTmp = lvObj.AddComponent<TextMeshProUGUI>();
+                string lvColor = (itemLevel == 1) ? "#FFFFFF"
+                               : (itemLevel == 2) ? "#00FFFF"
+                               : (itemLevel == 3) ? "#FFCC00"
+                               : (itemLevel == 4) ? "#FF00FF"
+                               : "#FF3366";
+                lvTmp.text = $"<size=14.5><color={lvColor}><b>Lv.{itemLevel}</b></color></size>";
+                lvTmp.alignment = TextAlignmentOptions.Center;
+                lvTmp.raycastTarget = false;
 
-                Image iiImg = iconInner.GetComponent<Image>();
-                iiImg.sprite = skillSpr;
-                iiImg.color = Color.white;
-                iiImg.preserveAspect = true;
-                iiImg.raycastTarget = false;
-            }
-
-            // Title & Subtitle Group
-            GameObject textGroupObj = new GameObject("SkillTextGroup", typeof(RectTransform), typeof(CanvasRenderer));
-            textGroupObj.layer = 5;
-            textGroupObj.transform.SetParent(headerObj.transform, false);
-            RectTransform tgRt = textGroupObj.GetComponent<RectTransform>();
-            tgRt.anchorMin = new Vector2(0f, 0f);
-            tgRt.anchorMax = new Vector2(1f, 1f);
-            tgRt.offsetMin = new Vector2(46f, 0f);
-            tgRt.offsetMax = new Vector2(-4f, 0f);
-
-            // Title Text
-            GameObject titleObj = new GameObject("SkillTitle", typeof(RectTransform), typeof(CanvasRenderer));
-            titleObj.layer = 5;
-            titleObj.transform.SetParent(textGroupObj.transform, false);
-            RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-            titleRt.anchorMin = new Vector2(0f, 0.45f);
-            titleRt.anchorMax = new Vector2(1f, 1f);
-            titleRt.offsetMin = Vector2.zero;
-            titleRt.offsetMax = Vector2.zero;
-
-            var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-            string sName = isVi ? skillNamesVi[skillIdx] : skillNamesEn[skillIdx];
-            titleTmp.text = $"<b><color=#{accentHex}>{sName}</color></b>";
-            titleTmp.fontSize = 14f;
-            titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.color = Color.white;
-            titleTmp.alignment = TextAlignmentOptions.Left;
-
-            // Subtitle Text
-            GameObject subObj = new GameObject("SkillSub", typeof(RectTransform), typeof(CanvasRenderer));
-            subObj.layer = 5;
-            subObj.transform.SetParent(textGroupObj.transform, false);
-            RectTransform subRt = subObj.GetComponent<RectTransform>();
-            subRt.anchorMin = new Vector2(0f, 0f);
-            subRt.anchorMax = new Vector2(1f, 0.45f);
-            subRt.offsetMin = Vector2.zero;
-            subRt.offsetMax = Vector2.zero;
-
-            var subTmp = subObj.AddComponent<TextMeshProUGUI>();
-            subTmp.text = isVi ? "3 Ô Khảm • Ghép 2 món cùng loại để tăng cấp" : "3 Sockets • Merge duplicates to level up";
-            subTmp.fontSize = 10.5f;
-            subTmp.color = new Color(0.65f, 0.82f, 0.95f, 0.85f);
-            subTmp.alignment = TextAlignmentOptions.Left;
-
-            // 3. Middle: 3 Sub-Sockets Row
-            GameObject subRowObj = new GameObject("SubSocketsRow", typeof(RectTransform), typeof(CanvasRenderer));
-            subRowObj.layer = 5;
-            subRowObj.transform.SetParent(cardObj.transform, false);
-            RectTransform srRt = subRowObj.GetComponent<RectTransform>();
-            srRt.anchorMin = new Vector2(0.5f, 0.5f);
-            srRt.anchorMax = new Vector2(0.5f, 0.5f);
-            srRt.pivot = new Vector2(0.5f, 0.5f);
-            srRt.anchoredPosition = new Vector2(0f, 4f);
-            srRt.sizeDelta = new Vector2(cardW - 20f, 115f);
-
-            float subBoxW = 142f;
-            float subBoxH = 110f;
-            float subSpacing = 12f;
-            float subStartX = -((subCount - 1) * (subBoxW + subSpacing)) / 2f;
-
-            for (int s = 0; s < subCount; s++)
-            {
-                int subIdx = s;
-                bool hasItem = EquipmentSocketManager.GetSkillSubSocketGem(skillIdx, subIdx, out string itemId, out int itemLevel);
-
-                GameObject subBoxObj = new GameObject($"SubSocket_{subIdx}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-                subBoxObj.layer = 5;
-                subBoxObj.transform.SetParent(subRowObj.transform, false);
-
-                RectTransform sbRt = subBoxObj.GetComponent<RectTransform>();
-                sbRt.anchoredPosition = new Vector2(subStartX + s * (subBoxW + subSpacing), 0f);
-                sbRt.sizeDelta = new Vector2(subBoxW, subBoxH);
-
-                Image sbImg = subBoxObj.GetComponent<Image>();
-                if (sprItemSlotFrame != null) { sbImg.sprite = sprItemSlotFrame; sbImg.type = Image.Type.Sliced; }
-
-                var sbOutline = subBoxObj.AddComponent<Outline>();
-                Button sbBtn = subBoxObj.GetComponent<Button>();
-                sbBtn.targetGraphic = sbImg;
-
-                // Unconditional drop target for this specific sub-slot
-                var subDrop = subBoxObj.AddComponent<UIDropSocketTarget>();
-                subDrop.socketSlotIndex = skillIdx;
-                subDrop.subSlotIndex = subIdx;
-                subDrop.onGemDroppedDetailed = (droppedGemId, targetSlot, targetSub) =>
+                // Unsocket [x] button
+                GameObject unBtnObj = new GameObject("Btn_X", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+                unBtnObj.layer = 5;
+                unBtnObj.transform.SetParent(centerBoxObj.transform, false);
+                RectTransform unRt = unBtnObj.GetComponent<RectTransform>();
+                unRt.anchorMin = new Vector2(1f, 1f);
+                unRt.anchorMax = new Vector2(1f, 1f);
+                unRt.pivot = new Vector2(1f, 1f);
+                unRt.anchoredPosition = new Vector2(3f, 3f);
+                unRt.sizeDelta = new Vector2(24f, 24f);
+                Image unImg = unBtnObj.GetComponent<Image>();
+                unImg.color = new Color(0.8f, 0.2f, 0.25f, 0.95f);
+                Button unBtn = unBtnObj.GetComponent<Button>();
+                unBtn.targetGraphic = unImg;
+                unBtn.onClick.AddListener(() =>
                 {
-                    if (EquipmentSocketManager.SocketGemToSkill(targetSlot, targetSub, droppedGemId, out _, out _))
-                    {
-                        if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
-                        RefreshGemSocketModal();
-                        if (!string.IsNullOrEmpty(selectedItemId)) InspectItem(selectedItemId);
-                        RefreshGrid();
-                    }
+                    EquipmentSocketManager.UnsocketHeroSlot(slotIdx, curHero);
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
+                    RefreshGemSocketModal();
+                    if (!string.IsNullOrEmpty(selectedItemId)) InspectItem(selectedItemId);
+                    RefreshGrid();
+                });
+
+                GameObject unTxt = new GameObject("X", typeof(RectTransform), typeof(CanvasRenderer));
+                unTxt.layer = 5;
+                unTxt.transform.SetParent(unBtnObj.transform, false);
+                RectTransform utRt = unTxt.GetComponent<RectTransform>();
+                utRt.anchorMin = Vector2.zero;
+                utRt.anchorMax = Vector2.one;
+                utRt.sizeDelta = Vector2.zero;
+                var utTmp = unTxt.AddComponent<TextMeshProUGUI>();
+                utTmp.text = "x";
+                utTmp.fontSize = 15f;
+                utTmp.fontStyle = FontStyles.Bold;
+                utTmp.alignment = TextAlignmentOptions.Center;
+                utTmp.color = Color.white;
+                utTmp.raycastTarget = false;
+
+                // Drag Support
+                var sDrag = centerBoxObj.AddComponent<UIDragDropItem>();
+                sDrag.itemId = itemId;
+                sDrag.itemIcon = itemDef != null ? itemDef.Icon : null;
+                sDrag.itemColor = itemCol;
+                sDrag.isSocketedGem = true;
+                sDrag.sourceSocketIndex = slotIdx;
+                sDrag.onDragOutOfSocket = (unslotIdx) =>
+                {
+                    EquipmentSocketManager.UnsocketHeroSlot(unslotIdx, curHero);
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
+                    RefreshGemSocketModal();
+                    if (!string.IsNullOrEmpty(selectedItemId)) InspectItem(selectedItemId);
+                    RefreshGrid();
                 };
-
-                if (!hasItem)
+                sDrag.onMoveSocket = (fromS, toS) =>
                 {
-                    sbImg.color = new Color(0.18f, 0.22f, 0.32f, 0.65f);
-                    sbOutline.effectColor = new Color(0.35f, 0.45f, 0.6f, 0.5f);
-                    sbOutline.effectDistance = new Vector2(1f, -1f);
-
-                    GameObject plusObj = new GameObject("PlusText", typeof(RectTransform), typeof(CanvasRenderer));
-                    plusObj.layer = 5;
-                    plusObj.transform.SetParent(subBoxObj.transform, false);
-                    RectTransform pRt = plusObj.GetComponent<RectTransform>();
-                    pRt.anchorMin = Vector2.zero;
-                    pRt.anchorMax = Vector2.one;
-                    pRt.sizeDelta = Vector2.zero;
-                    var pTmp = plusObj.AddComponent<TextMeshProUGUI>();
-                    pTmp.text = $"<color=#557799><size=20>+</size>\n<size=11>Ô {subIdx + 1}</size></color>";
-                    pTmp.alignment = TextAlignmentOptions.Center;
-                    pTmp.raycastTarget = false;
-                }
-                else
-                {
-                    var itemDef = InventoryItemDatabase.GetItem(itemId);
-                    var itemEff = EquipmentSocketManager.GetGemEffect(itemId);
-                    Color itemCol = itemEff.HasValue ? itemEff.Value.gemColor : Color.white;
-
-                    sbImg.color = new Color(itemCol.r * 0.3f, itemCol.g * 0.3f, itemCol.b * 0.3f, 0.95f);
-                    sbOutline.effectColor = itemCol;
-                    sbOutline.effectDistance = new Vector2(1.5f, -1.5f);
-
-                    // Item Icon
-                    GameObject gIcon = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-                    gIcon.layer = 5;
-                    gIcon.transform.SetParent(subBoxObj.transform, false);
-                    RectTransform gicRt = gIcon.GetComponent<RectTransform>();
-                    gicRt.anchorMin = new Vector2(0.5f, 0.5f);
-                    gicRt.anchorMax = new Vector2(0.5f, 0.5f);
-                    gicRt.pivot = new Vector2(0.5f, 0.5f);
-                    gicRt.anchoredPosition = new Vector2(0f, 4f);
-                    gicRt.sizeDelta = new Vector2(52f, 52f);
-                    Image gicImg = gIcon.GetComponent<Image>();
-                    gicImg.sprite = itemDef != null ? itemDef.Icon : null;
-                    gicImg.preserveAspect = true;
-                    gicImg.raycastTarget = false;
-
-                    // Mini Level Tag at bottom
-                    GameObject lvObj = new GameObject("LvTag", typeof(RectTransform), typeof(CanvasRenderer));
-                    lvObj.layer = 5;
-                    lvObj.transform.SetParent(subBoxObj.transform, false);
-                    RectTransform lvRt = lvObj.GetComponent<RectTransform>();
-                    lvRt.anchorMin = new Vector2(0f, 0f);
-                    lvRt.anchorMax = new Vector2(1f, 0f);
-                    lvRt.pivot = new Vector2(0.5f, 0f);
-                    lvRt.anchoredPosition = new Vector2(0f, 2f);
-                    lvRt.sizeDelta = new Vector2(-6f, 18f);
-                    var lvTmp = lvObj.AddComponent<TextMeshProUGUI>();
-                    string lvColor = (itemLevel == 1) ? "#FFFFFF"
-                                   : (itemLevel == 2) ? "#00FFFF"
-                                   : (itemLevel == 3) ? "#FFCC00"
-                                   : (itemLevel == 4) ? "#FF00FF"
-                                   : "#FF3366";
-                    lvTmp.text = $"<size=11><color={lvColor}><b>Lv.{itemLevel}</b></color></size>";
-                    lvTmp.alignment = TextAlignmentOptions.Center;
-                    lvTmp.raycastTarget = false;
-
-                    // Unsocket [x] button
-                    GameObject unBtnObj = new GameObject("Btn_X", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-                    unBtnObj.layer = 5;
-                    unBtnObj.transform.SetParent(subBoxObj.transform, false);
-                    RectTransform unRt = unBtnObj.GetComponent<RectTransform>();
-                    unRt.anchorMin = new Vector2(1f, 1f);
-                    unRt.anchorMax = new Vector2(1f, 1f);
-                    unRt.pivot = new Vector2(1f, 1f);
-                    unRt.anchoredPosition = new Vector2(2f, 2f);
-                    unRt.sizeDelta = new Vector2(22f, 22f);
-                    Image unImg = unBtnObj.GetComponent<Image>();
-                    unImg.color = new Color(0.8f, 0.2f, 0.25f, 0.95f);
-                    Button unBtn = unBtnObj.GetComponent<Button>();
-                    unBtn.targetGraphic = unImg;
-                    unBtn.onClick.AddListener(() =>
-                    {
-                        EquipmentSocketManager.UnsocketSubGem(skillIdx, subIdx);
-                        if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
-                        RefreshGemSocketModal();
-                        if (!string.IsNullOrEmpty(selectedItemId)) InspectItem(selectedItemId);
-                        RefreshGrid();
-                    });
-
-                    GameObject unTxt = new GameObject("X", typeof(RectTransform), typeof(CanvasRenderer));
-                    unTxt.layer = 5;
-                    unTxt.transform.SetParent(unBtnObj.transform, false);
-                    RectTransform utRt = unTxt.GetComponent<RectTransform>();
-                    utRt.anchorMin = Vector2.zero;
-                    utRt.anchorMax = Vector2.one;
-                    utRt.sizeDelta = Vector2.zero;
-                    var utTmp = unTxt.AddComponent<TextMeshProUGUI>();
-                    utTmp.text = "x";
-                    utTmp.fontSize = 14f;
-                    utTmp.fontStyle = FontStyles.Bold;
-                    utTmp.alignment = TextAlignmentOptions.Center;
-                    utTmp.color = Color.white;
-                    utTmp.raycastTarget = false;
-
-                    // Drag Support
-                    var sDrag = subBoxObj.AddComponent<UIDragDropItem>();
-                    sDrag.itemId = itemId;
-                    sDrag.itemIcon = itemDef != null ? itemDef.Icon : null;
-                    sDrag.itemColor = itemCol;
-                    sDrag.isSocketedGem = true;
-                    sDrag.sourceSocketIndex = skillIdx;
-                    sDrag.sourceSubSocketIndex = subIdx;
-                    sDrag.onDragOutOfSocket = (unslotIdx) =>
-                    {
-                        EquipmentSocketManager.UnsocketSubGem(unslotIdx, subIdx);
-                        if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
-                        RefreshGemSocketModal();
-                        if (!string.IsNullOrEmpty(selectedItemId)) InspectItem(selectedItemId);
-                        RefreshGrid();
-                    };
-                    sDrag.onMoveSubSocket = (fromSkill, fromSub, toSkill, toSub) =>
-                    {
-                        EquipmentSocketManager.MoveOrSwapSubGem(fromSkill, fromSub, toSkill, toSub);
-                        if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
-                        RefreshGemSocketModal();
-                        if (!string.IsNullOrEmpty(selectedItemId)) InspectItem(selectedItemId);
-                        RefreshGrid();
-                    };
-                }
+                    EquipmentSocketManager.MoveOrSwapHeroSlot(fromS, toS, curHero);
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
+                    RefreshGemSocketModal();
+                    if (!string.IsNullOrEmpty(selectedItemId)) InspectItem(selectedItemId);
+                    RefreshGrid();
+                };
             }
 
-            // 4. Bottom Skill Buff Summary
-            EquipmentSocketManager.GetSkillSocketBonus(skillIdx, out int bAtk, out int bHp, out int bDef, out float bLife, out float bCd, out float bShard, out float bRegen);
-            List<string> skillBuffs = new List<string>();
-            if (bAtk > 0) skillBuffs.Add($"<color=#FFCC00>+{bAtk} ATK</color>");
-            if (bHp > 0) skillBuffs.Add($"<color=#22C55E>+{bHp} HP</color>");
-            if (bDef > 0) skillBuffs.Add($"<color=#38BDF8>+{bDef} DEF</color>");
-            if (bLife > 0) skillBuffs.Add($"<color=#F43F5E>+{Mathf.RoundToInt(bLife * 100)}% Hút Máu</color>");
-            if (bCd > 0) skillBuffs.Add($"<color=#C084FC>-{Mathf.RoundToInt(bCd * 100)}% CD</color>");
-            if (bShard > 0) skillBuffs.Add($"<color=#FBBF24>+{Mathf.RoundToInt(bShard * 100)}% Shard</color>");
-            if (bRegen > 0) skillBuffs.Add($"<color=#10B981>+{bRegen} HP/s</color>");
+            // Bottom Slot Buff Summary
+            EquipmentSocketManager.GetHeroSocketBonus(slotIdx, out int bAtk, out int bHp, out int bDef, out float bLife, out float bCd, out float bShard, out float bRegen, out float bMaxEnergy, out float bEnergyRegen, curHero);
+            List<string> slotBuffs = new List<string>();
+            if (bAtk > 0) slotBuffs.Add($"<color=#FF3B30>+{bAtk} ATK</color>");
+            if (bHp > 0) slotBuffs.Add($"<color=#22C55E>+{bHp} HP</color>");
+            if (bDef > 0) slotBuffs.Add($"<color=#38BDF8>+{bDef} DEF</color>");
+            if (bMaxEnergy > 0) slotBuffs.Add($"<color=#00E5FF>+{Mathf.RoundToInt(bMaxEnergy)} Mana</color>");
+            if (bEnergyRegen > 0) slotBuffs.Add($"<color=#06B6D4>+{bEnergyRegen:0.#} Mana/s</color>");
+            if (bLife > 0) slotBuffs.Add($"<color=#F43F5E>+{Mathf.RoundToInt(bLife * 100)}% {(isVi ? "Hút Máu" : "Lifesteal")}</color>");
+            if (bCd > 0) slotBuffs.Add($"<color=#C084FC>-{Mathf.RoundToInt(bCd * 100)}% CD</color>");
+            if (bShard > 0) slotBuffs.Add($"<color=#FBBF24>+{Mathf.RoundToInt(bShard * 100)}% Shard</color>");
+            if (bRegen > 0) slotBuffs.Add($"<color=#10B981>+{bRegen} HP/s</color>");
 
-            GameObject buffSummaryObj = new GameObject("SkillBuffSummary", typeof(RectTransform), typeof(CanvasRenderer));
+            GameObject buffSummaryObj = new GameObject("SlotBuffSummary", typeof(RectTransform), typeof(CanvasRenderer));
             buffSummaryObj.layer = 5;
             buffSummaryObj.transform.SetParent(cardObj.transform, false);
             RectTransform bsRt = buffSummaryObj.GetComponent<RectTransform>();
@@ -2088,13 +1917,13 @@ public class InventoryUI : MonoBehaviour
             bsRt.anchorMax = new Vector2(1f, 0f);
             bsRt.pivot = new Vector2(0.5f, 0f);
             bsRt.anchoredPosition = new Vector2(0f, 6f);
-            bsRt.sizeDelta = new Vector2(-16f, 24f);
+            bsRt.sizeDelta = new Vector2(-12f, 22f);
 
             var bsTmp = buffSummaryObj.AddComponent<TextMeshProUGUI>();
-            bsTmp.text = (skillBuffs.Count > 0)
-                ? $"<b>Buff:</b> {string.Join("  ", skillBuffs)}"
+            bsTmp.text = (slotBuffs.Count > 0)
+                ? $"{string.Join(" ", slotBuffs)}"
                 : (isVi ? "<color=#777777>[Trống]</color>" : "<color=#777777>[Empty]</color>");
-            bsTmp.fontSize = 11f;
+            bsTmp.fontSize = 13.5f;
             bsTmp.alignment = TextAlignmentOptions.Center;
             bsTmp.enableWordWrapping = true;
         }
@@ -2128,7 +1957,7 @@ public class InventoryUI : MonoBehaviour
             ngTmp.text = LocalizationManager.T(
                 "Trong túi đồ hiện không có kiếm, khiên, khoáng thạch hoặc đá quý!\nHãy đi phó bản diệt quái hoặc mở Gacha để nhận thêm trang bị.",
                 "No swords, shields, minerals or gems in inventory!\nDefeat dungeon monsters or pull Gacha to obtain items.");
-            ngTmp.fontSize = 13f;
+            ngTmp.fontSize = 15.5f;
             ngTmp.color = new Color(0.7f, 0.75f, 0.85f);
             ngTmp.alignment = TextAlignmentOptions.Center;
             return;
@@ -2147,7 +1976,7 @@ public class InventoryUI : MonoBehaviour
             gemCardObjs.Add(cardObj);
 
             RectTransform cRt = cardObj.GetComponent<RectTransform>();
-            cRt.sizeDelta = new Vector2(225f, 105f);
+            cRt.sizeDelta = new Vector2(230f, 105f);
 
             Image cImg = cardObj.GetComponent<Image>();
             cImg.color = new Color(0.08f, 0.10f, 0.16f, 0.95f);
@@ -2168,7 +1997,7 @@ public class InventoryUI : MonoBehaviour
             string itemIdToSocket = itemEntry.itemId;
             dragItem.onClick = () =>
             {
-                if (EquipmentSocketManager.SocketGemToSkill(selectedSocketSlotIndex, -1, itemIdToSocket, out _, out _))
+                if (EquipmentSocketManager.SocketGemToHeroSlot(selectedSocketSlotIndex, itemIdToSocket, out _, out _, curHero))
                 {
                     if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
                     RefreshGemSocketModal();
@@ -2186,7 +2015,7 @@ public class InventoryUI : MonoBehaviour
             ibRt.anchorMax = new Vector2(0f, 0.5f);
             ibRt.pivot = new Vector2(0f, 0.5f);
             ibRt.anchoredPosition = new Vector2(8f, 0f);
-            ibRt.sizeDelta = new Vector2(48f, 48f);
+            ibRt.sizeDelta = new Vector2(50f, 50f);
             Image ibImg = ibObj.GetComponent<Image>();
             if (sprItemSlotFrame != null) { ibImg.sprite = sprItemSlotFrame; ibImg.type = Image.Type.Sliced; }
             ibImg.color = itemEff.Value.gemColor;
@@ -2210,14 +2039,14 @@ public class InventoryUI : MonoBehaviour
             RectTransform infoRt = infoObj.GetComponent<RectTransform>();
             infoRt.anchorMin = new Vector2(0f, 0f);
             infoRt.anchorMax = new Vector2(1f, 1f);
-            infoRt.offsetMin = new Vector2(62f, 4f);
+            infoRt.offsetMin = new Vector2(66f, 4f);
             infoRt.offsetMax = new Vector2(-6f, -4f);
 
             var vLayout = infoObj.AddComponent<VerticalLayoutGroup>();
             vLayout.childAlignment = TextAnchor.MiddleLeft;
             vLayout.childControlHeight = false;
             vLayout.childControlWidth = true;
-            vLayout.spacing = 2f;
+            vLayout.spacing = 3f;
 
             // Title + Quantity
             GameObject tObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
@@ -2226,8 +2055,8 @@ public class InventoryUI : MonoBehaviour
             var tTmp = tObj.AddComponent<TextMeshProUGUI>();
             string gName = LocalizationManager.IsVietnamese ? itemEff.Value.nameVi : itemEff.Value.nameEn;
             string qtyStr = itemEntry.quantity > 99 ? "99+" : $"x{itemEntry.quantity}";
-            tTmp.text = $"<b>{gName}</b> <size=11><color=#00FF88>{qtyStr}</color></size>";
-            tTmp.fontSize = 11.5f;
+            tTmp.text = $"<b>{gName}</b> <size=14><color=#00FF88>{qtyStr}</color></size>";
+            tTmp.fontSize = 15.5f;
             tTmp.color = Color.white;
             tTmp.raycastTarget = false;
 
@@ -2236,16 +2065,18 @@ public class InventoryUI : MonoBehaviour
             bObj.layer = 5;
             bObj.transform.SetParent(infoObj.transform, false);
             var bTmp = bObj.AddComponent<TextMeshProUGUI>();
-            bTmp.text = LocalizationManager.IsVietnamese ? itemEff.Value.effectSummaryVi : itemEff.Value.effectSummaryEn;
-            bTmp.fontSize = 9.5f;
+            string effSum = LocalizationManager.IsVietnamese ? itemEff.Value.effectSummaryVi : itemEff.Value.effectSummaryEn;
+            bTmp.text = EquipmentSocketManager.FormatColoredStatSummary(effSum);
+            bTmp.fontSize = 13.5f;
             bTmp.fontStyle = FontStyles.Bold;
-            bTmp.color = itemEff.Value.gemColor;
+            bTmp.color = Color.white;
         }
     }
 
     private void OnAutoMergeAllButtonClicked()
     {
-        int available = EquipmentSocketManager.GetTotalAvailableMergeGemsCount();
+        string curHero = EquipmentSocketManager.GetActiveHeroId();
+        int available = EquipmentSocketManager.GetTotalAvailableMergeGemsCount(curHero);
         if (available <= 0)
         {
             if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
@@ -2254,7 +2085,7 @@ public class InventoryUI : MonoBehaviour
             return;
         }
 
-        int consumed = EquipmentSocketManager.AutoMergeAllMatchingGems(out int upgradedSlots, out int totalLevelsGained);
+        int consumed = EquipmentSocketManager.AutoMergeAllMatchingGems(out int upgradedSlots, out int totalLevelsGained, curHero);
         if (consumed > 0)
         {
             if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
@@ -2298,20 +2129,7 @@ public class InventoryUI : MonoBehaviour
         closeButton = closeObj.GetComponent<Button>();
         closeButton.targetGraphic = img;
         closeButton.onClick.AddListener(Close);
-
-        GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        txtObj.layer = 5;
-        txtObj.transform.SetParent(closeObj.transform, false);
-        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
-        txtRt.anchorMin = Vector2.zero;
-        txtRt.anchorMax = Vector2.one;
-        txtRt.sizeDelta = Vector2.zero;
-        var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = "X";
-        tmp.fontSize = 24;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
-        tmp.alignment = TextAlignmentOptions.Center;
+        WhiteIconLoader.ReplaceTextWithIcon(closeButton, "Cross", Color.white, new Vector2(24f, 24f));
     }
 
     public void Open()
@@ -2476,7 +2294,11 @@ public class InventoryUI : MonoBehaviour
             else
             {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
-                Debug.LogWarning("[GACHA] Không đủ tài nguyên! Cần 100 Linh Hồn hoặc 1 Bùa Triệu Hồi.");
+                string warningMsg = LocalizationManager.T(
+                    "Không đủ tài nguyên! Cần 100 Linh Hồn hoặc 1 Bùa Triệu Hồi.",
+                    "Not enough resources! Requires 100 Aethel Shards or 1 Summon Scroll.");
+                PlayNoticeToast(warningMsg, new Color(1f, 0.35f, 0.35f));
+                Debug.LogWarning($"[GACHA] {warningMsg}");
             }
         }
         else if (pullCount == 10)
@@ -2508,7 +2330,11 @@ public class InventoryUI : MonoBehaviour
                 else
                 {
                     if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
-                    Debug.LogWarning($"[GACHA] Không đủ tài nguyên! Bạn có {currentScrolls} Bùa, cần thêm {topUpShardCost} Linh Hồn ({missingPulls} lượt x 90 Shards) để Quay 10 Lần.");
+                    string warningMsg = LocalizationManager.T(
+                        $"Không đủ tài nguyên! Cần thêm {topUpShardCost} Linh Hồn ({missingPulls} lượt x 90 Shards).",
+                        $"Not enough resources! Needs {topUpShardCost} more Shards ({missingPulls} rolls x 90 Shards).");
+                    PlayNoticeToast(warningMsg, new Color(1f, 0.35f, 0.35f));
+                    Debug.LogWarning($"[GACHA] {warningMsg}");
                 }
             }
             // Trường hợp 3: Có 0 vé -> Dùng 900 Shards
@@ -2521,7 +2347,11 @@ public class InventoryUI : MonoBehaviour
                 else
                 {
                     if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
-                    Debug.LogWarning("[GACHA] Không đủ tài nguyên! Cần 900 Linh Hồn hoặc 10 Bùa Triệu Hồi.");
+                    string warningMsg = LocalizationManager.T(
+                        "Không đủ tài nguyên! Cần 900 Linh Hồn hoặc 10 Bùa Triệu Hồi.",
+                        "Not enough resources! Requires 900 Aethel Shards or 10 Summon Scrolls.");
+                    PlayNoticeToast(warningMsg, new Color(1f, 0.35f, 0.35f));
+                    Debug.LogWarning($"[GACHA] {warningMsg}");
                 }
             }
         }
@@ -2676,10 +2506,10 @@ public class InventoryUI : MonoBehaviour
         tierObj.transform.SetParent(cardObj.transform, false);
         RectTransform tierRt = tierObj.GetComponent<RectTransform>();
         tierRt.anchoredPosition = new Vector2(0f, -32f);
-        tierRt.sizeDelta = new Vector2(150f, 18f);
+        tierRt.sizeDelta = new Vector2(150f, 20f);
         var tierTmp = tierObj.AddComponent<TextMeshProUGUI>();
         tierTmp.text = $"[{InventoryItemDatabase.GetRarityName(def.rarity)}]";
-        tierTmp.fontSize = 11;
+        tierTmp.fontSize = 15.5f;
         tierTmp.fontStyle = FontStyles.Bold;
         tierTmp.color = rCol;
         tierTmp.alignment = TextAlignmentOptions.Center;
@@ -2690,10 +2520,10 @@ public class InventoryUI : MonoBehaviour
         nameObj.transform.SetParent(cardObj.transform, false);
         RectTransform nameRt = nameObj.GetComponent<RectTransform>();
         nameRt.anchoredPosition = new Vector2(0f, -54f);
-        nameRt.sizeDelta = new Vector2(155f, 24f);
+        nameRt.sizeDelta = new Vector2(155f, 26f);
         var nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
         nameTmp.text = LocalizationManager.IsVietnamese ? def.nameVi : def.nameEn;
-        nameTmp.fontSize = 12;
+        nameTmp.fontSize = 16.5f;
         nameTmp.fontStyle = FontStyles.Bold;
         nameTmp.color = Color.white;
         nameTmp.alignment = TextAlignmentOptions.Center;
@@ -2821,7 +2651,7 @@ public class InventoryUI : MonoBehaviour
 
         var nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
         nameTmp.text = LocalizationManager.IsVietnamese ? def.nameVi : def.nameEn;
-        nameTmp.fontSize = 11;
+        nameTmp.fontSize = 15.5f;
         nameTmp.fontStyle = FontStyles.Bold;
         nameTmp.color = rarityCol;
         nameTmp.alignment = TextAlignmentOptions.Center;
@@ -2839,7 +2669,7 @@ public class InventoryUI : MonoBehaviour
             qtyRt.anchorMax = new Vector2(1f, 1f);
             qtyRt.pivot = new Vector2(1f, 1f);
             qtyRt.anchoredPosition = new Vector2(-4f, -4f);
-            qtyRt.sizeDelta = new Vector2(36f, 18f);
+            qtyRt.sizeDelta = new Vector2(40f, 20f);
 
             Image qtyBg = qtyObj.GetComponent<Image>();
             qtyBg.color = new Color(0f, 0f, 0f, 0.85f);
@@ -2854,7 +2684,7 @@ public class InventoryUI : MonoBehaviour
 
             var qTmp = qtyTxtObj.AddComponent<TextMeshProUGUI>();
             qTmp.text = (quantity > 99) ? "99+" : $"x{quantity}";
-            qTmp.fontSize = 10;
+            qTmp.fontSize = 14f;
             qTmp.fontStyle = FontStyles.Bold;
             qTmp.color = Color.white;
             qTmp.alignment = TextAlignmentOptions.Center;
@@ -2910,10 +2740,12 @@ public class InventoryUI : MonoBehaviour
         detailSourceText.text = $"{LocalizationManager.T("Nguồn gốc:", "Source:")} {src}";
 
         List<string> statLines = new List<string>();
-        if (def.atkBonus > 0) statLines.Add($"+{def.atkBonus} ATK");
-        if (def.hpBonus > 0) statLines.Add($"+{def.hpBonus} HP");
-        if (def.defBonus > 0) statLines.Add($"+{def.defBonus}% DEF");
-        if (def.speedBonus > 0) statLines.Add($"+{def.speedBonus:F1} SPD");
+        if (def.physAtkBonus > 0) statLines.Add($"<color=#FF3B30>+{def.physAtkBonus} ATK</color>");
+        if (def.magicAtkBonus > 0) statLines.Add($"<color=#B84DFF>+{def.magicAtkBonus} AP</color>");
+        if (def.atkBonus > 0 && def.physAtkBonus == 0 && def.magicAtkBonus == 0) statLines.Add($"<color=#FF3B30>+{def.atkBonus} ATK</color>");
+        if (def.hpBonus > 0) statLines.Add($"<color=#22C55E>+{def.hpBonus} HP</color>");
+        if (def.defBonus > 0) statLines.Add($"<color=#38BDF8>+{def.defBonus} DEF</color>");
+        if (def.speedBonus > 0) statLines.Add($"<color=#38BDF8>+{def.speedBonus:F1} SPD</color>");
 
         int chestCount = AccountDatabase.GetActiveUserItemCount("chest_ancient_relic");
         int keyCount = AccountDatabase.GetActiveUserItemCount("key_ancient_dungeon");
@@ -2940,20 +2772,22 @@ public class InventoryUI : MonoBehaviour
             detailStatsText.text = $"<color=#FF4757>[ {LocalizationManager.T("LÕI LINH HỒN THẦN THOẠI", "MYTHIC SOUL CORE")} ]</color>\n<color=#00FF88>{LocalizationManager.T("Hấp thụ nhận ngay +1000 Linh Hồn (Aethel Shards)", "Absorb to immediately obtain +1000 Aethel Shards")}</color>";
             detailQuantityText.text = $"{LocalizationManager.T("Số lượng sở hữu:", "Owned:")} <color=#FFD700>{countFormatted}</color>";
         }
-        else if (def.category == InventoryItemDatabase.ItemCategory.Equipment)
+        else if (def.category == InventoryItemDatabase.ItemCategory.Equipment || EquipmentSocketManager.IsGem(def.id) || def.category == InventoryItemDatabase.ItemCategory.Material)
         {
             var gemEff = EquipmentSocketManager.GetGemEffect(def.id);
             string effText = gemEff.HasValue ? (LocalizationManager.IsVietnamese ? gemEff.Value.effectSummaryVi : gemEff.Value.effectSummaryEn) : "";
-            string baseStatStr = (statLines.Count > 0) ? string.Join("  |  ", statLines) : "";
-            string buffPart = !string.IsNullOrEmpty(effText) ? $"<color=#00FF88>[Khảm Chiêu]: {effText}</color>" : "";
-            detailStatsText.text = !string.IsNullOrEmpty(buffPart) ? $"{baseStatStr}\n{buffPart}" : baseStatStr;
-            detailQuantityText.text = $"{LocalizationManager.T("Số lượng sở hữu:", "Owned:")} <color=#FFD700>{countFormatted}</color>";
-        }
-        else if (EquipmentSocketManager.IsGem(def.id) || def.category == InventoryItemDatabase.ItemCategory.Material)
-        {
-            var gemEff = EquipmentSocketManager.GetGemEffect(def.id);
-            string effText = gemEff.HasValue ? (LocalizationManager.IsVietnamese ? gemEff.Value.effectSummaryVi : gemEff.Value.effectSummaryEn) : "";
-            detailStatsText.text = $"<color=#00FF88>[Thuộc tính Khảm]: {effText}</color>\n<color=#00D2FF>{LocalizationManager.T("Khảm tại mục 'Kỹ Năng' | Ghép trùng để Lên Cấp", "Socket at 'Skills' | Merge duplicates to Level Up")}</color>";
+            if (!string.IsNullOrEmpty(effText))
+            {
+                detailStatsText.text = $"<b>{EquipmentSocketManager.FormatColoredStatSummary(effText)}</b>";
+            }
+            else if (statLines.Count > 0)
+            {
+                detailStatsText.text = $"<b>{string.Join("  |  ", statLines)}</b>";
+            }
+            else
+            {
+                detailStatsText.text = "";
+            }
             detailQuantityText.text = $"{LocalizationManager.T("Số lượng sở hữu:", "Owned:")} <color=#FFD700>{countFormatted}</color>";
         }
         else if (statLines.Count > 0)
@@ -2978,7 +2812,7 @@ public class InventoryUI : MonoBehaviour
 
             if (def.id == "scroll_summon_mythic")
             {
-                if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, -145f); actionRt.sizeDelta = new Vector2(360f, 44f); }
+                if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, 25f); actionRt.sizeDelta = new Vector2(380f, 56f); }
                 actionBtnImg.color = new Color(0.7f, 0.25f, 0.85f, 1f);
                 actionBtnText.text = LocalizationManager.T("ĐẾN ĐÀI GACHA", "GO TO GACHA");
                 actionButton.interactable = (count > 0);
@@ -2990,7 +2824,7 @@ public class InventoryUI : MonoBehaviour
                 if (maxOpen >= 2)
                 {
                     // 2-Button Split: [ MỞ ] (Left) and [ MỞ TẤT CẢ (N) ] (Right)
-                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(-92f, -145f); actionRt.sizeDelta = new Vector2(176f, 44f); }
+                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(-105f, 25f); actionRt.sizeDelta = new Vector2(200f, 56f); }
                     actionBtnText.text = LocalizationManager.T("MỞ", "OPEN");
                     actionButton.interactable = true;
                     actionBtnImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);
@@ -2999,7 +2833,7 @@ public class InventoryUI : MonoBehaviour
                     {
                         openAllButton.gameObject.SetActive(true);
                         RectTransform openAllRt = openAllButton.GetComponent<RectTransform>();
-                        if (openAllRt != null) { openAllRt.anchoredPosition = new Vector2(92f, -145f); openAllRt.sizeDelta = new Vector2(176f, 44f); }
+                        if (openAllRt != null) { openAllRt.anchoredPosition = new Vector2(105f, 25f); openAllRt.sizeDelta = new Vector2(200f, 56f); }
 
                         openAllBtnImg.color = new Color(0.9f, 0.55f, 0.12f, 1f);
                         openAllBtnText.text = LocalizationManager.T($"MỞ HẾT ({FormatCompactNumber(maxOpen)})", $"OPEN ALL ({FormatCompactNumber(maxOpen)})");
@@ -3011,7 +2845,7 @@ public class InventoryUI : MonoBehaviour
                     // Single Centered Button: only 1 chest or only 1 key available
                     if (openAllButton != null) openAllButton.gameObject.SetActive(false);
 
-                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, -145f); actionRt.sizeDelta = new Vector2(360f, 44f); }
+                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, 25f); actionRt.sizeDelta = new Vector2(380f, 56f); }
                     if (keyCount > 0 && chestCount > 0)
                     {
                         actionBtnImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);
@@ -3028,7 +2862,7 @@ public class InventoryUI : MonoBehaviour
             }
             else if (def.id.Contains("key"))
             {
-                if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, -145f); actionRt.sizeDelta = new Vector2(360f, 44f); }
+                if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, 25f); actionRt.sizeDelta = new Vector2(380f, 56f); }
                 if (chestCount > 0)
                 {
                     actionBtnImg.color = new Color(0.20f, 0.50f, 0.85f, 1f);
@@ -3046,7 +2880,7 @@ public class InventoryUI : MonoBehaviour
             {
                 if (count >= 2)
                 {
-                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(-92f, -145f); actionRt.sizeDelta = new Vector2(176f, 44f); }
+                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(-105f, 25f); actionRt.sizeDelta = new Vector2(200f, 56f); }
                     actionBtnImg.color = new Color(0.15f, 0.55f, 0.85f, 1f);
                     actionBtnText.text = LocalizationManager.T("HẤP THỤ 1", "ABSORB 1");
                     actionButton.interactable = true;
@@ -3055,7 +2889,7 @@ public class InventoryUI : MonoBehaviour
                     {
                         openAllButton.gameObject.SetActive(true);
                         RectTransform openAllRt = openAllButton.GetComponent<RectTransform>();
-                        if (openAllRt != null) { openAllRt.anchoredPosition = new Vector2(92f, -145f); openAllRt.sizeDelta = new Vector2(176f, 44f); }
+                        if (openAllRt != null) { openAllRt.anchoredPosition = new Vector2(105f, 25f); openAllRt.sizeDelta = new Vector2(200f, 56f); }
                         openAllBtnImg.color = new Color(0.85f, 0.25f, 0.85f, 1f);
                         openAllBtnText.text = LocalizationManager.T($"HẤP THỤ HẾT ({FormatCompactNumber(count)})", $"ABSORB ALL ({FormatCompactNumber(count)})");
                         openAllButton.interactable = true;
@@ -3064,7 +2898,7 @@ public class InventoryUI : MonoBehaviour
                 else
                 {
                     if (openAllButton != null) openAllButton.gameObject.SetActive(false);
-                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, -145f); actionRt.sizeDelta = new Vector2(360f, 44f); }
+                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, 25f); actionRt.sizeDelta = new Vector2(380f, 56f); }
                     actionBtnImg.color = new Color(0.15f, 0.55f, 0.85f, 1f);
                     actionBtnText.text = LocalizationManager.T("HẤP THỤ (+1000 LINH HỒN)", "ABSORB (+1000 SHARDS)");
                     actionButton.interactable = (count > 0);
@@ -3076,7 +2910,7 @@ public class InventoryUI : MonoBehaviour
                 if (count >= 2)
                 {
                     long totalShardVal = (long)shardVal * count;
-                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(-92f, -145f); actionRt.sizeDelta = new Vector2(176f, 44f); }
+                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(-105f, 25f); actionRt.sizeDelta = new Vector2(200f, 56f); }
                     actionBtnImg.color = new Color(0.85f, 0.40f, 0.12f, 1f);
                     actionBtnText.text = LocalizationManager.T($"RÃ 1 (+{FormatCompactNumber(shardVal)})", $"SALVAGE 1 (+{FormatCompactNumber(shardVal)})");
                     actionButton.interactable = true;
@@ -3085,7 +2919,7 @@ public class InventoryUI : MonoBehaviour
                     {
                         openAllButton.gameObject.SetActive(true);
                         RectTransform openAllRt = openAllButton.GetComponent<RectTransform>();
-                        if (openAllRt != null) { openAllRt.anchoredPosition = new Vector2(92f, -145f); openAllRt.sizeDelta = new Vector2(176f, 44f); }
+                        if (openAllRt != null) { openAllRt.anchoredPosition = new Vector2(105f, 25f); openAllRt.sizeDelta = new Vector2(200f, 56f); }
                         openAllBtnImg.color = new Color(0.92f, 0.25f, 0.15f, 1f);
                         openAllBtnText.text = LocalizationManager.T($"RÃ HẾT (+{FormatCompactNumber(totalShardVal)})", $"SALVAGE ALL (+{FormatCompactNumber(totalShardVal)})");
                         openAllButton.interactable = true;
@@ -3094,7 +2928,7 @@ public class InventoryUI : MonoBehaviour
                 else
                 {
                     if (openAllButton != null) openAllButton.gameObject.SetActive(false);
-                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, -145f); actionRt.sizeDelta = new Vector2(360f, 44f); }
+                    if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, 25f); actionRt.sizeDelta = new Vector2(380f, 56f); }
                     actionBtnImg.color = new Color(0.85f, 0.40f, 0.12f, 1f);
                     actionBtnText.text = LocalizationManager.T($"RÃ LẤY LINH HỒN (+{FormatCompactNumber(shardVal)})", $"SALVAGE (+{FormatCompactNumber(shardVal)} SHARDS)");
                     actionButton.interactable = (count > 0);
@@ -3103,7 +2937,7 @@ public class InventoryUI : MonoBehaviour
             else
             {
                 if (openAllButton != null) openAllButton.gameObject.SetActive(false);
-                if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, -145f); actionRt.sizeDelta = new Vector2(360f, 44f); }
+                if (actionRt != null) { actionRt.anchoredPosition = new Vector2(0f, 25f); actionRt.sizeDelta = new Vector2(380f, 56f); }
                 actionBtnImg.color = new Color(0.35f, 0.35f, 0.4f, 1f);
                 actionBtnText.text = LocalizationManager.T("SỬ DỤNG", "USE");
                 actionButton.interactable = (count > 0);
@@ -3214,6 +3048,82 @@ public class InventoryUI : MonoBehaviour
     }
 
     private List<GameObject> activeFlyShardBadges = new List<GameObject>();
+
+    public void PlayNoticeToast(string message, Color textColor)
+    {
+        for (int i = activeFlyShardBadges.Count - 1; i >= 0; i--)
+        {
+            if (activeFlyShardBadges[i] != null) Destroy(activeFlyShardBadges[i]);
+        }
+        activeFlyShardBadges.Clear();
+
+        GameObject toastObj = new GameObject("InventoryToast", typeof(RectTransform), typeof(CanvasRenderer), typeof(CanvasGroup), typeof(Image));
+        toastObj.layer = 5;
+        toastObj.transform.SetParent(transform, false);
+
+        RectTransform rt = toastObj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = new Vector2(0f, -50f);
+        rt.sizeDelta = new Vector2(650f, 44f);
+
+        Image bg = toastObj.GetComponent<Image>();
+        bg.color = new Color(0.05f, 0.05f, 0.1f, 0.92f);
+
+        var outline = toastObj.AddComponent<Outline>();
+        outline.effectColor = textColor;
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        CanvasGroup cg = toastObj.GetComponent<CanvasGroup>();
+        cg.blocksRaycasts = false;
+        cg.interactable = false;
+
+        GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        txtObj.layer = 5;
+        txtObj.transform.SetParent(toastObj.transform, false);
+        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.sizeDelta = Vector2.zero;
+
+        var tmp = txtObj.AddComponent<TextMeshProUGUI>();
+        tmp.text = message;
+        tmp.fontSize = 17f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = textColor;
+
+        activeFlyShardBadges.Add(toastObj);
+        StartCoroutine(AnimateToastNotice(toastObj, cg, rt));
+    }
+
+    private IEnumerator AnimateToastNotice(GameObject toastObj, CanvasGroup cg, RectTransform rt)
+    {
+        Vector2 startPos = rt.anchoredPosition;
+        Vector2 endPos = startPos + new Vector2(0f, 40f);
+        float duration = 1.6f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            if (toastObj == null || cg == null || rt == null) yield break;
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            rt.anchoredPosition = Vector2.Lerp(startPos, endPos, Mathf.SmoothStep(0f, 1f, t));
+            if (t > 0.65f)
+            {
+                cg.alpha = Mathf.Lerp(1f, 0f, (t - 0.65f) / 0.35f);
+            }
+            yield return null;
+        }
+
+        if (toastObj != null)
+        {
+            activeFlyShardBadges.Remove(toastObj);
+            Destroy(toastObj);
+        }
+    }
 
     public void PlaySoulShardFlyEffect(Vector3 startWorldPos, long shardAmount)
     {
@@ -3739,7 +3649,7 @@ public class InventoryUI : MonoBehaviour
         tierObj.transform.SetParent(infoObj.transform, false);
         var tTmp = tierObj.AddComponent<TextMeshProUGUI>();
         tTmp.text = tierBadge;
-        tTmp.fontSize = 10;
+        tTmp.fontSize = 12f;
         tTmp.fontStyle = FontStyles.Bold;
         tTmp.color = outlineCol;
 
@@ -3749,7 +3659,7 @@ public class InventoryUI : MonoBehaviour
         titleObj.transform.SetParent(infoObj.transform, false);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = title;
-        titleTmp.fontSize = 11.5f;
+        titleTmp.fontSize = 14f;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = Color.white;
         titleTmp.overflowMode = TextOverflowModes.Ellipsis;

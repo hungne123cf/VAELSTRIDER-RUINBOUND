@@ -213,6 +213,15 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     void Update()
     {
         if (isDead) return;
+
+        if (PlayerHealth.IsPlayerDead)
+        {
+            rb.linearVelocity = Vector2.zero;
+            SetMoving(false);
+            HideWarningCone();
+            return;
+        }
+
         if (attackTimer > 0f) attackTimer -= Time.deltaTime;
         if (pounceTimer > 0f) pounceTimer -= Time.deltaTime;
         if (spikesTimer > 0f) spikesTimer -= Time.deltaTime;

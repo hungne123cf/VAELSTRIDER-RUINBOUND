@@ -114,6 +114,15 @@ public class PotionQuickSlotUI : MonoBehaviour
             BindInventory();
         }
 
+        var health = (playerInventory != null) 
+            ? playerInventory.GetComponent<PlayerHealth>() 
+            : FindAnyObjectByType<PlayerHealth>();
+
+        if (health != null && (health.IsDead || health.CurrentHealth <= 0))
+        {
+            return;
+        }
+
         if (playerInventory != null)
         {
             bool used = playerInventory.UsePotion();

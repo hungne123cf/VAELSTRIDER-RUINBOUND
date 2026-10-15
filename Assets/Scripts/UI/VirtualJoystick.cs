@@ -85,6 +85,7 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
         }
 
         inputVector = position / handleRange;
+        if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
         if (playerController != null)
         {
             playerController.SetMobileInput(inputVector);
@@ -99,6 +100,7 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
             handleRect.anchoredPosition = Vector2.zero;
         }
 
+        if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
         if (playerController != null)
         {
             playerController.SetMobileInput(Vector2.zero);

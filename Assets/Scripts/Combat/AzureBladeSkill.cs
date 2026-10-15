@@ -24,7 +24,12 @@ public class AzureBladeSkill : MonoBehaviour
     private PlayerCombat playerCombat;
     private PlayerHealth playerHealth;
     private Animator animator;
+    private SpriteRenderer spriteRenderer;
     private RangedAimIndicator aimIndicator;
+
+    private GameObject cryoChargeAuraObj = null;
+    private float nextFrostParticleTime = 0f;
+    private bool hasPlayedMaxCryoGlint = false;
 
     private float attackCooldown = 5.0f;
     private float attackCooldownTimer = 0f;
@@ -50,6 +55,7 @@ public class AzureBladeSkill : MonoBehaviour
         playerCombat = GetComponent<PlayerCombat>();
         playerHealth = GetComponent<PlayerHealth>();
         animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         aimIndicator = RangedAimIndicator.EnsureExists(gameObject);
         RefreshCooldownStats();
     }
@@ -137,12 +143,16 @@ public class AzureBladeSkill : MonoBehaviour
     /// </summary>
     public bool StartAim(Vector2 initialDir)
     {
+        if (playerHealth != null && playerHealth.IsDead) return false;
         if (!IsAttackReady) return false;
 
         isAiming = true;
         currentHoldDuration = 0f;
+        hasPlayedMaxCryoGlint = false;
         currentAimDir = (initialDir.sqrMagnitude > 0.01f) ? initialDir.normalized : GetFacingDirection();
         if (aimIndicator == null) aimIndicator = RangedAimIndicator.EnsureExists(gameObject);
+
+        CreateCryoChargeAura();
         return true;
     }
 
@@ -151,6 +161,12 @@ public class AzureBladeSkill : MonoBehaviour
     /// </summary>
     public void UpdateAim(Vector2 aimDirection, float holdDuration)
     {
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            CancelAim();
+            return;
+        }
+
         isAiming = true;
         currentHoldDuration = holdDuration;
         if (aimDirection.sqrMagnitude > 0.01f)
@@ -168,11 +184,35 @@ public class AzureBladeSkill : MonoBehaviour
         // Tỷ lệ tụ lực tính trong khoảng [0.1s -> 1.0s]
         float chargeProgress = Mathf.Clamp01((currentHoldDuration - minChargeTime) / (maxChargeTime - minChargeTime));
 
-        // Hiển thị tia ngắm laze định hướng
+        // Cập nhật quầng hào quang băng tuyết
+        UpdateCryoChargeAura(chargeProgress);
+
+        // Sinh hạt tinh thể băng ngọc hút dồn vào lưỡi kiếm
+        if (Time.time >= nextFrostParticleTime)
+        {
+            nextFrostParticleTime = Time.time + 0.045f;
+            SpawnInwardFrostCrystal(transform.position, currentAimDir, chargeProgress);
+        }
+
+        // Hiển thị tia ngắm laze định hướng chuẩn xạ thủ
         if (aimIndicator != null)
         {
             Vector2 origin = (Vector2)transform.position + currentAimDir * 0.4f;
             aimIndicator.Show(origin, currentAimDir, chargeProgress);
+        }
+
+        // KHI ĐẠT 100% TỤ LỰC (MAX CHARGE 1.0s): Khóa hồng tâm hoàn hảo + Lóe sáng tinh thể băng `✧`!
+        if (chargeProgress >= 1.0f && !hasPlayedMaxCryoGlint)
+        {
+            hasPlayedMaxCryoGlint = true;
+            Vector3 glintPos = transform.position + (Vector3)(currentAimDir * 0.45f) + Vector3.up * 0.25f;
+            SpawnCryoStarGlint(glintPos);
+            SoundManager.EnsureInstance()?.PlayHitImpact();
+
+            var cam = FindAnyObjectByType<CameraFollow>();
+            if (cam != null) cam.Shake(0.12f, 0.18f);
+
+            StartCoroutine(FlashSpriteRoutine(new Color(0.4f, 0.95f, 1f, 1f), 0.12f));
         }
     }
 
@@ -183,6 +223,8 @@ public class AzureBladeSkill : MonoBehaviour
     {
         isAiming = false;
         currentHoldDuration = 0f;
+        hasPlayedMaxCryoGlint = false;
+        DestroyCryoChargeAura();
         if (aimIndicator != null) aimIndicator.Hide();
     }
 
@@ -191,7 +233,16 @@ public class AzureBladeSkill : MonoBehaviour
     /// </summary>
     public void ReleaseAimAndFire(int bonusAttackDamage)
     {
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            CancelAim();
+            return;
+        }
+
         if (aimIndicator != null) aimIndicator.Hide();
+        DestroyCryoChargeAura();
+        hasPlayedMaxCryoGlint = false;
+
         if (!IsAttackReady) return;
 
         attackCooldownTimer = attackCooldown;
@@ -214,37 +265,40 @@ public class AzureBladeSkill : MonoBehaviour
         float damageMultiplier = Mathf.Lerp(1.0f, maxChargedMultiplier, chargeProgress);
         int totalDamage = Mathf.RoundToInt((baseWaveDamage + bonusAttackDamage) * damageMultiplier);
 
-        // Hiển thị popup hiệu ứng tụ lực
+        // Hiển thị hiệu ứng tụ lực
         if (isFullCharge)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("★ TỤ LỰC TỐI ĐA (1.0s)!", "★ MAX CHARGE (1.0s)!"), new Color(1f, 0.9f, 0.2f));
-        }
-        else if (chargeProgress > 0.25f)
-        {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T($"TỤ LỰC +{Mathf.RoundToInt(chargeProgress * 100)}%!", $"CHARGED +{Mathf.RoundToInt(chargeProgress * 100)}%!"), new Color(0.3f, 0.95f, 1f));
+            var cam = FindAnyObjectByType<CameraFollow>();
+            if (cam != null) cam.Shake(0.16f, 0.22f);
         }
 
         // Vị trí xuất phát kiếm khí
-        Vector3 spawnPos = transform.position + (Vector3)(currentAimDir * 0.7f) + Vector3.up * 0.2f;
+        Vector3 spawnPos = transform.position + (Vector3)(currentAimDir * 0.50f) + Vector3.up * 0.2f;
+
+        // Hiệu ứng nổ bung tinh thể băng khi bắn ra
+        if (chargeProgress > 0.25f)
+        {
+            SpawnCryoMuzzleBurst(spawnPos, currentAimDir, chargeProgress);
+        }
 
         // Tốc độ và số lượng xuyên thấu tăng theo mức tụ lực
         float speed = Mathf.Lerp(waveSpeed, waveSpeed * 1.45f, chargeProgress);
         int pierce = Mathf.RoundToInt(Mathf.Lerp(4, 9, chargeProgress));
 
-        // Phóng sóng kiếm (kích thước chuẩn 1.0 với hình ảnh vẽ tay Twin_sword)
-        SwordWaveProjectile.Spawn(spawnPos, currentAimDir, totalDamage, speed, scaleMultiplier: 1.0f, isUlti: false, isCharged: (chargeProgress > 0.2f), pierceLimit: pierce, ownerSkill: this);
+        // Phóng sóng kiếm (kích thước chuẩn với hiệu ứng phát sáng lam băng)
+        float waveScale = Mathf.Lerp(0.9f, 1.35f, chargeProgress);
+        SwordWaveProjectile.Spawn(spawnPos, currentAimDir, totalDamage, speed, scaleMultiplier: waveScale, isUlti: false, isCharged: (chargeProgress > 0.2f), pierceLimit: pierce, ownerSkill: this);
     }
 
     /// <summary>
     /// Giảm 50% thời gian hồi chiêu và hồi phục Năng Lượng / Nội Năng khi kiếm khí chém trúng quái vật
     /// </summary>
-    public void OnWaveHitEnemy(bool isCharged = false, bool isUlti = false)
+    public void OnWaveHitEnemy(int hitDamage = 0, bool isCharged = false, bool isUlti = false)
     {
         if (attackCooldownTimer > 0.05f)
         {
             float reduction = attackCooldownTimer * 0.5f;
             attackCooldownTimer = Mathf.Max(0f, attackCooldownTimer - reduction);
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, LocalizationManager.T("⚡ GIẢM HỒI CHIÊU 50%!", "⚡ CD -50%!"), new Color(0.2f, 1f, 0.85f));
         }
 
         // Tích tụ năng lượng & Nội Năng CHỈ KHI kiếm khí chém trúng quái vật
@@ -258,7 +312,8 @@ public class AzureBladeSkill : MonoBehaviour
 
         if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
         {
-            int heal = Mathf.Max(1, Mathf.RoundToInt(baseWaveDamage * playerCombat.LifestealPercent));
+            int effDmg = (hitDamage > 0) ? hitDamage : (isCharged ? Mathf.RoundToInt(baseWaveDamage * maxChargedMultiplier) : baseWaveDamage);
+            int heal = Mathf.Max(1, Mathf.RoundToInt(effDmg * playerCombat.LifestealPercent));
             playerHealth.Heal(heal);
         }
     }
@@ -271,7 +326,6 @@ public class AzureBladeSkill : MonoBehaviour
         if (attackCooldownTimer > 0f)
         {
             attackCooldownTimer = 0f;
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.3f, LocalizationManager.T("⚡ HỒI ĐÒN ĐÁNH!", "⚡ CD RESET!"), new Color(1f, 0.9f, 0.2f));
         }
     }
 
@@ -280,6 +334,7 @@ public class AzureBladeSkill : MonoBehaviour
     /// </summary>
     public bool OnPerformAttack(Vector2 facingDirection, int baseAttackDamage)
     {
+        if (playerHealth != null && playerHealth.IsDead) return false;
         if (!IsAttackReady) return false;
         attackCooldownTimer = attackCooldown;
 
@@ -307,9 +362,9 @@ public class AzureBladeSkill : MonoBehaviour
     /// </summary>
     public bool TriggerSpecialSkill()
     {
+        if (playerHealth != null && playerHealth.IsDead) return false;
         if (specialCooldownTimer > 0f)
         {
-            DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, LocalizationManager.T("ĐANG HỒI CHIÊU!", "COOLDOWN!"), Color.yellow);
             return false;
         }
 
@@ -330,7 +385,6 @@ public class AzureBladeSkill : MonoBehaviour
         if (facing.sqrMagnitude < 0.001f) facing = Vector2.down;
         facing = facing.normalized;
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, LocalizationManager.T("LAM PHONG HẢI TRIỀU!", "AZURE TEMPEST!"), new Color(0.2f, 0.9f, 1f));
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         if (animator != null)
@@ -372,5 +426,201 @@ public class AzureBladeSkill : MonoBehaviour
         Vector2 dir = new Vector2(mx, my);
         if (dir.sqrMagnitude < 0.01f) return Vector2.down;
         return dir.normalized;
+    }
+
+    // =========================================================================
+    // HỆ THỐNG HIỆU ỨNG THỊ GIÁC BĂNG LAM XẠ THỦ (CRYO MARKSMAN VFX SYSTEM)
+    // =========================================================================
+
+    private void CreateCryoChargeAura()
+    {
+        if (cryoChargeAuraObj != null) Destroy(cryoChargeAuraObj);
+
+        cryoChargeAuraObj = new GameObject("Azure_CryoChargeAura");
+        cryoChargeAuraObj.transform.SetParent(transform, false);
+        cryoChargeAuraObj.transform.localPosition = new Vector3(0f, 0.1f, 0f);
+
+        var light = cryoChargeAuraObj.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
+        light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;
+        light.color = new Color(0.2f, 0.95f, 1f, 1f);
+        light.intensity = 1.3f;
+        light.pointLightInnerRadius = 0.25f;
+        light.pointLightOuterRadius = 1.5f;
+    }
+
+    private void UpdateCryoChargeAura(float ratio)
+    {
+        if (cryoChargeAuraObj == null) return;
+        var light = cryoChargeAuraObj.GetComponent<UnityEngine.Rendering.Universal.Light2D>();
+        if (light != null)
+        {
+            light.intensity = Mathf.Lerp(1.3f, 3.0f, ratio);
+            light.pointLightOuterRadius = Mathf.Lerp(1.5f, 2.4f, ratio);
+            light.color = Color.Lerp(new Color(0.2f, 0.95f, 1f, 1f), new Color(0.9f, 1f, 1f, 1f), ratio);
+        }
+    }
+
+    private void DestroyCryoChargeAura()
+    {
+        if (cryoChargeAuraObj != null)
+        {
+            Destroy(cryoChargeAuraObj);
+            cryoChargeAuraObj = null;
+        }
+    }
+
+    private void SpawnInwardFrostCrystal(Vector3 center, Vector2 facingDir, float ratio)
+    {
+        float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+        float radius = Random.Range(1.1f, 1.7f);
+        Vector3 spawnPos = center + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * radius;
+
+        GameObject p = new GameObject("FrostCrystalMote");
+        p.transform.position = spawnPos;
+        p.transform.localScale = Vector3.one * Random.Range(0.12f, 0.22f);
+
+        var sr = p.AddComponent<SpriteRenderer>();
+        sr.sprite = GetFrostDiamondSprite();
+        sr.color = (ratio >= 0.85f) ? new Color(0.95f, 1f, 1f, 0.95f) : new Color(0.35f, 0.95f, 1f, 0.85f);
+        sr.sortingOrder = 3200;
+
+        var rb = p.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 0f;
+        Vector2 target = (Vector2)center + facingDir * 0.35f;
+        Vector2 flyDir = (target - (Vector2)spawnPos).normalized;
+        rb.linearVelocity = flyDir * Random.Range(6f, 10f);
+
+        Destroy(p, 0.18f);
+    }
+
+    private void SpawnCryoStarGlint(Vector3 glintPos)
+    {
+        GameObject star = new GameObject("CryoLockOnGlint");
+        star.transform.position = glintPos;
+        star.transform.localScale = Vector3.zero;
+
+        var sr = star.AddComponent<SpriteRenderer>();
+        sr.sprite = GetFrostDiamondSprite();
+        sr.color = new Color(1f, 1f, 1f, 1f);
+        sr.sortingOrder = 4500;
+
+        var light = star.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
+        light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;
+        light.color = new Color(0.4f, 0.95f, 1f, 1f);
+        light.intensity = 3.5f;
+        light.pointLightInnerRadius = 0.25f;
+        light.pointLightOuterRadius = 1.9f;
+
+        StartCoroutine(AnimateCryoStarRoutine(star, light));
+    }
+
+    private IEnumerator AnimateCryoStarRoutine(GameObject starObj, UnityEngine.Rendering.Universal.Light2D light)
+    {
+        float dur = 0.22f;
+        float elapsed = 0f;
+
+        while (elapsed < dur)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / dur;
+            float scale = Mathf.Sin(t * Mathf.PI) * 1.5f;
+            if (starObj != null) starObj.transform.localScale = Vector3.one * scale;
+            if (light != null) light.intensity = (1f - t) * 3.5f;
+            yield return null;
+        }
+
+        if (starObj != null) Destroy(starObj);
+    }
+
+    private void SpawnCryoMuzzleBurst(Vector3 spawnPos, Vector2 direction, float ratio)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            GameObject spk = new GameObject("CryoMuzzleShard");
+            spk.transform.position = spawnPos + (Vector3)Random.insideUnitCircle * 0.12f;
+            spk.transform.localScale = Vector3.one * Random.Range(0.12f, 0.22f);
+
+            var sr = spk.AddComponent<SpriteRenderer>();
+            sr.sprite = GetFrostDiamondSprite();
+            sr.color = new Color(0.6f, 0.95f, 1f, 0.95f);
+            sr.sortingOrder = 3600;
+
+            float spreadAngle = Random.Range(-40f, 40f);
+            float baseAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + spreadAngle;
+            float rad = baseAngle * Mathf.Deg2Rad;
+            Vector2 shootDir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+
+            var rb = spk.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.linearVelocity = shootDir * Random.Range(4f, 8f);
+
+            StartCoroutine(FadeCryoObjectRoutine(spk, sr, 0.18f));
+        }
+    }
+
+    private IEnumerator FadeCryoObjectRoutine(GameObject obj, SpriteRenderer sr, float duration)
+    {
+        float elapsed = 0f;
+        Color startCol = (sr != null) ? sr.color : Color.white;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            if (sr != null) sr.color = new Color(startCol.r, startCol.g, startCol.b, (1f - t) * startCol.a);
+            yield return null;
+        }
+        if (obj != null) Destroy(obj);
+    }
+
+    private IEnumerator FlashSpriteRoutine(Color flashColor, float duration)
+    {
+        if (spriteRenderer == null) yield break;
+        Color orig = spriteRenderer.color;
+        spriteRenderer.color = flashColor;
+        yield return new WaitForSeconds(duration);
+        if (spriteRenderer != null) spriteRenderer.color = orig;
+    }
+
+    private static Sprite cachedFrostDiamondSprite = null;
+    private static Sprite GetFrostDiamondSprite()
+    {
+        if (cachedFrostDiamondSprite != null) return cachedFrostDiamondSprite;
+
+        int size = 32;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float center = (size - 1) / 2.0f;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = Mathf.Abs(x - center) / center;
+                float dy = Mathf.Abs(y - center) / center;
+
+                // Diamond frost crystal formula
+                float dist = dx + dy;
+                if (dist <= 1.0f)
+                {
+                    float alpha = 1f - dist;
+                    if (dist < 0.35f)
+                    {
+                        tex.SetPixel(x, y, new Color(1f, 1f, 1f, 1f));
+                    }
+                    else
+                    {
+                        tex.SetPixel(x, y, new Color(0.35f, 0.95f, 1f, alpha * 1.5f));
+                    }
+                }
+                else
+                {
+                    tex.SetPixel(x, y, Color.clear);
+                }
+            }
+        }
+
+        tex.Apply();
+        cachedFrostDiamondSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 32);
+        return cachedFrostDiamondSprite;
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class SwordWaveProjectile : MonoBehaviour
@@ -210,6 +211,12 @@ public class SwordWaveProjectile : MonoBehaviour
             spriteRenderer.sprite = twinSwordFrames[currentFrame];
         }
 
+        // Tàn khí băng tuyết lấp lánh phía sau kiếm khí tụ lực
+        if ((isChargedWave || isUltiWave) && Random.value > 0.45f)
+        {
+            SpawnFrostTrailSpark(transform.position);
+        }
+
         // Max distance check
         if (Vector3.Distance(startPosition, transform.position) >= maxDistance)
         {
@@ -250,7 +257,14 @@ public class SwordWaveProjectile : MonoBehaviour
                 hitDamageables.Add(damageable);
                 hitInstanceIds.Add(instanceId);
 
-                damageable.TakeDamage(damage);
+                var combat = Object.FindAnyObjectByType<PlayerCombat>();
+                bool isCrit = (combat != null) 
+                    ? combat.RollCritical(isChargedWave ? 0.15f : (isUltiWave ? 0.25f : 0f), out float critMult) 
+                    : (UnityEngine.Random.value < (isChargedWave ? 0.35f : 0.20f));
+                float mult = isCrit ? 1.75f : 1.0f;
+                int finalDamage = Mathf.RoundToInt(damage * mult);
+
+                damageable.TakeDamage(finalDamage);
 
                 // Giảm 50% thời gian hồi chiêu và hồi phục Năng Lượng / Nội Năng khi chém trúng quái vật thực sự
                 bool isProp = (hitObj.GetComponent<BreakableProp>() != null || hitObj.GetComponentInParent<BreakableProp>() != null || hitObj.GetComponent<TreasureChest>() != null || hitObj.GetComponentInParent<TreasureChest>() != null);
@@ -258,17 +272,22 @@ public class SwordWaveProjectile : MonoBehaviour
                 {
                     if (ownerSkill != null)
                     {
-                        ownerSkill.OnWaveHitEnemy(isChargedWave, isUltiWave);
+                        ownerSkill.OnWaveHitEnemy(finalDamage, isChargedWave, isUltiWave);
                     }
                     else
                     {
                         var fallbackSkill = FindAnyObjectByType<AzureBladeSkill>();
-                        if (fallbackSkill != null) fallbackSkill.OnWaveHitEnemy(isChargedWave, isUltiWave);
+                        if (fallbackSkill != null) fallbackSkill.OnWaveHitEnemy(finalDamage, isChargedWave, isUltiWave);
                     }
                 }
 
                 SoundManager.EnsureInstance()?.PlayHitImpact();
-                DamagePopup.Create(hitObj.transform.position, damage, isCritical: (damage > 20));
+                DamagePopup.Create(hitObj.transform.position, finalDamage, DamageType.Magic, isCritical: isCrit);
+
+                if (isChargedWave || isUltiWave)
+                {
+                    SpawnHitFrostShatter(hitObj.transform.position);
+                }
 
                 currentPierceCount++;
                 if (currentPierceCount >= maxPierceCount)
@@ -312,5 +331,92 @@ public class SwordWaveProjectile : MonoBehaviour
                 Destroy(gameObject);
             }
         }
+    }
+
+    private void SpawnFrostTrailSpark(Vector3 pos)
+    {
+        GameObject spark = new GameObject("CryoSpark");
+        spark.transform.position = pos + (Vector3)Random.insideUnitCircle * 0.15f;
+        spark.transform.localScale = Vector3.one * Random.Range(0.08f, 0.15f);
+
+        var sSr = spark.AddComponent<SpriteRenderer>();
+        sSr.sprite = GetSparkSprite();
+        sSr.color = new Color(0.35f, 0.95f, 1f, 0.75f);
+        sSr.sortingOrder = 5400;
+
+        var rb = spark.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 0f;
+        rb.linearVelocity = (Vector2)Random.insideUnitCircle * 0.8f - moveDirection * 1.2f;
+
+        StartCoroutine(FadeSparkRoutine(spark, sSr, 0.14f));
+    }
+
+    private void SpawnHitFrostShatter(Vector3 hitPos)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            GameObject spk = new GameObject("CryoShatterShard");
+            spk.transform.position = hitPos;
+            spk.transform.localScale = Vector3.one * Random.Range(0.10f, 0.20f);
+
+            var sSr = spk.AddComponent<SpriteRenderer>();
+            sSr.sprite = GetSparkSprite();
+            sSr.color = new Color(0.9f, 1f, 1f, 0.95f);
+            sSr.sortingOrder = 5600;
+
+            float ang = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            var rb = spk.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.linearVelocity = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * Random.Range(4f, 7f);
+
+            StartCoroutine(FadeSparkRoutine(spk, sSr, 0.15f));
+        }
+    }
+
+    private IEnumerator FadeSparkRoutine(GameObject obj, SpriteRenderer sSr, float duration)
+    {
+        float elapsed = 0f;
+        Color c = (sSr != null) ? sSr.color : Color.white;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            if (sSr != null) sSr.color = new Color(c.r, c.g, c.b, (1f - t) * c.a);
+            yield return null;
+        }
+        if (obj != null) Destroy(obj);
+    }
+
+    private static Sprite cachedSparkSprite = null;
+    private static Sprite GetSparkSprite()
+    {
+        if (cachedSparkSprite != null) return cachedSparkSprite;
+
+        int size = 16;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float center = (size - 1) / 2f;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = Mathf.Abs(x - center) / center;
+                float dy = Mathf.Abs(y - center) / center;
+                float d = dx + dy;
+                if (d < 1f)
+                {
+                    float a = 1f - d;
+                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+                }
+                else
+                {
+                    tex.SetPixel(x, y, Color.clear);
+                }
+            }
+        }
+        tex.Apply();
+        cachedSparkSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 32f);
+        return cachedSparkSprite;
     }
 }

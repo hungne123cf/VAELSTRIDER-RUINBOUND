@@ -42329,7 +42329,11 @@ MonoBehaviour:
   - {fileID: 7911745388139033260, guid: 7691e6b410dba16458e71cee9c52ae4f, type: 3}
   - {fileID: 8251958557810653103, guid: 7691e6b410dba16458e71cee9c52ae4f, type: 3}
   - {fileID: 8828373778834231235, guid: 7691e6b410dba16458e71cee9c52ae4f, type: 3}
+  roninIdleFrames: []
   azureIdleFrames: []
+  titanIdleFrames: []
+  duneIdleFrames: []
+  mageIdleFrames: []
   mapPanelTitleText: {fileID: 0}
   map1Button: {fileID: 0}
   map2Button: {fileID: 0}
@@ -42350,25 +42354,61 @@ MonoBehaviour:
   rosterHeroStatsText: {fileID: 1162165863}
   rosterHeroSkillTitleText: {fileID: 1875125079}
   rosterHeroSkillDescText: {fileID: 1704913562}
+  rosterSkill1IconImg: {fileID: 0}
+  rosterSkill1TagText: {fileID: 0}
+  rosterSkill1TitleText: {fileID: 0}
+  rosterSkill1DescText: {fileID: 0}
+  rosterSkill2IconImg: {fileID: 0}
+  rosterSkill2TagText: {fileID: 0}
+  rosterSkill2TitleText: {fileID: 0}
+  rosterSkill2DescText: {fileID: 0}
+  rosterSkill3IconImg: {fileID: 0}
+  rosterSkill3TagText: {fileID: 0}
+  rosterSkill3TitleText: {fileID: 0}
+  rosterSkill3DescText: {fileID: 0}
   rosterActionBtn: {fileID: 365198913}
   rosterActionBtnText: {fileID: 663184173}
   rosterBackBtn: {fileID: 303851207}
   rosterBackBtnText: {fileID: 0}
+  rosterBagSectionHeaderText: {fileID: 0}
+  rosterAutoMergeBtn: {fileID: 0}
+  rosterAutoMergeBtnText: {fileID: 0}
+  rosterBagContainer: {fileID: 0}
   cardVaelBtn: {fileID: 641113279}
   cardMaidBtn: {fileID: 1089033656}
+  cardRoninBtn: {fileID: 0}
   cardAzureBtn: {fileID: 0}
+  cardTitanBtn: {fileID: 0}
+  cardDuneBtn: {fileID: 0}
+  cardMageBtn: {fileID: 0}
   cardVaelAvatarImg: {fileID: 1612485771}
   cardMaidAvatarImg: {fileID: 825192086}
+  cardRoninAvatarImg: {fileID: 0}
   cardAzureAvatarImg: {fileID: 0}
+  cardTitanAvatarImg: {fileID: 0}
+  cardDuneAvatarImg: {fileID: 0}
+  cardMageAvatarImg: {fileID: 0}
   cardVaelTitleText: {fileID: 1783767181}
   cardVaelSubText: {fileID: 497554682}
   cardVaelStatusText: {fileID: 1471777623}
   cardMaidTitleText: {fileID: 1442588476}
   cardMaidSubText: {fileID: 616342484}
   cardMaidStatusText: {fileID: 714734927}
+  cardRoninTitleText: {fileID: 0}
+  cardRoninSubText: {fileID: 0}
+  cardRoninStatusText: {fileID: 0}
   cardAzureTitleText: {fileID: 0}
   cardAzureSubText: {fileID: 0}
   cardAzureStatusText: {fileID: 0}
+  cardTitanTitleText: {fileID: 0}
+  cardTitanSubText: {fileID: 0}
+  cardTitanStatusText: {fileID: 0}
+  cardDuneTitleText: {fileID: 0}
+  cardDuneSubText: {fileID: 0}
+  cardDuneStatusText: {fileID: 0}
+  cardMageTitleText: {fileID: 0}
+  cardMageSubText: {fileID: 0}
+  cardMageStatusText: {fileID: 0}
   cardPlaceholderText: {fileID: 792449376}
   aethelShardsDisplay: {fileID: 0}
   settingsUI: {fileID: 0}

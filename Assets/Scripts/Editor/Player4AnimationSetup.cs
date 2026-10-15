@@ -187,6 +187,14 @@ public class Player4AnimationSetup
         Sprite[] spinRight = (spinSprites.Length >= 27) ? spinSprites.Skip(18).Take(9).ToArray() : spinDown;
         Sprite[] spinUp = (spinSprites.Length >= 36) ? spinSprites.Skip(27).Take(9).ToArray() : spinDown;
 
+        // 8. Earthshaker Charge (GIỮ NGUYÊN ĐÚNG 1 FRAME DUY NHẤT NHƯ HÌNH: Hammer_Attack_0_0 CHO TẤT CẢ CÁC HƯỚNG)
+        Sprite holdPose = attackDown[0];
+
+        Sprite[] chargeDown = new Sprite[] { holdPose, holdPose };
+        Sprite[] chargeLeft = new Sprite[] { holdPose, holdPose };
+        Sprite[] chargeRight = new Sprite[] { holdPose, holdPose };
+        Sprite[] chargeUp = new Sprite[] { holdPose, holdPose };
+
         // Clips Creation
         AnimationClip clipIdleDown = CreateClip("Player4_Idle_Down", idleDown, 6f, true, false);
         AnimationClip clipIdleLeft = CreateClip("Player4_Idle_Left", idleLeft, 6f, true, false);
@@ -223,6 +231,11 @@ public class Player4AnimationSetup
         AnimationClip clipSpinRight = CreateClip("Player4_Spin_Right", spinRight, 14f, true, false);
         AnimationClip clipSpinUp = CreateClip("Player4_Spin_Up", spinUp, 14f, true, false);
 
+        AnimationClip clipChargeDown = CreateClip("Player4_Charge_Down", chargeDown, 1f, true, false);
+        AnimationClip clipChargeLeft = CreateClip("Player4_Charge_Left", chargeLeft, 1f, true, true);
+        AnimationClip clipChargeRight = CreateClip("Player4_Charge_Right", chargeRight, 1f, true, false);
+        AnimationClip clipChargeUp = CreateClip("Player4_Charge_Up", chargeUp, 1f, true, false);
+
         AnimationClip clipHurt = CreateClip("Player4_Hurt", hurtSprites.Take(3).ToArray(), 8f, false, false);
         AnimationClip clipDeath = CreateClip("Player4_Death", deathSprites.Take(6).ToArray(), 6f, false, false);
 
@@ -239,6 +252,7 @@ public class Player4AnimationSetup
         EnsureParameter(controller, "MoveY", AnimatorControllerParameterType.Float);
         EnsureParameter(controller, "Speed", AnimatorControllerParameterType.Float);
         EnsureParameter(controller, "ComboStep", AnimatorControllerParameterType.Int);
+        EnsureParameter(controller, "IsCharging", AnimatorControllerParameterType.Bool);
         EnsureParameter(controller, "AttackTrigger", AnimatorControllerParameterType.Trigger);
         EnsureParameter(controller, "SkillTrigger", AnimatorControllerParameterType.Trigger);
         EnsureParameter(controller, "SpinTrigger", AnimatorControllerParameterType.Trigger);
@@ -304,6 +318,35 @@ public class Player4AnimationSetup
 
         var attack2State = rootSm.AddState("Attack2");
         attack2State.motion = attack2Tree;
+
+        // 5. Blend Tree Charge (Earthshaker Hold Hammer High)
+        var chargeTree = new BlendTree { name = "ChargeTree", blendType = BlendTreeType.SimpleDirectional2D };
+        chargeTree.blendParameter = "MoveX";
+        chargeTree.blendParameterY = "MoveY";
+        chargeTree.AddChild(clipChargeDown, new Vector2(0, -1));
+        chargeTree.AddChild(clipChargeUp, new Vector2(0, 1));
+        chargeTree.AddChild(clipChargeRight, new Vector2(1, 0));
+        chargeTree.AddChild(clipChargeLeft, new Vector2(-1, 0));
+        AssetDatabase.AddObjectToAsset(chargeTree, controller);
+
+        var chargeState = rootSm.AddState("Charge");
+        chargeState.motion = chargeTree;
+
+        var anyToCharge = rootSm.AddAnyStateTransition(chargeState);
+        anyToCharge.AddCondition(AnimatorConditionMode.If, 0, "IsCharging");
+        anyToCharge.hasExitTime = false;
+        anyToCharge.canTransitionToSelf = false;
+        anyToCharge.duration = 0f;
+
+        var chargeToIdle = chargeState.AddTransition(idleState);
+        chargeToIdle.AddCondition(AnimatorConditionMode.IfNot, 0, "IsCharging");
+        chargeToIdle.hasExitTime = false;
+        chargeToIdle.duration = 0.05f;
+
+        var chargeToAttack2 = chargeState.AddTransition(attack2State);
+        chargeToAttack2.AddCondition(AnimatorConditionMode.If, 0, "AttackTrigger");
+        chargeToAttack2.hasExitTime = false;
+        chargeToAttack2.duration = 0f;
 
         // 5. Blend Tree Spin (Whirlwind 360)
         var spinTree = new BlendTree { name = "SpinTree", blendType = BlendTreeType.SimpleDirectional2D };

@@ -167,13 +167,14 @@ public class WorldItemPickup : MonoBehaviour
         // 3. Tự động hút về phía người chơi khi trong tầm nam châm
         if (dist <= magnetRadius && airborneTimer >= minAirborneDuration)
         {
-            currentFlySpeed = Mathf.Min(currentFlySpeed + Time.deltaTime * 24f, 18f);
+            currentFlySpeed = Mathf.Min(Mathf.Max(currentFlySpeed, 8.5f) + Time.deltaTime * 32f, 22f);
             transform.position = Vector3.MoveTowards(
                 transform.position,
                 player.position + Vector3.up * 0.4f,
                 currentFlySpeed * Time.deltaTime);
 
-            if (dist <= pickupRadius)
+            float updatedDist = Vector2.Distance(transform.position, player.position + Vector3.up * 0.4f);
+            if (updatedDist <= Mathf.Max(pickupRadius, 1.25f))
             {
                 TriggerPickup();
             }

@@ -43,19 +43,26 @@ public class ArmorShopUI : MonoBehaviour
 
     public static void GetEquippedArmorBonus(out int hpBonus, out float defPercent, out float speedBonus)
     {
+        GetEquippedArmorBonus(out hpBonus, out defPercent, out speedBonus, out _, out _);
+    }
+
+    public static void GetEquippedArmorBonus(out int hpBonus, out float defPercent, out float speedBonus, out float manaBonus, out float manaRegenBonus)
+    {
         hpBonus = 0;
         defPercent = 0f;
         speedBonus = 0f;
+        manaBonus = 0f;
+        manaRegenBonus = 0f;
         for (int i = 0; i <= 6; i++)
         {
             int eqId = PlayerPrefs.GetInt("Equipped_Armor_Slot_" + i, 0);
             if (eqId > 0)
             {
-                if (eqId >= 51) { hpBonus += 30; defPercent += 0.08f; speedBonus += 0.2f; }
-                else if (eqId >= 41) { hpBonus += 20; defPercent += 0.05f; speedBonus += 0.1f; }
-                else if (eqId >= 27) { hpBonus += 15; defPercent += 0.03f; }
-                else if (eqId >= 13) { hpBonus += 10; defPercent += 0.02f; }
-                else { hpBonus += 5; defPercent += 0.01f; }
+                if (eqId >= 51) { hpBonus += 30; defPercent += 0.08f; speedBonus += 0.2f; manaBonus += 15f; manaRegenBonus += 1.0f; }
+                else if (eqId >= 41) { hpBonus += 20; defPercent += 0.05f; speedBonus += 0.1f; manaBonus += 10f; manaRegenBonus += 0.7f; }
+                else if (eqId >= 27) { hpBonus += 15; defPercent += 0.03f; manaBonus += 8f; manaRegenBonus += 0.5f; }
+                else if (eqId >= 13) { hpBonus += 10; defPercent += 0.02f; manaBonus += 5f; manaRegenBonus += 0.3f; }
+                else { hpBonus += 5; defPercent += 0.01f; manaBonus += 3f; manaRegenBonus += 0.15f; }
             }
         }
     }
@@ -554,9 +561,7 @@ public class ArmorShopUI : MonoBehaviour
 
         Image dbImg = dialogBox.GetComponent<Image>();
         dbImg.color = new Color(0.04f, 0.05f, 0.09f, 1f);
-        var dbOutline = dialogBox.AddComponent<Outline>();
-        dbOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 1f);
-        dbOutline.effectDistance = new Vector2(2f, -2f);
+        WhiteIconLoader.ApplyGothicFrame(dialogBox, new Color(0.85f, 0.72f, 0.38f, 0.90f), 0.35f);
 
         // Header Title
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer));
@@ -595,40 +600,9 @@ public class ArmorShopUI : MonoBehaviour
         Button closeBtn = closeBtnObj.GetComponent<Button>();
         closeBtn.targetGraphic = cbImg;
         closeBtn.onClick.AddListener(Close);
+        WhiteIconLoader.ReplaceTextWithIcon(closeBtn, "Cross", Color.white, new Vector2(24f, 24f));
 
-        GameObject cbTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        cbTxtObj.layer = 5;
-        cbTxtObj.transform.SetParent(closeBtnObj.transform, false);
-        RectTransform cbtRt = cbTxtObj.GetComponent<RectTransform>();
-        cbtRt.anchorMin = Vector2.zero;
-        cbtRt.anchorMax = Vector2.one;
-        cbtRt.sizeDelta = Vector2.zero;
-        var cbTmp = cbTxtObj.AddComponent<TextMeshProUGUI>();
-        cbTmp.fontSize = 24;
-        cbTmp.fontStyle = FontStyles.Bold;
-        cbTmp.alignment = TextAlignmentOptions.Center;
-        cbTmp.text = "X";
-        cbTmp.color = Color.white;
-
-        // Subtitle / Notice
-        GameObject subObj = new GameObject("SubtitleText", typeof(RectTransform), typeof(CanvasRenderer));
-        subObj.layer = 5;
-        subObj.transform.SetParent(dialogBox.transform, false);
-        RectTransform subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchorMin = new Vector2(0f, 1f);
-        subRt.anchorMax = new Vector2(1f, 1f);
-        subRt.pivot = new Vector2(0.5f, 1f);
-        subRt.anchoredPosition = new Vector2(0f, -68f);
-        subRt.sizeDelta = new Vector2(0f, 26f);
-        shopSubtitleText = subObj.AddComponent<TextMeshProUGUI>();
-        shopSubtitleText.fontSize = 14.5f;
-        shopSubtitleText.alignment = TextAlignmentOptions.Center;
-        shopSubtitleText.color = new Color(0.4f, 0.85f, 1f);
-        shopSubtitleText.text = LocalizationManager.T(
-            "Cung cấp 14 loại khoáng thạch độc nhất và nguyên liệu tàn tích cổ xưa.",
-            "Featuring 14 unique mineral nodes & ancient ruin crafting materials.");
-
-        // Category Tab Bar
+        // Category Tab Bar (Shifted up to -70f now that subtitle is removed)
         BuildCategoryTabs(dialogBox.transform);
 
         // Left Grid Area
@@ -654,8 +628,8 @@ public class ArmorShopUI : MonoBehaviour
         taRt.anchorMin = new Vector2(0.5f, 1f);
         taRt.anchorMax = new Vector2(0.5f, 1f);
         taRt.pivot = new Vector2(0.5f, 1f);
-        taRt.anchoredPosition = new Vector2(0f, -108f);
-        taRt.sizeDelta = new Vector2(880f, 44f);
+        taRt.anchoredPosition = new Vector2(0f, -72f);
+        taRt.sizeDelta = new Vector2(920f, 44f);
 
         (ShopCategory cat, string vi, string en)[] tabs = new[]
         {
@@ -665,7 +639,7 @@ public class ArmorShopUI : MonoBehaviour
             (ShopCategory.Equipment, "TRANG BỊ", "EQUIPMENT")
         };
 
-        float tabWidth = 210f;
+        float tabWidth = 220f;
         float spacing = 10f;
         float startX = -((tabs.Length - 1) * (tabWidth + spacing)) / 2f;
 
@@ -678,7 +652,7 @@ public class ArmorShopUI : MonoBehaviour
 
             RectTransform tbRt = tBtnObj.GetComponent<RectTransform>();
             tbRt.anchoredPosition = new Vector2(startX + i * (tabWidth + spacing), 0f);
-            tbRt.sizeDelta = new Vector2(tabWidth, 40f);
+            tbRt.sizeDelta = new Vector2(tabWidth, 44f);
 
             Image tImg = tBtnObj.GetComponent<Image>();
             tImg.color = (tabInfo.cat == currentCategory) ? new Color(0.2f, 0.45f, 0.75f, 0.95f) : new Color(0.08f, 0.1f, 0.15f, 0.85f);
@@ -700,7 +674,7 @@ public class ArmorShopUI : MonoBehaviour
 
             var tTmp = tTxtObj.AddComponent<TextMeshProUGUI>();
             tTmp.text = LocalizationManager.T(tabInfo.vi, tabInfo.en);
-            tTmp.fontSize = 13.5f;
+            tTmp.fontSize = 16.5f;
             tTmp.fontStyle = FontStyles.Bold;
             tTmp.alignment = TextAlignmentOptions.Center;
             tTmp.color = (tabInfo.cat == currentCategory) ? Color.white : new Color(0.7f, 0.75f, 0.85f);
@@ -755,16 +729,14 @@ public class ArmorShopUI : MonoBehaviour
 
         RectTransform scrollRt = gridAreaObj.GetComponent<RectTransform>();
         scrollRt.anchorMin = new Vector2(0f, 0f);
-        scrollRt.anchorMax = new Vector2(0.62f, 1f);
+        scrollRt.anchorMax = new Vector2(0.63f, 1f);
         scrollRt.pivot = new Vector2(0.5f, 0.5f);
-        scrollRt.offsetMin = new Vector2(40f, 30f);
-        scrollRt.offsetMax = new Vector2(-15f, -170f);
+        scrollRt.offsetMin = new Vector2(30f, 25f);
+        scrollRt.offsetMax = new Vector2(-10f, -128f);
 
         Image scrollBg = gridAreaObj.GetComponent<Image>();
         scrollBg.color = new Color(0.04f, 0.05f, 0.08f, 0.85f);
-        var scrollOutline = gridAreaObj.AddComponent<Outline>();
-        scrollOutline.effectColor = new Color(0.25f, 0.32f, 0.45f, 0.6f);
-        scrollOutline.effectDistance = new Vector2(1.5f, -1.5f);
+        WhiteIconLoader.ApplyGothicFrame(gridAreaObj, new Color(0.25f, 0.35f, 0.50f, 0.60f), 0.50f);
 
         scrollRect = gridAreaObj.GetComponent<ScrollRect>();
         scrollRect.horizontal = false;
@@ -796,9 +768,9 @@ public class ArmorShopUI : MonoBehaviour
         contentRt.sizeDelta = new Vector2(0f, 0f);
 
         var grid = contentObj.GetComponent<GridLayoutGroup>();
-        grid.cellSize = new Vector2(256f, 135f);
-        grid.spacing = new Vector2(16f, 14f);
-        grid.padding = new RectOffset(20, 20, 16, 16);
+        grid.cellSize = new Vector2(252f, 132f);
+        grid.spacing = new Vector2(14f, 12f);
+        grid.padding = new RectOffset(16, 16, 14, 14);
         grid.childAlignment = TextAnchor.UpperLeft;
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         grid.constraintCount = 4;
@@ -820,7 +792,7 @@ public class ArmorShopUI : MonoBehaviour
         enRt.sizeDelta = Vector2.zero;
         var enTmp = emptyCategoryNoticeObj.AddComponent<TextMeshProUGUI>();
         enTmp.text = LocalizationManager.T("Danh mục này đang được chuẩn bị,\nsẽ sớm cập nhật trong bản tới!", "This category is coming soon in the next update!");
-        enTmp.fontSize = 15;
+        enTmp.fontSize = 16.5f;
         enTmp.fontStyle = FontStyles.Bold;
         enTmp.alignment = TextAlignmentOptions.Center;
         enTmp.color = new Color(0.6f, 0.7f, 0.85f, 0.75f);
@@ -834,25 +806,26 @@ public class ArmorShopUI : MonoBehaviour
         inspObj.transform.SetParent(parent, false);
 
         RectTransform rt = inspObj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.62f, 0f);
+        rt.anchorMin = new Vector2(0.64f, 0f);
         rt.anchorMax = new Vector2(1f, 1f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.offsetMin = new Vector2(15f, 30f);
-        rt.offsetMax = new Vector2(-40f, -170f);
+        rt.offsetMin = new Vector2(10f, 25f);
+        rt.offsetMax = new Vector2(-25f, -128f);
 
         Image img = inspObj.GetComponent<Image>();
         img.color = new Color(0.05f, 0.06f, 0.10f, 0.98f);
-        var inspOutline = inspObj.AddComponent<Outline>();
-        inspOutline.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.75f);
-        inspOutline.effectDistance = new Vector2(2f, -2f);
+        WhiteIconLoader.ApplyGothicFrame(inspObj, new Color(0.85f, 0.72f, 0.35f, 0.75f), 0.50f);
 
         // Big Icon Box with Framed Sprite
         GameObject iconBox = new GameObject("IconBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         iconBox.layer = 5;
         iconBox.transform.SetParent(inspObj.transform, false);
         RectTransform iconBoxRt = iconBox.GetComponent<RectTransform>();
-        iconBoxRt.anchoredPosition = new Vector2(0f, 132f);
-        iconBoxRt.sizeDelta = new Vector2(76f, 76f);
+        iconBoxRt.anchorMin = new Vector2(0.5f, 1f);
+        iconBoxRt.anchorMax = new Vector2(0.5f, 1f);
+        iconBoxRt.pivot = new Vector2(0.5f, 1f);
+        iconBoxRt.anchoredPosition = new Vector2(0f, -20f);
+        iconBoxRt.sizeDelta = new Vector2(120f, 120f);
         
         detailIconBoxImg = iconBox.GetComponent<Image>();
         if (sprItemSlotFrame != null)
@@ -868,7 +841,7 @@ public class ArmorShopUI : MonoBehaviour
         RectTransform iconRt = iconObj.GetComponent<RectTransform>();
         iconRt.anchorMin = Vector2.zero;
         iconRt.anchorMax = Vector2.one;
-        iconRt.sizeDelta = new Vector2(-14f, -14f);
+        iconRt.sizeDelta = new Vector2(-18f, -18f);
         detailIconImg = iconObj.GetComponent<Image>();
         detailIconImg.preserveAspect = true;
 
@@ -877,10 +850,13 @@ public class ArmorShopUI : MonoBehaviour
         nameObj.layer = 5;
         nameObj.transform.SetParent(inspObj.transform, false);
         RectTransform nameRt = nameObj.GetComponent<RectTransform>();
-        nameRt.anchoredPosition = new Vector2(0f, 76f);
-        nameRt.sizeDelta = new Vector2(340f, 26f);
+        nameRt.anchorMin = new Vector2(0f, 1f);
+        nameRt.anchorMax = new Vector2(1f, 1f);
+        nameRt.pivot = new Vector2(0.5f, 1f);
+        nameRt.anchoredPosition = new Vector2(0f, -152f);
+        nameRt.sizeDelta = new Vector2(0f, 38f);
         detailNameText = nameObj.AddComponent<TextMeshProUGUI>();
-        detailNameText.fontSize = 16f;
+        detailNameText.fontSize = 28f;
         detailNameText.fontStyle = FontStyles.Bold;
         detailNameText.alignment = TextAlignmentOptions.Center;
         detailNameText.color = new Color(1f, 0.9f, 0.45f);
@@ -890,70 +866,84 @@ public class ArmorShopUI : MonoBehaviour
         badgeObj.layer = 5;
         badgeObj.transform.SetParent(inspObj.transform, false);
         RectTransform badgeRt = badgeObj.GetComponent<RectTransform>();
-        badgeRt.anchoredPosition = new Vector2(0f, 54f);
-        badgeRt.sizeDelta = new Vector2(340f, 18f);
+        badgeRt.anchorMin = new Vector2(0f, 1f);
+        badgeRt.anchorMax = new Vector2(1f, 1f);
+        badgeRt.pivot = new Vector2(0.5f, 1f);
+        badgeRt.anchoredPosition = new Vector2(0f, -194f);
+        badgeRt.sizeDelta = new Vector2(0f, 28f);
         detailBadgeText = badgeObj.AddComponent<TextMeshProUGUI>();
-        detailBadgeText.fontSize = 11.5f;
+        detailBadgeText.fontSize = 18f;
         detailBadgeText.fontStyle = FontStyles.Bold;
         detailBadgeText.alignment = TextAlignmentOptions.Center;
 
-        // Description
+        // Description Card (Middle container)
         GameObject descObj = new GameObject("DescText", typeof(RectTransform), typeof(CanvasRenderer));
         descObj.layer = 5;
         descObj.transform.SetParent(inspObj.transform, false);
         RectTransform descRt = descObj.GetComponent<RectTransform>();
-        descRt.anchoredPosition = new Vector2(0f, 16f);
-        descRt.sizeDelta = new Vector2(330f, 44f);
+        descRt.anchorMin = new Vector2(0.06f, 0.44f);
+        descRt.anchorMax = new Vector2(0.94f, 0.64f);
+        descRt.offsetMin = Vector2.zero;
+        descRt.offsetMax = Vector2.zero;
         detailDescText = descObj.AddComponent<TextMeshProUGUI>();
-        detailDescText.fontSize = 11f;
+        detailDescText.fontSize = 17.5f;
         detailDescText.alignment = TextAlignmentOptions.Center;
         detailDescText.color = new Color(0.85f, 0.9f, 0.98f);
         detailDescText.enableWordWrapping = true;
         detailDescText.overflowMode = TextOverflowModes.Ellipsis;
-        detailDescText.lineSpacing = -3f;
+        detailDescText.lineSpacing = 4f;
 
         // Price Text
         GameObject prcObj = new GameObject("PriceText", typeof(RectTransform), typeof(CanvasRenderer));
         prcObj.layer = 5;
         prcObj.transform.SetParent(inspObj.transform, false);
         RectTransform prcRt = prcObj.GetComponent<RectTransform>();
-        prcRt.anchoredPosition = new Vector2(0f, -18f);
-        prcRt.sizeDelta = new Vector2(350f, 20f);
+        prcRt.anchorMin = new Vector2(0f, 0f);
+        prcRt.anchorMax = new Vector2(1f, 0f);
+        prcRt.pivot = new Vector2(0.5f, 0f);
+        prcRt.anchoredPosition = new Vector2(0f, 235f);
+        prcRt.sizeDelta = new Vector2(0f, 34f);
         detailPriceText = prcObj.AddComponent<TextMeshProUGUI>();
-        detailPriceText.fontSize = 13f;
+        detailPriceText.fontSize = 22f;
         detailPriceText.fontStyle = FontStyles.Bold;
         detailPriceText.alignment = TextAlignmentOptions.Center;
         detailPriceText.color = new Color(1f, 0.85f, 0.3f);
         detailPriceText.enableAutoSizing = true;
-        detailPriceText.fontSizeMin = 9.5f;
-        detailPriceText.fontSizeMax = 13f;
+        detailPriceText.fontSizeMin = 17f;
+        detailPriceText.fontSizeMax = 22f;
 
         // Balance Display
         GameObject balObj = new GameObject("BalanceText", typeof(RectTransform), typeof(CanvasRenderer));
         balObj.layer = 5;
         balObj.transform.SetParent(inspObj.transform, false);
         RectTransform balRt = balObj.GetComponent<RectTransform>();
-        balRt.anchoredPosition = new Vector2(0f, -40f);
-        balRt.sizeDelta = new Vector2(350f, 20f);
+        balRt.anchorMin = new Vector2(0f, 0f);
+        balRt.anchorMax = new Vector2(1f, 0f);
+        balRt.pivot = new Vector2(0.5f, 0f);
+        balRt.anchoredPosition = new Vector2(0f, 198f);
+        balRt.sizeDelta = new Vector2(0f, 30f);
         balanceText = balObj.AddComponent<TextMeshProUGUI>();
-        balanceText.fontSize = 12f;
+        balanceText.fontSize = 20f;
         balanceText.fontStyle = FontStyles.Bold;
         balanceText.alignment = TextAlignmentOptions.Center;
         balanceText.color = new Color(0.35f, 0.85f, 1f);
         balanceText.enableAutoSizing = true;
-        balanceText.fontSizeMin = 9.5f;
-        balanceText.fontSizeMax = 12f;
+        balanceText.fontSizeMin = 16f;
+        balanceText.fontSizeMax = 20f;
 
         // Multiplier Buttons Row (x1, x5, x10, x20, MAX)
         GameObject multRowObj = new GameObject("MultiplierRow", typeof(RectTransform), typeof(CanvasRenderer), typeof(HorizontalLayoutGroup));
         multRowObj.layer = 5;
         multRowObj.transform.SetParent(inspObj.transform, false);
         RectTransform multRt = multRowObj.GetComponent<RectTransform>();
-        multRt.anchoredPosition = new Vector2(0f, -72f);
-        multRt.sizeDelta = new Vector2(320f, 30f);
+        multRt.anchorMin = new Vector2(0.5f, 0f);
+        multRt.anchorMax = new Vector2(0.5f, 0f);
+        multRt.pivot = new Vector2(0.5f, 0f);
+        multRt.anchoredPosition = new Vector2(0f, 142f);
+        multRt.sizeDelta = new Vector2(380f, 44f);
 
         var multLayout = multRowObj.GetComponent<HorizontalLayoutGroup>();
-        multLayout.spacing = 6f;
+        multLayout.spacing = 8f;
         multLayout.childAlignment = TextAnchor.MiddleCenter;
         multLayout.childControlWidth = true;
         multLayout.childControlHeight = true;
@@ -993,7 +983,7 @@ public class ArmorShopUI : MonoBehaviour
             mtRt.sizeDelta = Vector2.zero;
             var mTmp = mTxtObj.AddComponent<TextMeshProUGUI>();
             mTmp.text = btnLabel;
-            mTmp.fontSize = 12.5f;
+            mTmp.fontSize = 17f;
             mTmp.fontStyle = FontStyles.Bold;
             mTmp.alignment = TextAlignmentOptions.Center;
             mTmp.color = new Color(0.7f, 0.75f, 0.85f);
@@ -1009,8 +999,11 @@ public class ArmorShopUI : MonoBehaviour
         buyObj.layer = 5;
         buyObj.transform.SetParent(inspObj.transform, false);
         RectTransform buyRt = buyObj.GetComponent<RectTransform>();
-        buyRt.anchoredPosition = new Vector2(0f, -114f);
-        buyRt.sizeDelta = new Vector2(320f, 38f);
+        buyRt.anchorMin = new Vector2(0.5f, 0f);
+        buyRt.anchorMax = new Vector2(0.5f, 0f);
+        buyRt.pivot = new Vector2(0.5f, 0f);
+        buyRt.anchoredPosition = new Vector2(0f, 80f);
+        buyRt.sizeDelta = new Vector2(380f, 52f);
 
         buyActionBtnImg = buyObj.GetComponent<Image>();
         buyActionBtnImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);
@@ -1030,13 +1023,13 @@ public class ArmorShopUI : MonoBehaviour
         btRt.sizeDelta = Vector2.zero;
         buyActionBtnText = bTxtObj.AddComponent<TextMeshProUGUI>();
         buyActionBtnText.text = LocalizationManager.T("MUA VẬT PHẨM", "BUY ITEM");
-        buyActionBtnText.fontSize = 13.5f;
+        buyActionBtnText.fontSize = 21f;
         buyActionBtnText.fontStyle = FontStyles.Bold;
         buyActionBtnText.color = Color.white;
         buyActionBtnText.alignment = TextAlignmentOptions.Center;
         buyActionBtnText.enableAutoSizing = true;
-        buyActionBtnText.fontSizeMin = 9f;
-        buyActionBtnText.fontSizeMax = 13.5f;
+        buyActionBtnText.fontSizeMin = 17f;
+        buyActionBtnText.fontSizeMax = 21f;
         buyActionBtnText.margin = new Vector4(4f, 2f, 4f, 2f);
 
         // Big Glowing Shortcut Button to Gacha Altar
@@ -1044,8 +1037,11 @@ public class ArmorShopUI : MonoBehaviour
         gachaObj.layer = 5;
         gachaObj.transform.SetParent(inspObj.transform, false);
         RectTransform gRt = gachaObj.GetComponent<RectTransform>();
-        gRt.anchoredPosition = new Vector2(0f, -158f);
-        gRt.sizeDelta = new Vector2(320f, 34f);
+        gRt.anchorMin = new Vector2(0.5f, 0f);
+        gRt.anchorMax = new Vector2(0.5f, 0f);
+        gRt.pivot = new Vector2(0.5f, 0f);
+        gRt.anchoredPosition = new Vector2(0f, 20f);
+        gRt.sizeDelta = new Vector2(380f, 48f);
 
         Image gImg = gachaObj.GetComponent<Image>();
         gImg.color = new Color(0.7f, 0.25f, 0.85f, 1f);
@@ -1065,8 +1061,9 @@ public class ArmorShopUI : MonoBehaviour
         gtRt.sizeDelta = Vector2.zero;
         var gTmp = gTxtObj.AddComponent<TextMeshProUGUI>();
         gTmp.text = LocalizationManager.T("ĐẾN ĐÀI QUAY GACHA", "GO TO GACHA ALTAR");
-        gTmp.fontSize = 13;
+        gTmp.fontSize = 19f;
         gTmp.fontStyle = FontStyles.Bold;
+        gtRt.sizeDelta = Vector2.zero;
         gTmp.color = Color.white;
         gTmp.alignment = TextAlignmentOptions.Center;
         gTmp.enableWordWrapping = false;
@@ -1176,13 +1173,13 @@ public class ArmorShopUI : MonoBehaviour
                 bRt.anchorMin = new Vector2(1f, 1f);
                 bRt.anchorMax = new Vector2(1f, 1f);
                 bRt.pivot = new Vector2(1f, 1f);
-                bRt.anchoredPosition = new Vector2(-10f, -8f);
-                bRt.sizeDelta = new Vector2(75f, 16f);
+                bRt.anchoredPosition = new Vector2(-8f, -6f);
+                bRt.sizeDelta = new Vector2(80f, 20f);
                 var bTmp = badgeObj.AddComponent<TextMeshProUGUI>();
                 bTmp.text = LocalizationManager.T(item.badgeTextVi, item.badgeTextEn);
-                bTmp.fontSize = 8.5f;
+                bTmp.fontSize = 11.5f;
                 bTmp.fontStyle = FontStyles.Bold;
-                bTmp.alignment = TextAlignmentOptions.Right;
+                bTmp.alignment = TextAlignmentOptions.TopRight;
                 bTmp.color = item.badgeColor;
             }
 
@@ -1194,12 +1191,12 @@ public class ArmorShopUI : MonoBehaviour
             nRt.anchorMin = new Vector2(0f, 1f);
             nRt.anchorMax = new Vector2(1f, 1f);
             nRt.pivot = new Vector2(0f, 1f);
-            nRt.anchoredPosition = new Vector2(72f, -22f);
-            nRt.sizeDelta = new Vector2(-80f, 54f);
+            nRt.anchoredPosition = new Vector2(74f, -8f);
+            nRt.sizeDelta = new Vector2(-160f, 48f);
             var nTmp = nameObj.AddComponent<TextMeshProUGUI>();
             nTmp.text = LocalizationManager.T(item.nameVi, item.nameEn);
-            nTmp.fontSize = 11.5f;
-            nTmp.lineSpacing = -8f;
+            nTmp.fontSize = 13.5f;
+            nTmp.lineSpacing = 1.1f;
             nTmp.fontStyle = FontStyles.Bold;
             nTmp.alignment = TextAlignmentOptions.TopLeft;
             nTmp.color = Color.white;
@@ -1214,18 +1211,18 @@ public class ArmorShopUI : MonoBehaviour
             pRt.anchorMin = new Vector2(0f, 0f);
             pRt.anchorMax = new Vector2(1f, 0f);
             pRt.pivot = new Vector2(0f, 0f);
-            pRt.anchoredPosition = new Vector2(72f, 10f);
-            pRt.sizeDelta = new Vector2(-80f, 22f);
+            pRt.anchoredPosition = new Vector2(74f, 8f);
+            pRt.sizeDelta = new Vector2(-80f, 24f);
             var pTmp = prcObj.AddComponent<TextMeshProUGUI>();
             string prcStr = item.priceShards >= 10000 ? (item.priceShards / 1000.0).ToString("0.#") + "K" : item.priceShards.ToString("N0");
             pTmp.text = $"{prcStr} {LocalizationManager.T("Linh Hồn", "Shards")}";
-            pTmp.fontSize = 12f;
+            pTmp.fontSize = 16.5f;
             pTmp.fontStyle = FontStyles.Bold;
             pTmp.alignment = TextAlignmentOptions.BottomLeft;
             pTmp.color = new Color(1f, 0.85f, 0.3f);
             pTmp.enableAutoSizing = true;
-            pTmp.fontSizeMin = 8.5f;
-            pTmp.fontSizeMax = 12f;
+            pTmp.fontSizeMin = 14.5f;
+            pTmp.fontSizeMax = 16.5f;
         }
 
         if (selectedShopIndex >= currentFilteredItems.Count) selectedShopIndex = 0;
