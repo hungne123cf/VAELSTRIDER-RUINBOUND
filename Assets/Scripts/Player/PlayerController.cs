@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashDuration = 0.2f;
     [SerializeField] private float dashCooldown = 5.0f;
 
+    public float MoveSpeed => moveSpeed;
+
     private Rigidbody2D rb;
     private Animator animator;
 
@@ -68,8 +70,10 @@ public class PlayerController : MonoBehaviour
     }
 
 
-        public bool IsStunned => isStunned;
+    public bool IsStunned => isStunned || stunTimerRemaining > 0f;
+    public float StunTimerRemaining => Mathf.Max(0f, stunTimerRemaining);
     private bool isStunned = false;
+    private float stunTimerRemaining = 0f;
 
     public void ApplyStun(float duration)
     {
@@ -88,6 +92,7 @@ public class PlayerController : MonoBehaviour
     private System.Collections.IEnumerator StunRoutine(float duration)
     {
         isStunned = true;
+        stunTimerRemaining = Mathf.Max(stunTimerRemaining, duration);
         canMove = false;
         if (rb != null) rb.linearVelocity = Vector2.zero;
         if (animator != null) animator.SetFloat(SpeedHash, 0f);
@@ -105,7 +110,11 @@ public class PlayerController : MonoBehaviour
         srWeb.sortingOrder = 3000;
         webTrap.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
 
-        yield return new WaitForSeconds(duration);
+        while (stunTimerRemaining > 0f)
+        {
+            stunTimerRemaining -= Time.deltaTime;
+            yield return null;
+        }
 
         if (webTrap != null) Destroy(webTrap);
         isStunned = false;
@@ -122,6 +131,43 @@ public class PlayerController : MonoBehaviour
         moveSpeed = (baseMoveSpeed + bonusSpeed) * multiplier;
         yield return new WaitForSeconds(duration);
         moveSpeed = baseMoveSpeed + bonusSpeed;
+    }
+
+    public void ApplyFreeze(float duration)
+    {
+        if (isStunned) return;
+        StartCoroutine(FreezeRoutine(duration));
+    }
+
+    private System.Collections.IEnumerator FreezeRoutine(float duration)
+    {
+        isStunned = true;
+        stunTimerRemaining = Mathf.Max(stunTimerRemaining, duration);
+        canMove = false;
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        if (animator != null) animator.SetFloat(SpeedHash, 0f);
+
+        GameObject iceBlock = new GameObject("GlacialFreezeVisual");
+        iceBlock.transform.SetParent(transform, false);
+        iceBlock.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+        var srIce = iceBlock.AddComponent<SpriteRenderer>();
+        srIce.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
+        srIce.color = new Color(0.35f, 0.85f, 1f, 0.75f);
+        srIce.sortingOrder = 5500;
+        iceBlock.transform.localScale = new Vector3(1.2f, 1.4f, 1f);
+
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.2f, LocalizationManager.T("❄ ĐÓNG BĂNG! (0.5s)", "❄ FROZEN! (0.5s)"), new Color(0.35f, 0.85f, 1f));
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+
+        while (stunTimerRemaining > 0f)
+        {
+            stunTimerRemaining -= Time.deltaTime;
+            yield return null;
+        }
+
+        if (iceBlock != null) Destroy(iceBlock);
+        isStunned = false;
+        canMove = true;
     }
 
     // Animator Hashes
@@ -199,8 +245,7 @@ public class PlayerController : MonoBehaviour
         var titan = GetComponent<TitanBerserkerSkill>();
         if (titan != null && (titan.IsChargingEarthshaker || titan.IsExecutingCataclysm)) return true;
 
-        var ronin = GetComponent<GaleRoninSkill>();
-        if (ronin != null && ronin.IsChargingIaido) return true;
+        // Gale Ronin cho phép vừa di chuyển chậm vừa gồng tụ lực Iaido để tăng tính cơ động, không bị chôn chân
 
         var azure = GetComponent<AzureBladeSkill>();
         if (azure != null && azure.IsAiming) return true;
@@ -316,7 +361,10 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            rb.linearVelocity = moveInput * moveSpeed;
+            float curSpeed = moveSpeed;
+            var ronin = GetComponent<GaleRoninSkill>();
+            if (ronin != null && ronin.IsChargingIaido) curSpeed *= 0.5f;
+            rb.linearVelocity = moveInput * curSpeed;
         }
     }
 
@@ -361,7 +409,10 @@ public class PlayerController : MonoBehaviour
 
         if (rb != null)
         {
-            rb.linearVelocity = moveInput * moveSpeed;
+            float curSpeed = moveSpeed;
+            var ronin = GetComponent<GaleRoninSkill>();
+            if (ronin != null && ronin.IsChargingIaido) curSpeed *= 0.5f;
+            rb.linearVelocity = moveInput * curSpeed;
         }
         UpdateAnimations();
     }
@@ -443,6 +494,8 @@ public class PlayerController : MonoBehaviour
             }
 
             isDashing = true;
+            SoundManager.EnsureInstance()?.PlayDash();
+            AugmentManager.Instance?.OnPlayerDash(transform.position);
             var titan = GetComponent<TitanBerserkerSkill>();
             dashTimer = (titan != null && titan.enabled) ? 0.38f : dashDuration;
 
@@ -685,16 +738,16 @@ public class PlayerController : MonoBehaviour
         else if (sr != null && sr.sprite != null)
         {
             Bounds b = sr.sprite.bounds;
-            float cy = Mathf.Clamp(b.center.y, 0f, 0.55f);
-            float h = Mathf.Max(0.75f, b.size.y * 0.75f);
-            float w = Mathf.Max(0.45f, b.size.x * 0.55f);
+            float cy = Mathf.Clamp(b.center.y, 0f, 0.35f);
+            float h = Mathf.Clamp(b.size.y * 0.5f, 0.5f, 0.75f);
+            float w = Mathf.Clamp(b.size.x * 0.5f, 0.45f, 0.6f);
             cap.offset = new Vector2(0f, cy);
             cap.size = new Vector2(w, h);
         }
         else
         {
-            cap.offset = new Vector2(0f, 0f);
-            cap.size = new Vector2(0.48f, 0.75f);
+            cap.offset = new Vector2(0f, 0.2f);
+            cap.size = new Vector2(0.48f, 0.65f);
         }
 
         var combat = GetComponent<PlayerCombat>();

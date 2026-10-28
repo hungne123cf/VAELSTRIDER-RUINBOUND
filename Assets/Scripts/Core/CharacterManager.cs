@@ -16,6 +16,7 @@ public class CharacterData
     public string skillDescEN;
     public int baseHealth;
     public int baseAttack;
+    public int baseDefense;
     public float baseSpeed;
     public int unlockPrice;
     public string controllerPath;
@@ -46,12 +47,16 @@ public class CharacterManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Application.isPlaying)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
             InitializeCharacters();
         }
         else if (Instance != this)
         {
-            Destroy(gameObject);
+            if (Application.isPlaying) Destroy(gameObject);
+            else DestroyImmediate(gameObject);
         }
     }
 
@@ -75,7 +80,10 @@ public class CharacterManager : MonoBehaviour
 
             var go = new GameObject("CharacterManager");
             Instance = go.AddComponent<CharacterManager>();
-            DontDestroyOnLoad(go);
+            if (Application.isPlaying)
+            {
+                DontDestroyOnLoad(go);
+            }
             Instance.InitializeCharacters();
         }
         return Instance;
@@ -99,6 +107,7 @@ public class CharacterManager : MonoBehaviour
             skillDescEN = "Golden sword arts. Hold attack for Divine Parry Stance: blocks incoming damage and retaliates with a x3.0 Crit Divine Riposte! Special skill spins 360° pulling enemies and erupting with a blast.",
             baseHealth = 100,
             baseAttack = 20,
+            baseDefense = 12,
             baseSpeed = 5.0f,
             unlockPrice = 0,
             controllerPath = "Assets/Animation/Player/idle_down_0.controller",
@@ -119,6 +128,7 @@ public class CharacterManager : MonoBehaviour
             skillDescEN = "Wide 180° slashes applying Wind Marks. When Inner Energy Shield is active, hold attack to charge Iaido Spatial Slash & shoot Gale Crescent Waves (up to x2.85 Crit DMG)! Special skill executes phantom assassination slashes!",
             baseHealth = 95,
             baseAttack = 28,
+            baseDefense = 6,
             baseSpeed = 5.4f,
             unlockPrice = 0, // Mở khóa sẵn sàng chơi
             controllerPath = "Assets/Animation/Player2/Player2.controller",
@@ -139,6 +149,7 @@ public class CharacterManager : MonoBehaviour
             skillDescEN = "Heavy slashes that unleash piercing sword waves. Special skill releases 5 massive crescent waves in a fan spread!",
             baseHealth = 110,
             baseAttack = 24,
+            baseDefense = 14,
             baseSpeed = 4.8f,
             unlockPrice = 0, // Mở khóa sẵn sàng chơi
             controllerPath = "Assets/Animation/Player3/Player3.controller",
@@ -159,6 +170,7 @@ public class CharacterManager : MonoBehaviour
             skillDescEN = "Heavy war hammer. Hold attack for Earthshaker Stance: immune to all damage & CC while charging, release to smash the ground and Stun enemies for 1s! Special skill draws all enemies and slams with cataclysmic lava.",
             baseHealth = 200,
             baseAttack = 32,
+            baseDefense = 25,
             baseSpeed = 4.0f,
             unlockPrice = 0, // Mở khóa sẵn sàng chơi
             controllerPath = "Assets/Animation/Player4/Player4.controller",
@@ -179,6 +191,7 @@ public class CharacterManager : MonoBehaviour
             skillDescEN = "Swift 3-hit dagger combos with high critical chance. Hold attack for Mirage Defend: reduces damage by 70% and unleashes an Air Slash Counter (1.2s Stun)! Special skill summons a sand vortex and executes a devastating Cross-X Slash with Sand Bleed.",
             baseHealth = 110,
             baseAttack = 18,
+            baseDefense = 8,
             baseSpeed = 4.8f,
             unlockPrice = 0, // Mở khóa sẵn sàng chơi
             controllerPath = "Assets/Animation/Player5/Player5.controller",
@@ -199,6 +212,7 @@ public class CharacterManager : MonoBehaviour
             skillDescEN = "Launches 3 homing arcane orbs with chain lightning. Hold attack for Arcane Barrier absorbing 80% damage and bursting outward. Special skill summons a cataclysmic meteor storm!",
             baseHealth = 90,
             baseAttack = 30,
+            baseDefense = 5,
             baseSpeed = 4.5f,
             unlockPrice = 0,
             controllerPath = "",

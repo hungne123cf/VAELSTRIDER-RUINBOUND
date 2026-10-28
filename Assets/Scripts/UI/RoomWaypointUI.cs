@@ -33,6 +33,13 @@ public class RoomWaypointUI : MonoBehaviour
 
         if (DungeonRoomManager.Instance == null) return;
 
+        // Khi danh Boss, an hoan toan Waypoint de khong che khuat thanh mau Boss va khong gian chien dau
+        if (BossHealthBarUI.Instance != null && BossHealthBarUI.Instance.IsVisible)
+        {
+            SetVisible(false);
+            return;
+        }
+
         Vector3 target = DungeonRoomManager.Instance.GetNextObjectiveTarget();
         if (target == Vector3.zero)
         {
@@ -62,7 +69,8 @@ public class RoomWaypointUI : MonoBehaviour
 
         if (distanceText != null)
         {
-            distanceText.text = $"{(int)distance}m";
+            distanceText.text = "";
+            distanceText.enabled = false;
         }
     }
 
@@ -74,9 +82,12 @@ public class RoomWaypointUI : MonoBehaviour
 
     private void SetVisible(bool visible)
     {
-        // Arrow square removed as requested
         if (arrowImage != null) arrowImage.enabled = false;
-        if (distanceText != null) distanceText.enabled = visible;
+        if (distanceText != null)
+        {
+            distanceText.text = "";
+            distanceText.enabled = false;
+        }
     }
 
     public static RoomWaypointUI EnsureUIExists()
@@ -100,7 +111,7 @@ public class RoomWaypointUI : MonoBehaviour
         rt.anchorMin = new Vector2(0.5f, 1f);
         rt.anchorMax = new Vector2(0.5f, 1f);
         rt.pivot = new Vector2(0.5f, 1f);
-        rt.anchoredPosition = new Vector2(0, -145);
+        rt.anchoredPosition = new Vector2(0, -90);
         rt.sizeDelta = new Vector2(120, 50);
 
         instance = hudObj.AddComponent<RoomWaypointUI>();
@@ -117,7 +128,7 @@ public class RoomWaypointUI : MonoBehaviour
         instance.arrowImage.raycastTarget = false;
         instance.arrowImage.enabled = false;
 
-        // Distance text
+        // Distance text (Đã bỏ hiển thị theo yêu cầu)
         GameObject distObj = new GameObject("DistText");
         distObj.transform.SetParent(hudObj.transform, false);
         RectTransform dtRt = distObj.AddComponent<RectTransform>();
@@ -130,6 +141,9 @@ public class RoomWaypointUI : MonoBehaviour
         instance.distanceText.color = Color.white;
         instance.distanceText.alignment = TextAlignmentOptions.Left;
         instance.distanceText.raycastTarget = false;
+        instance.distanceText.text = "";
+        instance.distanceText.enabled = false;
+        distObj.SetActive(false);
 
         return instance;
     }

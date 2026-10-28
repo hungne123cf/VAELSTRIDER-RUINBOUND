@@ -8,6 +8,12 @@ public class PotionQuickSlotUI : MonoBehaviour
 {
     public static PotionQuickSlotUI Instance { get; private set; }
 
+    /// <summary>
+    /// Cho phép bật/tắt nút Bình Máu trên màn hình chiến đấu.
+    /// Đặt false để ẩn nút bấm (chuyển sang cơ chế nhặt Ngọc Máu hồi trực tiếp).
+    /// </summary>
+    public static bool EnablePotionQuickSlot = false;
+
     [Header("UI References")]
     [SerializeField] private Button potionButton;
     [SerializeField] private Image potionIcon;
@@ -24,6 +30,12 @@ public class PotionQuickSlotUI : MonoBehaviour
 
     void Awake()
     {
+        if (!EnablePotionQuickSlot)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         Instance = this;
 
         if (potionButton == null) potionButton = GetComponent<Button>();
@@ -35,19 +47,13 @@ public class PotionQuickSlotUI : MonoBehaviour
 
         parentCanvas = GetComponentInParent<Canvas>();
 
-                // Bo tròn khung nút bình máu
+        // Khung ngọc vuông mạ ngàm rồng Runic Slot cho bình dược phẩm
         Image bgImg = GetComponent<Image>();
         if (bgImg != null)
         {
-            Sprite slotSprite = Resources.Load<Sprite>("UI/potion_slot_circle");
-#if UNITY_EDITOR
-            if (slotSprite == null) slotSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/potion_slot_circle.png");
-#endif
-            if (slotSprite != null)
-            {
-                bgImg.sprite = slotSprite;
-                bgImg.color = Color.white;
-            }
+            bgImg.sprite = SoulslikeHUDStyler.GetPotionSlotFrameSprite();
+            bgImg.type = Image.Type.Sliced;
+            bgImg.color = Color.white;
         }
 
         if (potionButton != null)
@@ -285,9 +291,30 @@ public class PotionQuickSlotUI : MonoBehaviour
 
     public static PotionQuickSlotUI EnsureUIExists()
     {
-        if (Instance != null) return Instance;
-
         Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+
+        if (!EnablePotionQuickSlot)
+        {
+            if (canvas != null)
+            {
+                Transform ex = canvas.transform.Find("Btn_Potion");
+                if (ex != null) ex.gameObject.SetActive(false);
+            }
+            var allCanvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var c in allCanvases)
+            {
+                if (c == null) continue;
+                Transform ex = c.transform.Find("Btn_Potion");
+                if (ex != null) ex.gameObject.SetActive(false);
+            }
+            if (Instance != null && Instance.gameObject != null)
+            {
+                Instance.gameObject.SetActive(false);
+            }
+            return null;
+        }
+
+        if (Instance != null) return Instance;
         if (canvas == null) return null;
 
         Transform existing = canvas.transform.Find("Btn_Potion");

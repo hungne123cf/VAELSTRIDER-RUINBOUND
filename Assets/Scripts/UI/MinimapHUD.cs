@@ -12,6 +12,12 @@ public class MinimapHUD : MonoBehaviour
 {
     public static MinimapHUD Instance { get; private set; }
 
+    /// <summary>
+    /// Cho phép bật/tắt toàn bộ hệ thống Minimap Radar trên màn hình.
+    /// Đặt false để tắt và ẩn hoàn toàn theo yêu cầu người dùng.
+    /// </summary>
+    public static bool EnableMinimapHUD = false;
+
     [Header("Minimap Settings")]
     [SerializeField] private float radarRadius = 35f; // Bán kính quét thực tế trong game (35m)
     [SerializeField] private float mapUiRadius = 48f;  // Bán kính hiển thị trên Minimap UI (pixel)
@@ -42,6 +48,12 @@ public class MinimapHUD : MonoBehaviour
 
     void Awake()
     {
+        if (!EnableMinimapHUD)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         Instance = this;
         EnsureProceduralSprites();
     }
@@ -454,6 +466,27 @@ public class MinimapHUD : MonoBehaviour
 
     public static MinimapHUD EnsureUIExists()
     {
+        if (!EnableMinimapHUD)
+        {
+            if (Instance != null && Instance.gameObject != null)
+            {
+                Instance.gameObject.SetActive(false);
+            }
+            var allMinimaps = Object.FindObjectsByType<MinimapHUD>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var m in allMinimaps)
+            {
+                if (m != null && m.gameObject != null) m.gameObject.SetActive(false);
+            }
+            var allCanvases = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var c in allCanvases)
+            {
+                if (c == null) continue;
+                Transform ex = c.transform.Find("Minimap_Compass_HUD");
+                if (ex != null) ex.gameObject.SetActive(false);
+            }
+            return null;
+        }
+
         EnsureProceduralSprites();
 
         if (Instance != null)

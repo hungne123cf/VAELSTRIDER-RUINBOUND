@@ -6,9 +6,12 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// UI hiển thị 3 lựa chọn Lõi Nâng Cấp (Augments) khi nhân vật lên cấp.
-/// Thiết kế phong cách Dark Neutral / Gothic RPG với khung kim loại chạm khắc cổ điển và dải phân cách chạm khắc.
-/// Tự tạo toàn bộ UI bằng code kết hợp 9-sliced frame & divider asset.
+/// UI hiển thị 3 lựa chọn Lõi Nâng Cấp (Augments) phong cách Đấu Trường Chân Lý (TFT) & Dark Fantasy.
+/// - Thể hiện rõ BẬC NÂNG CẤP (Tier / Rarity): BẬC BẠC (SILVER TIER), BẬC VÀNG (GOLD TIER), BẬC KIM CƯƠNG (PRISMATIC TIER)
+/// - Giữ màu sắc đặc trưng của Loại Chỉ Số (Vật Lý, Phép, Chí Mạng, Hút Máu, Sinh Lực, Tốc Độ, Phòng Thủ, Nội Năng)
+/// - Loại bỏ hoàn toàn các ký tự gây lỗi ô vuông (emojis, unicode stars) và các dấu ngoặc vuông "[ ]"
+/// - Huy hiệu trung tâm dùng Sprite đồ họa chất lượng cao kết hợp mã chữ viết tắt rõ nét (ATK, HP, SPD...)
+/// - Cơ chế Đổi Lại (Reroll) với số lượt ngẫu nhiên từ 2 đến 4 lượt tùy vào độ may rủi khi lên cấp
 /// </summary>
 public class LevelUpChoiceUI : MonoBehaviour
 {
@@ -18,7 +21,25 @@ public class LevelUpChoiceUI : MonoBehaviour
     // ─── Runtime ───────────────────────────────────────────────────────────────
     private GameObject _root;
     private bool _isShowing = false;
+    public static bool IsShowing => _instance != null && _instance._isShowing;
     private List<AugmentDatabase.AugmentData> _currentChoices;
+
+    // Reroll system: 1 trận có tối đa 5 lượt đổi lại (Match-wide limit)
+    public const int MAX_MATCH_REROLLS = 5;
+    private static int _matchRemainingRerolls = MAX_MATCH_REROLLS;
+    public static void ResetMatchRerolls() => _matchRemainingRerolls = MAX_MATCH_REROLLS;
+    public static int RemainingMatchRerolls => _matchRemainingRerolls;
+
+    private int _remainingRerolls = MAX_MATCH_REROLLS;
+    private int _totalRerolls = MAX_MATCH_REROLLS;
+    private int _currentLevel = 1;
+    private string _currentHeroId = "Vaelstrider";
+    private TextMeshProUGUI _rerollBtnText;
+    private Button _rerollBtn;
+    private Transform _cardsContainer;
+
+    // Danh sách lõi đã xuất hiện trong phiên lên cấp này (chống trùng lặp khi roll lại - Anti-Repeat chuẩn TFT)
+    private readonly HashSet<AugmentDatabase.AugmentType> _sessionSeenAugments = new HashSet<AugmentDatabase.AugmentType>();
 
     // Queue lên cấp liên tiếp (khi giết Boss nhận nhiều EXP)
     private static readonly Queue<int> _pendingLevelUps = new Queue<int>();
@@ -26,21 +47,20 @@ public class LevelUpChoiceUI : MonoBehaviour
     // Cache sprites
     private static Sprite _frameSprite;
     private static Sprite _dividerSprite;
+    private static Sprite _stoneBtnSprite;
+    private static Sprite _panelBgSprite;
+    private static Sprite _runicRingSprite;
+    private static Sprite _obsidianCoreSprite;
 
-    // ─── Neutral Dark Color Palette ────────────────────────────────────────────
-    private static readonly Color ColorOverlayBg      = new Color(0.015f, 0.018f, 0.024f, 0.94f);
-    private static readonly Color ColorMainPanelBg    = new Color(0.060f, 0.065f, 0.075f, 0.98f);
-    private static readonly Color ColorMainPanelFrame = new Color(0.550f, 0.600f, 0.700f, 0.85f);
+    private static Sprite _cachedAttackIcon;
+    private static Sprite _cachedDashIcon;
+    private static Sprite _cachedUltiIcon;
+    private static Sprite _cachedStarIcon;
 
-    private static readonly Color ColorCardBaseBg     = new Color(0.085f, 0.090f, 0.105f, 0.98f);
-    private static readonly Color ColorCardFrameNorm  = new Color(0.600f, 0.650f, 0.750f, 0.85f);
-    private static readonly Color ColorCardFrameHover = new Color(1.000f, 1.000f, 1.000f, 1.00f);
-
-    private static readonly Color ColorDividerLine    = new Color(0.500f, 0.550f, 0.650f, 0.55f);
-
-    private static readonly Color ColorBtnNormBg      = new Color(0.140f, 0.150f, 0.180f, 1.00f);
-    private static readonly Color ColorBtnHoverBg     = new Color(0.220f, 0.240f, 0.280f, 1.00f);
-    private static readonly Color ColorBtnPressedBg   = new Color(0.080f, 0.090f, 0.110f, 1.00f);
+    // ─── Luminous Dark Fantasy Color Palette ──────────────────────────────────
+    private static readonly Color ColorOverlayBg      = new Color(0.015f, 0.020f, 0.030f, 0.75f);
+    private static readonly Color ColorMainPanelBg    = new Color(0.050f, 0.065f, 0.095f, 0.98f);
+    private static readonly Color ColorMainPanelFrame = new Color(0.950f, 0.820f, 0.400f, 0.90f);
 
     public static void ResetUI()
     {
@@ -55,6 +75,11 @@ public class LevelUpChoiceUI : MonoBehaviour
                 _instance._root = null;
             }
         }
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = false;
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(true);
+        Time.timeScale = 1.0f;
         GameAutoBootstrap.SetGameplayHUDVisible(true);
     }
 
@@ -81,6 +106,27 @@ public class LevelUpChoiceUI : MonoBehaviour
     private IEnumerator ShowRoutine(int level)
     {
         _isShowing = true;
+        _currentLevel = level;
+
+        // Kích hoạt trạng thái Miễn Sát Thương tuyệt đối cho Người chơi trong lúc chọn Lõi Nâng Cấp
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        bool prevInvul = false;
+        if (ph != null)
+        {
+            prevInvul = ph.isInvulnerable;
+            ph.isInvulnerable = true;
+        }
+
+        // Tạm dừng nhận input di chuyển
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(false);
+
+        // Xóa sạch danh sách lõi đã thấy ở các lượt roll trước của phiên này
+        _sessionSeenAugments.Clear();
+
+        // Đồng bộ số lượt đổi lại còn lại của trận đấu (tối đa 5 lượt/trận)
+        _remainingRerolls = _matchRemainingRerolls;
+        _totalRerolls = MAX_MATCH_REROLLS;
 
         // Ẩn toàn bộ Gameplay HUD để không chồng lấn
         GameAutoBootstrap.SetGameplayHUDVisible(false);
@@ -101,8 +147,20 @@ public class LevelUpChoiceUI : MonoBehaviour
             yield return null;
         }
 
-        // Khôi phục thời gian
-        Time.timeScale = prevTimeScale;
+        // Xoá UI trước khi mở lại timeScale để tránh spike lag 1 frame
+        if (_root != null)
+        {
+            Destroy(_root);
+            _root = null;
+        }
+
+        // Chờ 1 frame để tất cả enemy AI Update() nhận được IsShowing=false đúng thứ tự
+        yield return new WaitForEndOfFrame();
+
+        // Khôi phục thời gian và trạng thái nhân vật
+        Time.timeScale = (prevTimeScale > 0f) ? prevTimeScale : 1.0f;
+        if (ph != null) ph.isInvulnerable = prevInvul;
+        if (pc != null) pc.SetCanMove(true);
 
         // Nếu không còn lượt lên cấp chờ nào, hiện lại Gameplay HUD
         if (_pendingLevelUps.Count == 0)
@@ -110,23 +168,42 @@ public class LevelUpChoiceUI : MonoBehaviour
             GameAutoBootstrap.SetGameplayHUDVisible(true);
         }
 
-        // Xử lý lần lên cấp tiếp theo nếu có
-        yield return new WaitForSecondsRealtime(0.2f);
+        yield return new WaitForSecondsRealtime(0.15f);
         ProcessQueue();
     }
 
     // ─── Asset Loaders ─────────────────────────────────────────────────────────
+    private static Sprite LoadSpriteFromDiskOrEditor(string relativePath)
+    {
+#if UNITY_EDITOR
+        Sprite s = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(relativePath);
+        if (s != null) return s;
+#endif
+        string diskPath = System.IO.Path.Combine(Application.dataPath, relativePath.Replace("Assets/", ""));
+        if (System.IO.File.Exists(diskPath))
+        {
+            byte[] bytes = System.IO.File.ReadAllBytes(diskPath);
+            Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            if (tex.LoadImage(bytes))
+            {
+                tex.filterMode = FilterMode.Bilinear;
+                tex.wrapMode = TextureWrapMode.Clamp;
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+        }
+        return null;
+    }
+
     private static Sprite GetFrameSprite()
     {
+        if (_frameSprite != null) return _frameSprite;
+        _frameSprite = Resources.Load<Sprite>("UI/frame_gothic_border");
         if (_frameSprite != null) return _frameSprite;
 
 #if UNITY_EDITOR
         _frameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/frame_gothic_border.png");
         if (_frameSprite != null) return _frameSprite;
 #endif
-
-        _frameSprite = Resources.Load<Sprite>("UI/frame_gothic_border");
-        if (_frameSprite != null) return _frameSprite;
 
         string[] candidates = new string[]
         {
@@ -151,12 +228,13 @@ public class LevelUpChoiceUI : MonoBehaviour
                 }
             }
         }
-
         return _frameSprite;
     }
 
     private static Sprite GetDividerSprite()
     {
+        if (_dividerSprite != null) return _dividerSprite;
+        _dividerSprite = SoulslikeHUDStyler.GetGothicDividerSprite();
         if (_dividerSprite != null) return _dividerSprite;
 
 #if UNITY_EDITOR
@@ -165,33 +243,46 @@ public class LevelUpChoiceUI : MonoBehaviour
 #endif
 
         _dividerSprite = Resources.Load<Sprite>("UI/divider_fade_004");
-        if (_dividerSprite != null) return _dividerSprite;
-
-        string[] candidates = new string[]
-        {
-            System.IO.Path.Combine(Application.dataPath, "Sprites/UI/divider_fade_004.png"),
-            System.IO.Path.Combine(Application.dataPath, "Resources/UI/divider_fade_004.png"),
-            System.IO.Path.Combine(Application.dataPath, "ART/UI/Default/Divider Fade/divider-fade-004.png")
-        };
-
-        foreach (var path in candidates)
-        {
-            if (System.IO.File.Exists(path))
-            {
-                byte[] bytes = System.IO.File.ReadAllBytes(path);
-                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                if (tex.LoadImage(bytes))
-                {
-                    tex.filterMode = FilterMode.Point;
-                    tex.wrapMode = TextureWrapMode.Clamp;
-                    _dividerSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
-                        new Vector2(0.5f, 0.5f), 100f);
-                    break;
-                }
-            }
-        }
-
         return _dividerSprite;
+    }
+
+    private static Sprite GetStoneBtnSprite()
+    {
+        if (_stoneBtnSprite != null) return _stoneBtnSprite;
+        _stoneBtnSprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        return _stoneBtnSprite;
+    }
+
+    private static Sprite GetPanelBgSprite()
+    {
+        if (_panelBgSprite != null) return _panelBgSprite;
+        _panelBgSprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        return _panelBgSprite;
+    }
+
+    private static Sprite GetRunicRingSprite()
+    {
+        if (_runicRingSprite != null) return _runicRingSprite;
+        _runicRingSprite = SoulslikeHUDStyler.GetActionButtonRingSprite();
+        return _runicRingSprite;
+    }
+
+    private static Sprite GetObsidianCoreSprite()
+    {
+        if (_obsidianCoreSprite != null) return _obsidianCoreSprite;
+        _obsidianCoreSprite = SoulslikeHUDStyler.GetActionButtonCoreSprite();
+        return _obsidianCoreSprite;
+    }
+
+    private static Sprite GetMedallionSprite(AugmentDatabase.AugmentType type)
+    {
+        // Sử dụng Icon đồ họa riêng biệt độc nhất từ AugmentIconHelper
+        Sprite s = AugmentIconHelper.GetAugmentSprite(type);
+        if (s != null) return s;
+
+        if (_cachedAttackIcon == null)
+            _cachedAttackIcon = LoadSpriteFromDiskOrEditor("Assets/Sprites/UI/Attack.png");
+        return _cachedAttackIcon;
     }
 
     // ─── Build UI ──────────────────────────────────────────────────────────────
@@ -200,10 +291,17 @@ public class LevelUpChoiceUI : MonoBehaviour
         if (_root != null) Destroy(_root);
 
         bool isVietnamese = LocalizationManager.IsVietnamese;
-        string heroId = PlayerUpgradeManager.Instance != null
+        _currentHeroId = PlayerUpgradeManager.Instance != null
             ? PlayerUpgradeManager.Instance.GetCurrentHeroKey() : "Vaelstrider";
 
-        _currentChoices = AugmentDatabase.GetRandomChoices(heroId, 3);
+        _currentChoices = AugmentDatabase.GetRandomChoices(_currentHeroId, 3, level, _sessionSeenAugments);
+        if (_currentChoices != null)
+        {
+            foreach (var c in _currentChoices)
+            {
+                if (c != null) _sessionSeenAugments.Add(c.type);
+            }
+        }
 
         // ── Canvas ─────────────────────────────────────────────────────────────
         _root = new GameObject("LevelUpRoot");
@@ -220,48 +318,70 @@ public class LevelUpChoiceUI : MonoBehaviour
         cg.blocksRaycasts = true;
         cg.interactable = true;
 
-        // ── Dark Overlay (Neutral Vignette) ────────────────────────────────────
+        // ── Dark Overlay Vignette ──────────────────────────────────────────────
         var overlay = CreatePanel(_root.transform, ColorOverlayBg, Vector2.zero, Vector2.one);
         overlay.name = "Overlay";
 
-        // ── Main Panel Window (Framed with Gothic Asset) ───────────────────────
+        // ── Main Panel Window (Framed with Gothic Ornate Asset) ────────────────
         var panel = CreateFramedPanel(overlay.transform, "MainPanel",
             ColorMainPanelBg, ColorMainPanelFrame,
-            new Vector2(0.08f, 0.06f), new Vector2(0.92f, 0.94f),
+            new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.96f),
             0.35f, out Image panelFrameImg);
 
         // ── Title Section ──────────────────────────────────────────────────────
         var titleObj = new GameObject("Title");
         titleObj.transform.SetParent(panel.transform, false);
         var titleRT = titleObj.AddComponent<RectTransform>();
-        titleRT.anchorMin = new Vector2(0.10f, 0.84f);
-        titleRT.anchorMax = new Vector2(0.90f, 0.98f);
+        titleRT.anchorMin = new Vector2(0.10f, 0.850f);
+        titleRT.anchorMax = new Vector2(0.90f, 0.985f);
         titleRT.offsetMin = titleRT.offsetMax = Vector2.zero;
 
         var titleTMP = titleObj.AddComponent<TextMeshProUGUI>();
         string titleStr = isVietnamese ? $"LÊN CẤP {level}" : $"LEVEL UP {level}";
-        string subStr   = isVietnamese ? "Chọn 1 nâng cấp để tiếp tục chiến đấu" : "Choose 1 augment to continue";
-        titleTMP.text = $"<size=34><b><color=#ECEFF4>{titleStr}</color></b></size>\n<size=17><color=#7E889B>{subStr}</color></size>";
+        string subStr   = isVietnamese ? "Chọn 1 Lõi Nâng Cấp để tiếp nhận ân sủng tàn tích" : "Choose 1 Augment to embrace the Ruinbound grace";
+        titleTMP.text = $"<size=38><b><color=#FFEAA7>{titleStr}</color></b></size>\n<size=16><color=#CBD5E1>{subStr}</color></size>";
         titleTMP.alignment = TextAlignmentOptions.Center;
         titleTMP.color = Color.white;
         titleTMP.enableWordWrapping = true;
+        SoulslikeHUDStyler.SetSafeOutline(titleTMP, 0.45f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
 
         // Title flanking decorative divider wings
-        var tlw = CreateDividerWing(panel.transform, "TitleLeftWing",
-            new Vector2(0.24f, 0.912f), new Vector2(0.36f, 0.932f),
-            new Color(0.70f, 0.75f, 0.85f, 0.80f), false);
+        CreateDividerWing(panel.transform, "TitleLeftWing",
+            new Vector2(0.20f, 0.915f), new Vector2(0.34f, 0.938f),
+            new Color(1f, 0.85f, 0.40f, 0.90f), false);
 
-        var trw = CreateDividerWing(panel.transform, "TitleRightWing",
-            new Vector2(0.64f, 0.912f), new Vector2(0.76f, 0.932f),
-            new Color(0.70f, 0.75f, 0.85f, 0.80f), true);
+        CreateDividerWing(panel.transform, "TitleRightWing",
+            new Vector2(0.66f, 0.915f), new Vector2(0.80f, 0.938f),
+            new Color(1f, 0.85f, 0.40f, 0.90f), true);
 
         // Title bottom symmetric ornamental divider
         CreateOrnamentDivider(panel.transform, "TitleDivider",
-            new Vector2(0.18f, 0.825f), new Vector2(0.82f, 0.840f),
-            new Color(0.55f, 0.60f, 0.70f, 0.65f));
+            new Vector2(0.15f, 0.835f), new Vector2(0.85f, 0.850f),
+            new Color(0.95f, 0.82f, 0.40f, 0.85f));
 
-        // ── 3 Augment Cards (Neutral Dark + Gothic Frame) ──────────────────────
-        float cardWidth = 0.285f;
+        // ── Cards Container ────────────────────────────────────────────────────
+        var cardsContainerObj = new GameObject("CardsContainer");
+        cardsContainerObj.transform.SetParent(panel.transform, false);
+        var ccRT = cardsContainerObj.AddComponent<RectTransform>();
+        ccRT.anchorMin = new Vector2(0f, 0.09f);
+        ccRT.anchorMax = new Vector2(1f, 0.83f);
+        ccRT.offsetMin = ccRT.offsetMax = Vector2.zero;
+        _cardsContainer = cardsContainerObj.transform;
+
+        BuildCards(isVietnamese);
+
+        // ── Reroll Button (Đổi lại may rủi 2 đến 4 lượt) ───────────────────────
+        BuildRerollButton(panel.transform, isVietnamese);
+    }
+
+    private void BuildCards(bool isVietnamese)
+    {
+        for (int i = _cardsContainer.childCount - 1; i >= 0; i--)
+        {
+            Destroy(_cardsContainer.GetChild(i).gameObject);
+        }
+
+        float cardWidth = 0.290f;
         float startX    = 0.045f;
         float gap       = (1f - startX * 2f - cardWidth * 3f) / 2f;
 
@@ -270,173 +390,583 @@ public class LevelUpChoiceUI : MonoBehaviour
             var aug = _currentChoices[i];
             float xMin = startX + i * (cardWidth + gap);
             float xMax = xMin + cardWidth;
-            BuildCard(panel.transform, aug, i, isVietnamese,
-                new Vector2(xMin, 0.06f), new Vector2(xMax, 0.80f));
-        }
-
-        // Đảm bảo viền ngoài của MainPanel luôn hiển thị trên cùng không bị đè
-        if (panelFrameImg != null)
-        {
-            panelFrameImg.transform.SetAsLastSibling();
+            BuildCard(_cardsContainer, aug, i, isVietnamese,
+                new Vector2(xMin, 0.02f), new Vector2(xMax, 0.98f));
         }
     }
 
+    private void BuildRerollButton(Transform parent, bool isVN)
+    {
+        var btnObj = new GameObject("RerollButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        btnObj.transform.SetParent(parent, false);
+        var btnRT = btnObj.GetComponent<RectTransform>();
+        btnRT.anchorMin = new Vector2(0.35f, 0.015f);
+        btnRT.anchorMax = new Vector2(0.65f, 0.078f);
+        btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
+
+        var btnImg = btnObj.GetComponent<Image>();
+        btnImg.sprite = GetStoneBtnSprite();
+        btnImg.type = Image.Type.Sliced;
+        btnImg.color = new Color(0.18f, 0.20f, 0.28f, 1f);
+
+        _rerollBtn = btnObj.GetComponent<Button>();
+        _rerollBtn.targetGraphic = btnImg;
+
+        var outline = btnObj.AddComponent<Outline>();
+        outline.effectColor = new Color(0.95f, 0.75f, 0.25f, 0.95f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        // Icon đồ họa xoay vòng lặp lại (Repeat-Right) không bao giờ bị lỗi ô vuông
+        Sprite rerollIcon = WhiteIconLoader.GetSprite("Repeat-Right");
+        if (rerollIcon != null)
+        {
+            var iconObj = new GameObject("RerollIcon");
+            iconObj.transform.SetParent(btnObj.transform, false);
+            var iconRT = iconObj.AddComponent<RectTransform>();
+            iconRT.anchorMin = new Vector2(0.06f, 0.20f);
+            iconRT.anchorMax = new Vector2(0.18f, 0.80f);
+            iconRT.offsetMin = iconRT.offsetMax = Vector2.zero;
+
+            var iconImg = iconObj.AddComponent<Image>();
+            iconImg.sprite = rerollIcon;
+            iconImg.color = new Color(1f, 0.85f, 0.35f, 0.95f);
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+        }
+
+        var txtObj = new GameObject("RerollText");
+        txtObj.transform.SetParent(btnObj.transform, false);
+        var txtRT = txtObj.AddComponent<RectTransform>();
+        txtRT.anchorMin = new Vector2(0.16f, 0f);
+        txtRT.anchorMax = new Vector2(0.96f, 1f);
+        txtRT.offsetMin = txtRT.offsetMax = Vector2.zero;
+
+        _rerollBtnText = txtObj.AddComponent<TextMeshProUGUI>();
+        _rerollBtnText.fontSize = 17f;
+        _rerollBtnText.fontStyle = FontStyles.Bold;
+        _rerollBtnText.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(_rerollBtnText, 0.40f, new Color(0f, 0f, 0f, 0.95f));
+
+        UpdateRerollButtonUI(isVN);
+
+        _rerollBtn.onClick.AddListener(() => OnRerollClicked(isVN));
+    }
+
+    private void UpdateRerollButtonUI(bool isVN)
+    {
+        if (_rerollBtnText == null || _rerollBtn == null) return;
+
+        if (_matchRemainingRerolls > 0)
+        {
+            _rerollBtn.interactable = true;
+            string label = isVN
+                ? $"ĐỔI LẠI <color=#FFD700>({_matchRemainingRerolls}/{MAX_MATCH_REROLLS} LƯỢT)</color>"
+                : $"REROLL <color=#FFD700>({_matchRemainingRerolls}/{MAX_MATCH_REROLLS} LEFT)</color>";
+            _rerollBtnText.text = label;
+            _rerollBtnText.color = Color.white;
+        }
+        else
+        {
+            _rerollBtn.interactable = false;
+            string label = isVN ? $"HẾT LƯỢT ĐỔI (0/{MAX_MATCH_REROLLS})" : $"NO REROLLS (0/{MAX_MATCH_REROLLS})";
+            _rerollBtnText.text = label;
+            _rerollBtnText.color = new Color(0.6f, 0.6f, 0.65f, 1f);
+        }
+    }
+
+    private void OnRerollClicked(bool isVN)
+    {
+        if (_matchRemainingRerolls <= 0)
+        {
+            UpdateRerollButtonUI(isVN);
+            return;
+        }
+
+        _matchRemainingRerolls--;
+        _remainingRerolls = _matchRemainingRerolls;
+        UpdateRerollButtonUI(isVN);
+        SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+
+        _currentChoices = AugmentDatabase.GetRandomChoices(_currentHeroId, 3, _currentLevel, _sessionSeenAugments);
+        if (_currentChoices != null)
+        {
+            foreach (var c in _currentChoices)
+            {
+                if (c != null) _sessionSeenAugments.Add(c.type);
+            }
+        }
+
+        DamagePopup.CreateText(
+            Camera.main != null ? Camera.main.transform.position + Vector3.up * 1.5f : Vector3.up * 2f,
+            isVN ? "LÀM MỚI LÕI NÂNG CẤP" : "AUGMENTS RE-ROLLED",
+            new Color(1f, 0.85f, 0.25f)
+        );
+
+        BuildCards(isVN);
+    }
+
+    // ─── Stat Color & Naming Helpers ───────────────────────────────────────────
+    public static Color GetDamageTypeColor(AugmentDatabase.AugmentType type)
+    {
+        switch (type)
+        {
+            case AugmentDatabase.AugmentType.BonusAttack:
+            case AugmentDatabase.AugmentType.LaceratingEdge:
+            case AugmentDatabase.AugmentType.RagingFire:
+            case AugmentDatabase.AugmentType.BerserkerMode:
+            case AugmentDatabase.AugmentType.HeavyImpact:
+            case AugmentDatabase.AugmentType.RelentlessAssault:
+            case AugmentDatabase.AugmentType.GiantSlayer:
+            case AugmentDatabase.AugmentType.BattleFrenzy:
+                return new Color(0.96f, 0.26f, 0.21f); // Sát thương Vật Lý: Đỏ Chiến Binh (#F44336)
+            case AugmentDatabase.AugmentType.BonusSpellVamp:
+            case AugmentDatabase.AugmentType.EchoStrike:
+            case AugmentDatabase.AugmentType.ArcaneOverdrive:
+            case AugmentDatabase.AugmentType.CelestialCascade:
+            case AugmentDatabase.AugmentType.StaticOverload:
+            case AugmentDatabase.AugmentType.EchoingVoid:
+                return new Color(0.72f, 0.33f, 1f);    // Phép Thuật / Tinh Tú: Tím Ma Pháp (#B854FF)
+            case AugmentDatabase.AugmentType.BonusCritChance:
+            case AugmentDatabase.AugmentType.BonusCritDamage:
+            case AugmentDatabase.AugmentType.ShadowAmbush:
+            case AugmentDatabase.AugmentType.ChainReaction:
+                return new Color(1f, 0.82f, 0.12f);    // Chí Mạng: Vàng Kim Hoàng Triều (#FFD21E)
+            case AugmentDatabase.AugmentType.BonusLifesteal:
+            case AugmentDatabase.AugmentType.VampireBlood:
+            case AugmentDatabase.AugmentType.BloodGodTribute:
+            case AugmentDatabase.AugmentType.DeathsTouch:
+            case AugmentDatabase.AugmentType.LifeTransfusion:
+                return new Color(0.95f, 0.15f, 0.25f); // Huyết Tế / Hút Máu: Đỏ Huyết (#F42640)
+            case AugmentDatabase.AugmentType.PoisonTouch:
+                return new Color(0.12f, 0.90f, 0.42f); // Độc Dược / Ăn Mòn: Lục Độc Acid (#1FE66B)
+            case AugmentDatabase.AugmentType.BonusHealth:
+            case AugmentDatabase.AugmentType.RegenerativeCore:
+            case AugmentDatabase.AugmentType.SoulHarvest:
+            case AugmentDatabase.AugmentType.AbundantVitality:
+            case AugmentDatabase.AugmentType.SecondWind:
+                return new Color(0.18f, 0.88f, 0.45f); // Sinh Lực: Lục Bảo (#2EE073)
+            case AugmentDatabase.AugmentType.BonusSpeed:
+            case AugmentDatabase.AugmentType.SwiftShadow:
+            case AugmentDatabase.AugmentType.FleetWind:
+            case AugmentDatabase.AugmentType.StormDancer:
+                return new Color(0.20f, 0.80f, 1f);    // Nhanh Nhẹn / Phong Lôi: Băng Lam (#33CCFF)
+            case AugmentDatabase.AugmentType.BonusDefense:
+            case AugmentDatabase.AugmentType.AncientShield:
+            case AugmentDatabase.AugmentType.IronBastion:
+            case AugmentDatabase.AugmentType.DivineAegis:
+            case AugmentDatabase.AugmentType.ArcaneShield:
+            case AugmentDatabase.AugmentType.UnwaveringWill:
+            case AugmentDatabase.AugmentType.PrismaticTitan:
+                return new Color(0.35f, 0.65f, 1f);    // Phòng Thủ: Lam Khiên (#59A6FF)
+            case AugmentDatabase.AugmentType.BountyHunter:
+                return new Color(1.00f, 0.82f, 0.20f); // Tài Phú / Tinh Thể (#FFD133)
+            case AugmentDatabase.AugmentType.BonusCooldownReduction:
+            case AugmentDatabase.AugmentType.UltimateCharge:
+            case AugmentDatabase.AugmentType.ComboMastery:
+            case AugmentDatabase.AugmentType.SurgingPulse:
+            case AugmentDatabase.AugmentType.BonusMaxEnergy:
+                return new Color(0.98f, 0.65f, 0.18f); // Hồi Chiêu / Nội Năng: Hổ Phách (#FA962E)
+            case AugmentDatabase.AugmentType.DemonicPact:
+            case AugmentDatabase.AugmentType.UndyingSovereign:
+            case AugmentDatabase.AugmentType.GodforgedArsenal:
+            case AugmentDatabase.AugmentType.AscendedDivinity:
+            default:
+                return new Color(0.95f, 0.45f, 0.90f); // Thần Thoại / Đa Năng: Hồng Tinh Vân (#F273E6)
+        }
+    }
+
+    public static string GetDamageTypeName(AugmentDatabase.AugmentType type, bool isVN)
+    {
+        switch (type)
+        {
+            case AugmentDatabase.AugmentType.BonusAttack:
+            case AugmentDatabase.AugmentType.LaceratingEdge:
+            case AugmentDatabase.AugmentType.RagingFire:
+            case AugmentDatabase.AugmentType.BerserkerMode:
+            case AugmentDatabase.AugmentType.HeavyImpact:
+            case AugmentDatabase.AugmentType.RelentlessAssault:
+            case AugmentDatabase.AugmentType.GiantSlayer:
+            case AugmentDatabase.AugmentType.BattleFrenzy:
+                return isVN ? "VẬT LÝ" : "PHYSICAL";
+            case AugmentDatabase.AugmentType.BonusSpellVamp:
+            case AugmentDatabase.AugmentType.EchoStrike:
+            case AugmentDatabase.AugmentType.ArcaneOverdrive:
+            case AugmentDatabase.AugmentType.CelestialCascade:
+            case AugmentDatabase.AugmentType.StaticOverload:
+            case AugmentDatabase.AugmentType.EchoingVoid:
+                return isVN ? "PHÉP THUẬT" : "MAGIC";
+            case AugmentDatabase.AugmentType.BonusCritChance:
+            case AugmentDatabase.AugmentType.BonusCritDamage:
+            case AugmentDatabase.AugmentType.ShadowAmbush:
+            case AugmentDatabase.AugmentType.ChainReaction:
+                return isVN ? "BẠO KÍCH" : "CRITICAL";
+            case AugmentDatabase.AugmentType.BonusLifesteal:
+            case AugmentDatabase.AugmentType.VampireBlood:
+            case AugmentDatabase.AugmentType.BloodGodTribute:
+            case AugmentDatabase.AugmentType.DeathsTouch:
+            case AugmentDatabase.AugmentType.LifeTransfusion:
+                return isVN ? "HÚT MÁU" : "LIFESTEAL";
+            case AugmentDatabase.AugmentType.PoisonTouch:
+                return isVN ? "ĐỘC DƯỢC" : "VENOM";
+            case AugmentDatabase.AugmentType.BonusHealth:
+            case AugmentDatabase.AugmentType.RegenerativeCore:
+            case AugmentDatabase.AugmentType.SoulHarvest:
+            case AugmentDatabase.AugmentType.AbundantVitality:
+            case AugmentDatabase.AugmentType.SecondWind:
+                return isVN ? "SINH LỰC" : "VITALITY";
+            case AugmentDatabase.AugmentType.BonusSpeed:
+            case AugmentDatabase.AugmentType.SwiftShadow:
+            case AugmentDatabase.AugmentType.FleetWind:
+            case AugmentDatabase.AugmentType.StormDancer:
+                return isVN ? "TỐC ĐỘ" : "SPEED";
+            case AugmentDatabase.AugmentType.BonusDefense:
+            case AugmentDatabase.AugmentType.AncientShield:
+            case AugmentDatabase.AugmentType.IronBastion:
+            case AugmentDatabase.AugmentType.DivineAegis:
+            case AugmentDatabase.AugmentType.ArcaneShield:
+            case AugmentDatabase.AugmentType.UnwaveringWill:
+            case AugmentDatabase.AugmentType.PrismaticTitan:
+                return isVN ? "PHÒNG THỦ" : "DEFENSE";
+            case AugmentDatabase.AugmentType.BountyHunter:
+                return isVN ? "TÀI PHÚ" : "FORTUNE";
+            case AugmentDatabase.AugmentType.BonusCooldownReduction:
+            case AugmentDatabase.AugmentType.UltimateCharge:
+            case AugmentDatabase.AugmentType.ComboMastery:
+            case AugmentDatabase.AugmentType.SurgingPulse:
+            case AugmentDatabase.AugmentType.BonusMaxEnergy:
+                return isVN ? "NỘI NĂNG" : "ENERGY";
+            case AugmentDatabase.AugmentType.DemonicPact:
+            case AugmentDatabase.AugmentType.UndyingSovereign:
+            case AugmentDatabase.AugmentType.GodforgedArsenal:
+            case AugmentDatabase.AugmentType.AscendedDivinity:
+            default:
+                return isVN ? "TOÀN NĂNG" : "MYTHIC";
+        }
+    }
+
+    public static string GetStatShortCode(AugmentDatabase.AugmentType type)
+    {
+        switch (type)
+        {
+            case AugmentDatabase.AugmentType.BonusAttack:
+            case AugmentDatabase.AugmentType.LaceratingEdge:
+            case AugmentDatabase.AugmentType.RagingFire:
+            case AugmentDatabase.AugmentType.BerserkerMode:
+            case AugmentDatabase.AugmentType.HeavyImpact:
+            case AugmentDatabase.AugmentType.RelentlessAssault:
+            case AugmentDatabase.AugmentType.GiantSlayer:
+            case AugmentDatabase.AugmentType.BattleFrenzy:
+                return "ATK";
+            case AugmentDatabase.AugmentType.BonusSpellVamp:
+            case AugmentDatabase.AugmentType.EchoStrike:
+            case AugmentDatabase.AugmentType.ArcaneOverdrive:
+            case AugmentDatabase.AugmentType.CelestialCascade:
+            case AugmentDatabase.AugmentType.StaticOverload:
+            case AugmentDatabase.AugmentType.EchoingVoid:
+                return "AP";
+            case AugmentDatabase.AugmentType.BonusCritChance:
+            case AugmentDatabase.AugmentType.BonusCritDamage:
+            case AugmentDatabase.AugmentType.ShadowAmbush:
+            case AugmentDatabase.AugmentType.ChainReaction:
+                return "CRIT";
+            case AugmentDatabase.AugmentType.BonusLifesteal:
+            case AugmentDatabase.AugmentType.VampireBlood:
+            case AugmentDatabase.AugmentType.BloodGodTribute:
+            case AugmentDatabase.AugmentType.DeathsTouch:
+            case AugmentDatabase.AugmentType.LifeTransfusion:
+                return "VAMP";
+            case AugmentDatabase.AugmentType.PoisonTouch:
+                return "TOXIN";
+            case AugmentDatabase.AugmentType.BonusHealth:
+            case AugmentDatabase.AugmentType.RegenerativeCore:
+            case AugmentDatabase.AugmentType.SoulHarvest:
+            case AugmentDatabase.AugmentType.AbundantVitality:
+            case AugmentDatabase.AugmentType.SecondWind:
+                return "HP";
+            case AugmentDatabase.AugmentType.BonusSpeed:
+            case AugmentDatabase.AugmentType.SwiftShadow:
+            case AugmentDatabase.AugmentType.FleetWind:
+            case AugmentDatabase.AugmentType.StormDancer:
+                return "SPD";
+            case AugmentDatabase.AugmentType.BonusDefense:
+            case AugmentDatabase.AugmentType.AncientShield:
+            case AugmentDatabase.AugmentType.IronBastion:
+            case AugmentDatabase.AugmentType.DivineAegis:
+            case AugmentDatabase.AugmentType.ArcaneShield:
+            case AugmentDatabase.AugmentType.UnwaveringWill:
+            case AugmentDatabase.AugmentType.PrismaticTitan:
+                return "DEF";
+            case AugmentDatabase.AugmentType.BountyHunter:
+                return "SHARD";
+            case AugmentDatabase.AugmentType.BonusCooldownReduction:
+            case AugmentDatabase.AugmentType.UltimateCharge:
+            case AugmentDatabase.AugmentType.ComboMastery:
+            case AugmentDatabase.AugmentType.SurgingPulse:
+            case AugmentDatabase.AugmentType.BonusMaxEnergy:
+                return "CDR";
+            case AugmentDatabase.AugmentType.DemonicPact:
+            case AugmentDatabase.AugmentType.UndyingSovereign:
+            case AugmentDatabase.AugmentType.GodforgedArsenal:
+            case AugmentDatabase.AugmentType.AscendedDivinity:
+            default:
+                return "MYTH";
+        }
+    }
+
+    // ─── Build Individual Card (Dark Fantasy & TFT Tier Aesthetic) ─────────────
     private void BuildCard(Transform parent, AugmentDatabase.AugmentData aug, int index,
         bool isVN, Vector2 anchorMin, Vector2 anchorMax)
     {
-        // 1. Card Container & Outer Frame
-        var card = CreateFramedPanel(parent, $"Card_{index}",
-            ColorCardBaseBg, ColorCardFrameNorm,
-            anchorMin, anchorMax,
-            0.42f, out Image cardFrameImg);
+        Color typeColor = GetDamageTypeColor(aug.type);
+        string typeName = GetDamageTypeName(aug.type, isVN);
 
-        var cardRT = card.GetComponent<RectTransform>();
-
-        // 2. Rarity Header (No black block overlay, no broken unicode characters!)
-        string rarityLabel;
-        Color rarityColor;
+        // 1. Phân biệt BẬC NÂNG CẤP (TIER / RARITY) rõ rệt:
+        string tierTitle;
+        Color tierFrameColor;
+        Color tierGlowColor;
+        Color tierBannerBg;
 
         switch (aug.rarity)
         {
             case AugmentDatabase.AugmentData.Rarity.Epic:
-                rarityLabel = isVN ? "SỬ THI" : "EPIC";
-                rarityColor = new Color(0.92f, 0.78f, 0.50f); // Soft amber gold
+                tierTitle = isVN ? "BẬC KIM CƯƠNG" : "PRISMATIC TIER";
+                tierFrameColor = new Color(0.92f, 0.50f, 0.98f, 1f); // Tím Lăng Kính Ánh Tinh Vân
+                tierGlowColor  = new Color(0.70f, 0.35f, 0.95f, 0.40f);
+                tierBannerBg   = new Color(0.32f, 0.08f, 0.42f, 0.95f);
                 break;
+
             case AugmentDatabase.AugmentData.Rarity.Rare:
-                rarityLabel = isVN ? "QUÝ HIẾM" : "RARE";
-                rarityColor = new Color(0.55f, 0.80f, 0.98f); // Soft ice silver
+                tierTitle = isVN ? "BẬC VÀNG" : "GOLD TIER";
+                tierFrameColor = new Color(1.00f, 0.82f, 0.28f, 1f); // Hoàng Kim Vương Giả
+                tierGlowColor  = new Color(0.95f, 0.60f, 0.12f, 0.35f);
+                tierBannerBg   = new Color(0.38f, 0.22f, 0.05f, 0.95f);
                 break;
+
             default:
-                rarityLabel = isVN ? "THƯỜNG" : "COMMON";
-                rarityColor = new Color(0.72f, 0.77f, 0.85f); // Slate silver
+                tierTitle = isVN ? "BẬC BẠC" : "SILVER TIER";
+                tierFrameColor = new Color(0.80f, 0.86f, 0.95f, 0.95f); // Thép Bạc Cổ Điển
+                tierGlowColor  = new Color(0.55f, 0.65f, 0.80f, 0.30f);
+                tierBannerBg   = new Color(0.12f, 0.16f, 0.24f, 0.95f);
                 break;
         }
 
-        var rarityHeader = new GameObject("RarityHeader");
-        rarityHeader.transform.SetParent(card.transform, false);
-        var rhRT = rarityHeader.AddComponent<RectTransform>();
-        rhRT.anchorMin = new Vector2(0.06f, 0.900f);
-        rhRT.anchorMax = new Vector2(0.94f, 0.965f);
-        rhRT.offsetMin = rhRT.offsetMax = Vector2.zero;
+        // Card Container với viền phẩm chất rõ ràng
+        var card = CreateFramedPanel(parent, $"Card_{index}",
+            new Color(0.065f, 0.080f, 0.115f, 0.98f), tierFrameColor,
+            anchorMin, anchorMax,
+            0.40f, out Image cardFrameImg);
 
-        // Left wing (pointing inward)
-        CreateDividerWing(rarityHeader.transform, "LeftWing",
-            new Vector2(0f, 0.20f), new Vector2(0.30f, 0.80f),
-            new Color(rarityColor.r, rarityColor.g, rarityColor.b, 0.75f), false);
+        var cardRT = card.GetComponent<RectTransform>();
 
-        // Center text (clean, no unicode glyph tofu boxes)
-        var rarityTxtObj = new GameObject("RarityText");
-        rarityTxtObj.transform.SetParent(rarityHeader.transform, false);
-        var rarityTxtRT = rarityTxtObj.AddComponent<RectTransform>();
-        rarityTxtRT.anchorMin = new Vector2(0.30f, 0f);
-        rarityTxtRT.anchorMax = new Vector2(0.70f, 1f);
-        rarityTxtRT.offsetMin = rarityTxtRT.offsetMax = Vector2.zero;
+        // 2. Banner Bậc Nâng Cấp (Top Tier Banner) - Không ký tự sao gây lỗi ô vuông
+        var tierBannerObj = new GameObject("TierBanner");
+        tierBannerObj.transform.SetParent(card.transform, false);
+        var tbRT = tierBannerObj.AddComponent<RectTransform>();
+        tbRT.anchorMin = new Vector2(0.04f, 0.925f);
+        tbRT.anchorMax = new Vector2(0.96f, 0.985f);
+        tbRT.offsetMin = tbRT.offsetMax = Vector2.zero;
 
-        var rarityTxt = rarityTxtObj.AddComponent<TextMeshProUGUI>();
-        rarityTxt.text = rarityLabel;
-        rarityTxt.color = rarityColor;
-        rarityTxt.fontSize = 15;
-        rarityTxt.alignment = TextAlignmentOptions.Center;
-        rarityTxt.fontStyle = FontStyles.Bold;
+        var tbImg = tierBannerObj.AddComponent<Image>();
+        tbImg.sprite = GetPanelBgSprite();
+        tbImg.type = Image.Type.Sliced;
+        tbImg.color = tierBannerBg;
 
-        // Right wing (mirrored, pointing inward)
-        CreateDividerWing(rarityHeader.transform, "RightWing",
-            new Vector2(0.70f, 0.20f), new Vector2(1f, 0.80f),
-            new Color(rarityColor.r, rarityColor.g, rarityColor.b, 0.75f), true);
+        var tbOutline = tierBannerObj.AddComponent<Outline>();
+        tbOutline.effectColor = tierFrameColor;
+        tbOutline.effectDistance = new Vector2(1f, -1f);
 
-        // 3. Stat Emblem Badge (Gothic Framed)
-        var emblemObj = CreateFramedPanel(card.transform, "Emblem",
-            new Color(0.04f, 0.045f, 0.055f, 1f),
-            new Color(0.60f, 0.65f, 0.75f, 0.95f),
-            new Vector2(0.5f, 0.76f), new Vector2(0.5f, 0.76f),
-            0.72f, out _);
+        var tierTxtObj = new GameObject("TierText");
+        tierTxtObj.transform.SetParent(tierBannerObj.transform, false);
+        var ttRT = tierTxtObj.AddComponent<RectTransform>();
+        ttRT.anchorMin = Vector2.zero;
+        ttRT.anchorMax = Vector2.one;
+        ttRT.offsetMin = ttRT.offsetMax = Vector2.zero;
 
-        var emblemRT = emblemObj.GetComponent<RectTransform>();
-        emblemRT.sizeDelta = new Vector2(86f, 72f);
-        emblemRT.pivot = new Vector2(0.5f, 0.5f);
+        var tierTxt = tierTxtObj.AddComponent<TextMeshProUGUI>();
+        tierTxt.text = tierTitle;
+        tierTxt.color = tierFrameColor;
+        tierTxt.fontSize = 14f;
+        tierTxt.alignment = TextAlignmentOptions.Center;
+        tierTxt.fontStyle = FontStyles.Bold;
+        SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.35f, new Color(0.02f, 0.02f, 0.02f, 0.95f));
 
-        var emblemTxtObj = new GameObject("EmblemText");
-        emblemTxtObj.transform.SetParent(emblemObj.transform, false);
-        var etRT = emblemTxtObj.AddComponent<RectTransform>();
-        etRT.anchorMin = Vector2.zero;
-        etRT.anchorMax = Vector2.one;
-        etRT.offsetMin = new Vector2(4f, 2f);
-        etRT.offsetMax = new Vector2(-4f, -2f);
+        // 3. Stat Type Pill Tag - Bỏ hoàn toàn dấu ngoặc vuông "[ ]" và emoji
+        var statTagObj = new GameObject("StatTag");
+        statTagObj.transform.SetParent(card.transform, false);
+        var stRT = statTagObj.AddComponent<RectTransform>();
+        stRT.anchorMin = new Vector2(0.20f, 0.855f);
+        stRT.anchorMax = new Vector2(0.80f, 0.912f);
+        stRT.offsetMin = stRT.offsetMax = Vector2.zero;
 
-        var etTMP = emblemTxtObj.AddComponent<TextMeshProUGUI>();
-        etTMP.text = GetTypeBadgeText(aug.type);
-        etTMP.fontSize = 17f;
-        etTMP.fontStyle = FontStyles.Bold;
-        etTMP.alignment = TextAlignmentOptions.Center;
-        etTMP.color = new Color(0.95f, 0.97f, 1f);
-        etTMP.enableWordWrapping = false;
-        etTMP.enableAutoSizing = true;
-        etTMP.fontSizeMin = 11f;
-        etTMP.fontSizeMax = 18f;
-        etTMP.overflowMode = TextOverflowModes.Ellipsis;
+        var stImg = statTagObj.AddComponent<Image>();
+        stImg.sprite = GetStoneBtnSprite();
+        stImg.type = Image.Type.Sliced;
+        stImg.color = new Color(0.04f, 0.05f, 0.07f, 0.95f);
 
-        // 4. Augment Name
+        var stOutline = statTagObj.AddComponent<Outline>();
+        stOutline.effectColor = new Color(typeColor.r, typeColor.g, typeColor.b, 0.90f);
+        stOutline.effectDistance = new Vector2(1.2f, -1.2f);
+
+        var stTxtObj = new GameObject("StatTagText");
+        stTxtObj.transform.SetParent(statTagObj.transform, false);
+        var sttRT = stTxtObj.AddComponent<RectTransform>();
+        sttRT.anchorMin = Vector2.zero;
+        sttRT.anchorMax = Vector2.one;
+        sttRT.offsetMin = sttRT.offsetMax = Vector2.zero;
+
+        var stTxt = stTxtObj.AddComponent<TextMeshProUGUI>();
+        stTxt.text = typeName; // Chỉ hiển thị tên loại chỉ số rõ ràng, không có "[ ]" hay emoji
+        stTxt.color = typeColor;
+        stTxt.fontSize = 13.5f;
+        stTxt.alignment = TextAlignmentOptions.Center;
+        stTxt.fontStyle = FontStyles.Bold;
+        SoulslikeHUDStyler.SetSafeOutline(stTxt, 0.30f, Color.black);
+
+        // 4. Central Runic Medallion (Huy hiệu đá quý cổ điển Dark Fantasy)
+        var medallionObj = new GameObject("Medallion");
+        medallionObj.transform.SetParent(card.transform, false);
+        var medRT = medallionObj.AddComponent<RectTransform>();
+        medRT.anchorMin = new Vector2(0.5f, 0.730f);
+        medRT.anchorMax = new Vector2(0.5f, 0.730f);
+        medRT.sizeDelta = new Vector2(88f, 88f);
+        medRT.pivot = new Vector2(0.5f, 0.5f);
+
+        // Obsidian Core (Nền đá tròn)
+        var coreImg = medallionObj.AddComponent<Image>();
+        coreImg.sprite = GetObsidianCoreSprite();
+        coreImg.color = new Color(0.08f, 0.10f, 0.14f, 1f);
+
+        // Runic Ring (Vành kim loại chạm khắc cổ)
+        var ringObj = new GameObject("RunicRing");
+        ringObj.transform.SetParent(medallionObj.transform, false);
+        var ringRT = ringObj.AddComponent<RectTransform>();
+        ringRT.anchorMin = Vector2.zero;
+        ringRT.anchorMax = Vector2.one;
+        ringRT.offsetMin = ringRT.offsetMax = Vector2.zero;
+        var ringImg = ringObj.AddComponent<Image>();
+        ringImg.sprite = GetRunicRingSprite();
+        ringImg.color = Color.Lerp(tierFrameColor, typeColor, 0.40f);
+
+        // Biểu tượng icon ở giữa: Dùng Sprite Image đồ họa thật để KHÔNG BAO GIỜ bị ô vuông
+        Sprite iconSprite = GetMedallionSprite(aug.type);
+        if (iconSprite != null)
+        {
+            var iconImgObj = new GameObject("IconImg");
+            iconImgObj.transform.SetParent(medallionObj.transform, false);
+            var iconRT = iconImgObj.AddComponent<RectTransform>();
+            iconRT.anchorMin = new Vector2(0.24f, 0.24f);
+            iconRT.anchorMax = new Vector2(0.76f, 0.76f);
+            iconRT.offsetMin = iconRT.offsetMax = Vector2.zero;
+
+            var iconImg = iconImgObj.AddComponent<Image>();
+            iconImg.sprite = iconSprite;
+            iconImg.color = typeColor;
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+        }
+        else
+        {
+            var iconTxtObj = new GameObject("IconText");
+            iconTxtObj.transform.SetParent(medallionObj.transform, false);
+            var iconRT = iconTxtObj.AddComponent<RectTransform>();
+            iconRT.anchorMin = Vector2.zero;
+            iconRT.anchorMax = Vector2.one;
+            iconRT.offsetMin = iconRT.offsetMax = Vector2.zero;
+
+            var iconTMP = iconTxtObj.AddComponent<TextMeshProUGUI>();
+            iconTMP.text = GetStatShortCode(aug.type);
+            iconTMP.fontSize = 20f;
+            iconTMP.fontStyle = FontStyles.Bold;
+            iconTMP.alignment = TextAlignmentOptions.Center;
+            iconTMP.color = typeColor;
+            SoulslikeHUDStyler.SetSafeOutline(iconTMP, 0.35f, Color.black);
+        }
+
+        // 5. Augment Name (Tên Lõi Nâng Cấp)
         var nameObj = new GameObject("Name");
         nameObj.transform.SetParent(card.transform, false);
         var nameRT = nameObj.AddComponent<RectTransform>();
-        nameRT.anchorMin = new Vector2(0.06f, 0.57f);
-        nameRT.anchorMax = new Vector2(0.94f, 0.69f);
+        nameRT.anchorMin = new Vector2(0.05f, 0.540f);
+        nameRT.anchorMax = new Vector2(0.95f, 0.640f);
         nameRT.offsetMin = nameRT.offsetMax = Vector2.zero;
 
         var nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
         nameTMP.text = isVN ? aug.nameVN : aug.nameEN;
-        nameTMP.fontSize = 20;
+        nameTMP.fontSize = 20.5f;
         nameTMP.fontStyle = FontStyles.Bold;
         nameTMP.alignment = TextAlignmentOptions.Center;
-        nameTMP.color = new Color(0.96f, 0.98f, 1f);
+        nameTMP.color = new Color(1f, 0.96f, 0.88f);
         nameTMP.enableWordWrapping = true;
+        SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.40f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
 
-        // 5. Symmetric Ornamental Divider 1 (Replaces plain flat bar)
+        // 6. Ornamental Divider 1
         CreateOrnamentDivider(card.transform, "Divider1",
-            new Vector2(0.10f, 0.550f), new Vector2(0.90f, 0.564f),
-            ColorDividerLine);
+            new Vector2(0.08f, 0.520f), new Vector2(0.92f, 0.535f),
+            tierFrameColor * 0.85f);
 
-        // 6. Augment Description
+        // 7. Augment Description (Mô tả chi tiết chuẩn TFT)
         string desc = isVN ? aug.descVN : aug.descEN;
         string valStr = aug.value % 1 == 0 ? ((int)aug.value).ToString() : aug.value.ToString("F1");
-        desc = desc.Replace("{v}", $"<b><color=#FFFFFF>{valStr}</color></b>");
+        desc = desc.Replace("{v}", $"<b><color=#FFEAA7>{valStr}</color></b>");
         if (aug.duration > 0)
         {
-            desc = desc.Replace("{d}", $"<b><color=#FFFFFF>{(int)aug.duration}</color></b>");
+            desc = desc.Replace("{d}", $"<b><color=#55EFC4>{(int)aug.duration}s</color></b>");
+        }
+
+        // Kèm câu trích dẫn tàn tích Dark Fantasy (flavor text)
+        string flavor = isVN ? aug.flavorVN : aug.flavorEN;
+        string fullDesc = desc;
+        if (!string.IsNullOrEmpty(flavor))
+        {
+            fullDesc += $"\n\n<size=82%><color=#94A3B8><i>{flavor}</i></color></size>";
         }
 
         var descObj = new GameObject("Desc");
         descObj.transform.SetParent(card.transform, false);
         var descRT = descObj.AddComponent<RectTransform>();
-        descRT.anchorMin = new Vector2(0.06f, 0.28f);
-        descRT.anchorMax = new Vector2(0.94f, 0.54f);
+        descRT.anchorMin = new Vector2(0.06f, 0.255f);
+        descRT.anchorMax = new Vector2(0.94f, 0.510f);
         descRT.offsetMin = descRT.offsetMax = Vector2.zero;
 
         var descTMP = descObj.AddComponent<TextMeshProUGUI>();
-        descTMP.text = desc;
-        descTMP.fontSize = 16;
+        descTMP.text = fullDesc;
+        descTMP.fontSize = 15.5f;
         descTMP.alignment = TextAlignmentOptions.Center;
-        descTMP.color = new Color(0.78f, 0.82f, 0.88f);
+        descTMP.color = new Color(0.92f, 0.95f, 1f);
         descTMP.enableWordWrapping = true;
+        SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.25f, new Color(0f, 0f, 0f, 0.85f));
 
-        // 7. Symmetric Ornamental Divider 2 (Replaces plain flat bar)
+        // 8. Ornamental Divider 2
         CreateOrnamentDivider(card.transform, "Divider2",
-            new Vector2(0.10f, 0.245f), new Vector2(0.90f, 0.259f),
-            ColorDividerLine);
+            new Vector2(0.08f, 0.235f), new Vector2(0.92f, 0.250f),
+            tierFrameColor * 0.85f);
 
-        // 8. Pick Button (Framed Gothic Dark Plate)
-        var btnObj = CreateFramedPanel(card.transform, "PickButton",
-            ColorBtnNormBg, ColorCardFrameNorm,
-            new Vector2(0.10f, 0.06f), new Vector2(0.90f, 0.21f),
-            0.65f, out Image btnFrameImg);
+        // 9. Acquire Button (Nút Đá Phiến Chạm Khắc Cổ Điển)
+        var btnObj = new GameObject("PickButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        btnObj.transform.SetParent(card.transform, false);
+        var btnRT = btnObj.GetComponent<RectTransform>();
+        btnRT.anchorMin = new Vector2(0.08f, 0.050f);
+        btnRT.anchorMax = new Vector2(0.92f, 0.210f);
+        btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
-        var btn = btnObj.AddComponent<Button>();
+        var btnImg = btnObj.GetComponent<Image>();
+        btnImg.sprite = GetStoneBtnSprite();
+        btnImg.type = Image.Type.Sliced;
+        btnImg.color = Color.Lerp(new Color(0.12f, 0.16f, 0.22f, 1f), tierFrameColor * 0.35f, 0.35f);
+
+        var btn = btnObj.GetComponent<Button>();
+        btn.targetGraphic = btnImg;
+
         var colors = btn.colors;
-        colors.normalColor = ColorBtnNormBg;
-        colors.highlightedColor = ColorBtnHoverBg;
-        colors.pressedColor = ColorBtnPressedBg;
-        colors.selectedColor = ColorBtnHoverBg;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1.3f, 1.3f, 1.3f, 1f);
+        colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+        colors.selectedColor = colors.highlightedColor;
         btn.colors = colors;
+
+        var bOut = btnObj.AddComponent<Outline>();
+        bOut.effectColor = tierFrameColor;
+        bOut.effectDistance = new Vector2(1.5f, -1.5f);
 
         var btnTxtObj = new GameObject("BtnText");
         btnTxtObj.transform.SetParent(btnObj.transform, false);
@@ -446,27 +976,21 @@ public class LevelUpChoiceUI : MonoBehaviour
         btnTxtRT.offsetMin = btnTxtRT.offsetMax = Vector2.zero;
 
         var btnTMP = btnTxtObj.AddComponent<TextMeshProUGUI>();
-        btnTMP.text = isVN ? "CHỌN" : "PICK";
-        btnTMP.fontSize = 21;
+        btnTMP.text = isVN ? "CHỌN NÂNG CẤP" : "ACQUIRE AUGMENT";
+        btnTMP.fontSize = 17f;
         btnTMP.fontStyle = FontStyles.Bold;
         btnTMP.alignment = TextAlignmentOptions.Center;
-        btnTMP.color = new Color(0.95f, 0.97f, 1f);
+        btnTMP.color = Color.white;
+        SoulslikeHUDStyler.SetSafeOutline(btnTMP, 0.40f, new Color(0f, 0f, 0f, 0.95f));
 
-        // Click actions: clicking either the button or card executes selection
         var captured = aug;
         btn.onClick.AddListener(() => PickChoice(captured));
 
-        // QUAN TRỌNG: Đưa khung của card lên làm Sibling cuối cùng để KHÔNG BAO GIỜ bị bất kỳ phần tử con nào đè lên
-        if (cardFrameImg != null)
-        {
-            cardFrameImg.transform.SetAsLastSibling();
-        }
-
-        // Add interactive hover states
-        SetupCardHover(card, cardRT, cardFrameImg, btnFrameImg);
+        // Interactive hover states
+        SetupCardHover(card, cardRT, cardFrameImg, tierFrameColor);
     }
 
-    private void SetupCardHover(GameObject cardObj, RectTransform cardRT, Image cardFrame, Image btnFrame)
+    private void SetupCardHover(GameObject cardObj, RectTransform cardRT, Image cardFrame, Color normalBorderColor)
     {
         var trigger = cardObj.GetComponent<EventTrigger>();
         if (trigger == null) trigger = cardObj.AddComponent<EventTrigger>();
@@ -475,7 +999,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         enter.callback.AddListener(_ => {
             if (cardRT != null)
             {
-                StartCoroutine(AnimateHover(cardRT, cardFrame, btnFrame, 1.035f, ColorCardFrameHover, 0.12f));
+                StartCoroutine(AnimateHover(cardRT, cardFrame, 1.035f, Color.white, 0.12f));
             }
         });
 
@@ -483,7 +1007,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         exit.callback.AddListener(_ => {
             if (cardRT != null)
             {
-                StartCoroutine(AnimateHover(cardRT, cardFrame, btnFrame, 1.000f, ColorCardFrameNorm, 0.12f));
+                StartCoroutine(AnimateHover(cardRT, cardFrame, 1.000f, normalBorderColor, 0.12f));
             }
         });
 
@@ -491,16 +1015,14 @@ public class LevelUpChoiceUI : MonoBehaviour
         trigger.triggers.Add(exit);
     }
 
-    private IEnumerator AnimateHover(RectTransform rt, Image cardFrame, Image btnFrame,
+    private IEnumerator AnimateHover(RectTransform rt, Image cardFrame,
         float targetScale, Color targetFrameColor, float duration)
     {
         if (rt == null) yield break;
 
         Vector3 startScale = rt.localScale;
         Vector3 endScale = Vector3.one * targetScale;
-
         Color startCardColor = cardFrame != null ? cardFrame.color : targetFrameColor;
-        Color startBtnColor  = btnFrame != null ? btnFrame.color : targetFrameColor;
 
         float t = 0f;
         while (t < duration)
@@ -511,51 +1033,12 @@ public class LevelUpChoiceUI : MonoBehaviour
 
             rt.localScale = Vector3.Lerp(startScale, endScale, factor);
             if (cardFrame != null) cardFrame.color = Color.Lerp(startCardColor, targetFrameColor, factor);
-            if (btnFrame != null) btnFrame.color = Color.Lerp(startBtnColor, targetFrameColor, factor);
 
             yield return null;
         }
 
         if (rt != null) rt.localScale = endScale;
         if (cardFrame != null) cardFrame.color = targetFrameColor;
-        if (btnFrame != null) btnFrame.color = targetFrameColor;
-    }
-
-    private string GetTypeBadgeText(AugmentDatabase.AugmentType type)
-    {
-        switch (type)
-        {
-            case AugmentDatabase.AugmentType.BonusAttack:
-            case AugmentDatabase.AugmentType.RagingFire:
-            case AugmentDatabase.AugmentType.BerserkerMode:
-                return "ATK";
-            case AugmentDatabase.AugmentType.BonusHealth:
-            case AugmentDatabase.AugmentType.RegenerativeCore:
-            case AugmentDatabase.AugmentType.SoulHarvest:
-                return "HP";
-            case AugmentDatabase.AugmentType.BonusSpeed:
-            case AugmentDatabase.AugmentType.SwiftShadow:
-                return "SPD";
-            case AugmentDatabase.AugmentType.BonusCritChance:
-            case AugmentDatabase.AugmentType.BonusCritDamage:
-                return "CRIT";
-            case AugmentDatabase.AugmentType.BonusLifesteal:
-            case AugmentDatabase.AugmentType.BonusSpellVamp:
-            case AugmentDatabase.AugmentType.VampireBlood:
-                return "VAMP";
-            case AugmentDatabase.AugmentType.BonusDefense:
-            case AugmentDatabase.AugmentType.AncientShield:
-                return "DEF";
-            case AugmentDatabase.AugmentType.BonusCooldownReduction:
-            case AugmentDatabase.AugmentType.EchoStrike:
-            case AugmentDatabase.AugmentType.UltimateCharge:
-                return "CDR";
-            case AugmentDatabase.AugmentType.ComboMastery:
-            case AugmentDatabase.AugmentType.BonusMaxEnergy:
-                return "COMBO";
-            default:
-                return "BUFF";
-        }
     }
 
     // ─── Pick choice ───────────────────────────────────────────────────────────
@@ -564,12 +1047,15 @@ public class LevelUpChoiceUI : MonoBehaviour
         if (AugmentManager.Instance != null)
             AugmentManager.Instance.ApplyAugment(aug);
 
-        // Show floating text
+        // Hiển thị ngay biểu tượng Lõi Nâng Cấp lên màn hình trận đấu (AugmentHUDBar)
+        AugmentHUDBar.EnsureExists()?.OnAugmentAcquired(aug);
+
+        // Show floating text không có dấu ngoặc vuông "[ ]"
         DamagePopup.CreateText(
             Camera.main != null ? Camera.main.transform.position + Vector3.up * 1.5f : Vector3.up * 2f,
             LocalizationManager.IsVietnamese
-                ? $"[ {aug.nameVN} ]"
-                : $"[ {aug.nameEN} ]",
+                ? $"{aug.nameVN}"
+                : $"{aug.nameEN}",
             new Color(0.95f, 0.95f, 0.98f)
         );
 
@@ -588,7 +1074,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         }
     }
 
-    // ─── Helpers ───────────────────────────────────────────────────────────────
+    // ─── Visual Helpers ────────────────────────────────────────────────────────
     private GameObject CreatePanel(Transform parent, Color color, Vector2 anchorMin, Vector2 anchorMax)
     {
         var go = new GameObject("Panel");
@@ -614,6 +1100,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
         var bgImg = go.AddComponent<Image>();
+        bgImg.sprite = GetPanelBgSprite();
+        bgImg.type = Image.Type.Sliced;
         bgImg.color = bgColor;
         bgImg.raycastTarget = true;
 
@@ -634,9 +1122,6 @@ public class LevelUpChoiceUI : MonoBehaviour
         return go;
     }
 
-    /// <summary>
-    /// Tạo cánh trang trí một bên (divider-fade-004) với tuỳ chọn lật gương horizontally.
-    /// </summary>
     private GameObject CreateDividerWing(Transform parent, string name,
         Vector2 anchorMin, Vector2 anchorMax, Color color, bool flipHorizontal)
     {
@@ -661,9 +1146,6 @@ public class LevelUpChoiceUI : MonoBehaviour
         return go;
     }
 
-    /// <summary>
-    /// Tạo thanh phân cách đối xứng trung tâm từ 2 nửa ghép lại (chữ thập ở giữa, mờ dần sang 2 bên).
-    /// </summary>
     private GameObject CreateOrnamentDivider(Transform parent, string name,
         Vector2 anchorMin, Vector2 anchorMax, Color color)
     {
@@ -674,7 +1156,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         rt.anchorMax = anchorMax;
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
-        // Left half (mờ từ mép trái tới tâm)
+        // Left half
         var left = new GameObject("Left");
         left.transform.SetParent(go.transform, false);
         var leftRT = left.AddComponent<RectTransform>();
@@ -687,7 +1169,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         leftImg.raycastTarget = false;
         leftImg.preserveAspect = false;
 
-        // Right half (lật ngược, từ tâm mờ dần ra mép phải)
+        // Right half
         var right = new GameObject("Right");
         right.transform.SetParent(go.transform, false);
         var rightRT = right.AddComponent<RectTransform>();

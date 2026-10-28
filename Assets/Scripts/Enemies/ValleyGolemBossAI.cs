@@ -13,12 +13,12 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
     public static event System.Action<ValleyGolemBossAI> OnEnemyDied;
 
     [Header("Boss Stats")]
-    [SerializeField] private int maxHealth = 1400;
+    [SerializeField] private int maxHealth = 750;
     [SerializeField] private int currentHealth;
-    [SerializeField] private int slamDamage = 45;
-    [SerializeField] private int stoneDamage = 12;
+    [SerializeField] private int slamDamage = 22;
+    [SerializeField] private int stoneDamage = 8;
     [SerializeField] private float moveSpeed = 1.8f;
-    [SerializeField] private float skillCooldown = 4.5f;
+    [SerializeField] private float skillCooldown = 5.0f;
 
     private Transform player;
     private PlayerHealth playerHealth;
@@ -70,10 +70,11 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
             box.offset = new Vector2(0, 0);
             myCol = box;
         }
+        EnemyNavigationHelper.EnsureFrictionless(myCol);
 
-        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
-        slamDamage = MapScalingManager.ScaleDamage(slamDamage);
-        stoneDamage = MapScalingManager.ScaleDamage(stoneDamage);
+        maxHealth = MapScalingManager.ScaleBossHealth(maxHealth, phases: 1);
+        slamDamage = MapScalingManager.ScaleBossDamage(slamDamage, isSpecialSkill: true);
+        stoneDamage = MapScalingManager.ScaleBossDamage(stoneDamage, isSpecialSkill: false);
         currentHealth = maxHealth;
         CreateWarningCircle();
     }
@@ -98,6 +99,15 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+        // Đóng băng hoàn toàn Boss AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
+        if (LevelUpChoiceUI.IsShowing)
+        {
+            rb.linearVelocity = Vector2.zero;
+            // Reset timer để boss không tấn công ngay khi màn hình đóng
+            lastSkillTime = Time.time;
+            return;
+        }
+
         if (PlayerHealth.IsPlayerDead)
         {
             rb.linearVelocity = Vector2.zero;
@@ -118,25 +128,38 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
             if (dist > 2.5f)
             {
                 Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
-                rb.linearVelocity = dir * moveSpeed;
+                Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, myCol, 0.7f, 1.4f);
+                rb.linearVelocity = moveDir * moveSpeed;
             }
             else
             {
                 rb.linearVelocity = Vector2.zero;
             }
 
-            // Kich hoat tuyet ky theo chu ky
-            if (Time.time - lastSkillTime >= skillCooldown)
+            // Kich hoat tuyet ky theo chu ky (Giam 25% thoi gian hoi chieu trong Che do Tham hoa Calamity)
+            float activeCooldown = CorruptedCycleManager.IsCorruptedActive ? skillCooldown * 0.75f : skillCooldown;
+            if (Time.time - lastSkillTime >= activeCooldown)
             {
                 lastSkillTime = Time.time;
                 attackCycle++;
-                if (attackCycle % 2 == 1)
+                if (CorruptedCycleManager.IsCorruptedActive)
                 {
-                    StartCoroutine(EarthShatterRoutine());
+                    int skillMod = attackCycle % 4;
+                    if (skillMod == 1) StartCoroutine(EarthShatterRoutine());
+                    else if (skillMod == 2) StartCoroutine(CorruptedVoidFissureRoutine());
+                    else if (skillMod == 3) StartCoroutine(StoneBarrageRoutine());
+                    else StartCoroutine(AbyssalGravityVortexRoutine());
                 }
                 else
                 {
-                    StartCoroutine(StoneBarrageRoutine());
+                    if (attackCycle % 2 == 1)
+                    {
+                        StartCoroutine(EarthShatterRoutine());
+                    }
+                    else
+                    {
+                        StartCoroutine(StoneBarrageRoutine());
+                    }
                 }
             }
         }
@@ -332,6 +355,129 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
 
         var script = proj.AddComponent<ValleyThornProjectile>();
         script.Init(dir * 6.5f, stoneDamage);
+    }
+
+    /// <summary>
+    /// Tuyệt Kỹ Ác Mộng 1 (Chu Kỳ Tha Hóa): Nứt Đất Địa Chấn Hư Không 6 Hướng!
+    /// </summary>
+    private IEnumerator CorruptedVoidFissureRoutine()
+    {
+        isCasting = true;
+        SoundManager.EnsureInstance()?.PlayBossWarning();
+
+        // Cảnh báo hào quang tím tử linh
+        DrawWarningCircle(transform.position, 3.8f);
+        circleLine.startColor = new Color(0.8f, 0.2f, 1f, 0.9f);
+        circleLine.endColor = new Color(0.5f, 0.05f, 0.8f, 0.9f);
+
+        float elapsed = 0f;
+        while (elapsed < 1.4f)
+        {
+            elapsed += Time.deltaTime;
+            float pulse = Mathf.PingPong(elapsed * 8f, 1f);
+            sr.color = Color.Lerp(Color.white, new Color(0.7f, 0.2f, 1f), pulse);
+            yield return null;
+        }
+
+        redCircleIndicator.SetActive(false);
+        redCircleIndicator.transform.SetParent(transform);
+        sr.color = Color.white;
+
+        // Bắn 6 luồng địa chấn hư không và nổ gai đất tử thần
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.5f, 0.6f);
+
+        for (int i = 0; i < 6; i++)
+        {
+            float angle = i * 60f;
+            Vector2 dir = Quaternion.Euler(0, 0, angle) * Vector2.right;
+            SpawnFissureLine(transform.position, dir);
+        }
+
+        yield return new WaitForSeconds(0.7f);
+        isCasting = false;
+    }
+
+    private void SpawnFissureLine(Vector3 origin, Vector2 dir)
+    {
+        for (int step = 1; step <= 4; step++)
+        {
+            Vector3 pos = origin + (Vector3)(dir * step * 1.5f);
+            GameObject fissure = new GameObject("VoidFissureNode");
+            fissure.transform.position = pos;
+
+            var srF = fissure.AddComponent<SpriteRenderer>();
+            srF.sprite = sr.sprite;
+            srF.color = new Color(0.85f, 0.25f, 1f, 0.7f);
+            srF.sortingOrder = 5100;
+            fissure.transform.localScale = Vector3.one * 0.45f;
+
+            var col = fissure.AddComponent<CircleCollider2D>();
+            col.radius = 0.9f;
+            col.isTrigger = true;
+
+            var trig = fissure.AddComponent<VoidHazardPoolTrigger>();
+            Destroy(fissure, 2.2f);
+        }
+    }
+
+    /// <summary>
+    /// Tuyệt Kỹ Ác Mộng 2 (Chu Kỳ Tha Hóa): Lực Hút Vực Thẳm (Abyssal Gravity Pull)
+    /// Hút chặt người chơi vào tâm chấn, buộc người chơi phải dùng DASH né thoát!
+    /// </summary>
+    private IEnumerator AbyssalGravityVortexRoutine()
+    {
+        isCasting = true;
+        SoundManager.EnsureInstance()?.PlayBossWarning();
+
+        Vector3 vortexCenter = player != null ? player.position : transform.position;
+        DrawWarningCircle(vortexCenter, 4.2f);
+        circleLine.startColor = new Color(0.6f, 0.1f, 0.9f, 0.9f);
+        circleLine.endColor = new Color(0.2f, 0.05f, 0.4f, 0.9f);
+
+        float vortexDuration = 1.8f;
+        float elapsed = 0f;
+
+        while (elapsed < vortexDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            // Kéo giật nhẹ Player về tâm hố đen (Buộc phải dùng Dash)
+            if (player != null)
+            {
+                Vector2 pullDir = ((Vector2)vortexCenter - (Vector2)player.position);
+                float dist = pullDir.magnitude;
+                if (dist > 0.3f && dist < 4.5f)
+                {
+                    player.position += (Vector3)(pullDir.normalized * (3.8f * Time.deltaTime));
+                }
+            }
+
+            yield return null;
+        }
+
+        redCircleIndicator.SetActive(false);
+        redCircleIndicator.transform.SetParent(transform);
+
+        // Hố đen phát nổ!
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+        BreakableDebrisFX.SpawnPotShatter(vortexCenter);
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.6f, 0.7f);
+
+        if (player != null && Vector2.Distance(player.position, vortexCenter) <= 4.2f)
+        {
+            if (playerHealth != null)
+            {
+                int dmg = Mathf.RoundToInt(slamDamage * 1.35f);
+                playerHealth.TakeDamage(dmg);
+                SoundManager.EnsureInstance()?.PlayPlayerHurt();
+            }
+        }
+
+        yield return new WaitForSeconds(0.6f);
+        isCasting = false;
     }
 
     public void TakeDamage(int damage)

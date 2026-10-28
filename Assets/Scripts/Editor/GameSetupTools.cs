@@ -423,6 +423,101 @@ public static class GameSetupTools
         }
     }
 
+    [MenuItem("Vaelstrider/UI/Setup Player Avatar HUD and Align Bars")]
+    [MenuItem("GameObject/Vaelstrider/Player Avatar HUD", false, 11)]
+    public static void SetupPlayerAvatarHUDInCurrentScene()
+    {
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("[UI] Không tìm thấy Canvas trong Scene hiện tại!");
+            return;
+        }
+
+        var avatarUI = PlayerAvatarUI.EnsureUIExists(canvas);
+        if (avatarUI != null)
+        {
+            Undo.RegisterCreatedObjectUndo(avatarUI.gameObject, "Setup Player Avatar HUD");
+            Selection.activeGameObject = avatarUI.gameObject;
+        }
+
+        AlignHealthBarBesideAvatar();
+        Debug.Log("<color=green>[UI]</color> Đã tạo và cấu hình thành công PlayerAvatarHUD nằm cạnh thanh Máu & Năng Lượng!");
+    }
+
+    [MenuItem("Vaelstrider/UI/Align Health Bar Beside Player Avatar")]
+    public static void AlignHealthBarBesideAvatar()
+    {
+        var healthBar = GameObject.Find("PlayerHealthBar");
+        if (healthBar == null)
+        {
+            var hpUI = Object.FindAnyObjectByType<HealthBarUI>();
+            if (hpUI != null) healthBar = hpUI.gameObject;
+        }
+
+        if (healthBar != null)
+        {
+            RectTransform rt = healthBar.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                Undo.RecordObject(rt, "Align Health Bar Beside Avatar");
+                rt.anchorMin = new Vector2(0f, 1f);
+                rt.anchorMax = new Vector2(0f, 1f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = new Vector2(244f, -30f);
+                rt.sizeDelta = new Vector2(360f, 26f);
+
+                PlayerAvatarUI.AlignHealthAndStatusBars();
+                SoulslikeHUDStyler.ApplySoulslikeThemeToAll();
+
+                EditorUtility.SetDirty(healthBar);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(healthBar.scene);
+            }
+        }
+    }
+
+    [MenuItem("Vaelstrider/UI/Bake Player Avatar HUD To All Map Scenes")]
+    public static void BakePlayerAvatarHUDToAllMapScenes()
+    {
+        string[] mapScenes = new string[]
+        {
+            "Assets/Scenes/Map1_Thestart.unity",
+            "Assets/Scenes/Map2_ValleyRuin.unity",
+            "Assets/Scenes/Map3_ForgottenMemories.unity"
+        };
+
+        string currentActive = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().path;
+
+        foreach (var scenePath in mapScenes)
+        {
+            if (!System.IO.File.Exists(scenePath)) continue;
+
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene(scenePath, UnityEditor.SceneManagement.OpenSceneMode.Single);
+            Canvas mainCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
+            if (mainCanvas == null) mainCanvas = Object.FindAnyObjectByType<Canvas>();
+            if (mainCanvas == null) continue;
+
+            var avatarUI = PlayerAvatarUI.EnsureUIExists(mainCanvas);
+            if (avatarUI != null)
+            {
+                EditorUtility.SetDirty(avatarUI.gameObject);
+            }
+
+            AlignHealthBarBesideAvatar();
+
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scene);
+            UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene);
+            Debug.Log($"<color=green>[UI]</color> Đã bake PlayerAvatarHUD vào scene: {scenePath}");
+        }
+
+        if (!string.IsNullOrEmpty(currentActive) && System.IO.File.Exists(currentActive))
+        {
+            UnityEditor.SceneManagement.EditorSceneManager.OpenScene(currentActive, UnityEditor.SceneManagement.OpenSceneMode.Single);
+        }
+        AssetDatabase.SaveAssets();
+    }
+
     [MenuItem("Vaelstrider/RESTORE EVERYTHING (Chest, Waves, Boss, Potions, Portal, UI)", false, 0)]
     
     [MenuItem("Vaelstrider/UI/Setup Special Skill Button")]
@@ -478,7 +573,7 @@ public static class GameSetupTools
                 rt.anchorMin = new Vector2(0.5f, 1f);
                 rt.anchorMax = new Vector2(0.5f, 1f);
                 rt.pivot = new Vector2(0.5f, 1f);
-                rt.anchoredPosition = new Vector2(0f, -80f);
+                rt.anchoredPosition = new Vector2(0f, -152f);
                 rt.sizeDelta = new Vector2(600f, 60f);
 
                 CanvasGroup cg = bannerObj.AddComponent<CanvasGroup>();

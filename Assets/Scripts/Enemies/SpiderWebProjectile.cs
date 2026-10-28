@@ -7,7 +7,7 @@ public class SpiderWebProjectile : MonoBehaviour
 {
     private Vector2 direction;
     private float speed = 8.5f;
-    private int damage = 8;
+    private int damage = 6;
     private float stunDuration = 2.0f;
     private bool hasHit = false;
 
@@ -37,17 +37,43 @@ public class SpiderWebProjectile : MonoBehaviour
             sr.sprite = bulletSprites[0];
         }
 
-        sr.color = Color.white;
+        Color realmColor;
+        Color lightCol;
+        switch (CorruptedCycleManager.CurrentRealm)
+        {
+            case CalamityRealm.VoidNightmare:
+                realmColor = new Color(0.20f, 0.05f, 0.35f, 1f);
+                lightCol = new Color(0.6f, 0.1f, 0.9f, 1f);
+                break;
+            case CalamityRealm.MagmaCalamity:
+                realmColor = new Color(1.0f, 0.40f, 0.05f, 1f);
+                lightCol = new Color(1.0f, 0.6f, 0.1f, 1f);
+                break;
+            case CalamityRealm.AcidDownpour:
+                realmColor = new Color(0.25f, 1.0f, 0.35f, 1f);
+                lightCol = new Color(0.3f, 1.0f, 0.4f, 1f);
+                break;
+            case CalamityRealm.FrostfallBlizzard:
+                realmColor = new Color(0.85f, 0.95f, 1.0f, 1f);
+                lightCol = new Color(0.5f, 0.85f, 1.0f, 1f);
+                break;
+            default:
+                realmColor = Color.white;
+                lightCol = new Color(0.9f, 0.95f, 1f, 1f);
+                break;
+        }
+
+        sr.color = realmColor;
         sr.sortingOrder = 2500;
         transform.localScale = new Vector3(1.1f, 1.1f, 1f);
 
-        // Anh sang da quang trang bac huyen ao
+        // Ánh sáng dạ quang theo hệ nguyên tố
         GameObject lightObj = new GameObject("Web_Light");
         lightObj.transform.SetParent(transform, false);
         lightObj.transform.localPosition = Vector3.zero;
         var light = lightObj.AddComponent<Light2D>();
         light.lightType = Light2D.LightType.Point;
-        light.color = new Color(0.9f, 0.95f, 1f, 1f);
+        light.color = lightCol;
         light.intensity = 1.6f;
         light.pointLightInnerRadius = 0.2f;
         light.pointLightOuterRadius = 1.6f;

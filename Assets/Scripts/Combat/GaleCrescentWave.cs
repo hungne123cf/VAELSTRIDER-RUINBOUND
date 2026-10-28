@@ -100,17 +100,21 @@ public class GaleCrescentWave : MonoBehaviour
         if (damageable != null && !(damageable is PlayerHealth) && !hitDamageables.Contains(damageable))
         {
             hitDamageables.Add(damageable);
-            damageable.TakeDamage(waveDamage);
-            DamagePopup.Create(other.transform.position, waveDamage, isCritical: true);
+            GameObject attacker = ownerSkill != null ? ownerSkill.gameObject : gameObject;
+            int actualDamage = AugmentManager.ProcessOutgoingDamage(attacker, other.gameObject, waveDamage);
+            damageable.TakeDamage(actualDamage);
+            DamagePopup.Create(other.transform.position, actualDamage, isCritical: true);
 
             SoundManager.EnsureInstance()?.PlayHitImpact();
 
             // Hiệu ứng tia sét nổ bạo kích trên thân quái
             SpawnHitLightningSparks(other.transform.position);
 
+            AugmentManager.TriggerOnHitAugments(attacker, other.gameObject, actualDamage, damageable);
+
             if (ownerSkill != null)
             {
-                ownerSkill.OnCrescentWaveHit(other.gameObject, damageable, waveDamage);
+                ownerSkill.OnCrescentWaveHit(other.gameObject, damageable, actualDamage);
             }
         }
     }

@@ -62,6 +62,32 @@ public class VictoryUI : MonoBehaviour
 
         if (playAgainButton != null) playAgainButton.onClick.AddListener(RestartRun);
         if (nextRealmButton != null) nextRealmButton.onClick.AddListener(GoToNextRealm);
+
+        StyleVictoryWindow();
+    }
+
+    private void StyleVictoryWindow()
+    {
+        Transform card = transform.Find("CardWindow");
+        if (card != null)
+        {
+            Image cBg = card.GetComponent<Image>();
+            if (cBg != null)
+            {
+                cBg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+                cBg.type = Image.Type.Sliced;
+                cBg.color = Color.white;
+            }
+        }
+        if (titleText != null)
+        {
+            titleText.fontSize = 32;
+            titleText.fontStyle = FontStyles.Bold;
+            titleText.color = new Color(0.96f, 0.88f, 0.45f); // Antique gold
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.35f, Color.black);
+        }
+        if (playAgainButton != null) SoulslikeHUDStyler.StyleButton(playAgainButton);
+        if (nextRealmButton != null) SoulslikeHUDStyler.StyleButton(nextRealmButton);
     }
 
     void OnEnable()
@@ -153,13 +179,13 @@ public class VictoryUI : MonoBehaviour
         {
             PlayerPrefs.SetInt("Map1_Completed", 1);
             AccountDatabase.AddItemToActiveUser("scroll_summon_mythic", 1, "GachaArtifact", "Chiến Thắng Map 1");
-            AccountDatabase.AddItemToActiveUser("gem_amethyst", 3, "Material", "Chiến Thắng Map 1");
+            AccountDatabase.AddItemToActiveUser("ore_forge_stone", 3, "Material", "Chiến Thắng Map 1");
         }
         else if (currentScene.Contains("Map2") || currentScene.Contains("Valley"))
         {
             PlayerPrefs.SetInt("Map2_Completed", 1);
             AccountDatabase.AddItemToActiveUser("scroll_summon_mythic", 2, "GachaArtifact", "Chiến Thắng Map 2");
-            AccountDatabase.AddItemToActiveUser("gem_bloodstone", 2, "Material", "Chiến Thắng Map 2");
+            AccountDatabase.AddItemToActiveUser("ore_gold_node", 2, "Material", "Chiến Thắng Map 2");
             AccountDatabase.AddItemToActiveUser("chest_ancient_relic", 1, "GachaArtifact", "Chiến Thắng Map 2");
         }
         else if (currentScene.Contains("Map3") || currentScene.Contains("Forgotten"))
@@ -222,6 +248,8 @@ public class VictoryUI : MonoBehaviour
     public void RestartRun()
     {
         PlayerInventory.ResetRunShards();
+        LevelUpChoiceUI.ResetMatchRerolls();
+        MatchTimerUI.ResetRunTimer();
         Time.timeScale = 1f;
         runStartTime = 0f;
         enemiesKilled = 0;
@@ -231,8 +259,14 @@ public class VictoryUI : MonoBehaviour
     public void GoToNextRealm()
     {
         Time.timeScale = 1f;
-        runStartTime = 0f;
         enemiesKilled = 0;
+        var ph = Object.FindAnyObjectByType<PlayerHealth>();
+        if (ph != null && !ph.IsDead)
+        {
+            PlayerHealth.RunPreservedCurrentHealth = ph.CurrentHealth;
+        }
+
+        MatchTimerUI.ContinueRunTimer(); // Giữ nguyên và tiếp tục dòng thời gian cho Map tiếp theo
         string currentScene = SceneManager.GetActiveScene().name;
 
         if (currentScene == "SampleScene" || currentScene.Contains("Map1"))
@@ -294,20 +328,23 @@ public class VictoryUI : MonoBehaviour
         RectTransform cardRect = cardObj.AddComponent<RectTransform>();
         cardRect.sizeDelta = new Vector2(540, 420);
         Image cardBg = cardObj.AddComponent<Image>();
-        cardBg.color = new Color(0.11f, 0.09f, 0.16f, 0.98f);
+        cardBg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        cardBg.type = Image.Type.Sliced;
+        cardBg.color = Color.white;
 
         // Title
         GameObject titleObj = new GameObject("TitleText");
         titleObj.transform.SetParent(cardObj.transform, false);
-        RectTransform titleRect = titleObj.AddComponent<RectTransform>();
+        RectTransform titleRect = titleObj.GetComponent<RectTransform>();
         titleRect.anchoredPosition = new Vector2(0, 150);
         titleRect.sizeDelta = new Vector2(500, 50);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         var locTitle = titleObj.AddComponent<LocalizedText>();
         locTitle.SetTexts("CHIẾN THẮNG!", "REALM PURIFIED!");
-        titleTmp.fontSize = 36;
+        titleTmp.fontSize = 32;
         titleTmp.fontStyle = FontStyles.Bold;
-        titleTmp.color = new Color(1f, 0.85f, 0.2f);
+        titleTmp.color = new Color(0.96f, 0.88f, 0.45f); // Antique gold
+        SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.35f, Color.black);
         titleTmp.alignment = TextAlignmentOptions.Center;
 
         // Subtitle
@@ -344,6 +381,9 @@ public class VictoryUI : MonoBehaviour
 
         var playBtn = CreateBtn(btnContainer.transform, "Btn_PlayAgain", LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Vector2(-115, 0), new Color(0.25f, 0.35f, 0.7f));
         var nextBtn = CreateBtn(btnContainer.transform, "Btn_NextRealm", LocalizationManager.T("ẢI TIẾP THEO", "NEXT REALM"), new Vector2(115, 0), new Color(0.85f, 0.45f, 0.15f));
+
+        SoulslikeHUDStyler.StyleButton(playBtn);
+        SoulslikeHUDStyler.StyleButton(nextBtn);
 
         WhiteIconLoader.SetButtonIconAndText(playBtn, "Repeat-Right", LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Color(0.4f, 0.85f, 1f), Color.white, true);
         WhiteIconLoader.SetButtonIconAndText(nextBtn, "Play", LocalizationManager.T("ẢI TIẾP THEO", "NEXT REALM"), new Color(1f, 0.85f, 0.35f), Color.white, true);

@@ -71,8 +71,16 @@ public class AzureBladeSkill : MonoBehaviour
         RefreshCooldownStats();
     }
 
+    [Header("Speed to AP Conversion (Kiếm Khí Quy Hóa)")]
+    private int convertedMagicAttack = 0;
+    private float totalBonusSpeedScore = 0f;
+
+    public int ConvertedMagicAttack => convertedMagicAttack;
+    public float TotalBonusSpeedScore => totalBonusSpeedScore;
+
     /// <summary>
     /// Tính toán giảm thời gian hồi chiêu đòn đánh thường (5s -> 0.8s) dựa trên Trang bị, Khảm ngọc và Nâng cấp
+    /// Đồng thời tự động chuyển hóa toàn bộ Tốc Đánh & Tốc Độ cộng thêm thành Sát Thương Phép (AP) cho Azure Blade.
     /// </summary>
     public void RefreshCooldownStats()
     {
@@ -80,9 +88,10 @@ public class AzureBladeSkill : MonoBehaviour
 
         // 1. Giảm hồi chiêu từ Nâng Cấp Nhanh Nhẹn (Agility / Speed Upgrade)
         var upgradeMgr = PlayerUpgradeManager.EnsureInstance();
+        int agiLvl = 0;
         if (upgradeMgr != null)
         {
-            int agiLvl = upgradeMgr.GetLevel(PlayerUpgradeManager.UpgradeType.Agility);
+            agiLvl = upgradeMgr.GetLevel(PlayerUpgradeManager.UpgradeType.Agility);
             totalCdr += agiLvl * 0.35f; // Mỗi cấp giảm 0.35s hồi chiêu
         }
 
@@ -95,11 +104,13 @@ public class AzureBladeSkill : MonoBehaviour
 
         // 3. Giảm hồi chiêu từ Vũ khí (Weapon Speed Bonus)
         string equippedWpnId = PlayerPrefs.GetString("Equipped_Weapon_Id", "");
+        float wpnSpeed = 0f;
         if (!string.IsNullOrEmpty(equippedWpnId))
         {
             var def = InventoryItemDatabase.GetItem(equippedWpnId);
             if (def != null && def.speedBonus > 0f)
             {
+                wpnSpeed = def.speedBonus;
                 totalCdr += def.speedBonus * 0.45f;
             }
         }
@@ -111,12 +122,38 @@ public class AzureBladeSkill : MonoBehaviour
             totalCdr += baseAttackCooldown * gemCdr;
         }
 
+        // 5. Giảm hồi chiêu từ Lõi Nâng Cấp (Augments Speed & CDR)
+        float augSpeed = 0f;
+        float augCDR = 0f;
+        if (AugmentManager.Instance != null)
+        {
+            augSpeed = AugmentManager.Instance.GetAugBonusSpeed();
+            augCDR = AugmentManager.Instance.GetAugCDR();
+            totalCdr += baseAttackCooldown * (augCDR + augSpeed * 0.5f);
+        }
+
         attackCooldown = Mathf.Max(minAttackCooldown, baseAttackCooldown - totalCdr);
 
-        // 5. Cập nhật Cooldown Tuyệt Kỹ (18s -> min 5s)
-        float ultiUpCd = (upgradeMgr != null) ? upgradeMgr.GetUltiCooldownReduction() : 0f;
+        // 6. Cập nhật Cooldown Tuyệt Kỹ (18s -> min 5s)
+        string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        float ultiUpCd = (upgradeMgr != null) ? upgradeMgr.GetUltiCooldownReduction(curHero) : 0f;
         float ultiGemCd = (gemCdr > 0f) ? 18.0f * gemCdr : 0f;
-        specialCooldown = Mathf.Max(5.0f, 18.0f - ultiUpCd - ultiGemCd);
+        float ultiAugCd = (augCDR > 0f) ? 18.0f * augCDR : 0f;
+        specialCooldown = Mathf.Max(5.0f, 18.0f - ultiUpCd - ultiGemCd - ultiAugCd);
+
+        // === CƠ CHẾ ĐẶC QUYỀN AZURE BLADE: TỐC ĐÁNH & TỐC ĐỘ CHUYỂN HÓA THÀNH SÁT THƯƠNG PHÉP (AP) ===
+        // Mỗi điểm tốc độ / tốc đánh từ Nhanh nhẹn, Giáp, Vũ khí, Khảm ngọc, Lõi Nâng Cấp
+        // đều tự động quy đổi thành Sát Thương Phép (AP) cộng thêm cho Sóng Kiếm!
+        // - Mỗi 0.1s CDR / tốc đánh đạt được = 1 điểm tốc
+        // - Mỗi +1.0 tốc chạy từ Vũ khí, Giáp = 10 điểm tốc
+        // - Mỗi % tốc chạy từ Lõi nâng cấp = 0.75 điểm tốc
+        float speedScore = totalCdr * 10f;
+        speedScore += (wpnSpeed + armorSpd) * 10f;
+        speedScore += (augSpeed * 100f) * 0.75f;
+
+        totalBonusSpeedScore = speedScore;
+        // Tỷ lệ chuyển hóa hào phóng: 1 điểm tốc quy đổi thành +2.2 Sát Thương Phép (AP)
+        convertedMagicAttack = Mathf.Max(0, Mathf.RoundToInt(speedScore * 2.2f));
     }
 
     void Update()

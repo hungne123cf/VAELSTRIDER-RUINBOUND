@@ -6,15 +6,17 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Bộ đếm thời gian trong trận (Match Stopwatch HUD).
 /// Thiết kế giao diện Dark Fantasy sang trọng, hiển thị thời gian chính xác (00:00).
-/// Tự động đồng bộ với VictoryUI và GameOverUI.
+/// Chạy liên tục từ Map này sang Map khác (Map 1 -> Map 2 -> Map 3) trong suốt cả Run,
+/// chỉ reset về 00:00 khi bắt đầu Run mới từ Main Menu hoặc khi bấm Thử Lại (Restart).
 /// </summary>
 public class MatchTimerUI : MonoBehaviour
 {
     public static MatchTimerUI Instance { get; private set; }
 
     [Header("Timer State")]
-    private float elapsedTime = 0f;
-    private bool isRunning = false;
+    // Lưu thời gian dạng static để không bị mất khi chuyển cảnh giữa các Map
+    private static float totalRunElapsedTime = 0f;
+    private static bool isTimerRunning = false;
     private static float lastFinalTime = 0f;
 
     [Header("UI Elements")]
@@ -22,19 +24,28 @@ public class MatchTimerUI : MonoBehaviour
     private Image timerBackground;
     private CanvasGroup canvasGroup;
 
-    public static float CurrentElapsedTime => Instance != null ? Instance.elapsedTime : 0f;
-    public static float LastFinalClearTime => lastFinalTime;
+    public float ElapsedTime => totalRunElapsedTime;
+    public static float CurrentElapsedTime => totalRunElapsedTime;
+    public static float LastFinalClearTime => lastFinalTime > 0f ? lastFinalTime : totalRunElapsedTime;
 
     void Awake()
     {
         Instance = this;
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
+        if (timerText == null) timerText = GetComponentInChildren<TextMeshProUGUI>();
+        UpdateTimerText();
     }
 
     void Start()
     {
-        StartTimer();
+        string curScene = SceneManager.GetActiveScene().name;
+        if (curScene != "LoginScene" && curScene != "MainMenuScene")
+        {
+            StartTimer();
+        }
+        UpdateTimerText();
     }
 
     void OnEnable()
@@ -49,58 +60,87 @@ public class MatchTimerUI : MonoBehaviour
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name != "LoginScene" && scene.name != "MainMenuScene")
+        if (scene.name == "LoginScene" || scene.name == "MainMenuScene")
         {
-            ResetAndStartTimer();
+            StopTimer();
+            totalRunElapsedTime = 0f;
+            if (gameObject != null) gameObject.SetActive(false);
         }
         else
         {
-            StopTimer();
-            if (gameObject != null) gameObject.SetActive(false);
+            // Chuyển Map trong trận (Map 1 -> Map 2 -> Map 3):
+            // TIẾP TỤC CHẠY THỜI GIAN CỦA RUN, KHÔNG RESET VỀ 00:00!
+            StartTimer();
+            UpdateTimerText();
         }
     }
 
     void Update()
     {
-        if (!isRunning) return;
+        if (!isTimerRunning) return;
 
-        elapsedTime += Time.deltaTime;
+        totalRunElapsedTime += Time.deltaTime;
+        UpdateTimerText();
+    }
 
+    private void UpdateTimerText()
+    {
         if (timerText != null)
         {
             string label = LocalizationManager.T("THỜI GIAN", "TIME");
-            timerText.text = $"<color=#FFA502><size=11>{label}</size></color>  <color=#FFFFFF><b>{FormatTime(elapsedTime)}</b></color>";
+            timerText.text = $"<color=#FFA502><size=11>{label}</size></color>  <color=#FFFFFF><b>{FormatTime(totalRunElapsedTime)}</b></color>";
         }
     }
 
     public void StartTimer()
     {
-        isRunning = true;
+        isTimerRunning = true;
     }
 
     public void ResumeTimer()
     {
-        isRunning = true;
+        isTimerRunning = true;
+        UpdateTimerText();
+    }
+
+    /// <summary>
+    /// Bắt đầu một Run hoàn toàn mới: Reset thời gian về 00:00 và bắt đầu đếm
+    /// </summary>
+    public static void ResetRunTimer()
+    {
+        totalRunElapsedTime = 0f;
+        lastFinalTime = 0f;
+        isTimerRunning = true;
+        if (Instance != null) Instance.UpdateTimerText();
     }
 
     public void ResetAndStartTimer()
     {
-        elapsedTime = 0f;
-        isRunning = true;
-        if (timerText != null)
-        {
-            string label = LocalizationManager.T("THỜI GIAN", "TIME");
-            timerText.text = $"<color=#FFA502><size=11>{label}</size></color>  <color=#FFFFFF><b>00:00</b></color>";
-        }
+        ResetRunTimer();
     }
 
     public void StopTimer()
     {
-        if (isRunning)
+        if (isTimerRunning)
         {
-            isRunning = false;
-            lastFinalTime = elapsedTime;
+            isTimerRunning = false;
+            lastFinalTime = totalRunElapsedTime;
         }
+    }
+
+    public static void PauseRunTimer()
+    {
+        if (isTimerRunning)
+        {
+            isTimerRunning = false;
+            lastFinalTime = totalRunElapsedTime;
+        }
+    }
+
+    public static void ContinueRunTimer()
+    {
+        isTimerRunning = true;
+        if (Instance != null) Instance.UpdateTimerText();
     }
 
     public static string GetFormattedCurrentTime()
@@ -125,19 +165,28 @@ public class MatchTimerUI : MonoBehaviour
         if (Instance != null)
         {
             Instance.gameObject.SetActive(true);
+            Instance.UpdateTimerText();
             return Instance;
         }
 
-        Canvas canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
         if (canvas == null) return null;
 
         Transform existing = canvas.transform.Find("MatchTimerHUD");
         if (existing != null)
         {
+            existing.gameObject.SetActive(true);
+            var exRt = existing.GetComponent<RectTransform>();
+            if (exRt != null)
+            {
+                exRt.anchoredPosition = new Vector2(0f, -8f);
+                exRt.sizeDelta = new Vector2(120f, 26f);
+            }
             Instance = existing.GetComponent<MatchTimerUI>();
             if (Instance != null)
             {
-                Instance.gameObject.SetActive(true);
+                Instance.UpdateTimerText();
                 return Instance;
             }
         }
@@ -151,8 +200,8 @@ public class MatchTimerUI : MonoBehaviour
         rt.anchorMin = new Vector2(0.5f, 1f);
         rt.anchorMax = new Vector2(0.5f, 1f);
         rt.pivot = new Vector2(0.5f, 1f);
-        rt.anchoredPosition = new Vector2(0f, -14f);
-        rt.sizeDelta = new Vector2(130f, 32f);
+        rt.anchoredPosition = new Vector2(0f, -8f);
+        rt.sizeDelta = new Vector2(120f, 26f);
 
         Image bgImg = rootObj.GetComponent<Image>();
         bgImg.color = new Color(0.05f, 0.07f, 0.12f, 0.92f);
@@ -172,7 +221,8 @@ public class MatchTimerUI : MonoBehaviour
         txtRt.offsetMax = Vector2.zero;
 
         var tmp = textObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = "<color=#FFA502><size=11>TIME</size></color>  <color=#FFFFFF><b>00:00</b></color>";
+        string label = LocalizationManager.T("THỜI GIAN", "TIME");
+        tmp.text = $"<color=#FFA502><size=11>{label}</size></color>  <color=#FFFFFF><b>{FormatTime(totalRunElapsedTime)}</b></color>";
         tmp.fontSize = 15;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;

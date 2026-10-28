@@ -12,12 +12,12 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
     public static event System.Action<ValleyBeastAI> OnEnemyDied;
 
     [Header("Stats")]
-    [SerializeField] private int maxHealth = 220;
+    [SerializeField] private int maxHealth = 120;
     [SerializeField] private int currentHealth;
-    [SerializeField] private float moveSpeed = 4.2f;
-    [SerializeField] private int attackDamage = 22;
+    [SerializeField] private float moveSpeed = 3.6f;
+    [SerializeField] private int attackDamage = 12;
     [SerializeField] private float attackRange = 1.35f;
-    [SerializeField] private float attackCooldown = 1.4f;
+    [SerializeField] private float attackCooldown = 1.6f;
     [SerializeField] private float detectionRadius = 10f;
 
     private Transform player;
@@ -60,6 +60,7 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
             box.offset = new Vector2(0, 0);
             myCol = box;
         }
+        EnemyNavigationHelper.EnsureFrictionless(myCol);
 
         maxHealth = MapScalingManager.ScaleHealth(maxHealth);
         attackDamage = MapScalingManager.ScaleDamage(attackDamage);
@@ -107,8 +108,9 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
 
             if (dist > attackRange)
             {
-                // Duoi theo nguoi choi
-                rb.linearVelocity = dir * moveSpeed;
+                // Duoi theo nguoi choi (tu dong luon lach qua vat can)
+                Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, myCol, 0.35f, 1.0f);
+                rb.linearVelocity = moveDir * moveSpeed;
                 isMoving = true;
             }
             else
@@ -190,6 +192,7 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
         if (isDead) return;
 
         currentHealth -= damage;
+        EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
         StartCoroutine(HitFlashRoutine());
 
         // Knockback nhe khi trung don
@@ -295,5 +298,13 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
             if (obj is Sprite s) runSprites.Add(s);
         }
 #endif
+    }
+
+    public static ValleyBeastAI Spawn(Vector3 pos, int index = 1)
+    {
+        GameObject go = new GameObject($"ValleyBeast_{index}");
+        go.transform.position = pos;
+        var ai = go.AddComponent<ValleyBeastAI>();
+        return ai;
     }
 }

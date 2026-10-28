@@ -24,11 +24,15 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     public Action<int, int> onMoveSocket;
     public Action<int, int, int, int> onMoveSubSocket;
 
+    [NonSerialized] public bool hasHandledDrop = false;
+    public static bool IsAnyDragging { get; private set; } = false;
+    public static UIDragDropItem CurrentDraggingItem { get; private set; } = null;
     private static GameObject dragAvatarObj = null;
     private static RectTransform dragAvatarRt = null;
-    private Canvas rootCanvas = null;
+    private Canvas cachedDragCanvas = null;
     private bool isDragging = false;
     private bool isScrolling = false;
+    private bool wasDragged = false;
 
     void Awake()
     {
@@ -38,22 +42,35 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         }
     }
 
-    private Canvas GetRootCanvas()
+    private Canvas GetDragCanvas()
     {
-        if (rootCanvas == null)
+        if (cachedDragCanvas != null && cachedDragCanvas.gameObject.activeInHierarchy)
         {
-            rootCanvas = GetComponentInParent<Canvas>();
-            if (rootCanvas != null)
-            {
-                rootCanvas = rootCanvas.rootCanvas;
-            }
+            return cachedDragCanvas;
         }
-        return rootCanvas;
+
+        Canvas[] parentCanvases = GetComponentsInParent<Canvas>();
+        if (parentCanvases != null && parentCanvases.Length > 0)
+        {
+            Canvas topCanvas = parentCanvases[0];
+            foreach (var c in parentCanvases)
+            {
+                if (c.sortingOrder > topCanvas.sortingOrder)
+                {
+                    topCanvas = c;
+                }
+            }
+            cachedDragCanvas = topCanvas;
+            return cachedDragCanvas;
+        }
+
+        cachedDragCanvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
+        return cachedDragCanvas;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        // Visual press effect on mobile
+        wasDragged = false;
         transform.localScale = new Vector3(0.96f, 0.96f, 1f);
     }
 
@@ -64,26 +81,42 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (!isDragging && !isScrolling)
+        if (eventData.dragging || isDragging || isScrolling)
         {
-            onClick?.Invoke();
+            return;
         }
+
+        if (Vector2.Distance(eventData.position, eventData.pressPosition) > 12f)
+        {
+            return;
+        }
+
+        onClick?.Invoke();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        float distFromPress = Vector2.Distance(eventData.position, eventData.pressPosition);
+        wasDragged = true;
+        hasHandledDrop = false;
+
         float dx = Mathf.Abs(eventData.delta.x);
         float dy = Mathf.Abs(eventData.delta.y);
+        float totalDy = eventData.position.y - eventData.pressPosition.y;
+        float totalDx = eventData.position.x - eventData.pressPosition.x;
 
-        // Smart gesture resolution for Mobile:
-        // If inside a ScrollRect (e.g. Bag container) and not already in a hero socket:
+        // Smart gesture resolution:
+        // When inside a Bag scrollrect and dragging upward or leftward towards hero sockets:
         if (parentScrollRect != null && !isSocketedGem)
         {
-            // If the ScrollRect is Horizontal:
+            bool isDraggingUpward = eventData.delta.y > 1f || totalDy > 3f || (dy > dx * 0.6f && totalDy > 0f);
+            bool isDraggingLeftward = eventData.delta.x < -1f || totalDx < -3f;
+            bool isDraggingTowardsSockets = isDraggingUpward || isDraggingLeftward;
+
             if (parentScrollRect.horizontal && !parentScrollRect.vertical)
             {
-                // User is swiping horizontally -> Prioritize smooth mobile list scrolling!
-                if (dx > dy * 0.6f || (dy < 12f && dx > 2f))
+                // Scroll only if gesture is predominantly horizontal and not dragging towards sockets
+                if (!isDraggingTowardsSockets && dx > dy * 1.3f && distFromPress > 10f)
                 {
                     isScrolling = true;
                     isDragging = false;
@@ -91,11 +124,11 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
                     return;
                 }
             }
-            // If the ScrollRect is Vertical:
             else if (parentScrollRect.vertical && !parentScrollRect.horizontal)
             {
-                // User is swiping vertically -> Prioritize vertical list scrolling!
-                if (dy > dx * 0.6f || (dx < 12f && dy > 2f))
+                // In vertical bag, dragging upward (totalDy > 0) is towards hero sockets above bag.
+                // Scroll only if gesture is downward (totalDy < 0) and not dragging towards sockets.
+                if (!isDraggingTowardsSockets && dy > dx * 1.3f && distFromPress > 10f && totalDy < -5f)
                 {
                     isScrolling = true;
                     isDragging = false;
@@ -107,32 +140,70 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
         isScrolling = false;
         isDragging = true;
-        Canvas canvas = GetRootCanvas();
+        IsAnyDragging = true;
+        CurrentDraggingItem = this;
+        hasHandledDrop = false;
+
+        Canvas canvas = GetDragCanvas();
         if (canvas == null) return;
 
-        // Create Ghost Icon floating with finger across the Canvas
+        // Clean up any stale avatar
         if (dragAvatarObj != null) Destroy(dragAvatarObj);
 
-        dragAvatarObj = new GameObject("DragAvatar_Item", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(CanvasGroup));
+        // Root Avatar Container
+        dragAvatarObj = new GameObject("DragAvatar_Item", typeof(RectTransform), typeof(CanvasRenderer));
         dragAvatarObj.layer = 5;
         dragAvatarObj.transform.SetParent(canvas.transform, false);
         dragAvatarObj.transform.SetAsLastSibling();
 
-        dragAvatarRt = dragAvatarObj.GetComponent<RectTransform>();
-        dragAvatarRt.sizeDelta = new Vector2(70f, 70f);
+        // High-order canvas overlay (32700) so avatar is ALWAYS on top of modals (modal is ~28000)
+        Canvas avatarCanvas = dragAvatarObj.AddComponent<Canvas>();
+        avatarCanvas.overrideSorting = true;
+        avatarCanvas.sortingOrder = 32700;
 
-        Image img = dragAvatarObj.GetComponent<Image>();
-        img.sprite = itemIcon;
-        img.color = itemColor;
-        img.preserveAspect = true;
-
-        var outline = dragAvatarObj.AddComponent<Outline>();
-        outline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
-        outline.effectDistance = new Vector2(2f, -2f);
-
-        CanvasGroup cg = dragAvatarObj.GetComponent<CanvasGroup>();
+        CanvasGroup cg = dragAvatarObj.AddComponent<CanvasGroup>();
         cg.blocksRaycasts = false;
-        cg.alpha = 0.88f;
+        cg.interactable = false;
+        cg.alpha = 0.95f;
+
+        dragAvatarRt = dragAvatarObj.GetComponent<RectTransform>();
+        dragAvatarRt.sizeDelta = new Vector2(76f, 76f);
+        dragAvatarRt.localScale = new Vector3(1.15f, 1.15f, 1f);
+
+        // Background Dark Frame Plate
+        GameObject bgCard = new GameObject("BgCard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        bgCard.layer = 5;
+        bgCard.transform.SetParent(dragAvatarObj.transform, false);
+        RectTransform bgRt = bgCard.GetComponent<RectTransform>();
+        bgRt.anchorMin = Vector2.zero;
+        bgRt.anchorMax = Vector2.one;
+        bgRt.sizeDelta = Vector2.zero;
+        Image bgImg = bgCard.GetComponent<Image>();
+        bgImg.color = new Color(0.06f, 0.08f, 0.14f, 0.95f);
+        bgImg.raycastTarget = false;
+
+        var bgOutline = bgCard.AddComponent<Outline>();
+        Color glowCol = (itemColor != Color.white && itemColor.a > 0.1f) ? itemColor : new Color(1f, 0.85f, 0.35f, 1f);
+        bgOutline.effectColor = glowCol;
+        bgOutline.effectDistance = new Vector2(2f, -2f);
+
+        var bgShadow = bgCard.AddComponent<Shadow>();
+        bgShadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
+        bgShadow.effectDistance = new Vector2(4f, -4f);
+
+        // Item Icon Image
+        GameObject icObj = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        icObj.layer = 5;
+        icObj.transform.SetParent(dragAvatarObj.transform, false);
+        RectTransform icRt = icObj.GetComponent<RectTransform>();
+        icRt.anchorMin = Vector2.zero;
+        icRt.anchorMax = Vector2.one;
+        icRt.sizeDelta = new Vector2(-10f, -10f);
+        Image img = icObj.GetComponent<Image>();
+        img.sprite = itemIcon;
+        img.color = Color.white;
+        img.preserveAspect = true;
+        img.raycastTarget = false;
 
         UpdateAvatarPosition(eventData);
     }
@@ -161,10 +232,26 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             return;
         }
 
-        if (!isDragging) return;
+        if (!isDragging)
+        {
+            if (Vector2.Distance(eventData.position, eventData.pressPosition) < 12f)
+            {
+                onClick?.Invoke();
+            }
+            return;
+        }
 
         isDragging = false;
+        IsAnyDragging = false;
+        CurrentDraggingItem = null;
         transform.localScale = Vector3.one;
+
+        if (dragAvatarObj != null)
+        {
+            Destroy(dragAvatarObj);
+            dragAvatarObj = null;
+            dragAvatarRt = null;
+        }
 
         // KÉO RA ĐỂ THÁO NGỌC (DRAG-OUT TO UNSOCKET) HOẶC ĐỔI CHỖ LỖ KHẢM (MOVE/SWAP)
         if (isSocketedGem)
@@ -173,6 +260,22 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             if (eventData.pointerEnter != null)
             {
                 targetSlot = eventData.pointerEnter.GetComponent<UIDropSocketTarget>() ?? eventData.pointerEnter.GetComponentInParent<UIDropSocketTarget>();
+            }
+
+            if (targetSlot == null && eventData.pointerCurrentRaycast.gameObject != null)
+            {
+                targetSlot = eventData.pointerCurrentRaycast.gameObject.GetComponent<UIDropSocketTarget>() ?? eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<UIDropSocketTarget>();
+            }
+
+            if (targetSlot == null && EventSystem.current != null)
+            {
+                var raycastResults = new System.Collections.Generic.List<RaycastResult>();
+                EventSystem.current.RaycastAll(eventData, raycastResults);
+                foreach (var r in raycastResults)
+                {
+                    targetSlot = r.gameObject.GetComponent<UIDropSocketTarget>() ?? r.gameObject.GetComponentInParent<UIDropSocketTarget>();
+                    if (targetSlot != null) break;
+                }
             }
 
             if (targetSlot == null)
@@ -196,30 +299,69 @@ public class UIDragDropItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
                 }
             }
         }
-
-        if (dragAvatarObj != null)
+        else
         {
-            Destroy(dragAvatarObj);
-            dragAvatarObj = null;
-            dragAvatarRt = null;
+            // Kéo từ túi đồ thả vào lỗ khảm (Fallback nếu OnDrop chưa bắt được qua raycast bubbling)
+            if (!hasHandledDrop)
+            {
+                UIDropSocketTarget targetSlot = null;
+                if (eventData.pointerEnter != null)
+                {
+                    targetSlot = eventData.pointerEnter.GetComponent<UIDropSocketTarget>() ?? eventData.pointerEnter.GetComponentInParent<UIDropSocketTarget>();
+                }
+                if (targetSlot == null && eventData.pointerCurrentRaycast.gameObject != null)
+                {
+                    targetSlot = eventData.pointerCurrentRaycast.gameObject.GetComponent<UIDropSocketTarget>() ?? eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<UIDropSocketTarget>();
+                }
+                if (targetSlot == null && EventSystem.current != null)
+                {
+                    var raycastResults = new System.Collections.Generic.List<RaycastResult>();
+                    EventSystem.current.RaycastAll(eventData, raycastResults);
+                    foreach (var r in raycastResults)
+                    {
+                        targetSlot = r.gameObject.GetComponent<UIDropSocketTarget>() ?? r.gameObject.GetComponentInParent<UIDropSocketTarget>();
+                        if (targetSlot != null) break;
+                    }
+                }
+
+                // Distance fallback: Thả gần bất kỳ ô nào trong 6 ô quanh anh hùng (bán kính 85px)
+                if (targetSlot == null && InGameInventoryUI.Instance != null)
+                {
+                    targetSlot = InGameInventoryUI.Instance.FindClosestSocketTarget(eventData.position, 85f);
+                }
+
+                if (targetSlot != null)
+                {
+                    targetSlot.ReceiveDrop(this);
+                }
+            }
         }
+
+        // Đảm bảo refresh lại modal sau khi hoàn tất thao tác kéo thả
+        InGameInventoryUI.Instance?.RefreshModal(true);
     }
 
     private void UpdateAvatarPosition(PointerEventData eventData)
     {
         if (dragAvatarRt == null) return;
-        Canvas canvas = GetRootCanvas();
+        Canvas canvas = GetDragCanvas();
         if (canvas == null) return;
 
         RectTransform canvasRt = canvas.GetComponent<RectTransform>();
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRt, eventData.position, eventData.pressEventCamera, out Vector2 localPoint))
+        Camera cam = (canvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : eventData.pressEventCamera;
+        if (cam == null && canvas.renderMode != RenderMode.ScreenSpaceOverlay) cam = canvas.worldCamera;
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRt, eventData.position, cam, out Vector2 localPoint))
         {
-            dragAvatarRt.localPosition = localPoint + new Vector2(0f, 25f); // Dich nhe len tren de ngon tay khong che khuat icon
+            dragAvatarRt.localPosition = localPoint + new Vector2(0f, 28f);
         }
     }
 
     void OnDestroy()
     {
+        CurrentDraggingItem = null;
+        isDragging = false;
+        IsAnyDragging = false;
         if (dragAvatarObj != null)
         {
             Destroy(dragAvatarObj);
@@ -248,20 +390,17 @@ public class UIDropSocketTarget : MonoBehaviour, IDropHandler, IPointerEnterHand
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (eventData.pointerDrag != null)
+        var dragItem = (eventData.pointerDrag != null ? eventData.pointerDrag.GetComponent<UIDragDropItem>() : null) ?? UIDragDropItem.CurrentDraggingItem;
+        if (dragItem != null && !string.IsNullOrEmpty(dragItem.itemId) && EquipmentSocketManager.IsGem(dragItem.itemId))
         {
-            var dragItem = eventData.pointerDrag.GetComponent<UIDragDropItem>();
-            if (dragItem != null && !string.IsNullOrEmpty(dragItem.itemId) && EquipmentSocketManager.IsGem(dragItem.itemId))
+            if (dragItem.isSocketedGem && dragItem.sourceSocketIndex == socketSlotIndex && (subSlotIndex == -1 || dragItem.sourceSubSocketIndex == subSlotIndex))
             {
-                if (dragItem.isSocketedGem && dragItem.sourceSocketIndex == socketSlotIndex && (subSlotIndex == -1 || dragItem.sourceSubSocketIndex == subSlotIndex))
-                {
-                    return; // Đang kéo chính nó trên ô của nó
-                }
-
-                // Highlight slot with glowing cyan border and scale pop
-                if (outline != null) outline.effectColor = new Color(0f, 1f, 0.85f, 1f);
-                transform.localScale = originalScale * 1.08f;
+                return; // Đang kéo chính nó trên ô của nó
             }
+
+            // Highlight slot with glowing cyan border and scale pop
+            if (outline != null) outline.effectColor = new Color(0f, 1f, 0.85f, 1f);
+            transform.localScale = originalScale * 1.08f;
         }
     }
 
@@ -270,30 +409,43 @@ public class UIDropSocketTarget : MonoBehaviour, IDropHandler, IPointerEnterHand
         ResetVisual();
     }
 
-    public void OnDrop(PointerEventData eventData)
+    public void ReceiveDrop(UIDragDropItem dragItem)
     {
         ResetVisual();
-        if (eventData.pointerDrag != null)
-        {
-            var dragItem = eventData.pointerDrag.GetComponent<UIDragDropItem>();
-            if (dragItem != null && !string.IsNullOrEmpty(dragItem.itemId))
-            {
-                if (dragItem.isSocketedGem)
-                {
-                    // Được xử lý tự động trong UIDragDropItem.OnEndDrag
-                    return;
-                }
+        if (dragItem == null || string.IsNullOrEmpty(dragItem.itemId)) return;
+        if (dragItem.hasHandledDrop) return;
+        dragItem.hasHandledDrop = true;
 
-                if (onGemDroppedDetailed != null)
-                {
-                    onGemDroppedDetailed.Invoke(dragItem.itemId, socketSlotIndex, subSlotIndex);
-                }
-                else
-                {
-                    onGemDropped?.Invoke(dragItem.itemId, socketSlotIndex);
-                }
+        if (dragItem.isSocketedGem)
+        {
+            // Được xử lý tự động trong UIDragDropItem.OnEndDrag
+            return;
+        }
+
+        if (onGemDroppedDetailed != null)
+        {
+            onGemDroppedDetailed.Invoke(dragItem.itemId, socketSlotIndex, subSlotIndex);
+        }
+        else if (onGemDropped != null)
+        {
+            onGemDropped.Invoke(dragItem.itemId, socketSlotIndex);
+        }
+        else
+        {
+            string curHero = EquipmentSocketManager.GetActiveHeroId();
+            if (EquipmentSocketManager.SocketGemToHeroSlot(socketSlotIndex, dragItem.itemId, out _, out _, curHero))
+            {
+                SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+                InGameInventoryUI.Instance?.NotifyPlayerCombatStatsChanged();
+                InGameInventoryUI.Instance?.RefreshModal();
             }
         }
+    }
+
+    public void OnDrop(PointerEventData eventData)
+    {
+        var dragItem = (eventData.pointerDrag != null ? eventData.pointerDrag.GetComponent<UIDragDropItem>() : null) ?? UIDragDropItem.CurrentDraggingItem;
+        ReceiveDrop(dragItem);
     }
 
     private void ResetVisual()

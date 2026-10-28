@@ -7,13 +7,13 @@ public class SlimeAI : MonoBehaviour, IDamageable
     public static event System.Action<SlimeAI> OnEnemyDied;
 
     [Header("Slime Stats")]
-    [SerializeField] private int maxHealth = 135;
+    [SerializeField] private int maxHealth = 80;
     [SerializeField] private int currentHealth;
-    [SerializeField] private int attackDamage = 16;
-    [SerializeField] private float moveSpeed = 2.6f;
+    [SerializeField] private int attackDamage = 4;
+    [SerializeField] private float moveSpeed = 2.5f;
     [SerializeField] private float detectionRange = 100f; // Luon phat hien va truy duoi
     [SerializeField] private float meleeRange = 1.6f;
-    [SerializeField] private float attackCooldown = 1.5f;
+    [SerializeField] private float attackCooldown = 1.8f;
     [SerializeField] private float slowDuration = 2.0f;
     [SerializeField] private float slowFactor = 0.5f;
 
@@ -53,6 +53,7 @@ public class SlimeAI : MonoBehaviour, IDamageable
             col.size = new Vector2(1.8f, 0.8f);
             col.offset = new Vector2(0f, 0.4f);
             col.isTrigger = false;
+            EnemyNavigationHelper.EnsureFrictionless(col);
         }
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
@@ -122,20 +123,9 @@ public class SlimeAI : MonoBehaviour, IDamageable
         else
         {
             Vector2 dir = (player.position - transform.position).normalized;
-            rb.linearVelocity = dir * moveSpeed;
+            Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, col, 0.45f, 1.0f);
+            rb.linearVelocity = moveDir * moveSpeed;
             if (animator != null) animator.SetBool(IsMovingHash, true);
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (isDead || isKnockedBack || isAttacking || player == null || PlayerHealth.IsPlayerDead) return;
-
-        float dist = Vector2.Distance(transform.position, player.position);
-        if (dist > meleeRange)
-        {
-            Vector2 dir = ((Vector2)player.position - rb.position).normalized;
-            rb.MovePosition(rb.position + dir * moveSpeed * Time.fixedDeltaTime);
         }
     }
 
@@ -181,6 +171,7 @@ public class SlimeAI : MonoBehaviour, IDamageable
         if (isDead) return;
 
         currentHealth -= damage;
+        EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
         StartCoroutine(DamageFlashRoutine());
 
         if (player != null && !isKnockedBack)

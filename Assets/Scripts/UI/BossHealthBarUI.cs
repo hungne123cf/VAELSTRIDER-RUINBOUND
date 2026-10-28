@@ -36,6 +36,8 @@ public class BossHealthBarUI : MonoBehaviour
         Instance = this;
         if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
         if (panelRt == null) panelRt = GetComponent<RectTransform>();
+        if (panelRt != null) panelRt.anchoredPosition = new Vector2(0f, -44f);
+        SoulslikeHUDStyler.StyleBossHealthBar(GetComponentInParent<Canvas>());
     }
 
     private void OnEnable()
@@ -106,6 +108,8 @@ public class BossHealthBarUI : MonoBehaviour
         if (existing != null)
         {
             existing.gameObject.SetActive(true);
+            var rt = existing.GetComponent<RectTransform>();
+            if (rt != null) rt.anchoredPosition = new Vector2(0f, -44f);
             Instance = existing.GetComponent<BossHealthBarUI>();
             if (Instance != null) return Instance;
         }
@@ -118,7 +122,7 @@ public class BossHealthBarUI : MonoBehaviour
         rootRt.anchorMin = new Vector2(0.5f, 1f);
         rootRt.anchorMax = new Vector2(0.5f, 1f);
         rootRt.pivot = new Vector2(0.5f, 1f);
-        rootRt.anchoredPosition = new Vector2(0f, -25f);
+        rootRt.anchoredPosition = new Vector2(0f, -44f);
         rootRt.sizeDelta = new Vector2(780f, 95f);
 
         CanvasGroup cg = root.AddComponent<CanvasGroup>();
@@ -245,9 +249,17 @@ public class BossHealthBarUI : MonoBehaviour
         return ui;
     }
 
+    private GameObject trackedBossObject = null;
+
     public void ShowBoss(string name, int totalPhases = 3)
     {
-        ShowBoss(null, name);
+        ShowBoss((GameObject)null, name, totalPhases);
+    }
+
+    public void ShowBoss(GameObject bossObj, string name, int totalPhases = 3)
+    {
+        trackedBossObject = bossObj;
+        ShowBoss((BotWheelAI)null, name);
         UpdatePhaseDisplay(totalPhases);
     }
 
@@ -265,6 +277,7 @@ public class BossHealthBarUI : MonoBehaviour
         }
 
         currentBoss = boss;
+        if (boss != null) trackedBossObject = boss.gameObject;
         if (bossNameText != null) bossNameText.text = name;
 
         if (healthSlider != null) healthSlider.value = 1f;
@@ -319,29 +332,75 @@ public class BossHealthBarUI : MonoBehaviour
     public void UpdatePhaseDisplay(int phase)
     {
         currentPhase = phase;
-        int idx = Mathf.Clamp(phase - 1, 0, 2);
         if (healthFillImage != null)
         {
-            healthFillImage.color = phaseColors[idx];
+            if (phase == 3)
+            {
+                healthFillImage.sprite = SoulslikeHUDStyler.GetRubyFillSprite();
+                healthFillImage.type = Image.Type.Sliced;
+                healthFillImage.color = Color.white;
+            }
+            else if (phase == 2)
+            {
+                healthFillImage.sprite = SoulslikeHUDStyler.GetAmethystFillSprite();
+                healthFillImage.type = Image.Type.Sliced;
+                healthFillImage.color = Color.white;
+            }
+            else
+            {
+                healthFillImage.sprite = SoulslikeHUDStyler.GetRubyFillSprite();
+                healthFillImage.type = Image.Type.Sliced;
+                healthFillImage.color = new Color(1f, 0.35f, 0.35f, 1f);
+            }
         }
 
         if (phaseText != null)
         {
-            if (phase == 3)
+            string roman = (phase == 3) ? "I" : ((phase == 2) ? "II" : "III");
+            string pColor = (phase == 3) ? "#ffd700" : ((phase == 2) ? "#d880ff" : "#ff4040");
+
+            string subTitle;
+            if (currentBoss != null)
             {
-                phaseText.text = LocalizationManager.T("<color=#38BDF8>[III]</color>  [ GIAI ĐOẠN 1: CHÚA TỂ THỨC TỈNH ]", "<color=#38BDF8>[III]</color>  [ PHASE 1: LORD AWAKENING ]");
-                phaseText.color = new Color(0.4f, 0.8f, 1f);
-            }
-            else if (phase == 2)
-            {
-                phaseText.text = LocalizationManager.T("<color=#C084FC>[II]</color>  [ GIAI ĐOẠN 2: BẦY NHỆN SĂN MỒI ]", "<color=#C084FC>[II]</color>  [ PHASE 2: HUNTING SWARM ]");
-                phaseText.color = new Color(0.85f, 0.45f, 1f);
+                subTitle = (phase == 3)
+                    ? LocalizationManager.T("KHỞI ĐỘNG CỖ MÁY", "CORE ACTIVATION")
+                    : ((phase == 2)
+                        ? LocalizationManager.T("BÁNH XE CUỒNG NỘ", "FRENZIED OVERDRIVE")
+                        : LocalizationManager.T("TẬN DIỆT TÀN TÍCH", "ANCIENT OVERLOAD"));
             }
             else
             {
-                phaseText.text = LocalizationManager.T("<color=#EF4444>[I]</color>  [ GIAI ĐOẠN 3: CUỒNG NỘ HUYẾT NGUYỆT ]", "<color=#EF4444>[I]</color>  [ PHASE 3: BLOOD MOON FRENZY ]");
-                phaseText.color = new Color(1f, 0.25f, 0.25f);
+                subTitle = (phase == 3)
+                    ? LocalizationManager.T("CHÚA TỂ THỨC TỈNH", "LORD AWAKENING")
+                    : ((phase == 2)
+                        ? LocalizationManager.T("BẦY NHỆN SĂN MỒI", "HUNTING SWARM")
+                        : LocalizationManager.T("CUỒNG NỘ HUYẾT NGUYỆT", "BLOOD MOON FRENZY"));
             }
+
+            string armorInfo = "";
+            EnemyArmor armor = null;
+            if (trackedBossObject != null)
+            {
+                armor = trackedBossObject.GetComponent<EnemyArmor>() ?? trackedBossObject.GetComponentInParent<EnemyArmor>();
+            }
+            if (armor == null && currentBoss != null)
+            {
+                armor = currentBoss.GetComponent<EnemyArmor>() ?? currentBoss.GetComponentInParent<EnemyArmor>();
+            }
+            if (armor == null)
+            {
+                armor = Object.FindAnyObjectByType<EnemyArmor>();
+            }
+
+            if (armor != null && (armor.CurrentPhysicalArmor > 0 || armor.CurrentMagicArmor > 0))
+            {
+                string armLabel = LocalizationManager.T("GIÁP", "ARM");
+                string resLabel = LocalizationManager.T("KHÁNG", "RES");
+                armorInfo = $"  <size=10><color=#F97316>[{armLabel}: {armor.CurrentPhysicalArmor}]</color> <color=#A855F7>[{resLabel}: {armor.CurrentMagicArmor}]</color></size>";
+            }
+
+            string phaseLabel = LocalizationManager.T("GIAI ĐOẠN", "PHASE");
+            phaseText.text = $"<color={pColor}>[ {roman} ]</color>  <size=11><color=#c4b89f>{phaseLabel} {roman}: {subTitle}</color></size>{armorInfo}";
         }
     }
 

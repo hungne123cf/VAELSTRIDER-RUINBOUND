@@ -31,23 +31,25 @@ public class RoomBarrier : MonoBehaviour
     private void UpdateColliderSize()
     {
         EnsureComponents();
+        float overlap = 0.6f; // Bịt kín gối sâu vào tường 2 đầu
+        float thickness = 2.0f; // Dày 2.0m chống xuyên thấu vật lý 100%
         if (boxCollider != null)
         {
             if (isVertical)
             {
-                boxCollider.size = new Vector2(0.8f, size);
+                boxCollider.size = new Vector2(thickness, size + overlap);
                 boxCollider.offset = Vector2.zero;
             }
             else
             {
-                boxCollider.size = new Vector2(size, 0.8f);
+                boxCollider.size = new Vector2(size + overlap, thickness);
                 boxCollider.offset = Vector2.zero;
             }
         }
         if (spriteRenderer != null)
         {
             spriteRenderer.drawMode = SpriteDrawMode.Sliced;
-            spriteRenderer.size = isVertical ? new Vector2(0.7f, size) : new Vector2(size, 0.7f);
+            spriteRenderer.size = isVertical ? new Vector2(1.0f, size + overlap) : new Vector2(size + overlap, 1.0f);
         }
     }
 
@@ -64,7 +66,7 @@ public class RoomBarrier : MonoBehaviour
         if (isLocked) return;
         isLocked = true;
         gameObject.SetActive(true);
-        boxCollider.enabled = true;
+        if (boxCollider != null) boxCollider.enabled = true;
 
         SoundManager.EnsureInstance()?.PlayHitImpact();
         StartCoroutine(FadeBarrier(0f, 0.85f, 0.3f));
@@ -74,7 +76,7 @@ public class RoomBarrier : MonoBehaviour
     {
         if (!isLocked) return;
         isLocked = false;
-        boxCollider.enabled = false;
+        if (boxCollider != null) boxCollider.enabled = false;
 
         SoundManager.EnsureInstance()?.PlayShardPickup();
         StartCoroutine(FadeBarrier(0.85f, 0f, 0.5f));
@@ -99,38 +101,18 @@ public class RoomBarrier : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        CheckAndPassPlayerThrough(collision.collider);
+        if (isLocked && collision.rigidbody != null)
+        {
+            // Triệt tiêu vận tốc đâm xuyên khi va chạm cổng phong ấn
+            collision.rigidbody.linearVelocity = Vector2.zero;
+        }
     }
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        CheckAndPassPlayerThrough(collision.collider);
-    }
-
-    private void CheckAndPassPlayerThrough(Collider2D otherCol)
-    {
-        if (!isLocked || otherCol == null) return;
-
-        var player = otherCol.GetComponent<PlayerController>() ?? otherCol.GetComponentInParent<PlayerController>();
-        if (player == null) return;
-
-        var roomMgr = DungeonRoomManager.Instance;
-        if (roomMgr != null && roomMgr.currentRoom != null)
+        if (isLocked && collision.rigidbody != null)
         {
-            var curRoom = roomMgr.currentRoom;
-            Vector3 pPos = player.transform.position;
-            bool isInsideRoom = curRoom.roomBounds.Contains(new Vector2(pPos.x, pPos.y));
-
-            // Nếu người chơi bị kẹt bên ngoài phòng khi cửa đã đóng
-            if (!isInsideRoom)
-            {
-                // Cho phép người chơi bước qua cửa vào sâu trong phòng
-                Vector3 toCenter = (curRoom.roomCenter - transform.position).normalized;
-                Vector3 insidePos = transform.position + toCenter * 1.5f;
-                player.transform.position = new Vector3(insidePos.x, insidePos.y, player.transform.position.z);
-                SoundManager.EnsureInstance()?.PlayPortalSpawn();
-                DamagePopup.CreateText(player.transform.position + Vector3.up * 1.2f, LocalizationManager.T("BƯỚC VÀO PHÒNG ĐẤU!", "ENTER COMBAT ROOM!"), new Color(0.2f, 0.85f, 1f));
-            }
+            collision.rigidbody.linearVelocity = Vector2.zero;
         }
     }
 

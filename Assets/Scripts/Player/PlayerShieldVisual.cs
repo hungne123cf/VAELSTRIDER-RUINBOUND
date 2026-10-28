@@ -17,11 +17,19 @@ public class PlayerShieldVisual : MonoBehaviour
 
     void Awake()
     {
-        shieldRenderer = gameObject.AddComponent<SpriteRenderer>();
-        shieldRenderer.sprite = GetOrCreateShieldSprite();
-        shieldRenderer.color = shieldColor;
-        shieldRenderer.sortingOrder = 5005; // Luon hien thi phia tren Sprite nhan vat (Player la 5000)
-        shieldRenderer.enabled = false;
+        shieldRenderer = GetComponent<SpriteRenderer>();
+        if (shieldRenderer == null)
+        {
+            shieldRenderer = gameObject.AddComponent<SpriteRenderer>();
+        }
+
+        if (shieldRenderer != null)
+        {
+            shieldRenderer.sprite = GetOrCreateShieldSprite();
+            shieldRenderer.color = shieldColor;
+            shieldRenderer.sortingOrder = 5005; // Luon hien thi phia tren Sprite nhan vat (Player la 5000)
+            shieldRenderer.enabled = false;
+        }
 
         UpdatePositionAndScale();
     }

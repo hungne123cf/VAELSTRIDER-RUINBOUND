@@ -1,14 +1,26 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public enum DamageType
 {
-    Physical = 0,   // Sát thương Vật Lý (Đỏ Cam)
+    Physical = 0,   // Sát thương Vật Lý (Đỏ Cam / Vàng Kim)
     Magic = 1,      // Sát thương Phép (Tím Tinh Tú)
     TrueDamage = 2  // Sát thương Chuẩn (Trắng Sáng Bạc Tinh Khiết)
 }
 
+/// <summary>
+/// VAELSTRIDER: RUINBOUND - High-Performance Damage Popup Pool
+/// Hệ thống số nhảy sát thương sử dụng Object Pooling 100%:
+/// - Triệt tiêu hoàn toàn rác bộ nhớ (Zero GC Allocations) trong các pha combat đông quái
+/// - Giới hạn tối đa 35 popup cùng lúc, tự động tái chế popup cũ nhất khi đánh dồn dập
+/// - Chống lag giật tuyệt đối khi dùng Tuyệt Kỹ xoáy nhiều quái
+/// </summary>
 public class DamagePopup : MonoBehaviour
 {
+    private static readonly Queue<DamagePopup> _pool = new Queue<DamagePopup>();
+    private static readonly List<DamagePopup> _activePopups = new List<DamagePopup>();
+    private const int MAX_ACTIVE_POPUPS = 35;
+
     private TextMesh textMesh;
     private TextMesh shadowMesh;
     private Color textColor;
@@ -20,6 +32,21 @@ public class DamagePopup : MonoBehaviour
     private bool isCrit = false;
     private Vector3 targetScale = Vector3.one;
 
+    private static Transform _poolRoot;
+    private static Transform PoolRoot
+    {
+        get
+        {
+            if (_poolRoot == null)
+            {
+                var go = new GameObject("[DamagePopup_Pool]");
+                Object.DontDestroyOnLoad(go);
+                _poolRoot = go.transform;
+            }
+            return _poolRoot;
+        }
+    }
+
     public static DamagePopup Create(Vector3 position, int damageAmount, bool isCritical = false, bool isPlayer = false)
     {
         return Create(position, damageAmount, DamageType.Physical, isCritical, isPlayer);
@@ -27,134 +54,132 @@ public class DamagePopup : MonoBehaviour
 
     public static DamagePopup Create(Vector3 position, int damageAmount, DamageType damageType, bool isCritical = false, bool isPlayer = false)
     {
-        GameObject popupObj = new GameObject("DamagePopup");
+        DamagePopup popup = GetFromPool();
 
-        // Tản ngẫu nhiên nhẹ quanh tâm để nhiều đòn đánh không xuất hiện đè khít lên cùng 1 tọa độ
-        Vector3 spawnOffset = new Vector3(Random.Range(-0.35f, 0.35f), Random.Range(0.6f, 0.85f), 0f);
-        popupObj.transform.position = position + spawnOffset;
+        Vector3 spawnOffset = new Vector3(Random.Range(-0.30f, 0.30f), Random.Range(0.6f, 0.85f), 0f);
+        popup.transform.position = position + spawnOffset;
 
-        TextMesh tm = popupObj.AddComponent<TextMesh>();
-        tm.alignment = TextAlignment.Center;
-        tm.anchor = TextAnchor.MiddleCenter;
-
-        Color mainColor;
         string displayText;
+        Color mainColor;
 
         if (isPlayer)
         {
-            // Người chơi bị nhận sát thương: Số đỏ tươi
             displayText = damageAmount.ToString();
             mainColor = new Color(1f, 0.18f, 0.18f);
-            tm.fontSize = isCritical ? 38 : 30;
-            tm.characterSize = isCritical ? 0.088f : 0.075f;
-            tm.fontStyle = FontStyle.Bold;
+            popup.textMesh.fontSize = isCritical ? 36 : 28;
+            popup.textMesh.characterSize = isCritical ? 0.085f : 0.072f;
         }
         else
         {
-            // Sát thương gây ra lên Quái / Mục tiêu:
-            // Sát thương thường CHỈ HIỆN SỐ (không đính kèm chữ ATK/AP/TD)
-            // Sát thương chí mạng hiển thị "CRIT! {số}" với font to và màu rực sáng
             if (isCritical)
             {
-                displayText = $"CRIT {damageAmount}";
-                tm.fontSize = 34;
-                tm.characterSize = 0.080f;
-                tm.fontStyle = FontStyle.Bold;
+                displayText = damageAmount.ToString();
+                popup.textMesh.fontSize = 32;
+                popup.textMesh.characterSize = 0.080f;
 
                 switch (damageType)
                 {
                     case DamageType.TrueDamage:
-                        // Chí mạng sát thương chuẩn: Trắng Tinh Điện Quang
                         mainColor = new Color(1f, 1f, 1f);
                         break;
                     case DamageType.Magic:
-                        // Chí mạng sát thương phép: Tím Neon siêu sáng
                         mainColor = new Color(0.92f, 0.45f, 1f);
                         break;
                     case DamageType.Physical:
                     default:
-                        // Chí mạng sát thương vật lý: Vàng Kim Rực Lửa (Chuẩn Crit Pixel Game)
                         mainColor = new Color(1f, 0.85f, 0.12f);
                         break;
                 }
             }
             else
             {
-                // Đòn đánh thường: CHỈ HIỂN THỊ CON SỐ THUẦN TÚY (Số nhảy sạch sẽ)
                 displayText = damageAmount.ToString();
-                tm.fontSize = 30;
-                tm.characterSize = 0.075f;
-                tm.fontStyle = FontStyle.Bold;
+                popup.textMesh.fontSize = 28;
+                popup.textMesh.characterSize = 0.072f;
 
                 switch (damageType)
                 {
                     case DamageType.TrueDamage:
-                        // Sát thương chuẩn: Trắng Bạc
                         mainColor = new Color(0.92f, 0.95f, 1f);
                         break;
                     case DamageType.Magic:
-                        // Sát thương phép: Tím AP
                         mainColor = new Color(0.76f, 0.35f, 1f);
                         break;
                     case DamageType.Physical:
                     default:
-                        // Sát thương vật lý: Đỏ Cam ATK
-                        mainColor = new Color(1f, 0.25f, 0.22f);
+                        mainColor = new Color(1f, 0.60f, 0.15f);
                         break;
                 }
             }
         }
 
-        tm.text = displayText;
-        tm.color = mainColor;
+        popup.textMesh.text = displayText;
+        popup.shadowMesh.text = displayText;
+        popup.shadowMesh.fontSize = popup.textMesh.fontSize;
+        popup.shadowMesh.characterSize = popup.textMesh.characterSize;
 
-        MeshRenderer mr = popupObj.GetComponent<MeshRenderer>();
-        if (mr != null)
-        {
-            mr.sortingLayerName = "Entities";
-            mr.sortingOrder = 999;
-        }
-
-        // Tạo bóng đen pixel (Pixel Drop Shadow) phía sau chữ để nổi bật trên mọi nền gạch/đất
-        GameObject shadowObj = new GameObject("Shadow");
-        shadowObj.transform.SetParent(popupObj.transform, false);
-        shadowObj.transform.localPosition = new Vector3(0.04f, -0.04f, 0.01f);
-
-        TextMesh shadowTm = shadowObj.AddComponent<TextMesh>();
-        shadowTm.text = displayText;
-        shadowTm.alignment = tm.alignment;
-        shadowTm.anchor = tm.anchor;
-        shadowTm.fontSize = tm.fontSize;
-        shadowTm.characterSize = tm.characterSize;
-        shadowTm.fontStyle = tm.fontStyle;
         Color sCol = new Color(0f, 0f, 0f, 0.88f);
-        shadowTm.color = sCol;
-
-        MeshRenderer smr = shadowObj.GetComponent<MeshRenderer>();
-        if (smr != null)
-        {
-            smr.sortingLayerName = "Entities";
-            smr.sortingOrder = 998;
-        }
-
-        DamagePopup popup = popupObj.AddComponent<DamagePopup>();
-        popup.Setup(tm, shadowTm, mainColor, sCol, isCritical);
+        popup.Setup(mainColor, sCol, isCritical);
 
         return popup;
     }
 
     public static DamagePopup CreateText(Vector3 position, string text, Color color)
     {
-        GameObject popupObj = new GameObject("TextPopup");
-        popupObj.transform.position = position + new Vector3(Random.Range(-0.2f, 0.2f), 0.7f, 0f);
+        DamagePopup popup = GetFromPool();
+
+        popup.transform.position = position + new Vector3(Random.Range(-0.2f, 0.2f), 0.7f, 0f);
+
+        popup.textMesh.text = text;
+        popup.textMesh.fontSize = 30;
+        popup.textMesh.characterSize = 0.075f;
+
+        popup.shadowMesh.text = text;
+        popup.shadowMesh.fontSize = 30;
+        popup.shadowMesh.characterSize = 0.075f;
+
+        Color sCol = new Color(0f, 0f, 0f, 0.88f);
+        popup.Setup(color, sCol, false);
+
+        return popup;
+    }
+
+    private static DamagePopup GetFromPool()
+    {
+        DamagePopup popup = null;
+
+        // 1. Lấy từ Pool nếu có sẵn
+        while (_pool.Count > 0 && popup == null)
+        {
+            popup = _pool.Dequeue();
+        }
+
+        // 2. Nếu pool trống nhưng số lượng đang active vượt ngưỡng tối đa: tái chế con cũ nhất
+        if (popup == null && _activePopups.Count >= MAX_ACTIVE_POPUPS)
+        {
+            popup = _activePopups[0];
+            _activePopups.RemoveAt(0);
+        }
+
+        // 3. Nếu vẫn chưa có thì sinh mới 1 instance
+        if (popup == null)
+        {
+            popup = InstantiatePopupInstance();
+        }
+
+        popup.gameObject.SetActive(true);
+        _activePopups.Add(popup);
+        return popup;
+    }
+
+    private static DamagePopup InstantiatePopupInstance()
+    {
+        GameObject popupObj = new GameObject("DamagePopup_Pooled");
+        popupObj.transform.SetParent(PoolRoot, false);
 
         TextMesh tm = popupObj.AddComponent<TextMesh>();
-        tm.text = text;
         tm.alignment = TextAlignment.Center;
         tm.anchor = TextAnchor.MiddleCenter;
-        tm.color = color;
-        tm.fontSize = 32;
-        tm.characterSize = 0.075f;
         tm.fontStyle = FontStyle.Bold;
 
         MeshRenderer mr = popupObj.GetComponent<MeshRenderer>();
@@ -164,20 +189,14 @@ public class DamagePopup : MonoBehaviour
             mr.sortingOrder = 999;
         }
 
-        // Shadow cho text thông báo
         GameObject shadowObj = new GameObject("Shadow");
         shadowObj.transform.SetParent(popupObj.transform, false);
         shadowObj.transform.localPosition = new Vector3(0.04f, -0.04f, 0.01f);
 
         TextMesh shadowTm = shadowObj.AddComponent<TextMesh>();
-        shadowTm.text = text;
-        shadowTm.alignment = tm.alignment;
-        shadowTm.anchor = tm.anchor;
-        shadowTm.fontSize = tm.fontSize;
-        shadowTm.characterSize = tm.characterSize;
-        shadowTm.fontStyle = tm.fontStyle;
-        Color sCol = new Color(0f, 0f, 0f, 0.88f);
-        shadowTm.color = sCol;
+        shadowTm.alignment = TextAlignment.Center;
+        shadowTm.anchor = TextAnchor.MiddleCenter;
+        shadowTm.fontStyle = FontStyle.Bold;
 
         MeshRenderer smr = shadowObj.GetComponent<MeshRenderer>();
         if (smr != null)
@@ -186,49 +205,50 @@ public class DamagePopup : MonoBehaviour
             smr.sortingOrder = 998;
         }
 
-        DamagePopup popup = popupObj.AddComponent<DamagePopup>();
-        popup.Setup(tm, shadowTm, color, sCol, false);
-        return popup;
+        DamagePopup comp = popupObj.AddComponent<DamagePopup>();
+        comp.textMesh = tm;
+        comp.shadowMesh = shadowTm;
+
+        return comp;
     }
 
-    public void Setup(TextMesh tm, TextMesh stm, Color color, Color sColor, bool critical)
+    private void Setup(Color color, Color sColor, bool critical)
     {
-        textMesh = tm;
-        shadowMesh = stm;
         textColor = color;
         shadowColor = sColor;
         isCrit = critical;
 
+        if (textMesh != null) textMesh.color = textColor;
+        if (shadowMesh != null) shadowMesh.color = shadowColor;
+
         if (isCrit)
         {
-            // Chí mạng: Nảy cao bổng lên, bung mạnh sang hai bên
-            velocity = new Vector3(Random.Range(-1.6f, 1.6f), Random.Range(3.8f, 4.6f), 0f);
+            velocity = new Vector3(Random.Range(-1.5f, 1.5f), Random.Range(3.6f, 4.4f), 0f);
             gravity = 7.0f;
-            maxLifeTime = 0.85f;
+            maxLifeTime = 0.80f;
             lifeTimer = maxLifeTime;
-            targetScale = Vector3.one * 1.12f;
-            transform.localScale = Vector3.one * 1.50f; // Pop nảy vừa vặn, không quá to
+            targetScale = Vector3.one * 1.10f;
+            transform.localScale = Vector3.one * 1.45f;
         }
         else
         {
-            // Thường: Văng nhẹ hình vòng cung tản ra, tránh đè lên nhau
-            velocity = new Vector3(Random.Range(-1.1f, 1.1f), Random.Range(2.4f, 3.2f), 0f);
+            velocity = new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(2.2f, 3.0f), 0f);
             gravity = 5.5f;
-            maxLifeTime = 0.65f;
+            maxLifeTime = 0.60f;
             lifeTimer = maxLifeTime;
             targetScale = Vector3.one;
-            transform.localScale = Vector3.one * 1.35f; // Nảy nhẹ khi xuất hiện
+            transform.localScale = Vector3.one * 1.30f;
         }
     }
 
     void Update()
     {
-        // 1. Quỹ đạo nảy hình vòng cung (Arc trajectory chống đè số)
+        // 1. Quỹ đạo nảy hình vòng cung
         transform.position += velocity * Time.deltaTime;
         velocity.y -= gravity * Time.deltaTime;
-        velocity.x *= Mathf.Clamp01(1f - 1.5f * Time.deltaTime); // Ma sát ngang nhẹ
+        velocity.x *= Mathf.Clamp01(1f - 1.5f * Time.deltaTime);
 
-        // 2. Hiệu ứng Scale Punchy Pop (co về targetScale mượt mà)
+        // 2. Co về targetScale
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 18f);
 
         // 3. Đếm thời gian và Fade Out
@@ -244,8 +264,20 @@ public class DamagePopup : MonoBehaviour
 
             if (lifeTimer <= 0f)
             {
-                Destroy(gameObject);
+                RecycleThis();
             }
         }
+    }
+
+    private void RecycleThis()
+    {
+        _activePopups.Remove(this);
+        gameObject.SetActive(false);
+        _pool.Enqueue(this);
+    }
+
+    void OnDestroy()
+    {
+        _activePopups.Remove(this);
     }
 }

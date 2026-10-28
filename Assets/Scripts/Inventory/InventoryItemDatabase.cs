@@ -47,6 +47,10 @@ public static class InventoryItemDatabase
         public float speedBonus = 0f;
         public float manaBonus = 0f;
         public float manaRegenBonus = 0f;
+        public int armorPenBonus = 0;
+        public int magicPenBonus = 0;
+        public float armorPenPctBonus = 0f;
+        public float magicPenPctBonus = 0f;
         public string sourceVi;
         public string sourceEn;
         public bool isUsable = false;
@@ -403,6 +407,8 @@ public static class InventoryItemDatabase
             atkBonus = 45,
             physAtkBonus = 30,
             trueAtkBonus = 15,
+            armorPenBonus = 25,
+            armorPenPctBonus = 0.15f,
             hpBonus = 30,
             sellPrice = 300
         });
@@ -422,6 +428,8 @@ public static class InventoryItemDatabase
             atkBonus = 32,
             physAtkBonus = 16,
             magicAtkBonus = 16,
+            magicPenBonus = 20,
+            magicPenPctBonus = 0.12f,
             sellPrice = 180
         });
 
@@ -439,6 +447,8 @@ public static class InventoryItemDatabase
             sourceEn = "BotWheel Boss Drop (Map 2)",
             atkBonus = 24,
             physAtkBonus = 24,
+            armorPenBonus = 18,
+            armorPenPctBonus = 0.10f,
             speedBonus = 0.5f,
             sellPrice = 120
         });
@@ -458,6 +468,8 @@ public static class InventoryItemDatabase
             atkBonus = 18,
             physAtkBonus = 12,
             magicAtkBonus = 6,
+            armorPenBonus = 10,
+            magicPenBonus = 10,
             hpBonus = 20,
             sellPrice = 75
         });

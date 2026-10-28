@@ -609,11 +609,10 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         frameRt.anchorMax = new Vector2(0.96f, 0.96f);
         frameRt.sizeDelta = Vector2.zero;
         Image fImg = frameObj.GetComponent<Image>();
-        fImg.color = new Color(0.04f, 0.06f, 0.10f, 0.95f);
-
-        var fOutline = frameObj.AddComponent<Outline>();
-        fOutline.effectColor = new Color(0.25f, 0.55f, 0.9f, 0.8f);
-        fOutline.effectDistance = new Vector2(2f, -2f);
+        fImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        fImg.type = Image.Type.Sliced;
+        fImg.color = Color.white;
+        WhiteIconLoader.ApplyGothicFrame(frameObj, Color.white, 0.40f);
 
         // 3. Thanh Header trên cùng (Title & Close Button)
         GameObject headerObj = new GameObject("HeaderBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -626,7 +625,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         hRt.anchoredPosition = Vector2.zero;
         hRt.sizeDelta = new Vector2(0f, 50f);
         Image hImg = headerObj.GetComponent<Image>();
-        hImg.color = new Color(0.08f, 0.12f, 0.20f, 0.98f);
+        hImg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
+        hImg.type = Image.Type.Sliced;
+        hImg.color = Color.white;
 
         // Text Tiêu Đề
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer));
@@ -640,7 +641,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = "<b>PHẾ TÍCH NGẬP NƯỚC</b>";
         titleText.fontSize = 20f;
-        titleText.color = new Color(1f, 0.85f, 0.3f);
+        titleText.color = new Color(0.98f, 0.88f, 0.55f);
         titleText.alignment = TextAlignmentOptions.Left;
 
         // Text Subtitle
@@ -655,8 +656,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = "TẦNG 1 - TÀN TÍCH CỔ ĐẠI | KHÁM PHÁ TOÀN CẢNH";
         subtitleText.fontSize = 15.5f;
-        subtitleText.color = new Color(0.7f, 0.85f, 1f, 0.75f);
+        subtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
         subtitleText.alignment = TextAlignmentOptions.Left;
+        SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
 
         // Nút Đóng [X]
         GameObject closeObj = new GameObject("Btn_Close", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -668,11 +670,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         cRt.pivot = new Vector2(1f, 0.5f);
         cRt.anchoredPosition = new Vector2(-12f, 0f);
         cRt.sizeDelta = new Vector2(36f, 36f);
-        Image cImg = closeObj.GetComponent<Image>();
-        cImg.color = new Color(0.85f, 0.2f, 0.2f, 0.9f);
         Button cBtn = closeObj.GetComponent<Button>();
         cBtn.onClick.AddListener(CloseMap);
-        WhiteIconLoader.ReplaceTextWithIcon(cBtn, "Cross", Color.white, new Vector2(20f, 20f));
+        SoulslikeHUDStyler.StyleCloseButton(cBtn);
 
         // 4. Khu Vực Viewport Bản Đồ (Có Mask cắt góc)
         GameObject viewportObj = new GameObject("MapViewport", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Mask));

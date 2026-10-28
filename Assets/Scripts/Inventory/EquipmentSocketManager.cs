@@ -28,6 +28,10 @@ public static class EquipmentSocketManager
         public float hpRegenPerSec;   // 5 = +5 HP/s
         public float bonusMaxEnergy;  // +25 Max Mana
         public float energyRegenPerSec; // +1.5 Mana/s
+        public int bonusArmorPen;     // Xuyên Giáp Vật Lý Cố Định (+Flat Armor Pen)
+        public int bonusMagicPen;     // Xuyên Kháng Phép Cố Định (+Flat Magic Pen)
+        public float armorPenPct;     // Xuyên Giáp Vật Lý Phần Trăm (+% Armor Pen)
+        public float magicPenPct;     // Xuyên Kháng Phép Phần Trăm (+% Magic Pen)
         public string effectSummaryVi;
         public string effectSummaryEn;
         public Color gemColor;
@@ -56,6 +60,14 @@ public static class EquipmentSocketManager
             else if (p.Contains("Mana"))
             {
                 formattedParts.Add($"<color=#00E5FF>{p}</color>");
+            }
+            else if (p.Contains("Xuyên Giáp") || p.Contains("ARMPEN") || p.Contains("Armor Pen") || p.Contains("XG"))
+            {
+                formattedParts.Add($"<color=#F97316>{p}</color>");
+            }
+            else if (p.Contains("Xuyên Phép") || p.Contains("MGPEN") || p.Contains("Magic Pen") || p.Contains("XP"))
+            {
+                formattedParts.Add($"<color=#A855F7>{p}</color>");
             }
             else if (p.Contains("ATK"))
             {
@@ -110,13 +122,17 @@ public static class EquipmentSocketManager
         return string.Join(", ", formattedParts);
     }
 
-    public static string FormatCompactStats(int atk, int hp, int def, float lifestealPct = 0f, float cdRedPct = 0f, float shardPct = 0f, float regen = 0f, float bonusEnergy = 0f, float energyRegen = 0f, int physAtk = 0, int magicAtk = 0, int trueAtk = 0)
+    public static string FormatCompactStats(int atk, int hp, int def, float lifestealPct = 0f, float cdRedPct = 0f, float shardPct = 0f, float regen = 0f, float bonusEnergy = 0f, float energyRegen = 0f, int physAtk = 0, int magicAtk = 0, int trueAtk = 0, int armorPen = 0, int magicPen = 0, float armorPenPct = 0f, float magicPenPct = 0f)
     {
         List<string> parts = new List<string>();
         if (physAtk > 0) parts.Add($"<color=#FF3B30>+{physAtk} ATK</color>");
         if (magicAtk > 0) parts.Add($"<color=#B84DFF>+{magicAtk} AP</color>");
         if (trueAtk > 0) parts.Add($"<color=#E2E8F0>+{trueAtk} TD</color>");
         if (physAtk == 0 && magicAtk == 0 && trueAtk == 0 && atk > 0) parts.Add($"<color=#FF3B30>+{atk} ATK</color>");
+        if (armorPen > 0) parts.Add($"<color=#F97316>+{armorPen} {(LocalizationManager.IsVietnamese ? "Xuyên Giáp" : "Armor Pen")}</color>");
+        if (armorPenPct > 0f) parts.Add($"<color=#F97316>+{Mathf.RoundToInt(armorPenPct * 100)}% {(LocalizationManager.IsVietnamese ? "Xuyên Giáp" : "Armor Pen")}</color>");
+        if (magicPen > 0) parts.Add($"<color=#A855F7>+{magicPen} {(LocalizationManager.IsVietnamese ? "Xuyên Phép" : "Magic Pen")}</color>");
+        if (magicPenPct > 0f) parts.Add($"<color=#A855F7>+{Mathf.RoundToInt(magicPenPct * 100)}% {(LocalizationManager.IsVietnamese ? "Xuyên Phép" : "Magic Pen")}</color>");
         if (hp > 0) parts.Add($"<color=#22C55E>+{hp} HP</color>");
         if (def > 0) parts.Add($"<color=#38BDF8>+{def} DEF</color>");
         if (lifestealPct > 0f) parts.Add($"<color=#F43F5E>+{Mathf.RoundToInt(lifestealPct * 100)}% {(LocalizationManager.IsVietnamese ? "Hút Máu" : "Lifesteal")}</color>");
@@ -141,6 +157,7 @@ public static class EquipmentSocketManager
                     nameEn = "Bloodstone Crystal",
                     bonusAtk = 18,
                     bonusTrueAtk = 18,
+                    bonusArmorPen = 12,
                     bonusHp = 0,
                     bonusDef = 0,
                     lifestealPct = 0.06f,
@@ -150,8 +167,8 @@ public static class EquipmentSocketManager
                     cdReductionPct = 0f,
                     shardBonusPct = 0f,
                     hpRegenPerSec = 0f,
-                    effectSummaryVi = "+18 TD, +6% Hút Máu VL",
-                    effectSummaryEn = "+18 TD, +6% Phys Lifesteal",
+                    effectSummaryVi = "+18 TD, +12 Xuyên Giáp, +6% Hút Máu VL",
+                    effectSummaryEn = "+18 TD, +12 Armor Pen, +6% Phys Lifesteal",
                     gemColor = new Color(1f, 0.25f, 0.3f, 1f)
                 }
             },
@@ -163,6 +180,8 @@ public static class EquipmentSocketManager
                     nameEn = "Ruin Amethyst Gem",
                     bonusAtk = 14,
                     bonusMagicAtk = 14,
+                    bonusMagicPen = 18,
+                    magicPenPct = 0.08f,
                     bonusHp = 0,
                     bonusDef = 0,
                     lifestealPct = 0f,
@@ -174,8 +193,8 @@ public static class EquipmentSocketManager
                     hpRegenPerSec = 0f,
                     bonusMaxEnergy = 20f,
                     energyRegenPerSec = 1.0f,
-                    effectSummaryVi = "+14 AP, +6% Hút Máu Phép, -8% CD, +20 Mana, +1.0 Mana/s",
-                    effectSummaryEn = "+14 AP, +6% Spell Vamp, -8% CD, +20 Mana, +1.0 Mana/s",
+                    effectSummaryVi = "+14 AP, +18 Xuyên Phép (+8%), +6% Hút Máu Phép, -8% CD, +20 Mana, +1.0 Mana/s",
+                    effectSummaryEn = "+14 AP, +18 Magic Pen (+8%), +6% Spell Vamp, -8% CD, +20 Mana, +1.0 Mana/s",
                     gemColor = new Color(0.75f, 0.35f, 1f, 1f)
                 }
             },
@@ -228,6 +247,7 @@ public static class EquipmentSocketManager
                     nameEn = "Blazing Dark Coal",
                     bonusAtk = 16,
                     bonusPhysAtk = 16,
+                    bonusArmorPen = 15,
                     bonusHp = 0,
                     bonusDef = 0,
                     lifestealPct = 0f,
@@ -236,8 +256,8 @@ public static class EquipmentSocketManager
                     hpRegenPerSec = 0f,
                     bonusMaxEnergy = 0f,
                     energyRegenPerSec = 0f,
-                    effectSummaryVi = "+16 ATK",
-                    effectSummaryEn = "+16 ATK",
+                    effectSummaryVi = "+16 ATK, +15 Xuyên Giáp",
+                    effectSummaryEn = "+16 ATK, +15 Armor Pen",
                     gemColor = new Color(1f, 0.45f, 0.15f, 1f)
                 }
             },
@@ -249,6 +269,7 @@ public static class EquipmentSocketManager
                     nameEn = "Cyan Tin Ore",
                     bonusAtk = 8,
                     bonusMagicAtk = 8,
+                    bonusMagicPen = 12,
                     bonusHp = 0,
                     bonusDef = 0,
                     lifestealPct = 0f,
@@ -257,8 +278,8 @@ public static class EquipmentSocketManager
                     hpRegenPerSec = 0f,
                     bonusMaxEnergy = 30f,
                     energyRegenPerSec = 1.8f,
-                    effectSummaryVi = "+8 AP, -10% CD, +30 Mana, +1.8 Mana/s",
-                    effectSummaryEn = "+8 AP, -10% CD, +30 Mana, +1.8 Mana/s",
+                    effectSummaryVi = "+8 AP, +12 Xuyên Phép, -10% CD, +30 Mana, +1.8 Mana/s",
+                    effectSummaryEn = "+8 AP, +12 Magic Pen, -10% CD, +30 Mana, +1.8 Mana/s",
                     gemColor = new Color(0.2f, 0.8f, 1f, 1f)
                 }
             },
@@ -270,6 +291,7 @@ public static class EquipmentSocketManager
                     nameEn = "Dark Iron Ore",
                     bonusAtk = 6,
                     bonusPhysAtk = 6,
+                    bonusArmorPen = 10,
                     bonusHp = 40,
                     bonusDef = 18,
                     lifestealPct = 0f,
@@ -278,8 +300,8 @@ public static class EquipmentSocketManager
                     hpRegenPerSec = 0f,
                     bonusMaxEnergy = 0f,
                     energyRegenPerSec = 0f,
-                    effectSummaryVi = "+6 ATK, +40 HP, +18 DEF",
-                    effectSummaryEn = "+6 ATK, +40 HP, +18 DEF",
+                    effectSummaryVi = "+6 ATK, +10 Xuyên Giáp, +40 HP, +18 DEF",
+                    effectSummaryEn = "+6 ATK, +10 Armor Pen, +40 HP, +18 DEF",
                     gemColor = new Color(0.55f, 0.65f, 0.85f, 1f)
                 }
             },
@@ -291,6 +313,7 @@ public static class EquipmentSocketManager
                     nameEn = "Forge Stone Ore",
                     bonusAtk = 10,
                     bonusPhysAtk = 10,
+                    bonusArmorPen = 15,
                     bonusHp = 25,
                     bonusDef = 10,
                     lifestealPct = 0f,
@@ -299,8 +322,8 @@ public static class EquipmentSocketManager
                     hpRegenPerSec = 0f,
                     bonusMaxEnergy = 0f,
                     energyRegenPerSec = 0f,
-                    effectSummaryVi = "+10 ATK, +25 HP, +10 DEF",
-                    effectSummaryEn = "+10 ATK, +25 HP, +10 DEF",
+                    effectSummaryVi = "+10 ATK, +15 Xuyên Giáp, +25 HP, +10 DEF",
+                    effectSummaryEn = "+10 ATK, +15 Armor Pen, +25 HP, +10 DEF",
                     gemColor = new Color(0.4f, 0.55f, 0.75f, 1f)
                 }
             },
@@ -377,6 +400,8 @@ public static class EquipmentSocketManager
                     bonusAtk = 45,
                     bonusPhysAtk = 30,
                     bonusTrueAtk = 15,
+                    bonusArmorPen = 25,
+                    armorPenPct = 0.15f,
                     bonusHp = 30,
                     bonusDef = 0,
                     lifestealPct = 0.04f,
@@ -386,8 +411,8 @@ public static class EquipmentSocketManager
                     cdReductionPct = 0.06f,
                     shardBonusPct = 0.20f,
                     hpRegenPerSec = 0f,
-                    effectSummaryVi = "+30 ATK, +15 TD, +30 HP, +12% CRIT, +4% Hút Máu VL, -6% CD, +20% Shard",
-                    effectSummaryEn = "+30 ATK, +15 TD, +30 HP, +12% CRIT, +4% Phys Lifesteal, -6% CD, +20% Shard",
+                    effectSummaryVi = "+30 ATK, +15 TD, +25 XG (+15%), +30 HP, +12% CRIT, +4% Hút Máu VL, -6% CD, +20% Shard",
+                    effectSummaryEn = "+30 ATK, +15 TD, +25 Armor Pen (+15%), +30 HP, +12% CRIT, +4% Phys Lifesteal, -6% CD, +20% Shard",
                     gemColor = new Color(1f, 0.28f, 0.35f, 1f)
                 }
             },
@@ -400,6 +425,8 @@ public static class EquipmentSocketManager
                     bonusAtk = 32,
                     bonusPhysAtk = 16,
                     bonusMagicAtk = 16,
+                    bonusMagicPen = 20,
+                    magicPenPct = 0.12f,
                     bonusHp = 0,
                     bonusDef = 0,
                     lifestealPct = 0.06f,
@@ -409,8 +436,8 @@ public static class EquipmentSocketManager
                     cdReductionPct = 0f,
                     shardBonusPct = 0f,
                     hpRegenPerSec = 0f,
-                    effectSummaryVi = "+16 ATK, +16 AP, +6% Hút Máu VL, +6% Hút Máu Phép",
-                    effectSummaryEn = "+16 ATK, +16 AP, +6% Phys Lifesteal, +6% Spell Vamp",
+                    effectSummaryVi = "+16 ATK, +16 AP, +20 XP (+12%), +6% Hút Máu VL, +6% Hút Máu Phép",
+                    effectSummaryEn = "+16 ATK, +16 AP, +20 Magic Pen (+12%), +6% Phys Lifesteal, +6% Spell Vamp",
                     gemColor = new Color(1f, 0.55f, 0.15f, 1f)
                 }
             },
@@ -422,6 +449,8 @@ public static class EquipmentSocketManager
                     nameEn = "Shadow Katana",
                     bonusAtk = 24,
                     bonusPhysAtk = 24,
+                    bonusArmorPen = 18,
+                    armorPenPct = 0.10f,
                     bonusHp = 0,
                     bonusDef = 0,
                     lifestealPct = 0f,
@@ -431,8 +460,8 @@ public static class EquipmentSocketManager
                     cdReductionPct = 0.12f,
                     shardBonusPct = 0f,
                     hpRegenPerSec = 0f,
-                    effectSummaryVi = "+24 ATK, -12% CD, +15% CRIT",
-                    effectSummaryEn = "+24 ATK, -12% CD, +15% CRIT",
+                    effectSummaryVi = "+24 ATK, +18 XG (+10%), -12% CD, +15% CRIT",
+                    effectSummaryEn = "+24 ATK, +18 Armor Pen (+10%), -12% CD, +15% CRIT",
                     gemColor = new Color(0.75f, 0.35f, 1f, 1f)
                 }
             },
@@ -445,6 +474,8 @@ public static class EquipmentSocketManager
                     bonusAtk = 18,
                     bonusPhysAtk = 12,
                     bonusMagicAtk = 6,
+                    bonusArmorPen = 10,
+                    bonusMagicPen = 10,
                     bonusHp = 20,
                     bonusDef = 5,
                     lifestealPct = 0f,
@@ -854,12 +885,12 @@ public static class EquipmentSocketManager
 
     public static readonly string[] SlotNamesVi = new string[]
     {
-        "VŨ KHÍ", "ÁO GIÁP", "GIÀY", "MŨ NÓN", "NHẪN", "HỘ PHÙ"
+        "Ô #1", "Ô #2", "Ô #3", "Ô #4", "Ô #5", "Ô #6"
     };
 
     public static readonly string[] SlotNamesEn = new string[]
     {
-        "WEAPON", "ARMOR", "BOOTS", "HELMET", "RING", "AMULET"
+        "SLOT #1", "SLOT #2", "SLOT #3", "SLOT #4", "SLOT #5", "SLOT #6"
     };
 
     public static string NormalizeHeroId(string heroId)
@@ -934,6 +965,8 @@ public static class EquipmentSocketManager
         string key = $"Hero_{normHero}_GearSlot_{slotIndex}";
         string raw = PlayerPrefs.GetString(key, "");
 
+        if (raw == "empty" || raw == "none") return false;
+
         // Auto migration from all possible key variations if normalized key is empty
         if (string.IsNullOrEmpty(raw))
         {
@@ -952,16 +985,18 @@ public static class EquipmentSocketManager
                 if (!string.IsNullOrEmpty(varKey) && varKey != key)
                 {
                     string varVal = PlayerPrefs.GetString(varKey, "");
-                    if (!string.IsNullOrEmpty(varVal))
+                    if (!string.IsNullOrEmpty(varVal) && varVal != "empty" && varVal != "none")
                     {
-                        raw = varVal;
-                        PlayerPrefs.SetString(key, raw);
-                        PlayerPrefs.DeleteKey(varKey);
-                        PlayerPrefs.Save();
-                        break;
+                        if (string.IsNullOrEmpty(raw))
+                        {
+                            raw = varVal;
+                            PlayerPrefs.SetString(key, raw);
+                        }
                     }
+                    PlayerPrefs.DeleteKey(varKey);
                 }
             }
+            PlayerPrefs.Save();
         }
 
         // Auto migration from legacy sub-socket keys if still empty
@@ -971,7 +1006,7 @@ public static class EquipmentSocketManager
             int oldSub = slotIndex % SUB_SOCKETS_PER_SKILL;
             string oldKey = $"Hero_{normHero}_SkillSocket_Skill_{oldSkill}_Sub_{oldSub}";
             string oldRaw = PlayerPrefs.GetString(oldKey, "");
-            if (!string.IsNullOrEmpty(oldRaw))
+            if (!string.IsNullOrEmpty(oldRaw) && oldRaw != "empty" && oldRaw != "none")
             {
                 raw = oldRaw;
                 PlayerPrefs.SetString(key, raw);
@@ -982,7 +1017,7 @@ public static class EquipmentSocketManager
             {
                 string legacyKey = $"Hero_{normHero}_SkillSocket_Skill_{slotIndex}_Sub_0";
                 string legacyRaw = PlayerPrefs.GetString(legacyKey, "");
-                if (!string.IsNullOrEmpty(legacyRaw))
+                if (!string.IsNullOrEmpty(legacyRaw) && legacyRaw != "empty" && legacyRaw != "none")
                 {
                     raw = legacyRaw;
                     PlayerPrefs.SetString(key, raw);
@@ -992,7 +1027,7 @@ public static class EquipmentSocketManager
             }
         }
 
-        if (string.IsNullOrEmpty(raw)) return false;
+        if (string.IsNullOrEmpty(raw) || raw == "empty" || raw == "none") return false;
 
         if (raw.Contains(":"))
         {
@@ -1161,7 +1196,11 @@ public static class EquipmentSocketManager
         resultingLevel = 1;
         if (string.IsNullOrEmpty(gemId)) return false;
         EnsureGemEffects();
-        if (!gemEffects.ContainsKey(gemId)) return false;
+        if (!gemEffects.ContainsKey(gemId))
+        {
+            var eff = GetGemEffect(gemId);
+            if (!eff.HasValue) return false;
+        }
         if (string.IsNullOrEmpty(heroId)) heroId = GetActiveHeroId();
 
         // 1. If targeting specific slot (0..5)
@@ -1198,7 +1237,32 @@ public static class EquipmentSocketManager
             return false;
         }
 
-        // 2. Auto Slot (First matching to merge, or first empty)
+        // 2. Auto Slot (Prioritize first EMPTY socket so player can fill all 6 slots!)
+        int autoEmptySlot = -1;
+        for (int s = 0; s < HERO_SOCKET_COUNT; s++)
+        {
+            if (!GetHeroSocketGem(s, out _, out _, heroId))
+            {
+                autoEmptySlot = s;
+                break;
+            }
+        }
+
+        // If an empty socket exists, equip directly into that empty socket!
+        if (autoEmptySlot != -1)
+        {
+            if (AccountDatabase.RemoveItemFromActiveUser(gemId, 1))
+            {
+                PlayerPrefs.SetString(GetHeroSocketKey(autoEmptySlot, heroId), $"{gemId}:1");
+                PlayerPrefs.Save();
+                resultingLevel = 1;
+                Debug.Log($"<color=green>[HERO-SOCKET]</color> Đã khảm '{gemId}' Lv.1 vào Ô trống #{autoEmptySlot + 1} ({SlotNamesVi[autoEmptySlot]})!");
+                return true;
+            }
+            return false;
+        }
+
+        // If ALL 6 sockets are already full, then check if we can merge with a matching gem:
         for (int s = 0; s < HERO_SOCKET_COUNT; s++)
         {
             if (GetHeroSocketGem(s, out string exGem, out int exLv, heroId) && exGem == gemId)
@@ -1210,23 +1274,15 @@ public static class EquipmentSocketManager
                     PlayerPrefs.Save();
                     leveledUp = true;
                     resultingLevel = newLevel;
+                    Debug.Log($"<color=cyan>[HERO-SOCKET-MERGE]</color> Nâng cấp '{gemId}' Ô #{s + 1} ({SlotNamesVi[s]}) lên Lv.{newLevel}!");
                     return true;
                 }
                 return false;
             }
         }
 
-        int autoSlot = -1;
-        for (int s = 0; s < HERO_SOCKET_COUNT; s++)
-        {
-            if (!GetHeroSocketGem(s, out _, out _, heroId))
-            {
-                autoSlot = s;
-                break;
-            }
-        }
-        if (autoSlot == -1) autoSlot = 0;
-
+        // If all 6 sockets are full with different items, replace slot 0:
+        int autoSlot = 0;
         if (GetHeroSocketGem(autoSlot, out string prevGem, out int prevLv, heroId))
         {
             AccountDatabase.AddItemToActiveUser(prevGem, prevLv, "Material", "Tháo Trang Bị Cũ");
@@ -1243,13 +1299,52 @@ public static class EquipmentSocketManager
         return false;
     }
 
+    public static void DeleteAllSocketKeysForSlot(int slotIndex, string heroId = null)
+    {
+        if (slotIndex < 0 || slotIndex >= HERO_SOCKET_COUNT) return;
+        if (string.IsNullOrEmpty(heroId)) heroId = GetActiveHeroId();
+        string normHero = NormalizeHeroId(heroId);
+        string key = $"Hero_{normHero}_GearSlot_{slotIndex}";
+
+        // Đánh dấu rõ ràng là empty để không bao giờ bị auto-migration kích hoạt lại ngọc cũ
+        PlayerPrefs.SetString(key, "empty");
+
+        string legacyConst = GetLegacyCharConstant(normHero);
+        string[] possibleVariants = new string[]
+        {
+            !string.IsNullOrEmpty(heroId) ? $"Hero_{heroId}_GearSlot_{slotIndex}" : null,
+            $"Hero_{legacyConst}_GearSlot_{slotIndex}",
+            $"Hero_{normHero.ToUpper()}_GearSlot_{slotIndex}",
+            $"Hero_{char.ToUpper(normHero[0]) + normHero.Substring(1)}_GearSlot_{slotIndex}",
+            $"Hero_{legacyConst.ToLower()}_GearSlot_{slotIndex}",
+            $"Hero_{normHero}_GearSlot_{slotIndex}_Legacy"
+        };
+        foreach (var v in possibleVariants)
+        {
+            if (!string.IsNullOrEmpty(v)) PlayerPrefs.DeleteKey(v);
+        }
+
+        int oldSkill = slotIndex / SUB_SOCKETS_PER_SKILL;
+        int oldSub = slotIndex % SUB_SOCKETS_PER_SKILL;
+        PlayerPrefs.DeleteKey($"Hero_{normHero}_SkillSocket_Skill_{oldSkill}_Sub_{oldSub}");
+        if (!string.IsNullOrEmpty(heroId)) PlayerPrefs.DeleteKey($"Hero_{heroId}_SkillSocket_Skill_{oldSkill}_Sub_{oldSub}");
+        if (!string.IsNullOrEmpty(legacyConst)) PlayerPrefs.DeleteKey($"Hero_{legacyConst}_SkillSocket_Skill_{oldSkill}_Sub_{oldSub}");
+
+        if (slotIndex < SKILL_COUNT)
+        {
+            PlayerPrefs.DeleteKey($"Hero_{normHero}_SkillSocket_Skill_{slotIndex}_Sub_0");
+            if (!string.IsNullOrEmpty(heroId)) PlayerPrefs.DeleteKey($"Hero_{heroId}_SkillSocket_Skill_{slotIndex}_Sub_0");
+        }
+
+        PlayerPrefs.Save();
+    }
+
     public static bool UnsocketHeroSlot(int slotIndex, string heroId = null)
     {
         if (string.IsNullOrEmpty(heroId)) heroId = GetActiveHeroId();
         if (GetHeroSocketGem(slotIndex, out string gemId, out int level, heroId))
         {
-            PlayerPrefs.DeleteKey(GetHeroSocketKey(slotIndex, heroId));
-            PlayerPrefs.Save();
+            DeleteAllSocketKeysForSlot(slotIndex, heroId);
             AccountDatabase.AddItemToActiveUser(gemId, level, "Material", "Tháo Trang Bị");
             Debug.Log($"<color=yellow>[HERO-UNSOCKET]</color> Đã tháo '{gemId}' Lv.{level} (trả lại {level} viên) khỏi Ô #{slotIndex + 1} ({SlotNamesVi[slotIndex]})!");
             return true;
@@ -1271,8 +1366,7 @@ public static class EquipmentSocketManager
         {
             int combinedLv = lvA + lvB;
             PlayerPrefs.SetString(GetHeroSocketKey(toSlot, heroId), $"{gemA}:{combinedLv}");
-            PlayerPrefs.DeleteKey(GetHeroSocketKey(fromSlot, heroId));
-            PlayerPrefs.Save();
+            DeleteAllSocketKeysForSlot(fromSlot, heroId);
             return true;
         }
 
@@ -1280,16 +1374,16 @@ public static class EquipmentSocketManager
         if (hasB)
         {
             PlayerPrefs.SetString(GetHeroSocketKey(fromSlot, heroId), $"{gemB}:{lvB}");
+            PlayerPrefs.Save();
         }
         else
         {
-            PlayerPrefs.DeleteKey(GetHeroSocketKey(fromSlot, heroId));
+            DeleteAllSocketKeysForSlot(fromSlot, heroId);
         }
-        PlayerPrefs.Save();
         return true;
     }
 
-    public static void GetHeroSocketBonus(int slotIndex, out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, out float physLifePct, out float spellVampPct, out float critChancePct, string heroId = null)
+    public static void GetHeroSocketBonus(int slotIndex, out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, out float physLifePct, out float spellVampPct, out float critChancePct, out int bonusArmorPen, out int bonusMagicPen, out float armorPenPct, out float magicPenPct, string heroId = null)
     {
         bonusAtk = 0;
         bonusPhysAtk = 0;
@@ -1306,6 +1400,10 @@ public static class EquipmentSocketManager
         physLifePct = 0f;
         spellVampPct = 0f;
         critChancePct = 0f;
+        bonusArmorPen = 0;
+        bonusMagicPen = 0;
+        armorPenPct = 0f;
+        magicPenPct = 0f;
 
         if (slotIndex < 0 || slotIndex >= HERO_SOCKET_COUNT) return;
         EnsureGemEffects();
@@ -1330,8 +1428,17 @@ public static class EquipmentSocketManager
                 physLifePct = effect.physLifestealPct * mult;
                 spellVampPct = effect.spellVampPct * mult;
                 critChancePct = effect.critChancePct * mult;
+                bonusArmorPen = Mathf.RoundToInt(effect.bonusArmorPen * mult);
+                bonusMagicPen = Mathf.RoundToInt(effect.bonusMagicPen * mult);
+                armorPenPct = effect.armorPenPct * mult;
+                magicPenPct = effect.magicPenPct * mult;
             }
         }
+    }
+
+    public static void GetHeroSocketBonus(int slotIndex, out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, out float physLifePct, out float spellVampPct, out float critChancePct, string heroId = null)
+    {
+        GetHeroSocketBonus(slotIndex, out bonusAtk, out bonusPhysAtk, out bonusMagicAtk, out bonusTrueAtk, out bonusHp, out bonusDef, out lifestealPct, out cdReductionPct, out shardBonusPct, out hpRegenPerSec, out bonusMaxEnergy, out energyRegenPerSec, out physLifePct, out spellVampPct, out critChancePct, out _, out _, out _, out _, heroId);
     }
 
     public static void GetHeroSocketBonus(int slotIndex, out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, string heroId = null)
@@ -1344,7 +1451,7 @@ public static class EquipmentSocketManager
         GetHeroSocketBonus(slotIndex, out bonusAtk, out _, out _, out _, out bonusHp, out bonusDef, out lifestealPct, out cdReductionPct, out shardBonusPct, out hpRegenPerSec, out bonusMaxEnergy, out energyRegenPerSec, heroId);
     }
 
-    public static void GetTotalHeroSocketBonus(out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, out float physLifePct, out float spellVampPct, out float critChancePct, string heroId = null)
+    public static void GetTotalHeroSocketBonus(out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, out float physLifePct, out float spellVampPct, out float critChancePct, out int bonusArmorPen, out int bonusMagicPen, out float armorPenPct, out float magicPenPct, string heroId = null)
     {
         bonusAtk = 0;
         bonusPhysAtk = 0;
@@ -1361,10 +1468,14 @@ public static class EquipmentSocketManager
         physLifePct = 0f;
         spellVampPct = 0f;
         critChancePct = 0f;
+        bonusArmorPen = 0;
+        bonusMagicPen = 0;
+        armorPenPct = 0f;
+        magicPenPct = 0f;
 
         for (int s = 0; s < HERO_SOCKET_COUNT; s++)
         {
-            GetHeroSocketBonus(s, out int sAtk, out int sPhys, out int sMagic, out int sTrue, out int sHp, out int sDef, out float sLife, out float sCd, out float sShard, out float sRegen, out float sMaxEn, out float sEnRegen, out float sPhysLife, out float sSpellVamp, out float sCrit, heroId);
+            GetHeroSocketBonus(s, out int sAtk, out int sPhys, out int sMagic, out int sTrue, out int sHp, out int sDef, out float sLife, out float sCd, out float sShard, out float sRegen, out float sMaxEn, out float sEnRegen, out float sPhysLife, out float sSpellVamp, out float sCrit, out int sArmPen, out int sMagPen, out float sArmPenPct, out float sMagPenPct, heroId);
             bonusAtk += sAtk;
             bonusPhysAtk += sPhys;
             bonusMagicAtk += sMagic;
@@ -1380,6 +1491,10 @@ public static class EquipmentSocketManager
             physLifePct += sPhysLife;
             spellVampPct += sSpellVamp;
             critChancePct += sCrit;
+            bonusArmorPen += sArmPen;
+            bonusMagicPen += sMagPen;
+            armorPenPct += sArmPenPct;
+            magicPenPct += sMagPenPct;
         }
 
         // Global Hard Caps
@@ -1392,6 +1507,13 @@ public static class EquipmentSocketManager
         hpRegenPerSec = Mathf.Min(15.0f, hpRegenPerSec);
         bonusMaxEnergy = Mathf.Min(100.0f, bonusMaxEnergy);
         energyRegenPerSec = Mathf.Min(6.0f, energyRegenPerSec);
+        armorPenPct = Mathf.Min(0.70f, armorPenPct);
+        magicPenPct = Mathf.Min(0.70f, magicPenPct);
+    }
+
+    public static void GetTotalHeroSocketBonus(out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, out float physLifePct, out float spellVampPct, out float critChancePct, string heroId = null)
+    {
+        GetTotalHeroSocketBonus(out bonusAtk, out bonusPhysAtk, out bonusMagicAtk, out bonusTrueAtk, out bonusHp, out bonusDef, out lifestealPct, out cdReductionPct, out shardBonusPct, out hpRegenPerSec, out bonusMaxEnergy, out energyRegenPerSec, out physLifePct, out spellVampPct, out critChancePct, out _, out _, out _, out _, heroId);
     }
 
     public static void GetTotalHeroSocketBonus(out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, string heroId = null)
@@ -1531,6 +1653,11 @@ public static class EquipmentSocketManager
     public static void GetActiveEquippedSocketBonus(out int bonusAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec)
     {
         GetActiveEquippedSocketBonus(out bonusAtk, out bonusHp, out bonusDef, out lifestealPct, out cdReductionPct, out shardBonusPct, out hpRegenPerSec, out _, out _);
+    }
+
+    public static void GetActiveEquippedSocketBonus(out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, out float physLifePct, out float spellVampPct, out float critChancePct, out int bonusArmorPen, out int bonusMagicPen, out float armorPenPct, out float magicPenPct)
+    {
+        GetTotalHeroSocketBonus(out bonusAtk, out bonusPhysAtk, out bonusMagicAtk, out bonusTrueAtk, out bonusHp, out bonusDef, out lifestealPct, out cdReductionPct, out shardBonusPct, out hpRegenPerSec, out bonusMaxEnergy, out energyRegenPerSec, out physLifePct, out spellVampPct, out critChancePct, out bonusArmorPen, out bonusMagicPen, out armorPenPct, out magicPenPct);
     }
 
     public static void GetActiveEquippedSocketBonus(out int bonusAtk, out int bonusPhysAtk, out int bonusMagicAtk, out int bonusTrueAtk, out int bonusHp, out int bonusDef, out float lifestealPct, out float cdReductionPct, out float shardBonusPct, out float hpRegenPerSec, out float bonusMaxEnergy, out float energyRegenPerSec, out float physLifePct, out float spellVampPct, out float critChancePct)

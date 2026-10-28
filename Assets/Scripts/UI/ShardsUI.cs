@@ -20,12 +20,14 @@ public class ShardsUI : MonoBehaviour
     void OnEnable()
     {
         FindTextComponents();
+        SoulslikeHUDStyler.StyleShardsCounter(GetComponentInParent<Canvas>());
         RefreshDisplay();
     }
 
     void Start()
     {
         FindTextComponents();
+        SoulslikeHUDStyler.StyleShardsCounter(GetComponentInParent<Canvas>());
         AccountDatabase.EnsureActiveSessionLoaded();
         HookInventory();
         RefreshDisplay();

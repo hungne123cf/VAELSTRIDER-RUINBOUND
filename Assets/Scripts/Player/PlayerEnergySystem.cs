@@ -137,6 +137,14 @@ public class PlayerEnergySystem : MonoBehaviour
     }
 
     /// <summary>
+    /// Rút bớt năng lượng (dùng khi dính hiệu ứng Khóa Hồn hoặc chiêu thức đối thủ)
+    /// </summary>
+    public void ConsumeEnergy(float amount)
+    {
+        currentEnergy = Mathf.Max(0f, currentEnergy - amount);
+    }
+
+    /// <summary>
     /// <summary>
     /// Tích tụ Nội Năng trong giao tranh.
     /// - Với Player 6: Đầy 100% kích hoạt trạng thái Bùng Nổ Thiên Quang (Hồi chiêu cuối 1s liên tục, không có giáp vàng).

@@ -7,12 +7,17 @@ public class Map3WaveSpawner : MonoBehaviour
     public static event System.Action OnAllWavesCleared;
 
     [Header("Wave Configuration")]
-    public int totalWaves = 3;
+    public int totalWaves = 10;
     public int currentWave = 1;
     public int livingEnemies = 0;
     public bool isWaveActive = false;
 
     private bool bossSpawned = false;
+
+    void Awake()
+    {
+        totalWaves = 10;
+    }
 
     void OnEnable()
     {
@@ -34,6 +39,7 @@ public class Map3WaveSpawner : MonoBehaviour
 
     void Start()
     {
+        totalWaves = 10;
         StartCoroutine(StartWaveRoutine(1));
     }
 
@@ -41,51 +47,186 @@ public class Map3WaveSpawner : MonoBehaviour
     {
         currentWave = waveIndex;
         isWaveActive = true;
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.2f);
+
+        var waveUI = FindAnyObjectByType<WaveUI>();
+        string wavePrefix = LocalizationManager.Get("HUD_WAVE");
 
         if (waveIndex == 1)
         {
-            DamagePopup.CreateText(Vector3.zero, LocalizationManager.T("ĐỢT 1: BẦY YÊU TINH & QUÁI NHỚT", "WAVE 1: GOBLINS & SLIMES"), new Color(0.4f, 1f, 0.6f));
-            yield return new WaitForSeconds(1.0f);
+            string t = $"{wavePrefix} 1 / 10: " + LocalizationManager.T("BẦY YÊU TINH & QUÁI NHỚT", "GOBLINS & SLIMES");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Quét sạch bầy quái nhỏ khai màn!", "Purge the opening swarm!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
 
-            // Spawn 4 Goblin + 3 Slime
             SpawnGoblin(new Vector3(-6f, 3f, 0f));
             SpawnGoblin(new Vector3(6f, 3f, 0f));
             SpawnGoblin(new Vector3(-5f, -3f, 0f));
             SpawnGoblin(new Vector3(5f, -3f, 0f));
-
             SpawnSlime(new Vector3(-3f, 4f, 0f));
             SpawnSlime(new Vector3(3f, 4f, 0f));
-            SpawnSlime(new Vector3(0f, -4f, 0f));
 
-            livingEnemies = 7;
+            livingEnemies = 6;
         }
         else if (waveIndex == 2)
         {
-            DamagePopup.CreateText(Vector3.zero, LocalizationManager.T("ĐỢT 2: BINH ĐOÀN BỘ XƯƠNG CỔ", "WAVE 2: ANCIENT SKELETON ARMY"), new Color(0.9f, 0.7f, 0.3f));
-            yield return new WaitForSeconds(1.0f);
+            string t = $"{wavePrefix} 2 / 10: " + LocalizationManager.T("YÊU TINH TẬP KÍCH & ĐẠI BẦY NHỚT", "GOBLIN AMBUSH & SLIME PACK");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Cẩn thận đòn áp sát nhanh của yêu tinh!", "Beware of fast goblin leaps!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
 
-            // Spawn 5 Skeleton + 3 Goblin
-            SpawnSkeleton(new Vector3(-7f, 2f, 0f));
-            SpawnSkeleton(new Vector3(7f, 2f, 0f));
-            SpawnSkeleton(new Vector3(0f, 5f, 0f));
-            SpawnSkeleton(new Vector3(-4f, -4f, 0f));
-            SpawnSkeleton(new Vector3(4f, -4f, 0f));
-
-            SpawnGoblin(new Vector3(-2f, 3f, 0f));
-            SpawnGoblin(new Vector3(2f, 3f, 0f));
-            SpawnGoblin(new Vector3(0f, -3f, 0f));
+            SpawnGoblin(new Vector3(-6f, 2f, 0f));
+            SpawnGoblin(new Vector3(6f, 2f, 0f));
+            SpawnGoblin(new Vector3(-4f, -3f, 0f));
+            SpawnGoblin(new Vector3(4f, -3f, 0f));
+            SpawnSlime(new Vector3(-3f, 4f, 0f));
+            SpawnSlime(new Vector3(3f, 4f, 0f));
+            SpawnSlime(new Vector3(-1f, -4f, 0f));
+            SpawnSlime(new Vector3(1f, -4f, 0f));
 
             livingEnemies = 8;
         }
         else if (waveIndex == 3)
         {
+            string t = $"{wavePrefix} 3 / 10: " + LocalizationManager.T("BINH ĐOÀN BỘ XƯƠNG THỨC TỈNH", "SKELETON ARMY AWAKENS");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Bộ xương cổ đại mang khiên giáp thức giấc!", "Ancient armored skeletons arise!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
+
+            SpawnSkeleton(new Vector3(-6f, 3f, 0f));
+            SpawnSkeleton(new Vector3(6f, 3f, 0f));
+            SpawnSkeleton(new Vector3(-4f, -3f, 0f));
+            SpawnSkeleton(new Vector3(4f, -3f, 0f));
+            SpawnSlime(new Vector3(-2f, 4f, 0f));
+            SpawnSlime(new Vector3(2f, 4f, 0f));
+            SpawnSlime(new Vector3(-2f, -4f, 0f));
+            SpawnSlime(new Vector3(2f, -4f, 0f));
+
+            livingEnemies = 8;
+        }
+        else if (waveIndex == 4)
+        {
+            string t = $"{wavePrefix} 4 / 10: " + LocalizationManager.T("LIÊN MINH XƯƠNG & YÊU TINH", "SKELETON & GOBLIN ALLIANCE");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Sự phối hợp giữa kiếm xương và đòn chém yêu tinh!", "Combined bone swords and goblin slashes!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
+
+            SpawnSkeleton(new Vector3(-7f, 2f, 0f));
+            SpawnSkeleton(new Vector3(7f, 2f, 0f));
+            SpawnSkeleton(new Vector3(0f, 5f, 0f));
+            SpawnSkeleton(new Vector3(-4f, -4f, 0f));
+            SpawnSkeleton(new Vector3(4f, -4f, 0f));
+            SpawnGoblin(new Vector3(-3f, 3f, 0f));
+            SpawnGoblin(new Vector3(3f, 3f, 0f));
+            SpawnGoblin(new Vector3(-2f, -2f, 0f));
+            SpawnGoblin(new Vector3(2f, -2f, 0f));
+
+            livingEnemies = 9;
+        }
+        else if (waveIndex == 5)
+        {
+            string t = $"{wavePrefix} 5 / 10: " + LocalizationManager.T("TIỂU ĐỘI BỘ XƯƠNG CỔ ĐẠI", "ANCIENT SKELETON BRIGADE");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Binh đoàn xương tràn ngập chiến trường!", "Skeleton legion swarms the field!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
+
+            SpawnSkeleton(new Vector3(-6f, 3f, 0f));
+            SpawnSkeleton(new Vector3(6f, 3f, 0f));
+            SpawnSkeleton(new Vector3(-3f, 4f, 0f));
+            SpawnSkeleton(new Vector3(3f, 4f, 0f));
+            SpawnSkeleton(new Vector3(-5f, -3f, 0f));
+            SpawnSkeleton(new Vector3(5f, -3f, 0f));
+            SpawnSlime(new Vector3(-2f, 2f, 0f));
+            SpawnSlime(new Vector3(2f, 2f, 0f));
+            SpawnSlime(new Vector3(-2f, -2f, 0f));
+            SpawnSlime(new Vector3(2f, -2f, 0f));
+
+            livingEnemies = 10;
+        }
+        else if (waveIndex == 6)
+        {
+            string t = $"{wavePrefix} 6 / 10: " + LocalizationManager.T("BẦY YÊU TINH CUỒNG NỘ", "FRENZIED GOBLIN HORDE");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Bầy yêu tinh tăng cường số lượng áp đảo!", "Goblins assault with overwhelming speed!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
+
+            SpawnGoblin(new Vector3(-6f, 3f, 0f));
+            SpawnGoblin(new Vector3(6f, 3f, 0f));
+            SpawnGoblin(new Vector3(-4f, 4f, 0f));
+            SpawnGoblin(new Vector3(4f, 4f, 0f));
+            SpawnGoblin(new Vector3(-5f, -3f, 0f));
+            SpawnGoblin(new Vector3(5f, -3f, 0f));
+            SpawnSkeleton(new Vector3(-2f, 2f, 0f));
+            SpawnSkeleton(new Vector3(2f, 2f, 0f));
+            SpawnSkeleton(new Vector3(-2f, -3f, 0f));
+            SpawnSkeleton(new Vector3(2f, -3f, 0f));
+
+            livingEnemies = 10;
+        }
+        else if (waveIndex == 7)
+        {
+            string t = $"{wavePrefix} 7 / 10: " + LocalizationManager.T("ĐỢT TẤN CÔNG ĐA CHỦNG LOÀI", "TRI-SPECIES ONSLAUGHT");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Sự hợp kích của toàn bộ sinh vật bóng tối!", "Full synergy assault of shadow creatures!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
+
+            SpawnSkeleton(new Vector3(-7f, 3f, 0f));
+            SpawnSkeleton(new Vector3(7f, 3f, 0f));
+            SpawnSkeleton(new Vector3(0f, 5f, 0f));
+            SpawnSkeleton(new Vector3(-4f, -4f, 0f));
+            SpawnSkeleton(new Vector3(4f, -4f, 0f));
+            SpawnGoblin(new Vector3(-3f, 2f, 0f));
+            SpawnGoblin(new Vector3(3f, 2f, 0f));
+            SpawnGoblin(new Vector3(-2f, -2f, 0f));
+            SpawnGoblin(new Vector3(2f, -2f, 0f));
+            SpawnSlime(new Vector3(0f, 2f, 0f));
+            SpawnSlime(new Vector3(0f, -3f, 0f));
+
+            livingEnemies = 11;
+        }
+        else if (waveIndex == 8)
+        {
+            string t = $"{wavePrefix} 8 / 10: " + LocalizationManager.T("BINH ĐOÀN TỬ THẦN TẬP KÍCH", "DEATHWATCH LEGION ADVANCES");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Quái vật đông đảo và hung tợn tột độ!", "Extreme swarm density! Stand your ground!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
+
+            for (int i = 0; i < 6; i++)
+            {
+                float ang = (i / 6f) * 360f * Mathf.Deg2Rad;
+                SpawnSkeleton(new Vector3(Mathf.Cos(ang) * 6f, Mathf.Sin(ang) * 4f, 0f));
+            }
+            for (int i = 0; i < 6; i++)
+            {
+                float ang = ((i + 0.5f) / 6f) * 360f * Mathf.Deg2Rad;
+                SpawnGoblin(new Vector3(Mathf.Cos(ang) * 4.5f, Mathf.Sin(ang) * 3f, 0f));
+            }
+
+            livingEnemies = 12;
+        }
+        else if (waveIndex == 9)
+        {
+            string t = $"{wavePrefix} 9 / 10: " + LocalizationManager.T("ĐỢT TẤN CÔNG CUỐI CÙNG TRƯỚC ĐẠI TRÙM!", "FINAL WAVE BEFORE ANCIENT BOSS!");
+            if (waveUI != null) waveUI.ShowBanner(t, LocalizationManager.T("Càn quét đợt sóng quái cuối cùng để tích lũy sức mạnh!", "Purge the final wave to reach peak power!"), 2.5f);
+            yield return new WaitForSeconds(0.8f);
+
+            for (int i = 0; i < 7; i++)
+            {
+                float ang = (i / 7f) * 360f * Mathf.Deg2Rad;
+                SpawnSkeleton(new Vector3(Mathf.Cos(ang) * 6.5f, Mathf.Sin(ang) * 4.5f, 0f));
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                float ang = (i / 5f) * 360f * Mathf.Deg2Rad;
+                SpawnGoblin(new Vector3(Mathf.Cos(ang) * 4.5f, Mathf.Sin(ang) * 3f, 0f));
+            }
+            SpawnSlime(new Vector3(-2f, 0f, 0f));
+            SpawnSlime(new Vector3(2f, 0f, 0f));
+
+            livingEnemies = 14;
+        }
+        else if (waveIndex == 10)
+        {
             // DON SACH TOAN BO QUAI TAP CON SOT LAI TRUOC KHI VAO TRAN BOSS!
             ClearAllNonBossEnemies();
 
-            DamagePopup.CreateText(Vector3.zero, LocalizationManager.T("CẢNH BÁO: PHONG ẤN CHÚA TỂ NHỆN CỔ ĐẠI!", "WARNING: ANCIENT SPIDER LORD!"), new Color(0.4f, 0.9f, 1f));
+            string bossTitle = LocalizationManager.T("CẢNH BÁO: CHÚA TỂ NHỆN CỔ ĐẠI! (ĐỢT 10 / 10)", "BOSS INCOMING: ANCIENT SPIDER LORD! (WAVE 10 / 10)");
+            if (waveUI != null) waveUI.ShowBanner(bossTitle, LocalizationManager.T("PHONG ẤN TRỨNG KÉN ĐÃ XUẤT HIỆN!", "THE COCOON SEAL HAS APPEARED!"), 3.0f);
+
             var cam = Object.FindAnyObjectByType<CameraFollow>();
-            if (cam != null) cam.Shake(0.45f, 0.6f);
+            if (cam != null) cam.Shake(0.5f, 0.7f);
 
             yield return new WaitForSeconds(1.5f);
 
@@ -135,7 +276,14 @@ public class Map3WaveSpawner : MonoBehaviour
     private IEnumerator NextWaveDelayRoutine()
     {
         // Thuong dot quai
-        DamagePopup.CreateText(Vector3.zero, LocalizationManager.T("HOÀN THÀNH ĐỢT QUÁI! +THƯỞNG", "WAVE CLEARED! +REWARDS"), new Color(1f, 0.85f, 0.2f));
+        string clearMsg = LocalizationManager.T($"HOÀN THÀNH ĐỢT {currentWave} / {totalWaves}!", $"WAVE {currentWave} / {totalWaves} CLEARED!");
+
+        var waveUI = FindAnyObjectByType<WaveUI>();
+        if (waveUI != null)
+        {
+            waveUI.ShowBanner(clearMsg, LocalizationManager.T("+10 Mảnh Linh Hồn. Chuẩn bị đợt tiếp theo...", "+10 Shards. Prepare for next wave..."), 2.2f);
+        }
+
         AethelShard.SpawnShards(Vector3.zero, 10);
         WorldItemPickup.RollDrop(Vector3.zero + new Vector3(Random.Range(-0.8f, 0.8f), Random.Range(-0.8f, 0.8f), 0), false);
         yield return new WaitForSeconds(2.5f);
@@ -146,6 +294,26 @@ public class Map3WaveSpawner : MonoBehaviour
     {
         isWaveActive = false;
         livingEnemies = 0;
+
+        if (CorruptedCycleManager.IsCorruptedActive && CorruptedCycleManager.CurrentRealm == CalamityRealm.VoidNightmare)
+        {
+            StartCoroutine(WaitForDoppelgangerRoutine());
+        }
+        else
+        {
+            OnAllWavesCleared?.Invoke();
+            WaveSpawner.TriggerAllWavesCleared();
+        }
+    }
+
+    private IEnumerator WaitForDoppelgangerRoutine()
+    {
+        yield return new WaitForSeconds(1.0f);
+        while (ShadowDoppelgangerBoss.ActiveBoss != null && !ShadowDoppelgangerBoss.ActiveBoss.IsDead)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+        yield return new WaitForSeconds(1.0f);
         OnAllWavesCleared?.Invoke();
         WaveSpawner.TriggerAllWavesCleared();
     }

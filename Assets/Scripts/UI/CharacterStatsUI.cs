@@ -23,7 +23,13 @@ public class CharacterStatsUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dashCdStatText;
     [SerializeField] private TextMeshProUGUI ultiCdStatText;
 
-    // 3 Skill & Trait Detail Cards
+    // 4 Skill & Trait Detail Cards (Card 0: NỘI TẠI, Card 1: CHIÊU 1, Card 2: CHIÊU 2, Card 3: CHIÊU 3)
+    [SerializeField] private TextMeshProUGUI passiveCardTitle;
+    [SerializeField] private TextMeshProUGUI passiveCardDesc;
+    [SerializeField] private Image passiveCardIcon;
+    [SerializeField] private Outline passiveCardOutline;
+    [SerializeField] private Outline passiveBadgeOutline;
+
     [SerializeField] private TextMeshProUGUI attackCardTitle;
     [SerializeField] private TextMeshProUGUI attackCardDesc;
     [SerializeField] private Image attackCardIcon;
@@ -208,9 +214,18 @@ public class CharacterStatsUI : MonoBehaviour
 
         int baseAtk = isMage ? 30 : (isDune ? 18 : (isTitan ? 32 : (isAzure ? 24 : (isRonin ? 28 : 20))));
         int baseHp = isMage ? 90 : (isDune ? 110 : (isTitan ? 200 : (isAzure ? 110 : (isRonin ? 95 : 100))));
-        int totalAtk = baseAtk + atkBonus + sAtk + augAtk;
+
+        int azureSpeedAP = 0;
+        var existingAzure = FindAnyObjectByType<AzureBladeSkill>();
+        if (existingAzure != null)
+        {
+            existingAzure.RefreshCooldownStats();
+            azureSpeedAP = existingAzure.ConvertedMagicAttack;
+        }
+
+        int totalAtk = baseAtk + atkBonus + sAtk + augAtk + (isAzure ? azureSpeedAP : 0);
         int totalPhysAtk = (!isMage && !isAzure) ? (baseAtk + atkBonus + sPhysAtk + augAtk) : sPhysAtk;
-        int totalMagicAtk = (isMage || isAzure) ? (baseAtk + atkBonus + sMagicAtk + augAtk) : sMagicAtk;
+        int totalMagicAtk = (isMage || isAzure) ? (baseAtk + atkBonus + sMagicAtk + augAtk + (isAzure ? azureSpeedAP : 0)) : sMagicAtk;
         int totalTrueAtk = sTrueAtk;
 
         int totalHp = baseHp + hpBonus + sHp + augHp;
@@ -367,7 +382,21 @@ public class CharacterStatsUI : MonoBehaviour
         {
             string label = isVi ? "TẤN CÔNG" : "ATTACK";
             string subStats = $"<size=9><color=#FF3B30>{totalPhysAtk}</color>|<color=#B84DFF>{totalMagicAtk}</color>" + (totalTrueAtk > 0 ? $"|<color=#E2E8F0>{totalTrueAtk}</color>" : "") + "</size>";
-            atkStatText.text = $"{label}\n<color=#FF5566><size=16><b>{totalAtk}</b></size></color>\n{subStats}";
+
+            int physPen = pcObj != null ? pcObj.TotalPhysicalArmorPenFlat : 0;
+            int physPenPct = pcObj != null ? Mathf.RoundToInt(pcObj.TotalPhysicalArmorPenPercent * 100) : 0;
+            int magPen = pcObj != null ? pcObj.TotalMagicPenFlat : 0;
+            int magPenPct = pcObj != null ? Mathf.RoundToInt(pcObj.TotalMagicPenPercent * 100) : 0;
+
+            string penSub = "";
+            if (physPen > 0 || physPenPct > 0 || magPen > 0 || magPenPct > 0)
+            {
+                string pPenStr = physPenPct > 0 ? $"{physPen}+{physPenPct}%" : $"{physPen}";
+                string mPenStr = magPenPct > 0 ? $"{magPen}+{magPenPct}%" : $"{magPen}";
+                penSub = $"\n<size=8><color=#F97316>XG:{pPenStr}</color> <color=#A855F7>XP:{mPenStr}</color></size>";
+            }
+
+            atkStatText.text = $"{label}\n<color=#FF5566><size=16><b>{totalAtk}</b></size></color>\n{subStats}{penSub}";
         }
         if (critStatText != null)
         {
@@ -395,21 +424,67 @@ public class CharacterStatsUI : MonoBehaviour
             ultiCdStatText.text = $"{label}\n<color=#FFAA33><size=16><b>{finalUltiCd:F1}s</b></size></color>";
         }
 
+        // Card 0: Passive (Nội Tại)
+        if (passiveCardTitle != null)
+        {
+            string pTitle = isMage ? (isVi ? "NỘI TẠI: TINH TÚ CỘNG HƯỞNG" : "PASSIVE: CELESTIAL RESONANCE")
+                          : isDune ? (isVi ? "NỘI TẠI: HUYẾT SA TẨY LỄ" : "PASSIVE: BLOOD SAND RITUAL")
+                          : isTitan ? (isVi ? "NỘI TẠI: DA DUNG NHAM CHIẾN THẦN" : "PASSIVE: VOLCANIC CARAPACE")
+                          : isAzure ? (isVi ? "NỘI TẠI: HÀN TÂM & KIẾM KHÍ QUY HÓA" : "PASSIVE: FROST SOUL & FLOWING RESONANCE")
+                          : isRonin ? (isVi ? "NỘI TẠI: PHONG LÔI PHONG ẤN" : "PASSIVE: WIND SEAL RESONANCE")
+                          : (isVi ? "NỘI TẠI: THÁNH QUANG BẢO HỘ" : "PASSIVE: RADIANT AEGIS");
+            passiveCardTitle.text = $"{pTitle}  <color=#D9A6FF><size=85%>BỊ ĐỘNG</size></color>";
+        }
+        if (passiveCardDesc != null)
+        {
+            if (isMage)
+            {
+                passiveCardDesc.text = isVi
+                    ? "• <b>Cộng Hưởng Tinh Tú:</b> Cầu ma pháp bắn trúng bộc phát sét lan & hồi phục <color=#38BDF8><b>+4 Mana</b></color> mỗi đòn trúng.\n• <b>Hồi chiêu:</b> <color=#E2E8F0><b>VÔ HẠN</b></color> (Tác dụng vĩnh cửu)"
+                    : "• <b>Celestial Resonance:</b> Hits bounce chain lightning & restore <color=#38BDF8><b>+4 Mana</b></color> per hit.\n• <b>Cooldown:</b> <color=#E2E8F0><b>PERMANENT</b></color>";
+            }
+            else if (isDune)
+            {
+                passiveCardDesc.text = isVi
+                    ? "• <b>Huyết Sa Tẩy Lễ:</b> Mỗi 2 chiêu thức tung ra hồi ngay <color=#22C55E><b>10% HP đã mất</b></color> & nhận <color=#FFAA33><b>+15% Tốc Đánh</b></color> trong 3s.\n• <b>Hồi chiêu:</b> <color=#E2E8F0><b>VÔ HẠN</b></color> (Tác dụng vĩnh cửu)"
+                    : "• <b>Blood Sand Ritual:</b> Every 2 skill casts restores <color=#22C55E><b>10% Missing HP</b></color> & +15% ATK Speed for 3s.\n• <b>Cooldown:</b> <color=#E2E8F0><b>PERMANENT</b></color>";
+            }
+            else if (isTitan)
+            {
+                passiveCardDesc.text = isVi
+                    ? "• <b>Da Dung Nham:</b> Giảm cố định <color=#55FF88><b>20% sát thương nhận vào</b></color> & nhận thêm <color=#FFAA33><b>+30% Kháng Khống Chế</b></color>.\n• <b>Hồi chiêu:</b> <color=#E2E8F0><b>VÔ HẠN</b></color> (Tác dụng vĩnh cửu)"
+                    : "• <b>Volcanic Carapace:</b> Permanently gains <color=#55FF88><b>20% Damage Reduction</b></color> & <color=#FFAA33><b>+30% CC Resistance</b></color>.\n• <b>Cooldown:</b> <color=#E2E8F0><b>PERMANENT</b></color>";
+            }
+            else if (isAzure)
+            {
+                passiveCardDesc.text = isVi
+                    ? $"• <b>Hàn Tâm Băng Phong:</b> Đòn đánh trúng đích hồi <color=#38BDF8><b>+6 Mana</b></color> & giảm 50% hồi đòn kế tiếp.\n• <b>Kiếm Khí Quy Hóa:</b> Tự động chuyển hóa toàn bộ <b>Tốc Đánh & Tốc Độ</b> cộng thêm thành <color=#D946EF><b>+{azureSpeedAP} Sát Thương Phép (AP)</b></color> cho Sóng Kiếm!\n• <b>Hồi chiêu:</b> <color=#E2E8F0><b>VÔ HẠN</b></color> (Tác dụng vĩnh cửu)"
+                    : $"• <b>Frost Blade Soul:</b> Hits restore <color=#38BDF8><b>+6 Mana</b></color> & cut next attack cooldown by 50%.\n• <b>Flowing Resonance:</b> Converts all <b>bonus Attack Speed & Speed</b> directly into <color=#D946EF><b>+{azureSpeedAP} Magic Damage (AP)</b></color> for Sword Waves!\n• <b>Cooldown:</b> <color=#E2E8F0><b>PERMANENT</b></color>";
+            }
+            else if (isRonin)
+            {
+                passiveCardDesc.text = isVi
+                    ? "• <b>Phong Lôi Phong Ấn:</b> Đòn đánh quét kiếm tích Phong Ấn (3 tầng nổ lốc <color=#FFAA33><b>240% Crit DMG</b></color>). Diệt địch hồi +10 Mana.\n• <b>Hồi chiêu:</b> <color=#E2E8F0><b>VÔ HẠN</b></color> (Tác dụng vĩnh cửu)"
+                    : "• <b>Wind Seal:</b> Cleaves stack marks (3 marks burst for <color=#FFAA33><b>240% Crit DMG</b></color>). Slaying foes grants +10 Mana.\n• <b>Cooldown:</b> <color=#E2E8F0><b>PERMANENT</b></color>";
+            }
+            else
+            {
+                passiveCardDesc.text = isVi
+                    ? "• <b>Thánh Quang Bảo Hộ:</b> Đòn đánh hồi <color=#38BDF8><b>+8 Mana</b></color>. Khi HP dưới 35%, kích hoạt Thánh Giáp Thiên Thần hồi ngay <color=#55FF88><b>25% HP</b></color>.\n• <b>Hồi chiêu:</b> <color=#E2E8F0><b>VÔ HẠN</b></color> (Tác dụng vĩnh cửu)"
+                    : "• <b>Radiant Aegis:</b> Hits restore <color=#38BDF8><b>+8 Mana</b></color>. When HP drops below 35%, activates Divine Aegis healing <color=#55FF88><b>25% HP</b></color>.\n• <b>Cooldown:</b> <color=#E2E8F0><b>PERMANENT</b></color>";
+            }
+        }
+
         // Card 1: Attack
         if (attackCardTitle != null)
         {
-            if (isMage)
-                attackCardTitle.text = isVi ? "1. CẦU MA PHÁP & HỘ THỂ MA TRẬN" : "1. ARCANE ORBS & BARRIER";
-            else if (isDune)
-                attackCardTitle.text = isVi ? "1. SONG ĐAO & THẾ THỦ PHẢN KÍCH" : "1. DUAL DAGGERS & MIRAGE PARRY";
-            else if (isTitan)
-                attackCardTitle.text = isVi ? "1. ĐẠI CHÙY & THẾ THỦ NỆN ĐẤT" : "1. WAR HAMMER & EARTHSHAKER";
-            else if (isAzure)
-                attackCardTitle.text = isVi ? "1. TRỌNG KIẾM & SÓNG BĂNG KIẾM KHÍ" : "1. FROST SWORD WAVES";
-            else if (isRonin)
-                attackCardTitle.text = isVi ? "1. PHONG NGUYỆT TRẢM & TỤ LỰC IAIDO" : "1. GALE CRESCENT SWEEP & IAIDO";
-            else
-                attackCardTitle.text = isVi ? "1. ĐẠI KIẾM & THẾ THỦ PHẢN KÍCH" : "1. ANCIENT SWORD & DIVINE PARRY";
+            string baseTitle = isMage ? (isVi ? "1. CẦU MA PHÁP (GỒNG KHIÊN)" : "1. ARCANE ORBS & BARRIER")
+                             : isDune ? (isVi ? "1. SONG ĐAO (GỒNG THỦ)" : "1. DUAL DAGGERS (PARRY)")
+                             : isTitan ? (isVi ? "1. ĐẠI CHÙY (GỒNG ĐỊA CHẤN)" : "1. WAR HAMMER (EARTHSHAKER)")
+                             : isAzure ? (isVi ? "1. TRỌNG KIẾM & SÓNG BĂNG KIẾM KHÍ" : "1. FROST SWORD WAVES")
+                             : isRonin ? (isVi ? "1. PHONG TRẢM (GỒNG TỤ LỰC)" : "1. GALE SLASH & IAIDO")
+                             : (isVi ? "1. ĐẠI KIẾM (GỒNG THẾ THỦ)" : "1. ANCIENT SWORD (PARRY)");
+            attackCardTitle.text = $"{baseTitle}  <color=#10B981><size=85%>[0 Mana]</size></color>";
         }
         if (attackCardDesc != null)
         {
@@ -417,41 +492,43 @@ public class CharacterStatsUI : MonoBehaviour
             {
                 attackCardDesc.text = isVi
                     ? $"• <b>Hệ Sát Thương:</b> <color=#B84DFF><b>AP</b></color> ({totalAtk} AP)\n" +
-                      $"• <b>Cầu Ma Pháp:</b> Bắn 3 cầu tự dẫn đường nổ sét lan | Gồng tạo <b>Hộ Thể Ma Trận</b> hấp thụ 80% dame, phản đòn AP & hồi <color=#38BDF8><b>+10 Mana</b></color>!"
+                      $"• <b>Cầu Ma Pháp:</b> Bắn cầu ma pháp tự dẫn đường | Gồng <b>Khiên Hộ Thể</b> giảm 60% sát thương, phản đòn AP & hồi <color=#38BDF8><b>+10 Mana</b></color>!\n" +
+                      $"• <b>[Thần Nộ Tinh Tú]:</b> Đầy 100% Nội Năng tím kích hoạt <color=#B84DFF><b>Overdrive (8s)</b></color>: Hồi Tuyệt Kỹ còn <color=#55FF88><b>1.0s</b></color>!"
                     : $"• <b>DMG Type:</b> <color=#B84DFF><b>AP</b></color> ({totalAtk} AP)\n" +
-                      $"• <b>Arcane Orbs:</b> 3 homing orbs with chain lightning | Hold for <b>Barrier</b> absorbing 80% dmg, counter AP & +10 Mana!";
+                      $"• <b>Arcane Orbs:</b> Homing orb | Hold for <b>Astral Barrier</b> absorbing 60% dmg, counter AP & +10 Mana!\n" +
+                      $"• <b>[Celestial Overdrive]:</b> 100% Inner Energy triggers <color=#B84DFF><b>Overdrive (8s)</b></color>: Ulti CD drops to <color=#55FF88><b>1.0s</b></color>!";
             }
             else if (isDune)
             {
                 attackCardDesc.text = isVi
                     ? $"• <b>Hệ Sát Thương:</b> <color=#FF3B30><b>ATK</b></color> & <color=#E2E8F0><b>TD</b></color>\n" +
-                      $"• <b>Đặc tính:</b> Combo 3 đòn song đao ({totalAtk} ATK). Nhấn Giữ Thế Thủ giảm 70% sát thương, tung Phản Kích gây <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>Choáng 1.2s!</b></color>"
+                      $"• <b>Đặc tính:</b> Đòn 3 phóng Lốc Sa Mạc (3.5s CD). [Gồng Thủ / Đầy Nộ]: Giảm 70% ST, phóng Lốc Đỏ gây <color=#E2E8F0><b>TD</b></color>, <color=#FFAA33><b>Choáng 0.75s</b></color> & <color=#FFAA33><b>Ngắt chiêu Boss!</b></color>"
                     : $"• <b>DMG Type:</b> <color=#FF3B30><b>ATK</b></color> & <color=#E2E8F0><b>TD</b></color>\n" +
-                      $"• <b>Trait:</b> Fast 3-hit combo ({totalAtk} ATK). Hold attack for Mirage Guard: 70% DR & Air Slash Counter dealing <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>1.2s Stun!</b></color>";
+                      $"• <b>Trait:</b> Hit 3 fires Sand Vortex (3.5s CD). [Hold Parry / Full Rage]: 70% DR, fires Crimson Vortex dealing <color=#E2E8F0><b>TD</b></color>, <color=#FFAA33><b>0.75s Stun</b></color> & <color=#FFAA33><b>Interrupts Boss!</b></color>";
             }
             else if (isTitan)
             {
                 attackCardDesc.text = isVi
-                    ? $"• <b>Hệ Sát Thương:</b> <color=#FF3B30><b>ATK</b></color> (Nội tại: Giảm 20% sát thương)\n" +
-                      $"• <b>Đặc tính:</b> Nện đất ({totalAtk} ATK). Nhấn Giữ gồng Thế Thủ: <color=#55FF88><b>Bất tử 100%</b></color>, thả tay nện đất bộc phá gây <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>Choáng 1.0s!</b></color>"
-                    : $"• <b>DMG Type:</b> <color=#FF3B30><b>ATK</b></color> (Innate: 20% DR)\n" +
-                      $"• <b>Trait:</b> Smashes inflicting {totalAtk} ATK. Hold attack for Earthshaker: <color=#55FF88><b>100% Invulnerable</b></color>, release to smash ground inflicting <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>Stun 1.0s!</b></color>";
+                    ? $"• <b>Hệ Sát Thương:</b> <color=#FF3B30><b>ATK</b></color>\n" +
+                      $"• <b>Đặc tính:</b> Nện đất ({totalAtk} ATK). Nhấn Giữ gồng Thế Thủ: <color=#55FF88><b>Bất tử 100%</b></color>, thả tay nện đất bộc phá gây <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>Choáng 1.0s!</b></color> (CD gồng: 5s-10s)"
+                    : $"• <b>DMG Type:</b> <color=#FF3B30><b>ATK</b></color>\n" +
+                      $"• <b>Trait:</b> Smashes inflicting {totalAtk} ATK. Hold attack for Earthshaker: <color=#55FF88><b>100% Invulnerable</b></color>, release to smash ground inflicting <color=#E2E8F0><b>TD</b></color> + <color=#FFAA33><b>Stun 1.0s!</b></color> (Charge CD: 5s-10s)";
             }
             else if (isAzure)
             {
                 attackCardDesc.text = isVi
                     ? $"• <b>Hệ Sát Thương:</b> <color=#B84DFF><b>AP</b></color> ({totalAtk} AP)\n" +
-                      $"• <b>Sóng Kiếm Tầm Xa:</b> Phóng sóng kiếm băng xuyên quái (6.5m), hồi <color=#38BDF8><b>+6 Mana</b></color> & giảm 50% thời gian chờ đòn đánh."
+                      $"• <b>Sóng Kiếm Băng:</b> Phóng kiếm khí xuyên quái (6.5m), hồi <color=#38BDF8><b>+6 Mana</b></color>. Găm <color=#FF2961><b>Vết Thương Sâu (Trái Tim Nứt)</b></color> 5s: <color=#FF4D79><b>giảm 50% hồi máu & hút máu</b></color> của địch & nhận <color=#55FFFF><b>+20% ST băng</b></color>! Nhấn Giữ Tụ Lực (1s) tăng ST lên <color=#FFAA33><b>x2.25 lần!</b></color>"
                     : $"• <b>DMG Type:</b> <color=#B84DFF><b>AP</b></color> ({totalAtk} AP)\n" +
-                      $"• <b>Frost Wave:</b> Piercing wave (6.5m), restores <color=#38BDF8><b>+6 Mana</b></color> & cuts attack cooldown 50%.";
+                      $"• <b>Frost Wave:</b> Piercing wave (6.5m), restores <color=#38BDF8><b>+6 Mana</b></color>. Inflicts <color=#FF2961><b>Grievous Wounds (Cracked Heart)</b></color> for 5s: <color=#FF4D79><b>reduces enemy healing & lifesteal by 50%</b></color> & takes <color=#55FFFF><b>+20% Frost DMG</b></color>! Hold Charge (1s) boosts wave damage to <color=#FFAA33><b>x2.25!</b></color>";
             }
             else if (isRonin)
             {
                 attackCardDesc.text = isVi
                     ? $"• <b>Hệ Sát Thương:</b> <color=#FF3B30><b>ATK</b></color> & <color=#B84DFF><b>AP</b></color> (Phong Ấn)\n" +
-                      $"• <b>Đặc tính:</b> Quét kiếm 180° ({totalAtk} ATK, hồi +10 Mana), tích 3 tầng nổ <color=#FFAA33><b>AP 240% Crit</b></color> + Lốc Xoáy. Khi có Khiên: Gồng phóng Nguyệt Kiếm Khí <color=#FF3B30><b>x2.85 Crit ATK!</b></color>"
+                      $"• <b>Đặc tính:</b> Quét kiếm 180° ({totalAtk} ATK, hồi +10 Mana), tích 3 tầng nổ lốc xoáy <color=#FFAA33><b>AP 240% Crit</b></color>. <color=#FFDF66><b>[Khi Đầy Nội Năng / Khiên Hộ Thân]:</b></color> Gồng phóng Nguyệt Kiếm Khí <color=#FF3B30><b>x2.85 Crit DMG</b></color> & Giảm 35% CD Tuyệt Kỹ!"
                     : $"• <b>DMG Type:</b> <color=#FF3B30><b>ATK</b></color> & <color=#B84DFF><b>AP</b></color> (Wind Marks)\n" +
-                      $"• <b>Trait:</b> 180° Crescent cleave ({totalAtk} ATK, +10 Mana), 3 marks detonate for <color=#FFAA33><b>AP 240% Crit</b></color> + Vortex. When Shielded: Charge for <color=#FF3B30><b>x2.85 Crit ATK!</b></color>";
+                      $"• <b>Trait:</b> 180° Crescent cleave ({totalAtk} ATK, +10 Mana), 3 marks detonate for <color=#FFAA33><b>AP 240% Crit</b></color> vortex. <color=#FFDF66><b>[When Full Energy / Shield Active]:</b></color> Charge for Crescent Wave <color=#FF3B30><b>x2.85 Crit DMG</b></color> & -35% Ulti CD!";
             }
             else
             {
@@ -467,68 +544,68 @@ public class CharacterStatsUI : MonoBehaviour
         if (dashCardTitle != null)
         {
             if (isMage)
-                dashCardTitle.text = isVi ? "2. TỐC BIẾN HƯ KHÔNG (BLINK)" : "2. ARCANE BLINK DASH";
+                dashCardTitle.text = (isVi ? "2. TỐC BIẾN HƯ KHÔNG (BLINK)" : "2. ARCANE BLINK DASH") + "  <color=#10B981><size=85%>[0 Mana]</size></color>";
             else if (isDune)
-                dashCardTitle.text = isVi ? "2. ẢO ẢNH SA LƯỚT (3 LẦN LIÊN HOÀN)" : "2. TRIPLE SAND MIRAGE DASH";
+                dashCardTitle.text = (isVi ? "2. ẢO ẢNH SA LƯỚT (3 LẦN LIÊN HOÀN)" : "2. TRIPLE SAND MIRAGE DASH") + "  <color=#FF4757><size=85%>[4% HP]</size></color>";
             else if (isTitan)
-                dashCardTitle.text = isVi ? "2. CHIẾN XA XOAY BÚA 360°" : "2. JUGGERNAUT 360° SPIN";
+                dashCardTitle.text = (isVi ? "2. CHIẾN XA XOAY BÚA 360°" : "2. JUGGERNAUT 360° SPIN") + "  <color=#10B981><size=85%>[0 Mana]</size></color>";
             else if (isAzure)
-                dashCardTitle.text = isVi ? "2. HÀN BĂNG TRƯỢT TUYẾT" : "2. FROST GLIDE DASH";
+                dashCardTitle.text = (isVi ? "2. HÀN BĂNG TRƯỢT TUYẾT" : "2. FROST GLIDE DASH") + "  <color=#10B981><size=85%>[0 Mana]</size></color>";
             else if (isRonin)
-                dashCardTitle.text = isVi ? "2. TÀN ẢNH TỐC BIẾN (MURAD STYLE)" : "2. SHADOW PHANTOM WARP";
+                dashCardTitle.text = (isVi ? "2. TÀN ẢNH TỐC BIẾN (MURAD STYLE)" : "2. SHADOW PHANTOM WARP") + "  <color=#10B981><size=85%>[0 Mana]</size></color>";
             else
-                dashCardTitle.text = isVi ? "2. THÁNH THUẪN PHẢN ĐÒN" : "2. RADIANT RIPOSTE DASH";
+                dashCardTitle.text = (isVi ? "2. THÁNH THUẪN PHẢN ĐÒN" : "2. RADIANT RIPOSTE DASH") + "  <color=#10B981><size=85%>[0 Mana]</size></color>";
         }
         if (dashCardDesc != null)
         {
             if (isMage)
             {
                 dashCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>15 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (<color=#55FF88><b>Bất tử khi tốc biến</b></color>)\n" +
-                      $"• <b>Đặc tính:</b> Dịch chuyển tức thời, để lại tàn ảnh ma pháp nổ đẩy lùi & hồi <color=#38BDF8><b>+12 Mana</b></color>"
-                    : $"• <b>Cost:</b> <color=#38BDF8><b>15 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (<color=#55FF88><b>Invulnerable</b></color>)\n" +
-                      $"• <b>Trait:</b> Instant warp leaving repulsive arcane clone & restores <color=#38BDF8><b>+12 Mana</b></color>";
+                    ? $"• <b>Tiêu hao:</b> <color=#10B981><b>0 Mana</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Đặc tính:</b> Dịch chuyển tức thời 3.2m né đòn, để lại Vết Rách Hư Không xoay tròn gây <color=#B84DFF><b>AP liên tục</b></color>, <color=#FFAA33><b>Giảm 1.5s hồi Tuyệt Kỹ</b></color> & hồi <color=#38BDF8><b>+12 Mana</b></color>."
+                    : $"• <b>Cost:</b> <color=#10B981><b>0 Mana</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Trait:</b> Instant 3.2m void warp to dodge, leaves Singularity Rift dealing continuous AP, <color=#FFAA33><b>Cuts Ulti CD 1.5s</b></color> & restores <color=#38BDF8><b>+12 Mana</b></color>.";
             }
             else if (isDune)
             {
                 dashCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#FF5566><b>4% Máu</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
-                      $"• <b>Đặc tính:</b> Tích lũy tối đa 3 lần lướt liên hoàn cực cơ động, tạo tàn ảnh cát & <color=#FFAA33><b>Giảm 1.5s hồi Tuyệt Kỹ</b></color> mỗi lần lướt."
+                    ? $"• <b>Tiêu hao:</b> <color=#FF5566><b>4% HP</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Đặc tính:</b> Tích lũy tối đa 3 lần lướt liên hoàn cực cơ động (tiêu hao 4% HP), tạo tàn ảnh cát & <color=#FFAA33><b>Giảm 1.5s hồi Tuyệt Kỹ</b></color> mỗi lần lướt."
                     : $"• <b>Cost:</b> <color=#FF5566><b>4% HP</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
-                      $"• <b>Trait:</b> Stores up to 3 Consecutive Dash Charges, leaves mirages & <color=#FFAA33><b>Reduces Ulti CD 1.5s</b></color> per dash.";
+                      $"• <b>Trait:</b> Stores up to 3 Consecutive Dash Charges (consumes 4% HP), leaves mirages & <color=#FFAA33><b>Reduces Ulti CD 1.5s</b></color> per dash.";
             }
             else if (isTitan)
             {
                 dashCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                    ? $"• <b>Tiêu hao:</b> <color=#10B981><b>0 Mana</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
                       $"• <b>Đặc tính:</b> Lướt tốc độ cao xoay búa 360° càn quét gây ATK & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>."
-                    : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                    : $"• <b>Cost:</b> <color=#10B981><b>0 Mana</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
                       $"• <b>Trait:</b> Heavy spin dash slashing all enemies along path with ATK & <color=#FFAA33><b>Reduces Ultimate CD by 2.0s</b></color>.";
             }
             else if (isRonin)
             {
                 dashCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>15 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (<color=#55FF88><b>Bất tử khi dịch chuyển</b></color>)\n" +
-                      $"• <b>Nhịp 1:</b> Tốc biến 4.8m tới trước (<color=#55FF88><b>Bất tử</b></color>) cắm bóng.\n" +
-                      $"• <b>Nhịp 2 (Bấm lại):</b> Lập tức Teleport quay về bóng & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ!</b></color>"
-                    : $"• <b>Cost:</b> <color=#38BDF8><b>15 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (<color=#55FF88><b>Invulnerable</b></color>)\n" +
-                      $"• <b>Stage 1:</b> Warps 4.8m forward leaving clone (<color=#55FF88><b>Invincible</b></color>).\n" +
-                      $"• <b>Stage 2 (Cast again):</b> Instantly Warps back to clone & <color=#FFAA33><b>Cuts Ulti CD by 2.0s!</b></color>";
+                    ? $"• <b>Tiêu hao:</b> <color=#10B981><b>0 Mana</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Nhịp 1:</b> Tốc biến 4.8m tới trước (<color=#55FF88><b>Bất tử 0.25s</b></color>) cắm bóng 4.5s.\n" +
+                      $"• <b>Nhịp 2 (Bấm lại):</b> Lập tức Teleport quay về bóng (<color=#55FF88><b>Bất tử 0.30s</b></color>) & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ!</b></color>"
+                    : $"• <b>Cost:</b> <color=#10B981><b>0 Mana</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                      $"• <b>Stage 1:</b> Warps 4.8m forward leaving clone for 4.5s (<color=#55FF88><b>Invincible 0.25s</b></color>).\n" +
+                      $"• <b>Stage 2 (Cast again):</b> Instantly Warps back to clone (<color=#55FF88><b>Invincible 0.30s</b></color>) & <color=#FFAA33><b>Cuts Ulti CD by 2.0s!</b></color>";
             }
             else if (isAzure)
             {
                 dashCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                    ? $"• <b>Tiêu hao:</b> <color=#10B981><b>0 Mana</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
                       $"• <b>Đặc tính:</b> Lướt né đòn trên dải băng tuyết & <color=#55FFFF><b>Hồi ngay lập tức đòn đánh thường</b></color> kế tiếp."
-                    : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
+                    : $"• <b>Cost:</b> <color=#10B981><b>0 Mana</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color>\n" +
                       $"• <b>Trait:</b> Swift glide dash dodging attacks & <color=#55FFFF><b>Instantly resets basic attack cooldown</b></color>.";
             }
             else
             {
                 dashCardDesc.text = isVi
-                    ? $"• <b>Tiêu hao:</b> <color=#38BDF8><b>20 NL</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (<color=#55FF88><b>Bất tử khi lướt</b></color>)\n" +
+                    ? $"• <b>Tiêu hao:</b> <color=#10B981><b>0 Mana</b></color> | <b>Hồi chiêu:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (<color=#55FF88><b>Bất tử khi lướt</b></color>)\n" +
                       $"• <b>Thánh Thuẫn Phản Đòn:</b> Lướt qua quái/đỡ đòn sẽ <color=#FFAA33><b>Hồi 50% CD Lướt</b></color>, hồi <color=#38BDF8><b>+15 Mana</b></color> & phóng 3 Thánh Kiếm Khí gây ATK!"
-                    : $"• <b>Cost:</b> <color=#38BDF8><b>20 Energy</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (<color=#55FF88><b>Invulnerable</b></color>)\n" +
+                    : $"• <b>Cost:</b> <color=#10B981><b>0 Mana</b></color> | <b>Cooldown:</b> <color=#55DDFF><b>{finalDashCd:F1}s</b></color> (<color=#55FF88><b>Invulnerable</b></color>)\n" +
                       $"• <b>Radiant Riposte:</b> Deflecting attacks <color=#FFAA33><b>Refunds 50% Dash CD</b></color>, restores <color=#38BDF8><b>+15 Mana</b></color> & fires 3 Holy Waves with ATK!";
             }
         }
@@ -537,17 +614,17 @@ public class CharacterStatsUI : MonoBehaviour
         if (ultiCardTitle != null)
         {
             if (isMage)
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: THIÊN THẠCH MA TRẬN" : "3. ULTIMATE: METEOR APOCALYPSE";
+                ultiCardTitle.text = (isVi ? "3. TUYỆT KỸ: THIÊN THẠCH MA TRẬN" : "3. ULTIMATE: METEOR APOCALYPSE") + "  <color=#00E5FF><size=85%>[60 Mana]</size></color>";
             else if (isDune)
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: CUỒNG BÃO SA ẢNH X-REND" : "3. ULTIMATE: SANDSTORM X-REND";
+                ultiCardTitle.text = (isVi ? "3. TUYỆT KỸ: CUỒNG BÃO SA ẢNH X-REND" : "3. ULTIMATE: SANDSTORM X-REND") + "  <color=#FF4757><size=85%>[20% HP]</size></color>";
             else if (isTitan)
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: CUỒNG NỘ CHẤN ĐỊA DUNG NHAM" : "3. ULTIMATE: VOLCANIC CATACLYSM SLAM";
+                ultiCardTitle.text = (isVi ? "3. TUYỆT KỸ: CUỒNG NỘ CHẤN ĐỊA DUNG NHAM" : "3. ULTIMATE: VOLCANIC CATACLYSM SLAM") + "  <color=#00E5FF><size=85%>[45 Mana]</size></color>";
             else if (isAzure)
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: BÃO SÓNG KIẾM NAN QUẠT" : "3. ULTIMATE: CRESCENT TEMPEST";
+                ultiCardTitle.text = (isVi ? "3. TUYỆT KỸ: BÃO SÓNG KIẾM NAN QUẠT" : "3. ULTIMATE: CRESCENT TEMPEST") + "  <color=#00E5FF><size=85%>[50 Mana]</size></color>";
             else if (isRonin)
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: ÁM ẢNH PHÂN THÂN TRẢM" : "3. ULTIMATE: PHANTOM FLASH CLEAVE";
+                ultiCardTitle.text = (isVi ? "3. TUYỆT KỸ: ÁM ẢNH PHÂN THÂN TRẢM" : "3. ULTIMATE: PHANTOM FLASH CLEAVE") + "  <color=#00E5FF><size=85%>[50 Mana]</size></color>";
             else
-                ultiCardTitle.text = isVi ? "3. TUYỆT KỸ: THÁNH KIẾM THIÊN NHAM" : "3. ULTIMATE: HOLY SWORD TEMPEST";
+                ultiCardTitle.text = (isVi ? "3. TUYỆT KỸ: THÁNH KIẾM THIÊN NHAM" : "3. ULTIMATE: HOLY SWORD TEMPEST") + "  <color=#00E5FF><size=85%>[50 Mana]</size></color>";
         }
         if (ultiCardDesc != null)
         {
@@ -558,26 +635,26 @@ public class CharacterStatsUI : MonoBehaviour
                 ultiCardDesc.text = isVi
                     ? $"• <b>Hệ Sát Thương:</b> <color=#B84DFF><b>AP</b></color> (+<color=#E2E8F0><b>TD</b></color> từ Ngọc)\n" +
                       $"• <b>Sát thương:</b> <color=#B84DFF><b>{mageMeteorDmg} AP</b></color> (5 Đợt Mưa Thiên Thạch)\n" +
-                      $"• <b>Tiêu hao:</b> <color=#38BDF8><b>50 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Hiệu ứng:</b> Triệu hồi 5 đợt thiên thạch ma pháp giáng thế từ không gian hủy diệt toàn bộ chiến trường"
+                      $"• <b>Tiêu hao:</b> <color=#00E5FF><b>60 Mana</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Hiệu ứng:</b> Triệu hồi 5 đợt thiên thạch ma pháp giáng thế từ không gian hủy diệt diện rộng.\n" +
+                      $"• <b>[Overdrive 8s]:</b> Đầy Nội Năng tím hồi chiêu giảm về <color=#55FF88><b>1.0s</b></color> & tiêu hao còn 25 Mana!"
                     : $"• <b>DMG Type:</b> <color=#B84DFF><b>AP</b></color> (+<color=#E2E8F0><b>TD</b></color> from Gems)\n" +
                       $"• <b>Damage:</b> <color=#B84DFF><b>{mageMeteorDmg} AP</b></color> (5 Waves Meteor Strikes)\n" +
-                      $"• <b>Cost:</b> <color=#38BDF8><b>50 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Effect:</b> Summons 5 waves of devastating meteor strikes annihilating all battlefield foes";
+                      $"• <b>Cost:</b> <color=#00E5FF><b>60 Mana</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Effect:</b> Summons 5 waves of devastating meteor strikes annihilating all battlefield foes.\n" +
+                      $"• <b>[Overdrive 8s]:</b> 100% Inner Energy cuts CD to <color=#55FF88><b>1.0s</b></color> & cost to 25 Mana!";
             }
             else if (isDune)
             {
                 int duneUltiDmg = (14 * 6) + (totalAtk * 3) + ultiDmgBonus;
 
                 ultiCardDesc.text = isVi
-                    ? $"• <b>Hệ Sát Thương:</b> <color=#FF3B30><b>ATK</b></color> (6 Đòn) & <color=#E2E8F0><b>TD</b></color> (X-Rend Trảm)\n" +
-                      $"• <b>Sát thương:</b> <color=#FF3B30><b>{duneUltiDmg} ATK</b></color> (6 Trảm + X-Slash Bạo Kích)\n" +
-                      $"• <b>Tiêu hao:</b> <color=#FF5566><b>20% Máu</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Hiệu ứng:</b> Khóa mục tiêu (8.5m) -> Hóa bóng cát lướt 6 đòn chém liên hoàn cực tốc rồi chém chéo X-Slash dứt điểm, đẩy lùi toàn bộ quái xung quanh"
-                    : $"• <b>DMG Type:</b> <color=#FF3B30><b>ATK</b></color> (6 Hits) & <color=#E2E8F0><b>TD</b></color> (X-Rend Finish)\n" +
-                      $"• <b>Damage:</b> <color=#FF3B30><b>{duneUltiDmg} ATK</b></color> (6 Flurry Hits + Final Critical X-Slash)\n" +
-                      $"• <b>Cost:</b> <color=#FF5566><b>20% HP</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Effect:</b> Lock-on (8.5m) -> Dissolves into sand mirages delivering 6 supersonic slashes followed by an explosive X-Rend cross slash knockback";
+                    ? $"• <b>Hệ Sát Thương:</b> <color=#FF3B30><b>ATK</b></color> & <color=#E2E8F0><b>TD</b></color> (X-Rend)\n" +
+                      $"• <b>Sát thương:</b> <color=#FF3B30><b>{duneUltiDmg} ATK/TD</b></color> | <b>Tiêu hao:</b> <color=#FF5566><b>20% HP</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Hiệu ứng:</b> Hút quái -> chém chữ X dứt điểm gây TD cực lớn, <color=#55FF88><b>Hút máu 50% sát thương gây ra</b></color> & Chảy Máu Sa Mạc liên tục."
+                    : $"• <b>DMG Type:</b> <color=#FF3B30><b>ATK</b></color> & <color=#E2E8F0><b>TD</b></color> (X-Rend)\n" +
+                      $"• <b>Damage:</b> <color=#FF3B30><b>{duneUltiDmg} ATK/TD</b></color> | <b>Cost:</b> <color=#FF5566><b>20% HP</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
+                      $"• <b>Effect:</b> 6 flurry hits + X-Slash dealing TD, <color=#55FF88><b>50% Lifesteal from damage dealt</b></color> & continuous Sand Bleed.";
             }
             else if (isTitan)
             {
@@ -587,13 +664,11 @@ public class CharacterStatsUI : MonoBehaviour
                     ? $"• <b>Hệ Sát Thương:</b> <color=#FF3B30><b>ATK</b></color> (+<color=#E2E8F0><b>TD</b></color> từ Ngọc)\n" +
                       $"• <b>Sát thương:</b> <color=#FF3B30><b>{titanUltiDmg} ATK</b></color> (Địa Chấn Dung Nham)\n" +
                       $"• <b>Tiêu hao:</b> <color=#38BDF8><b>45 NL</b></color> | <b>Hồi chiêu:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Hiệu ứng:</b> Hút quái vật (5.5m) -> Nện đại chùy hất tung và gây choáng diện rộng\n" +
-                      $"• <b>Nội tại:</b> <color=#55FF88><b>Kích hoạt ngay Khiên Hộ Thân Đất Đá!</b></color>"
+                      $"• <b>Hiệu ứng:</b> Hút toàn bộ quái vật (5.5m), đập nện đại chùy hất tung diện rộng & <color=#55FF88><b>Nhận Máu Ảo bằng 50% HP hiện tại trong 15s!</b></color>"
                     : $"• <b>DMG Type:</b> <color=#FF3B30><b>ATK</b></color> (+<color=#E2E8F0><b>TD</b></color> from Gems)\n" +
                       $"• <b>Damage:</b> <color=#FF3B30><b>{titanUltiDmg} ATK</b></color> (Cataclysm Slam)\n" +
                       $"• <b>Cost:</b> <color=#38BDF8><b>45 Energy</b></color> | <b>Cooldown:</b> <color=#FFAA33><b>{finalUltiCd:F1}s</b></color>\n" +
-                      $"• <b>Effect:</b> Draws enemies (5.5m) -> Cataclysmic slam launches and stuns all foes\n" +
-                      $"• <b>Special:</b> <color=#55FF88><b>Instantly triggers Titan Bulwark Shield!</b></color>";
+                      $"• <b>Effect:</b> Draws enemies (5.5m), cataclysmic slam launches foes & <color=#55FF88><b>Gains Barrier equal to 50% Current HP for 15s!</b></color>";
             }
             else if (isAzure)
             {
@@ -703,8 +778,10 @@ public class CharacterStatsUI : MonoBehaviour
         dRt.offsetMax = Vector2.zero;
 
         Image dImg = dialogBox.AddComponent<Image>();
-        dImg.color = new Color(0.04f, 0.05f, 0.09f, 0.98f);
-        WhiteIconLoader.ApplyGothicFrame(dialogBox, new Color(0.85f, 0.72f, 0.38f, 0.90f), 0.35f);
+        dImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        dImg.type = Image.Type.Sliced;
+        dImg.color = Color.white;
+        WhiteIconLoader.ApplyGothicFrame(dialogBox, Color.white, 0.40f);
 
         var uiComp = panelObj.AddComponent<CharacterStatsUI>();
 
@@ -717,15 +794,9 @@ public class CharacterStatsUI : MonoBehaviour
         cRt.anchoredPosition = new Vector2(-25f, -22f);
         cRt.sizeDelta = new Vector2(52f, 52f);
 
-        Image cImg = closeBtnObj.AddComponent<Image>();
-        cImg.color = new Color(0.75f, 0.22f, 0.25f, 1f);
-        var cOutline = closeBtnObj.AddComponent<Outline>();
-        cOutline.effectColor = new Color(1f, 0.85f, 0.4f, 0.7f);
-
         Button cBtn = closeBtnObj.AddComponent<Button>();
-        cBtn.targetGraphic = cImg;
         cBtn.onClick.AddListener(uiComp.Close);
-        WhiteIconLoader.ReplaceTextWithIcon(cBtn, "Cross", Color.white, new Vector2(24f, 24f));
+        SoulslikeHUDStyler.StyleCloseButton(cBtn);
 
         // Header Title
         GameObject headerObj = CreateUIObject("HeaderTitle", dialogBox.transform);
@@ -740,7 +811,7 @@ public class CharacterStatsUI : MonoBehaviour
         uiComp.characterTitleText.fontSize = 28;
         uiComp.characterTitleText.fontStyle = FontStyles.Bold;
         uiComp.characterTitleText.alignment = TextAlignmentOptions.Center;
-        uiComp.characterTitleText.color = new Color(1f, 0.85f, 0.35f);
+        uiComp.characterTitleText.color = new Color(0.98f, 0.88f, 0.55f);
 
         // Subtitle
         GameObject subObj = CreateUIObject("HeaderSubtitle", dialogBox.transform);
@@ -754,7 +825,9 @@ public class CharacterStatsUI : MonoBehaviour
         uiComp.characterSubtitleText = subObj.AddComponent<TextMeshProUGUI>();
         uiComp.characterSubtitleText.fontSize = 15;
         uiComp.characterSubtitleText.alignment = TextAlignmentOptions.Center;
-        uiComp.characterSubtitleText.color = new Color(0.6f, 0.85f, 1f);
+        uiComp.characterSubtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
+        SoulslikeHUDStyler.StyleHeader(uiComp.characterTitleText, uiComp.characterSubtitleText);
+        SoulslikeHUDStyler.AddFiligreeDivider(dialogBox.transform, new Vector2(0f, -82f), new Vector2(520f, 12f));
 
         // 4 Badges Container (Stretches across top under subtitle)
         GameObject badgesRow = CreateUIObject("BadgesRow", dialogBox.transform);
@@ -790,7 +863,7 @@ public class CharacterStatsUI : MonoBehaviour
         csRt.offsetMax = new Vector2(-30f, -172f);
 
         var vlg = cardsSection.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing = 14f;
+        vlg.spacing = 8f;
         vlg.childAlignment = TextAnchor.UpperCenter;
         vlg.childControlWidth = true;
         vlg.childControlHeight = true;
@@ -800,10 +873,13 @@ public class CharacterStatsUI : MonoBehaviour
         Sprite sprAttack = LoadSprite("Assets/Sprites/UI/Attack.png", "UI/Attack");
         Sprite sprDash = LoadSprite("Assets/Sprites/UI/Dash.png", "UI/Dash");
         Sprite sprUlti = LoadSprite("Assets/Sprites/UI/Ulti.png", "UI/Ulti");
+        Sprite sprPassive = LoadSprite("Assets/Sprites/UI/Star.png", "UI/Star");
+        if (sprPassive == null) sprPassive = sprAttack;
 
-        CreateSkillCard(cardsSection.transform, "Card_Attack", "1. ĐÒN ĐÁNH CƠ BẢN", sprAttack, new Color(1f, 0.45f, 0.25f), out uiComp.attackCardDesc, out uiComp.attackCardTitle, out uiComp.attackCardIcon, out uiComp.attackCardOutline, out uiComp.attackBadgeOutline);
+        CreateSkillCard(cardsSection.transform, "Card_Passive", "0. NỘI TẠI", sprPassive, new Color(0.85f, 0.65f, 1f), out uiComp.passiveCardDesc, out uiComp.passiveCardTitle, out uiComp.passiveCardIcon, out uiComp.passiveCardOutline, out uiComp.passiveBadgeOutline);
+        CreateSkillCard(cardsSection.transform, "Card_Attack", "1. ĐÒN ĐÁNH CƠ BẢN", sprAttack, new Color(1f, 0.85f, 0.35f), out uiComp.attackCardDesc, out uiComp.attackCardTitle, out uiComp.attackCardIcon, out uiComp.attackCardOutline, out uiComp.attackBadgeOutline);
         CreateSkillCard(cardsSection.transform, "Card_Dash", "2. LƯỚT NÉ ĐÒN", sprDash, new Color(0.2f, 0.95f, 0.65f), out uiComp.dashCardDesc, out uiComp.dashCardTitle, out uiComp.dashCardIcon, out uiComp.dashCardOutline, out uiComp.dashBadgeOutline);
-        CreateSkillCard(cardsSection.transform, "Card_Ulti", "3. TUYỆT KỸ", sprUlti, new Color(0.75f, 0.5f, 1f), out uiComp.ultiCardDesc, out uiComp.ultiCardTitle, out uiComp.ultiCardIcon, out uiComp.ultiCardOutline, out uiComp.ultiBadgeOutline);
+        CreateSkillCard(cardsSection.transform, "Card_Ulti", "3. TUYỆT KỸ", sprUlti, new Color(0.95f, 0.35f, 0.35f), out uiComp.ultiCardDesc, out uiComp.ultiCardTitle, out uiComp.ultiCardIcon, out uiComp.ultiCardOutline, out uiComp.ultiBadgeOutline);
 
         panelObj.SetActive(false);
         return uiComp;
@@ -860,7 +936,7 @@ public class CharacterStatsUI : MonoBehaviour
         WhiteIconLoader.ApplyGothicFrame(cardObj, new Color(accentCol.r, accentCol.g, accentCol.b, 0.70f), 0.55f);
         cardOutlineOut = null;
 
-        float leftPad = 25f;
+        float leftPad = 16f;
         badgeOutlineOut = null;
         iconImgOut = null;
 
@@ -869,8 +945,8 @@ public class CharacterStatsUI : MonoBehaviour
         ibRt.anchorMin = new Vector2(0f, 0.5f);
         ibRt.anchorMax = new Vector2(0f, 0.5f);
         ibRt.pivot = new Vector2(0f, 0.5f);
-        ibRt.anchoredPosition = new Vector2(25f, 0f);
-        ibRt.sizeDelta = new Vector2(76f, 76f);
+        ibRt.anchoredPosition = new Vector2(16f, 0f);
+        ibRt.sizeDelta = new Vector2(62f, 62f);
 
         Image ibBg = iconBadgeObj.AddComponent<Image>();
         ibBg.color = new Color(0.04f, 0.06f, 0.10f, 0.95f);
@@ -885,7 +961,7 @@ public class CharacterStatsUI : MonoBehaviour
         iiRt.anchorMax = new Vector2(0.5f, 0.5f);
         iiRt.pivot = new Vector2(0.5f, 0.5f);
         iiRt.anchoredPosition = Vector2.zero;
-        iiRt.sizeDelta = new Vector2(62f, 62f);
+        iiRt.sizeDelta = new Vector2(50f, 50f);
 
         Image iiImg = iconInner.AddComponent<Image>();
         iiImg.sprite = iconSpr;
@@ -893,19 +969,19 @@ public class CharacterStatsUI : MonoBehaviour
         iiImg.raycastTarget = false;
         iconImgOut = iiImg;
 
-        leftPad = 125f;
+        leftPad = 96f;
 
         GameObject tObj = CreateUIObject("Title", cardObj.transform);
         RectTransform tRt = tObj.GetComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0f, 1f);
         tRt.anchorMax = new Vector2(1f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.anchoredPosition = new Vector2(leftPad, -16f);
-        tRt.sizeDelta = new Vector2(-(leftPad + 25f), 32f);
+        tRt.anchoredPosition = new Vector2(leftPad, -10f);
+        tRt.sizeDelta = new Vector2(-(leftPad + 16f), 26f);
 
         titleTmp = tObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = title;
-        titleTmp.fontSize = 22f;
+        titleTmp.fontSize = 17.5f;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = new Color(1f, 0.88f, 0.38f);
 
@@ -914,12 +990,12 @@ public class CharacterStatsUI : MonoBehaviour
         dRt.anchorMin = new Vector2(0f, 0f);
         dRt.anchorMax = new Vector2(1f, 1f);
         dRt.pivot = new Vector2(0f, 1f);
-        dRt.anchoredPosition = new Vector2(leftPad, -52f);
-        dRt.sizeDelta = new Vector2(-(leftPad + 25f), -60f);
+        dRt.anchoredPosition = new Vector2(leftPad, -38f);
+        dRt.sizeDelta = new Vector2(-(leftPad + 16f), -44f);
 
         descTmp = dObj.AddComponent<TextMeshProUGUI>();
-        descTmp.fontSize = 17f;
-        descTmp.lineSpacing = 16;
+        descTmp.fontSize = 13.5f;
+        descTmp.lineSpacing = 6;
         descTmp.color = new Color(0.90f, 0.94f, 1f);
         descTmp.enableWordWrapping = true;
     }

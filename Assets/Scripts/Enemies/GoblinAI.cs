@@ -7,13 +7,13 @@ public class GoblinAI : MonoBehaviour, IDamageable
     public static event System.Action<GoblinAI> OnEnemyDied;
 
     [Header("Goblin Stats")]
-    [SerializeField] private int maxHealth = 145;
+    [SerializeField] private int maxHealth = 90;
     [SerializeField] private int currentHealth;
-    [SerializeField] private int attackDamage = 18;
-    [SerializeField] private float moveSpeed = 3.8f;
+    [SerializeField] private int attackDamage = 5;
+    [SerializeField] private float moveSpeed = 3.4f;
     [SerializeField] private float detectionRange = 100f; // Luon phat hien va truy duoi
     [SerializeField] private float meleeRange = 1.35f;
-    [SerializeField] private float attackCooldown = 1.1f;
+    [SerializeField] private float attackCooldown = 1.4f;
 
     private Transform player;
     private Rigidbody2D rb;
@@ -52,6 +52,7 @@ public class GoblinAI : MonoBehaviour, IDamageable
             col.size = new Vector2(0.8f, 1.3f);
             col.offset = new Vector2(0f, 0.65f);
             col.isTrigger = false;
+            EnemyNavigationHelper.EnsureFrictionless(col);
         }
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
@@ -121,22 +122,11 @@ public class GoblinAI : MonoBehaviour, IDamageable
         }
         else
         {
-            // Luon truy duoi Player
+            // Luon truy duoi Player (tu dong luon lach qua vat can)
             Vector2 dir = (player.position - transform.position).normalized;
-            rb.linearVelocity = dir * moveSpeed;
+            Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, col, 0.35f, 1.0f);
+            rb.linearVelocity = moveDir * moveSpeed;
             if (animator != null) animator.SetBool(IsMovingHash, true);
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (isDead || isKnockedBack || isAttacking || player == null || PlayerHealth.IsPlayerDead) return;
-
-        float dist = Vector2.Distance(transform.position, player.position);
-        if (dist > meleeRange)
-        {
-            Vector2 dir = ((Vector2)player.position - rb.position).normalized;
-            rb.MovePosition(rb.position + dir * moveSpeed * Time.fixedDeltaTime);
         }
     }
 
@@ -177,6 +167,7 @@ public class GoblinAI : MonoBehaviour, IDamageable
         if (isDead) return;
 
         currentHealth -= damage;
+        EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
         StartCoroutine(DamageFlashRoutine());
 
         if (player != null && !isKnockedBack)

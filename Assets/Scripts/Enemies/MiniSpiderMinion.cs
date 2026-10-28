@@ -9,10 +9,10 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
     private SpriteRenderer sr;
     private CircleCollider2D col;
 
-    private int maxHealth = 85;
+    private int maxHealth = 65;
     private int currentHealth;
     private float moveSpeed = 4.2f;
-    private int biteDamage = 14;
+    private int biteDamage = 3;
     private float biteCooldown = 1.0f;
     private float biteTimer = 0f;
     private bool isDead = false;
@@ -47,6 +47,7 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
         col.radius = 0.95f;
         col.offset = Vector2.zero;
         col.isTrigger = false;
+        EnemyNavigationHelper.EnsureFrictionless(col);
 
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
@@ -100,9 +101,10 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
 
         if (biteTimer > 0f) biteTimer -= Time.deltaTime;
 
-        // Bò nhanh tới player
+        // Bò nhanh tới player (luon lach qua vat can)
         Vector2 dir = (player.position - transform.position).normalized;
-        rb.linearVelocity = dir * moveSpeed;
+        Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, col, 0.25f, 0.8f);
+        rb.linearVelocity = moveDir * moveSpeed;
 
         // Lật mặt theo hướng đi
         if (Mathf.Abs(dir.x) > 0.05f)
@@ -140,6 +142,7 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable
         if (isDead) return;
 
         currentHealth -= damage;
+        EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
         StartCoroutine(DamageFlashRoutine());
         DamagePopup.Create(transform.position, damage, false);
 

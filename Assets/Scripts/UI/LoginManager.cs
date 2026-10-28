@@ -70,15 +70,99 @@ public class LoginManager : MonoBehaviour
 
     private void Start()
     {
+        // Tự động nạp hoặc tạo session offline để người chơi vào thẳng game không cần đăng nhập/đăng ký
+        AccountDatabase.EnsureOfflineSession();
+
         AutoBindUIElements();
         LoadRememberedAccount();
         HookButtons();
-        SetMode(false); // Mặc định mở Tab Đăng Nhập
+        ApplySoulslikeTheme();
+        SetMode(false);
         UpdateEyeIconDisplay();
         UpdateAllTexts();
         LocalizationManager.OnLanguageChanged += UpdateAllTexts;
 
-        ShowLoginPanel();
+        // Game Offline: Vào thẳng màn hình Bắt đầu trò chơi
+        ShowTapToStartDirectly();
+    }
+
+    public void ShowTapToStartDirectly()
+    {
+        if (loginCardPanel != null) loginCardPanel.SetActive(false);
+        if (tapToStartPanel != null) tapToStartPanel.SetActive(true);
+        if (switchAccountBtn != null) switchAccountBtn.gameObject.SetActive(false); // Ẩn nút đổi tài khoản vì là game offline
+
+        if (welcomeUserBannerText != null)
+        {
+            if (welcomeUserBannerText.transform.parent != null && 
+                (welcomeUserBannerText.transform.parent.name.Contains("Banner") || welcomeUserBannerText.transform.parent.name.Contains("User")))
+            {
+                welcomeUserBannerText.transform.parent.gameObject.SetActive(false);
+            }
+            welcomeUserBannerText.gameObject.SetActive(false);
+        }
+
+        // Tự động ẩn toàn bộ các thanh Divider trắng thừa trên Canvas
+        var dividers = Object.FindObjectsByType<Image>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var img in dividers)
+        {
+            if (img != null && img.gameObject.name.ToLower().Contains("divider"))
+            {
+                img.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void ApplySoulslikeTheme()
+    {
+        if (loginCardPanel != null)
+        {
+            SoulslikeHUDStyler.StyleModalWindow(loginCardPanel.transform);
+        }
+
+        if (titleText != null)
+        {
+            SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
+            titleText.color = new Color(0.98f, 0.85f, 0.45f, 1f);
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.45f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+            if (subtitleText != null)
+            {
+                subtitleText.color = new Color(0.92f, 0.90f, 0.85f, 0.95f);
+                SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.35f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+            }
+        }
+
+        if (actionSubmitButton != null)
+        {
+            SoulslikeHUDStyler.StyleButton(actionSubmitButton);
+        }
+
+        if (quitButton != null)
+        {
+            SoulslikeHUDStyler.StyleButton(quitButton);
+        }
+
+        if (switchAccountBtn != null)
+        {
+            switchAccountBtn.gameObject.SetActive(false);
+        }
+
+        if (usernameInputField != null)
+        {
+            SoulslikeHUDStyler.StyleInputField(usernameInputField);
+        }
+
+        if (passwordInputField != null)
+        {
+            SoulslikeHUDStyler.StyleInputField(passwordInputField);
+        }
+
+        if (tapToStartText != null)
+        {
+            tapToStartText.fontStyle = FontStyles.Bold;
+            tapToStartText.color = new Color(0.98f, 0.88f, 0.55f);
+            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.45f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
+        }
     }
 
     private void Update()
@@ -91,6 +175,12 @@ public class LoginManager : MonoBehaviour
             Color c = tapToStartText.color;
             c.a = alpha;
             tapToStartText.color = c;
+
+            // Hỗ trợ nhấn phím bất kỳ (Space, Enter, Gamepad, click chuột) để bắt đầu game
+            if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Escape))
+            {
+                OnTapToStartClicked();
+            }
         }
     }
 
@@ -265,18 +355,13 @@ public class LoginManager : MonoBehaviour
         if (statusFeedbackText != null) statusFeedbackText.text = "";
 
         // Cập nhật giao diện Tab
-        if (tabLoginBg != null) tabLoginBg.color = !isRegisterMode ? new Color(0.24f, 0.50f, 0.90f) : new Color(0.14f, 0.17f, 0.25f);
-        if (tabRegisterBg != null) tabRegisterBg.color = isRegisterMode ? new Color(0.85f, 0.50f, 0.15f) : new Color(0.14f, 0.17f, 0.25f);
-
-        if (tabLoginTxt != null)
+        if (tabLoginBtn != null)
         {
-            tabLoginTxt.text = LocalizationManager.T("ĐĂNG NHẬP", "LOGIN");
-            tabLoginTxt.color = !isRegisterMode ? Color.white : new Color(0.65f, 0.70f, 0.80f);
+            SoulslikeHUDStyler.StyleTabButton(tabLoginBtn, !isRegisterMode, LocalizationManager.T("ĐĂNG NHẬP", "LOGIN"));
         }
-        if (tabRegisterTxt != null)
+        if (tabRegisterBtn != null)
         {
-            tabRegisterTxt.text = LocalizationManager.T("ĐĂNG KÝ", "REGISTER");
-            tabRegisterTxt.color = isRegisterMode ? Color.white : new Color(0.65f, 0.70f, 0.80f);
+            SoulslikeHUDStyler.StyleTabButton(tabRegisterBtn, isRegisterMode, LocalizationManager.T("ĐĂNG KÝ", "REGISTER"));
         }
 
         if (actionSubmitButtonText != null)
@@ -287,11 +372,7 @@ public class LoginManager : MonoBehaviour
         }
         if (actionSubmitButton != null)
         {
-            var img = actionSubmitButton.GetComponent<Image>();
-            if (img != null)
-            {
-                img.color = isRegisterMode ? new Color(0.85f, 0.50f, 0.15f) : new Color(0.24f, 0.50f, 0.90f);
-            }
+            SoulslikeHUDStyler.StyleButton(actionSubmitButton);
         }
     }
 
@@ -318,11 +399,11 @@ public class LoginManager : MonoBehaviour
 
         if (tapToStartText != null && !isStartingGame)
         {
-            tapToStartText.text = LocalizationManager.T("— CHẠM VÀO MÀN HÌNH ĐỂ BẮT ĐẦU —", "— TAP SCREEN TO START —");
+            tapToStartText.text = LocalizationManager.T("— BẮT ĐẦU TRÒ CHƠI —\n<size=18><color=#E6C875>Chạm vào màn hình để bắt đầu</color></size>", "— START GAME —\n<size=18><color=#E6C875>Tap anywhere to start</color></size>");
         }
         if (versionText != null)
         {
-            versionText.text = LocalizationManager.T("Phiên bản 1.0.0 (Cloud Sync)", "Version 1.0.0 (Cloud Sync)");
+            versionText.text = LocalizationManager.T("Phiên bản Offline v1.0.0", "Offline Edition v1.0.0");
         }
     }
 
@@ -533,7 +614,7 @@ public class LoginManager : MonoBehaviour
         if (tapToStartText != null)
         {
             tapToStartText.color = new Color(0.4f, 1f, 0.6f, 1f);
-            tapToStartText.text = "ĐANG VÀO THẾ GIỚI CỔ TÍCH...";
+            tapToStartText.text = LocalizationManager.T("ĐANG KHỞI HÀNH VÀO VƯƠNG QUỐC...", "ENTERING RUINBOUND REALM...");
         }
 
         Debug.Log($"<color=green>[START GAME]</color> Chuyển đến MainMenuScene...");

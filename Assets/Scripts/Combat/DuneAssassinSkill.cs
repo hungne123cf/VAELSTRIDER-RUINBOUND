@@ -15,6 +15,10 @@ public class DuneAssassinSkill : MonoBehaviour
     public float attackCooldown = 0.22f; // Tốc độ ra đòn siêu nhanh
     private float attackCooldownTimer = 0f;
 
+    [Header("--- CÂN BẰNG LỐC XOÁY COMBO ĐÒN ĐÁNH THƯỜNG ---")]
+    public float tornadoComboCooldown = 3.5f; // Thời gian hồi nội tại giữa 2 lần tung lốc ở đòn đánh thường 3_atk
+    private float tornadoComboTimer = 0f;
+
     [Header("--- HỆ THỐNG THANH NỘ (FURY / RAGE SYSTEM) ---")]
     [SerializeField] private float maxFury = 100f;
     [SerializeField] private float currentFury = 0f;
@@ -184,6 +188,7 @@ public class DuneAssassinSkill : MonoBehaviour
     {
         if (attackCooldownTimer > 0f) attackCooldownTimer -= Time.deltaTime;
         if (specialCooldownTimer > 0f) specialCooldownTimer -= Time.deltaTime;
+        if (tornadoComboTimer > 0f) tornadoComboTimer -= Time.deltaTime;
 
         if (isDefending)
         {
@@ -507,8 +512,9 @@ public class DuneAssassinSkill : MonoBehaviour
                         ExecuteComboHitDamage(step, facingDir, bonusAtkDamage, isSecondaryHit: (i == hitIndex2));
                     }
 
-                    // ĐÒN 3 (3_ATK) KHI KẾT THÚC ĐÒN ĐÁNH GẦN: HIỆN VÙNG NGẮM TIA LỐC SA MẠC ĐỂ NGƯỜI CHƠI ĐIỀU KHIỂN HƯỚNG BẮN
-                    if (step == 3 && i < 15)
+                    // ĐÒN 3 (3_ATK): HIỆN TIA NGẮM LỐC KHI SẴN SÀNG TUNG LỐC (Hết hồi chiêu 3.5s hoặc Đầy Nộ)
+                    bool canSpawnComboVortex = (tornadoComboTimer <= 0f || IsRageFull);
+                    if (step == 3 && i < 15 && canSpawnComboVortex)
                     {
                         Color aimColor = IsRageFull 
                             ? new Color(1f, 0.18f, 0.18f, 0.95f) 
@@ -524,11 +530,20 @@ public class DuneAssassinSkill : MonoBehaviour
                         );
                     }
 
-                    // ĐÒN 3 (3_ATK) TẠI FRAME 15 (3_atk_16): PHÓNG RA CƠN LỐC KIẾM KHÍ (LỐC ĐỎ NẾU ĐỦ NỘ) THEO HƯỚNG ĐÃ NGẮM
+                    // ĐÒN 3 (3_ATK) TẠI FRAME 15 (3_atk_16): PHÓNG RA CƠN LỐC HOẶC TUNG SONG ĐAO TRẢM NẾU ĐANG HỒI CHIÊU LỐC
                     if (step == 3 && i == 15)
                     {
                         SkillAimIndicator.Instance?.Hide();
-                        SpawnSandBladeVortex((Vector2)transform.position + facingDir * 0.65f, facingDir, bonusAtkDamage);
+                        if (canSpawnComboVortex)
+                        {
+                            tornadoComboTimer = tornadoComboCooldown;
+                            SpawnSandBladeVortex((Vector2)transform.position + facingDir * 0.65f, facingDir, bonusAtkDamage);
+                        }
+                        else
+                        {
+                            // Đang trong hồi chiêu nội tại lốc: Tung cú chém cận chiến áp sát gây thêm sát thương
+                            ExecuteComboHitDamage(3, facingDir, bonusAtkDamage, isSecondaryHit: true);
+                        }
                     }
 
                     yield return new WaitForSeconds(frameTime);
@@ -589,14 +604,16 @@ public class DuneAssassinSkill : MonoBehaviour
             if (damageable != null && !(damageable is PlayerHealth) && !damagedSet.Contains(damageable))
             {
                 damagedSet.Add(damageable);
-                damageable.TakeDamage(totalDamage);
+                int actualDmg = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, totalDamage);
+                damageable.TakeDamage(actualDmg);
+                AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, actualDmg, damageable);
 
                 bool isProp = (col.GetComponent<BreakableProp>() != null || col.GetComponentInParent<BreakableProp>() != null || col.GetComponent<TreasureChest>() != null || col.GetComponentInParent<TreasureChest>() != null);
                 if (!isProp)
                 {
                     hitEnemyCount++;
                     SoundManager.EnsureInstance()?.PlayHitImpact();
-                    DamagePopup.Create(col.transform.position, totalDamage, (step == 3 ? DamageType.TrueDamage : DamageType.Physical), isCritical: isCrit);
+                    DamagePopup.Create(col.transform.position, actualDmg, (step == 3 ? DamageType.TrueDamage : DamageType.Physical), isCritical: isCrit);
 
                     // TÍCH NỘ CHO SA MẠC THÍCH KHÁCH KHI GÂY SÁT THƯƠNG
                     AddRage(step == 1 ? 14f : (step == 2 ? 18f : 30f));
@@ -815,7 +832,7 @@ public class DuneAssassinSkill : MonoBehaviour
         try
         {
             Sprite[] frames = (atk3Frames != null && atk3Frames.Length > 0) ? atk3Frames : defendFrames;
-            int startIndex = (frames == atk3Frames && frames.Length > 12) ? 12 : 2;
+            int startIndex = (frames != null && frames == atk3Frames && frames.Length > 12) ? 12 : 2;
 
             if (frames != null && frames.Length > startIndex)
             {
@@ -870,6 +887,8 @@ public class DuneAssassinSkill : MonoBehaviour
 
     public void SpawnSandBladeVortex(Vector2 origin, Vector2 direction, int bonusAtk)
     {
+        tornadoComboTimer = tornadoComboCooldown; // Đồng bộ thời gian hồi nội tại lốc
+
         bool isEmpowered = IsRageFull;
         if (isEmpowered)
         {
@@ -877,12 +896,22 @@ public class DuneAssassinSkill : MonoBehaviour
             var cam = Object.FindAnyObjectByType<CameraFollow>();
             if (cam != null) cam.Shake(0.22f, 0.30f);
         }
+        else
+        {
+            // Tích 10 nộ một lần duy nhất khi tung lốc thường (thay vì tích nộ vô hạn từng tick lốc)
+            AddRage(10f);
+        }
+
+        // LÕI NÂNG CẤP ĐẶC QUYỀN SÁT THỦ SA MẠC: TAM SA LỐC XOÁY (Phóng cùng lúc 3 Cơn Lốc Cát)
+        bool hasTripleVortex = AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.TripleMirageTornado);
 
         // CƠ CHẾ HIẾN TẾ MÁU (BLOOD SACRIFICE): Tiêu hao % máu khi tung lốc xoáy (8% thường / 12% nộ)
+        // Khi phóng ra 3 cơn lốc cát thì tiêu tốn máu gấp 3 lần để tung ra
         if (playerHealth != null && !playerHealth.IsDead)
         {
-            float hpPct = isEmpowered ? 0.12f : 0.08f;
-            playerHealth.ConsumeHealthPercent(hpPct);
+            float baseHpPct = isEmpowered ? 0.12f : 0.08f;
+            float hpMultiplier = hasTripleVortex ? 3f : 1f;
+            playerHealth.ConsumeHealthPercent(baseHpPct * hpMultiplier);
         }
 
         // Đếm số lần dùng chiêu -> Hồi 10% HP đã mất mỗi 2 chiêu
@@ -894,6 +923,23 @@ public class DuneAssassinSkill : MonoBehaviour
         vortexObj.transform.position = origin;
         var vortex = vortexObj.AddComponent<SandBladeVortexProjectile>();
         vortex.Initialize(direction, totalDamage, effectiveAtk, enemyLayers, gameObject, isEmpowered);
+
+        // Phóng cùng lúc 3 Cơn Lốc Cát (Trái - Giữa - Phải) khi có lõi Tam Sa Lốc Xoáy
+        if (hasTripleVortex)
+        {
+            Vector2 dirLeft = Quaternion.Euler(0, 0, 24f) * direction;
+            Vector2 dirRight = Quaternion.Euler(0, 0, -24f) * direction;
+
+            GameObject leftObj = new GameObject(isEmpowered ? "Dune_CrimsonSandVortex_Left" : "Dune_SandBladeVortex_Left");
+            leftObj.transform.position = origin;
+            var vLeft = leftObj.AddComponent<SandBladeVortexProjectile>();
+            vLeft.Initialize(dirLeft, totalDamage, effectiveAtk, enemyLayers, gameObject, isEmpowered);
+
+            GameObject rightObj = new GameObject(isEmpowered ? "Dune_CrimsonSandVortex_Right" : "Dune_SandBladeVortex_Right");
+            rightObj.transform.position = origin;
+            var vRight = rightObj.AddComponent<SandBladeVortexProjectile>();
+            vRight.Initialize(dirRight, totalDamage, effectiveAtk, enemyLayers, gameObject, isEmpowered);
+        }
     }
 
     // =========================================================================
@@ -997,11 +1043,13 @@ public class DuneAssassinSkill : MonoBehaviour
             var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
             if (damageable != null && !(damageable is PlayerHealth))
             {
-                damageable.TakeDamage(actualDamage);
+                int procDamage = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, actualDamage);
+                damageable.TakeDamage(procDamage);
                 bool isProp = (col.GetComponent<BreakableProp>() != null || col.GetComponentInParent<BreakableProp>() != null || col.GetComponent<TreasureChest>() != null || col.GetComponentInParent<TreasureChest>() != null);
                 if (!isProp)
                 {
-                    DamagePopup.Create(col.transform.position, actualDamage, DamageType.Physical, isCritical: false);
+                    DamagePopup.Create(col.transform.position, procDamage, DamageType.Physical, isCritical: false);
+                    AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, procDamage, damageable);
 
                     // Tích nộ và nội năng từ tuyệt kỹ (chỉ tính quái & boss)
                     AddRage(8f);
@@ -1036,11 +1084,13 @@ public class DuneAssassinSkill : MonoBehaviour
             var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
             if (damageable != null && !(damageable is PlayerHealth))
             {
-                damageable.TakeDamage(actualDamage);
+                int procDamage = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, actualDamage);
+                damageable.TakeDamage(procDamage);
                 bool isProp = (col.GetComponent<BreakableProp>() != null || col.GetComponentInParent<BreakableProp>() != null || col.GetComponent<TreasureChest>() != null || col.GetComponentInParent<TreasureChest>() != null);
                 if (!isProp)
                 {
-                    DamagePopup.Create(col.transform.position, actualDamage, DamageType.TrueDamage, isCritical: true);
+                    DamagePopup.Create(col.transform.position, procDamage, DamageType.TrueDamage, isCritical: true);
+                    AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, procDamage, damageable);
 
                     // Tích nộ và nội năng đòn kết liễu (chỉ tính quái & boss)
                     AddRage(25f);
@@ -1116,6 +1166,9 @@ public class SandBladeVortexProjectile : MonoBehaviour
     private int animIndex = 0;
     private HashSet<IDamageable> hitThisTick = new HashSet<IDamageable>();
     private HashSet<IDamageable> stunnedEnemies = new HashSet<IDamageable>();
+
+    private static readonly Dictionary<int, float> s_EnemyLastStunTime = new Dictionary<int, float>();
+    private const float STUN_IMMUNITY_COOLDOWN = 3.0f; // 3 giây miễn nhiễm choáng tiếp theo từ lốc
 
     private static Sprite[] vortexRepeatableFrames;
     private static Sprite[] vortexHitFrames;
@@ -1257,45 +1310,71 @@ public class SandBladeVortexProjectile : MonoBehaviour
                 {
                     DamagePopup.Create(col.transform.position, tickDmg, isEmpowered ? DamageType.TrueDamage : DamageType.Physical, isCritical: isEmpowered);
 
-                    // CƠN LỐC ĐỎ GÂY CHOÁNG KẺ ĐỊCH 2 GIÂY (STUN 2s)
+                    // CÂN BẰNG HIỆU ỨNG KHỐNG CHẾ & CHOÁNG (STUN) CỦA CƠN LỐC ĐỎ
+                    bool isBoss = (col.tag == "Boss") ||
+                                   (col.GetComponent<ValleyGolemBossAI>() != null || col.GetComponentInParent<ValleyGolemBossAI>() != null) ||
+                                   (col.GetComponent<SkeletonKingBossAI>() != null || col.GetComponentInParent<SkeletonKingBossAI>() != null) ||
+                                   (col.GetComponent<BotWheelAI>() != null || col.GetComponentInParent<BotWheelAI>() != null) ||
+                                   (col.GetComponent<BossGigapackSkills>() != null || col.GetComponentInParent<BossGigapackSkills>() != null) ||
+                                   col.name.IndexOf("Boss", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                   col.transform.root.name.IndexOf("Boss", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                   col.name.IndexOf("Titan", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                   col.transform.root.name.IndexOf("Titan", System.StringComparison.OrdinalIgnoreCase) >= 0;
+
                     if (isEmpowered && !stunnedEnemies.Contains(damageable))
                     {
                         stunnedEnemies.Add(damageable);
-                        EnemyStunEffect.ApplyStun(col.gameObject, 2.0f);
-                        DamagePopup.CreateText(col.transform.position + Vector3.up * 0.45f, "CHOÁNG 2s!", new Color(1f, 0.9f, 0.2f));
+                        int targetId = col.gameObject.GetInstanceID();
+                        float lastStun = 0f;
+                        bool hasRecentStun = s_EnemyLastStunTime.TryGetValue(targetId, out lastStun) && (Time.time - lastStun < STUN_IMMUNITY_COOLDOWN);
+
+                        if (isBoss)
+                        {
+                            // Boss có kháng khống chế: Chỉ bị ngắt chiêu nhẹ (micro-interrupt 0.20s), không bị choáng cứng
+                            if (!hasRecentStun)
+                            {
+                                s_EnemyLastStunTime[targetId] = Time.time;
+                                EnemyStunEffect.ApplyStun(col.gameObject, 0.20f);
+                                DamagePopup.CreateText(col.transform.position + Vector3.up * 0.45f, "NGẮT CHIÊU!", new Color(1f, 0.75f, 0.2f));
+                            }
+                        }
+                        else if (!hasRecentStun)
+                        {
+                            // Quái thường: Choáng 0.75s (giảm từ 2.0s) và có thời gian hồi miễn nhiễm 3.0s
+                            s_EnemyLastStunTime[targetId] = Time.time;
+                            EnemyStunEffect.ApplyStun(col.gameObject, 0.75f);
+                            DamagePopup.CreateText(col.transform.position + Vector3.up * 0.45f, "CHOÁNG!", new Color(1f, 0.9f, 0.2f));
+                        }
                     }
 
-                    // Hút mạnh quái vật và Boss vào tâm lốc
+                    // Hút kẻ địch vào tâm lốc (Boss có lực kháng cự lớn, chỉ bị kéo nhẹ)
                     var rbEnemy = col.GetComponent<Rigidbody2D>() ?? col.GetComponentInParent<Rigidbody2D>();
                     if (rbEnemy != null)
                     {
                         Vector2 pullDir = ((Vector2)transform.position - (Vector2)col.transform.position).normalized;
-                        rbEnemy.AddForce(pullDir * (isEmpowered ? 5.5f : 3.2f), ForceMode2D.Impulse);
+                        float pullMagnitude = isBoss ? 0.6f : (isEmpowered ? 4.2f : 2.5f);
+                        rbEnemy.AddForce(pullDir * pullMagnitude, ForceMode2D.Impulse);
                     }
 
-                    // CHỈ TÍCH NỘ, NỘI NĂNG VÀ HÚT MÁU KHI ĐÁNH TRÚNG QUÁI VẬT VÀ BOSS
+                    // CHỈ HÚT MÁU KHI ĐÁNH TRÚNG QUÁI VẬT VÀ BOSS (KHÔNG TÍCH NỘ LIÊN TỤC TRÊN TỪNG TICK LỐC XOÁY)
                     if (owner != null)
                     {
-                        var dune = owner.GetComponent<DuneAssassinSkill>();
-                        if (dune != null)
-                        {
-                            dune.AddRage(isEmpowered ? 5f : 8f);
-                        }
+                        // Giảm tích nội năng từ lốc (chỉ 1.5f mỗi tick thay vì spam giáp hộ thân liên tục)
                         var energySys = owner.GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
                         if (energySys != null)
                         {
-                            energySys.AddInnerEnergy(isEmpowered ? 4f : 6f);
+                            energySys.AddInnerEnergy(isEmpowered ? 1.5f : 1.0f);
                         }
 
                         var combat = owner.GetComponent<PlayerCombat>();
                         var health = owner.GetComponent<PlayerHealth>();
                         if (health != null && !health.IsDead)
                         {
-                            // 1. HỒI 50% SÁT THƯƠNG LỐC GÂY RA THÀNH MÁU GỐC
-                            int healAmount = Mathf.Max(1, Mathf.RoundToInt(tickDmg * 0.50f));
+                            // 1. HỒI 15% SÁT THƯƠNG LỐC GÂY RA THÀNH MÁU GỐC (Cân bằng lại so với mức 50% quá bá đạo)
+                            int healAmount = Mathf.Max(1, Mathf.RoundToInt(tickDmg * 0.15f));
                             health.Heal(healAmount);
 
-                            // 2. OVERHEAL (Phương án 2): % Hút Máu từ Trang Bị / Ngọc Khảm chuyển hóa thành Máu Ảo (Virtual Health Shield)
+                            // 2. OVERHEAL: % Hút Máu từ Trang Bị / Ngọc Khảm chuyển hóa thành Máu Ảo (Virtual Health Shield)
                             if (combat != null && combat.LifestealPercent > 0f)
                             {
                                 int virtualHpAmount = Mathf.Max(1, Mathf.RoundToInt(tickDmg * combat.LifestealPercent));

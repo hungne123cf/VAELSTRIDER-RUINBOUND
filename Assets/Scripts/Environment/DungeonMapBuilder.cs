@@ -141,16 +141,28 @@ public class DungeonMapBuilder : MonoBehaviour
         ClearChildren(barriersRoot);
 
         // Barrier 1: Cửa vào Sảnh 2 (x = 8, y = 0.5, cao 3 tiles: [-1.0, 2.0])
-        var b1 = RoomBarrier.Create(new Vector3(8f, 0.5f, 0f), true, 3.0f, "Barrier_Room2");
+        var b1 = RoomBarrier.Create(new Vector3(8f, 0.5f, 0f), true, 3.2f, "Barrier_Room2_Entrance");
         b1.transform.SetParent(barriersRoot);
 
-        // Barrier 2: Cửa vào Hầm 3 (x = 19.5, y = 24, rộng 3 tiles: [18.0, 21.0])
-        var b2 = RoomBarrier.Create(new Vector3(19.5f, 24f, 0f), false, 3.0f, "Barrier_Room3");
-        b2.transform.SetParent(barriersRoot);
+        // Barrier 2 (Exit Room 2): Cửa ra Sảnh 2 vào Hành lang 2 (x = 19.5, y = 13, rộng 3 tiles)
+        var b2_exit = RoomBarrier.Create(new Vector3(19.5f, 13f, 0f), false, 3.2f, "Barrier_Room2_Exit");
+        b2_exit.transform.SetParent(barriersRoot);
+        b2_exit.Lock();
 
-        // Barrier 3: Cửa vào Đại Điện Boss 4 (x = 42, y = 34.5, cao 3 tiles: [33.0, 36.0])
-        var b3 = RoomBarrier.Create(new Vector3(42f, 34.5f, 0f), true, 3.0f, "Barrier_Room4_Boss");
-        b3.transform.SetParent(barriersRoot);
+        // Barrier 3 (Entrance Room 3): Cửa vào Hầm 3 (x = 19.5, y = 24, rộng 3 tiles)
+        var b3_entrance = RoomBarrier.Create(new Vector3(19.5f, 24f, 0f), false, 3.2f, "Barrier_Room3_Entrance");
+        b3_entrance.transform.SetParent(barriersRoot);
+        b3_entrance.Lock();
+
+        // Barrier 4 (Exit Room 3): Cửa ra Hầm 3 vào Hành lang 3 (x = 31, y = 34.5, cao 3 tiles)
+        var b3_exit = RoomBarrier.Create(new Vector3(31f, 34.5f, 0f), true, 3.2f, "Barrier_Room3_Exit");
+        b3_exit.transform.SetParent(barriersRoot);
+        b3_exit.Lock();
+
+        // Barrier 5 (Entrance Room 4): Cửa vào Đại Điện Boss 4 (x = 42, y = 34.5, cao 3 tiles)
+        var b4_entrance = RoomBarrier.Create(new Vector3(42f, 34.5f, 0f), true, 3.2f, "Barrier_Room4_Boss");
+        b4_entrance.transform.SetParent(barriersRoot);
+        b4_entrance.Lock();
 
         // 6. Đặt Đuốc Tường (Torches with Light2D)
         Transform torchesRoot = GetOrCreateRoot("DungeonTorches");
@@ -180,15 +192,15 @@ public class DungeonMapBuilder : MonoBehaviour
         }
 
         // 7. Tạo & Cấu hình DungeonRoomManager
-        SetupDungeonRooms(b1, b2, b3);
+        SetupDungeonRooms(b1, b2_exit, b3_entrance, b3_exit, b4_entrance);
 
         // 8. Đặt lại vị trí Người chơi, Bàn Thờ Cổ & Rương
         PositionGameEntities();
 
-        Debug.Log("<color=green>[MAP BUILDER]</color> Hoàn tất kiến tạo Bản Đồ Đa Phòng: 4 Phòng, 3 Hành Lang, 18 Đuốc, 3 Cửa Phong Ấn!");
+        Debug.Log("<color=green>[MAP BUILDER]</color> Hoàn tất kiến tạo Bản Đồ Đa Phòng: 4 Phòng, 3 Hành Lang, 18 Đuốc, 5 Cửa Phong Ấn!");
     }
 
-    private static void SetupDungeonRooms(RoomBarrier b1, RoomBarrier b2, RoomBarrier b3)
+    private static void SetupDungeonRooms(RoomBarrier b1, RoomBarrier b2_exit, RoomBarrier b3_entrance, RoomBarrier b3_exit, RoomBarrier b4_entrance)
     {
         Transform roomsRoot = GetOrCreateRoot("DungeonRooms");
         ClearChildren(roomsRoot);
@@ -224,6 +236,8 @@ public class DungeonMapBuilder : MonoBehaviour
         r2.roomCenter = new Vector3(19, 2, 0);
         r2.enemySpawns = new List<Vector3>() { new Vector3(14, 4, 0), new Vector3(24, 0, 0) };
         r2.entranceBarrier = b1;
+        r2.exitBarrier = b2_exit;
+        r2.nextEntranceBarrier = b3_entrance;
         mgr.rooms.Add(r2);
 
         // Room 3: Cursed Crypt
@@ -237,7 +251,9 @@ public class DungeonMapBuilder : MonoBehaviour
         r3.roomBounds = new Rect(8, 24, 22, 20);
         r3.roomCenter = new Vector3(19, 34, 0);
         r3.enemySpawns = new List<Vector3>() { new Vector3(13, 38, 0), new Vector3(25, 38, 0), new Vector3(13, 30, 0), new Vector3(25, 30, 0) };
-        r3.entranceBarrier = b2;
+        r3.entranceBarrier = b3_entrance;
+        r3.exitBarrier = b3_exit;
+        r3.nextEntranceBarrier = b4_entrance;
         mgr.rooms.Add(r3);
 
         // Room 4: Titan Sanctum (Boss)
@@ -251,7 +267,7 @@ public class DungeonMapBuilder : MonoBehaviour
         r4.roomBounds = new Rect(42, 20, 28, 28);
         r4.roomCenter = new Vector3(56, 34, 0);
         r4.enemySpawns = new List<Vector3>() { new Vector3(56, 34, 0) };
-        r4.entranceBarrier = b3;
+        r4.entranceBarrier = b4_entrance;
         mgr.rooms.Add(r4);
     }
 

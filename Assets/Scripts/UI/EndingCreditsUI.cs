@@ -234,7 +234,9 @@ public class EndingCreditsUI : MonoBehaviour
 
     public void OnClickPlayAgain()
     {
+        CorruptedCycleManager.ResetToNormalCycle();
         PlayerInventory.ResetRunShards();
+        PlayerHealth.ResetRunPreservedHealth();
         Time.timeScale = 1f;
         if (Application.CanStreamedLevelBeLoaded("Map1_Thestart"))
         {
@@ -246,9 +248,16 @@ public class EndingCreditsUI : MonoBehaviour
         }
     }
 
+    public void OnClickEnterCorruptedCycle()
+    {
+        Time.timeScale = 1f;
+        CorruptedCycleManager.StartCorruptedCycle();
+    }
+
     public void OnClickMainMenu()
     {
         PlayerInventory.ResetRunShards();
+        PlayerHealth.ResetRunPreservedHealth();
         Time.timeScale = 1f;
         if (Application.CanStreamedLevelBeLoaded("MainMenuScene"))
         {
@@ -337,7 +346,7 @@ public class EndingCreditsUI : MonoBehaviour
         creditsTmp.fontSize = 24;
         creditsTmp.lineSpacing = 16f;
 
-        // Buttons Container (Speed Up / Skip)
+        // Buttons Container (Speed Up / Skip / Quick Corrupted Rift)
         GameObject topBar = new GameObject("TopControls");
         topBar.transform.SetParent(root.transform, false);
         RectTransform topRt = topBar.AddComponent<RectTransform>();
@@ -345,9 +354,10 @@ public class EndingCreditsUI : MonoBehaviour
         topRt.anchorMax = new Vector2(1f, 1f);
         topRt.pivot = new Vector2(1f, 1f);
         topRt.anchoredPosition = new Vector2(-30f, -30f);
-        topRt.sizeDelta = new Vector2(340f, 50f);
+        topRt.sizeDelta = new Vector2(580f, 50f);
 
-        ui.btnSpeedUp = CreateSmallButton(topBar.transform, new Vector2(-170f, 0f), LocalizationManager.T("TĂNG TỐC", "SPEED UP"), new Color(0.18f, 0.28f, 0.45f, 0.95f), ui.ToggleSpeedUp);
+        CreateSmallButton(topBar.transform, new Vector2(-380f, 0f), LocalizationManager.T("CỔNG THA HÓA >>", "CORRUPTED RIFT >>"), new Color(0.55f, 0.15f, 0.85f, 0.95f), ui.OnClickEnterCorruptedCycle);
+        ui.btnSpeedUp = CreateSmallButton(topBar.transform, new Vector2(-190f, 0f), LocalizationManager.T("TĂNG TỐC", "SPEED UP"), new Color(0.18f, 0.28f, 0.45f, 0.95f), ui.ToggleSpeedUp);
         ui.speedUpText = ui.btnSpeedUp.GetComponentInChildren<TextMeshProUGUI>();
         ui.btnSkip = CreateSmallButton(topBar.transform, new Vector2(0f, 0f), LocalizationManager.T("BỎ QUA", "SKIP"), new Color(0.45f, 0.15f, 0.18f, 0.95f), ui.SkipCredits);
 
@@ -358,7 +368,7 @@ public class EndingCreditsUI : MonoBehaviour
         sRt.anchorMin = new Vector2(0.5f, 0.5f);
         sRt.anchorMax = new Vector2(0.5f, 0.5f);
         sRt.pivot = new Vector2(0.5f, 0.5f);
-        sRt.sizeDelta = new Vector2(680f, 480f);
+        sRt.sizeDelta = new Vector2(760f, 490f);
         sRt.anchoredPosition = Vector2.zero;
 
         Image sBg = statsObj.AddComponent<Image>();
@@ -370,8 +380,8 @@ public class EndingCreditsUI : MonoBehaviour
         GameObject sTitleObj = new GameObject("Title");
         sTitleObj.transform.SetParent(statsObj.transform, false);
         RectTransform sTitleRt = sTitleObj.AddComponent<RectTransform>();
-        sTitleRt.anchoredPosition = new Vector2(0f, 180f);
-        sTitleRt.sizeDelta = new Vector2(600f, 50f);
+        sTitleRt.anchoredPosition = new Vector2(0f, 185f);
+        sTitleRt.sizeDelta = new Vector2(650f, 50f);
         var sTitleTmp = sTitleObj.AddComponent<TextMeshProUGUI>();
         var sTitleLoc = sTitleObj.AddComponent<LocalizedText>();
         sTitleLoc.SetTexts("HOÀN THÀNH HÀNH TRÌNH", "JOURNEY COMPLETED");
@@ -385,7 +395,7 @@ public class EndingCreditsUI : MonoBehaviour
         sBodyObj.transform.SetParent(statsObj.transform, false);
         RectTransform sBodyRt = sBodyObj.AddComponent<RectTransform>();
         sBodyRt.anchoredPosition = new Vector2(0f, 25f);
-        sBodyRt.sizeDelta = new Vector2(600f, 220f);
+        sBodyRt.sizeDelta = new Vector2(680f, 220f);
         var sBodyTmp = sBodyObj.AddComponent<TextMeshProUGUI>();
         sBodyTmp.fontSize = 20;
         sBodyTmp.lineSpacing = 12f;
@@ -397,10 +407,11 @@ public class EndingCreditsUI : MonoBehaviour
         sBtnContainer.transform.SetParent(statsObj.transform, false);
         RectTransform sBtnRt = sBtnContainer.AddComponent<RectTransform>();
         sBtnRt.anchoredPosition = new Vector2(0f, -170f);
-        sBtnRt.sizeDelta = new Vector2(560f, 60f);
+        sBtnRt.sizeDelta = new Vector2(720f, 60f);
 
-        CreateActionButton(sBtnContainer.transform, new Vector2(-140f, 0f), LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Color(0.2f, 0.38f, 0.72f, 1f), ui.OnClickPlayAgain);
-        CreateActionButton(sBtnContainer.transform, new Vector2(140f, 0f), LocalizationManager.T("TRANG CHỦ", "MAIN MENU"), new Color(0.24f, 0.58f, 0.35f, 1f), ui.OnClickMainMenu);
+        CreateActionButton(sBtnContainer.transform, new Vector2(-240f, 0f), LocalizationManager.T("CHƠI LẠI (RESET)", "PLAY AGAIN"), new Color(0.2f, 0.38f, 0.72f, 1f), ui.OnClickPlayAgain);
+        CreateActionButton(sBtnContainer.transform, new Vector2(0f, 0f), LocalizationManager.T("CỔNG THA HÓA (CYCLE II)", "CORRUPTED RIFT (CYCLE II)"), new Color(0.58f, 0.16f, 0.88f, 1f), ui.OnClickEnterCorruptedCycle);
+        CreateActionButton(sBtnContainer.transform, new Vector2(240f, 0f), LocalizationManager.T("TRANG CHỦ", "MAIN MENU"), new Color(0.24f, 0.58f, 0.35f, 1f), ui.OnClickMainMenu);
 
         // Đảm bảo TopControls luôn ở lớp trên cùng
         topBar.transform.SetAsLastSibling();

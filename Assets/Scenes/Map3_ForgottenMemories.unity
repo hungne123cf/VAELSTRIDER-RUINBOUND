@@ -5098,8 +5098,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 130, y: -28}
-  m_SizeDelta: {x: 220, y: 22}
+  m_AnchoredPosition: {x: 200, y: -24}
+  m_SizeDelta: {x: 284, y: 15}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &929933077
 MonoBehaviour:
@@ -8503,7 +8503,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b6fd3b8a22d216429a77a6b38ffd5ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Map3WaveSpawner
-  totalWaves: 3
+  totalWaves: 10
   currentWave: 1
   livingEnemies: 0
   isWaveActive: 0

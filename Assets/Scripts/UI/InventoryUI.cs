@@ -346,11 +346,10 @@ public class InventoryUI : MonoBehaviour
         boxRt.offsetMax = Vector2.zero;
 
         Image boxImg = dialogBox.GetComponent<Image>();
-        boxImg.color = new Color(0.04f, 0.05f, 0.09f, 1f);
-
-        var outline = dialogBox.AddComponent<Outline>();
-        outline.effectColor = new Color(0.85f, 0.65f, 0.25f, 0.95f);
-        outline.effectDistance = new Vector2(2.5f, -2.5f);
+        boxImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        boxImg.type = Image.Type.Sliced;
+        boxImg.color = Color.white;
+        WhiteIconLoader.ApplyGothicFrame(dialogBox, Color.white, 0.40f);
 
         // 2. Header Title
         GameObject headerObj = new GameObject("Header", typeof(RectTransform), typeof(CanvasRenderer));
@@ -367,7 +366,7 @@ public class InventoryUI : MonoBehaviour
         titleText.text = LocalizationManager.T("TÚI ĐỒ & ĐÀI QUAY VẬN MỆNH", "INVENTORY & GACHA VAULT");
         titleText.fontSize = 28;
         titleText.fontStyle = FontStyles.Bold;
-        titleText.color = new Color(1f, 0.85f, 0.35f);
+        titleText.color = new Color(0.98f, 0.88f, 0.55f);
         titleText.alignment = TextAlignmentOptions.Center;
 
         // Subtitle
@@ -384,8 +383,10 @@ public class InventoryUI : MonoBehaviour
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = LocalizationManager.T("Lưu trữ trang bị, khoáng thạch & Dùng Linh Hồn quay Thần Binh cổ đại", "Store battle gear & spend Aethel Shards to summon mythic artifacts");
         subtitleText.fontSize = 17f;
-        subtitleText.color = new Color(0.7f, 0.75f, 0.85f);
+        subtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
         subtitleText.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
+        SoulslikeHUDStyler.AddFiligreeDivider(dialogBox.transform, new Vector2(0f, -94f), new Vector2(650f, 12f));
 
         // 3. Category Filter Tabs
         BuildCategoryTabs(dialogBox.transform);
@@ -923,14 +924,14 @@ public class InventoryUI : MonoBehaviour
             "<b>TỶ LỆ TRIỆU HỒI VẬN MỆNH:</b>\n" +
             "- <color=#FF4757>[THẦN THOẠI 3%]</color>: Thánh Kiếm Excalibur (+45 ATK), Khiên Long Thần, Lõi Linh Hồn (+1000 Shards)\n" +
             "- <color=#FFA502>[HUYỀN THOẠI 12%]</color>: Hỏa Diệm Kiếm (+32 ATK), Chìa Khóa Tàn Tích, Khiên Long Thần\n" +
-            "- <color=#9B59B6>[SỬ THI 25%]</color>: Hắc Dạ Katana (+24 ATK), Rương Tàn Tích Cổ, Huyết Thạch Ma Thuật\n" +
-            "- <color=#3742FA>[HIẾM 35%]</color>: Kiếm Hiệp Sĩ, Khiên Hoàng Gia, Thạch Anh Tím, Ngọc Bích, Quặng Vàng, Quặng Thiếc\n" +
+            "- <color=#9B59B6>[SỬ THI 25%]</color>: Hắc Dạ Katana (+24 ATK), Rương Tàn Tích Cổ, Quặng Vàng Nguyên Chất\n" +
+            "- <color=#3742FA>[HIẾM 35%]</color>: Kiếm Hiệp Sĩ, Khiên Hoàng Gia, Quặng Thiếc Lam, Đá Luyện Kim, Quặng Vàng\n" +
             "- <color=#CED6E0>[PHỔ THÔNG 25%]</color>: Đá Luyện Kim, Đá Trấn Cung, Quặng Đồng, Quặng Sắt Hắc Ám",
             "<b>SUMMON DROP RATES:</b>\n" +
             "- <color=#FF4757>[MYTHIC 3%]</color>: Excalibur Blade (+45 ATK), Dragon Shield, Abyssal Core (+1000 Shards)\n" +
             "- <color=#FFA502>[LEGENDARY 12%]</color>: Flamebrand Sword, Ancient Key, Dragon Shield\n" +
-            "- <color=#9B59B6>[EPIC 25%]</color>: Shadow Katana, Relic Chest, Bloodstone Crystal\n" +
-            "- <color=#3742FA>[RARE 35%]</color>: Paladin Blade, Royal Shield, Amethyst, Jade, Gold Node, Tin Ore\n" +
+            "- <color=#9B59B6>[EPIC 25%]</color>: Shadow Katana, Relic Chest, Pure Gold Node\n" +
+            "- <color=#3742FA>[RARE 35%]</color>: Paladin Blade, Royal Shield, Cyan Tin, Forge Stone, Gold Node\n" +
             "- <color=#CED6E0>[COMMON 25%]</color>: Forge Stone, Keepstone, Copper Ore, Dark Iron Ore");
         rTmp.fontSize = 17.5f;
         rTmp.lineSpacing = 6f;
@@ -951,16 +952,20 @@ public class InventoryUI : MonoBehaviour
         gachaAltarObj.SetActive(false);
     }
 
-    private Button CreateGachaButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor)
+    private Button CreateGachaButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, Vector2? anchor = null, Vector2? pivot = null)
     {
         GameObject obj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         obj.layer = 5;
         obj.transform.SetParent(parent, false);
 
+        Vector2 defAnchor = (pos.y < 0f) ? new Vector2(0.5f, 0.5f) : new Vector2(0.5f, 0f);
+        Vector2 targetAnchor = anchor ?? defAnchor;
+        Vector2 targetPivot = pivot ?? targetAnchor;
+
         RectTransform rt = obj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 0f);
-        rt.anchorMax = new Vector2(0.5f, 0f);
-        rt.pivot = new Vector2(0.5f, 0f);
+        rt.anchorMin = targetAnchor;
+        rt.anchorMax = targetAnchor;
+        rt.pivot = targetPivot;
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
 
@@ -984,10 +989,12 @@ public class InventoryUI : MonoBehaviour
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         tmp.text = text;
-        tmp.fontSize = 22f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = Color.white;
+        tmp.enableAutoSizing = true;
+        tmp.fontSizeMin = 14f;
+        tmp.fontSizeMax = 20f;
 
         return btn;
     }
@@ -1132,8 +1139,8 @@ public class InventoryUI : MonoBehaviour
         scrollObj.layer = 5;
         scrollObj.transform.SetParent(boxObj.transform, false);
         RectTransform scrollRt = scrollObj.GetComponent<RectTransform>();
-        scrollRt.anchoredPosition = new Vector2(0f, -32f);
-        scrollRt.sizeDelta = new Vector2(720f, 115f);
+        scrollRt.anchoredPosition = new Vector2(0f, -30f);
+        scrollRt.sizeDelta = new Vector2(720f, 125f);
 
         ScrollRect scrollRect = scrollObj.GetComponent<ScrollRect>();
         scrollRect.horizontal = true;
@@ -1144,7 +1151,7 @@ public class InventoryUI : MonoBehaviour
         scrollRect.scrollSensitivity = 25f;
 
         // Content
-        GameObject contentObj = new GameObject("CardsContent", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
+        GameObject contentObj = new GameObject("CardsContent", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter), typeof(LayoutElement));
         contentObj.layer = 5;
         contentObj.transform.SetParent(scrollObj.transform, false);
         RectTransform contentRt = contentObj.GetComponent<RectTransform>();
@@ -1152,12 +1159,15 @@ public class InventoryUI : MonoBehaviour
         contentRt.anchorMax = new Vector2(0f, 1f);
         contentRt.pivot = new Vector2(0f, 0.5f);
         contentRt.anchoredPosition = Vector2.zero;
-        contentRt.sizeDelta = new Vector2(0f, 115f);
+        contentRt.sizeDelta = new Vector2(0f, 125f);
+
+        var cLe = contentObj.GetComponent<LayoutElement>();
+        cLe.minWidth = 720f;
 
         var hlg = contentObj.GetComponent<HorizontalLayoutGroup>();
-        hlg.childAlignment = TextAnchor.MiddleLeft;
-        hlg.spacing = 12f;
-        hlg.padding = new RectOffset(12, 12, 5, 5);
+        hlg.childAlignment = TextAnchor.MiddleCenter;
+        hlg.spacing = 16f;
+        hlg.padding = new RectOffset(16, 16, 6, 6);
         hlg.childControlWidth = false;
         hlg.childControlHeight = false;
 
@@ -1170,10 +1180,10 @@ public class InventoryUI : MonoBehaviour
 
         chestRewardCardsContainer = contentObj.transform;
 
-        // Confirm Button
+        // Confirm Button (Anchored inside the modal box, neatly above bottom border)
         chestRewardConfirmBtn = CreateGachaButton(boxObj.transform, "Btn_ConfirmChest",
             LocalizationManager.T("NHẬN CHIẾN LỢI PHẨM", "CLAIM REWARDS"),
-            new Vector2(0f, -175f), new Vector2(280f, 46f), new Color(0.18f, 0.65f, 0.38f, 1f));
+            new Vector2(0f, -170f), new Vector2(320f, 48f), new Color(0.18f, 0.65f, 0.38f, 1f));
         chestRewardConfirmBtn.onClick.AddListener(() =>
         {
             if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
@@ -1976,13 +1986,16 @@ public class InventoryUI : MonoBehaviour
             gemCardObjs.Add(cardObj);
 
             RectTransform cRt = cardObj.GetComponent<RectTransform>();
-            cRt.sizeDelta = new Vector2(230f, 105f);
+            cRt.sizeDelta = new Vector2(92f, 92f);
 
             Image cImg = cardObj.GetComponent<Image>();
             cImg.color = new Color(0.08f, 0.10f, 0.16f, 0.95f);
 
             var cOutline = cardObj.AddComponent<Outline>();
-            cOutline.effectColor = itemEff.Value.gemColor * 0.8f;
+            cOutline.effectColor = itemEff.Value.gemColor * 0.85f;
+            cOutline.effectDistance = new Vector2(1.5f, -1.5f);
+            WhiteIconLoader.ApplyGothicFrame(cardObj, itemEff.Value.gemColor * 0.75f, 0.35f);
+
             // Mobile 2s Long-Press to Reveal Salvage [X] Badge
             var lp = cardObj.AddComponent<UILongPressTrigger>();
             lp.targetItemId = itemEntry.itemId;
@@ -1997,79 +2010,57 @@ public class InventoryUI : MonoBehaviour
             string itemIdToSocket = itemEntry.itemId;
             dragItem.onClick = () =>
             {
-                if (EquipmentSocketManager.SocketGemToHeroSlot(selectedSocketSlotIndex, itemIdToSocket, out _, out _, curHero))
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                EquipmentItemDetailPopupUI.EnsureUIExists(gemSocketModalObj != null ? gemSocketModalObj.transform : null);
+                EquipmentItemDetailPopupUI.Show(-1, itemIdToSocket, 1, curHero, () =>
                 {
-                    if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
                     RefreshGemSocketModal();
                     if (!string.IsNullOrEmpty(selectedItemId)) InspectItem(selectedItemId);
                     RefreshGrid();
-                }
+                });
             };
 
-            // Icon Box (Left)
-            GameObject ibObj = new GameObject("IconBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            // Center Item Icon
+            GameObject ibObj = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             ibObj.layer = 5;
             ibObj.transform.SetParent(cardObj.transform, false);
             RectTransform ibRt = ibObj.GetComponent<RectTransform>();
-            ibRt.anchorMin = new Vector2(0f, 0.5f);
-            ibRt.anchorMax = new Vector2(0f, 0.5f);
-            ibRt.pivot = new Vector2(0f, 0.5f);
-            ibRt.anchoredPosition = new Vector2(8f, 0f);
-            ibRt.sizeDelta = new Vector2(50f, 50f);
+            ibRt.anchorMin = new Vector2(0.5f, 0.5f);
+            ibRt.anchorMax = new Vector2(0.5f, 0.5f);
+            ibRt.pivot = new Vector2(0.5f, 0.5f);
+            ibRt.anchoredPosition = Vector2.zero;
+            ibRt.sizeDelta = new Vector2(62f, 62f);
             Image ibImg = ibObj.GetComponent<Image>();
-            if (sprItemSlotFrame != null) { ibImg.sprite = sprItemSlotFrame; ibImg.type = Image.Type.Sliced; }
-            ibImg.color = itemEff.Value.gemColor;
+            ibImg.sprite = itemDef.Icon;
+            ibImg.preserveAspect = true;
+            ibImg.raycastTarget = false;
 
-            GameObject icObj = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            icObj.layer = 5;
-            icObj.transform.SetParent(ibObj.transform, false);
-            RectTransform icRt = icObj.GetComponent<RectTransform>();
-            icRt.anchorMin = Vector2.zero;
-            icRt.anchorMax = Vector2.one;
-            icRt.sizeDelta = new Vector2(-8f, -8f);
-            Image icImg = icObj.GetComponent<Image>();
-            icImg.sprite = itemDef.Icon;
-            icImg.preserveAspect = true;
-            icImg.raycastTarget = false;
+            // Quantity Stack Badge in Bottom-Right Corner
+            if (itemEntry.quantity > 0)
+            {
+                GameObject qObj = new GameObject("QtyBadge", typeof(RectTransform), typeof(CanvasRenderer));
+                qObj.layer = 5;
+                qObj.transform.SetParent(cardObj.transform, false);
+                RectTransform qRt = qObj.GetComponent<RectTransform>();
+                qRt.anchorMin = new Vector2(1f, 0f);
+                qRt.anchorMax = new Vector2(1f, 0f);
+                qRt.pivot = new Vector2(1f, 0f);
+                qRt.anchoredPosition = new Vector2(-4f, 4f);
+                qRt.sizeDelta = new Vector2(50f, 18f);
 
-            // Details (Right)
-            GameObject infoObj = new GameObject("Info", typeof(RectTransform), typeof(CanvasRenderer));
-            infoObj.layer = 5;
-            infoObj.transform.SetParent(cardObj.transform, false);
-            RectTransform infoRt = infoObj.GetComponent<RectTransform>();
-            infoRt.anchorMin = new Vector2(0f, 0f);
-            infoRt.anchorMax = new Vector2(1f, 1f);
-            infoRt.offsetMin = new Vector2(66f, 4f);
-            infoRt.offsetMax = new Vector2(-6f, -4f);
+                var qTmp = qObj.AddComponent<TextMeshProUGUI>();
+                string qtyStr = itemEntry.quantity > 99 ? "99+" : $"x{itemEntry.quantity}";
+                qTmp.text = $"<color=#00FF88><b>{qtyStr}</b></color>";
+                qTmp.fontSize = 12.5f;
+                qTmp.fontStyle = FontStyles.Bold;
+                qTmp.alignment = TextAlignmentOptions.BottomRight;
+                qTmp.enableWordWrapping = false;
+                qTmp.raycastTarget = false;
 
-            var vLayout = infoObj.AddComponent<VerticalLayoutGroup>();
-            vLayout.childAlignment = TextAnchor.MiddleLeft;
-            vLayout.childControlHeight = false;
-            vLayout.childControlWidth = true;
-            vLayout.spacing = 3f;
-
-            // Title + Quantity
-            GameObject tObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
-            tObj.layer = 5;
-            tObj.transform.SetParent(infoObj.transform, false);
-            var tTmp = tObj.AddComponent<TextMeshProUGUI>();
-            string gName = LocalizationManager.IsVietnamese ? itemEff.Value.nameVi : itemEff.Value.nameEn;
-            string qtyStr = itemEntry.quantity > 99 ? "99+" : $"x{itemEntry.quantity}";
-            tTmp.text = $"<b>{gName}</b> <size=14><color=#00FF88>{qtyStr}</color></size>";
-            tTmp.fontSize = 15.5f;
-            tTmp.color = Color.white;
-            tTmp.raycastTarget = false;
-
-            // Buff Summary
-            GameObject bObj = new GameObject("Buff", typeof(RectTransform), typeof(CanvasRenderer));
-            bObj.layer = 5;
-            bObj.transform.SetParent(infoObj.transform, false);
-            var bTmp = bObj.AddComponent<TextMeshProUGUI>();
-            string effSum = LocalizationManager.IsVietnamese ? itemEff.Value.effectSummaryVi : itemEff.Value.effectSummaryEn;
-            bTmp.text = EquipmentSocketManager.FormatColoredStatSummary(effSum);
-            bTmp.fontSize = 13.5f;
-            bTmp.fontStyle = FontStyles.Bold;
-            bTmp.color = Color.white;
+                var qOutline = qObj.AddComponent<Outline>();
+                qOutline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+                qOutline.effectDistance = new Vector2(1f, -1f);
+            }
         }
     }
 
@@ -2119,17 +2110,9 @@ public class InventoryUI : MonoBehaviour
         closeRt.anchoredPosition = new Vector2(-30f, -30f);
         closeRt.sizeDelta = new Vector2(52f, 52f);
 
-        Image img = closeObj.GetComponent<Image>();
-        img.color = new Color(0.75f, 0.22f, 0.25f, 1f);
-
-        var closeOutline = closeObj.AddComponent<Outline>();
-        closeOutline.effectColor = new Color(1f, 0.85f, 0.4f, 0.7f);
-        closeOutline.effectDistance = new Vector2(1.5f, -1.5f);
-
         closeButton = closeObj.GetComponent<Button>();
-        closeButton.targetGraphic = img;
         closeButton.onClick.AddListener(Close);
-        WhiteIconLoader.ReplaceTextWithIcon(closeButton, "Cross", Color.white, new Vector2(24f, 24f));
+        SoulslikeHUDStyler.StyleCloseButton(closeButton);
     }
 
     public void Open()
@@ -2392,7 +2375,7 @@ public class InventoryUI : MonoBehaviour
         // Pity Guarantee: If 10-roll and no Epic+ was rolled, upgrade the 10th slot to a guaranteed Epic!
         if (pullCount >= 10 && !hasHighTier && wonItems.Count > 0)
         {
-            string[] epicGuaranteedPool = new string[] { "gem_bloodstone", "chest_ancient_relic", "wpn_katana", "gem_amethyst" };
+            string[] epicGuaranteedPool = new string[] { "ore_gold_node", "chest_ancient_relic", "wpn_katana", "ore_forge_stone" };
             string epicId = epicGuaranteedPool[Random.Range(0, epicGuaranteedPool.Length)];
             wonItems[wonItems.Count - 1] = InventoryItemDatabase.GetItem(epicId);
         }
@@ -2418,8 +2401,8 @@ public class InventoryUI : MonoBehaviour
 
         string[] mythicPool = new string[] { "wpn_legendary_sword", "shield_dragon_06", "core_abyssal_soul" };
         string[] legendaryPool = new string[] { "wpn_fire_sword", "key_ancient_dungeon", "shield_dragon_06" };
-        string[] epicPool = new string[] { "wpn_katana", "chest_ancient_relic", "gem_bloodstone", "gem_amethyst" };
-        string[] rarePool = new string[] { "wpn_paladin_sword", "shield_aegis_01", "gem_jade", "ore_gold_node", "ore_tin", "ore_boulder_stone" };
+        string[] epicPool = new string[] { "wpn_katana", "chest_ancient_relic", "core_abyssal_soul", "ore_gold_node" };
+        string[] rarePool = new string[] { "wpn_paladin_sword", "shield_aegis_01", "ore_tin", "ore_gold_node", "ore_forge_stone", "ore_keep_stone" };
         string[] commonPool = new string[] { "ore_forge_stone", "ore_keep_stone", "ore_copper", "ore_iron", "ore_coal", "ore_stone" };
 
         string pickedId;
@@ -2743,6 +2726,10 @@ public class InventoryUI : MonoBehaviour
         if (def.physAtkBonus > 0) statLines.Add($"<color=#FF3B30>+{def.physAtkBonus} ATK</color>");
         if (def.magicAtkBonus > 0) statLines.Add($"<color=#B84DFF>+{def.magicAtkBonus} AP</color>");
         if (def.atkBonus > 0 && def.physAtkBonus == 0 && def.magicAtkBonus == 0) statLines.Add($"<color=#FF3B30>+{def.atkBonus} ATK</color>");
+        if (def.armorPenBonus > 0) statLines.Add($"<color=#F97316>+{def.armorPenBonus} {(LocalizationManager.IsVietnamese ? "Xuyên Giáp" : "Armor Pen")}</color>");
+        if (def.armorPenPctBonus > 0f) statLines.Add($"<color=#F97316>+{Mathf.RoundToInt(def.armorPenPctBonus * 100)}% {(LocalizationManager.IsVietnamese ? "Xuyên Giáp" : "Armor Pen")}</color>");
+        if (def.magicPenBonus > 0) statLines.Add($"<color=#A855F7>+{def.magicPenBonus} {(LocalizationManager.IsVietnamese ? "Xuyên Phép" : "Magic Pen")}</color>");
+        if (def.magicPenPctBonus > 0f) statLines.Add($"<color=#A855F7>+{Mathf.RoundToInt(def.magicPenPctBonus * 100)}% {(LocalizationManager.IsVietnamese ? "Xuyên Phép" : "Magic Pen")}</color>");
         if (def.hpBonus > 0) statLines.Add($"<color=#22C55E>+{def.hpBonus} HP</color>");
         if (def.defBonus > 0) statLines.Add($"<color=#38BDF8>+{def.defBonus} DEF</color>");
         if (def.speedBonus > 0) statLines.Add($"<color=#38BDF8>+{def.speedBonus:F1} SPD</color>");
@@ -3229,7 +3216,7 @@ public class InventoryUI : MonoBehaviour
         int shardReward = Random.Range(250, 501);
         AccountDatabase.AddAethelShards(shardReward);
 
-        string[] bonusPool = new string[] { "ore_gold_node", "gem_amethyst", "gem_bloodstone", "gem_jade", "ore_tin", "ore_forge_stone" };
+        string[] bonusPool = new string[] { "ore_gold_node", "ore_forge_stone", "ore_tin", "ore_keep_stone" };
         string bonusItemId = bonusPool[Random.Range(0, bonusPool.Length)];
         var bonusItemDef = InventoryItemDatabase.GetItem(bonusItemId);
         if (bonusItemDef != null)
@@ -3326,8 +3313,8 @@ public class InventoryUI : MonoBehaviour
 
         AccountDatabase.AddAethelShards(totalShards);
 
-        // Roll openCount bonus minerals/gems & aggregate
-        string[] bonusPool = new string[] { "ore_gold_node", "gem_amethyst", "gem_bloodstone", "gem_jade", "ore_tin", "ore_forge_stone" };
+        // Roll openCount bonus minerals/ores & aggregate
+        string[] bonusPool = new string[] { "ore_gold_node", "ore_forge_stone", "ore_tin", "ore_keep_stone" };
         Dictionary<string, int> bonusDrops = new Dictionary<string, int>();
         for (int i = 0; i < openCount; i++)
         {
@@ -3586,13 +3573,13 @@ public class InventoryUI : MonoBehaviour
         cardObj.transform.SetParent(chestRewardCardsContainer, false);
 
         RectTransform rt = cardObj.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(175f, 95f);
+        rt.sizeDelta = new Vector2(250f, 100f);
 
         var le = cardObj.AddComponent<LayoutElement>();
-        le.preferredWidth = 175f;
-        le.preferredHeight = 95f;
-        le.minWidth = 175f;
-        le.minHeight = 95f;
+        le.preferredWidth = 250f;
+        le.preferredHeight = 100f;
+        le.minWidth = 250f;
+        le.minHeight = 100f;
 
         Image img = cardObj.GetComponent<Image>();
         img.color = new Color(0.10f, 0.12f, 0.18f, 0.95f);
@@ -3609,8 +3596,8 @@ public class InventoryUI : MonoBehaviour
         ibRt.anchorMin = new Vector2(0f, 0.5f);
         ibRt.anchorMax = new Vector2(0f, 0.5f);
         ibRt.pivot = new Vector2(0f, 0.5f);
-        ibRt.anchoredPosition = new Vector2(8f, 0f);
-        ibRt.sizeDelta = new Vector2(50f, 50f);
+        ibRt.anchoredPosition = new Vector2(10f, 0f);
+        ibRt.sizeDelta = new Vector2(56f, 56f);
 
         Image ibImg = ibObj.GetComponent<Image>();
         if (sprItemSlotFrame != null) { ibImg.sprite = sprItemSlotFrame; ibImg.type = Image.Type.Sliced; }
@@ -3634,8 +3621,8 @@ public class InventoryUI : MonoBehaviour
         RectTransform infoRt = infoObj.GetComponent<RectTransform>();
         infoRt.anchorMin = new Vector2(0f, 0f);
         infoRt.anchorMax = new Vector2(1f, 1f);
-        infoRt.offsetMin = new Vector2(64f, 6f);
-        infoRt.offsetMax = new Vector2(-6f, -6f);
+        infoRt.offsetMin = new Vector2(74f, 8f);
+        infoRt.offsetMax = new Vector2(-8f, -8f);
 
         var vlg = infoObj.AddComponent<VerticalLayoutGroup>();
         vlg.childAlignment = TextAnchor.MiddleLeft;
@@ -3659,9 +3646,12 @@ public class InventoryUI : MonoBehaviour
         titleObj.transform.SetParent(infoObj.transform, false);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = title;
-        titleTmp.fontSize = 14f;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = Color.white;
+        titleTmp.enableAutoSizing = true;
+        titleTmp.fontSizeMin = 10f;
+        titleTmp.fontSizeMax = 13.5f;
+        titleTmp.lineSpacing = -5f;
         titleTmp.overflowMode = TextOverflowModes.Ellipsis;
 
         return cardObj;

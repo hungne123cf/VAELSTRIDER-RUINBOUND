@@ -52,7 +52,7 @@ public static class LocalizationManager
         { "LOGIN_VERSION", ("Phiên bản v1.0.0 - Sẵn sàng chiến đấu", "Version v1.0.0 - Ready for Battle") },
 
         // Top Bar & Account Info
-        { "LBL_PLAYER_DEFAULT_NAME", ("HÙNG", "HERO") },
+        { "LBL_PLAYER_DEFAULT_NAME", ("CHIẾN BINH", "HERO") },
         { "LBL_PLAYER_TITLE", ("LỮ KHÁCH TÀN TÍCH", "RUIN WANDERER") },
         { "LBL_SHARDS", ("LINH HỒN", "SHARDS") },
         { "LBL_POTIONS", ("BÌNH MÁU", "POTIONS") },
@@ -150,11 +150,11 @@ public static class LocalizationManager
         { "HUD_ENEMIES_SLAIN", ("Kẻ Thù Tiêu Diệt:", "Enemies Slain:") },
         { "HUD_SHARDS_EARNED", ("Linh Hồn Thu Được:", "Shards Earned:") },
 
-        // Prompts & Interactions
-        { "PROMPT_SHRINE", ("[E] Tế Đàn Cổ Đại", "[E] Ancient Shrine") },
-        { "PROMPT_CHEST", ("[E] Mở Rương Báu", "[E] Open Treasure Chest") },
-        { "PROMPT_PORTAL", ("[E] Cổng Không Gian", "[E] Ruin Portal") },
-        { "PROMPT_GRAVE", ("[E] Thu Hồi Mảnh Linh Hồn", "[E] Retrieve Lost Shards") },
+        // Prompts & Interactions (Mobile touch / Proximity)
+        { "PROMPT_SHRINE", ("Tế Đàn Cổ Đại", "Ancient Shrine") },
+        { "PROMPT_CHEST", ("Mở Rương Báu", "Open Treasure Chest") },
+        { "PROMPT_PORTAL", ("Cổng Không Gian", "Ruin Portal") },
+        { "PROMPT_GRAVE", ("Thu Hồi Mảnh Linh Hồn", "Retrieve Lost Shards") },
 
         // Shrine Upgrades
         { "SHRINE_TITLE", ("TẾ ĐÀN NÂNG CẤP CỔ ĐẠI", "ANCIENT UPGRADE SHRINE") },

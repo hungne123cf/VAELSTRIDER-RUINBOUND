@@ -1,6 +1,6 @@
 // ========================================================
 // VAELSTRIDER: RUINBOUND - Main Menu Dynamic Background
-// Ambient Sparkling Holy Spirit Particles (Holy VFX 01 Impact 1-7)
+// Apocalyptic Ruined City Background (Assets/ART/Backgrounds/Night/WCP_Example.png)
 // ========================================================
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,17 +10,14 @@ public class MainMenuDynamicBackground : MonoBehaviour
 {
     public static MainMenuDynamicBackground Instance { get; private set; }
 
-    [Header("Background Artwork")]
-    [SerializeField] private Sprite epicBackgroundSprite;
-
     [Header("Color Palette")]
-    [SerializeField] private Color deepSpaceBase = new Color(0.04f, 0.05f, 0.08f, 1f);
+    [SerializeField] private Color deepBaseColor = new Color(0.12f, 0.13f, 0.11f, 1f);
 
     private RectTransform rootRt;
-    private RectTransform bgArtRt;
-    private Image bgArtImg;
+    private RectTransform cityArtRt;
+    private Image cityArtImg;
 
-    private struct FloatingEmber
+    private struct FloatingAsh
     {
         public RectTransform rt;
         public Image img;
@@ -31,18 +28,12 @@ public class MainMenuDynamicBackground : MonoBehaviour
         public float phaseOffset;
         public float baseAlpha;
         public float baseScale;
-        public Color goldColor;
-        public int currentFrame;
-        public float frameTimer;
-        public float frameDuration;
+        public Color ashColor;
     }
 
-    private List<FloatingEmber> embers = new List<FloatingEmber>();
-    private const int EMBER_COUNT = 35;
+    private List<FloatingAsh> ashMotes = new List<FloatingAsh>();
+    private const int ASH_COUNT = 25;
     private float timer = 0f;
-
-    // The exact 7 Holy VFX 01 Impact frames
-    private static Sprite[] impactFrames = null;
 
     public static MainMenuDynamicBackground EnsureBackground(Canvas parentCanvas)
     {
@@ -73,8 +64,12 @@ public class MainMenuDynamicBackground : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
-        if (rootRt == null)
+        if (Instance == null) Instance = this;
+    }
+
+    private void Start()
+    {
+        if (cityArtImg == null || cityArtImg.sprite == null)
         {
             BuildBackgroundElements();
         }
@@ -89,7 +84,7 @@ public class MainMenuDynamicBackground : MonoBehaviour
         rootRt.sizeDelta = Vector2.zero;
         transform.SetAsFirstSibling();
 
-        // 1. Base Dark Fallback
+        // 1. Solid Fallback Base
         GameObject baseObj = new GameObject("BaseColor", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         baseObj.transform.SetParent(transform, false);
         RectTransform baseRt = baseObj.GetComponent<RectTransform>();
@@ -97,147 +92,124 @@ public class MainMenuDynamicBackground : MonoBehaviour
         baseRt.anchorMax = Vector2.one;
         baseRt.sizeDelta = Vector2.zero;
         Image baseImg = baseObj.GetComponent<Image>();
-        baseImg.color = deepSpaceBase;
+        baseImg.color = deepBaseColor;
         baseImg.raycastTarget = false;
 
-        // 2. Load Epic Ruin Artwork Sprite
-        if (epicBackgroundSprite == null)
-        {
-#if UNITY_EDITOR
-            epicBackgroundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Backgrounds/mainmenu_bg_epic.jpg");
-#endif
-            if (epicBackgroundSprite == null)
-            {
-                string path = System.IO.Path.Combine(Application.dataPath, "ART/Backgrounds/mainmenu_bg_epic.jpg");
-                if (System.IO.File.Exists(path))
-                {
-                    byte[] fileData = System.IO.File.ReadAllBytes(path);
-                    Texture2D tex = new Texture2D(2, 2);
-                    if (tex.LoadImage(fileData))
-                    {
-                        epicBackgroundSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
-                    }
-                }
-            }
-        }
+        // 2. Ruined City Master Artwork (WCP_Example.png - Exact Ruined City Skyline)
+        Sprite citySprite = LoadSpriteFromAssetPath("Assets/ART/Backgrounds/Night/WCP_Example.png");
 
-        // 3. Fullscreen Epic Background Image Layer
-        GameObject artObj = new GameObject("EpicBgArtwork", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        GameObject artObj = new GameObject("RuinedCityArtwork", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         artObj.transform.SetParent(transform, false);
-        bgArtRt = artObj.GetComponent<RectTransform>();
-        bgArtRt.anchorMin = Vector2.zero;
-        bgArtRt.anchorMax = Vector2.one;
-        bgArtRt.sizeDelta = new Vector2(100f, 60f);
-        bgArtRt.anchoredPosition = Vector2.zero;
 
-        bgArtImg = artObj.GetComponent<Image>();
-        if (epicBackgroundSprite != null)
+        cityArtRt = artObj.GetComponent<RectTransform>();
+        cityArtRt.anchorMin = Vector2.zero;
+        cityArtRt.anchorMax = Vector2.one;
+        // Overflow margin so smooth mouse parallax movement never reveals canvas edges
+        cityArtRt.sizeDelta = new Vector2(80f, 50f);
+        cityArtRt.anchoredPosition = Vector2.zero;
+
+        cityArtImg = artObj.GetComponent<Image>();
+        if (citySprite != null)
         {
-            bgArtImg.sprite = epicBackgroundSprite;
-            bgArtImg.color = Color.white;
+            cityArtImg.sprite = citySprite;
+            cityArtImg.color = Color.white;
         }
         else
         {
-            bgArtImg.color = new Color(0.08f, 0.12f, 0.18f, 1f);
+            cityArtImg.color = new Color(0.35f, 0.38f, 0.35f, 1f);
         }
-        bgArtImg.preserveAspect = false;
-        bgArtImg.raycastTarget = false;
+        cityArtImg.preserveAspect = false;
+        cityArtImg.raycastTarget = false;
 
-        // 4. Floating Holy VFX 01 Impact Spirit Layer
-        GameObject embersContainer = new GameObject("SpiritSparksContainer", typeof(RectTransform));
-        embersContainer.transform.SetParent(transform, false);
-        RectTransform ecRt = embersContainer.GetComponent<RectTransform>();
-        ecRt.anchorMin = Vector2.zero;
-        ecRt.anchorMax = Vector2.one;
-        ecRt.sizeDelta = Vector2.zero;
+        // 3. Ambient Wasteland Dust / Ash Motes
+        GameObject ashContainer = new GameObject("WastelandAshContainer", typeof(RectTransform));
+        ashContainer.transform.SetParent(transform, false);
+        RectTransform acRt = ashContainer.GetComponent<RectTransform>();
+        acRt.anchorMin = Vector2.zero;
+        acRt.anchorMax = Vector2.one;
+        acRt.sizeDelta = Vector2.zero;
 
-        LoadImpactFrames();
+        // Simple soft dot sprite for ash particles
+        Sprite dotSpr = GetProceduralSoftDot();
 
-        Color[] goldTints = new Color[]
+        Color[] ashTints = new Color[]
         {
-            new Color(1.0f, 0.95f, 0.70f, 0.95f),  // Bright Radiant Gold
-            new Color(1.0f, 0.88f, 0.38f, 0.92f),  // Warm Golden Light
-            new Color(1.0f, 0.80f, 0.25f, 0.88f),  // Amber Gold
-            new Color(1.0f, 1.00f, 0.90f, 0.98f)   // Pure Holy White-Gold
+            new Color(0.85f, 0.88f, 0.84f, 0.40f), // Pale Wasteland Dust
+            new Color(0.70f, 0.74f, 0.68f, 0.35f), // Muted Gray-Green Ash
+            new Color(0.92f, 0.90f, 0.82f, 0.30f), // Soft Sand/Ruin Particle
+            new Color(0.55f, 0.58f, 0.52f, 0.35f)  // Dark Shadow Smudge
         };
 
-        embers.Clear();
-        for (int i = 0; i < EMBER_COUNT; i++)
+        ashMotes.Clear();
+        for (int i = 0; i < ASH_COUNT; i++)
         {
-            GameObject eObj = new GameObject($"HolySpark_{i}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            eObj.transform.SetParent(embersContainer.transform, false);
+            GameObject aObj = new GameObject($"AshMote_{i}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            aObj.transform.SetParent(ashContainer.transform, false);
 
-            RectTransform eRt = eObj.GetComponent<RectTransform>();
-            float baseSize = Random.Range(24f, 40f);
-            eRt.sizeDelta = new Vector2(baseSize, baseSize);
+            RectTransform aRt = aObj.GetComponent<RectTransform>();
+            float baseSize = Random.Range(6f, 16f);
+            aRt.sizeDelta = new Vector2(baseSize, baseSize);
 
-            float randX = Random.Range(-920f, 920f);
-            float randY = Random.Range(-520f, 520f);
-            eRt.anchoredPosition = new Vector2(randX, randY);
+            float randX = Random.Range(-960f, 960f);
+            float randY = Random.Range(-540f, 540f);
+            aRt.anchoredPosition = new Vector2(randX, randY);
 
-            int startFrame = (impactFrames != null && impactFrames.Length > 0) ? Random.Range(0, impactFrames.Length) : 0;
+            Image aImg = aObj.GetComponent<Image>();
+            if (dotSpr != null) aImg.sprite = dotSpr;
+            aImg.preserveAspect = true;
 
-            Image eImg = eObj.GetComponent<Image>();
-            if (impactFrames != null && impactFrames.Length > startFrame)
+            Color chosenTint = ashTints[Random.Range(0, ashTints.Length)];
+            float baseAlpha = Random.Range(0.20f, 0.45f);
+            aImg.color = new Color(chosenTint.r, chosenTint.g, chosenTint.b, baseAlpha);
+            aImg.raycastTarget = false;
+
+            FloatingAsh mote = new FloatingAsh
             {
-                eImg.sprite = impactFrames[startFrame];
-            }
-            eImg.preserveAspect = true;
-
-            Color chosenGold = goldTints[Random.Range(0, goldTints.Length)];
-            float baseAlpha = Random.Range(0.75f, 0.95f);
-            eImg.color = new Color(chosenGold.r, chosenGold.g, chosenGold.b, baseAlpha);
-            eImg.raycastTarget = false;
-
-            var eOutline = eObj.AddComponent<Outline>();
-            eOutline.effectColor = new Color(1f, 0.8f, 0.25f, 0.4f);
-            eOutline.effectDistance = new Vector2(1f, -1f);
-
-            FloatingEmber ember = new FloatingEmber
-            {
-                rt = eRt,
-                img = eImg,
+                rt = aRt,
+                img = aImg,
                 startPos = new Vector2(randX, randY),
-                floatSpeed = Random.Range(12f, 24f), // Slow peaceful upward drift
-                swaySpeed = Random.Range(0.5f, 1.2f), // Gentle sway
-                swayAmount = Random.Range(10f, 24f),
+                floatSpeed = Random.Range(8f, 18f),
+                swaySpeed = Random.Range(0.3f, 0.8f),
+                swayAmount = Random.Range(10f, 25f),
                 phaseOffset = Random.Range(0f, Mathf.PI * 2f),
                 baseAlpha = baseAlpha,
-                baseScale = Random.Range(0.85f, 1.2f),
-                goldColor = chosenGold,
-                currentFrame = startFrame,
-                frameTimer = Random.Range(0f, 0.16f),
-                frameDuration = Random.Range(0.16f, 0.22f) // Gentle, calm frame pacing (~5-6 FPS)
+                baseScale = Random.Range(0.85f, 1.25f),
+                ashColor = chosenTint
             };
-            embers.Add(ember);
+            ashMotes.Add(mote);
         }
     }
 
-    private static void LoadImpactFrames()
+    private static Sprite proceduralDot = null;
+    private static Sprite GetProceduralSoftDot()
     {
-        if (impactFrames != null && impactFrames.Length == 7) return;
+        if (proceduralDot != null) return proceduralDot;
 
-        List<Sprite> list = new List<Sprite>();
-        for (int i = 1; i <= 7; i++)
+        Texture2D tex = new Texture2D(32, 32, TextureFormat.RGBA32, false);
+        Color transparent = new Color(1f, 1f, 1f, 0f);
+        float center = 15.5f;
+        float radius = 15f;
+
+        for (int y = 0; y < 32; y++)
         {
-            Sprite s = LoadSpriteFromMultiplePaths(
-                $"Assets/ART/Item/Holy VFX 01-02/Holy VFX 01/Separated Frames/Holy VFX 01 Impact{i}.png",
-                $"Assets/ART/Item/Separated Frames/Holy VFX 01 Impact{i}.png"
-            );
-            if (s != null) list.Add(s);
+            for (int x = 0; x < 32; x++)
+            {
+                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                if (dist <= radius)
+                {
+                    float a = Mathf.Clamp01(1f - (dist / radius));
+                    a = a * a; // Smooth falloff
+                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+                }
+                else
+                {
+                    tex.SetPixel(x, y, transparent);
+                }
+            }
         }
-
-        if (list.Count > 0) impactFrames = list.ToArray();
-    }
-
-    private static Sprite LoadSpriteFromMultiplePaths(params string[] assetPaths)
-    {
-        foreach (var path in assetPaths)
-        {
-            Sprite s = LoadSpriteFromAssetPath(path);
-            if (s != null) return s;
-        }
-        return null;
+        tex.Apply();
+        proceduralDot = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 100f);
+        return proceduralDot;
     }
 
     private static Sprite LoadSpriteFromAssetPath(string fullAssetPath)
@@ -245,6 +217,21 @@ public class MainMenuDynamicBackground : MonoBehaviour
         Sprite spr = null;
 #if UNITY_EDITOR
         spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(fullAssetPath);
+        if (spr == null)
+        {
+            var subAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(fullAssetPath);
+            if (subAssets != null)
+            {
+                for (int i = 0; i < subAssets.Length; i++)
+                {
+                    if (subAssets[i] is Sprite s)
+                    {
+                        spr = s;
+                        break;
+                    }
+                }
+            }
+        }
 #endif
         if (spr == null)
         {
@@ -268,73 +255,7 @@ public class MainMenuDynamicBackground : MonoBehaviour
     {
         timer += Time.deltaTime;
 
-        // 1. Slow Peaceful Breathing on Background Artwork
-        if (bgArtRt != null)
-        {
-            float breath = Mathf.Sin(timer * 0.35f);
-            float scale = 1.02f + breath * 0.02f;
-            bgArtRt.localScale = new Vector3(scale, scale, 1f);
-        }
-
-        // 2. Update Holy VFX 01 Impact Spirits
-        for (int i = 0; i < embers.Count; i++)
-        {
-            var e = embers[i];
-            if (e.rt == null) continue;
-
-            // Gentle Frame Animation across Impact 1-7
-            if (impactFrames != null && impactFrames.Length > 0)
-            {
-                e.frameTimer += Time.deltaTime;
-                if (e.frameTimer >= e.frameDuration)
-                {
-                    e.frameTimer = 0f;
-                    e.currentFrame = (e.currentFrame + 1) % impactFrames.Length;
-                    if (e.img != null && impactFrames[e.currentFrame] != null)
-                    {
-                        e.img.sprite = impactFrames[e.currentFrame];
-                    }
-                }
-            }
-
-            Vector2 pos = e.rt.anchoredPosition;
-            pos.y += e.floatSpeed * Time.deltaTime;
-            pos.x = e.startPos.x + Mathf.Sin(timer * e.swaySpeed + e.phaseOffset) * e.swayAmount;
-
-            // Smooth Loop back when reaching top
-            if (pos.y > 560f)
-            {
-                pos.y = -560f;
-                e.startPos.x = Random.Range(-920f, 920f);
-            }
-
-            e.rt.anchoredPosition = pos;
-
-            // Gentle Breathing Scale (Very soft)
-            float gentlePulse = Mathf.Sin(timer * 1.0f + e.phaseOffset);
-            float scale = e.baseScale * (0.95f + 0.07f * gentlePulse);
-            e.rt.localScale = new Vector3(scale, scale, 1f);
-
-            // Smooth Edge Fade (Fade in at bottom, fade out at top)
-            if (e.img != null)
-            {
-                float verticalDist = Mathf.Abs(pos.y);
-                float edgeFade = 1f;
-                if (verticalDist > 440f)
-                {
-                    edgeFade = Mathf.Clamp01((560f - verticalDist) / 120f);
-                }
-
-                float finalAlpha = e.baseAlpha * (0.88f + 0.12f * gentlePulse) * edgeFade;
-                Color ec = e.goldColor;
-                ec.a = Mathf.Clamp01(finalAlpha);
-                e.img.color = ec;
-            }
-
-            embers[i] = e;
-        }
-
-        // 3. Subtle Parallax
+        // 1. Unified Mouse Parallax (Moves the entire artwork together so roads/buildings NEVER tear apart)
         Vector2 mouseNorm = Vector2.zero;
         if (UnityEngine.InputSystem.Mouse.current != null)
         {
@@ -345,10 +266,50 @@ public class MainMenuDynamicBackground : MonoBehaviour
             );
         }
 
-        if (bgArtRt != null)
+        if (cityArtRt != null)
         {
-            Vector2 targetPos = new Vector2(-mouseNorm.x * 12f, -mouseNorm.y * 8f);
-            bgArtRt.anchoredPosition = Vector2.Lerp(bgArtRt.anchoredPosition, targetPos, Time.deltaTime * 2.0f);
+            float breath = Mathf.Sin(timer * 0.3f);
+            float scale = 1.02f + breath * 0.01f;
+            cityArtRt.localScale = new Vector3(scale, scale, 1f);
+
+            Vector2 targetPos = new Vector2(-mouseNorm.x * 20f, -mouseNorm.y * 14f);
+            cityArtRt.anchoredPosition = Vector2.Lerp(cityArtRt.anchoredPosition, targetPos, Time.deltaTime * 2.5f);
+        }
+
+        // 2. Update Ambient Wasteland Dust Motes
+        for (int i = 0; i < ashMotes.Count; i++)
+        {
+            var m = ashMotes[i];
+            if (m.rt == null) continue;
+
+            Vector2 pos = m.rt.anchoredPosition;
+            pos.y += m.floatSpeed * Time.deltaTime;
+            pos.x = m.startPos.x + Mathf.Sin(timer * m.swaySpeed + m.phaseOffset) * m.swayAmount;
+
+            if (pos.y > 560f)
+            {
+                pos.y = -560f;
+                m.startPos.x = Random.Range(-960f, 960f);
+            }
+
+            m.rt.anchoredPosition = pos;
+
+            if (m.img != null)
+            {
+                float verticalDist = Mathf.Abs(pos.y);
+                float edgeFade = 1f;
+                if (verticalDist > 440f)
+                {
+                    edgeFade = Mathf.Clamp01((560f - verticalDist) / 120f);
+                }
+
+                float finalAlpha = m.baseAlpha * edgeFade;
+                Color c = m.ashColor;
+                c.a = Mathf.Clamp01(finalAlpha);
+                m.img.color = c;
+            }
+
+            ashMotes[i] = m;
         }
     }
 }

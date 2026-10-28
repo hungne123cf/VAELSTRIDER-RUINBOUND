@@ -62,6 +62,41 @@ public class PlayerExpBarUI : MonoBehaviour
         UpdateLevelText(lv);
     }
 
+    void Update()
+    {
+        AlignWithHealthBar();
+    }
+
+    public void AlignWithHealthBar()
+    {
+        if (_root == null) return;
+        Canvas mainCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (mainCanvas == null) mainCanvas = FindAnyObjectByType<Canvas>();
+        if (mainCanvas == null) return;
+
+        Transform healthBar = mainCanvas.transform.Find("PlayerHealthBar");
+        if (healthBar == null) healthBar = mainCanvas.transform.Find("HealthBar");
+        if (healthBar == null) return;
+
+        RectTransform hbRt = healthBar.GetComponent<RectTransform>();
+        RectTransform rootRt = _root.GetComponent<RectTransform>();
+        if (hbRt != null && rootRt != null)
+        {
+            float startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
+            float startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 3f;
+            float expOffsetY = startY - 38f;
+            float barWidth = Mathf.Max(260f, hbRt.sizeDelta.x - 30f);
+            if (Mathf.Abs(rootRt.anchoredPosition.x - startX) > 0.5f || 
+                Mathf.Abs(rootRt.anchoredPosition.y - expOffsetY) > 0.5f ||
+                Mathf.Abs(rootRt.sizeDelta.x - barWidth) > 0.5f ||
+                Mathf.Abs(rootRt.sizeDelta.y - 14f) > 0.5f)
+            {
+                rootRt.anchoredPosition = new Vector2(startX, expOffsetY);
+                rootRt.sizeDelta = new Vector2(barWidth, 14f);
+            }
+        }
+    }
+
     void OnDestroy()
     {
         if (_instance == this) _instance = null;
@@ -107,8 +142,8 @@ public class PlayerExpBarUI : MonoBehaviour
             RectTransform scRt = shardsUI.GetComponent<RectTransform>();
             if (scRt != null)
             {
-                // Đặt Linh Hồn ở y = -135f để nằm dưới thanh level (đỉnh Linh Hồn ở -135 + 28 = -107f, đáy level ở -96f)
-                scRt.anchoredPosition = new Vector2(scRt.anchoredPosition.x, -135f);
+                scRt.anchoredPosition = new Vector2(175f, -118f);
+                scRt.sizeDelta = new Vector2(120f, 28f);
             }
         }
     }
@@ -135,14 +170,14 @@ public class PlayerExpBarUI : MonoBehaviour
             if (hbRt != null)
             {
                 startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
-                startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 4f;
-                barWidth = hbRt.sizeDelta.x;
+                startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 3f;
+                barWidth = Mathf.Max(260f, hbRt.sizeDelta.x - 30f);
             }
         }
 
-        // Đặt ngay dưới 2 thanh năng lượng (tổng chiều cao năng lượng là 34px)
-        float expOffsetY = startY - 34f - 3f; // ~ -80f
-        float expBarHeight = 13f;
+        // Đặt ngay dưới 2 thanh năng lượng Soulslike (EnergyBar 18px + InnerEnergyBar 14px + đệm = 38px)
+        float expOffsetY = startY - 38f;
+        float expBarHeight = 14f;
 
         _root = new GameObject("PlayerExpBarHUD");
         _root.transform.SetParent(mainCanvas.transform, false);
@@ -154,12 +189,15 @@ public class PlayerExpBarUI : MonoBehaviour
         rootRt.anchoredPosition = new Vector2(startX, expOffsetY);
         rootRt.sizeDelta = new Vector2(barWidth, expBarHeight);
 
-        // Nền tối giống hệt EnergyBar
+        // Nền rãnh đá Obsidian rèn chỉ đồng cổ tím sâu thẳm rõ ràng
         var bgImg = _root.AddComponent<Image>();
-        bgImg.color = new Color(0.06f, 0.08f, 0.12f, 0.95f);
+        bgImg.sprite = SoulslikeHUDStyler.GetObsidianTroughSprite();
+        bgImg.type = Image.Type.Sliced;
+        bgImg.color = new Color(0.35f, 0.25f, 0.45f, 1f);
 
+        // Viền thạch anh tím rõ rệt giúp thanh EXP luôn nổi bật trên nền đá
         var outline = _root.AddComponent<Outline>();
-        outline.effectColor = new Color(0.2f, 0.35f, 0.5f, 0.6f);
+        outline.effectColor = new Color(0.55f, 0.40f, 0.75f, 0.85f);
         outline.effectDistance = new Vector2(1f, -1f);
 
         // Slider component
@@ -184,25 +222,27 @@ public class PlayerExpBarUI : MonoBehaviour
         fillRt.sizeDelta = Vector2.zero;
 
         _expFill = fill.AddComponent<Image>();
-        _expFill.color = new Color(0.22f, 0.60f, 1f, 1f); // Xanh Sapphire tươi sáng
+        _expFill.sprite = SoulslikeHUDStyler.GetAmethystFillSprite();
+        _expFill.type = Image.Type.Sliced;
+        _expFill.color = new Color(0.92f, 0.65f, 1.0f, 1f); // Tím pha lê rực rỡ
         _expSlider.fillRect = fillRt;
 
-        // Label Text hiển thị sắc nét giữa thanh: "LV 1   0 / 8 EXP"
+        // Label Text hiển thị góc phải: "0 / 4 XP"
         var textObj = new GameObject("Text");
         textObj.transform.SetParent(_root.transform, false);
         var textRt = textObj.AddComponent<RectTransform>();
         textRt.anchorMin = Vector2.zero;
         textRt.anchorMax = Vector2.one;
-        textRt.sizeDelta = Vector2.zero;
+        textRt.offsetMin = new Vector2(10f, 0f);
+        textRt.offsetMax = new Vector2(-10f, 0f);
 
         _expLabelText = textObj.AddComponent<TextMeshProUGUI>();
-        _expLabelText.fontSize = 11.5f;
+        _expLabelText.fontSize = 13f;
         _expLabelText.fontStyle = FontStyles.Bold;
-        _expLabelText.color = Color.white;
-        _expLabelText.alignment = TextAlignmentOptions.Center;
+        _expLabelText.color = new Color(0.98f, 0.94f, 1f, 1f);
+        _expLabelText.alignment = TextAlignmentOptions.MidlineRight;
         _expLabelText.raycastTarget = false;
-        _expLabelText.outlineWidth = 0.35f;
-        _expLabelText.outlineColor = Color.black;
+        SoulslikeHUDStyler.SetSafeOutline(_expLabelText, 0.40f, Color.black);
 
         // Initialize state
         _cachedLevel = PlayerLevelSystem.Instance != null ? PlayerLevelSystem.Instance.CurrentLevel : 1;
@@ -210,13 +250,19 @@ public class PlayerExpBarUI : MonoBehaviour
         _cachedReq = PlayerLevelSystem.Instance != null ? PlayerLevelSystem.Instance.ExpRequired : 4;
         UpdateBar(_cachedExp, _cachedReq);
         UpdateLevelText(_cachedLevel);
+
+        // Giữ Avatar HUD ở trên cùng
+        if (PlayerAvatarUI.Instance != null)
+        {
+            PlayerAvatarUI.Instance.transform.SetAsLastSibling();
+        }
     }
 
     private void RefreshLabel()
     {
         if (_expLabelText != null)
         {
-            _expLabelText.text = $"<color=#FFD700>LV {_cachedLevel}</color>   <size=10><color=#E0F2FE>{_cachedExp}/{_cachedReq} EXP</color></size>";
+            _expLabelText.text = $"<color=#ffffff>{_cachedExp}</color> / <color=#eeddff>{_cachedReq}</color> <color=#ffdd88>XP</color>";
         }
     }
 
@@ -246,10 +292,9 @@ public class PlayerExpBarUI : MonoBehaviour
     private System.Collections.IEnumerator FlashColor()
     {
         if (_expFill == null) yield break;
-        Color orig = _expFill.color;
-        _expFill.color = new Color(1f, 0.95f, 0.35f, 1f);
+        _expFill.color = new Color(1f, 0.95f, 0.65f, 1f);
         yield return new WaitForSeconds(0.25f);
         if (_expFill != null)
-            _expFill.color = orig;
+            _expFill.color = Color.white;
     }
 }

@@ -11,12 +11,12 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
     public static event System.Action<ValleySpitterAI> OnEnemyDied;
 
     [Header("Stats")]
-    [SerializeField] private int maxHealth = 180;
+    [SerializeField] private int maxHealth = 95;
     [SerializeField] private int currentHealth;
-    [SerializeField] private float attackRange = 8.5f;
-    [SerializeField] private float attackCooldown = 2.8f;
-    [SerializeField] private int projectileDamage = 20;
-    [SerializeField] private float projectileSpeed = 7.0f;
+    [SerializeField] private float attackRange = 8.0f;
+    [SerializeField] private float attackCooldown = 3.0f;
+    [SerializeField] private int projectileDamage = 11;
+    [SerializeField] private float projectileSpeed = 6.5f;
 
     private Transform player;
     private PlayerHealth playerHealth;
@@ -26,11 +26,14 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
     private float lastAttackTime = -10f;
     private bool isDead = false;
     private bool isCharging = false;
-    private LineRenderer telegraphLine;
+    private Vector3 basePosition;
 
     void Awake()
     {
-        try { gameObject.tag = "Enemy"; } catch { }
+        gameObject.tag = "Enemy";
+        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
+
         sr = GetComponent<SpriteRenderer>();
         if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 5000;
@@ -48,18 +51,32 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
         if (myCol == null)
         {
             var box = gameObject.AddComponent<BoxCollider2D>();
-            box.size = new Vector2(1.0f, 1.0f);
+            box.offset = Vector2.zero;
+            box.size = new Vector2(2.6f, 2.5f);
+            box.isTrigger = false;
             myCol = box;
         }
+        else if (myCol is BoxCollider2D bCol && bCol.offset.magnitude > 0.5f)
+        {
+            bCol.offset = Vector2.zero;
+            bCol.size = new Vector2(2.6f, 2.5f);
+        }
+        EnemyNavigationHelper.EnsureFrictionless(myCol);
+
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.simulated = true;
 
         maxHealth = MapScalingManager.ScaleHealth(maxHealth);
         projectileDamage = MapScalingManager.ScaleDamage(projectileDamage);
         currentHealth = maxHealth;
-        SetupTelegraphLine();
+        basePosition = transform.position;
     }
 
     void Start()
     {
+        basePosition = transform.position;
         FindPlayer();
         IgnorePlayerCollision();
     }
@@ -68,11 +85,15 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
-        if (PlayerHealth.IsPlayerDead)
+        // Đóng băng hoàn toàn AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
+        if (LevelUpChoiceUI.IsShowing)
         {
-            if (telegraphLine != null) telegraphLine.enabled = false;
+            // Nguồn diện từ - không di chuyển, không bao giờ bắn đạn ngay khi resume
+            lastAttackTime = Time.time; // Chặn timer - rồi mới cho phép tấn công sau full cooldown
             return;
         }
+
+        if (PlayerHealth.IsPlayerDead) return;
 
         if (player == null)
         {
@@ -82,9 +103,12 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
 
         float dist = Vector2.Distance(transform.position, player.position);
 
-        // Nhip tho nhap nho
-        float breathe = 1f + Mathf.Sin(Time.time * 4f) * 0.06f;
-        transform.localScale = new Vector3(breathe, 2f - breathe, 1f);
+        // Nhip tho nhap nho khi khong dang gao the tich tu nang luong
+        if (!isCharging)
+        {
+            float breathe = 1f + Mathf.Sin(Time.time * 4f) * 0.05f;
+            transform.localScale = new Vector3(breathe, 2f - breathe, 1f);
+        }
 
         if (dist <= attackRange && !isCharging)
         {
@@ -96,28 +120,14 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
         }
     }
 
-    private void SetupTelegraphLine()
-    {
-        telegraphLine = gameObject.AddComponent<LineRenderer>();
-        Shader unlitS = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") ?? Shader.Find("Sprites/Default"); if (unlitS != null) telegraphLine.material = new Material(unlitS);
-        telegraphLine.startColor = new Color(1f, 0.2f, 0.2f, 0.7f);
-        telegraphLine.endColor = new Color(1f, 0.5f, 0.1f, 0.2f);
-        telegraphLine.startWidth = 0.08f;
-        telegraphLine.endWidth = 0.04f;
-        telegraphLine.positionCount = 2;
-        telegraphLine.sortingOrder = 5100;
-        telegraphLine.enabled = false;
-    }
-
     private IEnumerator ChargeAndShootRoutine()
     {
         isCharging = true;
+        Vector3 anchorPos = transform.position;
 
-        // Giai doan 1: Ngam ban va bat duong canh bao do trong 1.0s
+        // Giai doan 1: Tich tu doc to va rung chuyen mat dat trong 1.0s (Khong con tia laze do gay roi mat)
         float elapsed = 0f;
         float chargeDuration = 1.0f;
-        if (telegraphLine != null) telegraphLine.enabled = true;
-
         Vector2 aimDir = Vector2.down;
 
         while (elapsed < chargeDuration)
@@ -125,41 +135,54 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
             elapsed += Time.deltaTime;
             if (player != null)
             {
-                Vector2 playerTarget = (Vector2)player.position + Vector2.up * 1.0f;
-                Vector2 myCenter = (Vector2)transform.position + Vector2.up * 0.5f;
+                Vector2 playerTarget = (Vector2)player.position + Vector2.up * 0.5f;
+                Vector2 myCenter = (Vector2)anchorPos;
                 aimDir = (playerTarget - myCenter).normalized;
-                if (telegraphLine != null)
-                {
-                    telegraphLine.SetPosition(0, myCenter);
-                    telegraphLine.SetPosition(1, myCenter + aimDir * attackRange);
-                }
             }
 
-            // Nhap nhay mau canh bao
-            float pulse = Mathf.PingPong(elapsed * 8f, 1f);
-            sr.color = Color.Lerp(Color.white, new Color(1f, 0.6f, 0.2f), pulse);
+            // Hieu ung rung lac cuc da (vibration) khi tich tu nang luong
+            float shakeAmp = Mathf.Lerp(0.02f, 0.07f, elapsed / chargeDuration);
+            transform.position = anchorPos + (Vector3)(Random.insideUnitCircle * shakeAmp);
+
+            // Nhap nhay sac mau cam vang canh bao tren be mat da
+            float pulse = Mathf.PingPong(elapsed * 9f, 1f);
+            sr.color = Color.Lerp(Color.white, new Color(1f, 0.65f, 0.2f), pulse);
 
             yield return null;
         }
 
-        if (telegraphLine != null) telegraphLine.enabled = false;
+        transform.position = anchorPos;
         sr.color = Color.white;
 
-        // Giai doan 2: Ban dan gai doc ve huong da ngam
+        // Giai doan 2: Ban dan gai doc ve huong da ngam tu loi cuc da
         if (!isDead)
         {
             SoundManager.EnsureInstance()?.PlayEnemyShoot();
-            SpawnThornProjectile(transform.position, aimDir);
+            Vector3 shootOrigin = anchorPos;
+            SpawnThornProjectile(shootOrigin, aimDir);
         }
 
         isCharging = false;
     }
 
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        var box = GetComponent<BoxCollider2D>();
+        if (box != null && box.offset.magnitude > 0.5f)
+        {
+            box.offset = Vector2.zero;
+            box.size = new Vector2(2.6f, 2.5f);
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+    }
+#endif
+
     private void SpawnThornProjectile(Vector3 origin, Vector2 dir)
     {
         GameObject proj = new GameObject("Valley_Thorn_Projectile");
-        float distToPlayer = (player != null) ? Vector2.Distance(transform.position, player.position) : 5f;
-        float spawnDist = Mathf.Min(0.35f, distToPlayer * 0.35f);
+        float distToPlayer = (player != null) ? Vector2.Distance(transform.position + new Vector3(1.5f, 1.45f, 0f), player.position) : 5f;
+        float spawnDist = Mathf.Min(1.35f, distToPlayer * 0.4f);
         proj.transform.position = origin + (Vector3)(dir * spawnDist);
 
         float rotZ = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
@@ -190,6 +213,8 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
         if (isDead) return;
 
         currentHealth -= damage;
+        // Hien thanh mau noi ngay tren dau cuc da voi toa do chuan
+        EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth, 0.35f);
         StartCoroutine(HitFlashRoutine());
 
         if (currentHealth <= 0)
@@ -211,7 +236,6 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
         if (isDead) return;
         isDead = true;
 
-        if (telegraphLine != null) telegraphLine.enabled = false;
         if (myCol != null) myCol.enabled = false;
 
         // Roi tinh the xanh & da khoang
@@ -243,6 +267,14 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
             }
         }
     }
+
+    public static ValleySpitterAI Spawn(Vector3 pos, int index = 1)
+    {
+        GameObject go = new GameObject($"ValleySpitter_{index}");
+        go.transform.position = pos;
+        var ai = go.AddComponent<ValleySpitterAI>();
+        return ai;
+    }
 }
 
 public class ValleyThornProjectile : MonoBehaviour
@@ -252,19 +284,117 @@ public class ValleyThornProjectile : MonoBehaviour
     private float maxLifetime = 3.5f;
     private bool hasHit = false;
 
+    private float trailTimer = 0f;
+
     public void Init(Vector2 vel, int dmg)
     {
         velocity = vel;
         damage = dmg;
+
+        ApplyDressCode();
         CheckProximity();
         Destroy(gameObject, maxLifetime);
+    }
+
+    private void ApplyDressCode()
+    {
+        var sr = GetComponent<SpriteRenderer>();
+        var realm = CorruptedCycleManager.CurrentRealm;
+
+        Color mainCol;
+        Color trailStart;
+        Color trailEnd;
+
+        switch (realm)
+        {
+            case CalamityRealm.VoidNightmare:
+                mainCol = new Color(0.12f, 0.05f, 0.22f, 1f);
+                trailStart = new Color(0.45f, 0.12f, 0.70f, 0.85f);
+                trailEnd = new Color(0.02f, 0.01f, 0.05f, 0.0f);
+                break;
+            case CalamityRealm.MagmaCalamity:
+                mainCol = new Color(1.0f, 0.35f, 0.05f, 1f);
+                trailStart = new Color(1.0f, 0.80f, 0.15f, 0.95f);
+                trailEnd = new Color(0.9f, 0.15f, 0.0f, 0.0f);
+                break;
+            case CalamityRealm.AcidDownpour:
+                mainCol = new Color(0.25f, 1.0f, 0.35f, 1f);
+                trailStart = new Color(0.35f, 1.0f, 0.45f, 0.90f);
+                trailEnd = new Color(0.1f, 0.6f, 0.2f, 0.0f);
+                break;
+            case CalamityRealm.FrostfallBlizzard:
+                mainCol = new Color(0.85f, 0.95f, 1.0f, 1f);
+                trailStart = new Color(0.6f, 0.9f, 1.0f, 0.85f);
+                trailEnd = new Color(0.3f, 0.7f, 1.0f, 0.0f);
+                break;
+            default:
+                mainCol = new Color(0.2f, 0.95f, 0.35f, 1f);
+                trailStart = new Color(0.3f, 1.0f, 0.4f, 0.75f);
+                trailEnd = new Color(0.1f, 0.5f, 0.1f, 0.0f);
+                break;
+        }
+
+        if (sr != null) sr.color = mainCol;
+
+        var trail = gameObject.AddComponent<TrailRenderer>();
+        trail.material = new Material(Shader.Find("Sprites/Default"));
+        trail.startColor = trailStart;
+        trail.endColor = trailEnd;
+        trail.startWidth = 0.28f;
+        trail.endWidth = 0.02f;
+        trail.time = 0.22f;
+        trail.sortingOrder = 5190;
     }
 
     void Update()
     {
         if (hasHit) return;
         transform.position += (Vector3)(velocity * Time.deltaTime);
+
+        trailTimer += Time.deltaTime;
+        if (trailTimer >= 0.07f)
+        {
+            trailTimer = 0f;
+            SpawnTrailParticle();
+        }
+
         CheckProximity();
+    }
+
+    private void SpawnTrailParticle()
+    {
+        var realm = CorruptedCycleManager.CurrentRealm;
+        GameObject p = new GameObject("Thorn_Trail_FX");
+        p.transform.position = transform.position;
+        var pSr = p.AddComponent<SpriteRenderer>();
+        pSr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
+        pSr.sortingOrder = 5180;
+
+        switch (realm)
+        {
+            case CalamityRealm.VoidNightmare:
+                pSr.color = new Color(0.15f, 0.04f, 0.22f, 0.7f);
+                p.transform.localScale = Vector3.one * Random.Range(0.2f, 0.35f);
+                break;
+            case CalamityRealm.MagmaCalamity:
+                pSr.color = new Color(1.0f, 0.7f, 0.1f, 0.85f);
+                p.transform.localScale = Vector3.one * Random.Range(0.14f, 0.25f);
+                break;
+            case CalamityRealm.AcidDownpour:
+                pSr.color = new Color(0.3f, 1.0f, 0.4f, 0.75f);
+                p.transform.localScale = Vector3.one * Random.Range(0.16f, 0.28f);
+                break;
+            case CalamityRealm.FrostfallBlizzard:
+                pSr.color = new Color(0.85f, 0.95f, 1.0f, 0.8f);
+                p.transform.localScale = Vector3.one * Random.Range(0.18f, 0.3f);
+                break;
+            default:
+                pSr.color = new Color(0.3f, 0.9f, 0.4f, 0.65f);
+                p.transform.localScale = Vector3.one * Random.Range(0.15f, 0.25f);
+                break;
+        }
+
+        Destroy(p, 0.18f);
     }
 
     private void CheckProximity()

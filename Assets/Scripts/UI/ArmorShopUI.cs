@@ -58,11 +58,11 @@ public class ArmorShopUI : MonoBehaviour
             int eqId = PlayerPrefs.GetInt("Equipped_Armor_Slot_" + i, 0);
             if (eqId > 0)
             {
-                if (eqId >= 51) { hpBonus += 30; defPercent += 0.08f; speedBonus += 0.2f; manaBonus += 15f; manaRegenBonus += 1.0f; }
-                else if (eqId >= 41) { hpBonus += 20; defPercent += 0.05f; speedBonus += 0.1f; manaBonus += 10f; manaRegenBonus += 0.7f; }
-                else if (eqId >= 27) { hpBonus += 15; defPercent += 0.03f; manaBonus += 8f; manaRegenBonus += 0.5f; }
-                else if (eqId >= 13) { hpBonus += 10; defPercent += 0.02f; manaBonus += 5f; manaRegenBonus += 0.3f; }
-                else { hpBonus += 5; defPercent += 0.01f; manaBonus += 3f; manaRegenBonus += 0.15f; }
+                if (eqId >= 51) { hpBonus += 30; defPercent += 8f; speedBonus += 0.2f; manaBonus += 15f; manaRegenBonus += 1.0f; }
+                else if (eqId >= 41) { hpBonus += 20; defPercent += 5f; speedBonus += 0.1f; manaBonus += 10f; manaRegenBonus += 0.7f; }
+                else if (eqId >= 27) { hpBonus += 15; defPercent += 3f; manaBonus += 8f; manaRegenBonus += 0.5f; }
+                else if (eqId >= 13) { hpBonus += 10; defPercent += 2f; manaBonus += 5f; manaRegenBonus += 0.3f; }
+                else { hpBonus += 5; defPercent += 1f; manaBonus += 3f; manaRegenBonus += 0.15f; }
             }
         }
     }
@@ -560,8 +560,10 @@ public class ArmorShopUI : MonoBehaviour
         dbRt.offsetMax = Vector2.zero;
 
         Image dbImg = dialogBox.GetComponent<Image>();
-        dbImg.color = new Color(0.04f, 0.05f, 0.09f, 1f);
-        WhiteIconLoader.ApplyGothicFrame(dialogBox, new Color(0.85f, 0.72f, 0.38f, 0.90f), 0.35f);
+        dbImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        dbImg.type = Image.Type.Sliced;
+        dbImg.color = Color.white;
+        WhiteIconLoader.ApplyGothicFrame(dialogBox, Color.white, 0.40f);
 
         // Header Title
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer));
@@ -577,8 +579,10 @@ public class ArmorShopUI : MonoBehaviour
         shopTitleText.fontSize = 28;
         shopTitleText.fontStyle = FontStyles.Bold;
         shopTitleText.alignment = TextAlignmentOptions.Center;
-        shopTitleText.color = new Color(1f, 0.88f, 0.45f);
+        shopTitleText.color = new Color(0.98f, 0.88f, 0.55f);
         shopTitleText.text = LocalizationManager.T("TIỆM TIẾP TẾ & KHOÁNG SẢN HOÀNG GIA", "ROYAL SUPPLIES & MINERALS EMPORIUM");
+        SoulslikeHUDStyler.StyleHeader(shopTitleText);
+        SoulslikeHUDStyler.AddFiligreeDivider(dialogBox.transform, new Vector2(0f, -65f), new Vector2(650f, 12f));
 
         // Close Button (Top Right)
         GameObject closeBtnObj = new GameObject("Btn_CloseShop", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -591,16 +595,9 @@ public class ArmorShopUI : MonoBehaviour
         cbRt.anchoredPosition = new Vector2(-30f, -30f);
         cbRt.sizeDelta = new Vector2(52f, 52f);
 
-        Image cbImg = closeBtnObj.GetComponent<Image>();
-        cbImg.color = new Color(0.75f, 0.22f, 0.25f, 1f);
-        var cbOutline = closeBtnObj.AddComponent<Outline>();
-        cbOutline.effectColor = new Color(1f, 0.85f, 0.4f, 0.7f);
-        cbOutline.effectDistance = new Vector2(1.5f, -1.5f);
-
         Button closeBtn = closeBtnObj.GetComponent<Button>();
-        closeBtn.targetGraphic = cbImg;
         closeBtn.onClick.AddListener(Close);
-        WhiteIconLoader.ReplaceTextWithIcon(closeBtn, "Cross", Color.white, new Vector2(24f, 24f));
+        SoulslikeHUDStyler.StyleCloseButton(closeBtn);
 
         // Category Tab Bar (Shifted up to -70f now that subtitle is removed)
         BuildCategoryTabs(dialogBox.transform);
@@ -936,11 +933,11 @@ public class ArmorShopUI : MonoBehaviour
         multRowObj.layer = 5;
         multRowObj.transform.SetParent(inspObj.transform, false);
         RectTransform multRt = multRowObj.GetComponent<RectTransform>();
-        multRt.anchorMin = new Vector2(0.5f, 0f);
-        multRt.anchorMax = new Vector2(0.5f, 0f);
+        multRt.anchorMin = new Vector2(0f, 0f);
+        multRt.anchorMax = new Vector2(1f, 0f);
         multRt.pivot = new Vector2(0.5f, 0f);
-        multRt.anchoredPosition = new Vector2(0f, 142f);
-        multRt.sizeDelta = new Vector2(380f, 44f);
+        multRt.anchoredPosition = new Vector2(0f, 148f);
+        multRt.sizeDelta = new Vector2(-40f, 44f);
 
         var multLayout = multRowObj.GetComponent<HorizontalLayoutGroup>();
         multLayout.spacing = 8f;
@@ -987,6 +984,9 @@ public class ArmorShopUI : MonoBehaviour
             mTmp.fontStyle = FontStyles.Bold;
             mTmp.alignment = TextAlignmentOptions.Center;
             mTmp.color = new Color(0.7f, 0.75f, 0.85f);
+            mTmp.enableAutoSizing = true;
+            mTmp.fontSizeMin = 11f;
+            mTmp.fontSizeMax = 17f;
 
             multiplierBtns.Add(mBtn);
             multiplierBtnImgs.Add(mImg);
@@ -994,16 +994,16 @@ public class ArmorShopUI : MonoBehaviour
             multiplierBtnTexts.Add(mTmp);
         }
 
-        // Buy Action Button
+        // Buy Action Button (Rộng rãi, hỗ trợ 2 dòng chống tràn UI)
         GameObject buyObj = new GameObject("Btn_BuyItem", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         buyObj.layer = 5;
         buyObj.transform.SetParent(inspObj.transform, false);
         RectTransform buyRt = buyObj.GetComponent<RectTransform>();
-        buyRt.anchorMin = new Vector2(0.5f, 0f);
-        buyRt.anchorMax = new Vector2(0.5f, 0f);
+        buyRt.anchorMin = new Vector2(0f, 0f);
+        buyRt.anchorMax = new Vector2(1f, 0f);
         buyRt.pivot = new Vector2(0.5f, 0f);
-        buyRt.anchoredPosition = new Vector2(0f, 80f);
-        buyRt.sizeDelta = new Vector2(380f, 52f);
+        buyRt.anchoredPosition = new Vector2(0f, 82f);
+        buyRt.sizeDelta = new Vector2(-40f, 56f);
 
         buyActionBtnImg = buyObj.GetComponent<Image>();
         buyActionBtnImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);
@@ -1023,25 +1023,27 @@ public class ArmorShopUI : MonoBehaviour
         btRt.sizeDelta = Vector2.zero;
         buyActionBtnText = bTxtObj.AddComponent<TextMeshProUGUI>();
         buyActionBtnText.text = LocalizationManager.T("MUA VẬT PHẨM", "BUY ITEM");
-        buyActionBtnText.fontSize = 21f;
+        buyActionBtnText.fontSize = 18f;
         buyActionBtnText.fontStyle = FontStyles.Bold;
         buyActionBtnText.color = Color.white;
         buyActionBtnText.alignment = TextAlignmentOptions.Center;
         buyActionBtnText.enableAutoSizing = true;
-        buyActionBtnText.fontSizeMin = 17f;
-        buyActionBtnText.fontSizeMax = 21f;
-        buyActionBtnText.margin = new Vector4(4f, 2f, 4f, 2f);
+        buyActionBtnText.fontSizeMin = 10f;
+        buyActionBtnText.fontSizeMax = 18f;
+        buyActionBtnText.lineSpacing = -10f;
+        buyActionBtnText.margin = new Vector4(6f, 2f, 6f, 2f);
+        buyActionBtnText.enableWordWrapping = true;
 
         // Big Glowing Shortcut Button to Gacha Altar
         GameObject gachaObj = new GameObject("Btn_GoToGacha", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         gachaObj.layer = 5;
         gachaObj.transform.SetParent(inspObj.transform, false);
         RectTransform gRt = gachaObj.GetComponent<RectTransform>();
-        gRt.anchorMin = new Vector2(0.5f, 0f);
-        gRt.anchorMax = new Vector2(0.5f, 0f);
+        gRt.anchorMin = new Vector2(0f, 0f);
+        gRt.anchorMax = new Vector2(1f, 0f);
         gRt.pivot = new Vector2(0.5f, 0f);
         gRt.anchoredPosition = new Vector2(0f, 20f);
-        gRt.sizeDelta = new Vector2(380f, 48f);
+        gRt.sizeDelta = new Vector2(-40f, 48f);
 
         Image gImg = gachaObj.GetComponent<Image>();
         gImg.color = new Color(0.7f, 0.25f, 0.85f, 1f);
@@ -1063,10 +1065,12 @@ public class ArmorShopUI : MonoBehaviour
         gTmp.text = LocalizationManager.T("ĐẾN ĐÀI QUAY GACHA", "GO TO GACHA ALTAR");
         gTmp.fontSize = 19f;
         gTmp.fontStyle = FontStyles.Bold;
-        gtRt.sizeDelta = Vector2.zero;
         gTmp.color = Color.white;
         gTmp.alignment = TextAlignmentOptions.Center;
         gTmp.enableWordWrapping = false;
+        gTmp.enableAutoSizing = true;
+        gTmp.fontSizeMin = 13f;
+        gTmp.fontSizeMax = 19f;
     }
 
     private void RefreshUI()
@@ -1356,15 +1360,15 @@ public class ArmorShopUI : MonoBehaviour
                 if (actualBuyMultiplier > 1)
                 {
                     buyActionBtnText.text = LocalizationManager.T(
-                        $"MUA x{actualBuyMultiplier:N0} ({FormatCompactNumber(totalCost)} Linh Hồn - {FormatCompactNumber(totalQuantityGained)} cái)",
-                        $"BUY x{actualBuyMultiplier:N0} ({FormatCompactNumber(totalCost)} Shards - {FormatCompactNumber(totalQuantityGained)} pcs)"
+                        $"<b>MUA x{actualBuyMultiplier:N0}</b>\n<size=74%><color=#FFF176>Chi phí: {FormatCompactNumber(totalCost)} Linh Hồn  •  Nhận: {FormatCompactNumber(totalQuantityGained)} cái</color></size>",
+                        $"<b>BUY x{actualBuyMultiplier:N0}</b>\n<size=74%><color=#FFF176>Cost: {FormatCompactNumber(totalCost)} Shards  •  Get: {FormatCompactNumber(totalQuantityGained)} pcs</color></size>"
                     );
                 }
                 else
                 {
                     buyActionBtnText.text = LocalizationManager.T(
-                        $"MUA VẬT PHẨM ({FormatCompactNumber(totalCost)} Linh Hồn)",
-                        $"BUY ITEM ({FormatCompactNumber(totalCost)} Shards)"
+                        $"<b>MUA VẬT PHẨM</b>\n<size=74%><color=#FFF176>Chi phí: {FormatCompactNumber(totalCost)} Linh Hồn</color></size>",
+                        $"<b>BUY ITEM</b>\n<size=74%><color=#FFF176>Cost: {FormatCompactNumber(totalCost)} Shards</color></size>"
                     );
                 }
             }

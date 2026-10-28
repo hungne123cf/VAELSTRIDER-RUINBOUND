@@ -361,7 +361,7 @@ public class TitanBerserkerSkill : MonoBehaviour
             animator.Play("Attack2", 0, 0f);
         }
 
-        SoundManager.EnsureInstance()?.PlayHitImpact();
+        SoundManager.EnsureInstance()?.PlayTitanSlam();
 
         // Rung màn hình cực mạnh
         float shakeAmt = Mathf.Lerp(0.22f, 0.45f, ratio);
@@ -396,9 +396,11 @@ public class TitanBerserkerSkill : MonoBehaviour
 
             if (dot >= 0.15f || Vector2.Distance(smashCenter, col.transform.position) <= 1.5f)
             {
-                damageable.TakeDamage(totalDamage);
+                int actualDmg = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, totalDamage);
+                damageable.TakeDamage(actualDmg);
                 bool isMaxCharge = ratio >= 0.90f;
-                DamagePopup.Create(col.transform.position, totalDamage, isMaxCharge ? DamageType.TrueDamage : DamageType.Physical, isCritical: true);
+                DamagePopup.Create(col.transform.position, actualDmg, isMaxCharge ? DamageType.TrueDamage : DamageType.Physical, isCritical: true);
+                AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, actualDmg, damageable);
 
                 bool isProp = (col.GetComponent<BreakableProp>() != null || col.GetComponentInParent<BreakableProp>() != null || col.GetComponent<TreasureChest>() != null || col.GetComponentInParent<TreasureChest>() != null || col.GetComponent<BoneEggObstacle>() != null || col.GetComponentInParent<BoneEggObstacle>() != null);
                 
@@ -646,8 +648,10 @@ public class TitanBerserkerSkill : MonoBehaviour
             if (damageable != null && !(damageable is PlayerHealth))
             {
                 hitCount++;
-                damageable.TakeDamage(totalDmg);
-                DamagePopup.Create(col.transform.position, totalDmg, DamageType.Physical, isCritical: isBash || Random.value < 0.25f);
+                int actualDmg = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, totalDmg);
+                damageable.TakeDamage(actualDmg);
+                DamagePopup.Create(col.transform.position, actualDmg, DamageType.Physical, isCritical: isBash || Random.value < 0.25f);
+                AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, actualDmg, damageable);
 
                 // Hất lùi quái mạnh
                 var rb = col.GetComponent<Rigidbody2D>() ?? col.GetComponentInParent<Rigidbody2D>();

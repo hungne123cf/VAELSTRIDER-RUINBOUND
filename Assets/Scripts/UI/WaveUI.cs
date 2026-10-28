@@ -10,16 +10,23 @@ public class WaveUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI tmpWaveText;
 
     private CanvasGroup canvasGroup;
+    private RectTransform rectTransform;
 
     void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
+        rectTransform = GetComponent<RectTransform>();
+
         if (legacyWaveText == null) legacyWaveText = GetComponentInChildren<Text>();
         if (tmpWaveText == null) tmpWaveText = GetComponentInChildren<TextMeshProUGUI>();
 
         canvasGroup.alpha = 0f;
+        UpdateBannerPosition();
+
+        // Tắt WaveBanner hoàn toàn theo yêu cầu người chơi trên tất cả các map
+        gameObject.SetActive(false);
     }
 
     void OnEnable()
@@ -34,55 +41,56 @@ public class WaveUI : MonoBehaviour
         WaveSpawner.OnWaveMessage -= DisplayWaveMessage;
     }
 
+    void Update()
+    {
+        if (canvasGroup != null && canvasGroup.alpha > 0.01f)
+        {
+            UpdateBannerPosition();
+        }
+    }
+
+    private void UpdateBannerPosition()
+    {
+        if (rectTransform == null) rectTransform = GetComponent<RectTransform>();
+        if (rectTransform == null) return;
+
+        // Kiểm tra xem Thanh Máu Trùm (Boss Health Bar) có đang hiển thị không
+        bool isBossBarVisible = (BossHealthBarUI.Instance != null &&
+                                 BossHealthBarUI.Instance.IsVisible &&
+                                 BossHealthBarUI.Instance.gameObject.activeInHierarchy);
+
+        // Nếu Trùm đang xuất hiện: Đặt Banner Wave ở -152f (nằm ngay dưới thanh máu Boss, tuyệt đối không đè)
+        // Nếu không có Trùm: Đặt Banner ở -95f (dưới thanh thời gian MatchTimer)
+        float targetY = isBossBarVisible ? -152f : -95f;
+        if (Mathf.Abs(rectTransform.anchoredPosition.y - targetY) > 0.5f)
+        {
+            rectTransform.anchoredPosition = new Vector2(0f, targetY);
+        }
+    }
+
     private void DisplayWaveStart(int current, int total, string title)
     {
-        ShowBanner(title, 2.5f);
+        // Đã tắt toàn bộ banner chữ vàng wave
     }
 
     private void DisplayWaveMessage(string message)
     {
-        ShowBanner(message, 2.5f);
+        // Đã tắt toàn bộ banner chữ vàng wave
     }
 
-    
     public void ShowBanner(string title, string subtitle, float duration = 2.5f)
     {
-        string full = string.IsNullOrEmpty(subtitle) ? title : $"{title}\n<size=70%>{subtitle}</size>";
-        ShowBanner(full, duration);
+        // Đã tắt toàn bộ banner chữ vàng wave theo yêu cầu trên tất cả các map
     }
 
     public void ShowBanner(string content, float duration = 2.5f)
     {
-        if (legacyWaveText != null) legacyWaveText.text = content;
-        if (tmpWaveText != null) tmpWaveText.text = content;
-
-        StopAllCoroutines();
-        StartCoroutine(BannerRoutine(duration));
+        // Đã tắt toàn bộ banner chữ vàng wave theo yêu cầu trên tất cả các map
     }
 
     private IEnumerator BannerRoutine(float duration)
     {
-        // Fade in
-        float t = 0f;
-        while (t < 0.3f)
-        {
-            t += Time.deltaTime;
-            canvasGroup.alpha = Mathf.Lerp(0f, 1f, t / 0.3f);
-            yield return null;
-        }
-        canvasGroup.alpha = 1f;
-
-        yield return new WaitForSeconds(duration);
-
-        // Fade out
-        t = 0f;
-        while (t < 0.4f)
-        {
-            t += Time.deltaTime;
-            canvasGroup.alpha = Mathf.Lerp(1f, 0f, t / 0.4f);
-            yield return null;
-        }
-        canvasGroup.alpha = 0f;
+        yield break;
     }
 
     public static WaveUI EnsureUIExists()

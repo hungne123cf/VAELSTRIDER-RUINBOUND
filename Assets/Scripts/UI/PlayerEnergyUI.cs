@@ -47,7 +47,55 @@ public class PlayerEnergyUI : MonoBehaviour
 
         UpdateEnergyBar();
         UpdateInnerEnergyBar();
+        AlignWithHealthBar();
         RepositionShardsCounter();
+    }
+
+    public void AlignWithHealthBar()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
+        if (canvas == null) return;
+
+        Transform healthBar = canvas.transform.Find("PlayerHealthBar");
+        if (healthBar == null) healthBar = canvas.transform.Find("HealthBar");
+        if (healthBar == null) return;
+
+        RectTransform hbRt = healthBar.GetComponent<RectTransform>();
+        if (hbRt != null && rootRt != null)
+        {
+            float startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
+            float startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 3f;
+            float barWidth = Mathf.Max(280f, hbRt.sizeDelta.x - 10f);
+            if (Mathf.Abs(rootRt.anchoredPosition.x - startX) > 0.5f || 
+                Mathf.Abs(rootRt.anchoredPosition.y - startY) > 0.5f ||
+                Mathf.Abs(rootRt.sizeDelta.x - barWidth) > 0.5f ||
+                Mathf.Abs(rootRt.sizeDelta.y - 38f) > 0.5f)
+            {
+                rootRt.anchoredPosition = new Vector2(startX, startY);
+                rootRt.sizeDelta = new Vector2(barWidth, 38f);
+
+                if (energySlider != null)
+                {
+                    var esRt = energySlider.GetComponent<RectTransform>();
+                    if (esRt != null)
+                    {
+                        esRt.anchoredPosition = new Vector2(0f, 0f);
+                        esRt.sizeDelta = new Vector2(barWidth, 18f);
+                    }
+                }
+                if (innerEnergySlider != null)
+                {
+                    var iesRt = innerEnergySlider.GetComponent<RectTransform>();
+                    if (iesRt != null)
+                    {
+                        iesRt.anchoredPosition = new Vector2(0f, -21f);
+                        iesRt.sizeDelta = new Vector2(barWidth - 10f, 14f);
+                    }
+                }
+            }
+        }
     }
 
     private void FindEnergySystem()
@@ -62,7 +110,7 @@ public class PlayerEnergyUI : MonoBehaviour
             }
         }
 
-        float barWidth = (rootRt != null && rootRt.sizeDelta.x > 50f) ? rootRt.sizeDelta.x : 220f;
+        float barWidth = (rootRt != null && rootRt.sizeDelta.x > 50f) ? rootRt.sizeDelta.x : 350f;
 
         if (energySlider == null)
         {
@@ -75,7 +123,7 @@ public class PlayerEnergyUI : MonoBehaviour
             }
             else
             {
-                energySlider = CreateSubBar(transform, "EnergyBar", 0f, barWidth, 13f, new Color(0.15f, 0.75f, 1f), out energyFillImage, out energyText, out _);
+                energySlider = CreateSubBar(transform, "EnergyBar", 0f, barWidth, 18f, Color.white, out energyFillImage, out energyText, out _);
             }
         }
 
@@ -91,7 +139,7 @@ public class PlayerEnergyUI : MonoBehaviour
             }
             else
             {
-                innerEnergySlider = CreateSubBar(transform, "InnerEnergyBar", -17f, barWidth, 13f, new Color(0.95f, 0.72f, 0.15f), out innerEnergyFillImage, out innerEnergyText, out innerEnergyOutline);
+                innerEnergySlider = CreateSubBar(transform, "InnerEnergyBar", -21f, barWidth - 10f, 14f, Color.white, out innerEnergyFillImage, out innerEnergyText, out innerEnergyOutline);
             }
         }
 
@@ -102,10 +150,19 @@ public class PlayerEnergyUI : MonoBehaviour
     private void ApplyHighContrastStyle(TextMeshProUGUI tmp)
     {
         if (tmp == null) return;
+        RectTransform tRt = tmp.GetComponent<RectTransform>();
+        if (tRt != null)
+        {
+            tRt.anchorMin = Vector2.zero;
+            tRt.anchorMax = Vector2.one;
+            tRt.offsetMin = new Vector2(10f, 0f);
+            tRt.offsetMax = new Vector2(-10f, 0f);
+        }
+        tmp.alignment = TextAlignmentOptions.MidlineRight;
+        tmp.fontSize = 13f;
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white; // Chữ trắng sáng
-        tmp.outlineWidth = 0.35f;
-        tmp.outlineColor = Color.black; // Viền đen dày đậm 360 độ cực kỳ dễ nhìn trên nền Cyan
+        tmp.color = new Color(0.80f, 0.93f, 1f, 1f); // Lam ngọc ánh sáng
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, Color.black);
     }
 
     private void RepositionShardsCounter()
@@ -114,9 +171,10 @@ public class PlayerEnergyUI : MonoBehaviour
         if (shardsUI != null)
         {
             RectTransform scRt = shardsUI.GetComponent<RectTransform>();
-            if (scRt != null && scRt.anchoredPosition.y > -130f)
+            if (scRt != null)
             {
-                scRt.anchoredPosition = new Vector2(scRt.anchoredPosition.x, -135f);
+                scRt.anchoredPosition = new Vector2(175f, -118f);
+                scRt.sizeDelta = new Vector2(120f, 28f);
             }
         }
     }
@@ -319,17 +377,21 @@ public class PlayerEnergyUI : MonoBehaviour
         }
 
         rootRt.anchoredPosition = new Vector2(startX, startY);
-        rootRt.sizeDelta = new Vector2(barWidth, 36f);
+        rootRt.sizeDelta = new Vector2(barWidth, 22f);
 
         Instance = rootObj.AddComponent<PlayerEnergyUI>();
 
-        // 1. Thanh Nang Luong (Cyan)
-        Instance.energySlider = CreateSubBar(rootObj.transform, "EnergyBar", 0f, barWidth, 13f, new Color(0.15f, 0.75f, 1f), out Instance.energyFillImage, out Instance.energyText, out _);
+        // 1. Thanh Nang Luong / Mana (Sapphire)
+        Instance.energySlider = CreateSubBar(rootObj.transform, "EnergyBar", 0f, barWidth, 9f, Color.white, out Instance.energyFillImage, out Instance.energyText, out _);
 
-        // 2. Thanh Noi Nang (Ho Phach / Vang)
-        Instance.innerEnergySlider = CreateSubBar(rootObj.transform, "InnerEnergyBar", -17f, barWidth, 13f, new Color(0.95f, 0.72f, 0.15f), out Instance.innerEnergyFillImage, out Instance.innerEnergyText, out Instance.innerEnergyOutline);
+        // 2. Thanh Noi Nang / Stamina (Amber Brass)
+        Instance.innerEnergySlider = CreateSubBar(rootObj.transform, "InnerEnergyBar", -11f, barWidth, 7f, Color.white, out Instance.innerEnergyFillImage, out Instance.innerEnergyText, out Instance.innerEnergyOutline);
 
         Instance.RepositionShardsCounter();
+        if (PlayerAvatarUI.Instance != null)
+        {
+            PlayerAvatarUI.Instance.transform.SetAsLastSibling();
+        }
 
         return Instance;
     }
@@ -347,10 +409,12 @@ public class PlayerEnergyUI : MonoBehaviour
         rt.sizeDelta = new Vector2(width, height);
 
         Image bgImg = barObj.AddComponent<Image>();
-        bgImg.color = new Color(0.06f, 0.08f, 0.12f, 0.95f);
+        bgImg.sprite = SoulslikeHUDStyler.GetObsidianTroughSprite();
+        bgImg.type = Image.Type.Sliced;
+        bgImg.color = Color.white;
 
         outlineComponent = barObj.AddComponent<Outline>();
-        outlineComponent.effectColor = new Color(0.2f, 0.35f, 0.5f, 0.6f);
+        outlineComponent.effectColor = new Color(0.12f, 0.08f, 0.04f, 0.8f);
         outlineComponent.effectDistance = new Vector2(1f, -1f);
 
         Slider slider = barObj.AddComponent<Slider>();
@@ -372,7 +436,9 @@ public class PlayerEnergyUI : MonoBehaviour
         fillRt.sizeDelta = Vector2.zero;
 
         fillImg = fill.AddComponent<Image>();
-        fillImg.color = fillColor;
+        fillImg.sprite = (name == "EnergyBar") ? SoulslikeHUDStyler.GetSapphireFillSprite() : SoulslikeHUDStyler.GetAmberFillSprite();
+        fillImg.type = Image.Type.Sliced;
+        fillImg.color = Color.white;
         slider.fillRect = fillRt;
 
         GameObject textObj = new GameObject("Text");
@@ -380,16 +446,16 @@ public class PlayerEnergyUI : MonoBehaviour
         RectTransform textRt = textObj.AddComponent<RectTransform>();
         textRt.anchorMin = Vector2.zero;
         textRt.anchorMax = Vector2.one;
-        textRt.sizeDelta = Vector2.zero;
+        textRt.offsetMin = new Vector2(10f, 0f);
+        textRt.offsetMax = new Vector2(-8f, 0f);
 
         labelText = textObj.AddComponent<TextMeshProUGUI>();
-        labelText.fontSize = 13.5f;
+        labelText.fontSize = 9.5f;
         labelText.fontStyle = FontStyles.Bold;
-        labelText.color = Color.white;
-        labelText.alignment = TextAlignmentOptions.Center;
+        labelText.color = new Color(0.80f, 0.93f, 1f, 1f);
+        labelText.alignment = TextAlignmentOptions.MidlineRight;
         labelText.raycastTarget = false;
-        labelText.outlineWidth = 0.35f;
-        labelText.outlineColor = Color.black;
+        SoulslikeHUDStyler.SetSafeOutline(labelText, 0.3f, Color.black);
 
         return slider;
     }

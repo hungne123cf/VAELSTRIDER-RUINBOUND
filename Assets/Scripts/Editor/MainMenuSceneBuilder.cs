@@ -126,10 +126,11 @@ public class MainMenuSceneBuilder
         mgr.RefreshCurrencies();
         mgr.RefreshAllTexts();
 
-        // 6. Ensure all modals (Inventory, ArmorShop, Settings, Roster) exist in Scene Hierarchy
+        // 6. Ensure all modals (Inventory, ArmorShop, Settings, Roster, HeroSelectCarousel) exist in Scene Hierarchy
         InventoryUI.EnsureUIExists();
         ArmorShopUI.EnsureUIExists();
         SettingsUI.EnsureUIExists();
+        mgr.EnsureHeroSelectCarouselModal();
 
         EditorSceneManager.MarkSceneDirty(activeScene);
         EditorSceneManager.SaveScene(activeScene);

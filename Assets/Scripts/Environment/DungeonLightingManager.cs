@@ -67,12 +67,7 @@ public class DungeonLightingManager : MonoBehaviour
             }
         }
 
-        // Dinh ky kiem tra vat lieu Lit cho quai moi sinh
-        if (autoApplyLitMaterials && Time.time >= nextMaterialCheck)
-        {
-            nextMaterialCheck = Time.time + 3.0f;
-            ApplyLitMaterialsToWorld();
-        }
+        // Chỉ cập nhật ánh sáng lồng đèn theo vị trí Player, không quét toàn scene định kỳ để tránh drop FPS
     }
 
     private void HandleWaveStarted(int current, int total, string title)

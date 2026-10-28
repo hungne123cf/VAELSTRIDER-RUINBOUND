@@ -42,6 +42,7 @@ public static class AccountDatabase
         public bool map3Completed = false;
         public bool unlockedMaid = false;
         public List<int> ownedArmorIds = new List<int>();
+        public List<string> unlockedCostumes = new List<string>();
         public List<InventoryItemEntry> inventoryItems = new List<InventoryItemEntry>();
         public string createdDate;
         public string lastLoginDate;
@@ -136,6 +137,7 @@ public static class AccountDatabase
                     acc.equippedCloakId = 0;
                     acc.equippedBagId = 0;
                     acc.ownedArmorIds = new List<int>();
+                    acc.unlockedCostumes = new List<string>();
                     acc.inventoryItems = new List<InventoryItemEntry>();
                     SaveDatabase();
 
@@ -145,8 +147,9 @@ public static class AccountDatabase
             }
         }
 
-        // Luôn xóa sạch toàn bộ PlayerPrefs tiến trình gameplay
+        // Luôn xóa sạch toàn bộ PlayerPrefs tiến trình gameplay & trang phục
         ClearTransientGameplayPlayerPrefs();
+        HeroCostumeManager.ResetAllCostumes();
         SetAethelShards(0);
         PlayerPrefs.SetInt("Save_HealthPotions", 0);
         PlayerPrefs.SetInt("Saved_HealthPotions", 0);
@@ -292,6 +295,7 @@ public static class AccountDatabase
             map3Completed = false,
             unlockedMaid = false,
             ownedArmorIds = new List<int>(),
+            unlockedCostumes = new List<string>(),
             createdDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             lastLoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
         };
@@ -310,21 +314,78 @@ public static class AccountDatabase
     }
 
     /// <summary>
-    /// Đảm bảo dữ liệu của tài khoản hiện tại được nạp đầy đủ từ Database khi chuyển scene
+    /// Đảm bảo dữ liệu của session offline hiện tại được nạp đầy đủ từ Database khi chuyển scene
     /// </summary>
     public static void EnsureActiveSessionLoaded()
     {
+        EnsureOfflineSession();
+    }
+
+    /// <summary>
+    /// Đảm bảo luôn có một session lưu trữ offline hợp lệ để người chơi vào thẳng game không cần đăng nhập/đăng ký.
+    /// Tự động loại bỏ hoàn toàn các chuỗi tên "HUNG" hoặc "hung" trước đây.
+    /// </summary>
+    public static void EnsureOfflineSession()
+    {
         EnsureDatabaseLoaded();
         string activeUser = PlayerPrefs.GetString(PREF_CURRENT_USER, "");
-        if (string.IsNullOrEmpty(activeUser)) return;
 
-        foreach (var acc in dbCache.accounts)
+        // Tự động chuyển đổi và dọn sạch tên "HUNG" hoặc "hung" sang hồ sơ offline chuẩn "Player"
+        if (dbCache != null && dbCache.accounts != null)
         {
-            if (string.Equals(acc.username, activeUser, StringComparison.OrdinalIgnoreCase))
+            bool modified = false;
+            foreach (var a in dbCache.accounts)
             {
-                ApplyAccountToGameSession(acc, false);
-                return;
+                if (a.username != null && a.username.ToLower().Contains("hung"))
+                {
+                    a.username = "Player";
+                    a.displayName = "Player";
+                    modified = true;
+                }
+                else if (a.displayName != null && a.displayName.ToLower().Contains("hung"))
+                {
+                    a.displayName = "Player";
+                    modified = true;
+                }
             }
+            if (modified)
+            {
+                SaveDatabase();
+            }
+        }
+
+        if (string.IsNullOrEmpty(activeUser) || activeUser.ToLower().Contains("hung"))
+        {
+            activeUser = "Player";
+            PlayerPrefs.SetString(PREF_CURRENT_USER, "Player");
+            PlayerPrefs.SetString("Player_Name", "Player");
+            PlayerPrefs.Save();
+        }
+
+        if (!string.IsNullOrEmpty(activeUser) && dbCache != null && dbCache.accounts != null)
+        {
+            foreach (var acc in dbCache.accounts)
+            {
+                if (string.Equals(acc.username, activeUser, StringComparison.OrdinalIgnoreCase))
+                {
+                    ApplyAccountToGameSession(acc, false);
+                    return;
+                }
+            }
+        }
+
+        // Nếu chưa có active user hoặc active user không tìm thấy, lấy tài khoản đầu tiên nếu có
+        if (dbCache != null && dbCache.accounts != null && dbCache.accounts.Count > 0)
+        {
+            ApplyAccountToGameSession(dbCache.accounts[0], false);
+            return;
+        }
+
+        // Tự động tạo hồ sơ offline mặc định "Player"
+        Register("Player", "offline", out _);
+        if (dbCache != null && dbCache.accounts != null && dbCache.accounts.Count > 0)
+        {
+            ApplyAccountToGameSession(dbCache.accounts[0], false);
         }
     }
 
@@ -437,8 +498,17 @@ public static class AccountDatabase
             }
         }
 
+        // Nạp trang phục đã mua của tài khoản này
+        if (acc.unlockedCostumes != null)
+        {
+            foreach (var costumeId in acc.unlockedCostumes)
+            {
+                PlayerPrefs.SetInt("Costume_Unlocked_" + costumeId, 1);
+            }
+        }
+
         PlayerPrefs.Save();
-        Debug.Log($"<color=green>[AccountDB]</color> Đã nạp thành công dữ liệu tài khoản '{acc.username}' (Shards={acc.aethelShards}, Potions={acc.healthPotions}, AtkLv={acc.upgradeAttack}, Map1={acc.map1Completed})");
+        Debug.Log($"<color=green>[SaveSystem]</color> Đã nạp thành công dữ liệu Offline (Shards={acc.aethelShards}, Potions={acc.healthPotions}, AtkLv={acc.upgradeAttack}, Map1={acc.map1Completed})");
     }
 
     /// <summary>
@@ -446,6 +516,15 @@ public static class AccountDatabase
     /// </summary>
     private static void ClearTransientGameplayPlayerPrefs()
     {
+        // Reset toàn bộ trang phục về mặc định ban đầu
+        HeroCostumeManager.ResetAllCostumes();
+
+        // Xóa các khóa sở hữu giáp shop
+        for (int i = 0; i <= 50; i++)
+        {
+            PlayerPrefs.DeleteKey("Owned_Armor_" + i);
+        }
+
         // Shards & Potions
         PlayerPrefs.DeleteKey("Save_AethelShards_Long");
         PlayerPrefs.DeleteKey("Save_AethelShards");
@@ -594,6 +673,7 @@ public static class AccountDatabase
                 acc.equippedBootsId = PlayerPrefs.GetInt("Equipped_Slot_Boots", 0);
                 acc.equippedCloakId = PlayerPrefs.GetInt("Equipped_Slot_Cloak", 0);
                 acc.equippedBagId = PlayerPrefs.GetInt("Equipped_Slot_Bag", 0);
+                acc.unlockedCostumes = HeroCostumeManager.GetUnlockedCostumeIds();
                 acc.lastLoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
                 SaveDatabase();
@@ -741,6 +821,7 @@ public static class AccountDatabase
             if (string.Equals(acc.username, activeUser, StringComparison.OrdinalIgnoreCase))
             {
                 if (acc.inventoryItems == null) acc.inventoryItems = new List<InventoryItemEntry>();
+                if (acc.unlockedCostumes == null) acc.unlockedCostumes = new List<string>();
                 return acc;
             }
         }
@@ -755,7 +836,8 @@ public static class AccountDatabase
             healthPotions = PlayerPrefs.GetInt("Save_HealthPotions", 0),
             createdDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             lastLoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            inventoryItems = new List<InventoryItemEntry>()
+            inventoryItems = new List<InventoryItemEntry>(),
+            unlockedCostumes = new List<string>()
         };
         dbCache.accounts.Add(newAcc);
         SaveDatabase();

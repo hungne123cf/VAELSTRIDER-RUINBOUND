@@ -9,7 +9,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
     public static event System.Action<Vector3> OnEggHatched;
 
     [Header("Egg Stats")]
-    [SerializeField] private int maxHealth = 550;
+    [SerializeField] private int maxHealth = 600;
     [SerializeField] private int currentHealth;
 
     private SpriteRenderer sr;
@@ -30,7 +30,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
 
     void Awake()
     {
-        maxHealth = MapScalingManager.ScaleHealth(maxHealth);
+        // Kén phong ấn là vật thể phong ấn chuyển tiếp sang Boss thật, cố định 600 HP để đánh trúng là thấy máu tụt rõ rệt
         currentHealth = maxHealth;
         sr = GetComponent<SpriteRenderer>();
         col = GetComponent<CircleCollider2D>();
@@ -69,41 +69,42 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
 
     private void SetupGuidanceVisuals()
     {
-        // 1. Mui ten chi dan & Dong chu nhap nhay tren dau (font vua phai, khong bi loi telex)
+        // 1. Dấu chấm than màu vàng như NPC nhiệm vụ (tuyệt đối không có chữ rườm rà)
         guidanceObj = new GameObject("GuidancePointer");
         guidanceObj.transform.SetParent(transform, false);
-        guidanceObj.transform.localPosition = new Vector3(0f, 2.6f, 0f);
+        guidanceObj.transform.localPosition = new Vector3(0f, 2.2f, 0f);
 
         guidanceTMP = guidanceObj.AddComponent<TextMeshPro>();
-        guidanceTMP.text = "<color=#FCD34D><b>[!] PHA HUY KEN PHONG AN [!]</b></color>\n<size=68%><color=#67E8F9>[Tan cong Ken de danh thuc Boss]</color></size>";
-        guidanceTMP.fontSize = 2.4f;
+        guidanceTMP.text = "<color=#FCD34D><b>!</b></color>";
+        guidanceTMP.fontSize = 5.2f;
+        guidanceTMP.fontStyle = FontStyles.Bold;
         guidanceTMP.alignment = TextAlignmentOptions.Center;
         guidanceTMP.sortingOrder = 4000;
 
-        // 2. Thanh mau mini tren dau qua trung
+        // 2. Thanh máu mini trên đầu kén (Đỏ Ruby, rút mượt từ phải sang trái)
         healthBarObj = new GameObject("EggHealthBar");
         healthBarObj.transform.SetParent(transform, false);
-        healthBarObj.transform.localPosition = new Vector3(0f, 1.9f, 0f);
+        healthBarObj.transform.localPosition = new Vector3(0f, 1.55f, 0f);
 
-        // Khung nen den (pivot center)
+        // Khung nền đen viền tối
         GameObject bgObj = new GameObject("BG");
         bgObj.transform.SetParent(healthBarObj.transform, false);
         var bgSr = bgObj.AddComponent<SpriteRenderer>();
         bgSr.sprite = CreateBoxSprite(new Vector2(0.5f, 0.5f));
-        bgSr.color = new Color(0f, 0f, 0f, 0.85f);
+        bgSr.color = new Color(0.08f, 0.08f, 0.1f, 0.95f);
         bgSr.sortingOrder = 3990;
-        bgObj.transform.localScale = new Vector3(2.2f, 0.35f, 1f);
+        bgObj.transform.localScale = new Vector3(1.8f, 0.22f, 1f);
 
-        // Thanh mau do (pivot trai de khi tru mau se rut tu phai sang trai)
+        // Thanh máu đỏ Ruby Dark Fantasy (pivot mép trái x=0)
         GameObject fillObj = new GameObject("Fill");
         fillObj.transform.SetParent(healthBarObj.transform, false);
-        fillObj.transform.localPosition = new Vector3(-1.05f, 0f, 0f);
+        fillObj.transform.localPosition = new Vector3(-0.85f, 0f, 0f);
 
         hpFillSr = fillObj.AddComponent<SpriteRenderer>();
         hpFillSr.sprite = CreateBoxSprite(new Vector2(0f, 0.5f));
-        hpFillSr.color = new Color(1f, 0.25f, 0.25f, 0.95f);
+        hpFillSr.color = new Color(0.95f, 0.22f, 0.22f, 1f);
         hpFillSr.sortingOrder = 3995;
-        fillObj.transform.localScale = new Vector3(2.1f, 0.25f, 1f);
+        fillObj.transform.localScale = new Vector3(1.7f, 0.16f, 1f);
 
         // 3. Cot sang huyen ao roi tu troi xuong qua trung
         GameObject lightObj = new GameObject("Egg_HolyLight");
@@ -131,18 +132,17 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
     void Start()
     {
         breatheRoutine = StartCoroutine(EggBreatheRoutine());
-        DamagePopup.CreateText(transform.position + Vector3.up * 2f, LocalizationManager.T("MỤC TIÊU: PHÁ HỦY KÉN PHONG ẤN!", "OBJECTIVE: DESTROY THE COCOON!"), Color.yellow);
     }
 
     void Update()
     {
         if (isDestroyed) return;
 
-        // Mui ten chi dan dap nhe len xuong de thu hut chu y
+        // Dấu chấm than NPC nhấp nhô nhẹ nhàng
         if (guidanceObj != null)
         {
-            float bob = Mathf.Sin(Time.time * 5f) * 0.12f;
-            guidanceObj.transform.localPosition = new Vector3(0f, 2.6f + bob, 0f);
+            float bob = Mathf.Sin(Time.time * 4.5f) * 0.12f;
+            guidanceObj.transform.localPosition = new Vector3(0f, 2.2f + bob, 0f);
         }
 
         // Anh sang nhip tho
@@ -181,8 +181,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
         if (hpFillSr != null)
         {
             float pct = Mathf.Clamp01((float)currentHealth / maxHealth);
-            hpFillSr.transform.localScale = new Vector3(2.1f * pct, 0.25f, 1f);
-            hpFillSr.color = Color.Lerp(Color.red, Color.green, pct);
+            hpFillSr.transform.localScale = new Vector3(1.7f * pct, 0.16f, 1f);
         }
 
         DamagePopup.Create(transform.position + Vector3.up * 0.8f, damage, false);

@@ -18,18 +18,29 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public void SetBaseMaxHealth(int newBase)
     {
         baseMaxHealth = newBase;
-        RefreshSocketHealthBonus();
-        currentHealth = Mathf.Min(currentHealth, maxHealth);
-        PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
-        PlayerPrefs.Save();
-    }
+        RefreshSocketHealthBonus(suppressHealthReset: true);
 
+        int preserved = RunPreservedCurrentHealth;
+        if (preserved > 0)
+        {
+            currentHealth = Mathf.Clamp(preserved, 1, maxHealth);
+        }
+        else if (isSceneInitializing || currentHealth <= 0)
+        {
+            // Bắt đầu một run mới: Sinh lực khởi đầu 100% theo đúng máu của tướng đã chọn!
+            currentHealth = maxHealth;
+        }
+        else
+        {
+            currentHealth = Mathf.Clamp(currentHealth, 1, maxHealth);
+        }
+        PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+    }
 
     public void ApplyUpgradeBonus(int bonusHp)
     {
-        int oldBonus = bonusMaxHealth;
         bonusMaxHealth = bonusHp;
-        RefreshSocketHealthBonus();
+        RefreshSocketHealthBonus(suppressHealthReset: true);
     }
 
     // ─── Augment HP bonus ────────────────────────────────────────────────────
@@ -38,13 +49,17 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public void ApplyAugmentBonus(int bonusHp)
     {
         augmentBonusHp = bonusHp;
-        RefreshSocketHealthBonus();
+        RefreshSocketHealthBonus(suppressHealthReset: true);
     }
 
     /// <summary>Hồi HP trực tiếp (không vượt quá maxHealth). Dùng cho SoulHarvest / Regen.</summary>
     public void HealDirect(int amount)
     {
         if (isDead || amount <= 0) return;
+        if (GrievousWoundsDebuff.HasDebuff(gameObject))
+        {
+            amount = Mathf.Max(1, Mathf.RoundToInt(amount * GrievousWoundsDebuff.GetHealingMultiplier(gameObject)));
+        }
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
     }
@@ -62,15 +77,73 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public static Vector3 LastDeathPosition { get; private set; }
     public static string LastDeathScene { get; private set; }
 
+    private const string PREF_RUN_PRESERVED_HEALTH = "RUN_PRESERVED_CURRENT_HEALTH";
+
+    /// <summary>
+    /// Lưu giữ chính xác lượng máu khi chuyển qua Map mới (chuẩn phong cách Shape of Dream / Roguelike).
+    /// Được lưu vào PlayerPrefs để chống mất mát qua Scene Load hoặc Domain Reload.
+    /// </summary>
+    public static int RunPreservedCurrentHealth
+    {
+        get => PlayerPrefs.GetInt(PREF_RUN_PRESERVED_HEALTH, -1);
+        set
+        {
+            if (value <= 0)
+            {
+                PlayerPrefs.DeleteKey(PREF_RUN_PRESERVED_HEALTH);
+            }
+            else
+            {
+                PlayerPrefs.SetInt(PREF_RUN_PRESERVED_HEALTH, value);
+            }
+            PlayerPrefs.Save();
+        }
+    }
+
+    public static void ResetRunPreservedHealth()
+    {
+        PlayerPrefs.DeleteKey(PREF_RUN_PRESERVED_HEALTH);
+        PlayerPrefs.Save();
+    }
+
+    private bool isSceneInitializing = true;
+
     void Awake()
     {
         Instance = this;
-        baseMaxHealth = maxHealth;
-        RefreshSocketHealthBonus();
 
-        int savedHp = PlayerPrefs.GetInt("Saved_CurrentHealth", maxHealth);
-        if (savedHp <= 0 || savedHp > maxHealth) savedHp = maxHealth;
-        currentHealth = Mathf.Clamp(savedHp, 1, maxHealth);
+        // Tự động nạp máu khởi điểm chuẩn theo đúng Anh Hùng đã chọn (Titan: 200, Azure/Dune: 110, Ronin: 95, Vael: 100)
+        var charMgr = CharacterManager.EnsureInstance();
+        var charData = charMgr != null ? charMgr.GetSelectedCharacter() : null;
+        if (charData != null && charData.baseHealth > 0)
+        {
+            baseMaxHealth = charData.baseHealth;
+        }
+        else
+        {
+            baseMaxHealth = maxHealth;
+        }
+
+        isSceneInitializing = true;
+
+        RefreshSocketHealthBonus(suppressHealthReset: true);
+
+        string activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+        // Nếu có lượng máu được bảo lưu từ map/vòng trước đó (RunPreservedCurrentHealth > 0)
+        int preserved = RunPreservedCurrentHealth;
+        if (preserved > 0)
+        {
+            currentHealth = Mathf.Clamp(preserved, 1, maxHealth);
+            Debug.Log($"<color=cyan>[HP PRESERVED]</color> Sang map mới tại {activeScene}: Bảo lưu chính xác {currentHealth}/{maxHealth} HP từ vòng trước!");
+        }
+        else
+        {
+            // Bắt đầu một Run mới từ đầu (chưa qua màn nào): Hồi đầy 100% sinh lực chuẩn theo tướng đã chọn
+            currentHealth = maxHealth;
+            Debug.Log($"<color=green>[HP INIT]</color> Bắt đầu run mới tại {activeScene}: Sinh lực khởi đầu 100% ({maxHealth}/{maxHealth} HP cho {charData?.nameVN ?? "Hero"})!");
+        }
+        PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
 
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
@@ -82,7 +155,41 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         }
     }
 
-    public void RefreshSocketHealthBonus()
+    IEnumerator Start()
+    {
+        // Chờ các hệ thống khác (PlayerUpgradeManager, AugmentManager, CharacterManager) hoàn tất nạp chỉ số
+        yield return null;
+        yield return null;
+        yield return new WaitForEndOfFrame();
+
+        int preserved = RunPreservedCurrentHealth;
+        if (preserved > 0)
+        {
+            currentHealth = Mathf.Clamp(preserved, 1, maxHealth);
+            PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+            Debug.Log($"<color=cyan>[HP LOCKED]</color> Hoàn tất khởi tạo map: Máu giữ nguyên chuẩn xác {currentHealth}/{maxHealth} HP!");
+        }
+        else
+        {
+            // Bắt đầu một Run mới: Luôn đảm bảo nhân vật đầy 100% sinh lực theo đúng tướng đã chọn sau khi nạp đủ nâng cấp
+            currentHealth = maxHealth;
+            PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+            Debug.Log($"<color=green>[HP FULL]</color> Khởi đầu trận mới: Sinh lực đầy bình 100% ({currentHealth}/{maxHealth} HP)!");
+        }
+
+        isSceneInitializing = false;
+    }
+
+    void OnDestroy()
+    {
+        // Khi scene unload, nếu nhân vật còn sống thì tự động bảo lưu lượng HP hiện tại sang scene tiếp theo
+        if (!isDead && currentHealth > 0)
+        {
+            RunPreservedCurrentHealth = currentHealth;
+        }
+    }
+
+    public void RefreshSocketHealthBonus(bool suppressHealthReset = false)
     {
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out int sockHp, out _, out _, out _, out _, out socketHpRegen);
         var upgradeMgr = PlayerUpgradeManager.EnsureInstance();
@@ -106,18 +213,42 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         int oldMax = maxHealth;
         maxHealth = baseMaxHealth + upHp + armorHp + weaponHp + sockHp + costumeHp + augmentBonusHp;
 
-        if (currentHealth > maxHealth || currentHealth <= 0)
+        // 1. Nếu đang trong giai đoạn khởi tạo map mới:
+        if (isSceneInitializing)
         {
-            currentHealth = maxHealth;
-        }
-        else if (maxHealth > oldMax && oldMax > 0)
-        {
-            currentHealth += (maxHealth - oldMax);
+            if (RunPreservedCurrentHealth > 0)
+            {
+                currentHealth = Mathf.Clamp(RunPreservedCurrentHealth, 1, maxHealth);
+            }
+            else
+            {
+                // Bắt đầu trận mới: Đầy bình 100% sinh lực của tướng đã chọn
+                currentHealth = maxHealth;
+            }
+            return;
         }
 
-        currentHealth = Mathf.Clamp(currentHealth, 1, maxHealth);
-        PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
-        PlayerPrefs.Save();
+        // 2. Nếu không phải khởi tạo map:
+        if (!suppressHealthReset)
+        {
+            if (currentHealth > maxHealth || currentHealth <= 0)
+            {
+                currentHealth = maxHealth;
+            }
+            else if (maxHealth > oldMax && oldMax > 0)
+            {
+                currentHealth += (maxHealth - oldMax);
+            }
+
+            currentHealth = Mathf.Clamp(currentHealth, 1, maxHealth);
+        }
+        else
+        {
+            if (currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+        }
     }
 
     private float socketHpRegen = 0f;
@@ -130,9 +261,20 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private float virtualHealthTimer = 0f;
     private bool isVirtualHealthActive = false;
 
-    public void AddVirtualHealth(int amount, float duration = 15f)
+    public void AddVirtualHealth(int amount, float duration = 15f, bool fillMissingBaseHpFirst = true)
     {
         if (amount <= 0 || isDead) return;
+
+        // Chuẩn nguyên tắc Overheal: Máu gốc chưa đầy thì ưu tiên hồi phục lấp đầy bình máu gốc trước
+        if (fillMissingBaseHpFirst && currentHealth < maxHealth)
+        {
+            int missing = maxHealth - currentHealth;
+            int healToFill = Mathf.Min(missing, amount);
+            Heal(healToFill);
+            amount -= healToFill;
+            if (amount <= 0) return; // Toàn bộ lượng máu đã được dùng để lấp đầy máu gốc
+        }
+
         int maxCap = Mathf.RoundToInt(maxHealth * 0.85f);
         if (isVirtualHealthActive && currentVirtualHealth > 0)
         {
@@ -248,6 +390,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (isDead || isInvulnerable) return;
 
+        // Tuyệt đối miễn nhiễm mọi sát thương khi đang chọn Lõi Nâng Cấp hoặc khi trò chơi đang Tạm dừng
+        if (LevelUpChoiceUI.IsShowing || Time.timeScale <= 0f) return;
+
         // Kiểm tra Thánh Thuẫn Phản Đòn khi Dash của Hiệp Sĩ Vaelstrider
         var playerCombat = GetComponent<PlayerCombat>();
         if (playerCombat != null && playerCombat.IsRadiantRiposteDashing)
@@ -277,34 +422,65 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - mage.barrierDamageReduction)));
         }
 
-        // Giảm sát thương theo Giáp của trang bị đang mặc + Khảm ngọc + Trang phục (tối đa giảm 65% để người chơi luôn nhận sát thương thực tế)
+        // Giảm sát thương theo Giáp căn bản của Tướng + Trang bị đang mặc + Khảm ngọc + Trang phục + Lõi Nâng Cấp (tối đa giảm 65% để người chơi luôn nhận sát thương thực tế)
+        string curCharId = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        var cData = CharacterManager.EnsureInstance()?.GetCharacter(curCharId);
+        int baseDef = cData != null ? cData.baseDefense : 10;
         ArmorShopUI.GetEquippedArmorBonus(out int _, out float armorDef, out float _);
+        if (armorDef > 0f && armorDef <= 1f) armorDef *= 100f; // Chuẩn hóa nếu trả về dạng số thập phân (vd: 0.08 -> 8%)
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out int sockDef, out _, out _, out _, out _);
-        HeroCostumeManager.GetEquippedCostumeBonus(CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "", out _, out _, out float costumeDef, out _);
-        float totalDef = Mathf.Min(65f, armorDef + sockDef + costumeDef);
+        HeroCostumeManager.GetEquippedCostumeBonus(curCharId, out _, out _, out float costumeDef, out _);
+        int augDef = AugmentManager.Instance != null ? AugmentManager.Instance.GetAugDef() : 0;
+        float totalDef = Mathf.Min(65f, baseDef + armorDef + sockDef + costumeDef + augDef);
         if (totalDef > 0)
         {
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - totalDef / 100f)));
         }
 
+        // Kiểm tra Lõi Thánh Khiên Hộ Mệnh (Divine Aegis) & Bất Diệt Cuồng Vương (Undying Sovereign)
+        var augMgr = AugmentManager.EnsureInstance();
+        if (augMgr != null)
+        {
+            augMgr.CheckDivineAegis(this);
+            if (augMgr.CheckUndyingSovereign(this, ref damage))
+            {
+                return;
+            }
+        }
+
         // 1. Kiểm tra và trừ vào Lớp Máu Ảo trước (Virtual Health Barrier)
         if (isVirtualHealthActive && currentVirtualHealth > 0)
         {
+            int virtualAbsorbed = 0;
             if (currentVirtualHealth >= damage)
             {
+                virtualAbsorbed = damage;
                 currentVirtualHealth -= damage;
                 if (currentVirtualHealth <= 0)
                 {
                     isVirtualHealthActive = false;
                 }
-                return; // Đã hấp thụ toàn bộ đòn đánh bằng máu ảo!
+                damage = 0;
             }
             else
             {
-                int absorbed = currentVirtualHealth;
-                damage -= absorbed;
+                virtualAbsorbed = currentVirtualHealth;
+                damage -= virtualAbsorbed;
                 currentVirtualHealth = 0;
                 isVirtualHealthActive = false;
+            }
+
+            if (virtualAbsorbed > 0)
+            {
+                // Hiển thị số trừ máu ảo màu vàng kim hổ phách nổi bật
+                DamagePopup.CreateText(transform.position + Vector3.up * 0.75f, $"-{virtualAbsorbed}", new Color(1f, 0.82f, 0.2f));
+                SoundManager.EnsureInstance()?.PlayHitImpact();
+                FindAnyObjectByType<CameraFollow>()?.Shake(0.08f, 0.1f);
+            }
+
+            if (damage <= 0)
+            {
+                return; // Đã hấp thụ toàn bộ đòn đánh bằng máu ảo!
             }
         }
 
@@ -312,7 +488,16 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
         if (energySys != null && energySys.IsShieldActive())
         {
+            int prevDmg = damage;
             damage = energySys.AbsorbDamage(damage);
+            int shieldAbsorbed = prevDmg - Mathf.Max(0, damage);
+            if (shieldAbsorbed > 0)
+            {
+                // Hiển thị số trừ khiên nội năng màu xanh lam/cyan hộ thuẫn
+                DamagePopup.CreateText(transform.position + Vector3.up * 0.9f, $"-{shieldAbsorbed}", new Color(0.35f, 0.88f, 1f));
+                FindAnyObjectByType<CameraFollow>()?.Shake(0.08f, 0.1f);
+            }
+
             if (damage <= 0)
             {
                 // Giáp hộ thân đã chặn toàn bộ đòn đánh!
@@ -338,6 +523,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         // Hiển thị số sát thương màu đỏ nảy lên trên đầu Player khi dính đòn
         DamagePopup.Create(transform.position + Vector3.up * 0.6f, damage, isCritical: false, isPlayer: true);
         Debug.Log($"<color=orange>[PLAYER HURT]</color> Bạn bị quái đánh trúng! Mất {damage} HP. Còn lại: {currentHealth}/{maxHealth}");
+
+        // Hiệu ứng nguyên tố của Cõi Thảm Họa (Calamity Realms) khi bị quái / boss đánh trúng
+        if (CorruptedCycleManager.IsCorruptedActive && currentHealth > 0)
+        {
+            ApplyCalamityElementalHitEffects(damage);
+        }
 
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.12f, 0.15f);
@@ -378,6 +569,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (isDead || currentHealth >= maxHealth) return false;
 
+        if (GrievousWoundsDebuff.HasDebuff(gameObject))
+        {
+            amount = Mathf.Max(1, Mathf.RoundToInt(amount * GrievousWoundsDebuff.GetHealingMultiplier(gameObject)));
+        }
+
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
         PlayerPrefs.Save();
@@ -393,6 +589,98 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     }
 
     public bool IsFullHealth() => currentHealth >= maxHealth;
+
+    private void ApplyCalamityElementalHitEffects(int incomingDamage)
+    {
+        switch (CorruptedCycleManager.CurrentRealm)
+        {
+            case CalamityRealm.MagmaCalamity:
+                if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.FlameAdaptation))
+                {
+                    // Lõi Thích Nghi Hỏa Ngục: Miễn nhiễm thiêu đốt, phản pháo Quả Cầu Dung Nham
+                    Collider2D[] foes = Physics2D.OverlapCircleAll(transform.position, 6.5f);
+                    foreach (var f in foes)
+                    {
+                        if (f.CompareTag("Enemy") || f.CompareTag("Boss"))
+                        {
+                            var dmg = f.GetComponent<IDamageable>();
+                            dmg?.TakeDamage(140);
+                            DamagePopup.Create(f.transform.position + Vector3.up * 0.5f, 140, DamageType.TrueDamage, isCritical: true);
+                            break;
+                        }
+                    }
+                    SoundManager.EnsureInstance()?.PlaySwordSlash();
+                    break;
+                }
+                if (UnityEngine.Random.value < 0.35f)
+                {
+                    PlayerBurnDebuff.Apply(gameObject, 3.0f, 0.035f);
+                    GrievousWoundsDebuff.Apply(gameObject, 4.0f, 0.50f, 0.20f, allowPlayer: true);
+                }
+                break;
+
+            case CalamityRealm.FrostfallBlizzard:
+                if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.GlacialSoul))
+                {
+                    // Lõi Linh Hồn Băng Giá: Miễn nhiễm khống chế làm chậm từ bão tuyết
+                    break;
+                }
+                if (UnityEngine.Random.value < 0.35f)
+                {
+                    var pc = GetComponent<PlayerController>();
+                    if (pc != null)
+                    {
+                        if (UnityEngine.Random.value < 0.35f)
+                        {
+                            pc.ApplyStun(0.5f);
+                        }
+                        else
+                        {
+                            pc.ApplySlow(0.55f, 1.5f);
+                        }
+                    }
+                }
+                break;
+
+            case CalamityRealm.AcidDownpour:
+                if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.AcidMembrane))
+                {
+                    // Lõi Màng Lọc Kịch Độc: Hồi phục sinh lực và kích nổ bào tử làm choáng quái
+                    Heal(Mathf.RoundToInt(maxHealth * 0.06f));
+                    Collider2D[] foes = Physics2D.OverlapCircleAll(transform.position, 4.8f);
+                    foreach (var f in foes)
+                    {
+                        if (f.CompareTag("Enemy") || f.CompareTag("Boss"))
+                        {
+                            f.GetComponent<IDamageable>()?.TakeDamage(80);
+                            DamagePopup.Create(f.transform.position + Vector3.up * 0.4f, 80, DamageType.Magic, isCritical: false);
+                        }
+                    }
+                    break;
+                }
+                if (UnityEngine.Random.value < 0.30f)
+                {
+                    int extraAcid = Mathf.Max(2, Mathf.RoundToInt(incomingDamage * 0.25f));
+                    currentHealth = Mathf.Max(0, currentHealth - extraAcid);
+                    DamagePopup.CreateText(transform.position + Vector3.up * 1.2f, $"-{extraAcid}", new Color(0.35f, 1f, 0.35f));
+                }
+                break;
+
+            case CalamityRealm.VoidNightmare:
+                if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.VoidTranscendence))
+                {
+                    // Lõi Siêu Việt Hư Không: Chuyển 25% sát thương nhận vào thành Hút Máu hồi phục
+                    Heal(Mathf.Max(12, Mathf.RoundToInt(incomingDamage * 0.25f)));
+                    break;
+                }
+                if (UnityEngine.Random.value < 0.25f)
+                {
+                    var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+                    if (energySys != null) energySys.ConsumeEnergy(12);
+                }
+                break;
+        }
+    }
 
     private IEnumerator FlashRedRoutine()
     {
@@ -416,6 +704,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         LastDeathPosition = transform.position;
         LastDeathScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         PlayerPrefs.SetInt("Saved_CurrentHealth", maxHealth);
+        ResetRunPreservedHealth();
         PlayerPrefs.Save();
         Debug.Log("<color=red>[PLAYER DIED]</color> Nhan vat guc nga! Phat animation chet...");
 
@@ -699,6 +988,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         isDead = false;
         currentHealth = maxHealth;
+        ResetRunPreservedHealth();
         PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
         PlayerPrefs.Save();
 

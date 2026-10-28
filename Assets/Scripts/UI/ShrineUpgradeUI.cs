@@ -313,11 +313,10 @@ public class ShrineUpgradeUI : MonoBehaviour
         boxRt.sizeDelta = new Vector2(980, 590);
 
         Image boxBg = boxObj.GetComponent<Image>();
-        boxBg.color = new Color(0.08f, 0.11f, 0.17f, 0.98f);
-
-        Outline boxOutline = boxObj.AddComponent<Outline>();
-        boxOutline.effectColor = new Color(0.25f, 0.65f, 0.95f, 0.85f);
-        boxOutline.effectDistance = new Vector2(2f, -2f);
+        boxBg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        boxBg.type = Image.Type.Sliced;
+        boxBg.color = Color.white;
+        WhiteIconLoader.ApplyGothicFrame(boxObj, Color.white, 0.40f);
 
         // Header Title
         GameObject titleObj = new GameObject("HeaderTitle", typeof(RectTransform));
@@ -334,8 +333,10 @@ public class ShrineUpgradeUI : MonoBehaviour
         titleTmp.fontSize = 25;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.alignment = TextAlignmentOptions.Center;
-        titleTmp.color = new Color(0.35f, 0.95f, 1f, 1f);
+        titleTmp.color = new Color(0.98f, 0.88f, 0.55f, 1f);
         instance.headerTitleText = titleTmp;
+        SoulslikeHUDStyler.StyleHeader(instance.headerTitleText);
+        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, -46f), new Vector2(500f, 12f));
 
         // Close Button [X]
         GameObject closeBtnObj = new GameObject("Btn_Close", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -347,12 +348,9 @@ public class ShrineUpgradeUI : MonoBehaviour
         cRt.pivot = new Vector2(1f, 1f);
         cRt.anchoredPosition = new Vector2(-16, -14);
         cRt.sizeDelta = new Vector2(36, 36);
-        Image cBg = closeBtnObj.GetComponent<Image>();
-        cBg.color = new Color(0.72f, 0.16f, 0.18f, 1f);
         Button closeBtn = closeBtnObj.GetComponent<Button>();
-        closeBtn.targetGraphic = cBg;
         closeBtn.onClick.AddListener(() => instance.Close());
-        WhiteIconLoader.ReplaceTextWithIcon(closeBtn, "Cross", Color.white, new Vector2(20f, 20f));
+        SoulslikeHUDStyler.StyleCloseButton(closeBtn);
 
         // 3. Toolbar (Shards Counter on Left, Multipliers in Middle, Upgrade All on Right)
         float toolbarY = -54f;

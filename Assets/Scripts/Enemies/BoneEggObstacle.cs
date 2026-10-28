@@ -6,7 +6,7 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
 {
     private SpriteRenderer sr;
     private CircleCollider2D col;
-    private int health = 110;
+    private int health = 80;
     private bool isDetonated = false;
 
     private Sprite[] idleSprites;
@@ -100,7 +100,7 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
         if (col != null) col.enabled = false;
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.8f);
-        int explodeDmg = MapScalingManager.ScaleDamage(22);
+        int explodeDmg = MapScalingManager.ScaleDamage(11);
         foreach (var h in hits)
         {
             if (h.CompareTag("Player"))

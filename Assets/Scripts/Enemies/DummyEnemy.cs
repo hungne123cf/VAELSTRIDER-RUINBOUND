@@ -22,6 +22,7 @@ public class DummyEnemy : MonoBehaviour, IDamageable
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
+        EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
         Debug.Log($"<color=yellow>[DUMMY STATUS]</color> {gameObject.name} mat {damage} mau! Mau con lai: {currentHealth}/{maxHealth}");
 
         // Hieu ung chop chop va rung nhe khi trung don

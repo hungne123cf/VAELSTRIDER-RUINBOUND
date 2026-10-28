@@ -25,6 +25,8 @@ public class PlayerCombat : MonoBehaviour
     private PlayerController playerController;
     private PlayerHealth playerHealth;
 
+    public static event System.Action<GameObject, int> OnPlayerHitEnemy;
+
     private int comboStep = 0;
     private float lastAttackTime = 0f;
     private float skillCooldownTimer = 0f;
@@ -57,6 +59,67 @@ public class PlayerCombat : MonoBehaviour
     private int socketPhysAtk = 0;
     private int socketMagicAtk = 0;
     private int socketTrueAtk = 0;
+
+    private int weaponArmorPenFlat = 0;
+    private float weaponArmorPenPct = 0f;
+    private int weaponMagicPenFlat = 0;
+    private float weaponMagicPenPct = 0f;
+
+    private int socketArmorPenFlat = 0;
+    private float socketArmorPenPct = 0f;
+    private int socketMagicPenFlat = 0;
+    private float socketMagicPenPct = 0f;
+
+    private int augBonusArmorPenFlat = 0;
+    private float augBonusArmorPenPct = 0f;
+    private int augBonusMagicPenFlat = 0;
+    private float augBonusMagicPenPct = 0f;
+
+    public int TotalPhysicalArmorPenFlat
+    {
+        get
+        {
+            int innate = 0;
+            string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+            if (curHero == CharacterManager.CHAR_TITAN_BERSERKER || GetComponent<TitanBerserkerSkill>() != null) innate += 20;
+            else if (curHero == CharacterManager.CHAR_GALE_RONIN || GetComponent<GaleRoninSkill>() != null) innate += 15;
+            return weaponArmorPenFlat + socketArmorPenFlat + augBonusArmorPenFlat + innate;
+        }
+    }
+
+    public float TotalPhysicalArmorPenPercent
+    {
+        get
+        {
+            float innate = 0f;
+            string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+            if (curHero == CharacterManager.CHAR_DUNE_ASSASSIN || GetComponent<DuneAssassinSkill>() != null) innate += 0.15f;
+            return Mathf.Clamp01(weaponArmorPenPct + socketArmorPenPct + augBonusArmorPenPct + innate);
+        }
+    }
+
+    public int TotalMagicPenFlat
+    {
+        get
+        {
+            int innate = 0;
+            string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+            if (curHero == CharacterManager.CHAR_CELESTIAL_MAGE || GetComponent<CelestialMageSkill>() != null) innate += 15;
+            else if (curHero == CharacterManager.CHAR_AZURE_BLADE || GetComponent<AzureBladeSkill>() != null) innate += 10;
+            return weaponMagicPenFlat + socketMagicPenFlat + augBonusMagicPenFlat + innate;
+        }
+    }
+
+    public float TotalMagicPenPercent
+    {
+        get
+        {
+            float innate = 0f;
+            string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+            if (curHero == CharacterManager.CHAR_CELESTIAL_MAGE || GetComponent<CelestialMageSkill>() != null) innate += 0.10f;
+            return Mathf.Clamp01(weaponMagicPenPct + socketMagicPenPct + augBonusMagicPenPct + innate);
+        }
+    }
 
     [Header("Critical Strike Settings")]
     [SerializeField] private float baseCritChance = 0.20f;   // 20% Tỉ lệ chí mạng cơ bản
@@ -102,14 +165,19 @@ public class PlayerCombat : MonoBehaviour
     private float comboResetMult   = 1f;
 
     public void ApplyAugmentBonus(int bonusAtk, float bonusCrit, float bonusCritDmg,
-                                   float bonusLifesteal, float bonusSpellVamp, float bonusCDR)
+                                   float bonusLifesteal, float bonusSpellVamp, float bonusCDR,
+                                   int bonusArmPen = 0, float bonusArmPenPct = 0f, int bonusMagPen = 0, float bonusMagPenPct = 0f)
     {
-        augBonusAtk      = bonusAtk;
-        augBonusCrit     = bonusCrit;
-        augBonusCritDmg  = bonusCritDmg;
-        augBonusLifesteal= bonusLifesteal;
-        augBonusSpellVamp= bonusSpellVamp;
-        augBonusCDR      = bonusCDR;
+        augBonusAtk          = bonusAtk;
+        augBonusCrit         = bonusCrit;
+        augBonusCritDmg      = bonusCritDmg;
+        augBonusLifesteal    = bonusLifesteal;
+        augBonusSpellVamp    = bonusSpellVamp;
+        augBonusCDR          = bonusCDR;
+        augBonusArmorPenFlat = bonusArmPen;
+        augBonusArmorPenPct  = bonusArmPenPct;
+        augBonusMagicPenFlat = bonusMagPen;
+        augBonusMagicPenPct  = bonusMagPenPct;
         RecalculateCombatStats();
     }
 
@@ -140,10 +208,10 @@ public class PlayerCombat : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         playerHealth = GetComponent<PlayerHealth>();
 
-        // Bat buoc ap dung chi so can ban Hardcore chuan (Vaelstrider = 10 + 10 = 20)
-        attack1Damage = 10;
-        attack2Damage = 10;
-        skillCooldown = 30.0f;
+        // Bat buoc ap dung chi so can ban Hardcore chuan (Vaelstrider = 18 + 28, Cooldown = 18s)
+        attack1Damage = 18;
+        attack2Damage = 28;
+        skillCooldown = 18.0f;
 
         AutoAlignCombat();
         if (enemyLayers.value == 0)
@@ -190,6 +258,10 @@ public class PlayerCombat : MonoBehaviour
         weaponPhysAtk = 0;
         weaponMagicAtk = 0;
         weaponTrueAtk = 0;
+        weaponArmorPenFlat = 0;
+        weaponArmorPenPct = 0f;
+        weaponMagicPenFlat = 0;
+        weaponMagicPenPct = 0f;
         bonusCritChance = 0f;
         if (!string.IsNullOrEmpty(equippedWpnId))
         {
@@ -200,6 +272,10 @@ public class PlayerCombat : MonoBehaviour
                 weaponPhysAtk = (def.physAtkBonus > 0 || def.magicAtkBonus > 0 || def.trueAtkBonus > 0) ? def.physAtkBonus : def.atkBonus;
                 weaponMagicAtk = def.magicAtkBonus;
                 weaponTrueAtk = def.trueAtkBonus;
+                weaponArmorPenFlat = def.armorPenBonus;
+                weaponArmorPenPct = def.armorPenPctBonus;
+                weaponMagicPenFlat = def.magicPenBonus;
+                weaponMagicPenPct = def.magicPenPctBonus;
 
                 if (equippedWpnId == "wpn_katana")
                 {
@@ -213,7 +289,8 @@ public class PlayerCombat : MonoBehaviour
             out _, out _,
             out lifestealPercent, out _, out _, out _,
             out _, out _,
-            out physLifestealPercent, out spellVampPercent, out float socketCrit);
+            out physLifestealPercent, out spellVampPercent, out float socketCrit,
+            out socketArmorPenFlat, out socketMagicPenFlat, out socketArmorPenPct, out socketMagicPenPct);
         bonusCritChance += socketCrit;
         RecalculateCombatStats();
     }
@@ -221,13 +298,26 @@ public class PlayerCombat : MonoBehaviour
     public void RecalculateCombatStats()
     {
         HeroCostumeManager.GetEquippedCostumeBonus(CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "", out _, out int costumeAtk, out _, out _);
+        string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        bool isAzure = (curHero == CharacterManager.CHAR_AZURE_BLADE || GetComponent<AzureBladeSkill>() != null);
+
+        int azureSpeedConvertedAP = 0;
+        var azureBlade = GetComponent<AzureBladeSkill>();
+        if (azureBlade != null)
+        {
+            azureBlade.RefreshCooldownStats();
+            if (isAzure)
+            {
+                azureSpeedConvertedAP = azureBlade.ConvertedMagicAttack;
+            }
+        }
+
         bonusPhysAtk = upgradeBonusAtk + weaponPhysAtk + socketPhysAtk + costumeAtk + augBonusAtk;
-        bonusMagicAtk = weaponMagicAtk + socketMagicAtk;
+        bonusMagicAtk = weaponMagicAtk + socketMagicAtk + azureSpeedConvertedAP;
         bonusTrueAtk = weaponTrueAtk + socketTrueAtk;
         bonusAttackDamage = bonusPhysAtk + bonusMagicAtk + bonusTrueAtk;
 
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out lifestealPercent, out float cdReduc, out _, out _);
-        string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         float upUltiCd = 0f;
         var upgradeMgr = PlayerUpgradeManager.EnsureInstance();
         if (upgradeMgr != null)
@@ -239,12 +329,6 @@ public class PlayerCombat : MonoBehaviour
 
         ultiCooldownReduction = upUltiCd + (baseUlti * (cdReduc + augBonusCDR));
         skillCooldown = Mathf.Max(3.0f, baseUlti - ultiCooldownReduction);
-
-        var azureBlade = GetComponent<AzureBladeSkill>();
-        if (azureBlade != null)
-        {
-            azureBlade.RefreshCooldownStats();
-        }
 
         var ronin = GetComponent<GaleRoninSkill>();
         if (ronin != null)
@@ -362,9 +446,12 @@ public class PlayerCombat : MonoBehaviour
                     {
                         azureBlade.StartAim(initialAim);
                     }
-                    else if (roninSkill != null && roninSkill.enabled && roninSkill.CanUseIaidoCharge)
+                    else if (roninSkill != null && roninSkill.enabled)
                     {
-                        roninSkill.StartIaidoCharge(initialAim);
+                        if (roninSkill.CanUseIaidoCharge)
+                        {
+                            roninSkill.StartIaidoCharge(initialAim);
+                        }
                     }
                     else if (mageSkill != null && mageSkill.enabled)
                     {
@@ -414,13 +501,26 @@ public class PlayerCombat : MonoBehaviour
                 {
                     azureBlade.UpdateAim(aimDir, attackHoldDuration);
                 }
-                else if (roninSkill != null && roninSkill.enabled && roninSkill.CanUseIaidoCharge)
+                else if (roninSkill != null && roninSkill.enabled)
                 {
-                    roninSkill.UpdateIaidoCharge(aimDir, attackHoldDuration);
+                    if (roninSkill.CanUseIaidoCharge)
+                    {
+                        if (!roninSkill.IsChargingIaido && roninSkill.IsAttackReady)
+                        {
+                            roninSkill.StartIaidoCharge(aimDir);
+                        }
+                        roninSkill.UpdateIaidoCharge(aimDir, attackHoldDuration);
+                    }
+                    else if (attackHoldDuration >= 0.15f)
+                    {
+                        if (playerController != null) playerController.SetFacingDirection(aimDir);
+                        Vector2 playerPos = (Vector2)transform.position;
+                        SkillAimIndicator.EnsureExists(gameObject)?.ShowAimArc(playerPos, aimDir, roninSkill.SlashRadius, 180f, new Color(0.15f, 0.95f, 0.85f, 0.85f));
+                    }
                 }
-                else
+                else if (titan == null && azureBlade == null && roninSkill == null && duneSkill == null && mageSkill == null)
                 {
-                    // Player 1 (Vaelstrider): Thế thủ kiếm thuẫn & Phóng đại sóng kiếm hoàng kim
+                    // Chỉ riêng Player 1 (Vaelstrider): Thế thủ kiếm thuẫn & Phóng đại sóng kiếm hoàng kim
                     if (CanUseParryCharge && attackHoldDuration >= 0.15f)
                     {
                         if (!isParrying)
@@ -502,13 +602,28 @@ public class PlayerCombat : MonoBehaviour
                 {
                     azureBlade.ReleaseAimAndFire(bonusAttackDamage);
                 }
-                else if (roninSkill != null && roninSkill.enabled && roninSkill.CanUseIaidoCharge && roninSkill.IsChargingIaido)
+                else if (roninSkill != null && roninSkill.enabled)
                 {
-                    roninSkill.ReleaseIaidoCharge(aimDir, bonusAttackDamage);
+                    if (roninSkill.CanUseIaidoCharge && roninSkill.IsChargingIaido)
+                    {
+                        roninSkill.ReleaseIaidoCharge(aimDir, bonusAttackDamage);
+                    }
+                    else
+                    {
+                        if (roninSkill.IsChargingIaido)
+                        {
+                            roninSkill.CancelIaidoCharge();
+                        }
+                        if (aimDir.sqrMagnitude > 0.01f && playerController != null)
+                        {
+                            playerController.SetFacingDirection(aimDir);
+                        }
+                        PerformAttack();
+                    }
                 }
-                else
+                else if (titan == null && azureBlade == null && roninSkill == null && duneSkill == null && mageSkill == null)
                 {
-                    // Player 1 (Vaelstrider)
+                    // Chỉ riêng Player 1 (Vaelstrider)
                     if (CanUseParryCharge && isParrying && (cachedHoldDur >= 0.22f || wasParryTriggered))
                     {
                         ReleaseParryStance(aimDir, bonusAttackDamage);
@@ -616,7 +731,7 @@ public class PlayerCombat : MonoBehaviour
             lastAttackTime = Time.time;
             comboStep++;
             if (comboStep > 2) comboStep = 1;
-            SoundManager.EnsureInstance()?.PlaySwordSlash();
+            SoundManager.EnsureInstance()?.PlaySwordSlash(comboStep);
 
             if (animator != null)
             {
@@ -665,7 +780,7 @@ public class PlayerCombat : MonoBehaviour
         lastAttackTime = Time.time;
         comboStep++;
         if (comboStep > 2) comboStep = 1;
-        SoundManager.EnsureInstance()?.PlaySwordSlash();
+        SoundManager.EnsureInstance()?.PlaySwordSlash(comboStep);
 
         if (animator != null)
         {
@@ -676,13 +791,31 @@ public class PlayerCombat : MonoBehaviour
             animator.Play(attackState, 0, 0f);
         }
 
-        ExecuteHitDamage();
+        // Đồng bộ thời điểm gây sát thương chính xác với khung hình vung kiếm (Impact Frame)
+        // Đòn 1 chém chéo vung tới đích sau ~0.10s, Đòn 2 bổ nặng kết chuỗi vung tới đích sau ~0.14s
+        float hitDelay = (comboStep == 1) ? 0.10f : 0.14f;
+        if (attackHitRoutine != null) StopCoroutine(attackHitRoutine);
+        attackHitRoutine = StartCoroutine(DelayedHitDamageRoutine(comboStep, hitDelay));
     }
 
-    private void ExecuteHitDamage()
+    private Coroutine attackHitRoutine = null;
+
+    private IEnumerator DelayedHitDamageRoutine(int step, float delay)
     {
+        if (delay > 0.005f)
+        {
+            yield return new WaitForSeconds(delay);
+        }
+        ExecuteHitDamage(step);
+        attackHitRoutine = null;
+    }
+
+    private void ExecuteHitDamage(int step = -1)
+    {
+        int curStep = (step > 0) ? step : comboStep;
         Vector3 origin = (attackPoint != null) ? attackPoint.position : transform.position;
-        int damage = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
+        int baseDmg = (curStep == 1) ? attack1Damage : attack2Damage;
+        int damage = baseDmg + bonusAttackDamage;
 
         // Quet toan bo muc tieu trong tam chem (Bao gom ca Quai vat va Vat the chem be BreakableProp)
         Collider2D[] allHits = Physics2D.OverlapCircleAll(origin, attackRadius);
@@ -706,46 +839,72 @@ public class PlayerCombat : MonoBehaviour
                     continue;
                 }
 
-                // La Quai Vat: Tinh toan Ti Le No Chi Mang (Base 20%, Don 2 Finisher +15% Crit Chance)
+                // La Quai Vat: Tinh toan Ti Le No Chi Mang (Base 20%, Don 2 Finisher +18% Crit Chance)
                 enemyCount++;
-                SoundManager.EnsureInstance()?.PlayHitImpact();
-
-                bool isCrit = RollCritical(comboStep == 2 ? 0.15f : 0f, out float critMult);
-                int baseAndPhys = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusPhysAtk;
+                bool isCrit = RollCritical(curStep == 2 ? 0.18f : 0f, out float critMult);
+                if (AugmentManager.Instance != null && AugmentManager.Instance.ConsumeShadowAmbush())
+                {
+                    isCrit = true;
+                    critMult = Mathf.Max(critMult, 2.2f);
+                }
+                SoundManager.EnsureInstance()?.PlayHitImpact(isCrit, curStep == 2);
+                int baseAndPhys = baseDmg + bonusPhysAtk;
                 int finalPhys = Mathf.RoundToInt(baseAndPhys * critMult);
                 int finalMagic = (bonusMagicAtk > 0) ? Mathf.RoundToInt(bonusMagicAtk * critMult) : 0;
                 int finalTrue = (bonusTrueAtk > 0) ? Mathf.RoundToInt(bonusTrueAtk * critMult) : 0;
 
-                int actualHitDmg = finalPhys + finalMagic + finalTrue;
+                int actualPhys = (finalPhys > 0) ? AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, finalPhys, DamageType.Physical) : 0;
+                int actualMagic = (finalMagic > 0) ? AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, finalMagic, DamageType.Magic) : 0;
+                int actualTrue = (finalTrue > 0) ? AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, finalTrue, DamageType.TrueDamage) : 0;
+                int actualHitDmg = actualPhys + actualMagic + actualTrue;
                 damageable.TakeDamage(actualHitDmg);
+                OnPlayerHitEnemy?.Invoke(col.gameObject, actualHitDmg);
 
-                DamagePopup.Create(col.transform.position, finalPhys, DamageType.Physical, isCritical: isCrit);
-                if (finalMagic > 0)
+                if (actualPhys > 0)
                 {
-                    DamagePopup.Create(col.transform.position + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.25f, 0f), finalMagic, DamageType.Magic, isCritical: isCrit);
+                    DamagePopup.Create(col.transform.position, actualPhys, DamageType.Physical, isCritical: isCrit);
                 }
-                if (finalTrue > 0)
+                if (actualMagic > 0)
                 {
-                    DamagePopup.Create(col.transform.position + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.5f, 0f), finalTrue, DamageType.TrueDamage, isCritical: isCrit);
+                    DamagePopup.Create(col.transform.position + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.25f, 0f), actualMagic, DamageType.Magic, isCritical: isCrit);
                 }
+                if (actualTrue > 0)
+                {
+                    DamagePopup.Create(col.transform.position + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.5f, 0f), actualTrue, DamageType.TrueDamage, isCritical: isCrit);
+                }
+
+                var augMgr = AugmentManager.EnsureInstance();
+                AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, actualHitDmg, damageable);
 
                 // Hoi nang luong va tich luy Noi Nang CHỈ KHI chem trung quai vat
                 var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
                 if (energySys != null)
                 {
-                    energySys.RestoreEnergy(8f);
+                    float extraEnergy = (augMgr != null && augMgr.HasSurgingPulse()) ? 6f : 0f;
+                    energySys.RestoreEnergy(8f + extraEnergy);
                     energySys.AddInnerEnergy(15f);
                 }
 
-                // Hồi phục Máu từ Hút Máu Vật Lý & Hút Máu Phép
+                // Hồi phục Máu từ Hút Máu Vật Lý & Hút Máu Phép (Huyết Thần Tế Lễ chuyển hóa Khiên Máu Ảo khi đầy bình)
                 if (playerHealth != null)
                 {
-                    int physHeal = (PhysLifestealPercent > 0f) ? Mathf.RoundToInt(finalPhys * PhysLifestealPercent) : 0;
-                    int magicHeal = (SpellVampPercent > 0f) ? Mathf.RoundToInt(finalMagic * SpellVampPercent) : 0;
+                    int physHeal = (PhysLifestealPercent > 0f) ? Mathf.RoundToInt(actualPhys * PhysLifestealPercent) : 0;
+                    int magicHeal = (SpellVampPercent > 0f) ? Mathf.RoundToInt(actualMagic * SpellVampPercent) : 0;
                     int totalHeal = physHeal + magicHeal;
+                    if (GrievousWoundsDebuff.HasDebuff(gameObject))
+                    {
+                        totalHeal = Mathf.RoundToInt(totalHeal * GrievousWoundsDebuff.GetHealingMultiplier(gameObject));
+                    }
                     if (totalHeal > 0)
                     {
-                        playerHealth.Heal(Mathf.Max(1, totalHeal));
+                        if (playerHealth.CurrentHealth >= playerHealth.MaxHealth && augMgr != null && augMgr.HasBloodGodTribute())
+                        {
+                            playerHealth.AddVirtualHealth(totalHeal, 35f);
+                        }
+                        else
+                        {
+                            playerHealth.Heal(Mathf.Max(1, totalHeal));
+                        }
                     }
                 }
             }
@@ -885,23 +1044,23 @@ public class PlayerCombat : MonoBehaviour
 
             Vector3 center = GetBodyCenterWorld();
 
-            // ĐỢT 1 (t = 0.0s): Chém mở màn & Hút nhẹ quái vào tâm bão
+            // ĐỢT 1 (t = 0.0s): Chém mở màn & Hút quái vào tâm bão
             if (animator != null) animator.Play("Player_Ulti", 0, 0f);
             SoundManager.EnsureInstance()?.PlaySwordSlash();
-            ExecuteCleaveWave(center, damage: 20 + Mathf.RoundToInt(bonusAttackDamage * 0.4f), isFinal: false, pullInward: true);
+            ExecuteCleaveWave(center, damage: 30 + Mathf.RoundToInt(bonusAttackDamage * 0.5f), isFinal: false, pullInward: true);
             yield return new WaitForSecondsRealtime(0.28f);
 
-            // ĐỢT 2 (t = 0.28s): Bão kiếm cuộn xoay liên kích 2
+            // ĐỢT 2 (t = 0.28s): Bão kiếm cuộn xoay liên kích 2 & Gom quái chặt hơn
             if (animator != null) animator.Play("Player_Ulti", 0, 0.15f);
             SoundManager.EnsureInstance()?.PlaySwordSlash();
-            if (cam != null) cam.Shake(0.12f, 0.2f);
-            ExecuteCleaveWave(center, damage: 20 + Mathf.RoundToInt(bonusAttackDamage * 0.4f), isFinal: false, pullInward: false);
+            if (cam != null) cam.Shake(0.15f, 0.2f);
+            ExecuteCleaveWave(center, damage: 45 + Mathf.RoundToInt(bonusAttackDamage * 0.6f), isFinal: false, pullInward: true);
             yield return new WaitForSecondsRealtime(0.28f);
 
             // ĐỢT 3 (t = 0.56s): Bão kiếm cuộn xoay liên kích 3
             if (animator != null) animator.Play("Player_Ulti", 0, 0.3f);
             SoundManager.EnsureInstance()?.PlaySwordSlash();
-            ExecuteCleaveWave(center, damage: 25 + Mathf.RoundToInt(bonusAttackDamage * 0.5f), isFinal: false, pullInward: false);
+            ExecuteCleaveWave(center, damage: 60 + Mathf.RoundToInt(bonusAttackDamage * 0.8f), isFinal: false, pullInward: false);
             yield return new WaitForSecondsRealtime(0.28f);
 
             // ĐỢT 4 - ĐÒN KẾT LIỄU CỰC ĐẠI (t = 0.84s): NỔ TUNG HẤT VĂNG TOÀN BỘ QUÁI
@@ -909,7 +1068,7 @@ public class PlayerCombat : MonoBehaviour
             SoundManager.EnsureInstance()?.PlaySwordSlash();
             SoundManager.EnsureInstance()?.PlayHitImpact();
             if (cam != null) cam.Shake(0.4f, 0.5f);
-            ExecuteCleaveWave(center, damage: 50 + bonusUltiDamage + bonusAttackDamage, isFinal: true, pullInward: false);
+            ExecuteCleaveWave(center, damage: 120 + bonusUltiDamage + bonusAttackDamage * 2, isFinal: true, pullInward: false);
             yield return new WaitForSecondsRealtime(0.30f);
         }
         finally
@@ -940,14 +1099,21 @@ public class PlayerCombat : MonoBehaviour
             if (damageable != null && !(damageable is PlayerHealth))
             {
                 bool isCrit = RollCritical(isFinal ? 0.25f : 0.05f, out float critMult);
-                int finalDamage = Mathf.RoundToInt(damage * critMult);
+                int rawDamage = Mathf.RoundToInt(damage * critMult);
+                int finalDamage = AugmentManager.ProcessOutgoingDamage(gameObject, enemy.gameObject, rawDamage);
                 damageable.TakeDamage(finalDamage);
+                OnPlayerHitEnemy?.Invoke(enemy.gameObject, finalDamage);
                 SoundManager.EnsureInstance()?.PlayHitImpact();
                 DamagePopup.Create(enemy.transform.position, finalDamage, DamageType.Physical, isCritical: isCrit);
                 if (bonusTrueAtk > 0)
                 {
                     int finalTrue = Mathf.RoundToInt(bonusTrueAtk * critMult);
                     DamagePopup.Create(enemy.transform.position + Vector3.up * 0.4f, finalTrue, DamageType.TrueDamage, isCritical: isCrit);
+                }
+
+                if (isFinal)
+                {
+                    AugmentManager.TriggerOnHitAugments(gameObject, enemy.gameObject, finalDamage, damageable);
                 }
 
                 bool isProp = (enemy.GetComponent<BreakableProp>() != null || enemy.GetComponentInParent<BreakableProp>() != null || enemy.GetComponent<TreasureChest>() != null || enemy.GetComponentInParent<TreasureChest>() != null);
@@ -1248,6 +1414,17 @@ public class PlayerCombat : MonoBehaviour
     {
         if (playerHealth != null && playerHealth.IsDead) return;
         if (isUltiActive || !CanUseParryCharge) return;
+
+        // Chỉ riêng Hiệp Sĩ Vaelstrider (Player 1) mới có thế thủ Parry Stance
+        if (GetComponent<TitanBerserkerSkill>() != null ||
+            GetComponent<AzureBladeSkill>() != null ||
+            GetComponent<GaleRoninSkill>() != null ||
+            GetComponent<DuneAssassinSkill>() != null ||
+            GetComponent<CelestialMageSkill>() != null)
+        {
+            return;
+        }
+
         isParrying = true;
         wasParryTriggered = false;
         parryHoldDuration = 0f;
@@ -1463,8 +1640,9 @@ public class PlayerCombat : MonoBehaviour
                 if (damagedRoots.Contains(root)) continue;
                 damagedRoots.Add(root);
 
-                damageable.TakeDamage(totalDmg);
-                DamagePopup.Create(col.transform.position, totalDmg, DamageType.Physical, isCritical: isParryCrit || chargeRatio >= 0.8f);
+                int actualDmg = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, totalDmg, DamageType.Physical);
+                damageable.TakeDamage(actualDmg);
+                DamagePopup.Create(col.transform.position, actualDmg, DamageType.Physical, isCritical: isParryCrit || chargeRatio >= 0.8f);
                 if (bonusTrueAtk > 0)
                 {
                     DamagePopup.Create(col.transform.position + Vector3.up * 0.4f, bonusTrueAtk, DamageType.TrueDamage, isCritical: isParryCrit);
@@ -1685,8 +1863,9 @@ public class PlayerCombat : MonoBehaviour
                 if (!hitObjects.Contains(hitRoot))
                 {
                     hitObjects.Add(hitRoot);
-                    damageable.TakeDamage(waveDmg);
-                    DamagePopup.Create(col.transform.position, waveDmg, DamageType.Physical, isCritical: isCrit || chargeRatio >= 0.8f);
+                    int actualWaveDmg = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, waveDmg, DamageType.Physical);
+                    damageable.TakeDamage(actualWaveDmg);
+                    DamagePopup.Create(col.transform.position, actualWaveDmg, DamageType.Physical, isCritical: isCrit || chargeRatio >= 0.8f);
 
                     var rb = col.GetComponent<Rigidbody2D>() ?? col.GetComponentInParent<Rigidbody2D>();
                     if (rb != null)
@@ -1930,7 +2109,7 @@ public class PlayerCombat : MonoBehaviour
         StartCoroutine(DivineRiposteWaveRoutine(transform.position, dir, true, counterDmg, 1.0f));
 
         // 4. Banner chữ chiến đấu nổi
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "★ THÁNH THUẪN PHẢN ĐÒN ★", new Color(1f, 0.85f, 0.2f, 1f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.5f, "THÁNH THUẪN PHẢN ĐÒN", new Color(1f, 0.85f, 0.2f, 1f));
 
         // 5. Hiệu ứng tia sáng bừng sáng
         if (radiantRiposteAuraObj != null)

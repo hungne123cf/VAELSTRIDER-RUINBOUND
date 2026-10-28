@@ -36,6 +36,13 @@ public static class LoginSceneBuilder
         EditorUtility.DisplayDialog("Đã Xóa Sạch Tài Khoản", "Toàn bộ tài khoản và tiến trình đã được xóa hoàn toàn về trạng thái ban đầu!", "OK");
     }
 
+    [MenuItem("Vaelstrider/Tài Khoản/Xóa Sạch Trang Phục Đã Mua (Reset Costumes)", false, 2)]
+    public static void ResetCostumesMenu()
+    {
+        HeroCostumeManager.ResetAllCostumes();
+        EditorUtility.DisplayDialog("Đã Reset Trang Phục", "Toàn bộ trang phục đã mua đã được xóa sạch và đưa về mặc định!", "OK");
+    }
+
     [MenuItem("Vaelstrider/Scenes/Build Login Scene (LoginScene.unity)", false, 0)]
     public static void BuildLoginScene()
     {
@@ -108,7 +115,16 @@ public static class LoginSceneBuilder
         bgRt.anchorMax = Vector2.one;
         bgRt.sizeDelta = Vector2.zero;
         Image bgImg = bgObj.AddComponent<Image>();
-        bgImg.color = new Color(0.04f, 0.05f, 0.08f, 1f);
+        Sprite sandBgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Backgrounds/Sand/Demo.png");
+        if (sandBgSprite != null)
+        {
+            bgImg.sprite = sandBgSprite;
+            bgImg.color = new Color(0.72f, 0.68f, 0.64f, 1f);
+        }
+        else
+        {
+            bgImg.color = new Color(0.12f, 0.10f, 0.08f, 1f);
+        }
 
         // 6. LoginManager Controller
         var loginMgr = canvasObj.AddComponent<LoginManager>();
@@ -192,7 +208,7 @@ public static class LoginSceneBuilder
 
         // 8B. Username Input Group
         CreateFieldLabel(loginCardObj.transform, "Tên Đăng Nhập:", new Vector2(0f, 145f));
-        var userInput = CreateInputField(loginCardObj.transform, "UsernameInput", "hung", new Vector2(0f, 105f), new Vector2(480f, 46f), false);
+        var userInput = CreateInputField(loginCardObj.transform, "UsernameInput", "", new Vector2(0f, 105f), new Vector2(480f, 46f), false);
 
         // 8C. Password Input Group + Eye Button (Clean "HIỆN" / "ẨN" text, No square emojis)
         CreateFieldLabel(loginCardObj.transform, "Mật Khẩu:", new Vector2(0f, 60f));
@@ -333,12 +349,13 @@ public static class LoginSceneBuilder
         userTxtRt.offsetMin = new Vector2(16f, 0f);
         userTxtRt.offsetMax = new Vector2(-120f, 0f);
         var userTmp = userTxtObj.AddComponent<TextMeshProUGUI>();
-        userTmp.text = "Chiến Binh: <b>hung</b> (Đã kết nối tài khoản)";
+        userTmp.text = "";
         userTmp.fontSize = 16;
         userTmp.fontStyle = FontStyles.Bold;
         userTmp.color = new Color(0.85f, 0.95f, 0.90f);
         userTmp.alignment = TextAlignmentOptions.Left;
         userTmp.raycastTarget = false;
+        userBannerObj.SetActive(false); // Offline game: hide account capsule
 
         // Switch Account Button inside banner
         GameObject switchAccObj = new GameObject("Btn_SwitchAccount");
@@ -367,6 +384,8 @@ public static class LoginSceneBuilder
         swTmp.alignment = TextAlignmentOptions.Center;
         swTmp.raycastTarget = false;
 
+        switchAccObj.SetActive(false); // Game offline, khong can doi tai khoan
+
         // Pulsing "TAP TO START" Text
         GameObject tapTextObj = new GameObject("TapToStartText");
         tapTextObj.transform.SetParent(tapPanel.transform, false);
@@ -374,17 +393,18 @@ public static class LoginSceneBuilder
         tapTxtRt.anchorMin = new Vector2(0.5f, 0.5f);
         tapTxtRt.anchorMax = new Vector2(0.5f, 0.5f);
         tapTxtRt.pivot = new Vector2(0.5f, 0.5f);
-        tapTxtRt.anchoredPosition = new Vector2(0f, -180f);
-        tapTxtRt.sizeDelta = new Vector2(800f, 60f);
+        tapTxtRt.anchoredPosition = new Vector2(0f, -200f);
+        tapTxtRt.sizeDelta = new Vector2(900f, 100f);
         var tapTxtTmp = tapTextObj.AddComponent<TextMeshProUGUI>();
-        tapTxtTmp.text = "— CHẠM VÀO MÀN HÌNH ĐỂ BẮT ĐẦU —";
+        tapTxtTmp.text = "— BẮT ĐẦU TRÒ CHƠI —\n<size=18><color=#E6C875>Chạm vào màn hình để bắt đầu</color></size>";
         tapTxtTmp.fontSize = 26;
         tapTxtTmp.fontStyle = FontStyles.Bold;
         tapTxtTmp.color = new Color(1f, 0.95f, 0.80f, 1f);
         tapTxtTmp.alignment = TextAlignmentOptions.Center;
         tapTxtTmp.raycastTarget = false;
 
-        tapPanel.SetActive(false);
+        tapPanel.SetActive(true);
+        loginCardObj.SetActive(false);
 
         // 10. Link all references into LoginManager
         SerializedObject so = new SerializedObject(loginMgr);

@@ -56,21 +56,18 @@ public class HealthPotion : MonoBehaviour
     private void TriggerPickup()
     {
         isCollected = true;
-        Vector3 worldStart = transform.position;
 
-        var inventory = player != null ? player.GetComponent<PlayerInventory>() : null;
-        if (inventory != null)
+        var health = (player != null) ? player.GetComponent<PlayerHealth>() : Object.FindAnyObjectByType<PlayerHealth>();
+        if (health != null && !health.IsDead)
         {
-            inventory.AddPotions(potionCount);
+            // Hồi phục trực tiếp 25% máu tối đa (tối thiểu 35 HP) cho mỗi ngọc/bình máu
+            int healPerPotion = Mathf.Max(35, Mathf.RoundToInt(health.MaxHealth * 0.25f));
+            int totalHeal = healPerPotion * Mathf.Max(1, potionCount);
+            health.Heal(totalHeal);
+            SoundManager.EnsureInstance()?.PlayPotionDrink();
         }
 
-        // Kich hoat hieu ung bay len o dem tren UI neu dang hoat dong
-        if (PotionQuickSlotUI.Instance != null && PotionQuickSlotUI.Instance.gameObject.activeInHierarchy)
-        {
-            PotionQuickSlotUI.Instance.PlayFlyAnimation(worldStart, null);
-        }
-
-        // Bien mat tren san ngay lap tuc de khong vuong chan Player
+        // Tự biến mất ngay lập tức
         Destroy(gameObject);
     }
 

@@ -11,18 +11,18 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
     public string bossName = "CHUA TE NHEN - SKELETON KING";
     public int totalBossPhases = 3;
     public int currentBossPhase = 1;
-    public int phaseMaxHealth = 1250;
+    public int phaseMaxHealth = 900;
     public int currentHealth;
 
     [Header("Stats")]
     [SerializeField] private float moveSpeed = 3.2f;
-    [SerializeField] private int meleeDamage = 38;
-    [SerializeField] private int slamDamage = 55;
-    [SerializeField] private int earthquakeDamage = 20;
+    [SerializeField] private int meleeDamage = 12;
+    [SerializeField] private int slamDamage = 18;
+    [SerializeField] private int earthquakeDamage = 9;
     [SerializeField] private float meleeRange = 2.4f;
-    [SerializeField] private float meleeCooldown = 1.5f;
-    [SerializeField] private float skillCooldown = 6.0f;
-    [SerializeField] private float webSpitCooldown = 5.0f;
+    [SerializeField] private float meleeCooldown = 1.35f;
+    [SerializeField] private float skillCooldown = 5.0f;
+    [SerializeField] private float webSpitCooldown = 4.5f;
 
     private Transform player;
     private Rigidbody2D rb;
@@ -34,6 +34,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
     private float meleeTimer = 0f;
     private float skillTimer = 3.0f;
     private float webSpitTimer = 2.5f;
+    private float corruptedBlinkTimer = 4.5f;
     private bool isBusy = false;
     private bool isPhaseTransitioning = false;
     private bool isDead = false;
@@ -47,10 +48,10 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
 
     void Awake()
     {
-        phaseMaxHealth = MapScalingManager.ScaleHealth(phaseMaxHealth);
-        meleeDamage = MapScalingManager.ScaleDamage(meleeDamage);
-        slamDamage = MapScalingManager.ScaleDamage(slamDamage);
-        earthquakeDamage = MapScalingManager.ScaleDamage(earthquakeDamage);
+        phaseMaxHealth = MapScalingManager.ScaleBossHealth(phaseMaxHealth, phases: 2);
+        meleeDamage = MapScalingManager.ScaleBossDamage(meleeDamage, isSpecialSkill: false);
+        slamDamage = MapScalingManager.ScaleBossDamage(slamDamage, isSpecialSkill: true);
+        earthquakeDamage = MapScalingManager.ScaleBossDamage(earthquakeDamage, isSpecialSkill: true);
         currentHealth = phaseMaxHealth;
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<CapsuleCollider2D>();
@@ -67,6 +68,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
             col.offset = new Vector2(0f, 2.0f);
             col.direction = CapsuleDirection2D.Vertical;
             col.isTrigger = false;
+            EnemyNavigationHelper.EnsureFrictionless(col);
         }
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
@@ -123,9 +125,11 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
             if (player == null) return;
         }
 
-        if (meleeTimer > 0f) meleeTimer -= Time.deltaTime;
-        if (skillTimer > 0f) skillTimer -= Time.deltaTime;
-        if (webSpitTimer > 0f) webSpitTimer -= Time.deltaTime;
+        float cdSpeed = CorruptedCycleManager.IsCorruptedActive ? 1.30f : 1.0f;
+        if (meleeTimer > 0f) meleeTimer -= Time.deltaTime * cdSpeed;
+        if (skillTimer > 0f) skillTimer -= Time.deltaTime * cdSpeed;
+        if (webSpitTimer > 0f) webSpitTimer -= Time.deltaTime * cdSpeed;
+        if (corruptedBlinkTimer > 0f) corruptedBlinkTimer -= Time.deltaTime * cdSpeed;
 
         if (isBusy) return;
 
@@ -138,6 +142,13 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
             transform.localScale = new Vector3(diff.x > 0 ? 1.2f : -1.2f, 1.2f, 1f);
         }
 
+        // Tuyệt Kỹ Ác Mộng 1 (Chu Kỳ Tha Hóa): Shadow Blink Decapitate (Dịch Chuyển Bóng Đêm Sau Lưng Trảm Kích)
+        if (CorruptedCycleManager.IsCorruptedActive && corruptedBlinkTimer <= 0f && dist >= 3.2f)
+        {
+            StartCoroutine(ShadowBlinkDecapitateRoutine());
+            return;
+        }
+
         // Chieu 1: Phun Ken To Nhen lam choang 2s (cooldown 5s)
         if (webSpitTimer <= 0f && dist >= 3.0f && dist <= 14f)
         {
@@ -145,10 +156,14 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
             return;
         }
 
-        // Chieu 2: Ky nang dac biet theo Phase (Dam dat & Tha cot trung nhen / Bao dia chan)
+        // Chieu 2: Ky nang dac biet theo Phase (Dam dat & Tha cot trung nhen / Bao dia chan / Bao Kiem Oan Hon)
         if (skillTimer <= 0f)
         {
-            if (currentBossPhase == 3)
+            if (CorruptedCycleManager.IsCorruptedActive && Random.value > 0.4f)
+            {
+                StartCoroutine(SpectralSwordBarrageRoutine());
+            }
+            else if (currentBossPhase == 3)
             {
                 StartCoroutine(TripleEarthquakeSkillRoutine());
             }
@@ -179,9 +194,10 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
         }
         else
         {
-            // Di chuyen san lung player
+            // Di chuyen san lung player (luon lach qua vat can)
             Vector2 dir = (player.position - transform.position).normalized;
-            rb.linearVelocity = dir * moveSpeed;
+            Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, col, 0.7f, 1.5f);
+            rb.linearVelocity = moveDir * moveSpeed;
             if (animator != null) animator.SetBool(IsMovingHash, true);
         }
     }
@@ -369,7 +385,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
             if (player != null && Vector2.Distance(transform.position, player.position) <= 2.2f)
             {
                 var target = player.GetComponent<IDamageable>();
-                if (target != null) target.TakeDamage(meleeDamage + 8);
+                if (target != null) target.TakeDamage(Mathf.RoundToInt(meleeDamage * 1.25f));
                 break;
             }
             yield return null;
@@ -444,6 +460,121 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
         return ring;
     }
 
+    /// <summary>
+    /// Tuyệt Kỹ Ác Mộng 1 (Chu Kỳ Tha Hóa): Dịch Chuyển Bóng Đêm Sau Lưng Trảm Kích (Shadow Blink Decapitate)
+    /// Boss tan biến vào bóng tối, xuất hiện sau lưng Player vung lưỡi hái tử thần!
+    /// Người chơi Mobile phải lập tức bấm DASH để né đòn chí mạng này!
+    /// </summary>
+    private IEnumerator ShadowBlinkDecapitateRoutine()
+    {
+        isBusy = true;
+        corruptedBlinkTimer = 6.5f;
+        rb.linearVelocity = Vector2.zero;
+
+        SoundManager.EnsureInstance()?.PlayBossWarning();
+
+        // 1. Tan biến vào hư không
+        float fade = 1f;
+        while (fade > 0.05f)
+        {
+            fade -= Time.deltaTime * 3.5f;
+            if (spriteRenderer != null) spriteRenderer.color = new Color(originalColor.r, originalColor.g, originalColor.b, fade);
+            yield return null;
+        }
+
+        if (col != null) col.enabled = false;
+        yield return new WaitForSeconds(0.4f);
+
+        if (isDead) yield break;
+
+        // 2. Xuất hiện ngay sau lưng người chơi
+        Vector3 playerPos = player != null ? player.position : transform.position;
+        Vector3 playerFaceDir = Vector3.right;
+        var pCont = player != null ? player.GetComponent<PlayerController>() : null;
+        if (pCont != null)
+        {
+            // Lấy hướng nhìn của người chơi để xuất hiện sau lưng
+            playerFaceDir = (player.localScale.x >= 0) ? Vector3.right : Vector3.left;
+        }
+
+        Vector3 ambushPos = playerPos - playerFaceDir * 1.8f;
+        transform.position = ambushPos;
+
+        // Cảnh báo vệt chém liêm đỏ thẫm
+        GameObject warningAim = CreateWarningAimLine(ambushPos, playerFaceDir, 3.6f, 0.45f);
+
+        // Hiện hình trở lại
+        if (spriteRenderer != null) spriteRenderer.color = new Color(0.9f, 0.2f, 0.2f, 0.95f);
+        if (col != null) col.enabled = true;
+
+        yield return new WaitForSeconds(0.4f);
+
+        if (isDead) yield break;
+
+        // 3. Vung đòn Trảm Kích Hư Không!
+        if (animator != null) animator.SetTrigger(AttackHash);
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+
+        var cam = Object.FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.5f, 0.55f);
+
+        if (player != null && Vector2.Distance(transform.position, player.position) <= 3.2f)
+        {
+            var target = player.GetComponent<IDamageable>();
+            if (target != null)
+            {
+                int lethalDmg = Mathf.RoundToInt(meleeDamage * 1.55f);
+                target.TakeDamage(lethalDmg);
+            }
+        }
+
+        if (spriteRenderer != null) spriteRenderer.color = originalColor;
+
+        yield return new WaitForSeconds(0.4f);
+        isBusy = false;
+    }
+
+    /// <summary>
+    /// Tuyệt Kỹ Ác Mộng 2 (Chu Kỳ Tha Hóa): Bão Kiếm Oan Hồn Huyết Sắc (Spectral Sword Barrage)
+    /// Phóng loạt 10 thanh kiếm ma quái bay theo hình cánh cung dồn dập
+    /// </summary>
+    private IEnumerator SpectralSwordBarrageRoutine()
+    {
+        isBusy = true;
+        skillTimer = skillCooldown + 1.5f;
+        rb.linearVelocity = Vector2.zero;
+
+        SoundManager.EnsureInstance()?.PlayBossWarning();
+        GameObject ring = CreateWarningRing(transform.position, 4.0f, 0.7f);
+
+        if (animator != null) animator.SetTrigger(SkillHash);
+        yield return new WaitForSeconds(0.6f);
+
+        if (isDead) yield break;
+
+        int swordCount = 10;
+        Vector2 targetDir = (player != null) ? ((Vector2)player.position - (Vector2)transform.position).normalized : Vector2.right;
+        float baseAngle = Mathf.Atan2(targetDir.y, targetDir.x) * Mathf.Rad2Deg;
+
+        for (int i = 0; i < swordCount; i++)
+        {
+            if (isDead) yield break;
+
+            float offset = (i - swordCount * 0.5f) * 12f;
+            float angle = baseAngle + offset;
+            Vector2 shootDir = Quaternion.Euler(0, 0, angle) * Vector2.right;
+
+            Vector2 spawnPos = (Vector2)transform.position + Vector2.up * 1.5f;
+            SpiderWebProjectile.Launch(spawnPos, shootDir);
+            SoundManager.EnsureInstance()?.PlayHitImpact();
+
+            yield return new WaitForSeconds(0.08f);
+        }
+
+        yield return new WaitForSeconds(0.4f);
+        isBusy = false;
+    }
+
     // =========================================================================
     // SAT THUONG & CHUYEN PHASE
     // =========================================================================
@@ -451,7 +582,11 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
     {
         if (isDead || isPhaseTransitioning) return;
 
-        currentHealth -= damage;
+        // Giới hạn sát thương tối đa trên 1 đòn không quá 25% máu của Phase để người chơi late-game không bỏ qua giai đoạn
+        int maxPerHit = Mathf.Max(100, Mathf.RoundToInt(phaseMaxHealth * 0.25f));
+        int finalDamage = Mathf.Min(damage, maxPerHit);
+
+        currentHealth -= finalDamage;
         StartCoroutine(DamageFlashRoutine());
         if (animator != null) animator.SetTrigger(HitHash);
 
@@ -566,11 +701,46 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
         WorldItemPickup.RollDrop(transform.position + Vector3.up * 0.5f, true);
         TreasureChest.SpawnChest(transform.position + Vector3.down * 1.5f);
 
-        // 3. Trieu hoi duy nhat 1 Cong Thien Gioi
-        StartCoroutine(SpawnHeavenlyPortalRoutine());
+        Vector3 bossDeathPos = transform.position;
+        // 3. Trieu hoi Bong Ma Ban Nga (CHỈ DUY NHẤT ở Màn Ác Mộng VoidNightmare) hoac Cong Thien Gioi
+        if (CorruptedCycleManager.IsCorruptedActive && CorruptedCycleManager.CurrentRealm == CalamityRealm.VoidNightmare)
+        {
+            ShadowDoppelgangerBoss.Spawn(bossDeathPos, () => {
+                var roomMgr = DungeonRoomManager.Instance ?? Object.FindAnyObjectByType<DungeonRoomManager>();
+                if (roomMgr != null)
+                {
+                    roomMgr.StartCoroutine(SpawnHeavenlyPortalRoutineStatic(bossDeathPos));
+                }
+                else
+                {
+                    SpawnPortalsDirect(bossDeathPos);
+                }
+            });
+        }
+        else
+        {
+            StartCoroutine(SpawnHeavenlyPortalRoutine());
+        }
 
         OnBossDied?.Invoke(this);
         Destroy(gameObject, 2.5f);
+    }
+
+    private static IEnumerator SpawnHeavenlyPortalRoutineStatic(Vector3 center)
+    {
+        yield return new WaitForSeconds(1.5f);
+        SpawnSovereignAltarStatic(center);
+        RuinPortal.SpawnPortal(center + new Vector3(-2.8f, 0, 0));
+        CorruptedVoidPortal.Spawn(center + new Vector3(2.8f, 0, 0));
+        WanderingMerchant.SpawnMerchant(center + new Vector3(0f, -2.5f, 0f));
+    }
+
+    private static void SpawnPortalsDirect(Vector3 center)
+    {
+        SpawnSovereignAltarStatic(center);
+        RuinPortal.SpawnPortal(center + new Vector3(-2.8f, 0, 0));
+        CorruptedVoidPortal.Spawn(center + new Vector3(2.8f, 0, 0));
+        WanderingMerchant.SpawnMerchant(center + new Vector3(0f, -2.5f, 0f));
     }
 
     private void ClearAllRemainingEnemies()
@@ -609,6 +779,35 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
     private IEnumerator SpawnHeavenlyPortalRoutine()
     {
         yield return new WaitForSeconds(1.8f);
-        RuinPortal.SpawnPortal(transform.position);
+        SpawnSovereignAltarStatic(transform.position);
+        RuinPortal.SpawnPortal(transform.position + new Vector3(-2.8f, 0, 0));
+        CorruptedVoidPortal.Spawn(transform.position + new Vector3(2.8f, 0, 0));
+        WanderingMerchant.SpawnMerchant(transform.position + new Vector3(0f, -2.5f, 0f));
+    }
+
+    private static void SpawnSovereignAltarStatic(Vector3 centerPos)
+    {
+        GameObject altar = new GameObject("SovereignAltar");
+        altar.transform.position = centerPos;
+        var sr = altar.AddComponent<SpriteRenderer>();
+        sr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
+        sr.color = new Color(1.0f, 0.85f, 0.25f, 0.85f);
+        sr.sortingOrder = 50;
+        altar.transform.localScale = Vector3.one * 1.8f;
+
+        // Vụ nổ ánh sáng hoàng gia và thông báo chiến tích
+        DamagePopup.CreateText(centerPos + Vector3.up * 2.2f, LocalizationManager.T("ĐIỆN THỜ THĂNG HOA: DI CHÚC VƯƠNG GIẢ!", "CELESTIAL ALTAR: SOVEREIGN'S LEGACY!"), new Color(1f, 0.88f, 0.2f));
+        SoundManager.EnsureInstance()?.PlayShardPickup();
+
+        var playerHealth = FindAnyObjectByType<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            // Hồi 40% máu và cộng thêm buff chiến tích
+            int healAmt = Mathf.RoundToInt(playerHealth.MaxHealth * 0.40f);
+            playerHealth.Heal(healAmt);
+            DamagePopup.CreateText(playerHealth.transform.position + Vector3.up * 1.6f, LocalizationManager.T("[CHÚC PHÚC VƯƠNG GIẢ] +20% SÁT THƯƠNG!", "[SOVEREIGN BOON] +20% DAMAGE!"), new Color(0.3f, 1f, 0.5f));
+        }
+
+        AethelShard.SpawnShards(centerPos, 30);
     }
 }

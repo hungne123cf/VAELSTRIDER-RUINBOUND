@@ -669,9 +669,11 @@ public class CelestialMageSkill : MonoBehaviour
                     : (UnityEngine.Random.value < 0.35f);
                 float mult = isCrit ? 1.8f : 1.0f;
                 int finalDamage = Mathf.RoundToInt(damage * mult);
+                int actualDmg = AugmentManager.ProcessOutgoingDamage(gameObject, h.gameObject, finalDamage, DamageType.Magic);
 
-                dmg.TakeDamage(finalDamage);
-                DamagePopup.Create(h.transform.position, finalDamage, DamageType.Magic, isCritical: isCrit);
+                dmg.TakeDamage(actualDmg);
+                DamagePopup.Create(h.transform.position, actualDmg, DamageType.Magic, isCritical: isCrit);
+                AugmentManager.TriggerOnHitAugments(gameObject, h.gameObject, actualDmg, dmg);
 
                 GameObject hitTargetObj = (dmg as Component)?.gameObject ?? h.gameObject;
                 if (IsBossTarget(hitTargetObj))
@@ -837,8 +839,9 @@ public class CelestialMageSkill : MonoBehaviour
                 if (dmg != null && !(dmg is PlayerHealth) && !damaged.Contains(dmg))
                 {
                     damaged.Add(dmg);
-                    dmg.TakeDamage(tickDmg);
-                    DamagePopup.Create(h.transform.position, tickDmg, DamageType.Magic);
+                    int actualTick = AugmentManager.ProcessOutgoingDamage(gameObject, h.gameObject, tickDmg, DamageType.Magic);
+                    dmg.TakeDamage(actualTick);
+                    DamagePopup.Create(h.transform.position, actualTick, DamageType.Magic);
                 }
             }
             yield return new WaitForSeconds(0.35f);
@@ -927,7 +930,14 @@ public class CelestialMageSkill : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < meteorCount; i++)
+        int totalMeteors = meteorCount;
+        bool hasSupercluster = AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.MeteorSupercluster);
+        if (hasSupercluster)
+        {
+            totalMeteors += 6; // Siêu Tinh Vụ Trụy Lạc: thêm 6 thiên thạch liên tiếp rơi dồn dập
+        }
+
+        for (int i = 0; i < totalMeteors; i++)
         {
             Vector3 impactPos = transform.position;
             if (targetPositions.Count > 0)
@@ -940,7 +950,7 @@ public class CelestialMageSkill : MonoBehaviour
             }
 
             StartCoroutine(SpawnSingleMeteor(impactPos));
-            yield return new WaitForSeconds(0.28f);
+            yield return new WaitForSeconds(hasSupercluster ? 0.16f : 0.28f);
         }
     }
 
@@ -1038,9 +1048,11 @@ public class CelestialMageSkill : MonoBehaviour
                     : (UnityEngine.Random.value < 0.45f);
                 float mult = isCrit ? 2.0f : 1.0f; // Sát thương gấp đôi khi nổ đại chí mạng!
                 int finalDmg = Mathf.RoundToInt(totalDamage * mult);
+                int actualDmg = AugmentManager.ProcessOutgoingDamage(gameObject, h.gameObject, finalDmg, DamageType.Magic);
 
-                dmg.TakeDamage(finalDmg);
-                DamagePopup.Create(h.transform.position, finalDmg, DamageType.Magic, isCritical: isCrit);
+                dmg.TakeDamage(actualDmg);
+                DamagePopup.Create(h.transform.position, actualDmg, DamageType.Magic, isCritical: isCrit);
+                AugmentManager.TriggerOnHitAugments(gameObject, h.gameObject, actualDmg, dmg);
                 if (playerCombat != null && playerCombat.BonusTrueDamage > 0)
                 {
                     int finalTrue = Mathf.RoundToInt(playerCombat.BonusTrueDamage * 2 * mult);
@@ -1487,9 +1499,11 @@ public class ArcaneOrbProjectile : MonoBehaviour
                 : (UnityEngine.Random.value < 0.25f);
             float mult = (playerCombat != null) ? (isCrit ? playerCombat.CritMultiplier : 1.0f) : (isCrit ? 1.75f : 1.0f);
             int finalDamage = Mathf.RoundToInt(damage * mult);
+            int actualDmg = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, finalDamage, DamageType.Magic);
 
-            dmg.TakeDamage(finalDamage);
-            DamagePopup.Create(col.transform.position, finalDamage, DamageType.Magic, isCritical: isCrit);
+            dmg.TakeDamage(actualDmg);
+            DamagePopup.Create(col.transform.position, actualDmg, DamageType.Magic, isCritical: isCrit);
+            AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, actualDmg, dmg);
 
             float vamp = (playerCombat != null) ? Mathf.Max(playerCombat.SpellVampPercent, playerCombat.LifestealPercent) : 0f;
             if (vamp > 0f && playerHealth != null)

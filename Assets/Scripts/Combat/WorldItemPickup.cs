@@ -213,13 +213,13 @@ public class WorldItemPickup : MonoBehaviour
         }
         else if (itemId == "potion")
         {
-            if (player != null)
+            var pHealth = (player != null) ? player.GetComponent<PlayerHealth>() : Object.FindAnyObjectByType<PlayerHealth>();
+            if (pHealth != null && !pHealth.IsDead)
             {
-                var inv = player.GetComponent<PlayerInventory>();
-                if (inv != null) inv.AddPotions(quantity);
+                int healAmount = Mathf.Max(35, Mathf.RoundToInt(pHealth.MaxHealth * 0.25f));
+                pHealth.Heal(healAmount * Mathf.Max(1, quantity));
+                SoundManager.EnsureInstance()?.PlayPotionDrink();
             }
-            SoundManager.EnsureInstance()?.PlayGemSocket();
-            DamagePopup.CreateText(spawnPopPos, $"+{quantity} " + LocalizationManager.T("Bình Máu", "Potion"), new Color(1f, 0.35f, 0.45f));
         }
         else
         {
@@ -355,36 +355,25 @@ public class WorldItemPickup : MonoBehaviour
 
     public static void RollDrop(Vector3 pos, bool isBoss = false, float dropChanceBonus = 0f)
     {
-        string[] commonOres = { "ore_stone", "ore_small_rocks", "ore_coal", "ore_iron", "ore_copper" };
-        string[] rareGems = { "gem_amber", "gem_topaz", "gem_sapphire", "gem_jade", "ore_gold_node", "ore_cyan_tin" };
-        string[] epicGems = { "gem_amethyst", "gem_bloodstone", "ore_forge_stone", "chest_ancient_relic" };
-
+        // (Cơ chế đá/khoáng sản/ngọc socket đã bỏ hoàn toàn - chỉ rơi Bình Hồi Máu và Mảnh Linh Hồn Shards)
         if (isBoss)
         {
-            int dropCount = Random.Range(2, 4);
-            for (int i = 0; i < dropCount; i++)
-            {
-                string dropItem = (i == 0 && Random.value < 0.65f)
-                    ? epicGems[Random.Range(0, epicGems.Length)]
-                    : ((Random.value < 0.35f) ? epicGems[Random.Range(0, epicGems.Length)] : rareGems[Random.Range(0, rareGems.Length)]);
-                
-                SpawnArc(pos, dropItem, 1);
-            }
-            return;
+            HealthPotion.Spawn(pos + Vector3.left * 0.6f, 1);
+            HealthPotion.Spawn(pos + Vector3.right * 0.6f, 1);
+            AethelShard.SpawnShards(pos, Random.Range(18, 30));
         }
-
-        float roll = Random.value;
-        if (roll < Mathf.Clamp01(0.14f + dropChanceBonus))
+        else
         {
-            string dropItem;
-            float rarityRoll = Random.value;
-            if (rarityRoll < 0.06f) dropItem = epicGems[Random.Range(0, epicGems.Length)];
-            else if (rarityRoll < 0.30f) dropItem = rareGems[Random.Range(0, rareGems.Length)];
-            else dropItem = commonOres[Random.Range(0, commonOres.Length)];
-
-            if (!string.IsNullOrEmpty(dropItem))
+            // Quái thường: 25% rơi bình hồi máu
+            if (Random.value < 0.25f)
             {
-                SpawnArc(pos, dropItem, 1);
+                HealthPotion.Spawn(pos, 1);
+            }
+
+            // Quái thường: rơi mảnh linh hồn Aethel Shards
+            if (Random.value < Mathf.Clamp01(0.65f + dropChanceBonus))
+            {
+                AethelShard.SpawnShards(pos, Random.Range(3, 8));
             }
         }
     }

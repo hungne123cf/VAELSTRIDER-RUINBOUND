@@ -20,10 +20,23 @@ public class RebuildShopModalHierarchy
         var allObjects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var go in allObjects)
         {
-            if (go.name == "ArmorShopModal")
+            if (go.name == "ArmorShopModal" || go.name == "RosterModalPanel" || go.name == "HeroRosterModal" || go.name.Contains("OldRosterModal"))
             {
-                Debug.Log($"[ShopFix] Removing stale ArmorShopModal from scene: {go.GetInstanceID()}");
+                Debug.Log($"[Fix] Removing stale modal from scene: {go.name} ({go.GetInstanceID()})");
                 Object.DestroyImmediate(go);
+                dirty = true;
+            }
+        }
+
+        var mm = Object.FindAnyObjectByType<MainMenuManager>();
+        if (mm != null)
+        {
+            SerializedObject so = new SerializedObject(mm);
+            var rpProp = so.FindProperty("rosterPanel");
+            if (rpProp != null && rpProp.objectReferenceValue != null)
+            {
+                rpProp.objectReferenceValue = null;
+                so.ApplyModifiedProperties();
                 dirty = true;
             }
         }

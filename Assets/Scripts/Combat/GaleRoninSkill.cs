@@ -7,8 +7,8 @@ public class GaleRoninSkill : MonoBehaviour
     [Header("Gale Ronin Attack Settings")]
     [SerializeField] private float slashRadius = 1.30f; // Tăng tầm đánh xa hơn một chút
     [SerializeField] private float slashAngle = 180f; // Góc chém bán nguyệt 180 độ
-    [SerializeField] private int baseSlashDamage = 28; // Sát thương uy lực 28 chuẩn 1:1 cho đòn đánh chậm Iaido
-    [SerializeField] private float attackCooldown = 1.20f; // Tốc độ chém chậm hơn rõ rệt (1.2s), đầm tay chuẩn Iaido Samurai
+    [SerializeField] private int baseSlashDamage = 28; // Sát thương uy lực 28 chuẩn 1:1 cho đòn đánh Iaido
+    [SerializeField] private float attackCooldown = 0.45f; // Tốc độ chém mượt mà, linh hoạt (0.45s) để combo liên hoàn cực sướng tay
     [SerializeField] private LayerMask targetLayers;
 
     public void SetBaseSlashDamage(int dmg) => baseSlashDamage = dmg;
@@ -370,7 +370,7 @@ public class GaleRoninSkill : MonoBehaviour
         {
             hasPlayedMaxGlint = true;
             SpawnSheathStarGlint(transform.position + (Vector3)(currentAimDir * 0.45f) + Vector3.up * 0.45f);
-            SoundManager.EnsureInstance()?.PlayHitImpact();
+            SoundManager.EnsureInstance()?.PlayKatanaSheathe();
 
             var cam = FindAnyObjectByType<CameraFollow>();
             if (cam != null) cam.Shake(0.14f, 0.22f);
@@ -439,7 +439,7 @@ public class GaleRoninSkill : MonoBehaviour
             animator.Play("Attack2", 0, 0f);
         }
 
-        SoundManager.EnsureInstance()?.PlaySwordSlash();
+        SoundManager.EnsureInstance()?.PlaySwordSlash(2);
 
         // Rung màn hình uy lực
         float shakeAmt = Mathf.Lerp(0.18f, 0.45f, ratio);
@@ -481,8 +481,10 @@ public class GaleRoninSkill : MonoBehaviour
                     // Max Charge: Kích nổ ngay lập tức 3 tầng Phong Ấn!
                     windMarks[rootObj] = 0;
                     int burstDmg = Mathf.RoundToInt(totalDamage * burstDamageMultiplier);
+                    burstDmg = AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, burstDmg);
                     damageable.TakeDamage(burstDmg);
                     DamagePopup.Create(col.transform.position, burstDmg, DamageType.Magic, isCritical: true);
+                    AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, burstDmg, damageable);
                     SpawnMiniGaleVortex(col.transform.position, Mathf.RoundToInt(totalDamage * 0.7f));
                 }
                 else
@@ -693,8 +695,8 @@ public class GaleRoninSkill : MonoBehaviour
 
     private IEnumerator HitStopRoutine(float duration)
     {
-        Time.timeScale = 0.05f;
-        yield return new WaitForSecondsRealtime(duration);
+        Time.timeScale = 0.15f;
+        yield return new WaitForSecondsRealtime(Mathf.Min(duration, 0.04f));
         Time.timeScale = 1.0f;
     }
 
@@ -757,18 +759,22 @@ public class GaleRoninSkill : MonoBehaviour
         {
             windMarks[targetRoot] = 0;
             int burstDamage = Mathf.RoundToInt(damage * burstDamageMultiplier);
+            burstDamage = AugmentManager.ProcessOutgoingDamage(gameObject, targetRoot, burstDamage);
             damageable.TakeDamage(burstDamage);
 
             Vector3 targetPos = targetRoot.transform.position;
             DamagePopup.Create(targetPos, burstDamage, DamageType.Magic, isCritical: true);
+            AugmentManager.TriggerOnHitAugments(gameObject, targetRoot, burstDamage, damageable);
             // Triệu hồi Lốc Xoáy Phong Lôi (Mini Gale Vortex)
             SpawnMiniGaleVortex(targetPos, Mathf.RoundToInt(damage * 0.6f));
         }
         else
         {
             windMarks[targetRoot] = currentStacks;
-            damageable.TakeDamage(damage);
-            DamagePopup.Create(targetRoot.transform.position, damage, DamageType.Physical, isCritical: false);
+            int actualDmg = AugmentManager.ProcessOutgoingDamage(gameObject, targetRoot, damage);
+            damageable.TakeDamage(actualDmg);
+            DamagePopup.Create(targetRoot.transform.position, actualDmg, DamageType.Physical, isCritical: false);
+            AugmentManager.TriggerOnHitAugments(gameObject, targetRoot, actualDmg, damageable);
 
             string markText = (currentStacks == 1) 
                 ? LocalizationManager.T("🌀 Ấn I", "🌀 Mark I") 
@@ -957,8 +963,8 @@ public class GaleRoninSkill : MonoBehaviour
 
         if (cam != null) cam.Shake(0.12f, 0.18f);
 
-        // DỪNG LẠI 0.35s ĐỂ NGƯỜI CHƠI NHÌN THẤY RÕ RÀNG HÀNH ĐỘNG XUẤT HIỆN SAU LƯNG
-        yield return new WaitForSeconds(0.35f);
+        // Chớp kiếm áp sát nhanh nhẹn (0.12s)
+        yield return new WaitForSeconds(0.12f);
 
         // 3. BƯỚC 2: TUNG ĐÒN CHÉM KẾT LIỄU CHÍ MẠNG (SHADOW EXECUTION SLICE)
         if (animator != null)
@@ -969,8 +975,8 @@ public class GaleRoninSkill : MonoBehaviour
 
         SoundManager.EnsureInstance()?.PlaySwordSlash();
 
-        // Đợi 0.12s để hoạt ảnh vung kiếm chém tới điểm va chạm
-        yield return new WaitForSeconds(0.12f);
+        // Đợi 0.08s để hoạt ảnh vung kiếm chém tới điểm va chạm
+        yield return new WaitForSeconds(0.08f);
 
         // Tính sát thương tuyệt kỹ (x3 sát thương cơ bản + bonus nâng cấp)
         int upUltBonus = 0;
@@ -982,8 +988,10 @@ public class GaleRoninSkill : MonoBehaviour
         bool targetWasAliveBefore = (targetDamageable != null && targetTransform != null);
         if (targetDamageable != null && targetTransform != null)
         {
-            targetDamageable.TakeDamage(totalStrikeDmg);
-            DamagePopup.Create(targetTransform.position, totalStrikeDmg, DamageType.TrueDamage, isCritical: true);
+            int actualStrikeDmg = AugmentManager.ProcessOutgoingDamage(gameObject, targetTransform.gameObject, totalStrikeDmg);
+            targetDamageable.TakeDamage(actualStrikeDmg);
+            DamagePopup.Create(targetTransform.position, actualStrikeDmg, DamageType.TrueDamage, isCritical: true);
+            AugmentManager.TriggerOnHitAugments(gameObject, targetTransform.gameObject, actualStrikeDmg, targetDamageable);
             var targetRb = targetTransform.GetComponent<Rigidbody2D>();
             if (targetRb != null)
             {
@@ -1014,7 +1022,7 @@ public class GaleRoninSkill : MonoBehaviour
         {
             specialCooldownTimer = 0f;
             SoundManager.EnsureInstance()?.PlayPortalSpawn();
-            }
+        }
 
         SoundManager.EnsureInstance()?.PlayHitImpact();
         if (cam != null) cam.Shake(0.35f, 0.35f);
@@ -1033,8 +1041,8 @@ public class GaleRoninSkill : MonoBehaviour
             playerHealth.Heal(healAmount);
         }
 
-        // DỪNG LẠI 0.45s ĐỂ NGƯỜI CHƠI NHÌN THẤY HOẠT ẢNH CHÉM VÀ SÁT THƯƠNG NẢY LÊN
-        yield return new WaitForSeconds(0.45f);
+        // Dừng ngắn 0.15s để đòn chém dứt khoát rồi biến về vị trí cũ
+        yield return new WaitForSeconds(0.15f);
 
         // 4. BƯỚC 3: DỊCH CHUYỂN TRỞ VỀ VỊ TRÍ CŨ
         SpawnShadowClone(behindPos, new Color(0.1f, 0.4f, 0.8f, 0.75f));
@@ -1130,7 +1138,7 @@ public class GaleRoninSkill : MonoBehaviour
         RaycastHit2D hit = Physics2D.CircleCast(startPos, 0.35f, facing, phantomTeleportDistance, LayerMask.GetMask("Obstacle", "Default"));
         if (hit.collider != null && !hit.collider.isTrigger && hit.collider.gameObject != gameObject)
         {
-            actualDist = Mathf.Max(0.5f, hit.distance - 0.35f);
+            actualDist = Mathf.Max(0f, hit.distance - 0.35f);
         }
 
         Vector2 targetPos = startPos + facing * actualDist;

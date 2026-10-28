@@ -122,8 +122,10 @@ public class ChestLootPopupUI : MonoBehaviour
         boxRt.anchoredPosition = Vector2.zero;
 
         Image boxImg = boxObj.GetComponent<Image>();
-        boxImg.color = new Color(0.04f, 0.05f, 0.09f, 0.98f);
-        WhiteIconLoader.ApplyGothicFrame(boxObj, new Color(0.85f, 0.72f, 0.38f, 0.90f), 0.35f);
+        boxImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        boxImg.type = Image.Type.Sliced;
+        boxImg.color = Color.white;
+        WhiteIconLoader.ApplyGothicFrame(boxObj, Color.white, 0.40f);
 
         // 2. Header Icon
         GameObject iconObj = new GameObject("HeaderChestIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -153,7 +155,7 @@ public class ChestLootPopupUI : MonoBehaviour
         titleText.text = LocalizationManager.T("RƯƠNG BÁU TÀN TÍCH", "ANCIENT RUIN CHEST");
         titleText.fontSize = 24;
         titleText.fontStyle = FontStyles.Bold;
-        titleText.color = new Color(1f, 0.88f, 0.35f);
+        titleText.color = new Color(0.98f, 0.88f, 0.55f);
         titleText.alignment = TextAlignmentOptions.Center;
 
         // 4. Subtitle Text
@@ -167,7 +169,9 @@ public class ChestLootPopupUI : MonoBehaviour
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = LocalizationManager.T("Chọn vật phẩm muốn nhặt hoặc nhấn Lấy Tất Cả:", "Select items to take or tap Claim All:");
         subtitleText.fontSize = 14.5f;
-        subtitleText.color = new Color(0.75f, 0.8f, 0.9f);
+        subtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
+        SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
+        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 106f), new Vector2(460f, 12f));
         subtitleText.alignment = TextAlignmentOptions.Center;
 
         // 5. Scroll View (Anti-Overflow, Mobile Touch Swipe)
@@ -245,13 +249,6 @@ public class ChestLootPopupUI : MonoBehaviour
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
 
-        Image img = btnObj.GetComponent<Image>();
-        img.color = bgColor;
-
-        var outline = btnObj.AddComponent<Outline>();
-        outline.effectColor = new Color(0f, 0f, 0f, 0.6f);
-        outline.effectDistance = new Vector2(1.5f, -1.5f);
-
         Button btn = btnObj.GetComponent<Button>();
 
         GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
@@ -267,9 +264,11 @@ public class ChestLootPopupUI : MonoBehaviour
         tmp.text = text;
         tmp.fontSize = 15;
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
+        tmp.color = new Color(0.96f, 0.88f, 0.65f);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.raycastTarget = false;
+
+        SoulslikeHUDStyler.StyleButton(btn, text);
 
         return btn;
     }

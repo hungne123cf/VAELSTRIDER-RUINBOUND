@@ -47,6 +47,9 @@ public class GameAutoBootstrap : MonoBehaviour
         }
         if (currentScene == "Map2_ValleyRuin")
         {
+            LevelUpChoiceUI.ResetUI();
+            // Dang o Map 2: Giu nguyen tien trinh ca tran (so luot doi lai Rerolls va Linh hon tich luy tu Map 1)
+
             // Dang o Map 2: Giu nguyen dia hinh thung lung Map 2, khoi tao UI, Upgrade va Ancient Shrine Tru Da Phat Sang
             MatchTimerUI.EnsureUIExists();
             MinimapHUD.EnsureUIExists();
@@ -57,23 +60,34 @@ public class GameAutoBootstrap : MonoBehaviour
             SettingsUI.EnsureSettingsButtonExists();
             CharacterStatsUI.EnsureUIExists();
             InGameInventoryUI.EnsureUIExists();
+            PlayerAvatarUI.EnsureUIExists();
             PlayerEnergyUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ChestLootPopupUI.EnsureUIExists();
+            PortalConfirmationPopupUI.EnsureUIExists();
             RemoveAncientShrine();
             PlayerLevelSystem.EnsureInstance();
             AugmentManager.EnsureInstance();
             PlayerExpBarUI.EnsureUIExists();
+            AugmentHUDBar.EnsureExists();
+            GuardianShieldHUDTracker.EnsureTrackerExists();
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
             MapSpiritSparksManager.EnsureInstance();
-            Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 2 (Valley Ruin)! Đã khởi tạo Hệ thống Level Farm & Lõi TFT.");
+            CorruptedAtmosphereManager.EnsureAtmosphere();
+            MagmaCalamityHazardManager.EnsureManager();
+            AcidDownpourHazardManager.EnsureManager();
+            FrostfallBlizzardHazardManager.EnsureManager();
+            Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 2 (Valley Ruin)! Đã khởi tạo Hệ thống Level Farm & Lõi TFT cùng hiệu ứng nguyên tố.");
             return;
         }
 
         if (currentScene.Contains("Map3") || currentScene.Contains("Ancient"))
         {
+            LevelUpChoiceUI.ResetUI();
+            // Dang o Map 3: Giu nguyen tien trinh ca tran (so luot doi lai Rerolls va Linh hon tich luy tu Map 1, 2)
+
             // Đang ở Map 3: Giữ nguyên 100% bản đồ bạn tự vẽ, chỉ nạp UI điều khiển và nâng cấp
             MatchTimerUI.EnsureUIExists();
             MinimapHUD.EnsureUIExists();
@@ -84,17 +98,24 @@ public class GameAutoBootstrap : MonoBehaviour
             SettingsUI.EnsureSettingsButtonExists();
             CharacterStatsUI.EnsureUIExists();
             InGameInventoryUI.EnsureUIExists();
+            PlayerAvatarUI.EnsureUIExists();
             PlayerEnergyUI.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ChestLootPopupUI.EnsureUIExists();
+            PortalConfirmationPopupUI.EnsureUIExists();
             RemoveAncientShrine();
             PlayerLevelSystem.EnsureInstance();
             AugmentManager.EnsureInstance();
             PlayerExpBarUI.EnsureUIExists();
+            AugmentHUDBar.EnsureExists();
+            GuardianShieldHUDTracker.EnsureTrackerExists();
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
-            MapSpiritSparksManager.EnsureInstance();
+            CorruptedAtmosphereManager.EnsureAtmosphere();
+            MagmaCalamityHazardManager.EnsureManager();
+            AcidDownpourHazardManager.EnsureManager();
+            FrostfallBlizzardHazardManager.EnsureManager();
             // Map 3 hoan toan do Map3WaveSpawner quan ly (Goblin, Skeleton, Slime, Skeleton King Boss)
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Forgotten Memories)! Tải toàn diện hệ thống Map 3.");
             return;
@@ -103,6 +124,14 @@ public class GameAutoBootstrap : MonoBehaviour
         // 0. Kiến tạo Bản Đồ Đa Phòng chỉ riêng cho Map 1 (Map1_Thestart)
         if (currentScene == "SampleScene" || currentScene == "Map1_Thestart")
         {
+            if (!CorruptedCycleManager.IsCorruptedActive)
+            {
+                // Đầu mỗi trận mới thường: xóa sạch số linh hồn tạm tích từ trận cũ
+                PlayerInventory.ResetRunShards();
+                LevelUpChoiceUI.ResetUI();
+                LevelUpChoiceUI.ResetMatchRerolls();
+            }
+
             DungeonMapBuilder.BuildDungeon();
         }
 
@@ -120,8 +149,10 @@ public class GameAutoBootstrap : MonoBehaviour
         SettingsUI.EnsureSettingsButtonExists();
         CharacterStatsUI.EnsureUIExists();
         InGameInventoryUI.EnsureUIExists();
+        PlayerAvatarUI.EnsureUIExists();
         PlayerEnergyUI.EnsureUIExists();
         ChestLootPopupUI.EnsureUIExists();
+        PortalConfirmationPopupUI.EnsureUIExists();
 
         // 3. Khoi tao He thong 3 dot quai + Boss Titan Wheel (WaveSpawner)
         EnsureWaveSpawner();
@@ -137,6 +168,8 @@ public class GameAutoBootstrap : MonoBehaviour
         PlayerLevelSystem.EnsureInstance();
         AugmentManager.EnsureInstance();
         PlayerExpBarUI.EnsureUIExists();
+        AugmentHUDBar.EnsureExists();
+        GuardianShieldHUDTracker.EnsureTrackerExists();
 
         // 7. He thong Anh Sang URP 2D Dark Fantasy
         EnsureDungeonLighting();
@@ -150,7 +183,10 @@ public class GameAutoBootstrap : MonoBehaviour
 
         // 10. Ap dung Nhan Vat da chon (Vaelstrider / Maid) va Tuyet Ky Quet Tan Ke Yeu
         ApplySelectedCharacterToPlayer();
-            EnsureBreakables();
+        CorruptedAtmosphereManager.EnsureAtmosphere();
+        MagmaCalamityHazardManager.EnsureManager();
+        AcidDownpourHazardManager.EnsureManager();
+        FrostfallBlizzardHazardManager.EnsureManager();
 
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
     }
@@ -185,7 +221,7 @@ public class GameAutoBootstrap : MonoBehaviour
         var minimaps = Object.FindObjectsByType<MinimapHUD>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var m in minimaps)
         {
-            if (m != null && m.gameObject != null) m.gameObject.SetActive(visible);
+            if (m != null && m.gameObject != null) m.gameObject.SetActive(MinimapHUD.EnableMinimapHUD && visible);
         }
 
         // 3. Match Timer
@@ -197,7 +233,7 @@ public class GameAutoBootstrap : MonoBehaviour
 
         // 4. Potion & Energy
         if (PotionQuickSlotUI.Instance != null && PotionQuickSlotUI.Instance.gameObject != null)
-            PotionQuickSlotUI.Instance.gameObject.SetActive(visible);
+            PotionQuickSlotUI.Instance.gameObject.SetActive(PotionQuickSlotUI.EnablePotionQuickSlot && visible);
 
         if (PlayerEnergyUI.Instance != null && PlayerEnergyUI.Instance.gameObject != null)
             PlayerEnergyUI.Instance.gameObject.SetActive(visible);
@@ -205,12 +241,15 @@ public class GameAutoBootstrap : MonoBehaviour
         if (PlayerExpBarUI.Instance != null && PlayerExpBarUI.Instance.gameObject != null)
             PlayerExpBarUI.Instance.SetVisible(visible);
 
+        if (AugmentHUDBar.Instance != null && AugmentHUDBar.Instance.gameObject != null)
+            AugmentHUDBar.Instance.gameObject.SetActive(visible);
+
         // 5. Hide / Show all specific HUD objects across ALL Canvases
         string[] hudNames = new string[]
         {
             "Btn_Attack", "Btn_Dash", "Btn_Special", "Btn_Potion",
             "Btn_InGameBag", "Btn_CharacterStats", "Btn_SettingsGear", "Btn_InGameSettings", "Btn_InGameInfo",
-            "PlayerHealthBar", "PlayerHealthUI", "PlayerExpBarHUD", "ExpBarHUD", "ShardsCounter", "WaveBanner", "MatchTimerPanel", "RuinRadarCompass",
+            "PlayerAvatarHUD", "PlayerHealthBar", "PlayerHealthUI", "PlayerExpBarHUD", "ExpBarHUD", "ShardsCounter", "WaveBanner", "MatchTimerPanel", "RuinRadarCompass",
             "Minimap_Compass_HUD", "RadarDisc", "CompassNeedle", "RuinPortalDistanceText"
         };
 
@@ -233,7 +272,12 @@ public class GameAutoBootstrap : MonoBehaviour
         {
             if (parent.name == targetNames[i])
             {
-                parent.gameObject.SetActive(visible);
+                bool targetActive = visible;
+                if (parent.name == "Btn_Potion" && !PotionQuickSlotUI.EnablePotionQuickSlot) targetActive = false;
+                else if (parent.name == "Btn_InGameBag" && !InGameInventoryUI.EnableInGameInventory) targetActive = false;
+                else if ((parent.name == "Minimap_Compass_HUD" || parent.name == "RadarDisc" || parent.name == "CompassNeedle" || parent.name == "RuinPortalDistanceText") && !MinimapHUD.EnableMinimapHUD) targetActive = false;
+
+                parent.gameObject.SetActive(targetActive);
                 return;
             }
         }
@@ -382,6 +426,7 @@ public class GameAutoBootstrap : MonoBehaviour
         Transform existing = canvas.transform.Find("WaveBanner");
         if (existing != null)
         {
+            existing.gameObject.SetActive(false);
             waveUI = existing.GetComponent<WaveUI>();
             if (waveUI == null) waveUI = existing.gameObject.AddComponent<WaveUI>();
             return waveUI;
@@ -389,12 +434,13 @@ public class GameAutoBootstrap : MonoBehaviour
 
         GameObject bannerObj = new GameObject("WaveBanner");
         bannerObj.transform.SetParent(canvas.transform, false);
+        bannerObj.SetActive(false);
 
         RectTransform rt = bannerObj.AddComponent<RectTransform>();
         rt.anchorMin = new Vector2(0.5f, 1f);
         rt.anchorMax = new Vector2(0.5f, 1f);
         rt.pivot = new Vector2(0.5f, 1f);
-        rt.anchoredPosition = new Vector2(0f, -80f);
+        rt.anchoredPosition = new Vector2(0f, -152f);
         rt.sizeDelta = new Vector2(600f, 60f);
 
         CanvasGroup cg = bannerObj.AddComponent<CanvasGroup>();

@@ -264,18 +264,29 @@ public class CameraFollow : MonoBehaviour
         targetOffset = defaultOffset;
     }
 
+    [Header("Screen Shake Settings")]
+    [Tooltip("Tắt hoàn toàn rung lắc màn hình để camera mượt mà tuyệt đối")]
+    [SerializeField] private bool enableScreenShake = false;
+    public static bool GlobalEnableScreenShake = false;
+
     public void Shake(float duration = 0.15f, float magnitude = 0.2f)
     {
+        // Bỏ hoàn toàn hiệu ứng rung màn hình để triệt tiêu mọi hiện tượng giật lag khung hình
+        if (!enableScreenShake || !GlobalEnableScreenShake) return;
         StartCoroutine(ShakeRoutine(duration, magnitude));
     }
 
     private System.Collections.IEnumerator ShakeRoutine(float duration, float magnitude)
     {
+        if (!enableScreenShake || !GlobalEnableScreenShake) yield break;
+
         Vector3 originalPos = transform.position;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
+            if (!enableScreenShake || !GlobalEnableScreenShake) yield break;
+
             float x = Random.Range(-1f, 1f) * magnitude;
             float y = Random.Range(-1f, 1f) * magnitude;
 

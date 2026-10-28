@@ -14,12 +14,66 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     [SerializeField] private PlayerController playerController;
 
     private Vector2 inputVector = Vector2.zero;
+    private Vector3 baseScale = Vector3.zero;
+    private CanvasGroup canvasGroup;
 
     void Awake()
     {
         if (containerRect == null) containerRect = GetComponent<RectTransform>();
         if (playerController == null) playerController = FindAnyObjectByType<PlayerController>();
+        if (baseScale == Vector3.zero)
+        {
+            baseScale = transform.localScale;
+            if (baseScale == Vector3.zero) baseScale = Vector3.one;
+        }
         EnsureRoundedSprites();
+        ApplyCustomPreferences();
+    }
+
+    void Start()
+    {
+        ApplyCustomPreferences();
+    }
+
+    public void ApplyCustomPreferences()
+    {
+        if (baseScale == Vector3.zero)
+        {
+            baseScale = transform.localScale;
+            if (baseScale == Vector3.zero) baseScale = Vector3.one;
+        }
+
+        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.0f);
+        float opacity = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
+
+        transform.localScale = baseScale * scaleMod;
+
+        if (PlayerPrefs.HasKey("Game_Controls_Joy_PosX"))
+        {
+            RectTransform rt = GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                float posX = PlayerPrefs.GetFloat("Game_Controls_Joy_PosX", 250f);
+                float posY = PlayerPrefs.GetFloat("Game_Controls_Joy_PosY", 250f);
+                rt.anchoredPosition = new Vector2(posX, posY);
+            }
+        }
+
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+            if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+        canvasGroup.alpha = opacity;
+    }
+
+    public static void ApplyToAllJoysticks()
+    {
+        var joysticks = Object.FindObjectsByType<VirtualJoystick>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var j in joysticks)
+        {
+            if (j != null) j.ApplyCustomPreferences();
+        }
     }
 
     private void EnsureRoundedSprites()

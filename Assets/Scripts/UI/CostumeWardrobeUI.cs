@@ -119,24 +119,32 @@ public class CostumeWardrobeUI : MonoBehaviour
         titleGo.transform.SetParent(header.transform, false);
         RectTransform tRt = titleGo.GetComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0, 0);
-        tRt.anchorMax = new Vector2(0.7f, 1);
+        tRt.anchorMax = new Vector2(0.55f, 1);
         tRt.offsetMin = new Vector2(20, 0);
+        tRt.offsetMax = Vector2.zero;
         titleText = titleGo.GetComponent<TextMeshProUGUI>();
-        titleText.fontSize = 22;
+        titleText.fontSize = 20;
         titleText.fontStyle = FontStyles.Bold;
         titleText.alignment = TextAlignmentOptions.MidlineLeft;
         titleText.color = new Color(1f, 0.85f, 0.35f, 1f);
+        titleText.enableWordWrapping = false;
+        titleText.overflowMode = TextOverflowModes.Ellipsis;
 
+        // Currency Display (Safe bounds, never overlaps close button)
         GameObject curGo = new GameObject("CurrencyText", typeof(RectTransform), typeof(TextMeshProUGUI));
         curGo.transform.SetParent(header.transform, false);
         RectTransform cRt = curGo.GetComponent<RectTransform>();
-        cRt.anchorMin = new Vector2(0.6f, 0);
-        cRt.anchorMax = new Vector2(0.92f, 1);
+        cRt.anchorMin = new Vector2(0.55f, 0);
+        cRt.anchorMax = new Vector2(1f, 1);
+        cRt.offsetMin = Vector2.zero;
+        cRt.offsetMax = new Vector2(-64f, 0);
         currencyText = curGo.GetComponent<TextMeshProUGUI>();
         currencyText.fontSize = 17;
         currencyText.fontStyle = FontStyles.Bold;
         currencyText.alignment = TextAlignmentOptions.MidlineRight;
-        currencyText.color = new Color(0.4f, 0.9f, 1f, 1f);
+        currencyText.color = new Color(0.35f, 0.88f, 1f, 1f);
+        currencyText.enableWordWrapping = false;
+        currencyText.overflowMode = TextOverflowModes.Ellipsis;
 
         // Close Button
         GameObject closeGo = new GameObject("Btn_Close", typeof(RectTransform), typeof(Image), typeof(Button));
@@ -144,7 +152,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         RectTransform closeRt = closeGo.GetComponent<RectTransform>();
         closeRt.anchorMin = new Vector2(1, 0.5f);
         closeRt.anchorMax = new Vector2(1, 0.5f);
-        closeRt.sizeDelta = new Vector2(40, 40);
+        closeRt.sizeDelta = new Vector2(38, 38);
         closeRt.anchoredPosition = new Vector2(-28, 0);
         closeGo.GetComponent<Image>().color = new Color(0.7f, 0.2f, 0.2f, 1f);
         closeBtn = closeGo.GetComponent<Button>();
@@ -154,6 +162,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         closeTxt.transform.SetParent(closeGo.transform, false);
         RectTransform xRt = closeTxt.GetComponent<RectTransform>();
         xRt.anchorMin = Vector2.zero; xRt.anchorMax = Vector2.one;
+        xRt.offsetMin = Vector2.zero; xRt.offsetMax = Vector2.zero;
         var xTmp = closeTxt.GetComponent<TextMeshProUGUI>();
         xTmp.text = "X";
         xTmp.fontSize = 20;
@@ -297,13 +306,13 @@ public class CostumeWardrobeUI : MonoBehaviour
     {
         if (titleText != null)
         {
-            titleText.text = LocalizationManager.T("🏛️ PHÒNG THAY ĐỒ & TRANG PHỤC CHIẾN THẦN", "🏛️ WARRIOR WARDROBE & COSTUMES");
+            titleText.text = LocalizationManager.T("PHÒNG THAY ĐỒ & TRANG PHỤC CHIẾN THẦN", "WARRIOR WARDROBE & COSTUMES");
         }
 
         long shards = AccountDatabase.GetAethelShards();
         if (currencyText != null)
         {
-            currencyText.text = $"💎 {shards:N0}";
+            currencyText.text = $"{LocalizationManager.T("Linh Hồn:", "Shards:")} <color=#4DEEEA>{shards:N0}</color>";
         }
 
         // Left Panel info
@@ -315,19 +324,24 @@ public class CostumeWardrobeUI : MonoBehaviour
 
     private void UpdateHeroPreview()
     {
+        string normHero = HeroCostumeManager.NormalizeHeroId(currentHeroId);
         var activeCostume = HeroCostumeManager.GetCostume(previewingCostumeId);
-        if (activeCostume == null) activeCostume = HeroCostumeManager.GetCostume(HeroCostumeManager.GetDefaultCostumeId(currentHeroId));
+        if (activeCostume == null) activeCostume = HeroCostumeManager.GetCostume(HeroCostumeManager.GetDefaultCostumeId(normHero));
 
         if (heroNameText != null)
         {
-            if (currentHeroId == CharacterManager.CHAR_TITAN_BERSERKER)
+            if (normHero == CharacterManager.CHAR_TITAN_BERSERKER)
                 heroNameText.text = LocalizationManager.T("Cuồng Chiến Binh (Titan)", "Titan Berserker");
-            else if (currentHeroId == CharacterManager.CHAR_AZURE_BLADE)
+            else if (normHero == CharacterManager.CHAR_AZURE_BLADE)
                 heroNameText.text = LocalizationManager.T("Lam Kiếm Sĩ (Azure)", "Azure Blade");
-            else if (currentHeroId == CharacterManager.CHAR_GALE_RONIN)
+            else if (normHero == CharacterManager.CHAR_GALE_RONIN)
                 heroNameText.text = LocalizationManager.T("Phong Lôi Lãng Khách", "Gale Ronin");
+            else if (normHero == CharacterManager.CHAR_DUNE_ASSASSIN)
+                heroNameText.text = LocalizationManager.T("Sa Mạc Thích Khách", "Dune Assassin");
+            else if (normHero == CharacterManager.CHAR_CELESTIAL_MAGE)
+                heroNameText.text = LocalizationManager.T("Pháp Sư Tinh Tú", "Celestial Mage");
             else
-                heroNameText.text = "Vaelstrider";
+                heroNameText.text = LocalizationManager.T("Hiệp Sĩ Tiên Phong (Vael)", "Vaelstrider");
         }
 
         if (heroCostumeNameText != null && activeCostume != null)
@@ -355,25 +369,43 @@ public class CostumeWardrobeUI : MonoBehaviour
         // Update Sprite / Image tint
         if (heroPreviewImg != null)
         {
-            // Load hero portrait / sprite
             Sprite spr = null;
-            if (currentHeroId == CharacterManager.CHAR_TITAN_BERSERKER)
+            if (MainMenuManager.Instance != null)
             {
-                spr = Resources.Load<Sprite>("Assets/ART/Player4/UI/Hero_Player4_Portrait");
-#if UNITY_EDITOR
-                if (spr == null) spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Player4/UI/Hero_Player4_Portrait.png");
-#endif
-            }
-            else if (currentHeroId == CharacterManager.CHAR_AZURE_BLADE)
-            {
-#if UNITY_EDITOR
-                spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Player3/Sword_Idle/Sword_Idle3_body.png");
-#endif
+                spr = MainMenuManager.Instance.GetHeroAvatarSprite(normHero);
             }
 
-            if (spr != null) heroPreviewImg.sprite = spr;
-            HeroCostumeManager.ApplyCostumeToImage(heroPreviewImg, currentHeroId, previewingCostumeId);
+            if (spr == null)
+            {
+                spr = LoadHeroFallbackSprite(normHero);
+            }
+
+            if (spr != null)
+            {
+                heroPreviewImg.sprite = spr;
+                heroPreviewImg.enabled = true;
+            }
+
+            HeroCostumeManager.ApplyCostumeToImage(heroPreviewImg, normHero, previewingCostumeId);
         }
+    }
+
+    private Sprite LoadHeroFallbackSprite(string heroId)
+    {
+        string norm = HeroCostumeManager.NormalizeHeroId(heroId);
+#if UNITY_EDITOR
+        if (norm == CharacterManager.CHAR_TITAN_BERSERKER)
+        {
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Player4/UI/Hero_Player4_Portrait.png");
+            if (s != null) return s;
+        }
+        else if (norm == CharacterManager.CHAR_DUNE_ASSASSIN)
+        {
+            var s = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Player5/PNG/idle/idle_1.png");
+            if (s != null) return s;
+        }
+#endif
+        return null;
     }
 
     private void PopulateCostumeList()
@@ -387,6 +419,22 @@ public class CostumeWardrobeUI : MonoBehaviour
 
         var costumes = HeroCostumeManager.GetCostumesForHero(currentHeroId);
         string equippedId = HeroCostumeManager.GetEquippedCostumeId(currentHeroId);
+
+        if (costumes.Count == 0)
+        {
+            GameObject emptyGo = new GameObject("EmptyNotice", typeof(RectTransform), typeof(TextMeshProUGUI));
+            emptyGo.transform.SetParent(costumeListContent, false);
+            RectTransform eRt = emptyGo.GetComponent<RectTransform>();
+            eRt.sizeDelta = new Vector2(0, 120);
+            var eTmp = emptyGo.GetComponent<TextMeshProUGUI>();
+            eTmp.text = LocalizationManager.T(
+                "Hiện chưa có trang phục bổ sung cho anh hùng này.\nHãy theo dõi các bản cập nhật sắp tới!",
+                "No additional costumes available for this hero yet.\nStay tuned for upcoming updates!");
+            eTmp.fontSize = 17f;
+            eTmp.alignment = TextAlignmentOptions.Center;
+            eTmp.color = new Color(0.7f, 0.75f, 0.85f, 0.8f);
+            return;
+        }
 
         foreach (var costume in costumes)
         {
@@ -459,7 +507,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         GameObject btnGo = new GameObject("Btn_Action", typeof(RectTransform), typeof(Image), typeof(Button));
         btnGo.transform.SetParent(card.transform, false);
         RectTransform bRt = btnGo.GetComponent<RectTransform>();
-        bRt.anchorMin = new Vector2(0.72f, 0.5f);
+        bRt.anchorMin = new Vector2(0.70f, 0.5f);
         bRt.anchorMax = new Vector2(0.98f, 0.5f);
         bRt.sizeDelta = new Vector2(0, 42);
         bRt.anchoredPosition = new Vector2(0, 0);
@@ -472,7 +520,7 @@ public class CostumeWardrobeUI : MonoBehaviour
         RectTransform btRt = btnTxtGo.GetComponent<RectTransform>();
         btRt.anchorMin = Vector2.zero; btRt.anchorMax = Vector2.one;
         var btTmp = btnTxtGo.GetComponent<TextMeshProUGUI>();
-        btTmp.fontSize = 16.5f;
+        btTmp.fontSize = 15.5f;
         btTmp.fontStyle = FontStyles.Bold;
         btTmp.alignment = TextAlignmentOptions.Center;
 
@@ -501,7 +549,7 @@ public class CostumeWardrobeUI : MonoBehaviour
             long shards = AccountDatabase.GetAethelShards();
             bool canAfford = (shards >= data.priceShards);
             bImg.color = canAfford ? new Color(0.85f, 0.55f, 0.15f, 1f) : new Color(0.40f, 0.40f, 0.45f, 1f);
-            btTmp.text = $"{data.priceShards:N0} 💎";
+            btTmp.text = $"{data.priceShards:N0} " + LocalizationManager.T("HỒN", "SHARDS");
             btTmp.color = Color.white;
             bBtn.onClick.AddListener(() =>
             {

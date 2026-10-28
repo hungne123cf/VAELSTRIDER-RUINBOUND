@@ -24,7 +24,13 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     private float[] pipPulseTimer;       // per-pip pulse animation time
     private int lastKnownCharges = -1;
 
+    // === Stun Lock Visuals ===
+    private GameObject lockOverlayObj;
+    private Image lockIconImg;
+
     private Vector3 originalScale;
+    private Vector3 baseScale = Vector3.zero;
+    private CanvasGroup canvasGroup;
     private bool isPointerDown = false;
     private float pointerDownTime = 0f;
     private Vector2 pointerDownPos = Vector2.zero;
@@ -33,10 +39,17 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     void Awake()
     {
         cachedHeroActionIcons.Clear();
-        originalScale = transform.localScale;
+        if (baseScale == Vector3.zero)
+        {
+            baseScale = transform.localScale;
+            if (baseScale == Vector3.zero) baseScale = Vector3.one;
+        }
+        originalScale = baseScale;
         EnsureTargets();
         EnsureRoundedSprites();
         EnsureCooldownVisuals();
+        EnsureLockVisuals();
+        ApplyCustomPreferences();
     }
 
     void Start()
@@ -47,6 +60,77 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             graphic.raycastTarget = true;
         }
         EnsureCooldownVisuals();
+        EnsureLockVisuals();
+        ApplyCustomPreferences();
+    }
+
+    public void ApplyCustomPreferences()
+    {
+        if (baseScale == Vector3.zero)
+        {
+            baseScale = transform.localScale;
+            if (baseScale == Vector3.zero) baseScale = Vector3.one;
+        }
+
+        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.0f);
+        float opacity = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
+
+        originalScale = baseScale * scaleMod;
+        transform.localScale = isPointerDown ? (originalScale * 0.85f) : originalScale;
+
+        string posXKey = null;
+        string posYKey = null;
+        float defaultX = 0f;
+        float defaultY = 0f;
+
+        if (buttonType == ButtonType.Attack || gameObject.name == "Btn_Attack")
+        {
+            posXKey = "Game_Controls_Atk_PosX";
+            posYKey = "Game_Controls_Atk_PosY";
+            defaultX = -220f;
+            defaultY = 220f;
+        }
+        else if (buttonType == ButtonType.Dash || gameObject.name == "Btn_Dash")
+        {
+            posXKey = "Game_Controls_Dash_PosX";
+            posYKey = "Game_Controls_Dash_PosY";
+            defaultX = -380f;
+            defaultY = 160f;
+        }
+        else if (buttonType == ButtonType.Skill || gameObject.name == "Btn_Special" || gameObject.name == "Btn_Skill")
+        {
+            posXKey = "Game_Controls_Skill_PosX";
+            posYKey = "Game_Controls_Skill_PosY";
+            defaultX = -350f;
+            defaultY = 290f;
+        }
+
+        if (posXKey != null && PlayerPrefs.HasKey(posXKey))
+        {
+            RectTransform rt = GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                float px = PlayerPrefs.GetFloat(posXKey, defaultX);
+                float py = PlayerPrefs.GetFloat(posYKey, defaultY);
+                rt.anchoredPosition = new Vector2(px, py);
+            }
+        }
+
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+            if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+        canvasGroup.alpha = opacity;
+    }
+
+    public static void ApplyToAllButtons()
+    {
+        var buttons = Object.FindObjectsByType<MobileActionButton>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var b in buttons)
+        {
+            if (b != null) b.ApplyCustomPreferences();
+        }
     }
 
     private const float HOLD_AIM_THRESHOLD = 0.45f;
@@ -62,6 +146,21 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
         EnsureRoundedSprites();
         EnsureCooldownVisuals();
+        EnsureLockVisuals();
+
+        bool isPlayerStunned = (playerController != null && playerController.IsStunned);
+        if (lockOverlayObj != null)
+        {
+            if (lockOverlayObj.activeSelf != isPlayerStunned)
+            {
+                lockOverlayObj.SetActive(isPlayerStunned);
+            }
+            if (isPlayerStunned && lockIconImg != null)
+            {
+                float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.08f;
+                lockIconImg.transform.localScale = new Vector3(pulse, pulse, 1f);
+            }
+        }
 
         if (buttonType == ButtonType.Attack)
         {
@@ -492,6 +591,59 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
     }
 
+    private void EnsureLockVisuals()
+    {
+        if (lockOverlayObj == null)
+        {
+            Transform existing = transform.Find("StunLockOverlay");
+            if (existing != null)
+            {
+                lockOverlayObj = existing.gameObject;
+                lockIconImg = existing.Find("LockIcon")?.GetComponent<Image>();
+            }
+            else
+            {
+                lockOverlayObj = new GameObject("StunLockOverlay", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                lockOverlayObj.transform.SetParent(transform, false);
+                RectTransform rt = lockOverlayObj.GetComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+
+                Image bg = lockOverlayObj.GetComponent<Image>();
+                bg.raycastTarget = false;
+                bg.color = new Color(0.04f, 0.05f, 0.08f, 0.85f);
+                Sprite circleSprite = Resources.Load<Sprite>("Combat/circle_fill");
+#if UNITY_EDITOR
+                if (circleSprite == null) circleSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
+#endif
+                if (circleSprite != null) bg.sprite = circleSprite;
+
+                GameObject iconGo = new GameObject("LockIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                iconGo.transform.SetParent(lockOverlayObj.transform, false);
+                RectTransform iconRt = iconGo.GetComponent<RectTransform>();
+                iconRt.anchorMin = new Vector2(0.5f, 0.5f);
+                iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+                iconRt.pivot = new Vector2(0.5f, 0.5f);
+                iconRt.sizeDelta = new Vector2(36f, 36f);
+                iconRt.anchoredPosition = Vector2.zero;
+
+                lockIconImg = iconGo.GetComponent<Image>();
+                lockIconImg.raycastTarget = false;
+                lockIconImg.sprite = WhiteIconLoader.GetSprite("Locker-Locked") ?? WhiteIconLoader.GetSprite("lock");
+                lockIconImg.color = new Color(1f, 0.85f, 0.25f, 0.95f); // Gold lock
+
+                lockOverlayObj.SetActive(false);
+            }
+        }
+
+        if (lockOverlayObj != null)
+        {
+            lockOverlayObj.transform.SetAsLastSibling();
+        }
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Pip / Dot charge display (Genshin / Valorant style)
     // ─────────────────────────────────────────────────────────────
@@ -639,52 +791,30 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         bool isDune = (curHero.Contains("dune") || curHero.Contains("player5"));
         bool isMage = (curHero.Contains("mage") || curHero.Contains("celestial") || curHero.Contains("player6"));
 
-        // 1. Khung viền đổi màu phát sáng theo hệ nguyên tố của tướng
-        Sprite frameSprite = null;
-#if UNITY_EDITOR
-        frameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/potion_slot_circle.png");
-        if (frameSprite == null) frameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Map/UI_button/circle_fill.png");
-#endif
-        if (frameSprite == null) frameSprite = Resources.Load<Sprite>("UI/potion_slot_circle");
+        // Dọn dẹp ObsidianCoreBg cũ nếu có để tránh che khuất Icon
+        Transform oldCore = transform.Find("ObsidianCoreBg");
+        if (oldCore != null)
+        {
+            Destroy(oldCore.gameObject);
+        }
 
+        // 1. Nền đĩa đá Obsidian đen huyền ở gốc nút
         Image btnImg = GetComponent<Image>();
-        if (btnImg != null && frameSprite != null)
+        Sprite coreSprite = SoulslikeHUDStyler.GetActionButtonCoreSprite();
+        if (btnImg != null && coreSprite != null)
         {
-            btnImg.sprite = frameSprite;
-            if (isMage)
-            {
-                btnImg.color = new Color(0.85f, 0.35f, 1f, 1f); // Tinh Vân Tử Quang
-            }
-            else if (isAzure)
-            {
-                btnImg.color = new Color(0.35f, 0.88f, 1f, 1f); // Lam Băng Tinh Thể
-            }
-            else if (isRonin)
-            {
-                btnImg.color = new Color(0.28f, 1f, 0.75f, 1f); // Phong Lôi Ngọc Bích
-            }
-            else if (isDune)
-            {
-                btnImg.color = new Color(0.98f, 0.72f, 0.22f, 1f); // Sa Mạc Hoàng Kim
-            }
-            else
-            {
-                btnImg.color = new Color(1f, 0.88f, 0.40f, 1f); // Hoàng Kim Cổ Tự
-            }
+            btnImg.sprite = coreSprite;
+            btnImg.color = Color.white;
         }
 
-        // Cập nhật màu chữ Cooldown theo tướng
-        if (cooldownText != null)
-        {
-            if (isMage) cooldownText.color = new Color(0.9f, 0.5f, 1f, 1f);
-            else if (isAzure) cooldownText.color = new Color(0.6f, 0.95f, 1f, 1f);
-            else if (isRonin) cooldownText.color = new Color(0.4f, 1f, 0.8f, 1f);
-            else if (isDune) cooldownText.color = new Color(1f, 0.85f, 0.35f, 1f);
-            else cooldownText.color = new Color(1f, 0.9f, 0.35f, 1f);
-        }
-
-        // 2. Icon chuyên biệt độc quyền cho từng nhân vật
+        // 2. Icon chuyên biệt cho từng nhân vật (Hiển thị ngay trên nền Obsidian)
         Sprite actionSprite = GetHeroActionIcon(curHero, buttonType);
+        if (actionSprite == null)
+        {
+            if (buttonType == ButtonType.Attack) actionSprite = WhiteIconLoader.GetSprite("Sword");
+            else if (buttonType == ButtonType.Dash) actionSprite = WhiteIconLoader.GetSprite("Dash") ?? WhiteIconLoader.GetSprite("Footsteps");
+            else actionSprite = WhiteIconLoader.GetSprite("Star") ?? WhiteIconLoader.GetSprite("Flame");
+        }
 
         Transform actionIconT = transform.Find("ActionIcon");
         Image actionIconImg = null;
@@ -692,17 +822,17 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             GameObject iconGo = new GameObject("ActionIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             iconGo.transform.SetParent(transform, false);
-            iconGo.transform.SetSiblingIndex(0);
 
             RectTransform rt = iconGo.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.10f, 0.10f);
-            rt.anchorMax = new Vector2(0.90f, 0.90f);
+            rt.anchorMin = new Vector2(0.18f, 0.18f);
+            rt.anchorMax = new Vector2(0.82f, 0.82f);
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
             actionIconImg = iconGo.GetComponent<Image>();
             actionIconImg.raycastTarget = false;
             actionIconImg.preserveAspect = true;
+            actionIconT = iconGo.transform;
         }
         else
         {
@@ -710,14 +840,14 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             RectTransform rt = actionIconT.GetComponent<RectTransform>();
             if (rt != null)
             {
-                rt.anchorMin = new Vector2(0.10f, 0.10f);
-                rt.anchorMax = new Vector2(0.90f, 0.90f);
+                rt.anchorMin = new Vector2(0.18f, 0.18f);
+                rt.anchorMax = new Vector2(0.82f, 0.82f);
                 rt.offsetMin = Vector2.zero;
                 rt.offsetMax = Vector2.zero;
             }
         }
 
-        if (actionIconImg != null && actionSprite != null)
+        if (actionIconImg != null)
         {
             actionIconImg.sprite = actionSprite;
             actionIconImg.color = Color.white;
@@ -725,7 +855,60 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             if (!actionIconImg.gameObject.activeSelf) actionIconImg.gameObject.SetActive(true);
         }
 
-        // 3. Tắt icon lốc xoáy cũ
+        // Đảm bảo ActionIcon nằm ngay trên nền (Sibling index 0)
+        actionIconT.SetSiblingIndex(0);
+
+        // 3. Khung viền đồng cổ rèn đúc Soulslike Runic Ring (Nằm phía trên viền ngoài icon)
+        Transform ringT = transform.Find("RunicRingFrame");
+        Image ringImg = null;
+        if (ringT == null)
+        {
+            GameObject ringGo = new GameObject("RunicRingFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            ringGo.transform.SetParent(transform, false);
+
+            RectTransform rRt = ringGo.GetComponent<RectTransform>();
+            rRt.anchorMin = Vector2.zero;
+            rRt.anchorMax = Vector2.one;
+            rRt.offsetMin = Vector2.zero;
+            rRt.offsetMax = Vector2.zero;
+
+            ringImg = ringGo.GetComponent<Image>();
+            ringImg.sprite = SoulslikeHUDStyler.GetActionButtonRingSprite();
+            ringImg.color = Color.white;
+            ringImg.raycastTarget = false;
+            ringT = ringGo.transform;
+        }
+        else
+        {
+            ringImg = ringT.GetComponent<Image>();
+            if (ringImg != null)
+            {
+                ringImg.sprite = SoulslikeHUDStyler.GetActionButtonRingSprite();
+                ringImg.color = Color.white;
+            }
+        }
+
+        // Đảm bảo Khung viền Runic Ring nằm ngay sau ActionIcon (Sibling index 1)
+        ringT.SetSiblingIndex(1);
+
+        // Đảm bảo CooldownOverlay nằm trên cùng của Icon và Ring
+        if (cooldownOverlay != null)
+        {
+            cooldownOverlay.transform.SetAsLastSibling();
+        }
+
+        // Đảm bảo CooldownText hiển thị rõ ràng trên CooldownOverlay
+        if (cooldownText != null)
+        {
+            cooldownText.transform.SetAsLastSibling();
+            if (isMage) cooldownText.color = new Color(0.9f, 0.5f, 1f, 1f);
+            else if (isAzure) cooldownText.color = new Color(0.6f, 0.95f, 1f, 1f);
+            else if (isRonin) cooldownText.color = new Color(0.4f, 1f, 0.8f, 1f);
+            else if (isDune) cooldownText.color = new Color(1f, 0.85f, 0.35f, 1f);
+            else cooldownText.color = new Color(1f, 0.9f, 0.35f, 1f);
+        }
+
+        // Tắt icon lốc xoáy cũ nếu có
         Transform iconT = transform.Find("SkillIcon");
         if (iconT != null)
         {
@@ -735,17 +918,19 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public static Sprite GetHeroActionIcon(string heroId, ButtonType btnType)
     {
-        string key = $"{heroId}_{btnType}";
+        string rawHero = heroId ?? "";
+        string lowerHero = rawHero.ToLowerInvariant();
+        string key = $"{lowerHero}_{btnType}";
         if (cachedHeroActionIcons.TryGetValue(key, out Sprite cached) && cached != null)
         {
             return cached;
         }
 
-        bool isTitan = (heroId.Contains("titan") || heroId.Contains("player4"));
-        bool isRonin = (heroId.Contains("ronin") || heroId.Contains("gale") || heroId.Contains("maid"));
-        bool isAzure = (heroId.Contains("azure") || heroId.Contains("player3"));
-        bool isDune = (heroId.Contains("dune") || heroId.Contains("player5"));
-        bool isMage = (heroId.Contains("mage") || heroId.Contains("player6") || heroId.Contains("celestial"));
+        bool isTitan = (lowerHero.Contains("titan") || lowerHero.Contains("player4"));
+        bool isRonin = (lowerHero.Contains("ronin") || lowerHero.Contains("gale") || lowerHero.Contains("maid") || lowerHero.Contains("player2"));
+        bool isAzure = (lowerHero.Contains("azure") || lowerHero.Contains("player3"));
+        bool isDune = (lowerHero.Contains("dune") || lowerHero.Contains("player5") || lowerHero.Contains("assassin"));
+        bool isMage = (lowerHero.Contains("mage") || lowerHero.Contains("player6") || lowerHero.Contains("celestial"));
 
         Sprite result = null;
 
@@ -1579,6 +1764,12 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         EnsureTargets();
         if (playerHealth != null && playerHealth.IsDead) return;
 
+        if (playerController != null && playerController.IsStunned)
+        {
+            StartCoroutine(ShakeButtonRoutine());
+            return;
+        }
+
         transform.localScale = originalScale * 0.85f;
         if (playerCombat != null)
         {
@@ -1651,6 +1842,12 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             return;
         }
 
+        if (playerController != null && playerController.IsStunned)
+        {
+            isPointerDown = false;
+            return;
+        }
+
         if (isPointerDown)
         {
             Vector2 delta = eventData.position - pointerDownPos;
@@ -1677,6 +1874,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
         EnsureTargets();
         if (playerHealth != null && playerHealth.IsDead) return;
+        if (playerController != null && playerController.IsStunned) return;
 
         bool isCancelled = false;
         if (SkillCancelZoneUI.Instance != null && SkillCancelZoneUI.Instance.gameObject.activeInHierarchy)

@@ -32,9 +32,14 @@ public class PlayerInventory : MonoBehaviour
     {
         AccountDatabase.EnsureActiveSessionLoaded();
 
-        // Trong trận đấu, hiển thị số linh hồn kiếm được trong trận (bắt đầu từ 0)
+        // Trong trận đấu, hiển thị số linh hồn kiếm được trong trận (bắt đầu từ 0 ở Map 1, giữ nguyên khi qua Map 2/3)
         if (IsBattleScene())
         {
+            string sName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (sName == "Map1_Thestart" || sName == "SampleScene")
+            {
+                currentRunShards = 0;
+            }
             aethelShards = currentRunShards;
         }
         else

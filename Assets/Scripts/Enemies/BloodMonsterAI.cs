@@ -12,20 +12,20 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     public bool IsBoss => isBoss;
 
     [Header("Base Stats")]
-    [SerializeField] public int maxHealth = 220;
+    [SerializeField] public int maxHealth = 130;
     [SerializeField] public int currentHealth;
-    [SerializeField] public int attackDamage = 22;
-    [SerializeField] public float moveSpeed = 3.6f;
+    [SerializeField] public int attackDamage = 13;
+    [SerializeField] public float moveSpeed = 3.4f;
     [SerializeField] public float detectionRange = 10f;
     [SerializeField] public float meleeRange = 1.4f;
     [SerializeField] public float rangedAttackRange = 7.5f;
-    [SerializeField] public float attackCooldown = 1.5f;
-    [SerializeField] public float projectileSpeed = 8.5f;
+    [SerializeField] public float attackCooldown = 1.6f;
+    [SerializeField] public float projectileSpeed = 8.0f;
 
     [Header("Boss 3-Phase Settings")]
     [SerializeField] public int totalBossPhases = 3;
     [SerializeField] public int currentBossPhase = 3; // 3: Normal -> 2: Enraged -> 1: Final Nightmare
-    [SerializeField] public int phaseMaxHealth = 1100;
+    [SerializeField] public int phaseMaxHealth = 520;
 
     // Cooldown timers
     private float attackTimer = 0f;
@@ -41,6 +41,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     // State flags
     private bool isAttacking = false;
     private bool isDead = false;
+    public bool IsDead => isDead;
     private bool isKnockedBack = false;
     private bool isTransitioningPhase = false;
     private bool isStunned = false;
@@ -88,6 +89,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
             cap.direction = CapsuleDirection2D.Vertical;
             enemyCol = cap;
         }
+        EnemyNavigationHelper.EnsureFrictionless(enemyCol);
 
         if (animator == null) animator = gameObject.AddComponent<Animator>();
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
@@ -214,6 +216,17 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+        // Đóng băng hoàn toàn AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
+        if (LevelUpChoiceUI.IsShowing)
+        {
+            rb.linearVelocity = Vector2.zero;
+            SetMoving(false);
+            HideWarningCone();
+            // Reset attack timer để không bắn ngay khi resume (cho 50% cooldown)
+            if (attackTimer < attackCooldown * 0.5f) attackTimer = attackCooldown * 0.5f;
+            return;
+        }
+
         if (PlayerHealth.IsPlayerDead)
         {
             rb.linearVelocity = Vector2.zero;
@@ -287,13 +300,15 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
             return;
         }
 
-        // 6. DUOI THEO PLAYER
-        rb.linearVelocity = dir * (isBoss ? moveSpeed * 1.15f : moveSpeed);
+        // 6. DUOI THEO PLAYER (tu dong luon lach qua vat can)
+        Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, enemyCol, isBoss ? 0.6f : 0.35f, 1.2f);
+        rb.linearVelocity = moveDir * (isBoss ? moveSpeed * 1.15f : moveSpeed);
         SetMoving(true);
     }
 
     void LateUpdate()
     {
+        if (LevelUpChoiceUI.IsShowing) return;
         ClampInsideRoomBounds();
     }
 
@@ -597,10 +612,15 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
                     dmg.TakeDamage(sd);
                     DamagePopup.Create(player.position + Vector3.up * 0.8f, sd, isPlayer: true);
 
-                    // Boss hoi phuc mau
-                    int healAmt = Mathf.RoundToInt(phaseMaxHealth * 0.045f);
+                    // Boss hoi phuc mau (neu dinh Vet Thuong Sau / Trai Tim Nut thi giam 50%)
+                    float healMult = GrievousWoundsDebuff.GetHealingMultiplier(gameObject);
+                    int healAmt = Mathf.RoundToInt(phaseMaxHealth * 0.045f * healMult);
                     currentHealth = Mathf.Min(currentHealth + healAmt, phaseMaxHealth);
                     DamagePopup.Create(transform.position + Vector3.up * 1.0f, healAmt, isPlayer: false);
+                    if (healMult < 0.95f)
+                    {
+                        DamagePopup.CreateText(transform.position + Vector3.up * 1.7f, LocalizationManager.T("-50% HỒI MÁU", "-50% HEAL"), new Color(1f, 0.25f, 0.45f));
+                    }
                     (BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance())?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
 
                     SoundManager.EnsureInstance()?.PlayHitImpact();
@@ -711,38 +731,16 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         }
     }
 
-    // Choáng Player: Khóa di chuyển và hiển thị sao choáng
+    // Choáng Player: Áp dụng Stun an toàn qua PlayerController
     private IEnumerator StunPlayerRoutine(Transform playerTransform, float duration)
     {
         if (playerTransform == null) yield break;
         var pCtrl = playerTransform.GetComponent<PlayerController>();
         if (pCtrl != null)
         {
-            pCtrl.SetCanMove(false);
-            pCtrl.enabled = false;
+            pCtrl.ApplyStun(duration);
         }
-
-        var pRb = playerTransform.GetComponent<Rigidbody2D>();
-        if (pRb != null) pRb.linearVelocity = Vector2.zero;
-
-        float elapsed = 0f;
-        while (elapsed < duration && playerTransform != null)
-        {
-            if (elapsed % 0.18f < Time.deltaTime)
-            {
-                float ang = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-                Vector3 starPos = playerTransform.position + new Vector3(Mathf.Cos(ang) * 0.45f, Mathf.Sin(ang) * 0.45f + 0.85f, 0);
-                DamagePopup.CreateText(starPos, "*", new Color(1f, 0.9f, 0.15f));
-            }
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        if (pCtrl != null)
-        {
-            pCtrl.enabled = true;
-            pCtrl.SetCanMove(true);
-        }
+        yield return new WaitForSeconds(duration);
     }
 
     // ===== ĐÒN ĐÁNH THƯỜNG / MELEE =====
@@ -854,6 +852,10 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     {
         if (isDead || isTransitioningPhase) return;
         currentHealth -= damage;
+        if (!isBoss)
+        {
+            EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
+        }
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.1f, 0.18f);
 
@@ -959,12 +961,34 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
 
         var co = GetComponent<Collider2D>();
         if (co != null) co.enabled = false;
+
+        // Đảm bảo trả lại quyền điều khiển cho người chơi
+        if (player != null)
+        {
+            var pCtrl = player.GetComponent<PlayerController>();
+            if (pCtrl != null)
+            {
+                pCtrl.enabled = true;
+                pCtrl.SetCanMove(true);
+            }
+        }
+
         Destroy(gameObject, 0.85f);
     }
 
     void OnDestroy()
     {
         if (warningZoneObj != null) Destroy(warningZoneObj);
+
+        if (player != null)
+        {
+            var pCtrl = player.GetComponent<PlayerController>();
+            if (pCtrl != null)
+            {
+                pCtrl.enabled = true;
+                pCtrl.SetCanMove(true);
+            }
+        }
     }
 
     // ===== SETUP / FACTORY =====
@@ -974,7 +998,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         transform.localScale = Vector3.one * scaleMultiplier;
         totalBossPhases = 3;
         currentBossPhase = 3;
-        phaseMaxHealth = MapScalingManager.ScaleHealth(1100);
+        phaseMaxHealth = MapScalingManager.ScaleHealth(520);
         currentHealth = phaseMaxHealth;
 
         int el = LayerMask.NameToLayer("Enemy");
@@ -988,7 +1012,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         cap.isTrigger = false;
         enemyCol = cap;
 
-        attackDamage *= damageMultiplier;
+        attackDamage = MapScalingManager.ScaleDamage(18);
         moveSpeed *= 1.15f;
         projectileSpeed *= 1.25f;
         meleeRange = 2.4f;

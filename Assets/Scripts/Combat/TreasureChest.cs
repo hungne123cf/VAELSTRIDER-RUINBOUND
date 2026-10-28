@@ -199,26 +199,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
             icon = potSpr
         });
 
-        // 3. Gems / Minerals
-        string[] mineralPool = new string[] { "gem_amethyst", "gem_bloodstone", "ore_forge_stone", "gem_jade", "gem_amber", "gem_sapphire" };
-        int dropCount = Random.Range(1, 3);
-        for (int i = 0; i < dropCount; i++)
-        {
-            string chosenId = mineralPool[Random.Range(0, mineralPool.Length)];
-            var def = InventoryItemDatabase.GetItem(chosenId);
-            if (def != null)
-            {
-                lootItems.Add(new ChestLootItem
-                {
-                    id = def.id,
-                    nameVi = def.nameVi,
-                    nameEn = def.nameEn,
-                    quantity = Random.Range(1, 3),
-                    rarity = def.rarity.ToString(),
-                    icon = def.Icon
-                });
-            }
-        }
+        // (Cơ chế đá/khoáng sản/item socket đã được loại bỏ hoàn toàn theo thiết kế mới, chỉ giữ lại Shards và Potion)
     }
 
     public List<ChestLootItem> GetLootItems()

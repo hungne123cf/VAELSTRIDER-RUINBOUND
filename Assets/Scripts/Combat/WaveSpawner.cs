@@ -16,7 +16,9 @@ public class WaveSpawner : MonoBehaviour
 
     private int currentWave = 0;
     private int aliveEnemies = 0;
+    private readonly HashSet<GameObject> currentWaveEnemies = new HashSet<GameObject>();
     private bool waveInProgress = false;
+    private bool isSpawningWave = false;
     private bool allWavesCleared = false;
     private System.Action currentRoomClearedCallback;
 
@@ -28,6 +30,8 @@ public class WaveSpawner : MonoBehaviour
 
     void Awake()
     {
+        totalWaves = 10;
+
         if (enemyPrefab == null)
         {
             var bot = FindAnyObjectByType<BotWheelAI>();
@@ -57,9 +61,9 @@ public class WaveSpawner : MonoBehaviour
         ValleyGolemBossAI.OnEnemyDied -= HandleValleyBossDied;
     }
 
-    private void HandleValleyBeastDied(ValleyBeastAI e) { HandleAnyEnemyDied(); }
-    private void HandleValleySpitterDied(ValleySpitterAI e) { HandleAnyEnemyDied(); }
-    private void HandleValleyBossDied(ValleyGolemBossAI e) { HandleAnyEnemyDied(); }
+    private void HandleValleyBeastDied(ValleyBeastAI e) { HandleAnyEnemyDied(e != null ? e.gameObject : null); }
+    private void HandleValleySpitterDied(ValleySpitterAI e) { HandleAnyEnemyDied(e != null ? e.gameObject : null); }
+    private void HandleValleyBossDied(ValleyGolemBossAI e) { HandleAnyEnemyDied(e != null ? e.gameObject : null); }
 
     void Start()
     {
@@ -82,19 +86,48 @@ public class WaveSpawner : MonoBehaviour
         StartNextWave();
     }
 
-    public void SpawnRoomEnemies(List<Vector3> spawnPositions, bool isBoss, System.Action onCleared)
+    public void SpawnRoomWave(int waveNumber, int totalWaveCount, string waveTitle, List<Vector3> spawnPositions, bool isBoss, System.Action onCleared)
     {
+        currentWave = waveNumber;
+        totalWaves = totalWaveCount;
         currentRoomClearedCallback = onCleared;
+        currentWaveEnemies.Clear();
         aliveEnemies = spawnPositions.Count;
         waveInProgress = true;
+        isSpawningWave = true;
 
+        OnWaveStarted?.Invoke(currentWave, totalWaves, waveTitle);
+        StartCoroutine(SpawnRoomEnemiesRoutine(spawnPositions, isBoss));
+    }
+
+    public void SpawnRoomEnemies(List<Vector3> spawnPositions, bool isBoss, System.Action onCleared)
+    {
+        string wavePrefix = LocalizationManager.Get("HUD_WAVE");
         currentWave++;
         string title = isBoss 
-            ? LocalizationManager.T("CẢNH BÁO: TRÙM TITAN WHEEL!", "BOSS INCOMING: TITAN WHEEL!") 
-            : $"{LocalizationManager.Get("HUD_WAVE")} {currentWave} / {totalWaves}";
-        OnWaveStarted?.Invoke(currentWave, totalWaves, title);
+            ? LocalizationManager.T($"CẢNH BÁO: TRÙM TITAN WHEEL! ({wavePrefix} {currentWave} / {totalWaves})", $"BOSS INCOMING: TITAN WHEEL! ({wavePrefix} {currentWave} / {totalWaves})") 
+            : $"{wavePrefix} {currentWave} / {totalWaves}";
 
-        StartCoroutine(SpawnRoomEnemiesRoutine(spawnPositions, isBoss));
+        SpawnRoomWave(currentWave, totalWaves, title, spawnPositions, isBoss, onCleared);
+    }
+
+    private void IgnorePlayerCollision(GameObject newEnemy)
+    {
+        if (newEnemy == null) return;
+        var player = FindAnyObjectByType<PlayerController>();
+        if (player != null)
+        {
+            var pCols = player.GetComponentsInChildren<Collider2D>();
+            var eCols = newEnemy.GetComponentsInChildren<Collider2D>();
+            foreach (var pCol in pCols)
+            {
+                foreach (var eCol in eCols)
+                {
+                    if (pCol != null && eCol != null)
+                        Physics2D.IgnoreCollision(pCol, eCol, true);
+                }
+            }
+        }
     }
 
     private IEnumerator SpawnRoomEnemiesRoutine(List<Vector3> spawnPositions, bool isBoss)
@@ -106,22 +139,9 @@ public class WaveSpawner : MonoBehaviour
             {
                 GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
                 newEnemy.SetActive(true);
+                currentWaveEnemies.Add(newEnemy);
 
-                // Bo qua va cham vat ly day nhau giua nguoi choi va quai
-                var player = FindAnyObjectByType<PlayerController>();
-                if (player != null)
-                {
-                    var pCols = player.GetComponentsInChildren<Collider2D>();
-                    var eCols = newEnemy.GetComponentsInChildren<Collider2D>();
-                    foreach (var pCol in pCols)
-                    {
-                        foreach (var eCol in eCols)
-                        {
-                            if (pCol != null && eCol != null)
-                                Physics2D.IgnoreCollision(pCol, eCol, true);
-                        }
-                    }
-                }
+                IgnorePlayerCollision(newEnemy);
 
                 if (isBoss)
                 {
@@ -133,39 +153,70 @@ public class WaveSpawner : MonoBehaviour
                 }
             }
 
-            yield return new WaitForSeconds(0.35f);
+            yield return new WaitForSeconds(0.25f);
+        }
+
+        aliveEnemies = currentWaveEnemies.Count;
+        isSpawningWave = false;
+
+        // Nếu tất cả quái đã bị hạ gục ngay trong lúc đang spawn
+        if (aliveEnemies <= 0 && waveInProgress)
+        {
+            CompleteCurrentWave();
         }
     }
 
     private void HandleBloodMonsterDied(BloodMonsterAI enemy)
     {
-        HandleAnyEnemyDied();
+        HandleAnyEnemyDied(enemy != null ? enemy.gameObject : null);
     }
 
     private void HandleEnemyDied(BotWheelAI enemy)
     {
-        HandleAnyEnemyDied();
+        HandleAnyEnemyDied(enemy != null ? enemy.gameObject : null);
     }
 
-    private void HandleAnyEnemyDied()
+    private void HandleAnyEnemyDied(GameObject enemyObj = null)
     {
-        aliveEnemies--;
-        Debug.Log($"<color=green>[SPAWNER]</color> Quái vật bị hạ gục! Còn lại trong phòng: {aliveEnemies}");
-
-        if (aliveEnemies <= 0 && waveInProgress)
+        if (enemyObj != null)
         {
-            waveInProgress = false;
+            // BẢO VỆ CHẶT CHẼ: Nếu quái vật chết KHÔNG thuộc đợt/phòng hiện tại (vd quái sót từ phòng cũ), bỏ qua không trừ điểm!
+            if (currentWaveEnemies.Count > 0 && !currentWaveEnemies.Contains(enemyObj))
+            {
+                Debug.Log($"<color=yellow>[SPAWNER]</color> Bỏ qua quái chết ngoại lai (không thuộc phòng hiện tại): {enemyObj.name}");
+                return;
+            }
+            currentWaveEnemies.Remove(enemyObj);
+            aliveEnemies = currentWaveEnemies.Count;
+        }
+        else
+        {
+            aliveEnemies = Mathf.Max(0, aliveEnemies - 1);
+        }
 
-            if (currentRoomClearedCallback != null)
-            {
-                var cb = currentRoomClearedCallback;
-                currentRoomClearedCallback = null;
-                cb.Invoke();
-            }
-            else
-            {
-                StartCoroutine(WaveCompletedRoutine());
-            }
+        Debug.Log($"<color=green>[SPAWNER]</color> Quái vật bị hạ gục! Còn lại trong phòng: {aliveEnemies} (Đang spawn: {isSpawningWave})");
+
+        if (!isSpawningWave && aliveEnemies <= 0 && waveInProgress)
+        {
+            CompleteCurrentWave();
+        }
+    }
+
+    private void CompleteCurrentWave()
+    {
+        currentWaveEnemies.Clear();
+        aliveEnemies = 0;
+        waveInProgress = false;
+
+        if (currentRoomClearedCallback != null)
+        {
+            var cb = currentRoomClearedCallback;
+            currentRoomClearedCallback = null;
+            cb.Invoke();
+        }
+        else
+        {
+            StartCoroutine(WaveCompletedRoutine());
         }
     }
 
@@ -173,7 +224,8 @@ public class WaveSpawner : MonoBehaviour
     {
         if (currentWave < totalWaves)
         {
-            OnWaveMessage?.Invoke(LocalizationManager.T($"HOÀN THÀNH ĐỢT {currentWave}!\nChuẩn bị cho đợt tiếp theo...", $"WAVE {currentWave} CLEARED!\nPrepare for next wave..."));
+            OnWaveMessage?.Invoke(LocalizationManager.T($"HOÀN THÀNH ĐỢT {currentWave} / {totalWaves}!\n+8 Mảnh Linh Hồn. Chuẩn bị cho đợt tiếp theo...", $"WAVE {currentWave} / {totalWaves} CLEARED!\n+8 Shards. Prepare for next wave..."));
+            AethelShard.SpawnShards(transform.position, 8);
             yield return new WaitForSeconds(timeBetweenWaves);
             StartNextWave();
         }
@@ -184,24 +236,51 @@ public class WaveSpawner : MonoBehaviour
             OnWaveMessage?.Invoke(LocalizationManager.T("CHIẾN THẮNG!\nTÀN TÍCH ĐÃ ĐƯỢC THANH TẨY!", "VICTORY!\nRUINS PURIFIED!"));
             OnAllWavesCleared?.Invoke();
 
-            AethelShard.SpawnShards(transform.position, 15);
+            AethelShard.SpawnShards(transform.position, 25);
             StartCoroutine(SpawnVictoryPortalRoutine());
         }
     }
 
     private IEnumerator SpawnVictoryPortalRoutine()
     {
+        while (ShadowDoppelgangerBoss.ActiveBoss != null && !ShadowDoppelgangerBoss.ActiveBoss.IsDead)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+
         yield return new WaitForSeconds(1.8f);
 
+        Vector3 portalPos = transform.position;
         var existingPortal = Object.FindAnyObjectByType<RuinPortal>(FindObjectsInactive.Include);
         if (existingPortal != null)
         {
             existingPortal.gameObject.SetActive(true);
             existingPortal.ActivatePortal();
+            portalPos = existingPortal.transform.position;
         }
         else
         {
-            RuinPortal.SpawnPortal(transform.position);
+            RuinPortal.SpawnPortal(portalPos);
+        }
+
+        // Xuất hiện Thương Nhân Tàn Tích (Wandering Merchant) bên cạnh Cổng Không Gian
+        WanderingMerchant.SpawnMerchant(portalPos + new Vector3(-3.0f, -0.4f, 0f));
+    }
+
+    private string GetMap2WaveTitle(int wave)
+    {
+        switch (wave)
+        {
+            case 1: return LocalizationManager.T("HUYẾT THÚ XUẤT HIỆN!", "BLOOD MONSTERS ARRIVE!");
+            case 2: return LocalizationManager.T("BẦY HUYẾT THÚ TĂNG CƯỜNG!", "REINFORCED BLOOD PACK!");
+            case 3: return LocalizationManager.T("QUÁI GAI ĐỘC THỨC TỈNH!", "VALLEY THORN SPITTERS AWAKEN!");
+            case 4: return LocalizationManager.T("HOÀNG THÚ CẬN CHIẾN XUẤT KÍCH!", "VALLEY BEASTS CHARGE!");
+            case 5: return LocalizationManager.T("ĐỢT QUÁI HỖN HỢP BÙNG NỔ!", "MIXED SWARM STRIKES!");
+            case 6: return LocalizationManager.T("MƯA GAI ĐỘC & BẦY HUYẾT THÚ!", "THORN VOLLEY & BLOOD HORDE!");
+            case 7: return LocalizationManager.T("BẦY HOÀNG THÚ CUỒNG LOẠN!", "FRENZIED VALLEY BEAST PACK!");
+            case 8: return LocalizationManager.T("BINH ĐOÀN THUNG LŨNG HUNG TỢN!", "ENRAGED VALLEY LEGION!");
+            case 9: return LocalizationManager.T("ĐỢT TẬP KÍCH CUỐI TRƯỚC HANG TRÙM!", "FINAL AMBUSH BEFORE THE LAIR!");
+            default: return LocalizationManager.T("QUÁI VẬT TẤN CÔNG!", "MONSTERS ATTACK!");
         }
     }
 
@@ -209,22 +288,22 @@ public class WaveSpawner : MonoBehaviour
     {
         currentWave++;
         waveInProgress = true;
+        isSpawningWave = true;
 
-        bool isMap2 = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Map2");
+        bool isMap2 = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Map2") ||
+                      UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Valley");
 
         string wavePrefix = LocalizationManager.Get("HUD_WAVE");
         string title = $"{wavePrefix} {currentWave} / {totalWaves}";
         if (currentWave == totalWaves)
         {
             title = isMap2 
-                ? LocalizationManager.T("CẢNH BÁO: ĐẠI TRÙM GOR'MOK!", "BOSS INCOMING: GOR'MOK!") 
-                : LocalizationManager.T("CẢNH BÁO: TRÙM TITAN WHEEL!", "BOSS INCOMING: TITAN WHEEL!");
+                ? LocalizationManager.T($"CẢNH BÁO: ĐẠI TRÙM GOR'MOK! ({wavePrefix} {currentWave} / {totalWaves})", $"BOSS INCOMING: GOR'MOK! ({wavePrefix} {currentWave} / {totalWaves})") 
+                : LocalizationManager.T($"CẢNH BÁO: TRÙM TITAN WHEEL! ({wavePrefix} {currentWave} / {totalWaves})", $"BOSS INCOMING: TITAN WHEEL! ({wavePrefix} {currentWave} / {totalWaves})");
         }
         else if (isMap2)
         {
-            title = (currentWave == 1) 
-                ? LocalizationManager.T("ĐỢT 1 / 3: HUYẾT THÚ XUẤT HIỆN!", "WAVE 1 / 3: BLOOD MONSTERS ARRIVE!") 
-                : LocalizationManager.T("ĐỢT 2 / 3: HUYẾT THÚ CUỒNG NỘ!", "WAVE 2 / 3: ENRAGED BLOOD MONSTERS!");
+            title = $"{wavePrefix} {currentWave} / {totalWaves}: " + GetMap2WaveTitle(currentWave);
         }
 
         OnWaveStarted?.Invoke(currentWave, totalWaves, title);
@@ -233,68 +312,91 @@ public class WaveSpawner : MonoBehaviour
 
     private IEnumerator SpawnWaveRoutine(int wave)
     {
-        bool isMap2 = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Map2");
+        bool isMap2 = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Map2") ||
+                      UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Valley");
 
-        int countToSpawn = 0;
         bool isBossWave = (wave == totalWaves);
+        currentWaveEnemies.Clear();
 
-        if (wave == 1) countToSpawn = isMap2 ? 3 : 2;
-        else if (wave == 2) countToSpawn = 4;
-        else if (isBossWave) countToSpawn = 1;
-
-        aliveEnemies = countToSpawn;
-
-        for (int i = 0; i < countToSpawn; i++)
+        if (isMap2)
         {
-            Vector3 spawnPos = GetSpawnPosition(i);
-
-            if (isMap2)
+            if (isBossWave)
             {
-                // Map 2: Su dung quai vat Blood Monster_A with shadows
-                if (isBossWave)
-                {
-                    BloodMonsterAI.Spawn(spawnPos, isBoss: true, index: 1);
-                }
-                else
-                {
-                    BloodMonsterAI.Spawn(spawnPos, isBoss: false, index: i + 1);
-                }
+                aliveEnemies = 1;
+                Vector3 spawnPos = GetSpawnPosition(0);
+                var bm = BloodMonsterAI.Spawn(spawnPos, isBoss: true, index: 1);
+                if (bm != null) currentWaveEnemies.Add(bm.gameObject);
             }
             else
             {
-                // Map 1: Dung quai goc BotWheel
+                int bloodCount = Mathf.Clamp(2 + (wave / 2), 3, 7);
+                int spitterCount = (wave >= 3) ? (wave >= 6 ? 2 : 1) : 0;
+                int beastCount = (wave >= 4) ? (wave >= 7 ? 2 : 1) : 0;
+                int totalEnemies = bloodCount + spitterCount + beastCount;
+                aliveEnemies = totalEnemies;
+
+                int spawnIdx = 0;
+                // 1. Spawn Blood Monsters
+                for (int i = 0; i < bloodCount; i++)
+                {
+                    Vector3 p = GetSpawnPosition(spawnIdx++);
+                    var bm = BloodMonsterAI.Spawn(p, isBoss: false, index: i + 1);
+                    if (bm != null) currentWaveEnemies.Add(bm.gameObject);
+                    yield return new WaitForSeconds(0.25f);
+                }
+
+                // 2. Spawn Valley Spitters
+                for (int i = 0; i < spitterCount; i++)
+                {
+                    Vector3 p = GetSpawnPosition(spawnIdx++);
+                    var sp = ValleySpitterAI.Spawn(p, i + 1);
+                    if (sp != null) currentWaveEnemies.Add(sp.gameObject);
+                    yield return new WaitForSeconds(0.25f);
+                }
+
+                // 3. Spawn Valley Beasts
+                for (int i = 0; i < beastCount; i++)
+                {
+                    Vector3 p = GetSpawnPosition(spawnIdx++);
+                    var vb = ValleyBeastAI.Spawn(p, i + 1);
+                    if (vb != null) currentWaveEnemies.Add(vb.gameObject);
+                    yield return new WaitForSeconds(0.25f);
+                }
+            }
+        }
+        else
+        {
+            // Map 1 hoặc Map khác
+            int countToSpawn = isBossWave ? 1 : Mathf.Clamp(2 + wave, 3, 9);
+            aliveEnemies = countToSpawn;
+
+            for (int i = 0; i < countToSpawn; i++)
+            {
+                Vector3 spawnPos = GetSpawnPosition(i);
                 if (enemyPrefab != null)
                 {
                     GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
                     newEnemy.SetActive(true);
+                    currentWaveEnemies.Add(newEnemy);
 
-                    var player = FindAnyObjectByType<PlayerController>();
-                    if (player != null)
-                    {
-                        var pCols = player.GetComponentsInChildren<Collider2D>();
-                        var eCols = newEnemy.GetComponentsInChildren<Collider2D>();
-                        foreach (var pCol in pCols)
-                        {
-                            foreach (var eCol in eCols)
-                            {
-                                if (pCol != null && eCol != null)
-                                    Physics2D.IgnoreCollision(pCol, eCol, true);
-                            }
-                        }
-                    }
+                    IgnorePlayerCollision(newEnemy);
 
                     if (isBossWave)
                     {
                         var ai = newEnemy.GetComponent<BotWheelAI>();
-                        if (ai != null)
-                        {
-                            ai.SetupBoss(1.85f, 3, 2);
-                        }
+                        if (ai != null) ai.SetupBoss(1.85f, 3, 2);
                     }
                 }
+                yield return new WaitForSeconds(0.25f);
             }
+        }
 
-            yield return new WaitForSeconds(0.4f);
+        aliveEnemies = currentWaveEnemies.Count;
+        isSpawningWave = false;
+
+        if (aliveEnemies <= 0 && waveInProgress)
+        {
+            CompleteCurrentWave();
         }
     }
 

@@ -264,12 +264,21 @@ public class SwordWaveProjectile : MonoBehaviour
                 float mult = isCrit ? 1.75f : 1.0f;
                 int finalDamage = Mathf.RoundToInt(damage * mult);
 
+                // Khuếch đại sát thương từ các nguồn debuff / Lõi Nâng Cấp (Độc Ăn Mòn +20%, Vết Thương Sâu, Diệt Khổng Lồ...) và giảm qua Kháng Phép
+                finalDamage = AugmentManager.ProcessOutgoingDamage(combat != null ? combat.gameObject : null, hitObj, finalDamage, DamageType.Magic);
+
                 damageable.TakeDamage(finalDamage);
 
                 // Giảm 50% thời gian hồi chiêu và hồi phục Năng Lượng / Nội Năng khi chém trúng quái vật thực sự
                 bool isProp = (hitObj.GetComponent<BreakableProp>() != null || hitObj.GetComponentInParent<BreakableProp>() != null || hitObj.GetComponent<TreasureChest>() != null || hitObj.GetComponentInParent<TreasureChest>() != null);
                 if (!isProp)
                 {
+                    // Găm hiệu ứng Vết Thương Sâu (Trái Tim Nứt) giảm 50% hồi máu & hút máu của địch trong 5.0s
+                    GrievousWoundsDebuff.Apply(hitObj, duration: 5.0f, healReduction: 0.50f, bonusDamage: 0.20f);
+
+                    // Kích hoạt toàn bộ hiệu ứng On-Hit của Lõi Nâng Cấp (Độc Ăn Mòn, Lôi Đình Song Trảm, Vọng Âm Tinh Tú...)
+                    AugmentManager.TriggerOnHitAugments(combat != null ? combat.gameObject : null, hitObj, finalDamage, damageable);
+
                     if (ownerSkill != null)
                     {
                         ownerSkill.OnWaveHitEnemy(finalDamage, isChargedWave, isUltiWave);

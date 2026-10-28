@@ -105,9 +105,44 @@ public class GameOverUI : MonoBehaviour
         bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
 
         if (titleText != null) 
+        {
             titleText.text = isVi ? "CHUYẾN PHIÊU LƯU KẾT THÚC" : "EXPEDITION FAILED";
+            titleText.enableWordWrapping = false;
+            titleText.enableAutoSizing = true;
+            titleText.fontSizeMin = 20f;
+            titleText.fontSizeMax = 28f;
+            var rt = titleText.rectTransform;
+            if (rt != null)
+            {
+                rt.sizeDelta = new Vector2(620f, 40f);
+                rt.anchoredPosition = new Vector2(0f, 172f);
+            }
+
+            Transform titleBox = titleText.transform.parent;
+            if (titleBox != null)
+            {
+                var leftWing = titleBox.Find("TitleLeftWing");
+                if (leftWing != null) leftWing.gameObject.SetActive(false);
+                var rightWing = titleBox.Find("TitleRightWing");
+                if (rightWing != null) rightWing.gameObject.SetActive(false);
+                var titleDiv = titleBox.Find("TitleDivider");
+                if (titleDiv != null)
+                {
+                    var divRt = titleDiv.GetComponent<RectTransform>();
+                    if (divRt != null) divRt.anchoredPosition = new Vector2(0f, 142f);
+                }
+            }
+        }
         if (subtitleText != null) 
+        {
             subtitleText.text = isVi ? "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này." : "Your journey ends here. Battle levels and augments only exist within this run.";
+            var sRt = subtitleText.rectTransform;
+            if (sRt != null)
+            {
+                sRt.sizeDelta = new Vector2(620f, 32f);
+                sRt.anchoredPosition = new Vector2(0f, 110f);
+            }
+        }
 
         // Game 1 mạng: Ẩn nút Respawn hồi sinh tại chỗ
         if (respawnButton != null)
@@ -115,16 +150,14 @@ public class GameOverUI : MonoBehaviour
             respawnButton.gameObject.SetActive(false);
         }
 
-        // Run Summary: Hiển thị cấp độ, số lõi nâng cấp và linh hồn thu thập được
+        // Run Summary: Chỉ hiển thị linh hồn thu thập được trong trận đấu hiện tại
         if (respawnStatusText != null)
         {
-            int lv = PlayerLevelSystem.Instance != null ? PlayerLevelSystem.Instance.CurrentLevel : 1;
-            int augCount = AugmentManager.Instance != null ? AugmentManager.Instance.SelectedAugmentCount : 0;
-            long shards = AccountDatabase.GetAethelShards();
+            long shards = PlayerInventory.GetCurrentRunShards();
 
             respawnStatusText.text = isVi 
-                ? $"<color=#FFD700><b>CẤP ĐẠT ĐƯỢC: {lv}</b></color>  |  <color=#38BDF8><b>LÕI NÂNG CẤP: {augCount}</b></color>  |  <color=#00FFFF><b>LINH HỒN: {shards:N0}</b></color>"
-                : $"<color=#FFD700><b>REACHED LEVEL: {lv}</b></color>  |  <color=#38BDF8><b>AUGMENTS: {augCount}</b></color>  |  <color=#00FFFF><b>AETHEL SHARDS: {shards:N0}</b></color>";
+                ? $"<color=#00FFFF><b>LINH HỒN: {shards:N0}</b></color>"
+                : $"<color=#00FFFF><b>AETHEL SHARDS: {shards:N0}</b></color>";
             respawnStatusText.color = Color.white;
         }
 
@@ -136,7 +169,7 @@ public class GameOverUI : MonoBehaviour
         }
         if (restartBtnText != null)
         {
-            restartBtnText.text = isVi ? "HỒI SINH & CHƠI LẠI RUN MỚI (MAP 1)" : "REVIVE & START NEW RUN (MAP 1)";
+            restartBtnText.text = isVi ? "HỒI SINH & CHƠI LẠI RUN MỚI" : "REVIVE & START NEW RUN";
             if (restartButton != null)
             {
                 WhiteIconLoader.SetButtonIconAndText(restartButton, "Repeat-Right", restartBtnText.text, new Color(1f, 0.85f, 0.35f), Color.white, true);
@@ -152,7 +185,7 @@ public class GameOverUI : MonoBehaviour
         }
         if (mainMenuBtnText != null)
         {
-            mainMenuBtnText.text = isVi ? "VỀ SẢNH CHÍNH (SANCTUARY)" : "RETURN TO SANCTUARY";
+            mainMenuBtnText.text = isVi ? "VỀ SẢNH CHÍNH" : "RETURN TO SANCTUARY";
             if (mainMenuButton != null)
             {
                 WhiteIconLoader.SetButtonIconAndText(mainMenuButton, "Home", mainMenuBtnText.text, new Color(0.4f, 0.85f, 1f), Color.white, true);
@@ -249,10 +282,14 @@ public class GameOverUI : MonoBehaviour
         }
         AccountDatabase.SaveActiveSessionToDatabase();
 
+        CorruptedCycleManager.ResetToNormalCycle();
         PlayerInventory.ResetRunShards();
         PlayerLevelSystem.Instance?.ResetForNewBattle();
         AugmentManager.Instance?.ResetForNewBattle();
         LevelUpChoiceUI.ResetUI();
+        LevelUpChoiceUI.ResetMatchRerolls();
+        MatchTimerUI.ResetRunTimer();
+        PlayerHealth.ResetRunPreservedHealth();
 
         Debug.Log("<color=cyan>[RESTART MAP]</color> Bat dau run moi tu dau (Map 1 - Level 1)!");
         if (Application.CanStreamedLevelBeLoaded("Map1_Thestart"))
@@ -280,37 +317,32 @@ public class GameOverUI : MonoBehaviour
         }
         AccountDatabase.SaveActiveSessionToDatabase();
 
+        CorruptedCycleManager.ResetToNormalCycle();
         PlayerInventory.ResetRunShards();
         PlayerLevelSystem.Instance?.ResetForNewBattle();
         AugmentManager.Instance?.ResetForNewBattle();
         LevelUpChoiceUI.ResetUI();
+        LevelUpChoiceUI.ResetMatchRerolls();
+        MatchTimerUI.ResetRunTimer();
+        PlayerHealth.ResetRunPreservedHealth();
 
         Debug.Log("<color=cyan>[MAIN MENU]</color> Tro ve MainMenuScene voi toan bo Linh Hon thu thap duoc...");
         SceneManager.LoadScene("MainMenuScene");
     }
 
     /// <summary>
-    /// Thoat ve trang dang nhap
+    /// Thoát về sảnh chính (Game Offline thuần túy)
     /// </summary>
     public void OnExitToLoginClicked()
     {
-        RespawnsUsedInCurrentMap = 0;
-        Time.timeScale = 1f;
-
-        var inv = UnityEngine.Object.FindAnyObjectByType<PlayerInventory>();
-        if (inv != null)
-        {
-            inv.SaveData();
-        }
-        AccountDatabase.SaveActiveSessionToDatabase();
-
-        Debug.Log("<color=yellow>[EXIT]</color> Tro ve trang LoginScene (Giu nguyen linh hon/Shards)...");
-        SceneManager.LoadScene("LoginScene");
+        OnReturnToMainMenuClicked();
     }
 
     // ─── Asset Loaders ─────────────────────────────────────────────────────────
     private static Sprite GetFrameSprite()
     {
+        if (_frameSprite != null) return _frameSprite;
+        _frameSprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
         if (_frameSprite != null) return _frameSprite;
 
 #if UNITY_EDITOR
@@ -350,6 +382,8 @@ public class GameOverUI : MonoBehaviour
 
     private static Sprite GetDividerSprite()
     {
+        if (_dividerSprite != null) return _dividerSprite;
+        _dividerSprite = SoulslikeHUDStyler.GetGothicDividerSprite();
         if (_dividerSprite != null) return _dividerSprite;
 
 #if UNITY_EDITOR
@@ -445,57 +479,43 @@ public class GameOverUI : MonoBehaviour
         boxRect.anchoredPosition = Vector2.zero;
 
         Image boxBg = boxObj.GetComponent<Image>();
-        boxBg.color = ColorBoxBg;
+        boxBg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        boxBg.type = Image.Type.Sliced;
+        boxBg.color = Color.white;
 
-        // Khung viền Gothic bao quanh CenterBox
-        GameObject boxFrame = new GameObject("FrameBorder", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        boxFrame.layer = 5;
-        boxFrame.transform.SetParent(boxObj.transform, false);
-        RectTransform frameRt = boxFrame.GetComponent<RectTransform>();
-        frameRt.anchorMin = Vector2.zero;
-        frameRt.anchorMax = Vector2.one;
-        frameRt.offsetMin = Vector2.zero;
-        frameRt.offsetMax = Vector2.zero;
-
-        Image frameImg = boxFrame.GetComponent<Image>();
-        frameImg.sprite = GetFrameSprite();
-        frameImg.type = Image.Type.Sliced;
-        frameImg.pixelsPerUnitMultiplier = 0.40f;
-        frameImg.color = ColorBoxFrame;
-        frameImg.raycastTarget = false;
-
-        // ─── Title: EXPEDITION FAILED ──────────────────────────────────────────
+        // ─── Title: YOU DIED / NGƯƠI ĐÃ TỬ TRẬN ──────────────────────────────────────────
         GameObject titleObj = new GameObject("Title", typeof(RectTransform));
         titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRect = titleObj.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, 168);
-        titleRect.sizeDelta = new Vector2(500, 50);
+        titleRect.anchoredPosition = new Vector2(0, 172);
+        titleRect.sizeDelta = new Vector2(620, 44);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = "CHUYẾN PHIÊU LƯU KẾT THÚC";
-        titleTmp.fontSize = 35;
+        titleTmp.text = LocalizationManager.T("NGƯƠI ĐÃ TỬ TRẬN", "YOU DIED");
+        titleTmp.fontSize = 32;
+        titleTmp.enableAutoSizing = true;
+        titleTmp.fontSizeMin = 24;
+        titleTmp.fontSizeMax = 34;
+        titleTmp.enableWordWrapping = false;
         titleTmp.fontStyle = FontStyles.Bold;
-        titleTmp.color = new Color(0.95f, 0.28f, 0.32f);
+        titleTmp.color = new Color(0.78f, 0.12f, 0.12f); // Deep blood ruby Soulslike
         titleTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.35f, Color.black);
         Instance.titleText = titleTmp;
 
-        // Title Flanking Wings
-        CreateDividerWing(boxObj.transform, "TitleLeftWing", new Vector2(-260, 168), new Vector2(90, 14), new Color(0.95f, 0.35f, 0.38f, 0.75f), false);
-        CreateDividerWing(boxObj.transform, "TitleRightWing", new Vector2(260, 168), new Vector2(90, 14), new Color(0.95f, 0.35f, 0.38f, 0.75f), true);
-
-        // Title Bottom Symmetric Divider
-        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 138), new Vector2(540, 12), new Color(0.55f, 0.60f, 0.70f, 0.65f));
+        // Title Bottom Symmetric Divider (No overlapping flanking wings)
+        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 142), new Vector2(540, 12), new Color(1f, 0.9f, 0.65f, 0.85f));
 
         // ─── Subtitle ──────────────────────────────────────────────────────────
         GameObject subObj = new GameObject("Subtitle", typeof(RectTransform));
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRect = subObj.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 104);
-        subRect.sizeDelta = new Vector2(580, 35);
+        subRect.anchoredPosition = new Vector2(0, 110);
+        subRect.sizeDelta = new Vector2(620, 32);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
-        subTmp.text = "Sinh mệnh đã cạn. Cấp độ và các lõi nâng cấp chỉ lưu giữ trong chuyến đi này.";
-        subTmp.fontSize = 15;
+        subTmp.text = "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này.";
+        subTmp.fontSize = 14.5f;
         subTmp.color = new Color(0.75f, 0.78f, 0.86f);
         subTmp.alignment = TextAlignmentOptions.Center;
         Instance.subtitleText = subTmp;
@@ -505,27 +525,28 @@ public class GameOverUI : MonoBehaviour
         statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
         RectTransform statusRect = statusObj.GetComponent<RectTransform>();
-        statusRect.anchoredPosition = new Vector2(0, 52);
-        statusRect.sizeDelta = new Vector2(600, 36);
+        statusRect.anchoredPosition = new Vector2(0, 58);
+        statusRect.sizeDelta = new Vector2(620, 34);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
-        statusTmp.fontSize = 15.5f;
+        statusTmp.fontSize = 18f;
         statusTmp.fontStyle = FontStyles.Bold;
         statusTmp.alignment = TextAlignmentOptions.Center;
         Instance.respawnStatusText = statusTmp;
 
         // Section Divider before buttons
-        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, 20), new Vector2(540, 10), ColorDividerLine);
+        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, 22), new Vector2(540, 10), ColorDividerLine);
 
         // ─── 1. Button: START NEW RUN (LEVEL 1) ────────────────────────────────
-        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI (MAP 1)",
-            new Vector2(0, -32), new Vector2(520, 54), ColorBtnRestartBg, ColorBtnFrame, 18, out Instance.restartBtnText);
+        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI",
+            new Vector2(0, -34), new Vector2(520, 54), ColorBtnRestartBg, ColorBtnFrame, 18, out Instance.restartBtnText);
 
         // ─── 2. Button: RETURN TO SANCTUARY ────────────────────────────────────
-        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH (SANCTUARY)",
-            new Vector2(0, -100), new Vector2(520, 54), ColorBtnMainMenuBg, ColorBtnFrame, 18, out Instance.mainMenuBtnText);
+        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH",
+            new Vector2(0, -104), new Vector2(520, 54), ColorBtnMainMenuBg, ColorBtnFrame, 18, out Instance.mainMenuBtnText);
 
-        // Đảm bảo khung ngoài của CenterBox luôn hiển thị trên cùng không bị che
-        boxFrame.transform.SetAsLastSibling();
+        // Đảm bảo khung ngoài của CenterBox nếu có luôn hiển thị trên cùng
+        Transform frame = boxObj.transform.Find("FrameBorder");
+        if (frame != null) frame.SetAsLastSibling();
 
         return Instance;
     }
@@ -541,34 +562,19 @@ public class GameOverUI : MonoBehaviour
         rt.sizeDelta = size;
 
         var img = obj.GetComponent<Image>();
-        img.color = bgColor;
+        img.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        img.type = Image.Type.Sliced;
+        img.color = Color.white;
 
         var btn = obj.GetComponent<Button>();
         btn.targetGraphic = img;
 
         var colors = btn.colors;
-        colors.normalColor = bgColor;
-        colors.highlightedColor = new Color(bgColor.r + 0.08f, bgColor.g + 0.09f, bgColor.b + 0.12f, 1f);
-        colors.pressedColor = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 1f);
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
+        colors.pressedColor = new Color(0.75f, 0.75f, 0.75f, 1f);
         colors.selectedColor = colors.highlightedColor;
         btn.colors = colors;
-
-        // Khung viền Gothic cho button
-        var frameObj = new GameObject("FrameBorder", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        frameObj.layer = 5;
-        frameObj.transform.SetParent(obj.transform, false);
-        var frameRt = frameObj.GetComponent<RectTransform>();
-        frameRt.anchorMin = Vector2.zero;
-        frameRt.anchorMax = Vector2.one;
-        frameRt.offsetMin = Vector2.zero;
-        frameRt.offsetMax = Vector2.zero;
-
-        var frameImg = frameObj.GetComponent<Image>();
-        frameImg.sprite = GetFrameSprite();
-        frameImg.type = Image.Type.Sliced;
-        frameImg.pixelsPerUnitMultiplier = 0.65f;
-        frameImg.color = frameColor;
-        frameImg.raycastTarget = false;
 
         GameObject txtObj = new GameObject("Text", typeof(RectTransform));
         txtObj.layer = 5;
@@ -584,11 +590,11 @@ public class GameOverUI : MonoBehaviour
         btnTxt.text = text;
         btnTxt.fontSize = fontSize;
         btnTxt.fontStyle = FontStyles.Bold;
-        btnTxt.color = Color.white;
+        btnTxt.color = new Color(0.96f, 0.88f, 0.65f, 1f); // Vàng kim cổ điển
         btnTxt.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(btnTxt, 0.35f, Color.black);
         btnTxt.raycastTarget = false;
 
-        frameObj.transform.SetAsLastSibling();
         return btn;
     }
 

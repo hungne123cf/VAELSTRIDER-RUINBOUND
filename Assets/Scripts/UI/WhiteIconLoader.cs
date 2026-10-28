@@ -277,10 +277,15 @@ public static class WhiteIconLoader
     private static Sprite _frameBorderSprite;
 
     /// <summary>
-    /// Lấy Sprite khung viền Gothic (frame_gothic_border.png 9-slice) dùng thống nhất cho toàn bộ modal trong game
+    /// <summary>
+    /// Lấy Sprite khung viền Gothic (frame_gothic_border.png 9-slice rỗng ở giữa) dùng làm viền nổi cho các panel/card
     /// </summary>
     public static Sprite GetFrameBorderSprite()
     {
+        if (_frameBorderSprite != null) return _frameBorderSprite;
+
+        // Ưu tiên tải viền rỗng ở giữa (frame_gothic_border.png) để không che tối nội dung bên dưới
+        _frameBorderSprite = Resources.Load<Sprite>("UI/frame_gothic_border");
         if (_frameBorderSprite != null) return _frameBorderSprite;
 
 #if UNITY_EDITOR
@@ -291,8 +296,9 @@ public static class WhiteIconLoader
         string[] candidates = new string[]
         {
             Path.Combine(Application.dataPath, "Sprites/UI/frame_gothic_border.png"),
+            Path.Combine(Application.dataPath, "Resources/UI/frame_gothic_border.png"),
             Path.Combine(Application.dataPath, "ART/UI/Default/Border/panel-border-004.png"),
-            Path.Combine(Application.dataPath, "Resources/UI/frame_gothic_border.png")
+            Path.Combine(Application.dataPath, "Sprites/UI/Soulslike/Dark_Fantasy_Panel_Bg.png")
         };
 
         foreach (var p in candidates)
@@ -308,7 +314,7 @@ public static class WhiteIconLoader
                         tex.filterMode = FilterMode.Point;
                         tex.wrapMode = TextureWrapMode.Clamp;
                         _frameBorderSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
-                            new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(14, 14, 14, 14));
+                            new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(12, 12, 12, 12));
                         break;
                     }
                 }
@@ -322,11 +328,18 @@ public static class WhiteIconLoader
     private static Sprite _dividerFadeSprite;
 
     /// <summary>
-    /// Lấy Sprite thanh divider cổ kính phai dần (divider_fade_004.png)
+    /// Lấy Sprite thanh divider cổ kính Gothic Filigree (Gothic_Filigree_Divider.png)
     /// </summary>
     public static Sprite GetDividerFadeSprite()
     {
         if (_dividerFadeSprite != null) return _dividerFadeSprite;
+
+        Sprite soulslikeDiv = SoulslikeHUDStyler.GetGothicDividerSprite();
+        if (soulslikeDiv != null)
+        {
+            _dividerFadeSprite = soulslikeDiv;
+            return _dividerFadeSprite;
+        }
 
 #if UNITY_EDITOR
         _dividerFadeSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/divider_fade_004.png");
@@ -335,6 +348,8 @@ public static class WhiteIconLoader
 
         string[] candidates = new string[]
         {
+            Path.Combine(Application.dataPath, "Sprites/UI/Soulslike/Gothic_Filigree_Divider.png"),
+            Path.Combine(Application.dataPath, "Resources/UI/Soulslike/Gothic_Filigree_Divider.png"),
             Path.Combine(Application.dataPath, "Sprites/UI/divider_fade_004.png"),
             Path.Combine(Application.dataPath, "ART/UI/Default/Divider Fade/divider-fade-004.png"),
             Path.Combine(Application.dataPath, "Resources/UI/divider_fade_004.png")
@@ -504,7 +519,7 @@ public static class WhiteIconLoader
         img.sprite = GetFrameBorderSprite();
         img.type = Image.Type.Sliced;
         img.pixelsPerUnitMultiplier = pixelsMultiplier;
-        img.color = frameColor ?? new Color(0.85f, 0.72f, 0.38f, 0.90f);
+        img.color = frameColor ?? Color.white;
         img.raycastTarget = false;
 
         return img;

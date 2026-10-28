@@ -12,16 +12,16 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     public bool IsBoss => isBoss;
 
     [Header("Enemy Stats")]
-    [SerializeField] private int maxHealth = 320; // Quai thuong mau trau hon (320 HP)
-    [SerializeField] private float moveSpeed = 3.2f;
-    [SerializeField] private int attackDamage = 28;
-    [SerializeField] private float attackCooldown = 1.8f;
+    [SerializeField] private int maxHealth = 110; // Quai thuong can bang (110 HP)
+    [SerializeField] private float moveSpeed = 3.0f;
+    [SerializeField] private int attackDamage = 11;
+    [SerializeField] private float attackCooldown = 2.0f;
 
     [Header("Boss 3 Health Bars")]
     public int totalBossPhases = 3;
     private int currentBossPhase = 3;
     public int CurrentBossPhase => currentBossPhase;
-    private int phaseMaxHealth = 950;
+    private int phaseMaxHealth = 420;
     private bool isTransitioningPhase = false;
 
     [Header("Boss Clone & Teleport Mechanics")]
@@ -79,6 +79,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        EnemyNavigationHelper.EnsureFrictionless(enemyCol);
 
         // Dam bao tam ban va phat hien luon du tam tam xa
         if (attackRange < 4.5f) attackRange = 5.2f;
@@ -145,6 +146,16 @@ public class BotWheelAI : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+        // Đóng băng hoàn toàn AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
+        if (LevelUpChoiceUI.IsShowing)
+        {
+            rb.linearVelocity = Vector2.zero;
+            SetMoving(false);
+            // Reset cooldown để kẻ địch KHÔNG bắn ngay khi màn hình đóng lại
+            attackCooldownTimer = attackCooldown * 0.5f;
+            return;
+        }
+
         if (PlayerHealth.IsPlayerDead)
         {
             rb.linearVelocity = Vector2.zero;
@@ -204,9 +215,10 @@ public class BotWheelAI : MonoBehaviour, IDamageable
             return;
         }
 
-        // 3. Trong tam phat hien nhung chua toi tam ban -> Tiep can nguoi choi
+        // 3. Trong tam phat hien nhung chua toi tam ban -> Tiep can nguoi choi (luon lach qua vat can)
         Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
-        rb.linearVelocity = dir * moveSpeed;
+        Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, enemyCol, 0.35f, 1.0f);
+        rb.linearVelocity = moveDir * moveSpeed;
         SetMoving(true);
 
         if (spriteRenderer != null)
@@ -218,6 +230,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
     void LateUpdate()
     {
+        if (LevelUpChoiceUI.IsShowing) return;
         ClampInsideRoomBounds();
     }
 
@@ -349,6 +362,10 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         }
 
         currentHealth -= damage;
+        if (!isBoss)
+        {
+            EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
+        }
 
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.12f, 0.2f);
@@ -509,17 +526,33 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         if (!isClone)
         {
-            OnEnemyDied?.Invoke(this);
-
-            // Tiêu diệt toàn bộ phân thân còn lại khi trùm thật bị tiêu diệt
+            // 1. Tiêu diệt toàn bộ phân thân còn lại NGAY LẬP TỨC trước khi thông báo kết thúc phòng
             foreach (var clone in activeClones)
             {
                 if (clone != null && !clone.isDead)
                 {
+                    clone.isDead = true;
                     clone.Die();
                 }
             }
             activeClones.Clear();
+
+            // 2. Thông báo đợt quái / Spawner
+            OnEnemyDied?.Invoke(this);
+
+            // 3. Thông báo Room Manager kết thúc đại điện Boss
+            if (isBoss)
+            {
+                var roomMgr = DungeonRoomManager.Instance ?? FindAnyObjectByType<DungeonRoomManager>();
+                if (roomMgr != null)
+                {
+                    var bossRoom = roomMgr.rooms.Find(r => r != null && r.roomType == DungeonRoom.RoomType.TitanSanctum) ?? roomMgr.currentRoom;
+                    if (bossRoom != null)
+                    {
+                        roomMgr.OnBossDefeated(bossRoom);
+                    }
+                }
+            }
         }
 
         if (isBoss && !isClone)
@@ -545,15 +578,15 @@ public class BotWheelAI : MonoBehaviour, IDamageable
         initialSpawnPosition = transform.position;
         transform.localScale = transform.localScale * scaleMultiplier;
 
-        // Hệ thống 3 thanh máu: Mỗi thanh 950 HP (scale theo Map)
+        // Hệ thống 3 thanh máu: Mỗi thanh 420 HP (scale theo Map)
         totalBossPhases = 3;
         currentBossPhase = 3;
-        phaseMaxHealth = MapScalingManager.ScaleHealth(950);
+        phaseMaxHealth = MapScalingManager.ScaleHealth(420);
         currentHealth = phaseMaxHealth;
 
-        attackDamage *= damageMultiplier;
+        attackDamage = MapScalingManager.ScaleDamage(16);
         moveSpeed *= 0.95f;
-        projectileSpeed *= 1.25f;
+        projectileSpeed *= 1.15f;
         attackRange = 7.0f;
         detectionRange = 12.0f;
 

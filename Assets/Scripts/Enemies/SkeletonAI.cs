@@ -7,13 +7,13 @@ public class SkeletonAI : MonoBehaviour, IDamageable
     public static event System.Action<SkeletonAI> OnEnemyDied;
 
     [Header("Skeleton Stats")]
-    [SerializeField] private int maxHealth = 240;
+    [SerializeField] private int maxHealth = 115;
     [SerializeField] private int currentHealth;
-    [SerializeField] private int attackDamage = 24;
-    [SerializeField] private float moveSpeed = 3.2f;
+    [SerializeField] private int attackDamage = 6;
+    [SerializeField] private float moveSpeed = 3.0f;
     [SerializeField] private float detectionRange = 100f; // Luon phat hien va truy duoi
     [SerializeField] private float meleeRange = 1.65f;
-    [SerializeField] private float attackCooldown = 1.3f;
+    [SerializeField] private float attackCooldown = 1.6f;
 
     private Transform player;
     private Rigidbody2D rb;
@@ -48,9 +48,11 @@ public class SkeletonAI : MonoBehaviour, IDamageable
 
         if (col != null)
         {
-            col.size = new Vector2(0.9f, 2.0f);
-            col.offset = new Vector2(0f, 1.0f);
+            // Top-down 2D standard: chỉ bao bọc phần chân đế để không bị cấn đầu/vai vào prop
+            col.size = new Vector2(0.6f, 0.7f);
+            col.offset = new Vector2(0f, 0.35f);
             col.isTrigger = false;
+            EnemyNavigationHelper.EnsureFrictionless(col);
         }
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
@@ -120,20 +122,9 @@ public class SkeletonAI : MonoBehaviour, IDamageable
         else
         {
             Vector2 dir = (player.position - transform.position).normalized;
-            rb.linearVelocity = dir * moveSpeed;
+            Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, col, 0.35f, 1.0f);
+            rb.linearVelocity = moveDir * moveSpeed;
             if (animator != null) animator.SetBool(IsMovingHash, true);
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (isDead || isKnockedBack || isAttacking || player == null || PlayerHealth.IsPlayerDead) return;
-
-        float dist = Vector2.Distance(transform.position, player.position);
-        if (dist > meleeRange)
-        {
-            Vector2 dir = ((Vector2)player.position - rb.position).normalized;
-            rb.MovePosition(rb.position + dir * moveSpeed * Time.fixedDeltaTime);
         }
     }
 
@@ -167,6 +158,7 @@ public class SkeletonAI : MonoBehaviour, IDamageable
         if (isDead) return;
 
         currentHealth -= damage;
+        EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
         StartCoroutine(DamageFlashRoutine());
 
         if (player != null && !isKnockedBack)
@@ -220,4 +212,17 @@ public class SkeletonAI : MonoBehaviour, IDamageable
         OnEnemyDied?.Invoke(this);
         Destroy(gameObject, 0.75f);
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        var c = GetComponent<CapsuleCollider2D>();
+        if (c != null && (c.size.y > 1.0f || c.offset.y > 0.6f))
+        {
+            c.size = new Vector2(0.6f, 0.7f);
+            c.offset = new Vector2(0f, 0.35f);
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+    }
+#endif
 }

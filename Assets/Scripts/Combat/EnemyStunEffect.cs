@@ -189,6 +189,12 @@ public class EnemyStunEffect : MonoBehaviour
                 hasCenterX = true;
             }
 
+            // Bỏ qua nếu bounds SpriteRenderer quá lớn so với Collider do khung ảnh trong suốt
+            if (mainCol != null && !mainCol.isTrigger && sr.bounds.max.y > mainCol.bounds.max.y + 0.6f)
+            {
+                continue;
+            }
+
             maxTopY = Mathf.Max(maxTopY, sr.bounds.max.y);
         }
 

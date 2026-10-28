@@ -34,6 +34,7 @@ public class HealthBarUI : MonoBehaviour
         playerHealth = FindAnyObjectByType<PlayerHealth>();
         if (hpSlider == null) hpSlider = GetComponent<Slider>();
         EnsureTextComponent();
+        SoulslikeHUDStyler.StyleHealthBar(GetComponentInParent<Canvas>());
 
         if (playerHealth != null)
         {
@@ -236,8 +237,7 @@ public class HealthBarUI : MonoBehaviour
         virtualHpText.color = Color.white;
         virtualHpText.alignment = TextAlignmentOptions.Center;
         virtualHpText.raycastTarget = false;
-        virtualHpText.outlineWidth = 0.35f;
-        virtualHpText.outlineColor = Color.black;
+        SoulslikeHUDStyler.SetSafeOutline(virtualHpText, 0.35f, Color.black);
     }
 
     private void EnsureTextComponent()
@@ -270,31 +270,43 @@ public class HealthBarUI : MonoBehaviour
         tmpHpText.color = Color.white;
         tmpHpText.alignment = TextAlignmentOptions.Center;
         tmpHpText.raycastTarget = false;
-        tmpHpText.outlineWidth = 0.35f;
-        tmpHpText.outlineColor = Color.black;
+        SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.35f, Color.black);
     }
 
     private void ApplyBoldOutline(TextMeshProUGUI tmp)
     {
+        ApplySoulslikeTypography(tmp);
+    }
+
+    private void ApplySoulslikeTypography(TextMeshProUGUI tmp)
+    {
         if (tmp == null) return;
+        RectTransform txtRt = tmp.GetComponent<RectTransform>();
+        if (txtRt != null)
+        {
+            txtRt.anchorMin = Vector2.zero;
+            txtRt.anchorMax = Vector2.one;
+            txtRt.offsetMin = new Vector2(10f, 0f);
+            txtRt.offsetMax = new Vector2(-8f, 0f);
+        }
+        tmp.alignment = TextAlignmentOptions.MidlineRight;
+        tmp.fontSize = 11f;
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
-        tmp.outlineWidth = 0.35f;
-        tmp.outlineColor = Color.black;
+        tmp.color = new Color(0.96f, 0.92f, 0.82f, 1f); // Trắng ngà hoàng gia
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
     }
 
     private void UpdateText(int current, int max)
     {
         EnsureTextComponent();
-        string textStr = $"{current} / {max}";
         if (tmpHpText != null)
         {
-            tmpHpText.text = textStr;
-            ApplyBoldOutline(tmpHpText);
+            tmpHpText.text = $"<color=#f0d890>{current}</color> <size=9><color=#8c806a>/</color></size> <color=#c4b89f>{max}</color>";
+            ApplySoulslikeTypography(tmpHpText);
         }
         else if (hpText != null)
         {
-            hpText.text = textStr;
+            hpText.text = $"{current} / {max}";
         }
     }
 }

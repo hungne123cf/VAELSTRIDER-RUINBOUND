@@ -66,11 +66,45 @@ public class AethelShard : MonoBehaviour
             16f);
     }
 
+    public static int ActiveShardCount { get; private set; } = 0;
+    private static Transform cachedPlayer;
+    private static PlayerInventory cachedInventory;
+
+    public static void EnsurePlayerCached()
+    {
+        if (cachedPlayer == null)
+        {
+            var pc = Object.FindAnyObjectByType<PlayerController>();
+            if (pc != null)
+            {
+                cachedPlayer = pc.transform;
+                cachedInventory = pc.GetComponent<PlayerInventory>();
+            }
+        }
+    }
+
     public static void SpawnShards(Vector3 spawnPos, int count)
     {
+        if (count <= 0) return;
+        EnsurePlayerCached();
         Sprite sprite = GetShardSprite();
 
-        for (int i = 0; i < count; i++)
+        // Tối ưu hóa: Nếu trên màn hình đã có quá nhiều mảnh rơi (> 30), gom cụm lại thành 1-2 viên giá trị cao
+        int spawnCount = count;
+        int valuePerShard = 1;
+
+        if (ActiveShardCount > 30)
+        {
+            spawnCount = 1;
+            valuePerShard = count;
+        }
+        else if (count > 4)
+        {
+            spawnCount = 2;
+            valuePerShard = Mathf.CeilToInt(count / 2f);
+        }
+
+        for (int i = 0; i < spawnCount; i++)
         {
             var go = new GameObject("AethelShard");
             go.transform.position = spawnPos + new Vector3(
@@ -80,16 +114,15 @@ public class AethelShard : MonoBehaviour
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = sprite;
             sr.sortingOrder = 50;
-            // Giu mau trang de sprite giu nguyen mau sac tinh the xanh sang dep mat
             sr.color = Color.white;
 
-            // Chuan hoa kich thuoc dong nhat 0.42m nho gon, vua van voi nhan vat
             if (sprite != null)
             {
                 float maxDim = Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y);
                 if (maxDim > 0.001f)
                 {
-                    go.transform.localScale = Vector3.one * (0.42f / maxDim);
+                    float scaleFactor = (valuePerShard > 1) ? 0.52f : 0.42f;
+                    go.transform.localScale = Vector3.one * (scaleFactor / maxDim);
                 }
             }
             else
@@ -100,15 +133,24 @@ public class AethelShard : MonoBehaviour
             go.AddComponent<AutoDepthSort>();
 
             var shard = go.AddComponent<AethelShard>();
+            shard.shardValue = valuePerShard;
             var dir2d = Random.insideUnitCircle.normalized;
             shard.scatterVelocity = new Vector3(dir2d.x, dir2d.y, 0) * Random.Range(3f, 5.5f);
+
+            ActiveShardCount++;
         }
     }
 
     void Start()
     {
-        var pc = FindAnyObjectByType<PlayerController>();
-        if (pc != null) { player = pc.transform; playerInventory = pc.GetComponent<PlayerInventory>(); }
+        if (cachedPlayer == null) EnsurePlayerCached();
+        player = cachedPlayer;
+        playerInventory = cachedInventory;
+    }
+
+    void OnDestroy()
+    {
+        ActiveShardCount = Mathf.Max(0, ActiveShardCount - 1);
     }
 
     void Update()
@@ -122,7 +164,13 @@ public class AethelShard : MonoBehaviour
         }
 
         transform.position += new Vector3(0, Mathf.Sin(Time.time * 6f) * 0.0015f, 0);
-        if (player == null) return;
+        if (player == null)
+        {
+            EnsurePlayerCached();
+            player = cachedPlayer;
+            playerInventory = cachedInventory;
+            if (player == null) return;
+        }
 
         float distance = Vector2.Distance(transform.position, player.position + Vector3.up * 0.6f);
         if (distance <= magnetRadius) isAttracted = true;
