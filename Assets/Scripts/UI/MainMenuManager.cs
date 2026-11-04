@@ -30,6 +30,11 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private Button rosterButton;
     [SerializeField] private Button skillButton;
     [SerializeField] private Button settingsButton;
+    [SerializeField] private Button mailboxButton;
+    private GameObject mailboxRedDot;
+    [SerializeField] private Button dailyLoginButton;
+    private GameObject dailyLoginRedDot;
+    private static bool _hasCheckedDailyPopup = false;
     [SerializeField] private Button exitButton;
     [SerializeField] private Button logoutButton;
     [SerializeField] private Button shopButton;
@@ -313,6 +318,16 @@ public class MainMenuManager : MonoBehaviour
             SettingsUI.EnsureUIExists();
             HookButtons();
             UpdateAllTexts();
+
+            MailboxUI.InitializeDefaultMails();
+            UpdateMailboxBadge();
+            UpdateDailyLoginBadge();
+
+            if (!_hasCheckedDailyPopup && DailyLoginUI.CanClaimToday())
+            {
+                _hasCheckedDailyPopup = true;
+                StartCoroutine(AutoOpenDailyLoginRoutine());
+            }
             UpdateCurrencyDisplay();
 
             LocalizationManager.OnLanguageChanged += UpdateAllTexts;
@@ -602,6 +617,41 @@ public class MainMenuManager : MonoBehaviour
             WhiteIconLoader.ReplaceTextWithIcon(settingsButton, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(44f, 44f));
         }
 
+        // 1. Mailbox Button (Hòm Thư Hiệp Sĩ - Nhận 5,000 Linh Hồn Tân Thủ & Giftcode)
+        TextMeshProUGUI mbTxt;
+        mailboxButton = EnsureNavButton(topParent, mailboxButton, "Btn_Mailbox", "", Vector2.zero, new Vector2(72f, 72f), new Color(0.12f, 0.16f, 0.24f, 0.94f), out mbTxt);
+        if (mailboxButton != null)
+        {
+            mailboxButton.transform.SetParent(topParent, false);
+            RectTransform mRt = mailboxButton.GetComponent<RectTransform>();
+            mRt.anchorMin = new Vector2(1f, 1f);
+            mRt.anchorMax = new Vector2(1f, 1f);
+            mRt.pivot = new Vector2(1f, 1f);
+            mRt.anchoredPosition = new Vector2(-114f, -28f);
+            mRt.sizeDelta = new Vector2(72f, 72f);
+            mailboxButton.gameObject.SetActive(true);
+            mailboxRedDot = CreateLobbyButtonIconAndRedDot(mailboxButton, Resources.Load<Sprite>("UI/icon_mail"), "TalkBubble", new Color(1f, 0.88f, 0.45f));
+        }
+
+        // 2. Daily Login Button (Điểm Danh 7 Ngày - Reset 07:00 Sáng)
+        TextMeshProUGUI dlTxt;
+        dailyLoginButton = EnsureNavButton(topParent, dailyLoginButton, "Btn_DailyLogin", "", Vector2.zero, new Vector2(72f, 72f), new Color(0.12f, 0.16f, 0.24f, 0.94f), out dlTxt);
+        if (dailyLoginButton != null)
+        {
+            dailyLoginButton.transform.SetParent(topParent, false);
+            RectTransform dRt = dailyLoginButton.GetComponent<RectTransform>();
+            dRt.anchorMin = new Vector2(1f, 1f);
+            dRt.anchorMax = new Vector2(1f, 1f);
+            dRt.pivot = new Vector2(1f, 1f);
+            dRt.anchoredPosition = new Vector2(-200f, -28f);
+            dRt.sizeDelta = new Vector2(72f, 72f);
+            dailyLoginButton.gameObject.SetActive(true);
+            dailyLoginRedDot = CreateLobbyButtonIconAndRedDot(dailyLoginButton, Resources.Load<Sprite>("UI/icon_daily"), "Star", new Color(0.35f, 0.95f, 0.85f));
+        }
+
+        UpdateMailboxBadge();
+        UpdateDailyLoginBadge();
+
         HookButtons();
         UpdateAllTexts();
     }
@@ -639,6 +689,22 @@ public class MainMenuManager : MonoBehaviour
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
             rt.anchoredPosition = new Vector2(-28f, -28f);
+            rt.sizeDelta = size;
+        }
+        else if (name == "Btn_Mailbox")
+        {
+            rt.anchorMin = new Vector2(1f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(1f, 1f);
+            rt.anchoredPosition = new Vector2(-114f, -28f);
+            rt.sizeDelta = size;
+        }
+        else if (name == "Btn_DailyLogin")
+        {
+            rt.anchorMin = new Vector2(1f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(1f, 1f);
+            rt.anchoredPosition = new Vector2(-200f, -28f);
             rt.sizeDelta = size;
         }
         else
@@ -3004,6 +3070,18 @@ public class MainMenuManager : MonoBehaviour
             settingsButton.onClick.RemoveAllListeners();
             settingsButton.onClick.AddListener(OnSettingsClicked);
             AttachPointerClick(settingsButton.gameObject, OnSettingsClicked);
+        }
+        if (mailboxButton != null)
+        {
+            mailboxButton.onClick.RemoveAllListeners();
+            mailboxButton.onClick.AddListener(OnMailboxClicked);
+            AttachPointerClick(mailboxButton.gameObject, OnMailboxClicked);
+        }
+        if (dailyLoginButton != null)
+        {
+            dailyLoginButton.onClick.RemoveAllListeners();
+            dailyLoginButton.onClick.AddListener(OnDailyLoginClicked);
+            AttachPointerClick(dailyLoginButton.gameObject, OnDailyLoginClicked);
         }
         if (exitButton != null)
         {
@@ -6029,4 +6107,110 @@ public class MainMenuManager : MonoBehaviour
         Time.timeScale = 1.0f;
         SceneManager.LoadScene(sceneName);
     }
+
+    private void OnMailboxClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        MailboxUI.OpenMailbox(() => {
+            UpdateMailboxBadge();
+            UpdateCurrencyDisplay();
+        });
+    }
+
+    private void OnDailyLoginClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        DailyLoginUI.OpenUI(() => {
+            UpdateDailyLoginBadge();
+            UpdateCurrencyDisplay();
+        });
+    }
+
+    public void UpdateMailboxBadge()
+    {
+        if (mailboxRedDot != null)
+        {
+            mailboxRedDot.SetActive(MailboxUI.HasUnclaimedMail());
+        }
+    }
+
+    public void UpdateDailyLoginBadge()
+    {
+        if (dailyLoginRedDot != null)
+        {
+            dailyLoginRedDot.SetActive(DailyLoginUI.CanClaimToday());
+        }
+    }
+
+    private GameObject CreateLobbyButtonIconAndRedDot(Button btn, Sprite sprite, string fallbackIconName, Color iconColor)
+    {
+        Transform txtT = btn.transform.Find("Text");
+        if (txtT != null) txtT.gameObject.SetActive(false);
+
+        Transform exIcon = btn.transform.Find("Icon");
+        if (exIcon != null) Destroy(exIcon.gameObject);
+
+        GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        iconObj.transform.SetParent(btn.transform, false);
+        RectTransform iRt = iconObj.GetComponent<RectTransform>();
+        iRt.anchorMin = new Vector2(0.5f, 0.5f);
+        iRt.anchorMax = new Vector2(0.5f, 0.5f);
+        iRt.pivot = new Vector2(0.5f, 0.5f);
+        iRt.anchoredPosition = Vector2.zero;
+        iRt.sizeDelta = new Vector2(40f, 40f);
+
+        Image iImg = iconObj.GetComponent<Image>();
+        iImg.raycastTarget = false;
+        iImg.preserveAspect = true;
+        if (sprite != null) iImg.sprite = sprite;
+        else iImg.sprite = WhiteIconLoader.GetSprite(fallbackIconName);
+        iImg.color = iconColor;
+
+        Transform exRd = btn.transform.Find("RedDot");
+        if (exRd != null) Destroy(exRd.gameObject);
+
+        GameObject rdObj = new GameObject("RedDot", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        rdObj.transform.SetParent(btn.transform, false);
+        RectTransform rdRt = rdObj.GetComponent<RectTransform>();
+        rdRt.anchorMin = new Vector2(1f, 1f);
+        rdRt.anchorMax = new Vector2(1f, 1f);
+        rdRt.pivot = new Vector2(1f, 1f);
+        rdRt.anchoredPosition = new Vector2(2f, 2f);
+        rdRt.sizeDelta = new Vector2(22f, 22f);
+
+        Image rdImg = rdObj.GetComponent<Image>();
+        rdImg.color = new Color(0.95f, 0.20f, 0.20f, 1f);
+
+        var rdOut = rdObj.AddComponent<Outline>();
+        rdOut.effectColor = Color.white;
+        rdOut.effectDistance = new Vector2(1f, -1f);
+
+        GameObject rdtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        rdtObj.transform.SetParent(rdObj.transform, false);
+        RectTransform rdtRt = rdtObj.GetComponent<RectTransform>();
+        rdtRt.anchorMin = Vector2.zero;
+        rdtRt.anchorMax = Vector2.one;
+        rdtRt.sizeDelta = Vector2.zero;
+        var rdtTmp = rdtObj.AddComponent<TextMeshProUGUI>();
+        rdtTmp.text = "<b>!</b>";
+        rdtTmp.fontSize = 13f;
+        rdtTmp.fontStyle = FontStyles.Bold;
+        rdtTmp.alignment = TextAlignmentOptions.Center;
+        rdtTmp.color = Color.white;
+
+        return rdObj;
+    }
+
+    private System.Collections.IEnumerator AutoOpenDailyLoginRoutine()
+    {
+        yield return new WaitForSeconds(0.4f);
+        if (DailyLoginUI.CanClaimToday())
+        {
+            DailyLoginUI.OpenUI(() => {
+                UpdateDailyLoginBadge();
+                UpdateCurrencyDisplay();
+            });
+        }
+    }
+
 }

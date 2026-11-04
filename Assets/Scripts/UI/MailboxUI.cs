@@ -1,0 +1,756 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class MailboxUI : MonoBehaviour
+{
+    public static MailboxUI Instance { get; private set; }
+
+    [Serializable]
+    public class MailItemData
+    {
+        public string id;
+        public string titleVi;
+        public string titleEn;
+        public string senderVi;
+        public string senderEn;
+        public string contentVi;
+        public string contentEn;
+        public int rewardShards;
+        public string date;
+    }
+
+    private static List<MailItemData> _mails = new List<MailItemData>();
+
+    private System.Action onCloseCallback;
+    private MailItemData selectedMail;
+
+    // UI References
+    private Transform mailListContent;
+    private TextMeshProUGUI detailTitleText;
+    private TextMeshProUGUI detailSenderText;
+    private TextMeshProUGUI detailDateText;
+    private TextMeshProUGUI detailBodyText;
+    private GameObject detailRewardBox;
+    private TextMeshProUGUI detailRewardValText;
+    private Button detailClaimButton;
+    private TextMeshProUGUI detailClaimBtnText;
+
+    private TMP_InputField giftcodeInput;
+    private TextMeshProUGUI giftcodeFeedbackText;
+
+    public static void InitializeDefaultMails()
+    {
+        _mails.Clear();
+
+        // 1. Thư Tân Thủ: 5,000 Linh Hồn
+        _mails.Add(new MailItemData
+        {
+            id = "mail_welcome_5000",
+            titleVi = "[QUÀ TÂN THỦ] LỜI HIỆU TRIỆU TỪ VỰC THẲM",
+            titleEn = "[NEWBIE GIFT] CALL OF THE RUINS",
+            senderVi = "Hội Đồng Vaelstrider",
+            senderEn = "Council of Vaelstrider",
+            contentVi = "Chào mừng dũng sĩ đã đặt chân đến thế giới Vaelstrider: Ruinbound!\n\nĐể tiếp thêm sinh lực và khai mở sức mạnh ban đầu, Hội Đồng xin gửi tặng bạn 5,000 Mảnh Linh Hồn. Hãy dùng chúng để chiêu mộ chiến binh, mở khóa kỹ năng và sẵn sàng cho những trận chiến sinh tử nơi Vực Thẳm.\n\nChúc hiệp sĩ bách chiến bách thắng!",
+            contentEn = "Welcome, brave warrior, to the realm of Vaelstrider: Ruinbound!\n\nTo empower your initial journey, the Council grants you 5,000 Soul Shards. Use them to recruit heroes, unlock perks, and conquer the depths.\n\nFight with honor!",
+            rewardShards = 5000,
+            date = "04/11/2026"
+        });
+
+        // 2. Thư Cập Nhật Hệ Thống
+        _mails.Add(new MailItemData
+        {
+            id = "mail_patch_1_3",
+            titleVi = "[CẬP NHẬT v1.3] ĐIỀU KHIỂN & ĐIỂM DANH MỚI",
+            titleEn = "[UPDATE v1.3] NEW CONTROLS & ATTENDANCE",
+            senderVi = "Đội Ngũ Phát Triển",
+            senderEn = "Dev Team",
+            contentVi = "Bản cập nhật v1.3 chính thức ra mắt hệ thống Tùy chỉnh nút cảm ứng trực tiếp trong trận đấu, Điểm danh nhận quà mỗi 7:00 sáng và Hòm thư hiệp sĩ.\n\nCảm ơn bạn đã luôn đồng hành cùng Vaelstrider!",
+            contentEn = "Update v1.3 introduces live in-match controls customization, 7:00 AM Daily Attendance, and the Knight's Mailbox.\n\nThank you for supporting Vaelstrider!",
+            rewardShards = 500,
+            date = "04/11/2026"
+        });
+    }
+
+    public static bool HasUnclaimedMail()
+    {
+        if (_mails.Count == 0) InitializeDefaultMails();
+
+        foreach (var m in _mails)
+        {
+            if (m.rewardShards > 0 && PlayerPrefs.GetInt("Mail_Claimed_" + m.id, 0) == 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void OpenMailbox(System.Action onClose = null)
+    {
+        if (Instance != null)
+        {
+            Destroy(Instance.gameObject);
+        }
+
+        Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (rootCanvas == null) rootCanvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
+
+        if (rootCanvas == null)
+        {
+            GameObject canvasObj = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            rootCanvas = canvasObj.GetComponent<Canvas>();
+            rootCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var scaler = canvasObj.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+        }
+
+        GameObject mbObj = new GameObject("MailboxUI", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        mbObj.layer = 5;
+        mbObj.transform.SetParent(rootCanvas.transform, false);
+
+        RectTransform rt = mbObj.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        Image bg = mbObj.GetComponent<Image>();
+        bg.color = new Color(0f, 0f, 0f, 0.75f); // Dim backdrop
+        bg.raycastTarget = true;
+
+        Instance = mbObj.AddComponent<MailboxUI>();
+        Instance.onCloseCallback = onClose;
+        Instance.BuildUI();
+    }
+
+    private void BuildUI()
+    {
+        if (_mails.Count == 0) InitializeDefaultMails();
+        bool isVi = LocalizationManager.IsVietnamese;
+
+        // Modal Window
+        GameObject win = new GameObject("Window", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        win.layer = 5;
+        win.transform.SetParent(transform, false);
+
+        RectTransform wRt = win.GetComponent<RectTransform>();
+        wRt.anchorMin = new Vector2(0.5f, 0.5f);
+        wRt.anchorMax = new Vector2(0.5f, 0.5f);
+        wRt.pivot = new Vector2(0.5f, 0.5f);
+        wRt.anchoredPosition = Vector2.zero;
+        wRt.sizeDelta = new Vector2(980f, 620f);
+
+        Image winImg = win.GetComponent<Image>();
+        winImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        winImg.type = Image.Type.Sliced;
+        winImg.color = new Color(0.05f, 0.07f, 0.12f, 0.98f);
+
+        var winOut = win.AddComponent<Outline>();
+        winOut.effectColor = new Color(0.35f, 0.60f, 0.85f, 0.70f);
+        winOut.effectDistance = new Vector2(2f, -2f);
+
+        // Header Title
+        GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
+        titleObj.transform.SetParent(win.transform, false);
+        RectTransform tRt = titleObj.GetComponent<RectTransform>();
+        tRt.anchorMin = new Vector2(0f, 1f);
+        tRt.anchorMax = new Vector2(1f, 1f);
+        tRt.pivot = new Vector2(0.5f, 1f);
+        tRt.anchoredPosition = new Vector2(0f, -20f);
+        tRt.sizeDelta = new Vector2(900f, 36f);
+
+        var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
+        tTmp.text = isVi ? "<b>HÒM THƯ HIỆP SĨ</b>" : "<b>KNIGHT'S MAILBOX</b>";
+        tTmp.fontSize = 24f;
+        tTmp.color = new Color(1f, 0.88f, 0.45f);
+        tTmp.alignment = TextAlignmentOptions.Center;
+
+        // Subtitle
+        GameObject subObj = new GameObject("SubTitle", typeof(RectTransform), typeof(CanvasRenderer));
+        subObj.transform.SetParent(win.transform, false);
+        RectTransform stRt = subObj.GetComponent<RectTransform>();
+        stRt.anchorMin = new Vector2(0f, 1f);
+        stRt.anchorMax = new Vector2(1f, 1f);
+        stRt.pivot = new Vector2(0.5f, 1f);
+        stRt.anchoredPosition = new Vector2(0f, -54f);
+        stRt.sizeDelta = new Vector2(900f, 24f);
+
+        var stTmp = subObj.AddComponent<TextMeshProUGUI>();
+        stTmp.text = isVi ? "Tin nhắn, Quà tặng & Mã phần thưởng từ Hội Đồng Vaelstrider" : "Messages, Gifts & Rewards from the Council of Vaelstrider";
+        stTmp.fontSize = 13.5f;
+        stTmp.color = new Color(0.70f, 0.80f, 0.92f, 0.8f);
+        stTmp.alignment = TextAlignmentOptions.Center;
+
+        // Close Button
+        GameObject closeBtnObj = new GameObject("Btn_Close", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        closeBtnObj.layer = 5;
+        closeBtnObj.transform.SetParent(win.transform, false);
+        RectTransform cRt = closeBtnObj.GetComponent<RectTransform>();
+        cRt.anchorMin = new Vector2(1f, 1f);
+        cRt.anchorMax = new Vector2(1f, 1f);
+        cRt.pivot = new Vector2(1f, 1f);
+        cRt.anchoredPosition = new Vector2(-18f, -18f);
+        cRt.sizeDelta = new Vector2(50f, 50f);
+
+        Image cImg = closeBtnObj.GetComponent<Image>();
+        cImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        cImg.type = Image.Type.Sliced;
+        cImg.color = new Color(0.38f, 0.15f, 0.16f, 0.95f);
+
+        GameObject cTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        cTxtObj.transform.SetParent(closeBtnObj.transform, false);
+        RectTransform ctRt = cTxtObj.GetComponent<RectTransform>();
+        ctRt.anchorMin = Vector2.zero;
+        ctRt.anchorMax = Vector2.one;
+        ctRt.sizeDelta = Vector2.zero;
+        var ctTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
+        ctTmp.text = "<b>✕</b>";
+        ctTmp.fontSize = 24f;
+        ctTmp.alignment = TextAlignmentOptions.Center;
+        ctTmp.color = Color.white;
+
+        Button closeBtn = closeBtnObj.GetComponent<Button>();
+        closeBtn.targetGraphic = cImg;
+        closeBtn.onClick.AddListener(CloseMailbox);
+
+        // --- LEFT COLUMN: Mail List (width 390px) ---
+        GameObject leftCol = new GameObject("LeftColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        leftCol.transform.SetParent(win.transform, false);
+        RectTransform lcRt = leftCol.GetComponent<RectTransform>();
+        lcRt.anchorMin = new Vector2(0f, 0f);
+        lcRt.anchorMax = new Vector2(0f, 1f);
+        lcRt.pivot = new Vector2(0f, 0.5f);
+        lcRt.anchoredPosition = new Vector2(25f, -20f);
+        lcRt.sizeDelta = new Vector2(380f, -145f);
+
+        Image lcImg = leftCol.GetComponent<Image>();
+        lcImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        lcImg.type = Image.Type.Sliced;
+        lcImg.color = new Color(0.03f, 0.05f, 0.08f, 0.85f);
+
+        mailListContent = leftCol.transform;
+
+        // --- RIGHT COLUMN: Mail Detail (width 510px) ---
+        GameObject rightCol = new GameObject("RightColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        rightCol.transform.SetParent(win.transform, false);
+        RectTransform rcRt = rightCol.GetComponent<RectTransform>();
+        rcRt.anchorMin = new Vector2(1f, 0f);
+        rcRt.anchorMax = new Vector2(1f, 1f);
+        rcRt.pivot = new Vector2(1f, 0.5f);
+        rcRt.anchoredPosition = new Vector2(-25f, -20f);
+        rcRt.sizeDelta = new Vector2(515f, -145f);
+
+        Image rcImg = rightCol.GetComponent<Image>();
+        rcImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        rcImg.type = Image.Type.Sliced;
+        rcImg.color = new Color(0.04f, 0.06f, 0.10f, 0.88f);
+
+        // Inside Right Column: Title
+        GameObject dtObj = new GameObject("DetailTitle", typeof(RectTransform), typeof(CanvasRenderer));
+        dtObj.transform.SetParent(rightCol.transform, false);
+        RectTransform dtRt = dtObj.GetComponent<RectTransform>();
+        dtRt.anchorMin = new Vector2(0f, 1f);
+        dtRt.anchorMax = new Vector2(1f, 1f);
+        dtRt.pivot = new Vector2(0f, 1f);
+        dtRt.anchoredPosition = new Vector2(22f, -18f);
+        dtRt.sizeDelta = new Vector2(470f, 32f);
+
+        detailTitleText = dtObj.AddComponent<TextMeshProUGUI>();
+        detailTitleText.fontSize = 16f;
+        detailTitleText.fontStyle = FontStyles.Bold;
+        detailTitleText.color = new Color(1f, 0.88f, 0.45f);
+
+        // Sender & Date
+        GameObject dsObj = new GameObject("DetailMeta", typeof(RectTransform), typeof(CanvasRenderer));
+        dsObj.transform.SetParent(rightCol.transform, false);
+        RectTransform dsRt = dsObj.GetComponent<RectTransform>();
+        dsRt.anchorMin = new Vector2(0f, 1f);
+        dsRt.anchorMax = new Vector2(1f, 1f);
+        dsRt.pivot = new Vector2(0f, 1f);
+        dsRt.anchoredPosition = new Vector2(22f, -48f);
+        dsRt.sizeDelta = new Vector2(470f, 22f);
+
+        detailSenderText = dsObj.AddComponent<TextMeshProUGUI>();
+        detailSenderText.fontSize = 12.5f;
+        detailSenderText.color = new Color(0.60f, 0.75f, 0.90f);
+
+        // Divider
+        SoulslikeHUDStyler.AddFiligreeDivider(rightCol.transform, new Vector2(0f, -74f), new Vector2(470f, 6f));
+
+        // Content Body
+        GameObject dbObj = new GameObject("DetailBody", typeof(RectTransform), typeof(CanvasRenderer));
+        dbObj.transform.SetParent(rightCol.transform, false);
+        RectTransform dbRt = dbObj.GetComponent<RectTransform>();
+        dbRt.anchorMin = new Vector2(0f, 0f);
+        dbRt.anchorMax = new Vector2(1f, 1f);
+        dbRt.offsetMin = new Vector2(22f, 130f);
+        dbRt.offsetMax = new Vector2(-22f, -86f);
+
+        detailBodyText = dbObj.AddComponent<TextMeshProUGUI>();
+        detailBodyText.fontSize = 14f;
+        detailBodyText.lineSpacing = 15f;
+        detailBodyText.color = new Color(0.85f, 0.90f, 0.96f);
+        detailBodyText.enableWordWrapping = true;
+
+        // Attachment Box
+        detailRewardBox = new GameObject("RewardBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        detailRewardBox.transform.SetParent(rightCol.transform, false);
+        RectTransform rbRt = detailRewardBox.GetComponent<RectTransform>();
+        rbRt.anchorMin = new Vector2(0.5f, 0f);
+        rbRt.anchorMax = new Vector2(0.5f, 0f);
+        rbRt.pivot = new Vector2(0.5f, 0f);
+        rbRt.anchoredPosition = new Vector2(0f, 68f);
+        rbRt.sizeDelta = new Vector2(470f, 52f);
+
+        Image rbImg = detailRewardBox.GetComponent<Image>();
+        rbImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        rbImg.type = Image.Type.Sliced;
+        rbImg.color = new Color(0.08f, 0.12f, 0.18f, 0.95f);
+
+        var rbOut = detailRewardBox.AddComponent<Outline>();
+        rbOut.effectColor = new Color(0.95f, 0.80f, 0.30f, 0.60f);
+        rbOut.effectDistance = new Vector2(1f, -1f);
+
+        GameObject rwTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        rwTxtObj.transform.SetParent(detailRewardBox.transform, false);
+        RectTransform rwRt = rwTxtObj.GetComponent<RectTransform>();
+        rwRt.anchorMin = Vector2.zero;
+        rwRt.anchorMax = Vector2.one;
+        rwRt.sizeDelta = Vector2.zero;
+
+        detailRewardValText = rwTxtObj.AddComponent<TextMeshProUGUI>();
+        detailRewardValText.fontSize = 15f;
+        detailRewardValText.fontStyle = FontStyles.Bold;
+        detailRewardValText.alignment = TextAlignmentOptions.Center;
+        detailRewardValText.color = new Color(1f, 0.92f, 0.55f);
+
+        // Claim Button
+        GameObject claimBtnObj = new GameObject("Btn_Claim", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        claimBtnObj.layer = 5;
+        claimBtnObj.transform.SetParent(rightCol.transform, false);
+        RectTransform clRt = claimBtnObj.GetComponent<RectTransform>();
+        clRt.anchorMin = new Vector2(0.5f, 0f);
+        clRt.anchorMax = new Vector2(0.5f, 0f);
+        clRt.pivot = new Vector2(0.5f, 0f);
+        clRt.anchoredPosition = new Vector2(0f, 14f);
+        clRt.sizeDelta = new Vector2(280f, 46f);
+
+        Image clImg = claimBtnObj.GetComponent<Image>();
+        clImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        clImg.type = Image.Type.Sliced;
+        clImg.color = new Color(0.10f, 0.48f, 0.25f, 0.98f);
+
+        var clOut = claimBtnObj.AddComponent<Outline>();
+        clOut.effectColor = new Color(0.35f, 1f, 0.65f, 0.70f);
+        clOut.effectDistance = new Vector2(1.5f, -1.5f);
+
+        GameObject clTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        clTxtObj.transform.SetParent(claimBtnObj.transform, false);
+        RectTransform cltRt = clTxtObj.GetComponent<RectTransform>();
+        cltRt.anchorMin = Vector2.zero;
+        cltRt.anchorMax = Vector2.one;
+        cltRt.sizeDelta = Vector2.zero;
+
+        detailClaimBtnText = clTxtObj.AddComponent<TextMeshProUGUI>();
+        detailClaimBtnText.text = isVi ? "<b>NHẬN QUÀ</b>" : "<b>CLAIM GIFT</b>";
+        detailClaimBtnText.fontSize = 15f;
+        detailClaimBtnText.alignment = TextAlignmentOptions.Center;
+        detailClaimBtnText.color = Color.white;
+
+        detailClaimButton = claimBtnObj.GetComponent<Button>();
+        detailClaimButton.targetGraphic = clImg;
+        detailClaimButton.onClick.AddListener(OnClaimSelectedMail);
+
+        // --- BOTTOM SECTION: Giftcode Bar (height 52px) ---
+        BuildGiftcodeBar(win.transform);
+
+        // Populate List
+        RefreshMailList();
+
+        // Auto select first mail
+        if (_mails.Count > 0)
+        {
+            SelectMail(_mails[0]);
+        }
+    }
+
+    private void BuildGiftcodeBar(Transform parent)
+    {
+        bool isVi = LocalizationManager.IsVietnamese;
+
+        GameObject gcBar = new GameObject("GiftcodeBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        gcBar.transform.SetParent(parent, false);
+        RectTransform gcRt = gcBar.GetComponent<RectTransform>();
+        gcRt.anchorMin = new Vector2(0f, 0f);
+        gcRt.anchorMax = new Vector2(1f, 0f);
+        gcRt.pivot = new Vector2(0.5f, 0f);
+        gcRt.anchoredPosition = new Vector2(0f, 16f);
+        gcRt.sizeDelta = new Vector2(930f, 48f);
+
+        Image gcImg = gcBar.GetComponent<Image>();
+        gcImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        gcImg.type = Image.Type.Sliced;
+        gcImg.color = new Color(0.04f, 0.06f, 0.10f, 0.90f);
+
+        // Label
+        GameObject lblObj = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer));
+        lblObj.transform.SetParent(gcBar.transform, false);
+        RectTransform lRt = lblObj.GetComponent<RectTransform>();
+        lRt.anchorMin = new Vector2(0f, 0.5f);
+        lRt.anchorMax = new Vector2(0f, 0.5f);
+        lRt.pivot = new Vector2(0f, 0.5f);
+        lRt.anchoredPosition = new Vector2(18f, 0f);
+        lRt.sizeDelta = new Vector2(160f, 32f);
+
+        var lTmp = lblObj.AddComponent<TextMeshProUGUI>();
+        lTmp.text = isVi ? "<b>MÃ QUÀ TẶNG:</b>" : "<b>GIFTCODE:</b>";
+        lTmp.fontSize = 14f;
+        lTmp.color = new Color(1f, 0.88f, 0.45f);
+        lTmp.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Input Field
+        GameObject inputObj = new GameObject("InputField", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(TMP_InputField));
+        inputObj.transform.SetParent(gcBar.transform, false);
+        RectTransform inRt = inputObj.GetComponent<RectTransform>();
+        inRt.anchorMin = new Vector2(0f, 0.5f);
+        inRt.anchorMax = new Vector2(0f, 0.5f);
+        inRt.pivot = new Vector2(0f, 0.5f);
+        inRt.anchoredPosition = new Vector2(185f, 0f);
+        inRt.sizeDelta = new Vector2(380f, 36f);
+
+        Image inBg = inputObj.GetComponent<Image>();
+        inBg.color = new Color(0.08f, 0.11f, 0.16f, 0.95f);
+
+        giftcodeInput = inputObj.GetComponent<TMP_InputField>();
+
+        // Text area
+        GameObject taObj = new GameObject("TextArea", typeof(RectTransform));
+        taObj.transform.SetParent(inputObj.transform, false);
+        RectTransform taRt = taObj.GetComponent<RectTransform>();
+        taRt.anchorMin = Vector2.zero;
+        taRt.anchorMax = Vector2.one;
+        taRt.offsetMin = new Vector2(10f, 2f);
+        taRt.offsetMax = new Vector2(-10f, -2f);
+
+        // Placeholder Text
+        GameObject phObj = new GameObject("Placeholder", typeof(RectTransform), typeof(CanvasRenderer));
+        phObj.transform.SetParent(taObj.transform, false);
+        RectTransform phRt = phObj.GetComponent<RectTransform>();
+        phRt.anchorMin = Vector2.zero;
+        phRt.anchorMax = Vector2.one;
+        phRt.sizeDelta = Vector2.zero;
+        var phTmp = phObj.AddComponent<TextMeshProUGUI>();
+        phTmp.text = isVi ? "Nhập code (VD: VAELSTRIDER, RUINBOUND)..." : "Enter code (e.g. VAELSTRIDER)...";
+        phTmp.fontSize = 13.5f;
+        phTmp.fontStyle = FontStyles.Italic;
+        phTmp.color = new Color(0.5f, 0.6f, 0.7f, 0.7f);
+        phTmp.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Input Text
+        GameObject itObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        itObj.transform.SetParent(taObj.transform, false);
+        RectTransform itRt = itObj.GetComponent<RectTransform>();
+        itRt.anchorMin = Vector2.zero;
+        itRt.anchorMax = Vector2.one;
+        itRt.sizeDelta = Vector2.zero;
+        var itTmp = itObj.AddComponent<TextMeshProUGUI>();
+        itTmp.fontSize = 14f;
+        itTmp.fontStyle = FontStyles.Bold;
+        itTmp.color = Color.white;
+        itTmp.alignment = TextAlignmentOptions.MidlineLeft;
+
+        giftcodeInput.textViewport = taRt;
+        giftcodeInput.textComponent = itTmp;
+        giftcodeInput.placeholder = phTmp;
+
+        // Redeem Button
+        GameObject rdBtnObj = new GameObject("Btn_Redeem", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        rdBtnObj.transform.SetParent(gcBar.transform, false);
+        RectTransform rdRt = rdBtnObj.GetComponent<RectTransform>();
+        rdRt.anchorMin = new Vector2(0f, 0.5f);
+        rdRt.anchorMax = new Vector2(0f, 0.5f);
+        rdRt.pivot = new Vector2(0f, 0.5f);
+        rdRt.anchoredPosition = new Vector2(580f, 0f);
+        rdRt.sizeDelta = new Vector2(140f, 36f);
+
+        Image rdImg = rdBtnObj.GetComponent<Image>();
+        rdImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        rdImg.type = Image.Type.Sliced;
+        rdImg.color = new Color(0.18f, 0.32f, 0.52f, 0.95f);
+
+        GameObject rdtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        rdtObj.transform.SetParent(rdBtnObj.transform, false);
+        RectTransform rdtRt = rdtObj.GetComponent<RectTransform>();
+        rdtRt.anchorMin = Vector2.zero;
+        rdtRt.anchorMax = Vector2.one;
+        rdtRt.sizeDelta = Vector2.zero;
+        var rdtTmp = rdtObj.AddComponent<TextMeshProUGUI>();
+        rdtTmp.text = isVi ? "<b>ĐỔI CODE</b>" : "<b>REDEEM</b>";
+        rdtTmp.fontSize = 13.5f;
+        rdtTmp.alignment = TextAlignmentOptions.Center;
+        rdtTmp.color = Color.white;
+
+        Button rdBtn = rdBtnObj.GetComponent<Button>();
+        rdBtn.targetGraphic = rdImg;
+        rdBtn.onClick.AddListener(OnRedeemGiftcode);
+
+        // Feedback Text
+        GameObject fbObj = new GameObject("Feedback", typeof(RectTransform), typeof(CanvasRenderer));
+        fbObj.transform.SetParent(gcBar.transform, false);
+        RectTransform fbRt = fbObj.GetComponent<RectTransform>();
+        fbRt.anchorMin = new Vector2(0f, 0.5f);
+        fbRt.anchorMax = new Vector2(1f, 0.5f);
+        fbRt.offsetMin = new Vector2(730f, -18f);
+        fbRt.offsetMax = new Vector2(-15f, 18f);
+
+        giftcodeFeedbackText = fbObj.AddComponent<TextMeshProUGUI>();
+        giftcodeFeedbackText.fontSize = 12f;
+        giftcodeFeedbackText.alignment = TextAlignmentOptions.MidlineLeft;
+        giftcodeFeedbackText.color = new Color(0.35f, 0.95f, 0.85f);
+    }
+
+    private void RefreshMailList()
+    {
+        bool isVi = LocalizationManager.IsVietnamese;
+
+        // Clear existing children
+        for (int i = mailListContent.childCount - 1; i >= 0; i--)
+        {
+            Destroy(mailListContent.GetChild(i).gameObject);
+        }
+
+        float itemHeight = 78f;
+        float gap = 8f;
+        float startY = -12f;
+
+        for (int i = 0; i < _mails.Count; i++)
+        {
+            var mail = _mails[i];
+            bool isClaimed = mail.rewardShards <= 0 || PlayerPrefs.GetInt("Mail_Claimed_" + mail.id, 0) == 1;
+
+            GameObject item = new GameObject("MailItem_" + mail.id, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            item.transform.SetParent(mailListContent, false);
+
+            RectTransform iRt = item.GetComponent<RectTransform>();
+            iRt.anchorMin = new Vector2(0.5f, 1f);
+            iRt.anchorMax = new Vector2(0.5f, 1f);
+            iRt.pivot = new Vector2(0.5f, 1f);
+            iRt.anchoredPosition = new Vector2(0f, startY - i * (itemHeight + gap));
+            iRt.sizeDelta = new Vector2(356f, itemHeight);
+
+            Image itemImg = item.GetComponent<Image>();
+            itemImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+            itemImg.type = Image.Type.Sliced;
+            itemImg.color = (selectedMail == mail) ? new Color(0.18f, 0.28f, 0.42f, 0.95f) : new Color(0.08f, 0.11f, 0.16f, 0.92f);
+
+            var outline = item.AddComponent<Outline>();
+            outline.effectColor = (selectedMail == mail) ? new Color(0.4f, 0.9f, 1f, 0.8f) : new Color(0.2f, 0.35f, 0.5f, 0.4f);
+            outline.effectDistance = new Vector2(1f, -1f);
+
+            // Mail Title
+            GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
+            titleObj.transform.SetParent(item.transform, false);
+            RectTransform tRt = titleObj.GetComponent<RectTransform>();
+            tRt.anchorMin = new Vector2(0f, 1f);
+            tRt.anchorMax = new Vector2(1f, 1f);
+            tRt.pivot = new Vector2(0f, 1f);
+            tRt.anchoredPosition = new Vector2(14f, -10f);
+            tRt.sizeDelta = new Vector2(328f, 22f);
+
+            var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
+            tTmp.text = isVi ? mail.titleVi : mail.titleEn;
+            tTmp.fontSize = 12.5f;
+            tTmp.fontStyle = FontStyles.Bold;
+            tTmp.color = isClaimed ? new Color(0.65f, 0.72f, 0.82f) : new Color(1f, 0.88f, 0.45f);
+            tTmp.overflowMode = TextOverflowModes.Ellipsis;
+
+            // Sender & Date
+            GameObject subObj = new GameObject("Meta", typeof(RectTransform), typeof(CanvasRenderer));
+            subObj.transform.SetParent(item.transform, false);
+            RectTransform sRt = subObj.GetComponent<RectTransform>();
+            sRt.anchorMin = new Vector2(0f, 0f);
+            sRt.anchorMax = new Vector2(1f, 0f);
+            sRt.pivot = new Vector2(0f, 0f);
+            sRt.anchoredPosition = new Vector2(14f, 10f);
+            sRt.sizeDelta = new Vector2(328f, 20f);
+
+            var sTmp = subObj.AddComponent<TextMeshProUGUI>();
+            string sender = isVi ? mail.senderVi : mail.senderEn;
+            string statusStr = isClaimed 
+                ? (isVi ? "<color=#88A0C0>Đã nhận</color>" : "<color=#88A0C0>Claimed</color>") 
+                : $"<color=#55EFC4><b>+{mail.rewardShards:N0} Linh Hồn</b></color>";
+            sTmp.text = $"{sender} • {statusStr}";
+            sTmp.fontSize = 11.5f;
+
+            // Red Dot if unclaimed
+            if (!isClaimed)
+            {
+                GameObject rdObj = new GameObject("RedDot", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                rdObj.transform.SetParent(item.transform, false);
+                RectTransform rdRt = rdObj.GetComponent<RectTransform>();
+                rdRt.anchorMin = new Vector2(1f, 1f);
+                rdRt.anchorMax = new Vector2(1f, 1f);
+                rdRt.pivot = new Vector2(1f, 1f);
+                rdRt.anchoredPosition = new Vector2(-8f, -8f);
+                rdRt.sizeDelta = new Vector2(12f, 12f);
+
+                Image rdImg = rdObj.GetComponent<Image>();
+                rdImg.color = new Color(0.95f, 0.20f, 0.20f, 1f);
+            }
+
+            Button btn = item.GetComponent<Button>();
+            btn.targetGraphic = itemImg;
+            btn.onClick.AddListener(() => {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                SelectMail(mail);
+            });
+        }
+    }
+
+    private void SelectMail(MailItemData mail)
+    {
+        selectedMail = mail;
+        bool isVi = LocalizationManager.IsVietnamese;
+
+        if (detailTitleText != null) detailTitleText.text = isVi ? mail.titleVi : mail.titleEn;
+        if (detailSenderText != null)
+        {
+            string sender = isVi ? mail.senderVi : mail.senderEn;
+            detailSenderText.text = isVi 
+                ? $"Người gửi: <b>{sender}</b> | Ngày: {mail.date}"
+                : $"From: <b>{sender}</b> | Date: {mail.date}";
+        }
+        if (detailBodyText != null) detailBodyText.text = isVi ? mail.contentVi : mail.contentEn;
+
+        bool hasReward = mail.rewardShards > 0;
+        bool isClaimed = hasReward && PlayerPrefs.GetInt("Mail_Claimed_" + mail.id, 0) == 1;
+
+        if (detailRewardBox != null)
+        {
+            detailRewardBox.SetActive(hasReward);
+            if (hasReward)
+            {
+                detailRewardValText.text = isVi 
+                    ? $"🎁 ĐÍNH KÈM: <b>+{mail.rewardShards:N0} MẢNH LINH HỒN</b>"
+                    : $"🎁 ATTACHMENT: <b>+{mail.rewardShards:N0} SOUL SHARDS</b>";
+            }
+        }
+
+        if (detailClaimButton != null)
+        {
+            detailClaimButton.gameObject.SetActive(hasReward);
+            detailClaimButton.interactable = !isClaimed;
+
+            Image clImg = detailClaimButton.GetComponent<Image>();
+            if (isClaimed)
+            {
+                clImg.color = new Color(0.20f, 0.25f, 0.32f, 0.95f);
+                detailClaimBtnText.text = isVi ? "<b>ĐÃ NHẬN</b>" : "<b>CLAIMED</b>";
+                detailClaimBtnText.color = new Color(0.65f, 0.72f, 0.82f);
+            }
+            else
+            {
+                clImg.color = new Color(0.10f, 0.48f, 0.25f, 0.98f);
+                detailClaimBtnText.text = isVi ? "<b>NHẬN QUÀ</b>" : "<b>CLAIM GIFT</b>";
+                detailClaimBtnText.color = Color.white;
+            }
+        }
+
+        RefreshMailList();
+    }
+
+    private void OnClaimSelectedMail()
+    {
+        if (selectedMail == null || selectedMail.rewardShards <= 0) return;
+
+        string claimKey = "Mail_Claimed_" + selectedMail.id;
+        if (PlayerPrefs.GetInt(claimKey, 0) == 1) return;
+
+        // 1. Add Shards to player's account
+        AccountDatabase.AddAethelShards(selectedMail.rewardShards);
+        PlayerPrefs.SetInt(claimKey, 1);
+        PlayerPrefs.Save();
+
+        // 2. Play Audio & FX
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
+
+        // 3. Refresh HUD
+        if (MainMenuManager.Instance != null)
+        {
+            MainMenuManager.Instance.RefreshCurrencies();
+        }
+
+        // 4. Update UI
+        SelectMail(selectedMail);
+        UpdateLobbyBadge();
+    }
+
+    private void OnRedeemGiftcode()
+    {
+        if (giftcodeInput == null) return;
+        string rawCode = giftcodeInput.text.Trim().ToUpperInvariant();
+        bool isVi = LocalizationManager.IsVietnamese;
+
+        if (string.IsNullOrEmpty(rawCode))
+        {
+            giftcodeFeedbackText.text = isVi ? "<color=#FF6B6B>Vui lòng nhập mã quà tặng!</color>" : "<color=#FF6B6B>Please enter a code!</color>";
+            return;
+        }
+
+        string usedKey = "Giftcode_Used_" + rawCode;
+        if (PlayerPrefs.GetInt(usedKey, 0) == 1)
+        {
+            giftcodeFeedbackText.text = isVi ? "<color=#FF6B6B>Mã này đã được sử dụng rồi!</color>" : "<color=#FF6B6B>This code has already been used!</color>";
+            return;
+        }
+
+        int reward = 0;
+        if (rawCode == "VAELSTRIDER" || rawCode == "RUINBOUND")
+        {
+            reward = 1000;
+        }
+        else if (rawCode == "NEWBIE2026" || rawCode == "SHADOWFIGHT")
+        {
+            reward = 500;
+        }
+        else
+        {
+            giftcodeFeedbackText.text = isVi ? "<color=#FF6B6B>Mã không hợp lệ hoặc đã hết hạn!</color>" : "<color=#FF6B6B>Invalid or expired code!</color>";
+            return;
+        }
+
+        // Apply giftcode reward
+        AccountDatabase.AddAethelShards(reward);
+        PlayerPrefs.SetInt(usedKey, 1);
+        PlayerPrefs.Save();
+
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
+        if (MainMenuManager.Instance != null) MainMenuManager.Instance.RefreshCurrencies();
+
+        giftcodeFeedbackText.text = isVi 
+            ? $"<color=#55EFC4><b>Thành công! Nhận +{reward:N0} Linh Hồn!</b></color>"
+            : $"<color=#55EFC4><b>Success! Received +{reward:N0} Souls!</b></color>";
+
+        giftcodeInput.text = "";
+    }
+
+    public static void UpdateLobbyBadge()
+    {
+        if (MainMenuManager.Instance != null)
+        {
+            MainMenuManager.Instance.UpdateMailboxBadge();
+        }
+    }
+
+    private void CloseMailbox()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        var cb = onCloseCallback;
+        Destroy(gameObject);
+        cb?.Invoke();
+    }
+}
