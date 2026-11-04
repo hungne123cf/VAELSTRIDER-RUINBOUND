@@ -219,14 +219,8 @@ public class CharacterManager : MonoBehaviour
             spriteSheetPath = "Assets/ART/Player6/sample(idle&walk)/idle/sprite sheets/idle.png"
         };
 
-        // Mở khóa sẵn toàn bộ hệ thống tướng để chơi và trải nghiệm mượt mà 100% trên cả Editor và APK
+        // Chỉ mở khóa mặc định Vaelstrider (Player 1). Các tướng khác mở khóa bằng Linh Hồn trong game
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_VAELSTRIDER, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_GALE_RONIN, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_AZURE_BLADE, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_TITAN_BERSERKER, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_DUNE_ASSASSIN, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_CELESTIAL_MAGE, 1);
-
         PlayerPrefs.Save();
     }
 
@@ -303,11 +297,16 @@ public class CharacterManager : MonoBehaviour
     public void SelectCharacter(string id)
     {
         string normId = NormalizeHeroId(id);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + normId, 1);
+        // Chỉ cho phép chọn vào trận nếu tướng đã được mở khóa hợp lệ
+        if (!IsCharacterUnlocked(normId))
+        {
+            Debug.LogWarning($"[CHARACTER] Tướng {normId} chưa được mở khóa, không thể chọn!");
+            return;
+        }
+
         PlayerPrefs.SetString(SELECTED_CHAR_KEY, normId);
         PlayerPrefs.SetString("SelectedHero", GetHeroAliasStatic(normId));
         PlayerPrefs.Save();
-        AccountDatabase.SyncHeroUnlock(normId);
         Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {normId}");
     }
 }

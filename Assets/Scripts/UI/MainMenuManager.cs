@@ -4649,11 +4649,15 @@ public class MainMenuManager : MonoBehaviour
         var charMgr = CharacterManager.EnsureInstance();
         if (charMgr != null)
         {
-            charMgr.SelectCharacter(heroId);
-            string alias = GetHeroAlias(heroId);
-            PlayerPrefs.SetString("SelectedHero", alias);
-            PlayerPrefs.Save();
-            AccountDatabase.SaveActiveSessionToDatabase();
+            // Chỉ chọn vào phiên chơi nếu tướng đã được mở khóa hợp lệ
+            if (charMgr.IsCharacterUnlocked(heroId))
+            {
+                charMgr.SelectCharacter(heroId);
+                string alias = GetHeroAlias(heroId);
+                PlayerPrefs.SetString("SelectedHero", alias);
+                PlayerPrefs.Save();
+                AccountDatabase.SaveActiveSessionToDatabase();
+            }
             UpdateHeroDetails();
         }
 
