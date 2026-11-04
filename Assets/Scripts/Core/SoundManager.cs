@@ -96,26 +96,47 @@ public class SoundManager : MonoBehaviour
 
         try
         {
-            // Khoi tao Pool 10 AudioSources cho SFX de combo da tang khong bao gio bi nghen am
+            // Tan dung AudioSource co san tren GameObject neu co de tranh khoi tao du thua
+            var existingSources = GetComponents<AudioSource>();
+            int existingCount = existingSources != null ? existingSources.Length : 0;
+            int srcIdx = 0;
+
             sfxPool = new AudioSource[SFX_POOL_SIZE];
             for (int i = 0; i < SFX_POOL_SIZE; i++)
             {
-                var src = gameObject.AddComponent<AudioSource>();
-                src.playOnAwake = false;
+                AudioSource src = null;
+                if (srcIdx < existingCount)
+                {
+                    src = existingSources[srcIdx++];
+                }
+                else
+                {
+                    try { src = gameObject.AddComponent<AudioSource>(); } catch { }
+                }
+                if (src != null) src.playOnAwake = false;
                 sfxPool[i] = src;
             }
 
             if (voiceSource == null)
             {
-                voiceSource = gameObject.AddComponent<AudioSource>();
-                voiceSource.playOnAwake = false;
+                if (srcIdx < existingCount)
+                    voiceSource = existingSources[srcIdx++];
+                else
+                    try { voiceSource = gameObject.AddComponent<AudioSource>(); } catch { }
+                if (voiceSource != null) voiceSource.playOnAwake = false;
             }
 
             if (musicSource == null)
             {
-                musicSource = gameObject.AddComponent<AudioSource>();
-                musicSource.loop = true;
-                musicSource.playOnAwake = false;
+                if (srcIdx < existingCount)
+                    musicSource = existingSources[srcIdx++];
+                else
+                    try { musicSource = gameObject.AddComponent<AudioSource>(); } catch { }
+                if (musicSource != null)
+                {
+                    musicSource.loop = true;
+                    musicSource.playOnAwake = false;
+                }
             }
         }
         catch (System.Exception ex)
@@ -130,11 +151,32 @@ public class SoundManager : MonoBehaviour
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
     }
 
     void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
+    }
+
+    private void OnAudioConfigurationChanged(bool deviceWasChanged)
+    {
+        if (deviceWasChanged)
+        {
+            try
+            {
+                Debug.Log("<color=cyan>[AUDIO]</color> Phat hien thiet bi am thanh thay doi / tai khoi tao FMOD...");
+                AudioConfiguration config = AudioSettings.GetConfiguration();
+                AudioSettings.Reset(config);
+                ApplyVolumes();
+                PlaySceneAmbience(SceneManager.GetActiveScene().name);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[SoundManager] Warning khi reset AudioConfiguration: {ex.Message}");
+            }
+        }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
