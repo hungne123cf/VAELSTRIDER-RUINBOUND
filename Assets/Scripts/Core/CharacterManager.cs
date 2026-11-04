@@ -219,8 +219,13 @@ public class CharacterManager : MonoBehaviour
             spriteSheetPath = "Assets/ART/Player6/sample(idle&walk)/idle/sprite sheets/idle.png"
         };
 
-        // Chỉ mở khóa mặc định Vaelstrider (Player 1). Các tướng khác mở khóa bằng Linh Hồn trong game
+        // Mở khóa toàn bộ 6 vị tướng để người chơi trải nghiệm trọn vẹn (Option 2)
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_VAELSTRIDER, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_GALE_RONIN, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_AZURE_BLADE, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_TITAN_BERSERKER, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_DUNE_ASSASSIN, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_CELESTIAL_MAGE, 1);
         PlayerPrefs.Save();
     }
 
@@ -280,8 +285,8 @@ public class CharacterManager : MonoBehaviour
     public bool IsCharacterUnlocked(string id)
     {
         string normId = NormalizeHeroId(id);
-        if (normId == CHAR_VAELSTRIDER) return true;
-        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + normId, 0) == 1;
+        // Option 2: Mở khóa toàn bộ tướng cho trải nghiệm người chơi đầy đủ
+        return true;
     }
 
     public bool UnlockCharacter(string id)

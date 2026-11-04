@@ -432,62 +432,32 @@ public static class AccountDatabase
         PlayerPrefs.SetInt("Map2_Completed", acc.map2Completed ? 1 : 0);
         PlayerPrefs.SetInt("Map3_Completed", acc.map3Completed ? 1 : 0);
 
-        // Nhân vật đã chọn & Tướng đã mở khóa: Chỉ mở khóa Vaelstrider mặc định, các tướng khác nạp theo acc.unlockedHeroes
-        PlayerPrefs.DeleteKey("Char_Unlocked_Maid");
-        PlayerPrefs.DeleteKey("Char_Unlocked_" + CharacterManager.CHAR_GALE_RONIN);
-        PlayerPrefs.DeleteKey("Char_Unlocked_" + CharacterManager.CHAR_AZURE_BLADE);
-        PlayerPrefs.DeleteKey("Char_Unlocked_" + CharacterManager.CHAR_TITAN_BERSERKER);
-        PlayerPrefs.DeleteKey("Char_Unlocked_" + CharacterManager.CHAR_DUNE_ASSASSIN);
-        PlayerPrefs.DeleteKey("Char_Unlocked_" + CharacterManager.CHAR_CELESTIAL_MAGE);
+        // Nhân vật đã chọn & Tướng đã mở khóa: Mở khóa toàn bộ 6 vị tướng (Option 2)
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_VAELSTRIDER, 1);
-        if (acc.unlockedHeroes != null)
-        {
-            foreach (var h in acc.unlockedHeroes)
-            {
-                string norm = CharacterManager.NormalizeHeroId(h);
-                PlayerPrefs.SetInt("Char_Unlocked_" + norm, 1);
-            }
-        }
-        string hero = acc.selectedHero;
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_GALE_RONIN, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_AZURE_BLADE, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_TITAN_BERSERKER, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_DUNE_ASSASSIN, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_CELESTIAL_MAGE, 1);
+
+        // Bảo tồn nhân vật đã chọn: Không bao giờ ghi đè lựa chọn của người chơi nếu đã chọn tướng khác Vaelstrider
+        string existingSelection = PlayerPrefs.GetString("Selected_Character_ID", "");
+        if (string.IsNullOrEmpty(existingSelection)) existingSelection = PlayerPrefs.GetString("SelectedHero", "");
         string charId = CharacterManager.CHAR_VAELSTRIDER;
-        if (!string.IsNullOrEmpty(hero))
+
+        if (!string.IsNullOrEmpty(existingSelection) && !existingSelection.Equals("vael", StringComparison.OrdinalIgnoreCase) && !existingSelection.Equals(CharacterManager.CHAR_VAELSTRIDER, StringComparison.OrdinalIgnoreCase))
         {
-            if (hero.Equals("titan", StringComparison.OrdinalIgnoreCase) ||
-                hero.Equals("titanberserker", StringComparison.OrdinalIgnoreCase) ||
-                hero.Equals(CharacterManager.CHAR_TITAN_BERSERKER, StringComparison.OrdinalIgnoreCase))
-            {
-                charId = CharacterManager.CHAR_TITAN_BERSERKER;
-            }
-            else if (hero.Equals("azure", StringComparison.OrdinalIgnoreCase) || 
-                hero.Equals("azureblade", StringComparison.OrdinalIgnoreCase) || 
-                hero.Equals(CharacterManager.CHAR_AZURE_BLADE, StringComparison.OrdinalIgnoreCase))
-            {
-                charId = CharacterManager.CHAR_AZURE_BLADE;
-            }
-            else if (hero.Equals("ronin", StringComparison.OrdinalIgnoreCase) ||
-                     hero.Equals("galeronin", StringComparison.OrdinalIgnoreCase) ||
-                     hero.Equals("maid", StringComparison.OrdinalIgnoreCase) || 
-                     hero.Equals(CharacterManager.CHAR_MAID, StringComparison.OrdinalIgnoreCase))
-            {
-                charId = CharacterManager.CHAR_GALE_RONIN;
-            }
-            else if (hero.Equals("dune", StringComparison.OrdinalIgnoreCase) ||
-                     hero.Equals("duneassassin", StringComparison.OrdinalIgnoreCase) ||
-                     hero.Equals("player5", StringComparison.OrdinalIgnoreCase) ||
-                     hero.Equals(CharacterManager.CHAR_DUNE_ASSASSIN, StringComparison.OrdinalIgnoreCase))
-            {
-                charId = CharacterManager.CHAR_DUNE_ASSASSIN;
-            }
-            else if (hero.Equals("mage", StringComparison.OrdinalIgnoreCase) ||
-                     hero.Equals("celestialmage", StringComparison.OrdinalIgnoreCase) ||
-                     hero.Equals("player6", StringComparison.OrdinalIgnoreCase) ||
-                     hero.Equals(CharacterManager.CHAR_CELESTIAL_MAGE, StringComparison.OrdinalIgnoreCase))
-            {
-                charId = CharacterManager.CHAR_CELESTIAL_MAGE;
-            }
+            charId = CharacterManager.NormalizeHeroId(existingSelection);
         }
-        PlayerPrefs.SetString("SelectedHero", (charId == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((charId == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (charId == CharacterManager.CHAR_GALE_RONIN || charId == CharacterManager.CHAR_MAID ? "ronin" : (charId == CharacterManager.CHAR_DUNE_ASSASSIN ? "dune" : (charId == CharacterManager.CHAR_CELESTIAL_MAGE ? "mage" : "vael")))));
+        else if (!string.IsNullOrEmpty(acc.selectedHero))
+        {
+            charId = CharacterManager.NormalizeHeroId(acc.selectedHero);
+        }
+
+        string heroAlias = CharacterManager.GetHeroAliasStatic(charId);
+        PlayerPrefs.SetString("SelectedHero", heroAlias);
         PlayerPrefs.SetString("Selected_Character_ID", charId);
+        acc.selectedHero = heroAlias;
         PlayerPrefs.SetInt("Save_SelectedHeroIndex", acc.selectedHeroIndex);
 
         // Trang bị giáp & phụ kiện

@@ -765,8 +765,8 @@ public class GaleRoninSkill : MonoBehaviour
             AugmentManager.TriggerOnHitAugments(gameObject, targetRoot, actualDmg, damageable);
 
             string markText = (currentStacks == 1) 
-                ? LocalizationManager.T("🌀 Ấn I", "🌀 Mark I") 
-                : LocalizationManager.T("🌀🌀 Ấn II", "🌀🌀 Mark II");
+                ? LocalizationManager.T("Ấn I", "Mark I") 
+                : LocalizationManager.T("Ấn II", "Mark II");
             }
 
         // Hơi hất lùi quái vật

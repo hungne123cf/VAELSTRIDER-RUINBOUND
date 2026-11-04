@@ -181,7 +181,7 @@ public static class WhiteIconLoader
         iconRt.pivot = new Vector2(0.5f, 0.5f);
         iconRt.anchoredPosition = Vector2.zero;
         
-        Vector2 finalSize = iconSize ?? new Vector2(26f, 26f);
+        Vector2 finalSize = iconSize ?? new Vector2(36f, 36f);
         iconRt.sizeDelta = finalSize;
 
         Image img = iconObj.GetComponent<Image>();
@@ -213,12 +213,12 @@ public static class WhiteIconLoader
             {
                 txtRt.anchorMin = Vector2.zero;
                 txtRt.anchorMax = Vector2.one;
-                txtRt.offsetMin = new Vector2(50f, 0f);
-                txtRt.offsetMax = new Vector2(-16f, 0f);
+                txtRt.offsetMin = new Vector2(65f, 0f);
+                txtRt.offsetMax = new Vector2(-20f, 0f);
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.enableAutoSizing = true;
-                tmp.fontSizeMin = 13f;
-                tmp.fontSizeMax = 17f;
+                tmp.fontSizeMin = 16f;
+                tmp.fontSizeMax = 25f;
                 tmp.enableWordWrapping = false;
                 tmp.overflowMode = TextOverflowModes.Ellipsis;
             }
@@ -253,8 +253,8 @@ public static class WhiteIconLoader
             iconRt.anchorMin = new Vector2(0f, 0.5f);
             iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.anchoredPosition = new Vector2(24f, 0f);
-            iconRt.sizeDelta = new Vector2(22f, 22f);
+            iconRt.anchoredPosition = new Vector2(28f, 0f);
+            iconRt.sizeDelta = new Vector2(34f, 34f);
         }
         else
         {
@@ -262,7 +262,7 @@ public static class WhiteIconLoader
             iconRt.anchorMax = new Vector2(0.5f, 0.5f);
             iconRt.pivot = new Vector2(0.5f, 0.5f);
             iconRt.anchoredPosition = Vector2.zero;
-            iconRt.sizeDelta = new Vector2(26f, 26f);
+            iconRt.sizeDelta = new Vector2(34f, 34f);
         }
 
         Image img = iconObj.GetComponent<Image>();

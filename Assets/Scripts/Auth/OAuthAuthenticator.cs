@@ -317,7 +317,7 @@ public class OAuthAuthenticator : MonoBehaviour
     private string GetInteractiveAuthHtml(string provider)
     {
         string color = provider == "Google" ? "#4285F4" : "#1877F2";
-        string icon = provider == "Google" ? "🔵 Google" : "🔷 Facebook";
+        string icon = provider == "Google" ? "Google" : "Facebook";
         string defaultName = PlayerPrefs.GetString("Player_Name", "Wanderer");
         string defaultEmail = provider == "Google" ? "player.vaelstrider@gmail.com" : "player.vaelstrider@fb.com";
 

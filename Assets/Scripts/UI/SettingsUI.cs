@@ -205,7 +205,7 @@ public class SettingsUI : MonoBehaviour
                 btnRt.anchorMax = new Vector2(1f, 1f);
                 btnRt.pivot = new Vector2(1f, 1f);
                 btnRt.anchoredPosition = new Vector2(-20f, -20f);
-                btnRt.sizeDelta = new Vector2(68f, 68f);
+                btnRt.sizeDelta = new Vector2(80f, 80f);
 
                 Image btnImg = btnObj.GetComponent<Image>();
                 btnImg.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
@@ -222,7 +222,7 @@ public class SettingsUI : MonoBehaviour
                     else EnsureUIExists()?.OpenSettings();
                 });
 
-                WhiteIconLoader.ReplaceTextWithIcon(btn, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(42f, 42f));
+                WhiteIconLoader.ReplaceTextWithIcon(btn, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(50f, 50f));
             }
         }
 
@@ -764,7 +764,8 @@ public class SettingsUI : MonoBehaviour
     {
         float bgmVal = 0.8f;
         float sfxVal = 0.8f;
-        float btnSizeVal = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.25f);
+        float btnSizeVal = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.40f);
+        if (btnSizeVal < 1.35f) btnSizeVal = 1.40f;
         float btnOpacityVal = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
         float joyX = PlayerPrefs.GetFloat("Game_Controls_Joy_PosX", 250f);
         float joyY = PlayerPrefs.GetFloat("Game_Controls_Joy_PosY", 250f);
@@ -930,7 +931,7 @@ public class SettingsUI : MonoBehaviour
     private void OnResetControlsDefault()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        PlayerPrefs.SetFloat("Game_Controls_ButtonScale", 1.25f);
+        PlayerPrefs.SetFloat("Game_Controls_ButtonScale", 1.40f);
         PlayerPrefs.SetFloat("Game_Controls_Opacity", 1.0f);
 
         PlayerPrefs.SetFloat("Game_Controls_Joy_PosX", 250f);
@@ -954,7 +955,8 @@ public class SettingsUI : MonoBehaviour
         MobileActionButton.ApplyToAllButtons();
         VirtualJoystick.ApplyToAllJoysticks();
 
-        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.25f);
+        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.40f);
+        if (scaleMod < 1.35f) scaleMod = 1.40f;
         float opacity = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
         var potionSlot = GameObject.Find("Btn_Potion");
         if (potionSlot != null)

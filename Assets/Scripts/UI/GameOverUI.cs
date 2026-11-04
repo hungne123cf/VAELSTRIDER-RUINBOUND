@@ -475,7 +475,7 @@ public class GameOverUI : MonoBehaviour
         boxObj.layer = 5;
         boxObj.transform.SetParent(panelObj.transform, false);
         RectTransform boxRect = boxObj.GetComponent<RectTransform>();
-        boxRect.sizeDelta = new Vector2(680, 480);
+        boxRect.sizeDelta = new Vector2(780, 560);
         boxRect.anchoredPosition = Vector2.zero;
 
         Image boxBg = boxObj.GetComponent<Image>();
@@ -488,14 +488,14 @@ public class GameOverUI : MonoBehaviour
         titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRect = titleObj.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, 172);
-        titleRect.sizeDelta = new Vector2(620, 44);
+        titleRect.anchoredPosition = new Vector2(0, 215);
+        titleRect.sizeDelta = new Vector2(720, 52);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = LocalizationManager.T("NGƯƠI ĐÃ TỬ TRẬN", "YOU DIED");
-        titleTmp.fontSize = 32;
+        titleTmp.fontSize = 38;
         titleTmp.enableAutoSizing = true;
         titleTmp.fontSizeMin = 24;
-        titleTmp.fontSizeMax = 34;
+        titleTmp.fontSizeMax = 42;
         titleTmp.enableWordWrapping = false;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = new Color(0.78f, 0.12f, 0.12f); // Deep blood ruby Soulslike
@@ -504,18 +504,18 @@ public class GameOverUI : MonoBehaviour
         Instance.titleText = titleTmp;
 
         // Title Bottom Symmetric Divider (No overlapping flanking wings)
-        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 142), new Vector2(540, 12), new Color(1f, 0.9f, 0.65f, 0.85f));
+        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 180), new Vector2(650, 12), new Color(1f, 0.9f, 0.65f, 0.85f));
 
         // ─── Subtitle ──────────────────────────────────────────────────────────
         GameObject subObj = new GameObject("Subtitle", typeof(RectTransform));
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRect = subObj.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 110);
-        subRect.sizeDelta = new Vector2(620, 32);
+        subRect.anchoredPosition = new Vector2(0, 142);
+        subRect.sizeDelta = new Vector2(720, 36);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         subTmp.text = "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này.";
-        subTmp.fontSize = 14.5f;
+        subTmp.fontSize = 17f;
         subTmp.color = new Color(0.75f, 0.78f, 0.86f);
         subTmp.alignment = TextAlignmentOptions.Center;
         Instance.subtitleText = subTmp;
@@ -525,24 +525,22 @@ public class GameOverUI : MonoBehaviour
         statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
         RectTransform statusRect = statusObj.GetComponent<RectTransform>();
-        statusRect.anchoredPosition = new Vector2(0, 58);
-        statusRect.sizeDelta = new Vector2(620, 34);
+        statusRect.anchoredPosition = new Vector2(0, 82);
+        statusRect.sizeDelta = new Vector2(720, 44);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
-        statusTmp.fontSize = 18f;
+        statusTmp.fontSize = 22f;
         statusTmp.fontStyle = FontStyles.Bold;
         statusTmp.alignment = TextAlignmentOptions.Center;
         Instance.respawnStatusText = statusTmp;
 
         // Section Divider before buttons
-        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, 22), new Vector2(540, 10), ColorDividerLine);
+        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, 42), new Vector2(650, 10), ColorDividerLine);
 
         // ─── 1. Button: START NEW RUN (LEVEL 1) ────────────────────────────────
-        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI",
-            new Vector2(0, -34), new Vector2(520, 54), ColorBtnRestartBg, ColorBtnFrame, 18, out Instance.restartBtnText);
+        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI", new Vector2(0, -32), new Vector2(640, 76), ColorBtnRestartBg, ColorBtnFrame, 24, out Instance.restartBtnText);
 
         // ─── 2. Button: RETURN TO SANCTUARY ────────────────────────────────────
-        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH",
-            new Vector2(0, -104), new Vector2(520, 54), ColorBtnMainMenuBg, ColorBtnFrame, 18, out Instance.mainMenuBtnText);
+        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH", new Vector2(0, -128), new Vector2(640, 76), ColorBtnMainMenuBg, ColorBtnFrame, 24, out Instance.mainMenuBtnText);
 
         // Đảm bảo khung ngoài của CenterBox nếu có luôn hiển thị trên cùng
         Transform frame = boxObj.transform.Find("FrameBorder");

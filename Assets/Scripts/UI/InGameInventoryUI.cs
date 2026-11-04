@@ -1614,8 +1614,8 @@ public class InGameInventoryUI : MonoBehaviour
             btnRt.anchorMin = new Vector2(1f, 1f);
             btnRt.anchorMax = new Vector2(1f, 1f);
             btnRt.pivot = new Vector2(1f, 1f);
-            btnRt.anchoredPosition = new Vector2(-100f, -20f);
-            btnRt.sizeDelta = new Vector2(68f, 68f);
+            btnRt.anchoredPosition = new Vector2(-110f, -20f);
+            btnRt.sizeDelta = new Vector2(80f, 80f);
 
             Image btnImg = btnObj.GetComponent<Image>();
             btnImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1633,7 +1633,7 @@ public class InGameInventoryUI : MonoBehaviour
                 if (ui != null) ui.Toggle();
             });
 
-            WhiteIconLoader.ReplaceTextWithIcon(btn, "Bag", new Color(1f, 0.88f, 0.55f), new Vector2(42f, 42f));
+            WhiteIconLoader.ReplaceTextWithIcon(btn, "Bag", new Color(1f, 0.88f, 0.55f), new Vector2(50f, 50f));
         }
 
         // 2. InGameBagPanel - Destroy any stale or cached panel to ensure latest 48 slots layout & listeners

@@ -326,7 +326,7 @@ public class VictoryUI : MonoBehaviour
         GameObject cardObj = new GameObject("CardWindow");
         cardObj.transform.SetParent(panelObj.transform, false);
         RectTransform cardRect = cardObj.AddComponent<RectTransform>();
-        cardRect.sizeDelta = new Vector2(540, 420);
+        cardRect.sizeDelta = new Vector2(680, 520);
         Image cardBg = cardObj.AddComponent<Image>();
         cardBg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
         cardBg.type = Image.Type.Sliced;
@@ -336,12 +336,12 @@ public class VictoryUI : MonoBehaviour
         GameObject titleObj = new GameObject("TitleText");
         titleObj.transform.SetParent(cardObj.transform, false);
         RectTransform titleRect = titleObj.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, 150);
-        titleRect.sizeDelta = new Vector2(500, 50);
+        titleRect.anchoredPosition = new Vector2(0, 195);
+        titleRect.sizeDelta = new Vector2(600, 54);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         var locTitle = titleObj.AddComponent<LocalizedText>();
         locTitle.SetTexts("CHIẾN THẮNG!", "REALM PURIFIED!");
-        titleTmp.fontSize = 32;
+        titleTmp.fontSize = 36;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = new Color(0.96f, 0.88f, 0.45f); // Antique gold
         SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.35f, Color.black);
@@ -351,12 +351,12 @@ public class VictoryUI : MonoBehaviour
         GameObject subObj = new GameObject("SubtitleText");
         subObj.transform.SetParent(cardObj.transform, false);
         RectTransform subRect = subObj.AddComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 115);
-        subRect.sizeDelta = new Vector2(480, 30);
+        subRect.anchoredPosition = new Vector2(0, 150);
+        subRect.sizeDelta = new Vector2(580, 34);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         var locSub = subObj.AddComponent<LocalizedText>();
         locSub.SetTexts("Tàn tích cổ đại đã được thanh tẩy khỏi sự tha hóa.", "The ancient ruins have been cleansed of corruption.");
-        subTmp.fontSize = 15;
+        subTmp.fontSize = 17;
         subTmp.color = new Color(0.75f, 0.75f, 0.85f);
         subTmp.alignment = TextAlignmentOptions.Center;
 
@@ -364,8 +364,8 @@ public class VictoryUI : MonoBehaviour
         GameObject statsContainer = new GameObject("StatsContainer");
         statsContainer.transform.SetParent(cardObj.transform, false);
         RectTransform statsRect = statsContainer.AddComponent<RectTransform>();
-        statsRect.anchoredPosition = new Vector2(0, 20);
-        statsRect.sizeDelta = new Vector2(440, 140);
+        statsRect.anchoredPosition = new Vector2(0, 30);
+        statsRect.sizeDelta = new Vector2(560, 160);
 
         var timeTmp = CreateRow(statsContainer.transform, "TIME_ROW", LocalizationManager.T("THỜI GIAN", "TIME ELAPSED"), "01:25", 45);
         var enemiesTmp = CreateRow(statsContainer.transform, "ENEMIES_ROW", LocalizationManager.T("KẺ ĐỊCH TIÊU DIỆT", "ENEMIES SLAIN"), $"{enemiesKilled}", 15);
@@ -376,11 +376,11 @@ public class VictoryUI : MonoBehaviour
         GameObject btnContainer = new GameObject("ButtonsContainer");
         btnContainer.transform.SetParent(cardObj.transform, false);
         RectTransform btnRect = btnContainer.AddComponent<RectTransform>();
-        btnRect.anchoredPosition = new Vector2(0, -145);
-        btnRect.sizeDelta = new Vector2(460, 60);
+        btnRect.anchoredPosition = new Vector2(0, -185);
+        btnRect.sizeDelta = new Vector2(600, 80);
 
-        var playBtn = CreateBtn(btnContainer.transform, "Btn_PlayAgain", LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Vector2(-115, 0), new Color(0.25f, 0.35f, 0.7f));
-        var nextBtn = CreateBtn(btnContainer.transform, "Btn_NextRealm", LocalizationManager.T("ẢI TIẾP THEO", "NEXT REALM"), new Vector2(115, 0), new Color(0.85f, 0.45f, 0.15f));
+        var playBtn = CreateBtn(btnContainer.transform, "Btn_PlayAgain", LocalizationManager.T("CHƠI LẠI", "PLAY AGAIN"), new Vector2(-150, 0), new Color(0.25f, 0.35f, 0.7f));
+        var nextBtn = CreateBtn(btnContainer.transform, "Btn_NextRealm", LocalizationManager.T("ẢI TIẾP THEO", "NEXT REALM"), new Vector2(150, 0), new Color(0.85f, 0.45f, 0.15f));
 
         SoulslikeHUDStyler.StyleButton(playBtn);
         SoulslikeHUDStyler.StyleButton(nextBtn);
@@ -406,7 +406,7 @@ public class VictoryUI : MonoBehaviour
         row.transform.SetParent(parent, false);
         RectTransform rect = row.AddComponent<RectTransform>();
         rect.anchoredPosition = new Vector2(0, posY);
-        rect.sizeDelta = new Vector2(420, 26);
+        rect.sizeDelta = new Vector2(520, 32);
 
         GameObject lblObj = new GameObject("Label");
         lblObj.transform.SetParent(row.transform, false);
@@ -414,10 +414,10 @@ public class VictoryUI : MonoBehaviour
         lblRect.anchorMin = new Vector2(0, 0.5f);
         lblRect.anchorMax = new Vector2(0, 0.5f);
         lblRect.pivot = new Vector2(0, 0.5f);
-        lblRect.sizeDelta = new Vector2(200, 26);
+        lblRect.sizeDelta = new Vector2(260, 32);
         var lblTmp = lblObj.AddComponent<TextMeshProUGUI>();
         lblTmp.text = label;
-        lblTmp.fontSize = 16;
+        lblTmp.fontSize = 18;
         lblTmp.color = new Color(0.65f, 0.65f, 0.75f);
         lblTmp.alignment = TextAlignmentOptions.Left;
 
@@ -427,7 +427,7 @@ public class VictoryUI : MonoBehaviour
         valRect.anchorMin = new Vector2(1, 0.5f);
         valRect.anchorMax = new Vector2(1, 0.5f);
         valRect.pivot = new Vector2(1, 0.5f);
-        valRect.sizeDelta = new Vector2(200, 26);
+        valRect.sizeDelta = new Vector2(240, 32);
         var valTmp = valObj.AddComponent<TextMeshProUGUI>();
         valTmp.text = defaultValue;
         valTmp.fontSize = 18;
@@ -445,7 +445,7 @@ public class VictoryUI : MonoBehaviour
 
         RectTransform rect = btnObj.AddComponent<RectTransform>();
         rect.anchoredPosition = pos;
-        rect.sizeDelta = new Vector2(200, 50);
+        rect.sizeDelta = new Vector2(280, 74);
 
         Image bg = btnObj.AddComponent<Image>();
         bg.color = bgColor;
@@ -462,7 +462,7 @@ public class VictoryUI : MonoBehaviour
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         tmp.text = text;
-        tmp.fontSize = 18;
+        tmp.fontSize = 22;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
         tmp.alignment = TextAlignmentOptions.Center;
