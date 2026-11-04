@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
 public class MailboxUI : MonoBehaviour
 {
@@ -41,6 +42,7 @@ public class MailboxUI : MonoBehaviour
     private Button detailDeleteButton;
 
     private TMP_InputField giftcodeInput;
+    private TouchScreenKeyboard mobileKeyboard;
     private TextMeshProUGUI giftcodeFeedbackText;
 
     public static void InitializeDefaultMails()
@@ -578,11 +580,12 @@ public class MailboxUI : MonoBehaviour
         phRt.anchorMax = Vector2.one;
         phRt.sizeDelta = Vector2.zero;
         var phTmp = phObj.AddComponent<TextMeshProUGUI>();
-        phTmp.text = isVi ? "Chạm để nhập mã..." : "Tap to enter code...";
+        phTmp.text = isVi ? "Chạm để mở bàn phím..." : "Tap to open keyboard...";
         phTmp.fontSize = 13f;
         phTmp.fontStyle = FontStyles.Italic;
         phTmp.color = new Color(0.5f, 0.6f, 0.7f, 0.7f);
         phTmp.alignment = TextAlignmentOptions.MidlineLeft;
+        phTmp.raycastTarget = false; // CRITICAL: Never block touches to InputField on mobile
 
         // Input Text
         GameObject itObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
@@ -596,10 +599,19 @@ public class MailboxUI : MonoBehaviour
         itTmp.fontStyle = FontStyles.Bold;
         itTmp.color = Color.white;
         itTmp.alignment = TextAlignmentOptions.MidlineLeft;
+        itTmp.raycastTarget = false; // CRITICAL: Never block touches to InputField on mobile
 
         giftcodeInput.textViewport = taRt;
         giftcodeInput.textComponent = itTmp;
         giftcodeInput.placeholder = phTmp;
+
+        // Click on InputField automatically summons native Android on-screen keyboard
+        var trigger = inputObj.AddComponent<EventTrigger>();
+        var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+        entry.callback.AddListener((eventData) => OpenMobileKeyboard());
+        trigger.triggers.Add(entry);
+
+        giftcodeInput.onSelect.AddListener((s) => OpenMobileKeyboard());
 
         // 1-Click Paste Button (DÁN MÃ TỪ BỘ NHỚ TẠM) - Cực tiện lợi cho điện thoại!
         GameObject pasteBtnObj = new GameObject("Btn_Paste", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -1237,6 +1249,54 @@ public class MailboxUI : MonoBehaviour
         if (MainMenuManager.Instance != null)
         {
             MainMenuManager.Instance.UpdateMailboxBadge();
+        }
+    }
+
+    public void OpenMobileKeyboard()
+    {
+        if (giftcodeInput != null)
+        {
+            giftcodeInput.Select();
+            giftcodeInput.ActivateInputField();
+        }
+
+        bool isVi = LocalizationManager.IsVietnamese;
+        string promptTitle = isVi ? "Nhập mã quà tặng (VD: HUNGNE123, VIP888...)" : "Enter Giftcode";
+
+        // Call Android Native Input Method Manager to force phone virtual keyboard to slide up
+        mobileKeyboard = TouchScreenKeyboard.Open(
+            giftcodeInput != null ? giftcodeInput.text : "",
+            TouchScreenKeyboardType.Default,
+            false, // autocorrection
+            false, // multiline
+            false, // secure
+            false, // alert
+            promptTitle
+        );
+    }
+
+    void Update()
+    {
+        // Live stream text from phone keyboard into InputField
+        if (mobileKeyboard != null)
+        {
+            if (giftcodeInput != null && mobileKeyboard.text != null)
+            {
+                giftcodeInput.text = mobileKeyboard.text.ToUpperInvariant();
+            }
+
+            if (mobileKeyboard.status == TouchScreenKeyboard.Status.Done)
+            {
+                if (giftcodeInput != null && !string.IsNullOrEmpty(giftcodeInput.text))
+                {
+                    OnRedeemGiftcode();
+                }
+                mobileKeyboard = null;
+            }
+            else if (mobileKeyboard.status == TouchScreenKeyboard.Status.Canceled || mobileKeyboard.status == TouchScreenKeyboard.Status.LostFocus)
+            {
+                mobileKeyboard = null;
+            }
         }
     }
 
