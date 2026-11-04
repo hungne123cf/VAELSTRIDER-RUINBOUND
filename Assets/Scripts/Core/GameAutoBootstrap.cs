@@ -134,7 +134,7 @@ public class GameAutoBootstrap : MonoBehaviour
         // 0. Kiến tạo Bản Đồ Đa Phòng chỉ riêng cho Map 1 (Map1_Thestart)
         if (currentScene == "SampleScene" || currentScene == "Map1_Thestart")
         {
-            if (!CorruptedCycleManager.IsCorruptedActive)
+            if (!CorruptedCycleManager.IsCorruptedActive && PlayerInventory.GetCurrentRunShards() <= 0)
             {
                 // Đầu mỗi trận mới thường: xóa sạch số linh hồn tạm tích từ trận cũ
                 PlayerInventory.ResetRunShards();

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.IO;
 
 public static class SpiderWebSpriteFactory
@@ -48,7 +48,13 @@ public static class SpiderWebSpriteFactory
 
     private static Sprite LoadOrGenerateSprite(string path, int width, int height, float ppu, bool isBullet, int frame)
     {
+        string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+        // 1. Nạp từ Resources trực tiếp cho Android APK
+        Sprite resSpr = Resources.Load<Sprite>("SpiderWeb/" + fileName);
+        if (resSpr != null) return resSpr;
+
 #if UNITY_EDITOR
+        // 2. Nạp từ AssetDatabase trong Editor
         Sprite loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
         if (loaded != null) return loaded;
 #endif
@@ -64,7 +70,14 @@ public static class SpiderWebSpriteFactory
             }
         }
 
-        // Fallback procedural pixel art
+        // 3. Fallback kén nhện boss Map 3 từ Resources nếu là bẫy kén
+        if (!isBullet)
+        {
+            var fallbackEgg = Resources.Load<Sprite>($"Enemies/Map3/SkeletonKing_Obstacle_{frame % 4}");
+            if (fallbackEgg != null) return fallbackEgg;
+        }
+
+        // 4. Fallback procedural pixel art
         return isBullet ? GenerateProceduralBulletSprite(frame) : GenerateProceduralTrapSprite(frame);
     }
 

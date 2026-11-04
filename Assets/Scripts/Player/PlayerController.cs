@@ -117,24 +117,46 @@ public class PlayerController : MonoBehaviour
         webTrap.transform.SetParent(transform, false);
         webTrap.transform.localPosition = new Vector3(0f, 0.2f, 0f);
         var srWeb = webTrap.AddComponent<SpriteRenderer>();
-        var obsSpr = Resources.Load<Sprite>("Combat/circle_fill");
+
+        var trapSprites = SpiderWebSpriteFactory.GetTrapSprites();
+        Sprite obsSpr = (trapSprites != null && trapSprites.Length > 0) ? trapSprites[0] : null;
+        if (obsSpr == null) obsSpr = Resources.Load<Sprite>("SpiderWeb/SpiderWeb_Trap_0");
+        if (obsSpr == null) obsSpr = Resources.Load<Sprite>("Enemies/Map3/SkeletonKing_Obstacle_0");
 #if UNITY_EDITOR
         if (obsSpr == null)
         {
-            obsSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_0.png");
+            obsSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/SpiderWeb/SpiderWeb_Trap_0.png");
+            if (obsSpr == null) obsSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_0.png");
         }
 #endif
         if (obsSpr == null) obsSpr = MagmaCalamityHazardManager.GetSoftCircleSprite();
+
         srWeb.sprite = obsSpr;
-        srWeb.color = new Color(1f, 1f, 1f, 0.8f);
-        srWeb.sortingOrder = 3000;
-        webTrap.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+        srWeb.color = Color.white;
+        srWeb.sortingOrder = 3200;
+        webTrap.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
+
+        float animTimer = 0f;
+        int frameIdx = 0;
 
         while (stunTimerRemaining > 0f)
         {
             stunTimerRemaining -= Time.deltaTime;
+            animTimer += Time.deltaTime;
+            if (animTimer >= 0.12f && trapSprites != null && trapSprites.Length > 0)
+            {
+                animTimer = 0f;
+                frameIdx = (frameIdx + 1) % trapSprites.Length;
+                if (srWeb != null && trapSprites[frameIdx] != null)
+                {
+                    srWeb.sprite = trapSprites[frameIdx];
+                }
+            }
             yield return null;
         }
+
+        // Vỡ kén nhện khi hết choáng
+        SpiderWebSpriteFactory.SpawnWebBreakVFX(transform.position);
 
         if (webTrap != null) Destroy(webTrap);
         isStunned = false;
