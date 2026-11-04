@@ -1260,44 +1260,69 @@ public class MailboxUI : MonoBehaviour
             giftcodeInput.ActivateInputField();
         }
 
-        bool isVi = LocalizationManager.IsVietnamese;
-        string promptTitle = isVi ? "Nhập mã quà tặng (VD: HUNGNE123, VIP888...)" : "Enter Giftcode";
+#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
+        if (TouchScreenKeyboard.isSupported)
+        {
+            try
+            {
+                bool isVi = LocalizationManager.IsVietnamese;
+                string promptTitle = isVi ? "Nhập mã quà tặng (VD: HUNGNE123, VIP888...)" : "Enter Giftcode";
 
-        // Call Android Native Input Method Manager to force phone virtual keyboard to slide up
-        mobileKeyboard = TouchScreenKeyboard.Open(
-            giftcodeInput != null ? giftcodeInput.text : "",
-            TouchScreenKeyboardType.Default,
-            false, // autocorrection
-            false, // multiline
-            false, // secure
-            false, // alert
-            promptTitle
-        );
+                mobileKeyboard = TouchScreenKeyboard.Open(
+                    giftcodeInput != null ? giftcodeInput.text : "",
+                    TouchScreenKeyboardType.Default,
+                    false, // autocorrection
+                    false, // multiline
+                    false, // secure
+                    false, // alert
+                    promptTitle
+                );
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("[MailboxUI] TouchScreenKeyboard warning: " + e.Message);
+                mobileKeyboard = null;
+            }
+        }
+#endif
     }
 
     void Update()
     {
-        // Live stream text from phone keyboard into InputField
+#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
+        // Live stream text from phone keyboard into InputField on physical mobile device
         if (mobileKeyboard != null)
         {
-            if (giftcodeInput != null && mobileKeyboard.text != null)
+            try
             {
-                giftcodeInput.text = mobileKeyboard.text.ToUpperInvariant();
-            }
-
-            if (mobileKeyboard.status == TouchScreenKeyboard.Status.Done)
-            {
-                if (giftcodeInput != null && !string.IsNullOrEmpty(giftcodeInput.text))
+                if (mobileKeyboard.active && giftcodeInput != null)
                 {
-                    OnRedeemGiftcode();
+                    string kText = mobileKeyboard.text;
+                    if (!string.IsNullOrEmpty(kText))
+                    {
+                        giftcodeInput.text = kText.ToUpperInvariant();
+                    }
                 }
-                mobileKeyboard = null;
+
+                if (mobileKeyboard.status == TouchScreenKeyboard.Status.Done)
+                {
+                    if (giftcodeInput != null && !string.IsNullOrEmpty(giftcodeInput.text))
+                    {
+                        OnRedeemGiftcode();
+                    }
+                    mobileKeyboard = null;
+                }
+                else if (mobileKeyboard.status == TouchScreenKeyboard.Status.Canceled || mobileKeyboard.status == TouchScreenKeyboard.Status.LostFocus)
+                {
+                    mobileKeyboard = null;
+                }
             }
-            else if (mobileKeyboard.status == TouchScreenKeyboard.Status.Canceled || mobileKeyboard.status == TouchScreenKeyboard.Status.LostFocus)
+            catch
             {
                 mobileKeyboard = null;
             }
         }
+#endif
     }
 
     private void CloseMailbox()
