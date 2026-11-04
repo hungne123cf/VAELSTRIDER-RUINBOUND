@@ -528,29 +528,38 @@ public class MailboxUI : MonoBehaviour
         lRt.anchorMin = new Vector2(0f, 0.5f);
         lRt.anchorMax = new Vector2(0f, 0.5f);
         lRt.pivot = new Vector2(0f, 0.5f);
-        lRt.anchoredPosition = new Vector2(16f, 0f);
-        lRt.sizeDelta = new Vector2(145f, 32f);
+        lRt.anchoredPosition = new Vector2(14f, 0f);
+        lRt.sizeDelta = new Vector2(120f, 32f);
 
         var lTmp = lblObj.AddComponent<TextMeshProUGUI>();
-        lTmp.text = isVi ? "<b>MÃ QUÀ TẶNG:</b>" : "<b>GIFTCODE:</b>";
+        lTmp.text = isVi ? "<b>MÃ QUÀ:</b>" : "<b>CODE:</b>";
         lTmp.fontSize = 13.5f;
         lTmp.color = new Color(1f, 0.88f, 0.45f);
         lTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
-        // Input Field
+        // Input Field - Optimized with large touch target for mobile (height 40px)
         GameObject inputObj = new GameObject("InputField", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(TMP_InputField));
         inputObj.transform.SetParent(gcBar.transform, false);
         RectTransform inRt = inputObj.GetComponent<RectTransform>();
         inRt.anchorMin = new Vector2(0f, 0.5f);
         inRt.anchorMax = new Vector2(0f, 0.5f);
         inRt.pivot = new Vector2(0f, 0.5f);
-        inRt.anchoredPosition = new Vector2(168f, 0f);
-        inRt.sizeDelta = new Vector2(360f, 36f);
+        inRt.anchoredPosition = new Vector2(140f, 0f);
+        inRt.sizeDelta = new Vector2(250f, 40f);
 
         Image inBg = inputObj.GetComponent<Image>();
         inBg.color = new Color(0.08f, 0.11f, 0.16f, 0.95f);
+        inBg.raycastTarget = true;
+
+        var inOutline = inputObj.AddComponent<Outline>();
+        inOutline.effectColor = new Color(0.25f, 0.45f, 0.65f, 0.60f);
+        inOutline.effectDistance = new Vector2(1f, -1f);
 
         giftcodeInput = inputObj.GetComponent<TMP_InputField>();
+        giftcodeInput.targetGraphic = inBg;
+        giftcodeInput.keyboardType = TouchScreenKeyboardType.Default;
+        giftcodeInput.shouldHideMobileInput = false;
+        giftcodeInput.characterLimit = 25;
 
         // Text area
         GameObject taObj = new GameObject("TextArea", typeof(RectTransform));
@@ -569,7 +578,7 @@ public class MailboxUI : MonoBehaviour
         phRt.anchorMax = Vector2.one;
         phRt.sizeDelta = Vector2.zero;
         var phTmp = phObj.AddComponent<TextMeshProUGUI>();
-        phTmp.text = isVi ? "Nhập code (VD: VAELSTRIDER, RUINBOUND)..." : "Enter code (e.g. VAELSTRIDER)...";
+        phTmp.text = isVi ? "Chạm để nhập mã..." : "Tap to enter code...";
         phTmp.fontSize = 13f;
         phTmp.fontStyle = FontStyles.Italic;
         phTmp.color = new Color(0.5f, 0.6f, 0.7f, 0.7f);
@@ -583,7 +592,7 @@ public class MailboxUI : MonoBehaviour
         itRt.anchorMax = Vector2.one;
         itRt.sizeDelta = Vector2.zero;
         var itTmp = itObj.AddComponent<TextMeshProUGUI>();
-        itTmp.fontSize = 13.5f;
+        itTmp.fontSize = 14f;
         itTmp.fontStyle = FontStyles.Bold;
         itTmp.color = Color.white;
         itTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -592,20 +601,90 @@ public class MailboxUI : MonoBehaviour
         giftcodeInput.textComponent = itTmp;
         giftcodeInput.placeholder = phTmp;
 
-        // Redeem Button
+        // 1-Click Paste Button (DÁN MÃ TỪ BỘ NHỚ TẠM) - Cực tiện lợi cho điện thoại!
+        GameObject pasteBtnObj = new GameObject("Btn_Paste", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        pasteBtnObj.transform.SetParent(gcBar.transform, false);
+        RectTransform pRt = pasteBtnObj.GetComponent<RectTransform>();
+        pRt.anchorMin = new Vector2(0f, 0.5f);
+        pRt.anchorMax = new Vector2(0f, 0.5f);
+        pRt.pivot = new Vector2(0f, 0.5f);
+        pRt.anchoredPosition = new Vector2(398f, 0f);
+        pRt.sizeDelta = new Vector2(75f, 40f);
+
+        Image pImg = pasteBtnObj.GetComponent<Image>();
+        pImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        pImg.type = Image.Type.Sliced;
+        pImg.color = new Color(0.22f, 0.28f, 0.38f, 0.95f);
+
+        GameObject ptObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        ptObj.transform.SetParent(pasteBtnObj.transform, false);
+        RectTransform ptRt = ptObj.GetComponent<RectTransform>();
+        ptRt.anchorMin = Vector2.zero;
+        ptRt.anchorMax = Vector2.one;
+        ptRt.sizeDelta = Vector2.zero;
+        var ptTmp = ptObj.AddComponent<TextMeshProUGUI>();
+        ptTmp.text = isVi ? "<b>DÁN</b>" : "<b>PASTE</b>";
+        ptTmp.fontSize = 12.5f;
+        ptTmp.alignment = TextAlignmentOptions.Center;
+        ptTmp.color = new Color(0.7f, 0.9f, 1f);
+
+        Button pasteBtn = pasteBtnObj.GetComponent<Button>();
+        pasteBtn.targetGraphic = pImg;
+        pasteBtn.onClick.AddListener(OnPasteFromClipboard);
+
+        // 1-Click Code List Picker Button (MÃ CÓ SẴN) - Không cần gõ phím!
+        GameObject listBtnObj = new GameObject("Btn_CodeList", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        listBtnObj.transform.SetParent(gcBar.transform, false);
+        RectTransform clRt = listBtnObj.GetComponent<RectTransform>();
+        clRt.anchorMin = new Vector2(0f, 0.5f);
+        clRt.anchorMax = new Vector2(0f, 0.5f);
+        clRt.pivot = new Vector2(0f, 0.5f);
+        clRt.anchoredPosition = new Vector2(480f, 0f);
+        clRt.sizeDelta = new Vector2(115f, 40f);
+
+        Image clImg = listBtnObj.GetComponent<Image>();
+        clImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        clImg.type = Image.Type.Sliced;
+        clImg.color = new Color(0.28f, 0.22f, 0.12f, 0.95f);
+
+        var clOut = listBtnObj.AddComponent<Outline>();
+        clOut.effectColor = new Color(1f, 0.82f, 0.35f, 0.65f);
+        clOut.effectDistance = new Vector2(1f, -1f);
+
+        GameObject cltObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        cltObj.transform.SetParent(listBtnObj.transform, false);
+        RectTransform cltRt = cltObj.GetComponent<RectTransform>();
+        cltRt.anchorMin = Vector2.zero;
+        cltRt.anchorMax = Vector2.one;
+        cltRt.sizeDelta = Vector2.zero;
+        var cltTmp = cltObj.AddComponent<TextMeshProUGUI>();
+        cltTmp.text = isVi ? "<b>MÃ CÓ SẴN</b>" : "<b>CODE LIST</b>";
+        cltTmp.fontSize = 12.5f;
+        cltTmp.alignment = TextAlignmentOptions.Center;
+        cltTmp.color = new Color(1f, 0.88f, 0.45f);
+
+        Button listBtn = listBtnObj.GetComponent<Button>();
+        listBtn.targetGraphic = clImg;
+        listBtn.onClick.AddListener(OpenCodeListModal);
+
+        // Redeem Button (ĐỔI CODE)
         GameObject rdBtnObj = new GameObject("Btn_Redeem", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         rdBtnObj.transform.SetParent(gcBar.transform, false);
         RectTransform rdRt = rdBtnObj.GetComponent<RectTransform>();
         rdRt.anchorMin = new Vector2(0f, 0.5f);
         rdRt.anchorMax = new Vector2(0f, 0.5f);
         rdRt.pivot = new Vector2(0f, 0.5f);
-        rdRt.anchoredPosition = new Vector2(538f, 0f);
-        rdRt.sizeDelta = new Vector2(130f, 36f);
+        rdRt.anchoredPosition = new Vector2(602f, 0f);
+        rdRt.sizeDelta = new Vector2(120f, 40f);
 
         Image rdImg = rdBtnObj.GetComponent<Image>();
         rdImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
         rdImg.type = Image.Type.Sliced;
-        rdImg.color = new Color(0.18f, 0.32f, 0.52f, 0.95f);
+        rdImg.color = new Color(0.12f, 0.46f, 0.26f, 0.98f);
+
+        var rdOut = rdBtnObj.AddComponent<Outline>();
+        rdOut.effectColor = new Color(0.35f, 1f, 0.65f, 0.70f);
+        rdOut.effectDistance = new Vector2(1.5f, -1.5f);
 
         GameObject rdtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
         rdtObj.transform.SetParent(rdBtnObj.transform, false);
@@ -615,7 +694,7 @@ public class MailboxUI : MonoBehaviour
         rdtRt.sizeDelta = Vector2.zero;
         var rdtTmp = rdtObj.AddComponent<TextMeshProUGUI>();
         rdtTmp.text = isVi ? "<b>ĐỔI CODE</b>" : "<b>REDEEM</b>";
-        rdtTmp.fontSize = 13f;
+        rdtTmp.fontSize = 13.5f;
         rdtTmp.alignment = TextAlignmentOptions.Center;
         rdtTmp.color = Color.white;
 
@@ -629,13 +708,210 @@ public class MailboxUI : MonoBehaviour
         RectTransform fbRt = fbObj.GetComponent<RectTransform>();
         fbRt.anchorMin = new Vector2(0f, 0.5f);
         fbRt.anchorMax = new Vector2(1f, 0.5f);
-        fbRt.offsetMin = new Vector2(678f, -18f);
+        fbRt.offsetMin = new Vector2(730f, -18f);
         fbRt.offsetMax = new Vector2(-12f, 18f);
 
         giftcodeFeedbackText = fbObj.AddComponent<TextMeshProUGUI>();
         giftcodeFeedbackText.fontSize = 12f;
         giftcodeFeedbackText.alignment = TextAlignmentOptions.MidlineLeft;
         giftcodeFeedbackText.color = new Color(0.35f, 0.95f, 0.85f);
+    }
+
+    private void OnPasteFromClipboard()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        string clip = GUIUtility.systemCopyBuffer;
+        if (!string.IsNullOrEmpty(clip) && giftcodeInput != null)
+        {
+            giftcodeInput.text = clip.Trim().ToUpperInvariant();
+            if (giftcodeFeedbackText != null)
+            {
+                giftcodeFeedbackText.text = LocalizationManager.IsVietnamese 
+                    ? "<color=#55EFC4>Đã dán mã từ bộ nhớ tạm!</color>" 
+                    : "<color=#55EFC4>Pasted from clipboard!</color>";
+            }
+        }
+        else if (giftcodeFeedbackText != null)
+        {
+            giftcodeFeedbackText.text = LocalizationManager.IsVietnamese 
+                ? "<color=#FF6B6B>Bộ nhớ tạm đang trống!</color>" 
+                : "<color=#FF6B6B>Clipboard is empty!</color>";
+        }
+    }
+
+    private void OpenCodeListModal()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+
+        // Build a sleek code picker popup
+        GameObject modalObj = new GameObject("CodeListModal", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        modalObj.transform.SetParent(transform, false);
+        RectTransform mRt = modalObj.GetComponent<RectTransform>();
+        mRt.anchorMin = Vector2.zero;
+        mRt.anchorMax = Vector2.one;
+        mRt.offsetMin = mRt.offsetMax = Vector2.zero;
+
+        Image mBg = modalObj.GetComponent<Image>();
+        mBg.color = new Color(0f, 0f, 0f, 0.65f);
+
+        GameObject card = new GameObject("Card", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        card.transform.SetParent(modalObj.transform, false);
+        RectTransform cRt = card.GetComponent<RectTransform>();
+        cRt.anchorMin = cRt.anchorMax = cRt.pivot = new Vector2(0.5f, 0.5f);
+        cRt.sizeDelta = new Vector2(620f, 440f);
+
+        Image cardImg = card.GetComponent<Image>();
+        cardImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        cardImg.type = Image.Type.Sliced;
+        cardImg.color = new Color(0.05f, 0.07f, 0.12f, 0.98f);
+
+        var outline = card.AddComponent<Outline>();
+        outline.effectColor = new Color(1f, 0.82f, 0.35f, 0.75f);
+        outline.effectDistance = new Vector2(2f, -2f);
+
+        bool isVi = LocalizationManager.IsVietnamese;
+
+        // Title
+        GameObject tObj = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
+        tObj.transform.SetParent(card.transform, false);
+        RectTransform tRt = tObj.GetComponent<RectTransform>();
+        tRt.anchorMin = tRt.anchorMax = tRt.pivot = new Vector2(0.5f, 1f);
+        tRt.anchoredPosition = new Vector2(0f, -16f);
+        tRt.sizeDelta = new Vector2(560f, 32f);
+        var tTmp = tObj.GetComponent<TextMeshProUGUI>();
+        tTmp.text = isVi ? "<b>DANH SÁCH MÃ QUÀ TẶNG CÓ SẴN</b>" : "<b>AVAILABLE GIFTCODES</b>";
+        tTmp.fontSize = 18f;
+        tTmp.alignment = TextAlignmentOptions.Center;
+        tTmp.color = new Color(1f, 0.88f, 0.45f);
+
+        // Subtitle
+        GameObject sObj = new GameObject("Sub", typeof(RectTransform), typeof(TextMeshProUGUI));
+        sObj.transform.SetParent(card.transform, false);
+        RectTransform sRt = sObj.GetComponent<RectTransform>();
+        sRt.anchorMin = sRt.anchorMax = sRt.pivot = new Vector2(0.5f, 1f);
+        sRt.anchoredPosition = new Vector2(0f, -44f);
+        sRt.sizeDelta = new Vector2(560f, 22f);
+        var sTmp = sObj.GetComponent<TextMeshProUGUI>();
+        sTmp.text = isVi ? "Chạm vào mã bất kỳ để tự động điền và kích hoạt:" : "Tap any code to automatically apply and redeem:";
+        sTmp.fontSize = 12f;
+        sTmp.alignment = TextAlignmentOptions.Center;
+        sTmp.color = new Color(0.75f, 0.82f, 0.90f);
+
+        // Close button
+        GameObject closeBtn = new GameObject("Btn_Close", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        closeBtn.transform.SetParent(card.transform, false);
+        RectTransform cbRt = closeBtn.GetComponent<RectTransform>();
+        cbRt.anchorMin = cbRt.anchorMax = cbRt.pivot = new Vector2(1f, 1f);
+        cbRt.anchoredPosition = new Vector2(-12f, -12f);
+        cbRt.sizeDelta = new Vector2(36f, 36f);
+        Image cbImg = closeBtn.GetComponent<Image>();
+        cbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        cbImg.color = new Color(0.38f, 0.15f, 0.16f);
+        GameObject cbtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        cbtObj.transform.SetParent(closeBtn.transform, false);
+        var cbtTmp = cbtObj.GetComponent<TextMeshProUGUI>();
+        cbtTmp.text = "X";
+        cbtTmp.alignment = TextAlignmentOptions.Center;
+        cbtTmp.color = Color.white;
+        closeBtn.GetComponent<Button>().onClick.AddListener(() => Destroy(modalObj));
+
+        // Code entries
+        string[] codes = new string[] { "HUNGNE123", "VIP888", "DARKFANTASY", "VAELSTRIDER", "RUINBOUND", "DISCORD2026", "NEWBIE2026", "SHADOWFIGHT" };
+        int[] rewards = new int[] { 5000, 2000, 1500, 1000, 1000, 1000, 500, 500 };
+        string[] descs = new string[] {
+            isVi ? "Mã Tác Giả Game" : "Author Dev Code",
+            isVi ? "Mã Siêu Cấp VIP" : "Super VIP Code",
+            isVi ? "Tri Ân Dark Fantasy" : "Dark Fantasy Gift",
+            isVi ? "Mã Khởi Đầu" : "Release Code",
+            isVi ? "Mã Vực Thẳm" : "Ruinbound Code",
+            isVi ? "Quà Hiệp Sĩ" : "Community Code",
+            isVi ? "Quà Tân Thủ" : "Newbie Bonus",
+            isVi ? "Tri Ân Đối Kháng" : "Combat Gift"
+        };
+
+        float startY = -78f;
+        float itemH = 38f;
+        float gap = 6f;
+
+        for (int i = 0; i < codes.Length; i++)
+        {
+            string cCode = codes[i];
+            int rAmount = rewards[i];
+            string dNote = descs[i];
+            bool isUsed = PlayerPrefs.GetInt("Giftcode_Used_" + cCode, 0) == 1;
+
+            GameObject row = new GameObject("Row_" + cCode, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            row.transform.SetParent(card.transform, false);
+            RectTransform rRt = row.GetComponent<RectTransform>();
+            rRt.anchorMin = rRt.anchorMax = rRt.pivot = new Vector2(0.5f, 1f);
+            rRt.anchoredPosition = new Vector2(0f, startY - i * (itemH + gap));
+            rRt.sizeDelta = new Vector2(560f, itemH);
+
+            Image rImg = row.GetComponent<Image>();
+            rImg.color = isUsed ? new Color(0.08f, 0.10f, 0.12f, 0.60f) : new Color(0.10f, 0.15f, 0.22f, 0.85f);
+
+            // Code Text
+            GameObject cObj = new GameObject("Code", typeof(RectTransform), typeof(TextMeshProUGUI));
+            cObj.transform.SetParent(row.transform, false);
+            RectTransform cTxtRt = cObj.GetComponent<RectTransform>();
+            cTxtRt.anchorMin = cTxtRt.anchorMax = cTxtRt.pivot = new Vector2(0f, 0.5f);
+            cTxtRt.anchoredPosition = new Vector2(16f, 0f);
+            cTxtRt.sizeDelta = new Vector2(160f, 30f);
+            var cTmp = cObj.GetComponent<TextMeshProUGUI>();
+            cTmp.text = $"<b>{cCode}</b>";
+            cTmp.fontSize = 14f;
+            cTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            cTmp.color = isUsed ? new Color(0.5f, 0.55f, 0.60f) : new Color(1f, 0.90f, 0.45f);
+
+            // Reward & Note
+            GameObject nObj = new GameObject("Note", typeof(RectTransform), typeof(TextMeshProUGUI));
+            nObj.transform.SetParent(row.transform, false);
+            RectTransform nRt = nObj.GetComponent<RectTransform>();
+            nRt.anchorMin = nRt.anchorMax = nRt.pivot = new Vector2(0f, 0.5f);
+            nRt.anchoredPosition = new Vector2(185f, 0f);
+            nRt.sizeDelta = new Vector2(250f, 30f);
+            var nTmp = nObj.GetComponent<TextMeshProUGUI>();
+            nTmp.text = $"<color=#55EFC4>+{rAmount:N0} Linh Hồn</color> | <size=11>{dNote}</size>";
+            nTmp.fontSize = 12.5f;
+            nTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            nTmp.color = isUsed ? new Color(0.5f, 0.55f, 0.60f) : Color.white;
+
+            // Pick / Status Button
+            GameObject actBtn = new GameObject("Btn_Act", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            actBtn.transform.SetParent(row.transform, false);
+            RectTransform aRt = actBtn.GetComponent<RectTransform>();
+            aRt.anchorMin = aRt.anchorMax = aRt.pivot = new Vector2(1f, 0.5f);
+            aRt.anchoredPosition = new Vector2(-10f, 0f);
+            aRt.sizeDelta = new Vector2(100f, 30f);
+
+            Image aImg = actBtn.GetComponent<Image>();
+            aImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+            aImg.type = Image.Type.Sliced;
+            aImg.color = isUsed ? new Color(0.20f, 0.22f, 0.25f, 0.8f) : new Color(0.12f, 0.48f, 0.26f, 0.95f);
+
+            GameObject atObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            atObj.transform.SetParent(actBtn.transform, false);
+            var atTmp = atObj.GetComponent<TextMeshProUGUI>();
+            atTmp.text = isUsed ? (isVi ? "ĐÃ DÙNG" : "USED") : (isVi ? "<b>DÙNG NGAY</b>" : "<b>APPLY</b>");
+            atTmp.fontSize = 11.5f;
+            atTmp.alignment = TextAlignmentOptions.Center;
+            atTmp.color = isUsed ? new Color(0.6f, 0.6f, 0.6f) : Color.white;
+
+            Button btn = actBtn.GetComponent<Button>();
+            btn.targetGraphic = aImg;
+            btn.interactable = !isUsed;
+            if (!isUsed)
+            {
+                btn.onClick.AddListener(() => {
+                    Destroy(modalObj);
+                    if (giftcodeInput != null)
+                    {
+                        giftcodeInput.text = cCode;
+                        OnRedeemGiftcode();
+                    }
+                });
+            }
+        }
     }
 
     private void RefreshMailList()
