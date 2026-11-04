@@ -87,8 +87,9 @@ public class BotWheelAI : MonoBehaviour, IDamageable
 
         if (runtimeBulletSprite == null)
         {
+            runtimeBulletSprite = Resources.Load<Sprite>("Combat/enemy_projectile");
 #if UNITY_EDITOR
-            runtimeBulletSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Combat/enemy_projectile.png");
+            if (runtimeBulletSprite == null) runtimeBulletSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Combat/enemy_projectile.png");
 #endif
             if (runtimeBulletSprite == null)
             {

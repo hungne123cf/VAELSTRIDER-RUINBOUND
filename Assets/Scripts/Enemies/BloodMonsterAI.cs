@@ -1075,25 +1075,46 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
 
     public static Sprite LoadBloodMonsterSprite()
     {
-        Sprite s = null;
+        Sprite s = Resources.Load<Sprite>("Enemies/Map2/BloodMonster/BloodMonster_0")
+                ?? Resources.Load<Sprite>("Enemies/Map2/BloodMonster/Blood_Monster_A_0")
+                ?? Resources.Load<Sprite>("Enemies/Map2/luck creature-idle_0");
+
 #if UNITY_EDITOR
-        var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Blood Monster_A with shadows/Blood Monster_A.png");
-        if (all != null)
+        if (s == null)
         {
-            foreach (var a in all)
+            var all = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Blood Monster_A with shadows/Blood Monster_A.png");
+            if (all != null)
             {
-                if (a is Sprite sp) { s = sp; break; }
+                foreach (var a in all)
+                {
+                    if (a is Sprite sp) { s = sp; break; }
+                }
             }
         }
 #endif
+
+        if (s == null)
+        {
+            // Procedural fallback to ensure zero-invisible bug on Android APK
+            Texture2D tex = new Texture2D(32, 32);
+            for (int x = 0; x < 32; x++)
+                for (int y = 0; y < 32; y++)
+                    tex.SetPixel(x, y, new Color(0.85f, 0.15f, 0.15f, 1f));
+            tex.Apply();
+            s = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 32f);
+        }
+
         return s;
     }
 
     public static RuntimeAnimatorController LoadBloodMonsterAnimator()
     {
-        RuntimeAnimatorController a = null;
+        RuntimeAnimatorController a = Resources.Load<RuntimeAnimatorController>("Controllers/BloodMonster");
 #if UNITY_EDITOR
-        a = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/BloodMonster/BloodMonster.controller");
+        if (a == null)
+        {
+            a = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/BloodMonster/BloodMonster.controller");
+        }
 #endif
         return a;
     }

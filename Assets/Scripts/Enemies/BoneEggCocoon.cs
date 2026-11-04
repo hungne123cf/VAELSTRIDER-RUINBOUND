@@ -58,10 +58,17 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
 
         for (int i = 0; i < 4; i++)
         {
+            var idleSpr = Resources.Load<Sprite>($"Enemies/Map3/SkeletonKing_Obstacle_{i}");
+            var deathSpr = Resources.Load<Sprite>($"Enemies/Map3/SkeletonKing_Ostacle_Death_{i}");
 #if UNITY_EDITOR
-            idleSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_{i}.png");
-            breakSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Ostacle_Death_{i}.png");
+            if (idleSpr == null) idleSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_{i}.png");
+            if (deathSpr == null) deathSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Ostacle_Death_{i}.png");
 #endif
+            if (idleSpr == null) idleSpr = MagmaCalamityHazardManager.GetSoftCircleSprite();
+            if (deathSpr == null) deathSpr = idleSpr;
+
+            idleSprites[i] = idleSpr;
+            breakSprites[i] = deathSpr;
         }
 
         if (idleSprites[0] != null) sr.sprite = idleSprites[0];

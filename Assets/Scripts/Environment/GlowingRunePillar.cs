@@ -99,8 +99,10 @@ public class GlowingRunePillar : MonoBehaviour
         // Am thanh khong gian 3D ngan vang co ngu (Spatial Rune Hum)
         AudioSource existingAudio = pillarObj.GetComponent<AudioSource>();
         if (existingAudio == null) existingAudio = pillarObj.AddComponent<AudioSource>();
+        AudioClip humClip = Resources.Load<AudioClip>("Audio/SFX/rune_pillar_hum");
 #if UNITY_EDITOR
-        AudioClip humClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/SFX/rune_pillar_hum.wav");
+        if (humClip == null) humClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/SFX/rune_pillar_hum.wav");
+#endif
         if (humClip != null)
         {
             existingAudio.clip = humClip;
@@ -113,7 +115,6 @@ public class GlowingRunePillar : MonoBehaviour
             existingAudio.volume = 0.32f;
             existingAudio.Play();
         }
-#endif
 
         return comp;
     }

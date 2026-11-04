@@ -147,8 +147,10 @@ public class BreakableProp : MonoBehaviour, IDamageable
             spritePath = foliageSprites[variant % foliageSprites.Length];
         }
 
+        string fileName = System.IO.Path.GetFileNameWithoutExtension(spritePath);
+        sr.sprite = Resources.Load<Sprite>("Props/" + fileName);
 #if UNITY_EDITOR
-        sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+        if (sr.sprite == null) sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
 #endif
 
         var col = go.AddComponent<BoxCollider2D>();

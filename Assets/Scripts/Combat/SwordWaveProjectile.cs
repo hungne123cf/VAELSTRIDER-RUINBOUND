@@ -83,7 +83,10 @@ public class SwordWaveProjectile : MonoBehaviour
         {
             for (int i = 1; i <= 8; i++)
             {
-                var s = Resources.Load<Sprite>($"Player3/Twin_sword/twin1/twin_sword_1_{i:D4}") ?? Resources.Load<Sprite>($"Player3/Twin_sword/twin_sword_{i:D4}");
+                var s = Resources.Load<Sprite>($"Player3/Sprites/Twin_sword/twin1/twin_sword_1_{i:D4}")
+                     ?? Resources.Load<Sprite>($"Player3/Sprites/Twin_sword/twin_sword_{i:D4}")
+                     ?? Resources.Load<Sprite>($"Player3/Twin_sword/twin1/twin_sword_1_{i:D4}")
+                     ?? Resources.Load<Sprite>($"Player3/Twin_sword/twin_sword_{i:D4}");
                 if (s != null) frames.Add(s);
             }
         }

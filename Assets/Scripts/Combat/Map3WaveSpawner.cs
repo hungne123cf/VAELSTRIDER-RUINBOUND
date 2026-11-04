@@ -326,9 +326,12 @@ public class Map3WaveSpawner : MonoBehaviour
         egg.tag = "Enemy";
 
         var sr = egg.AddComponent<SpriteRenderer>();
+        var spr = Resources.Load<Sprite>("Enemies/Map3/SkeletonKing_Obstacle_0");
 #if UNITY_EDITOR
-        sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_0.png");
+        if (spr == null) spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_0.png");
 #endif
+        if (spr == null) spr = MagmaCalamityHazardManager.GetSoftCircleSprite();
+        sr.sprite = spr;
         sr.sortingOrder = 1500;
 
         var col = egg.AddComponent<CircleCollider2D>();
@@ -348,15 +351,20 @@ public class Map3WaveSpawner : MonoBehaviour
         g.tag = "Enemy";
 
         var sr = g.AddComponent<SpriteRenderer>();
+        var spr = Resources.Load<Sprite>("Enemies/Map3/Goblin_Walk_0");
 #if UNITY_EDITOR
-        sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Monsters/Goblin/Variant0/Goblin_Walk_0.png");
+        if (spr == null) spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Monsters/Goblin/Variant0/Goblin_Walk_0.png");
 #endif
+        sr.sprite = spr;
         sr.sortingOrder = 1000;
 
         var anim = g.AddComponent<Animator>();
+        var ctrl = Resources.Load<RuntimeAnimatorController>("Controllers/Goblin");
 #if UNITY_EDITOR
-        anim.runtimeAnimatorController = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Goblin/Goblin.controller");
+        if (ctrl == null) ctrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Goblin/Goblin.controller");
 #endif
+        anim.runtimeAnimatorController = ctrl;
+
         var col = g.AddComponent<CapsuleCollider2D>();
         col.size = new Vector2(0.8f, 1.3f);
         col.offset = new Vector2(0f, 0.65f);
@@ -374,15 +382,20 @@ public class Map3WaveSpawner : MonoBehaviour
         s.tag = "Enemy";
 
         var sr = s.AddComponent<SpriteRenderer>();
+        var spr = Resources.Load<Sprite>("Enemies/Map3/Skeleton_Walk_0");
 #if UNITY_EDITOR
-        sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Monsters/Skeleton/Variant0/Skeleton_Walk_0.png");
+        if (spr == null) spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Monsters/Skeleton/Variant0/Skeleton_Walk_0.png");
 #endif
+        sr.sprite = spr;
         sr.sortingOrder = 1000;
 
         var anim = s.AddComponent<Animator>();
+        var ctrl = Resources.Load<RuntimeAnimatorController>("Controllers/Skeleton");
 #if UNITY_EDITOR
-        anim.runtimeAnimatorController = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Skeleton/Skeleton.controller");
+        if (ctrl == null) ctrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Skeleton/Skeleton.controller");
 #endif
+        anim.runtimeAnimatorController = ctrl;
+
         var col = s.AddComponent<CapsuleCollider2D>();
         col.size = new Vector2(0.9f, 2.0f);
         col.offset = new Vector2(0f, 1.0f);
@@ -400,15 +413,20 @@ public class Map3WaveSpawner : MonoBehaviour
         sl.tag = "Enemy";
 
         var sr = sl.AddComponent<SpriteRenderer>();
+        var spr = Resources.Load<Sprite>("Enemies/Map3/Slime_Walk_0");
 #if UNITY_EDITOR
-        sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Monsters/Slime/Variant0/Slime_Walk_0.png");
+        if (spr == null) spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Monsters/Slime/Variant0/Slime_Walk_0.png");
 #endif
+        sr.sprite = spr;
         sr.sortingOrder = 1000;
 
         var anim = sl.AddComponent<Animator>();
+        var ctrl = Resources.Load<RuntimeAnimatorController>("Controllers/Slime");
 #if UNITY_EDITOR
-        anim.runtimeAnimatorController = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Slime/Slime.controller");
+        if (ctrl == null) ctrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Slime/Slime.controller");
 #endif
+        anim.runtimeAnimatorController = ctrl;
+
         var col = sl.AddComponent<BoxCollider2D>();
         col.size = new Vector2(1.8f, 0.8f);
         col.offset = new Vector2(0f, 0.4f);
@@ -427,15 +445,20 @@ public class Map3WaveSpawner : MonoBehaviour
         bk.tag = "Enemy";
 
         var sr = bk.AddComponent<SpriteRenderer>();
+        var spr = Resources.Load<Sprite>("Enemies/Map3/SkeletonKing_Walk_0");
 #if UNITY_EDITOR
-        sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Walk_0.png");
+        if (spr == null) spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Walk_0.png");
 #endif
+        sr.sprite = spr;
         sr.sortingOrder = 2500;
 
         var anim = bk.AddComponent<Animator>();
+        var ctrl = Resources.Load<RuntimeAnimatorController>("Controllers/SkeletonKing");
 #if UNITY_EDITOR
-        anim.runtimeAnimatorController = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/SkeletonKing/SkeletonKing.controller");
+        if (ctrl == null) ctrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/SkeletonKing/SkeletonKing.controller");
 #endif
+        anim.runtimeAnimatorController = ctrl;
+
         var col = bk.AddComponent<CapsuleCollider2D>();
         col.size = new Vector2(2.5f, 4.0f);
         col.offset = new Vector2(0f, 2.0f);
