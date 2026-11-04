@@ -406,9 +406,9 @@ public class SettingsUI : MonoBehaviour
 
         // --- PAGE 2: TOUCH CONTROLS ---
         pageControls = CreatePage(contentPanel.transform, "Page_Controls");
-        pageControlsHeader = CreateLabel(pageControls.transform, "Header", "<b><color=#55EFC4>2. PHÍM ĐIỀU KHIỂN CẢM ỨNG</color></b>", new Vector2(25f, -16f), new Vector2(650f, 26f));
+        pageControlsHeader = CreateLabel(pageControls.transform, "Header", "<b><color=#55EFC4>2. NÚT ĐIỀU KHIỂN CẢM ỨNG</color></b>", new Vector2(25f, -16f), new Vector2(650f, 26f));
         pageControlsHeader.fontSize = 18;
-        pageControlsSub = CreateLabel(pageControls.transform, "Sub", "Kéo thả trực tiếp vị trí các phím trên màn hình trận đấu", new Vector2(25f, -42f), new Vector2(650f, 20f));
+        pageControlsSub = CreateLabel(pageControls.transform, "Sub", "Tùy chỉnh trực tiếp vị trí & kích thước các nút bấm trên màn hình", new Vector2(25f, -42f), new Vector2(650f, 20f));
         pageControlsSub.fontSize = 13.5f;
         pageControlsSub.color = new Color(0.75f, 0.82f, 0.92f, 0.8f);
         SoulslikeHUDStyler.AddFiligreeDivider(pageControls.transform, new Vector2(0f, -64f), new Vector2(680f, 8f));
@@ -421,7 +421,7 @@ public class SettingsUI : MonoBehaviour
         ccRt.anchorMax = new Vector2(0f, 1f);
         ccRt.pivot = new Vector2(0f, 1f);
         ccRt.anchoredPosition = new Vector2(25f, -76f);
-        ccRt.sizeDelta = new Vector2(670f, 180f);
+        ccRt.sizeDelta = new Vector2(670f, 235f);
 
         Image ccImg = controlsCard.GetComponent<Image>();
         ccImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -430,45 +430,24 @@ public class SettingsUI : MonoBehaviour
         WhiteIconLoader.ApplyGothicFrame(controlsCard, new Color(0.35f, 0.55f, 0.75f, 0.55f), 0.45f);
 
         // Title inside Card
-        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>KÉO THẢ PHÍM TRỰC TIẾP TRONG TRẬN ĐẤU</b>", new Vector2(22f, -16f), new Vector2(626f, 26f));
+        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>TÙY CHỈNH NÚT BẤM TRỰC TIẾP TRONG TRẬN ĐẤU</b>", new Vector2(22f, -16f), new Vector2(626f, 26f));
         controlsCardTitle.fontSize = 16.5f;
         controlsCardTitle.color = new Color(1f, 0.88f, 0.45f);
 
         // Description inside Card
-        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt, Tuyệt kỹ & Bình máu trực tiếp trên màn hình trận đấu để phù hợp nhất với cỡ tay của bạn.\n\nVị trí mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(22f, -44f), new Vector2(626f, 60f));
+        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt, Tuyệt kỹ & Bình máu trực tiếp trên màn hình trận đấu. Bạn có thể phóng to, thu nhỏ và chỉnh độ mờ các nút ngay tại đó để vừa vặn nhất với tay cầm của mình.\n\nVị trí và kích thước mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(22f, -46f), new Vector2(626f, 85f));
         controlsCardDesc.fontSize = 13.5f;
         controlsCardDesc.color = new Color(0.82f, 0.88f, 0.95f, 0.9f);
 
         // 2 Big Action Buttons inside Card
-        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(22f, -114f), new Vector2(370f, 48f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
+        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(22f, -148f), new Vector2(370f, 54f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
         customizeLayoutBtnText.fontSize = 15.5f;
 
-        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(405f, -114f), new Vector2(243f, 48f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
+        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(405f, -148f), new Vector2(243f, 54f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
         resetControlsDefaultBtnText.fontSize = 15f;
 
-        // Sliders for Button Scale and Opacity
-        btnScaleLabel = CreateLabel(pageControls.transform, "BtnScaleLabel", "Cỡ phím điều khiển (Button Size Scale):", new Vector2(25f, -270f), new Vector2(500f, 24f));
-        btnScaleLabel.fontSize = 15.5f;
-        btnScaleSlider = CreateSlider(pageControls.transform, "BtnScaleSlider", new Vector2(25f, -298f), new Vector2(550f, 28f));
-        btnScaleSlider.minValue = 0.75f;
-        btnScaleSlider.maxValue = 2.20f;
-        btnScaleValueText = CreateLabel(pageControls.transform, "BtnScaleVal", "125%", new Vector2(590f, -298f), new Vector2(80f, 28f));
-        btnScaleValueText.fontSize = 16.5f;
-        btnScaleValueText.fontStyle = FontStyles.Bold;
-        btnScaleValueText.color = new Color(0.35f, 0.95f, 0.85f);
-
-        btnOpacityLabel = CreateLabel(pageControls.transform, "BtnOpacityLabel", "Độ rõ / mờ phím bấm (Button Opacity):", new Vector2(25f, -338f), new Vector2(500f, 24f));
-        btnOpacityLabel.fontSize = 15.5f;
-        btnOpacitySlider = CreateSlider(pageControls.transform, "BtnOpacitySlider", new Vector2(25f, -366f), new Vector2(550f, 28f));
-        btnOpacitySlider.minValue = 0.35f;
-        btnOpacitySlider.maxValue = 1.0f;
-        btnOpacityValueText = CreateLabel(pageControls.transform, "BtnOpacityVal", "100%", new Vector2(590f, -366f), new Vector2(80f, 28f));
-        btnOpacityValueText.fontSize = 16.5f;
-        btnOpacityValueText.fontStyle = FontStyles.Bold;
-        btnOpacityValueText.color = new Color(1f, 0.85f, 0.35f);
-
         // Bottom Tip below Card
-        controlsCardTip = CreateLabel(pageControls.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí và kích thước các nút.</color></i>", new Vector2(25f, -410f), new Vector2(670f, 24f));
+        controlsCardTip = CreateLabel(pageControls.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí và kích thước các nút.</color></i>", new Vector2(25f, -330f), new Vector2(670f, 24f));
         controlsCardTip.fontSize = 13.5f;
 
         // --- PAGE 3: GAME DATA & SYSTEM ---
@@ -1013,12 +992,10 @@ public class SettingsUI : MonoBehaviour
         }
 
         // Page 2
-        if (pageControlsHeader != null) pageControlsHeader.text = isVi ? "<b><color=#55EFC4>2. PHÍM ĐIỀU KHIỂN CẢM ỨNG</color></b>" : "<b><color=#55EFC4>2. TOUCH CONTROLS SETTINGS</color></b>";
-        if (pageControlsSub != null) pageControlsSub.text = isVi ? "Kéo thả vị trí & tùy chỉnh kích thước phím trên màn hình" : "Custom position and scale buttons on the battle screen";
-        if (btnScaleLabel != null) btnScaleLabel.text = isVi ? "Cỡ phím điều khiển (Button Size Scale):" : "Button Size Scale:";
-        if (btnOpacityLabel != null) btnOpacityLabel.text = isVi ? "Độ rõ / mờ phím bấm (Button Opacity):" : "Button Opacity:";
+        if (pageControlsHeader != null) pageControlsHeader.text = isVi ? "<b><color=#55EFC4>2. NÚT ĐIỀU KHIỂN CẢM ỨNG</color></b>" : "<b><color=#55EFC4>2. TOUCH CONTROLS SETTINGS</color></b>";
+        if (pageControlsSub != null) pageControlsSub.text = isVi ? "Tùy chỉnh trực tiếp vị trí & kích thước các nút bấm trên màn hình" : "Custom position and scale buttons on the battle screen";
 
-        if (controlsCardTitle != null) controlsCardTitle.text = isVi ? "<b>KÉO THẢ PHÍM TRỰC TIẾP TRONG TRẬN ĐẤU</b>" : "<b>DIRECT IN-MATCH CONTROLS CUSTOMIZATION</b>";
+        if (controlsCardTitle != null) controlsCardTitle.text = isVi ? "<b>TÙY CHỈNH NÚT BẤM TRỰC TIẾP TRONG TRẬN ĐẤU</b>" : "<b>DIRECT IN-MATCH CONTROLS CUSTOMIZATION</b>";
         if (controlsCardDesc != null)
         {
             controlsCardDesc.text = isVi
@@ -1028,7 +1005,7 @@ public class SettingsUI : MonoBehaviour
 
         if (customizeLayoutBtnText != null)
         {
-            customizeLayoutBtnText.text = isVi ? "KÉO THẢ TRỰC TIẾP TRONG TRẬN" : "DRAG CONTROLS IN MATCH";
+            customizeLayoutBtnText.text = isVi ? "KÉO THẢ & CHỈNH CỠ NÚT" : "DRAG CONTROLS IN MATCH";
             if (customizeLayoutBtn != null) WhiteIconLoader.SetButtonIconAndText(customizeLayoutBtn, "Levels", customizeLayoutBtnText.text, new Color(0.3f, 0.9f, 1f), Color.white, true);
         }
 
