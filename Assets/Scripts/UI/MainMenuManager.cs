@@ -238,9 +238,17 @@ public class MainMenuManager : MonoBehaviour
     private TextMeshProUGUI carouselSkillGuardDesc;
     private TextMeshProUGUI carouselSkillUltiTitle;
     private TextMeshProUGUI carouselSkillUltiDesc;
+    private TextMeshProUGUI carouselConfirmBtnSubText;
+    private Image carouselConfirmBtnImg;
+    private Outline carouselConfirmBtnOutline;
     private readonly List<GameObject> carouselRosterCardObjs = new List<GameObject>();
     private readonly List<Outline> carouselRosterCardOutlines = new List<Outline>();
     private readonly List<Image> carouselRosterCardBgs = new List<Image>();
+    private readonly List<GameObject> carouselRosterCardLocks = new List<GameObject>();
+    private readonly List<Image> carouselRosterCardAvatars = new List<Image>();
+    private GameObject carouselToastObj;
+    private TextMeshProUGUI carouselToastText;
+    private Coroutine carouselToastCoroutine;
 
     private readonly string[] carouselHeroIds = new string[]
     {
@@ -263,36 +271,56 @@ public class MainMenuManager : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
-        EnsureHeroSprites();
-        EnsureInputSystemUIModule();
-        EnsureDynamicBackground();
-        EnsureBottomNavigationBar();
-        AutoBindUIElements();
-        HideCenterHeroDisplay();
-        EnsureRosterPanel();
-        InventoryUI.EnsureUIExists();
-        ArmorShopUI.EnsureUIExists();
-        SettingsUI.EnsureUIExists();
+        try
+        {
+            Instance = this;
+            Screen.orientation = ScreenOrientation.LandscapeLeft;
+            Screen.autorotateToPortrait = false;
+            Screen.autorotateToPortraitUpsideDown = false;
+            Screen.autorotateToLandscapeLeft = true;
+            Screen.autorotateToLandscapeRight = true;
+
+            EnsureHeroSprites();
+            EnsureInputSystemUIModule();
+            EnsureDynamicBackground();
+            EnsureBottomNavigationBar();
+            AutoBindUIElements();
+            HideCenterHeroDisplay();
+            EnsureRosterPanel();
+            InventoryUI.EnsureUIExists();
+            ArmorShopUI.EnsureUIExists();
+            SettingsUI.EnsureUIExists();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[MainMenuManager] Handled exception in Awake: {ex}");
+        }
     }
 
     private void Start()
     {
-        CorruptedCycleManager.ResetToNormalCycle();
-        AccountDatabase.EnsureActiveSessionLoaded();
-        EnsureHeroSprites();
-        EnsureDynamicBackground();
-        EnsureBottomNavigationBar();
-        HideCenterHeroDisplay();
-        EnsureRosterPanel();
-        InventoryUI.EnsureUIExists();
-        ArmorShopUI.EnsureUIExists();
-        SettingsUI.EnsureUIExists();
-        HookButtons();
-        UpdateAllTexts();
-        UpdateCurrencyDisplay();
+        try
+        {
+            CorruptedCycleManager.ResetToNormalCycle();
+            AccountDatabase.EnsureActiveSessionLoaded();
+            EnsureHeroSprites();
+            EnsureDynamicBackground();
+            EnsureBottomNavigationBar();
+            HideCenterHeroDisplay();
+            EnsureRosterPanel();
+            InventoryUI.EnsureUIExists();
+            ArmorShopUI.EnsureUIExists();
+            SettingsUI.EnsureUIExists();
+            HookButtons();
+            UpdateAllTexts();
+            UpdateCurrencyDisplay();
 
-        LocalizationManager.OnLanguageChanged += UpdateAllTexts;
+            LocalizationManager.OnLanguageChanged += UpdateAllTexts;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[MainMenuManager] Handled exception in Start: {ex}");
+        }
     }
 
     private void OnDestroy()
@@ -3626,6 +3654,23 @@ public class MainMenuManager : MonoBehaviour
             }
         }
 
+        string inspectedNorm = CharacterManager.NormalizeHeroId(inspectedHeroId);
+        bool inspectedUnlocked = CharacterManager.EnsureInstance() != null && CharacterManager.EnsureInstance().IsCharacterUnlocked(inspectedNorm);
+        if (!inspectedUnlocked)
+        {
+            var cData = CharacterManager.EnsureInstance()?.GetCharacter(inspectedNorm);
+            int price = cData != null ? cData.unlockPrice : 0;
+            if (rosterActionBtnText != null)
+            {
+                rosterActionBtnText.text = $"{LocalizationManager.T("MỞ KHÓA TƯỚNG", "UNLOCK WARRIOR")}\n<size=12><color=#FFD700>{price:N0} {LocalizationManager.T("LINH HỒN", "SOULS")}</color></size>";
+            }
+            if (rosterActionBtn != null)
+            {
+                var img = rosterActionBtn.GetComponent<Image>();
+                if (img != null) img.color = (AccountDatabase.GetAethelShards() >= price) ? new Color(0.15f, 0.45f, 0.25f, 1f) : new Color(0.35f, 0.15f, 0.15f, 1f);
+            }
+        }
+
         if (rosterHeroPreviewImage != null)
         {
             rosterHeroPreviewImage.transform.localScale = GetHeroVisualScale(inspectedHeroId);
@@ -4271,7 +4316,33 @@ public class MainMenuManager : MonoBehaviour
             heroPref = "mage";
         }
 
-        CharacterManager.EnsureInstance().SelectCharacter(targetChar);
+        var cm = CharacterManager.EnsureInstance();
+        if (cm != null && !cm.IsCharacterUnlocked(targetChar))
+        {
+            CharacterData cData = cm.GetCharacter(targetChar);
+            int price = cData != null ? cData.unlockPrice : 0;
+            long currentShards = AccountDatabase.GetAethelShards();
+
+            if (currentShards >= price)
+            {
+                AccountDatabase.SpendAethelShards(price);
+                cm.UnlockCharacter(targetChar);
+                AccountDatabase.SaveActiveSessionToDatabase();
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
+                UpdateCurrencyDisplay();
+                InspectHero(inspectedHeroId);
+                UpdateAllTexts();
+            }
+            else
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
+            }
+            return;
+        }
+
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+
+        cm?.SelectCharacter(targetChar);
         PlayerPrefs.SetString("SelectedHero", heroPref);
         PlayerPrefs.Save();
 
@@ -4513,6 +4584,43 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnCarouselConfirmClicked()
     {
+        if (currentCarouselIdx < 0 || currentCarouselIdx >= carouselHeroIds.Length) currentCarouselIdx = 0;
+        string heroId = carouselHeroIds[currentCarouselIdx];
+        var charMgr = CharacterManager.EnsureInstance();
+        bool isUnlocked = charMgr != null && charMgr.IsCharacterUnlocked(heroId);
+
+        if (!isUnlocked)
+        {
+            CharacterData cData = charMgr != null ? charMgr.GetCharacter(heroId) : null;
+            int price = cData != null ? cData.unlockPrice : 0;
+            long currentShards = AccountDatabase.GetAethelShards();
+
+            if (currentShards >= price)
+            {
+                // Mua thành công bằng Linh Hồn
+                AccountDatabase.SpendAethelShards(price);
+                charMgr.UnlockCharacter(heroId);
+                AccountDatabase.SaveActiveSessionToDatabase();
+
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
+
+                string hName = cData != null ? (LocalizationManager.IsVietnamese ? cData.nameVN : cData.nameEN) : heroId;
+                ShowCarouselToast(LocalizationManager.T($"✨ ĐÃ MỞ KHÓA THÀNH CÔNG {hName.ToUpper()}! ✨", $"✨ UNLOCKED {hName.ToUpper()} SUCCESSFULLY! ✨"), new Color(0.35f, 1f, 0.65f, 1f));
+
+                UpdateCarouselDisplay();
+                UpdateCurrencyDisplay();
+            }
+            else
+            {
+                // Không đủ Linh Hồn
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
+                long missing = price - currentShards;
+                ShowCarouselToast(LocalizationManager.T($"⚠ KHÔNG ĐỦ LINH HỒN! CẦN THÊM {missing:N0} LINH HỒN NỮA", $"⚠ NOT ENOUGH SOULS! NEED {missing:N0} MORE SOULS"), new Color(1f, 0.4f, 0.4f, 1f));
+            }
+            return;
+        }
+
+        // Tướng đã mở khóa -> Vào trận chiến!
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         if (carouselHeroAnimCoroutine != null)
         {
@@ -4520,10 +4628,7 @@ public class MainMenuManager : MonoBehaviour
             carouselHeroAnimCoroutine = null;
         }
 
-        if (currentCarouselIdx < 0 || currentCarouselIdx >= carouselHeroIds.Length) currentCarouselIdx = 0;
-        string heroId = carouselHeroIds[currentCarouselIdx];
-
-        CharacterManager.EnsureInstance().SelectCharacter(heroId);
+        charMgr.SelectCharacter(heroId);
 
         string alias = GetHeroAlias(heroId);
         PlayerPrefs.SetString("SelectedHero", alias);
@@ -5128,6 +5233,8 @@ public class MainMenuManager : MonoBehaviour
 
         carouselConfirmBtn = confirmBtnObj.GetComponent<Button>();
         carouselConfirmBtn.onClick.AddListener(OnCarouselConfirmClicked);
+        carouselConfirmBtnImg = cfbImg;
+        carouselConfirmBtnOutline = cfbOutline;
 
         GameObject cfbTxtObj = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         cfbTxtObj.transform.SetParent(confirmBtnObj.transform, false);
@@ -5162,8 +5269,53 @@ public class MainMenuManager : MonoBehaviour
         subTxt.alignment = TextAlignmentOptions.Center;
         subTxt.color = new Color(0.82f, 0.85f, 0.90f, 0.85f);
         subTxt.raycastTarget = false;
+        carouselConfirmBtnSubText = subTxt;
+
+        // Toast Notification for Unlock / Insufficient Souls Warning
+        carouselToastObj = new GameObject("CarouselToast", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        carouselToastObj.transform.SetParent(heroSelectCarouselModal.transform, false);
+        RectTransform tstRt = carouselToastObj.GetComponent<RectTransform>();
+        tstRt.anchorMin = new Vector2(0.5f, 1f);
+        tstRt.anchorMax = new Vector2(0.5f, 1f);
+        tstRt.pivot = new Vector2(0.5f, 1f);
+        tstRt.anchoredPosition = new Vector2(0f, -60f);
+        tstRt.sizeDelta = new Vector2(580f, 38f);
+        Image tstImg = carouselToastObj.GetComponent<Image>();
+        tstImg.color = new Color(0.04f, 0.06f, 0.1f, 0.95f);
+        var tstOutl = carouselToastObj.AddComponent<Outline>();
+        tstOutl.effectColor = new Color(1f, 0.85f, 0.35f, 0.85f);
+        tstOutl.effectDistance = new Vector2(1.5f, -1.5f);
+
+        GameObject tstTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        tstTxtObj.transform.SetParent(carouselToastObj.transform, false);
+        RectTransform tttRt = tstTxtObj.GetComponent<RectTransform>();
+        tttRt.anchorMin = Vector2.zero; tttRt.anchorMax = Vector2.one; tttRt.sizeDelta = Vector2.zero;
+        carouselToastText = tstTxtObj.GetComponent<TextMeshProUGUI>();
+        carouselToastText.fontSize = 14f;
+        carouselToastText.fontStyle = FontStyles.Bold;
+        carouselToastText.alignment = TextAlignmentOptions.Center;
+        carouselToastText.raycastTarget = false;
+        carouselToastObj.SetActive(false);
 
         heroSelectCarouselModal.SetActive(false);
+    }
+
+    public void ShowCarouselToast(string message, Color color)
+    {
+        if (carouselToastObj == null || carouselToastText == null) return;
+        if (carouselToastCoroutine != null) StopCoroutine(carouselToastCoroutine);
+        carouselToastCoroutine = StartCoroutine(ShowCarouselToastRoutine(message, color));
+    }
+
+    private IEnumerator ShowCarouselToastRoutine(string message, Color color)
+    {
+        carouselToastText.text = message;
+        carouselToastText.color = color;
+        carouselToastObj.SetActive(true);
+        carouselToastObj.transform.SetAsLastSibling();
+        yield return new WaitForSeconds(2.5f);
+        carouselToastObj.SetActive(false);
+        carouselToastCoroutine = null;
     }
 
     private void CreateStatRow(Transform parent, string name, Vector2 pos, string labelText, Color labelColor, Sprite troughSp, Sprite fillSp, out Image fillImg, out TextMeshProUGUI valTxt, out TextMeshProUGUI lblTxt)
@@ -5298,6 +5450,8 @@ public class MainMenuManager : MonoBehaviour
         carouselRosterCardObjs.Clear();
         carouselRosterCardOutlines.Clear();
         carouselRosterCardBgs.Clear();
+        carouselRosterCardLocks.Clear();
+        carouselRosterCardAvatars.Clear();
 
         GameObject deckObj = new GameObject("HeroRosterDeck", typeof(RectTransform));
         deckObj.transform.SetParent(parent, false);
@@ -5350,6 +5504,23 @@ public class MainMenuManager : MonoBehaviour
             fImg.sprite = GetHeroAvatarSprite(heroId);
             fImg.preserveAspect = true;
             fImg.raycastTarget = false;
+            carouselRosterCardAvatars.Add(fImg);
+
+            // Lock Badge on Roster Card
+            GameObject lkObj = new GameObject("LockBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            lkObj.transform.SetParent(card.transform, false);
+            RectTransform lkRt = lkObj.GetComponent<RectTransform>();
+            lkRt.anchorMin = new Vector2(1f, 1f);
+            lkRt.anchorMax = new Vector2(1f, 1f);
+            lkRt.pivot = new Vector2(1f, 1f);
+            lkRt.anchoredPosition = new Vector2(-6f, -6f);
+            lkRt.sizeDelta = new Vector2(22f, 22f);
+
+            Image lkImg = lkObj.GetComponent<Image>();
+            lkImg.sprite = WhiteIconLoader.GetSprite("Locker-Locked");
+            lkImg.color = new Color(1f, 0.85f, 0.35f, 0.95f);
+            lkImg.raycastTarget = false;
+            carouselRosterCardLocks.Add(lkObj);
 
             // Short Name
             GameObject nObj = new GameObject("Name", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -5398,12 +5569,26 @@ public class MainMenuManager : MonoBehaviour
             carouselTopCurrencyText.text = $"{shLabel}: {FormatCompactNumber(AccountDatabase.GetAethelShards())}";
         }
 
-        // 3. Name & Role
+        // 3. Name & Role & Lock State
+        bool isUnlocked = charMgr != null && charMgr.IsCharacterUnlocked(heroId);
+        int price = cData != null ? cData.unlockPrice : 0;
+        long currentShards = AccountDatabase.GetAethelShards();
+
         string heroName = cData != null ? (isVN ? cData.nameVN : cData.nameEN) : heroId;
         string heroRole = cData != null ? (isVN ? cData.roleVN : cData.roleEN) : "";
 
         if (carouselHeroNameText != null) carouselHeroNameText.text = heroName;
-        if (carouselHeroRoleText != null) carouselHeroRoleText.text = heroRole;
+        if (carouselHeroRoleText != null)
+        {
+            if (isUnlocked)
+            {
+                carouselHeroRoleText.text = $"{heroRole}  •  <color=#55FFAA>✔ {LocalizationManager.T("ĐÃ SỞ HỮU", "OWNED")}</color>";
+            }
+            else
+            {
+                carouselHeroRoleText.text = $"{heroRole}  •  <color=#FFD700>🔒 {price:N0} {LocalizationManager.T("LINH HỒN", "SOULS")}</color>";
+            }
+        }
 
         // 4. Stat Gauges
         if (cData != null)
@@ -5512,22 +5697,90 @@ public class MainMenuManager : MonoBehaviour
             carouselHeroSkillText.text = $"<color=#FFD700><b>{skillName}</b></color>\n<size=12><color=#CCCCCC>{skillDesc}</color></size>";
         }
 
-        // 6. Action button text
+        // 6. Action button text & unlock state
         if (carouselConfirmBtnText != null)
         {
-            carouselConfirmBtnText.text = LocalizationManager.T("XUẤT TRẬN", "ENTER BATTLE");
+            if (isUnlocked)
+            {
+                carouselConfirmBtnText.text = LocalizationManager.T("XUẤT TRẬN", "ENTER BATTLE");
+                carouselConfirmBtnText.color = new Color(1f, 0.92f, 0.65f, 1f);
+                if (carouselConfirmBtnSubText != null)
+                {
+                    carouselConfirmBtnSubText.text = LocalizationManager.T("TIẾN VÀO HẦM NGỤC", "ENTER RUINS");
+                    carouselConfirmBtnSubText.color = new Color(0.82f, 0.85f, 0.90f, 0.85f);
+                }
+                if (carouselConfirmBtnOutline != null)
+                {
+                    carouselConfirmBtnOutline.effectColor = new Color(1f, 0.85f, 0.3f, 0.95f);
+                }
+                if (carouselConfirmBtnImg != null)
+                {
+                    carouselConfirmBtnImg.color = Color.white;
+                }
+            }
+            else
+            {
+                carouselConfirmBtnText.text = LocalizationManager.T("MỞ KHÓA TƯỚNG", "UNLOCK WARRIOR");
+                if (currentShards >= price)
+                {
+                    carouselConfirmBtnText.color = new Color(0.35f, 1f, 0.65f, 1f);
+                    if (carouselConfirmBtnSubText != null)
+                    {
+                        carouselConfirmBtnSubText.text = $"{price:N0} {LocalizationManager.T("LINH HỒN", "SOULS")}";
+                        carouselConfirmBtnSubText.color = new Color(1f, 0.95f, 0.65f, 1f);
+                    }
+                    if (carouselConfirmBtnOutline != null)
+                    {
+                        carouselConfirmBtnOutline.effectColor = new Color(0.25f, 0.95f, 0.55f, 0.95f);
+                    }
+                    if (carouselConfirmBtnImg != null)
+                    {
+                        carouselConfirmBtnImg.color = new Color(0.12f, 0.28f, 0.18f, 1f);
+                    }
+                }
+                else
+                {
+                    long missing = price - currentShards;
+                    carouselConfirmBtnText.color = new Color(1f, 0.45f, 0.45f, 1f);
+                    if (carouselConfirmBtnSubText != null)
+                    {
+                        carouselConfirmBtnSubText.text = $"<color=#FF8888>{price:N0} {LocalizationManager.T("LINH HỒN", "SOULS")} ({LocalizationManager.T("THIẾU", "NEED")} {missing:N0})</color>";
+                    }
+                    if (carouselConfirmBtnOutline != null)
+                    {
+                        carouselConfirmBtnOutline.effectColor = new Color(0.7f, 0.2f, 0.2f, 0.85f);
+                    }
+                    if (carouselConfirmBtnImg != null)
+                    {
+                        carouselConfirmBtnImg.color = new Color(0.22f, 0.10f, 0.10f, 1f);
+                    }
+                }
+            }
+            if (carouselConfirmBtn != null) carouselConfirmBtn.interactable = true;
         }
 
-        // 7. Highlight Selected Roster Card in Bottom Deck
+        // 7. Highlight Selected Roster Card in Bottom Deck & Update Lock Icons
         for (int i = 0; i < carouselRosterCardObjs.Count; i++)
         {
             if (carouselRosterCardObjs[i] == null) continue;
             bool isSelected = (i == currentCarouselIdx);
+            string cardHeroId = (i >= 0 && i < carouselHeroIds.Length) ? carouselHeroIds[i] : "";
+            bool cardUnlocked = charMgr != null && charMgr.IsCharacterUnlocked(cardHeroId);
+
+            if (i < carouselRosterCardLocks.Count && carouselRosterCardLocks[i] != null)
+            {
+                carouselRosterCardLocks[i].SetActive(!cardUnlocked);
+            }
+
+            if (i < carouselRosterCardAvatars.Count && carouselRosterCardAvatars[i] != null)
+            {
+                carouselRosterCardAvatars[i].color = cardUnlocked ? Color.white : new Color(0.42f, 0.45f, 0.52f, 0.75f);
+            }
 
             if (i < carouselRosterCardOutlines.Count && carouselRosterCardOutlines[i] != null)
             {
                 carouselRosterCardOutlines[i].effectColor = isSelected
-                    ? new Color(1f, 0.85f, 0.3f, 1f)
+                    ? (cardUnlocked ? new Color(1f, 0.85f, 0.3f, 1f) : new Color(0.85f, 0.65f, 0.2f, 0.9f))
                     : new Color(0.25f, 0.30f, 0.40f, 0.6f);
                 carouselRosterCardOutlines[i].effectDistance = isSelected
                     ? new Vector2(2.5f, -2.5f)

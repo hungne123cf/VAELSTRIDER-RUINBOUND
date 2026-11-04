@@ -434,12 +434,8 @@ public class TitanBerserkerSkill : MonoBehaviour
                 energySys.AddInnerEnergy(hitEnemyCount * 12f);
             }
 
-            // Hồi phục Máu từ Ngọc Huyết Thạch / Lifesteal khi nện đòn gồng trúng quái
-            if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-            {
-                int heal = Mathf.Max(1, Mathf.RoundToInt(totalDamage * playerCombat.LifestealPercent));
-                playerHealth.Heal(heal);
-            }
+            // Hồi phục Máu từ Ngọc Huyết Thạch / Lõi Nâng Cấp khi nện đòn gồng trúng quái
+            playerCombat?.ApplyLifesteal(totalDamage, DamageType.Physical);
         }
 
         // TẠO CÁC CỌC BĂNG ĐỊA CHẤN LAN TỎA (Ice VFX thay cho vết nứt cũ)
@@ -672,11 +668,7 @@ public class TitanBerserkerSkill : MonoBehaviour
 
             AddBerserkRage(ragePerHit * hitCount);
 
-            if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-            {
-                int heal = Mathf.Max(1, Mathf.RoundToInt(totalDmg * playerCombat.LifestealPercent));
-                playerHealth.Heal(heal);
-            }
+            playerCombat?.ApplyLifesteal(totalDmg, DamageType.Physical);
         }
     }
 
@@ -1048,6 +1040,7 @@ public class TitanBerserkerSkill : MonoBehaviour
             if (dmg != null && !(dmg is PlayerHealth))
             {
                 dmg.TakeDamage(cataclysmDamage);
+                playerCombat?.ApplyLifesteal(cataclysmDamage, DamageType.Physical);
                 DamagePopup.Create(col.transform.position, cataclysmDamage, DamageType.Physical, isCritical: true);
                 if (playerCombat != null && playerCombat.BonusTrueDamage > 0)
                 {

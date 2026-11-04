@@ -696,11 +696,7 @@ public class CelestialMageSkill : MonoBehaviour
                     rb.linearVelocity = pushDir * (7.5f + chargeRatio * 4.0f);
                 }
 
-                if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-                {
-                    int healAmount = Mathf.Max(1, Mathf.RoundToInt(damage * playerCombat.LifestealPercent));
-                    playerHealth.Heal(healAmount);
-                }
+                playerCombat?.ApplyLifesteal(damage, DamageType.Magic);
             }
         }
 
@@ -1065,11 +1061,7 @@ public class CelestialMageSkill : MonoBehaviour
                     bossHitCount++;
                 }
 
-                if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-                {
-                    int healAmount = Mathf.Max(1, Mathf.RoundToInt(totalDamage * playerCombat.LifestealPercent));
-                    playerHealth.Heal(healAmount);
-                }
+                playerCombat?.ApplyLifesteal(totalDamage, DamageType.Magic);
             }
         }
 
@@ -1505,12 +1497,7 @@ public class ArcaneOrbProjectile : MonoBehaviour
             DamagePopup.Create(col.transform.position, actualDmg, DamageType.Magic, isCritical: isCrit);
             AugmentManager.TriggerOnHitAugments(gameObject, col.gameObject, actualDmg, dmg);
 
-            float vamp = (playerCombat != null) ? Mathf.Max(playerCombat.SpellVampPercent, playerCombat.LifestealPercent) : 0f;
-            if (vamp > 0f && playerHealth != null)
-            {
-                int healAmount = Mathf.Max(1, Mathf.RoundToInt(finalDamage * vamp));
-                playerHealth.Heal(healAmount);
-            }
+            playerCombat?.ApplyLifesteal(actualDmg, DamageType.Magic);
 
             // TÍCH LŨY NỘI NĂNG KHI ĐÁNH TRÚNG QUÁI (Quái thường +8, Boss +16)
             GameObject hitTargetObj = (dmg as Component)?.gameObject ?? col.gameObject;
@@ -1690,11 +1677,7 @@ public class AstralResidueField : MonoBehaviour
                 damageable.TakeDamage(damagePerTick);
                 DamagePopup.Create(col.transform.position + new Vector3(Random.Range(-0.2f, 0.2f), 0.35f, 0f), damagePerTick, DamageType.Magic, isCritical: false);
 
-                if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-                {
-                    int heal = Mathf.Max(1, Mathf.RoundToInt(damagePerTick * playerCombat.LifestealPercent));
-                    playerHealth.Heal(heal);
-                }
+                playerCombat?.ApplyLifesteal(damagePerTick, DamageType.Magic);
 
                 // TÍCH LŨY NỘI NĂNG KHI THIÊU ĐỐT TRÚNG QUÁI (Quái thường +1.0f, Boss +2.5f)
                 GameObject hitTargetObj = (damageable as Component)?.gameObject ?? col.gameObject;

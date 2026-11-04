@@ -635,20 +635,8 @@ public class DuneAssassinSkill : MonoBehaviour
                         }
                     }
 
-                    // Lifesteal & Overheal cho Đòn Đánh Thường
-                    if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null && !playerHealth.IsDead)
-                    {
-                        int healAmount = Mathf.Max(1, Mathf.RoundToInt(totalDamage * playerCombat.LifestealPercent));
-                        if (!playerHealth.IsFullHealth())
-                        {
-                            playerHealth.Heal(healAmount);
-                        }
-                        else
-                        {
-                            // Khi máu gốc đã đầy: Chuyển % hút máu thành Máu Ảo (Overheal)
-                            playerHealth.AddVirtualHealth(healAmount, 15f);
-                        }
-                    }
+                    // Lifesteal & Overheal cho Đòn Đánh Thường (ApplyLifesteal hỗ trợ đầy đủ Augments & Overheal Shield)
+                    playerCombat?.ApplyLifesteal(totalDamage, DamageType.Physical);
                 }
             }
         }

@@ -260,11 +260,7 @@ public class GaleRoninSkill : MonoBehaviour
             {
                 }
 
-            if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-            {
-                int healAmount = Mathf.Max(1, Mathf.RoundToInt(totalBaseDamage * playerCombat.LifestealPercent));
-                playerHealth.Heal(healAmount);
-            }
+            playerCombat?.ApplyLifesteal(totalBaseDamage, DamageType.Physical);
         }
 
         return true;
@@ -528,21 +524,13 @@ public class GaleRoninSkill : MonoBehaviour
                 specialCooldownTimer = Mathf.Max(0f, specialCooldownTimer - cdReduction);
             }
 
-            if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-            {
-                int healAmount = Mathf.Max(1, Mathf.RoundToInt(totalDamage * playerCombat.LifestealPercent));
-                playerHealth.Heal(healAmount);
-            }
+            playerCombat?.ApplyLifesteal(totalDamage, DamageType.Physical);
         }
     }
 
     public void OnCrescentWaveHit(GameObject enemyObj, IDamageable damageable, int damage)
     {
-        if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-        {
-            int healAmount = Mathf.Max(1, Mathf.RoundToInt(damage * playerCombat.LifestealPercent));
-            playerHealth.Heal(healAmount);
-        }
+        playerCombat?.ApplyLifesteal(damage, DamageType.Physical);
 
         var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
         if (energySys != null)
@@ -1035,11 +1023,7 @@ public class GaleRoninSkill : MonoBehaviour
             energySys.AddInnerEnergy(30f);
         }
 
-        if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
-        {
-            int healAmount = Mathf.Max(1, Mathf.RoundToInt(totalStrikeDmg * playerCombat.LifestealPercent));
-            playerHealth.Heal(healAmount);
-        }
+        playerCombat?.ApplyLifesteal(totalStrikeDmg, DamageType.Physical);
 
         // Dừng ngắn 0.15s để đòn chém dứt khoát rồi biến về vị trí cũ
         yield return new WaitForSeconds(0.15f);

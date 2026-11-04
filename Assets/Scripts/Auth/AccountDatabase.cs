@@ -432,8 +432,17 @@ public static class AccountDatabase
         PlayerPrefs.SetInt("Map2_Completed", acc.map2Completed ? 1 : 0);
         PlayerPrefs.SetInt("Map3_Completed", acc.map3Completed ? 1 : 0);
 
-        // Nhân vật đã chọn
+        // Nhân vật đã chọn & Tướng đã mở khóa
         PlayerPrefs.SetInt("Char_Unlocked_Maid", acc.unlockedMaid ? 1 : 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_VAELSTRIDER, 1);
+        if (acc.unlockedHeroes != null)
+        {
+            foreach (var h in acc.unlockedHeroes)
+            {
+                string norm = CharacterManager.NormalizeHeroId(h);
+                PlayerPrefs.SetInt("Char_Unlocked_" + norm, 1);
+            }
+        }
         string hero = acc.selectedHero;
         string charId = CharacterManager.CHAR_VAELSTRIDER;
         if (!string.IsNullOrEmpty(hero))
@@ -638,6 +647,29 @@ public static class AccountDatabase
         return false;
     }
 
+    public static AccountData GetActiveAccount()
+    {
+        EnsureDatabaseLoaded();
+        string activeUser = PlayerPrefs.GetString(PREF_CURRENT_USER, "");
+        if (string.IsNullOrEmpty(activeUser) || dbCache == null || dbCache.accounts == null) return null;
+        return dbCache.accounts.Find(a => string.Equals(a.username, activeUser, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public static void SyncHeroUnlock(string normHeroId)
+    {
+        var acc = GetActiveAccount();
+        if (acc != null)
+        {
+            if (acc.unlockedHeroes == null) acc.unlockedHeroes = new List<string>();
+            string alias = CharacterManager.GetHeroAliasStatic(normHeroId);
+            if (!acc.unlockedHeroes.Contains(alias))
+            {
+                acc.unlockedHeroes.Add(alias);
+            }
+            SaveDatabase();
+        }
+    }
+
     /// <summary>
     /// Lưu tiến trình hiện tại từ game session (PlayerPrefs) vào Database file & Cloud
     /// </summary>
@@ -674,6 +706,22 @@ public static class AccountDatabase
                 acc.equippedCloakId = PlayerPrefs.GetInt("Equipped_Slot_Cloak", 0);
                 acc.equippedBagId = PlayerPrefs.GetInt("Equipped_Slot_Bag", 0);
                 acc.unlockedCostumes = HeroCostumeManager.GetUnlockedCostumeIds();
+
+                // Lưu danh sách tướng đã mở khóa
+                if (acc.unlockedHeroes == null) acc.unlockedHeroes = new List<string>();
+                acc.unlockedHeroes.Clear();
+                acc.unlockedHeroes.Add("vael");
+
+                var cm = CharacterManager.EnsureInstance();
+                if (cm != null)
+                {
+                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_GALE_RONIN)) acc.unlockedHeroes.Add("ronin");
+                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_AZURE_BLADE)) acc.unlockedHeroes.Add("azure");
+                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_TITAN_BERSERKER)) acc.unlockedHeroes.Add("titan");
+                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_DUNE_ASSASSIN)) acc.unlockedHeroes.Add("dune");
+                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_CELESTIAL_MAGE)) acc.unlockedHeroes.Add("mage");
+                }
+
                 acc.lastLoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
                 SaveDatabase();

@@ -93,7 +93,7 @@ public class CharacterManager : MonoBehaviour
     {
         characters.Clear();
 
-        // 1. Vaelstrider
+        // 1. Vaelstrider (Protagonist / Balanced / Starter - Mặc định mở khóa)
         characters[CHAR_VAELSTRIDER] = new CharacterData
         {
             id = CHAR_VAELSTRIDER,
@@ -109,12 +109,12 @@ public class CharacterManager : MonoBehaviour
             baseAttack = 20,
             baseDefense = 12,
             baseSpeed = 5.0f,
-            unlockPrice = 0,
+            unlockPrice = 0, // Miễn phí ban đầu
             controllerPath = "Assets/Animation/Player/idle_down_0.controller",
             spriteSheetPath = "Assets/ART/Player/IDLE/idle_down.png"
         };
 
-        // 2. Phong Lôi Lãng Khách (Player 2)
+        // 2. Phong Lôi Lãng Khách (Gale Ronin / Player 2)
         characters[CHAR_GALE_RONIN] = new CharacterData
         {
             id = CHAR_GALE_RONIN,
@@ -130,7 +130,7 @@ public class CharacterManager : MonoBehaviour
             baseAttack = 28,
             baseDefense = 6,
             baseSpeed = 5.4f,
-            unlockPrice = 0, // Mở khóa sẵn sàng chơi
+            unlockPrice = 25000, // Tier A+: Sát thủ cơ động, tốc độ cao nhất (5.4 SPD), bạo kích khủng x2.85
             controllerPath = "Assets/Animation/Player2/Player2.controller",
             spriteSheetPath = "Assets/ART/Player2/_down idle.png"
         };
@@ -151,7 +151,7 @@ public class CharacterManager : MonoBehaviour
             baseAttack = 24,
             baseDefense = 14,
             baseSpeed = 4.8f,
-            unlockPrice = 0, // Mở khóa sẵn sàng chơi
+            unlockPrice = 12000, // Tier B+: Sóng kiếm tầm xa an toàn, phòng ngự vững chắc
             controllerPath = "Assets/Animation/Player3/Player3.controller",
             spriteSheetPath = "Assets/ART/Player3/Sword_Idle.png"
         };
@@ -172,7 +172,7 @@ public class CharacterManager : MonoBehaviour
             baseAttack = 32,
             baseDefense = 25,
             baseSpeed = 4.0f,
-            unlockPrice = 0, // Mở khóa sẵn sàng chơi
+            unlockPrice = 45000, // Tier S: Siêu Tanker bất tử 200 HP, ATK 32 cao nhất cận chiến, nện choáng
             controllerPath = "Assets/Animation/Player4/Player4.controller",
             spriteSheetPath = "Assets/ART/Player4/Hammer_Idle.png"
         };
@@ -193,7 +193,7 @@ public class CharacterManager : MonoBehaviour
             baseAttack = 18,
             baseDefense = 8,
             baseSpeed = 4.8f,
-            unlockPrice = 0, // Mở khóa sẵn sàng chơi
+            unlockPrice = 5000, // Tier B: Nhập môn, giá rẻ dễ tiếp cận, dồn sát thương xuất huyết & choáng
             controllerPath = "Assets/Animation/Player5/Player5.controller",
             spriteSheetPath = "Assets/ART/Player5/PNG/idle/idle_1.png"
         };
@@ -214,19 +214,73 @@ public class CharacterManager : MonoBehaviour
             baseAttack = 30,
             baseDefense = 5,
             baseSpeed = 4.5f,
-            unlockPrice = 0,
+            unlockPrice = 65000, // Tier SS: Pháp sư tối thượng, đạn tự dẫn đường sét lan, bão thiên thạch quét sạch map
             controllerPath = "",
             spriteSheetPath = "Assets/ART/Player6/sample(idle&walk)/idle/sprite sheets/idle.png"
         };
 
-        // Mặc định mở khóa
+        // Luôn đảm bảo tướng cơ bản ban đầu Vaelstrider được mở khóa
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_VAELSTRIDER, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_GALE_RONIN, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_AZURE_BLADE, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_TITAN_BERSERKER, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_DUNE_ASSASSIN, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_CELESTIAL_MAGE, 1);
+
+        // Di chuyển hệ thống khóa cũ sang hệ thống cân bằng Linh Hồn (One-time migration)
+        if (PlayerPrefs.GetInt("Hero_Soul_Unlock_Migrated_V5", 0) == 0)
+        {
+            var acc = AccountDatabase.GetActiveAccount();
+            HashSet<string> ownedFromAcc = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (acc != null && acc.unlockedHeroes != null)
+            {
+                foreach (var h in acc.unlockedHeroes)
+                {
+                    ownedFromAcc.Add(NormalizeHeroId(h));
+                }
+            }
+
+            string[] premiumHeroes = new string[]
+            {
+                CHAR_GALE_RONIN,
+                CHAR_AZURE_BLADE,
+                CHAR_TITAN_BERSERKER,
+                CHAR_DUNE_ASSASSIN,
+                CHAR_CELESTIAL_MAGE
+            };
+
+            foreach (var hId in premiumHeroes)
+            {
+                bool isOwned = ownedFromAcc.Contains(hId);
+                PlayerPrefs.SetInt(UNLOCKED_PREFIX + hId, isOwned ? 1 : 0);
+            }
+
+            PlayerPrefs.SetInt("Hero_Soul_Unlock_Migrated_V5", 1);
+        }
+
         PlayerPrefs.Save();
+    }
+
+    public static string NormalizeHeroId(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return CHAR_VAELSTRIDER;
+        string lower = id.Trim().ToLower();
+        if (lower == "titan" || lower == "titanberserker" || lower == "player4" || lower == CHAR_TITAN_BERSERKER.ToLower())
+            return CHAR_TITAN_BERSERKER;
+        if (lower == "azure" || lower == "azureblade" || lower == "player3" || lower == CHAR_AZURE_BLADE.ToLower())
+            return CHAR_AZURE_BLADE;
+        if (lower == "ronin" || lower == "galeronin" || lower == "player2" || lower == "maid" || lower == CHAR_GALE_RONIN.ToLower())
+            return CHAR_GALE_RONIN;
+        if (lower == "dune" || lower == "duneassassin" || lower == "player5" || lower == CHAR_DUNE_ASSASSIN.ToLower())
+            return CHAR_DUNE_ASSASSIN;
+        if (lower == "mage" || lower == "celestialmage" || lower == "player6" || lower == CHAR_CELESTIAL_MAGE.ToLower())
+            return CHAR_CELESTIAL_MAGE;
+        return CHAR_VAELSTRIDER;
+    }
+
+    public static string GetHeroAliasStatic(string normId)
+    {
+        if (normId == CHAR_TITAN_BERSERKER) return "titan";
+        if (normId == CHAR_AZURE_BLADE) return "azure";
+        if (normId == CHAR_GALE_RONIN) return "ronin";
+        if (normId == CHAR_DUNE_ASSASSIN) return "dune";
+        if (normId == CHAR_CELESTIAL_MAGE) return "mage";
+        return "vael";
     }
 
     public string GetSelectedCharacterId()
@@ -234,48 +288,16 @@ public class CharacterManager : MonoBehaviour
         string selected = PlayerPrefs.GetString(SELECTED_CHAR_KEY, "");
         if (string.IsNullOrEmpty(selected))
         {
-            selected = PlayerPrefs.GetString("SelectedHero", CHAR_TITAN_BERSERKER);
+            selected = PlayerPrefs.GetString("SelectedHero", CHAR_VAELSTRIDER);
         }
 
-        if (string.Equals(selected, "titan", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(selected, "titanberserker", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(selected, "player4", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(selected, CHAR_TITAN_BERSERKER, StringComparison.OrdinalIgnoreCase))
+        string norm = NormalizeHeroId(selected);
+        if (!IsCharacterUnlocked(norm))
         {
-            return CHAR_TITAN_BERSERKER;
+            norm = CHAR_VAELSTRIDER;
+            SelectCharacter(CHAR_VAELSTRIDER);
         }
-        else if (string.Equals(selected, "azure", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(selected, "azureblade", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(selected, "player3", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(selected, CHAR_AZURE_BLADE, StringComparison.OrdinalIgnoreCase))
-        {
-            return CHAR_AZURE_BLADE;
-        }
-        else if (string.Equals(selected, "ronin", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, "galeronin", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, "player2", StringComparison.OrdinalIgnoreCase) ||
-                 string.Equals(selected, "maid", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, CHAR_GALE_RONIN, StringComparison.OrdinalIgnoreCase))
-        {
-            return CHAR_GALE_RONIN;
-        }
-
-        else if (string.Equals(selected, "dune", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, "duneassassin", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, "player5", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, CHAR_DUNE_ASSASSIN, StringComparison.OrdinalIgnoreCase))
-        {
-            return CHAR_DUNE_ASSASSIN;
-        }
-        else if (string.Equals(selected, "mage", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, "celestialmage", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, "player6", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(selected, CHAR_CELESTIAL_MAGE, StringComparison.OrdinalIgnoreCase))
-        {
-            return CHAR_CELESTIAL_MAGE;
-        }
-
-        return CHAR_VAELSTRIDER;
+        return norm;
     }
 
     public CharacterData GetSelectedCharacter()
@@ -287,70 +309,39 @@ public class CharacterManager : MonoBehaviour
 
     public CharacterData GetCharacter(string id)
     {
-        if (characters.TryGetValue(id, out var data)) return data;
+        string normId = NormalizeHeroId(id);
+        if (characters.TryGetValue(normId, out var data)) return data;
         return null;
     }
 
     public bool IsCharacterUnlocked(string id)
     {
-        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + id, 0) == 1 || 
-               id == CHAR_VAELSTRIDER || 
-               id == CHAR_GALE_RONIN || 
-               id == CHAR_AZURE_BLADE ||
-               id == CHAR_TITAN_BERSERKER ||
-               id == CHAR_DUNE_ASSASSIN ||
-               id == CHAR_CELESTIAL_MAGE;
+        string normId = NormalizeHeroId(id);
+        if (normId == CHAR_VAELSTRIDER) return true;
+        return PlayerPrefs.GetInt(UNLOCKED_PREFIX + normId, 0) == 1;
     }
 
     public bool UnlockCharacter(string id)
     {
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + id, 1);
+        string normId = NormalizeHeroId(id);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + normId, 1);
         PlayerPrefs.Save();
+        AccountDatabase.SyncHeroUnlock(normId);
+        Debug.Log($"<color=green>[CHARACTER]</color> Đã mở khóa thành công tướng: {normId}");
         return true;
     }
 
     public void SelectCharacter(string id)
     {
-        string normId = CHAR_VAELSTRIDER;
-        if (string.Equals(id, "titan", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(id, "titanberserker", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(id, "player4", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(id, CHAR_TITAN_BERSERKER, StringComparison.OrdinalIgnoreCase))
+        string normId = NormalizeHeroId(id);
+        if (!IsCharacterUnlocked(normId))
         {
-            normId = CHAR_TITAN_BERSERKER;
-        }
-        else if (string.Equals(id, "azure", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(id, "azureblade", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(id, "player3", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(id, CHAR_AZURE_BLADE, StringComparison.OrdinalIgnoreCase))
-        {
-            normId = CHAR_AZURE_BLADE;
-        }
-        else if (string.Equals(id, "ronin", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, "galeronin", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, "player2", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, "maid", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, CHAR_GALE_RONIN, StringComparison.OrdinalIgnoreCase))
-        {
-            normId = CHAR_GALE_RONIN;
-        }
-        else if (string.Equals(id, "dune", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, "duneassassin", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, "player5", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, CHAR_DUNE_ASSASSIN, StringComparison.OrdinalIgnoreCase))
-        {
-            normId = CHAR_DUNE_ASSASSIN;
-        }
-        else if (string.Equals(id, "mage", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, "celestialmage", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, "player6", StringComparison.OrdinalIgnoreCase) || 
-                 string.Equals(id, CHAR_CELESTIAL_MAGE, StringComparison.OrdinalIgnoreCase))
-        {
-            normId = CHAR_CELESTIAL_MAGE;
+            Debug.LogWarning($"[CHARACTER] Tướng {normId} chưa được mở khóa bằng Linh Hồn!");
+            return;
         }
 
         PlayerPrefs.SetString(SELECTED_CHAR_KEY, normId);
-        PlayerPrefs.SetString("SelectedHero", (normId == CHAR_TITAN_BERSERKER) ? "titan" : ((normId == CHAR_AZURE_BLADE) ? "azure" : (normId == CHAR_GALE_RONIN ? "ronin" : (normId == CHAR_DUNE_ASSASSIN ? "dune" : (normId == CHAR_CELESTIAL_MAGE ? "mage" : "vael")))));
+        PlayerPrefs.SetString("SelectedHero", GetHeroAliasStatic(normId));
         PlayerPrefs.Save();
         Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {normId}");
     }

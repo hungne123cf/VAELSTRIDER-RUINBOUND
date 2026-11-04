@@ -347,11 +347,10 @@ public class AzureBladeSkill : MonoBehaviour
             energySys.AddInnerEnergy(gain * 1.5f);
         }
 
-        if (playerCombat != null && playerCombat.LifestealPercent > 0f && playerHealth != null)
+        if (playerCombat != null)
         {
             int effDmg = (hitDamage > 0) ? hitDamage : (isCharged ? Mathf.RoundToInt(baseWaveDamage * maxChargedMultiplier) : baseWaveDamage);
-            int heal = Mathf.Max(1, Mathf.RoundToInt(effDmg * playerCombat.LifestealPercent));
-            playerHealth.Heal(heal);
+            playerCombat.ApplyLifesteal(effDmg, DamageType.Magic);
         }
     }
 

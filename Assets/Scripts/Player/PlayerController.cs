@@ -701,14 +701,25 @@ public class PlayerController : MonoBehaviour
         var box = GetComponent<BoxCollider2D>();
         var cap = GetComponent<CapsuleCollider2D>();
 
-        if (box != null && cap == null)
+        if (box != null)
         {
             Vector2 oldOffset = box.offset;
             Vector2 oldSize = box.size;
-            Destroy(box);
-            cap = gameObject.AddComponent<CapsuleCollider2D>();
-            cap.offset = oldOffset;
-            cap.size = oldSize;
+            if (Application.isPlaying)
+            {
+                Destroy(box);
+            }
+            else
+            {
+                DestroyImmediate(box);
+            }
+
+            if (cap == null)
+            {
+                cap = gameObject.AddComponent<CapsuleCollider2D>();
+                cap.offset = oldOffset;
+                cap.size = oldSize;
+            }
         }
         else if (cap == null)
         {

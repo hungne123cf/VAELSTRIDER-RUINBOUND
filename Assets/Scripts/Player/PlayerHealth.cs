@@ -229,18 +229,19 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         }
 
         // 2. Nếu không phải khởi tạo map:
+        if (maxHealth > oldMax && oldMax > 0)
+        {
+            int deltaHp = maxHealth - oldMax;
+            currentHealth += deltaHp;
+            Debug.Log($"<color=green>[MAX HP INCREASE]</color> Giới hạn máu tăng +{deltaHp} HP ({oldMax} -> {maxHealth}). Lập tức cộng ngay +{deltaHp} HP vào sinh lực hiện tại: {currentHealth}/{maxHealth}!");
+        }
+
         if (!suppressHealthReset)
         {
             if (currentHealth > maxHealth || currentHealth <= 0)
             {
                 currentHealth = maxHealth;
             }
-            else if (maxHealth > oldMax && oldMax > 0)
-            {
-                currentHealth += (maxHealth - oldMax);
-            }
-
-            currentHealth = Mathf.Clamp(currentHealth, 1, maxHealth);
         }
         else
         {
@@ -248,6 +249,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             {
                 currentHealth = maxHealth;
             }
+        }
+
+        if (!isDead)
+        {
+            currentHealth = Mathf.Clamp(currentHealth, 1, maxHealth);
+            PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
         }
     }
 

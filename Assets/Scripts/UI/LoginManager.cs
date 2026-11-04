@@ -64,6 +64,11 @@ public class LoginManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
+        Screen.autorotateToPortrait = false;
+        Screen.autorotateToPortraitUpsideDown = false;
+        Screen.autorotateToLandscapeLeft = true;
+        Screen.autorotateToLandscapeRight = true;
         EnsureInputSystem();
         EnsureCloudService();
     }

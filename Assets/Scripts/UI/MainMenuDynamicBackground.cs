@@ -215,19 +215,33 @@ public class MainMenuDynamicBackground : MonoBehaviour
     private static Sprite LoadSpriteFromAssetPath(string fullAssetPath)
     {
         Sprite spr = null;
-#if UNITY_EDITOR
-        spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(fullAssetPath);
+
+        // 1. Uu tien Resources tren Android / Build Standalone
+        string fileNameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(fullAssetPath);
+        spr = Resources.Load<Sprite>("Backgrounds/" + fileNameWithoutExt);
+        if (spr == null) spr = Resources.Load<Sprite>(fileNameWithoutExt);
         if (spr == null)
         {
-            var subAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(fullAssetPath);
-            if (subAssets != null)
+            var all = Resources.LoadAll<Sprite>("Backgrounds/" + fileNameWithoutExt);
+            if (all != null && all.Length > 0) spr = all[0];
+        }
+
+#if UNITY_EDITOR
+        if (spr == null)
+        {
+            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(fullAssetPath);
+            if (spr == null)
             {
-                for (int i = 0; i < subAssets.Length; i++)
+                var subAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(fullAssetPath);
+                if (subAssets != null)
                 {
-                    if (subAssets[i] is Sprite s)
+                    for (int i = 0; i < subAssets.Length; i++)
                     {
-                        spr = s;
-                        break;
+                        if (subAssets[i] is Sprite s)
+                        {
+                            spr = s;
+                            break;
+                        }
                     }
                 }
             }
@@ -255,16 +269,20 @@ public class MainMenuDynamicBackground : MonoBehaviour
     {
         timer += Time.deltaTime;
 
-        // 1. Unified Mouse Parallax (Moves the entire artwork together so roads/buildings NEVER tear apart)
+        // 1. Unified Mouse Parallax (Safe on mobile / touch)
         Vector2 mouseNorm = Vector2.zero;
-        if (UnityEngine.InputSystem.Mouse.current != null)
+        try
         {
-            Vector2 mousePos = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
-            mouseNorm = new Vector2(
-                (mousePos.x / Screen.width - 0.5f) * 2f,
-                (mousePos.y / Screen.height - 0.5f) * 2f
-            );
+            if (UnityEngine.InputSystem.Mouse.current != null)
+            {
+                Vector2 mousePos = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
+                mouseNorm = new Vector2(
+                    (mousePos.x / Screen.width - 0.5f) * 2f,
+                    (mousePos.y / Screen.height - 0.5f) * 2f
+                );
+            }
         }
+        catch {}
 
         if (cityArtRt != null)
         {

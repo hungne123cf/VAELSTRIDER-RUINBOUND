@@ -33,82 +33,98 @@ public class DungeonMapBuilder : MonoBehaviour
             return;
         }
 
-        // 2. Load Tile Assets từ Palettes
-        TileBase floorTile = null;
-        TileBase wallTile = null;
+        // 2. Kiểm tra xem Tilemap đã có sẵn gạch trong Scene hay chưa
+        int existingGroundCount = groundTm.GetUsedTilesCount();
+        if (existingGroundCount > 0)
+        {
+            Debug.Log($"<color=cyan>[MAP BUILDER]</color> Bản đồ đã có sẵn {existingGroundCount} ô gạch trong Scene. Giữ nguyên 100% không xóa!");
+        }
+        else
+        {
+            // 2b. Chỉ tái tạo gạch khi Scene hoàn toàn chưa có gạch
+            TileBase floorTile = null;
+            TileBase wallTile = null;
 
 #if UNITY_EDITOR
-        floorTile = UnityEditor.AssetDatabase.LoadAssetAtPath<TileBase>("Assets/Palettes/TX Tileset Stone Ground_24.asset");
-        wallTile = UnityEditor.AssetDatabase.LoadAssetAtPath<TileBase>("Assets/Palettes/TX Tileset Stone Ground_43.asset");
+            floorTile = UnityEditor.AssetDatabase.LoadAssetAtPath<TileBase>("Assets/Palettes/TX Tileset Stone Ground_24.asset");
+            wallTile = UnityEditor.AssetDatabase.LoadAssetAtPath<TileBase>("Assets/Palettes/TX Tileset Stone Ground_43.asset");
 #endif
 
-        if (floorTile == null) floorTile = groundTm.GetTile(new Vector3Int(0, 0, 0));
-        if (wallTile == null) wallTile = wallsTm.GetTile(new Vector3Int(-14, 0, 0));
+            if (floorTile == null) floorTile = groundTm.GetTile(new Vector3Int(0, 0, 0));
+            if (wallTile == null) wallTile = wallsTm.GetTile(new Vector3Int(-14, 0, 0));
 
-        // 3. Clear toàn bộ tiles cũ
-        groundTm.ClearAllTiles();
-        wallsTm.ClearAllTiles();
-
-        // 4. Tính toán toàn bộ ô sàn (Floor) và ô tường (Wall)
-        HashSet<Vector2Int> floorSet = new HashSet<Vector2Int>();
-
-        void AddRect(int x1, int y1, int x2, int y2)
-        {
-            for (int x = x1; x <= x2; x++)
+            if (floorTile != null && wallTile != null)
             {
-                for (int y = y1; y <= y2; y++)
+                // 3. Clear toàn bộ tiles cũ
+                groundTm.ClearAllTiles();
+                wallsTm.ClearAllTiles();
+
+                // 4. Tính toán toàn bộ ô sàn (Floor) và ô tường (Wall)
+                HashSet<Vector2Int> floorSet = new HashSet<Vector2Int>();
+
+                void AddRect(int x1, int y1, int x2, int y2)
                 {
-                    floorSet.Add(new Vector2Int(x, y));
-                }
-            }
-        }
-
-        // Phòng 1: Sanctuary
-        AddRect(-16, -6, -2, 6);
-        // Hành lang 1: Corridor 1 (Đông)
-        AddRect(-1, -1, 7, 1);
-        // Phòng 2: Sunken Hall
-        AddRect(8, -8, 30, 12);
-        // Hành lang 2: Corridor 2 (Bắc)
-        AddRect(18, 13, 20, 23);
-        // Phòng 3: Cursed Crypt
-        AddRect(8, 24, 30, 44);
-        // Hành lang 3: Corridor 3 (Đông)
-        AddRect(31, 33, 41, 35);
-        // Phòng 4: Sanctum of the Titan (Boss Room)
-        AddRect(42, 20, 70, 48);
-
-        // Đặt toàn bộ gạch sàn (Ground)
-        foreach (var pos in floorSet)
-        {
-            groundTm.SetTile(new Vector3Int(pos.x, pos.y, 0), floorTile);
-        }
-
-        // Tính toán vành tường kín dày 2-3 ô (Wall Perimeter) ngăn hoàn toàn việc đi xuyên tường
-        HashSet<Vector2Int> wallSet = new HashSet<Vector2Int>();
-        foreach (var pos in floorSet)
-        {
-            for (int dx = -2; dx <= 2; dx++)
-            {
-                for (int dy = -2; dy <= 2; dy++)
-                {
-                    Vector2Int neighbor = new Vector2Int(pos.x + dx, pos.y + dy);
-                    if (!floorSet.Contains(neighbor))
+                    for (int x = x1; x <= x2; x++)
                     {
-                        wallSet.Add(neighbor);
+                        for (int y = y1; y <= y2; y++)
+                        {
+                            floorSet.Add(new Vector2Int(x, y));
+                        }
                     }
                 }
+
+                // Phòng 1: Sanctuary
+                AddRect(-16, -6, -2, 6);
+                // Hành lang 1: Corridor 1 (Đông)
+                AddRect(-1, -1, 7, 1);
+                // Phòng 2: Sunken Hall
+                AddRect(8, -8, 30, 12);
+                // Hành lang 2: Corridor 2 (Bắc)
+                AddRect(18, 13, 20, 23);
+                // Phòng 3: Cursed Crypt
+                AddRect(8, 24, 30, 44);
+                // Hành lang 3: Corridor 3 (Đông)
+                AddRect(31, 33, 41, 35);
+                // Phòng 4: Sanctum of the Titan (Boss Room)
+                AddRect(42, 20, 70, 48);
+
+                // Đặt toàn bộ gạch sàn (Ground)
+                foreach (var pos in floorSet)
+                {
+                    groundTm.SetTile(new Vector3Int(pos.x, pos.y, 0), floorTile);
+                }
+
+                // Tính toán vành tường kín dày 2-3 ô (Wall Perimeter) ngăn hoàn toàn việc đi xuyên tường
+                HashSet<Vector2Int> wallSet = new HashSet<Vector2Int>();
+                foreach (var pos in floorSet)
+                {
+                    for (int dx = -2; dx <= 2; dx++)
+                    {
+                        for (int dy = -2; dy <= 2; dy++)
+                        {
+                            Vector2Int neighbor = new Vector2Int(pos.x + dx, pos.y + dy);
+                            if (!floorSet.Contains(neighbor))
+                            {
+                                wallSet.Add(neighbor);
+                            }
+                        }
+                    }
+                }
+
+                // Đặt toàn bộ gạch tường (Walls)
+                foreach (var pos in wallSet)
+                {
+                    wallsTm.SetTile(new Vector3Int(pos.x, pos.y, 0), wallTile);
+                }
+
+                groundTm.RefreshAllTiles();
+                wallsTm.RefreshAllTiles();
+            }
+            else
+            {
+                Debug.LogWarning("[MAP BUILDER] floorTile hoặc wallTile null, an toàn bảo toàn Scene không bị xóa trắng!");
             }
         }
-
-        // Đặt toàn bộ gạch tường (Walls)
-        foreach (var pos in wallSet)
-        {
-            wallsTm.SetTile(new Vector3Int(pos.x, pos.y, 0), wallTile);
-        }
-
-        groundTm.RefreshAllTiles();
-        wallsTm.RefreshAllTiles();
 
         // Cấu hình Sorting Layer và Collider vững chắc cho Walls & Ground
         var wallRend = wallsTm.GetComponent<TilemapRenderer>();

@@ -44,6 +44,55 @@ public class PlayerCombat : MonoBehaviour
     public float SpellVampPercent => spellVampPercent + augBonusSpellVamp;
     public float LifestealPercent => lifestealPercent + augBonusLifesteal;
 
+    /// <summary>
+    /// Áp dụng Hút Máu (Lifesteal / Spellvamp / Omnivamp) chuẩn xác từ mọi nguồn: Đánh thường, Tuyệt kỹ, Phản đòn, Sóng năng lượng, Chưởng phép.
+    /// Tự động tính toán: Ngọc khảm (Socket Gems), Lõi nâng cấp (Augments), Vết Thương Sâu (Grievous Wounds), Huyết Thần Tế Lễ (Overheal Shield).
+    /// </summary>
+    public void ApplyLifesteal(int damageDealt, DamageType damageType = DamageType.Physical)
+    {
+        if (damageDealt <= 0) return;
+        if (playerHealth == null) playerHealth = GetComponent<PlayerHealth>() ?? PlayerHealth.Instance;
+        if (playerHealth == null || playerHealth.IsDead) return;
+
+        float effectiveRate = 0f;
+        if (damageType == DamageType.Physical)
+        {
+            effectiveRate = Mathf.Max(PhysLifestealPercent, LifestealPercent);
+        }
+        else if (damageType == DamageType.Magic)
+        {
+            effectiveRate = Mathf.Max(SpellVampPercent, LifestealPercent);
+        }
+        else // TrueDamage
+        {
+            effectiveRate = Mathf.Max(PhysLifestealPercent, Mathf.Max(SpellVampPercent, LifestealPercent));
+        }
+
+        if (effectiveRate <= 0.0001f) return;
+
+        int healAmount = Mathf.RoundToInt(damageDealt * effectiveRate);
+        if (healAmount <= 0) return;
+
+        // Giảm trừ hồi máu nếu đang dính hiệu ứng Vết Thương Sâu (Grievous Wounds)
+        if (GrievousWoundsDebuff.HasDebuff(gameObject))
+        {
+            healAmount = Mathf.RoundToInt(healAmount * GrievousWoundsDebuff.GetHealingMultiplier(gameObject));
+        }
+
+        if (healAmount <= 0) return;
+
+        var augMgr = AugmentManager.Instance;
+        // Huyết Thần Tế Lễ: Khi đầy máu, lượng máu hút dư thừa chuyển thành Lá Chắn Máu Ảo vĩnh cửu (tối đa 50% Max HP)
+        if (playerHealth.CurrentHealth >= playerHealth.MaxHealth && augMgr != null && augMgr.HasBloodGodTribute())
+        {
+            playerHealth.AddVirtualHealth(healAmount, 35f);
+        }
+        else
+        {
+            playerHealth.Heal(Mathf.Max(1, healAmount));
+        }
+    }
+
     private int upgradeBonusAtk = 0;
     private int weaponBonusAtk = 0;
     private int socketBonusAtk = 0;
@@ -885,28 +934,11 @@ public class PlayerCombat : MonoBehaviour
                     energySys.AddInnerEnergy(15f);
                 }
 
-                // Hồi phục Máu từ Hút Máu Vật Lý & Hút Máu Phép (Huyết Thần Tế Lễ chuyển hóa Khiên Máu Ảo khi đầy bình)
-                if (playerHealth != null)
-                {
-                    int physHeal = (PhysLifestealPercent > 0f) ? Mathf.RoundToInt(actualPhys * PhysLifestealPercent) : 0;
-                    int magicHeal = (SpellVampPercent > 0f) ? Mathf.RoundToInt(actualMagic * SpellVampPercent) : 0;
-                    int totalHeal = physHeal + magicHeal;
-                    if (GrievousWoundsDebuff.HasDebuff(gameObject))
-                    {
-                        totalHeal = Mathf.RoundToInt(totalHeal * GrievousWoundsDebuff.GetHealingMultiplier(gameObject));
-                    }
-                    if (totalHeal > 0)
-                    {
-                        if (playerHealth.CurrentHealth >= playerHealth.MaxHealth && augMgr != null && augMgr.HasBloodGodTribute())
-                        {
-                            playerHealth.AddVirtualHealth(totalHeal, 35f);
-                        }
-                        else
-                        {
-                            playerHealth.Heal(Mathf.Max(1, totalHeal));
-                        }
-                    }
-                }
+                // Hồi phục Máu từ Hút Máu Vật Lý, Phép & Chuẩn (ApplyLifesteal hỗ trợ đầy đủ Augments & Overheal Shield)
+                if (actualPhys > 0) ApplyLifesteal(actualPhys, DamageType.Physical);
+                if (actualMagic > 0) ApplyLifesteal(actualMagic, DamageType.Magic);
+                if (actualTrue > 0) ApplyLifesteal(actualTrue, DamageType.TrueDamage);
+
             }
         }
 
@@ -1126,11 +1158,8 @@ public class PlayerCombat : MonoBehaviour
                         energySys.AddInnerEnergy(isFinal ? 12f : 5f);
                     }
 
-                    if (lifestealPercent > 0f && playerHealth != null)
-                    {
-                        int healAmount = Mathf.Max(1, Mathf.RoundToInt(damage * lifestealPercent));
-                        playerHealth.Heal(healAmount);
-                    }
+                    // Hồi phục Máu từ Tuyệt Kỹ Bão Kiếm Lốc Xoáy (ApplyLifesteal hỗ trợ đầy đủ Augments & Overheal Shield)
+                    ApplyLifesteal(finalDamage, DamageType.Physical);
                 }
             }
 
@@ -1661,12 +1690,8 @@ public class PlayerCombat : MonoBehaviour
                     hitCount++;
                     ReduceUltiCooldownPercent(0.50f); // Giảm 50% hồi chiêu Ulti khi đánh trúng quái/Boss
 
-                    // Hồi phục Máu từ Ngọc Huyết Thạch / Lifesteal khi nổ phản đòn
-                    if (lifestealPercent > 0f && playerHealth != null)
-                    {
-                        int healAmount = Mathf.Max(1, Mathf.RoundToInt(totalDmg * lifestealPercent));
-                        playerHealth.Heal(healAmount);
-                    }
+                    // Hồi phục Máu từ Đòn Phản Đòn Thần Thánh (ApplyLifesteal hỗ trợ đầy đủ Augments & Overheal Shield)
+                    ApplyLifesteal(actualDmg, DamageType.Physical);
                 }
             }
         }
@@ -1882,12 +1907,8 @@ public class PlayerCombat : MonoBehaviour
                             ReduceUltiCooldownPercent(0.50f); // Giảm 50% hồi chiêu Ulti khi đánh trúng quái/Boss
                         }
 
-                        // Hồi phục Máu từ Ngọc Huyết Thạch / Lifesteal khi cột thánh quang đánh trúng quái
-                        if (lifestealPercent > 0f && playerHealth != null)
-                        {
-                            int healAmount = Mathf.Max(1, Mathf.RoundToInt(waveDmg * lifestealPercent));
-                            playerHealth.Heal(healAmount);
-                        }
+                        // Hồi phục Máu từ Thánh Quang Ba Động (ApplyLifesteal hỗ trợ đầy đủ Augments & Overheal Shield)
+                        ApplyLifesteal(actualWaveDmg, DamageType.Physical);
                     }
                 }
             }

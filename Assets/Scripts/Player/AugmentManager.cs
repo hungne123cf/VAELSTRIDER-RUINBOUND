@@ -796,7 +796,10 @@ public class AugmentManager : MonoBehaviour
 
             case AugmentDatabase.AugmentType.BonusLifesteal:
                 augBonusLifesteal += augment.value * 0.01f;
+                augBonusSpellVamp += augment.value * 0.01f;
+                augBonusDef += 10;
                 FlushStatsToCombat();
+                FlushStatsToHealth();
                 break;
 
             case AugmentDatabase.AugmentType.BonusSpellVamp:
@@ -822,6 +825,7 @@ public class AugmentManager : MonoBehaviour
                 augBonusAtk += 45;
                 augBonusSpeed += 0.20f;
                 augBonusLifesteal += 0.15f;
+                augBonusSpellVamp += 0.15f;
                 // Hy sinh 15% Máu tối đa
                 int sacrificeHp = PlayerHealth.Instance != null ? Mathf.RoundToInt(PlayerHealth.Instance.MaxHealth * 0.15f) : 60;
                 augBonusHp -= sacrificeHp;
@@ -841,6 +845,7 @@ public class AugmentManager : MonoBehaviour
             case AugmentDatabase.AugmentType.BloodGodTribute:
                 hasBloodGodTribute = true;
                 augBonusLifesteal += augment.value * 0.01f;
+                augBonusSpellVamp += augment.value * 0.01f;
                 FlushStatsToCombat();
                 break;
 
@@ -951,6 +956,7 @@ public class AugmentManager : MonoBehaviour
 
             case AugmentDatabase.AugmentType.LifeTransfusion:
                 augBonusLifesteal += augment.value * 0.01f;
+                augBonusSpellVamp += augment.value * 0.01f;
                 hasSoulHarvest = true;
                 soulHarvestHp = Mathf.Max(soulHarvestHp, 35);
                 FlushStatsToCombat();
@@ -965,6 +971,7 @@ public class AugmentManager : MonoBehaviour
             case AugmentDatabase.AugmentType.BattleFrenzy:
                 augBonusAtk += Mathf.RoundToInt(augment.value);
                 augBonusLifesteal += 0.12f;
+                augBonusSpellVamp += 0.12f;
                 augBonusSpeed += 0.10f;
                 FlushStatsToCombat();
                 FlushStatsToController();
@@ -1003,6 +1010,7 @@ public class AugmentManager : MonoBehaviour
 
             case AugmentDatabase.AugmentType.VoidTranscendence:
                 augBonusLifesteal += 0.25f;
+                augBonusSpellVamp += 0.25f;
                 augBonusAtk += 40;
                 FlushStatsToCombat();
                 break;
@@ -1010,6 +1018,7 @@ public class AugmentManager : MonoBehaviour
             // ── Timed buffs (Cộng dồn thời gian nếu nhận lại cùng Lõi) ────────────
             case AugmentDatabase.AugmentType.VampireBlood:
                 augBonusLifesteal += augment.value * 0.01f;
+                augBonusSpellVamp += augment.value * 0.01f;
                 float curVamp = _timedRemaining.ContainsKey(augment) ? _timedRemaining[augment] : 0f;
                 _timedRemaining[augment] = curVamp + augment.duration;
                 FlushStatsToCombat();
@@ -1041,6 +1050,8 @@ public class AugmentManager : MonoBehaviour
                 break;
 
             case AugmentDatabase.AugmentType.RegenerativeCore:
+                augBonusHp += 50;
+                FlushStatsToHealth();
                 if (_timedRegenCoroutines.TryGetValue(augment, out var oldCor) && oldCor != null)
                 {
                     StopCoroutine(oldCor);
@@ -1064,6 +1075,8 @@ public class AugmentManager : MonoBehaviour
             case AugmentDatabase.AugmentType.VampireBlood:
                 augBonusLifesteal -= a.value * 0.01f;
                 if (augBonusLifesteal < 0f) augBonusLifesteal = 0f;
+                augBonusSpellVamp -= a.value * 0.01f;
+                if (augBonusSpellVamp < 0f) augBonusSpellVamp = 0f;
                 FlushStatsToCombat();
                 break;
 
