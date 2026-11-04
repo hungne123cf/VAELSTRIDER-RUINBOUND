@@ -23,7 +23,7 @@ public static class AccountDatabase
         public int healthPotions = 0;
         public int selectedHeroIndex = 0;
         public string selectedHero = "vael";
-        public List<string> unlockedHeroes = new List<string> { "vael" };
+        public List<string> unlockedHeroes = new List<string> { "vael", "ronin", "azure", "titan", "dune", "mage" };
         public int equippedArmorId = 0;
         public int equippedHelmetId = 0;
         public int equippedPantsId = 0;
@@ -276,7 +276,7 @@ public static class AccountDatabase
             healthPotions = 0, // Không có bình máu ban đầu
             selectedHeroIndex = 0,
             selectedHero = "vael",
-            unlockedHeroes = new List<string> { "vael" },
+            unlockedHeroes = new List<string> { "vael", "ronin", "azure", "titan", "dune", "mage" },
             equippedArmor = "Iron Armor",
             equippedWeapon = "Steel Blade",
             equippedArmorId = 0,
@@ -433,8 +433,13 @@ public static class AccountDatabase
         PlayerPrefs.SetInt("Map3_Completed", acc.map3Completed ? 1 : 0);
 
         // Nhân vật đã chọn & Tướng đã mở khóa
-        PlayerPrefs.SetInt("Char_Unlocked_Maid", acc.unlockedMaid ? 1 : 0);
+        PlayerPrefs.SetInt("Char_Unlocked_Maid", 1);
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_VAELSTRIDER, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_GALE_RONIN, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_AZURE_BLADE, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_TITAN_BERSERKER, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_DUNE_ASSASSIN, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_CELESTIAL_MAGE, 1);
         if (acc.unlockedHeroes != null)
         {
             foreach (var h in acc.unlockedHeroes)

@@ -571,38 +571,42 @@ public class GameAutoBootstrap : MonoBehaviour
                 sr.enabled = true;
                 sr.color = Color.white;
                 sr.material = new Material(Shader.Find("Sprites/Default"));
-#if UNITY_EDITOR
-                var idleObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Idle.png");
-                if (idleObjs != null)
+                var idleObjs = Resources.LoadAll<Sprite>("Player4/Sprites/Hammer_Idle");
+                if (idleObjs != null && idleObjs.Length > 0)
                 {
-                    foreach (var o in idleObjs)
+                    sr.sprite = idleObjs[0];
+                }
+#if UNITY_EDITOR
+                if (sr.sprite == null)
+                {
+                    var edObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Idle.png");
+                    if (edObjs != null)
                     {
-                        if (o is Sprite s)
-                        {
-                            sr.sprite = s;
-                            break;
-                        }
+                        foreach (var o in edObjs) { if (o is Sprite s) { sr.sprite = s; break; } }
                     }
                 }
 #endif
-                if (sr.sprite == null)
-                {
-                    var fallbacks = MainMenuManager.LoadSpritesFromPath("Assets/ART/Player4/Hammer_Idle.png", 64, 64);
-                    if (fallbacks != null && fallbacks.Length > 0) sr.sprite = fallbacks[0];
-                }
             }
 
             var anim = player.GetComponent<Animator>();
-            if (anim != null) anim.enabled = true;
-#if UNITY_EDITOR
-            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Player4/Player4.controller");
-            if (controller != null && anim != null)
+            if (anim != null)
             {
-                anim.runtimeAnimatorController = controller;
-                anim.Rebind();
-                anim.Update(0f);
-            }
+                anim.enabled = true;
+                var controller = Resources.Load<RuntimeAnimatorController>("Controllers/Player4");
+#if UNITY_EDITOR
+                if (controller == null)
+                {
+                    controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Resources/Controllers/Player4.controller");
+                }
 #endif
+                if (controller != null)
+                {
+                    anim.runtimeAnimatorController = controller;
+                    anim.Rebind();
+                    anim.Update(0f);
+                }
+            }
+
             var sweep = player.GetComponent<SweepTheWeakSkill>();
             if (sweep != null) Object.Destroy(sweep);
 
@@ -620,17 +624,28 @@ public class GameAutoBootstrap : MonoBehaviour
             {
                 titan = player.gameObject.AddComponent<TitanBerserkerSkill>();
             }
-#if UNITY_EDITOR
-            var attackObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Attack.png");
-            if (attackObjs != null)
+            if (titan != null) titan.enabled = true;
+
+            var attackObjs = Resources.LoadAll<Sprite>("Player4/Sprites/Hammer_Attack");
+            if (attackObjs != null && attackObjs.Length > 0)
             {
-                foreach (var o in attackObjs)
+                foreach (var s in attackObjs)
                 {
-                    if (o is Sprite s && s.name == "Hammer_Attack_0_0")
+                    if (s.name == "Hammer_Attack_0_0")
                     {
                         titan.chargePoseSprite = s;
                         break;
                     }
+                }
+                if (titan.chargePoseSprite == null) titan.chargePoseSprite = attackObjs[0];
+            }
+#if UNITY_EDITOR
+            if (titan.chargePoseSprite == null)
+            {
+                var edAtk = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Attack.png");
+                if (edAtk != null)
+                {
+                    foreach (var o in edAtk) { if (o is Sprite s && s.name == "Hammer_Attack_0_0") { titan.chargePoseSprite = s; break; } }
                 }
             }
 #endif
@@ -667,32 +682,41 @@ public class GameAutoBootstrap : MonoBehaviour
             if (sr != null)
             {
                 sr.material = new Material(Shader.Find("Sprites/Default"));
-#if UNITY_EDITOR
-                var idleObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player3/Sword_Idle.png");
-                if (idleObjs != null)
+                var idleObjs = Resources.LoadAll<Sprite>("Player3/Sprites/Sword_Idle");
+                if (idleObjs != null && idleObjs.Length > 0)
                 {
-                    foreach (var o in idleObjs)
+                    sr.sprite = idleObjs[0];
+                }
+#if UNITY_EDITOR
+                if (sr.sprite == null)
+                {
+                    var edObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player3/Sword_Idle.png");
+                    if (edObjs != null)
                     {
-                        if (o is Sprite s)
-                        {
-                            sr.sprite = s;
-                            break;
-                        }
+                        foreach (var o in edObjs) { if (o is Sprite s) { sr.sprite = s; break; } }
                     }
                 }
 #endif
             }
 
             var anim = player.GetComponent<Animator>();
-#if UNITY_EDITOR
-            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Player3/Player3.controller");
-            if (controller != null && anim != null)
+            if (anim != null)
             {
-                anim.runtimeAnimatorController = controller;
-                anim.Rebind();
-                anim.Update(0f);
-            }
+                anim.enabled = true;
+                var controller = Resources.Load<RuntimeAnimatorController>("Controllers/Player3");
+#if UNITY_EDITOR
+                if (controller == null)
+                {
+                    controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Resources/Controllers/Player3.controller");
+                }
 #endif
+                if (controller != null)
+                {
+                    anim.runtimeAnimatorController = controller;
+                    anim.Rebind();
+                    anim.Update(0f);
+                }
+            }
             var titan = player.GetComponent<TitanBerserkerSkill>();
             if (titan != null) Object.Destroy(titan);
 
@@ -741,32 +765,41 @@ public class GameAutoBootstrap : MonoBehaviour
             if (sr != null)
             {
                 sr.material = new Material(Shader.Find("Sprites/Default"));
-#if UNITY_EDITOR
-                var idleObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player2/_down idle.png");
-                if (idleObjs != null)
+                var idleObjs = Resources.LoadAll<Sprite>("Player2/Sprites/_down idle");
+                if (idleObjs != null && idleObjs.Length > 0)
                 {
-                    foreach (var o in idleObjs)
+                    sr.sprite = idleObjs[0];
+                }
+#if UNITY_EDITOR
+                if (sr.sprite == null)
+                {
+                    var edObjs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player2/_down idle.png");
+                    if (edObjs != null)
                     {
-                        if (o is Sprite s)
-                        {
-                            sr.sprite = s;
-                            break;
-                        }
+                        foreach (var o in edObjs) { if (o is Sprite s) { sr.sprite = s; break; } }
                     }
                 }
 #endif
             }
 
             var anim = player.GetComponent<Animator>();
-#if UNITY_EDITOR
-            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Player2/Player2.controller");
-            if (controller != null && anim != null)
+            if (anim != null)
             {
-                anim.runtimeAnimatorController = controller;
-                anim.Rebind();
-                anim.Update(0f);
-            }
+                anim.enabled = true;
+                var controller = Resources.Load<RuntimeAnimatorController>("Controllers/Player2");
+#if UNITY_EDITOR
+                if (controller == null)
+                {
+                    controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Resources/Controllers/Player2.controller");
+                }
 #endif
+                if (controller != null)
+                {
+                    anim.runtimeAnimatorController = controller;
+                    anim.Rebind();
+                    anim.Update(0f);
+                }
+            }
             var titan = player.GetComponent<TitanBerserkerSkill>();
             if (titan != null) Object.Destroy(titan);
 
@@ -815,9 +848,14 @@ public class GameAutoBootstrap : MonoBehaviour
             if (sr != null)
             {
                 sr.material = new Material(Shader.Find("Sprites/Default"));
+                var spr = Resources.Load<Sprite>("Player5/Sprites/idle/idle_1");
+                if (spr != null) sr.sprite = spr;
 #if UNITY_EDITOR
-                var idleSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Player5/PNG/idle/idle_1.png");
-                if (idleSpr != null) sr.sprite = idleSpr;
+                if (sr.sprite == null)
+                {
+                    var idleSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Player5/PNG/idle/idle_1.png");
+                    if (idleSpr != null) sr.sprite = idleSpr;
+                }
 #endif
             }
 
@@ -868,6 +906,8 @@ public class GameAutoBootstrap : MonoBehaviour
             if (sr != null)
             {
                 sr.material = new Material(Shader.Find("Sprites/Default"));
+                var mSprites = Resources.LoadAll<Sprite>("Player6/Sprites/idle");
+                if (mSprites != null && mSprites.Length > 0) sr.sprite = mSprites[0];
             }
 
             var anim = player.GetComponent<Animator>();
@@ -921,13 +961,23 @@ public class GameAutoBootstrap : MonoBehaviour
         {
             player.transform.localScale = Vector3.one;
             var anim = player.GetComponent<Animator>();
-#if UNITY_EDITOR
-            var controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Player/idle_down_0.controller");
-            if (controller != null && anim != null)
+            if (anim != null)
             {
-                anim.runtimeAnimatorController = controller;
-            }
+                anim.enabled = true;
+                var controller = Resources.Load<RuntimeAnimatorController>("Controllers/Player1");
+#if UNITY_EDITOR
+                if (controller == null)
+                {
+                    controller = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Resources/Controllers/Player1.controller");
+                }
 #endif
+                if (controller != null)
+                {
+                    anim.runtimeAnimatorController = controller;
+                    anim.Rebind();
+                    anim.Update(0f);
+                }
+            }
             var titan = player.GetComponent<TitanBerserkerSkill>();
             if (titan != null) Object.Destroy(titan);
 

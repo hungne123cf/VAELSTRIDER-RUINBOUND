@@ -320,6 +320,16 @@ public class DuneAssassinSkill : MonoBehaviour
     private static Sprite[] LoadFramesFromDirectory(string dirPath, string prefix)
     {
         var list = new List<Sprite>();
+        string cleanSub = dirPath.Replace("Assets/ART/Player5/PNG/", "").Replace("Assets/ART/Player5/", "");
+        string resPath = "Player5/Sprites/" + cleanSub;
+        var resAll = Resources.LoadAll<Sprite>(resPath);
+        if (resAll != null && resAll.Length > 0)
+        {
+            var resList = new List<Sprite>(resAll);
+            resList.Sort((a, b) => ExtractNumber(a.name).CompareTo(ExtractNumber(b.name)));
+            return resList.ToArray();
+        }
+
 #if UNITY_EDITOR
         if (System.IO.Directory.Exists(dirPath))
         {

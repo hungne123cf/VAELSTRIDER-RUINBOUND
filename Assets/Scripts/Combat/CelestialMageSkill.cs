@@ -1108,13 +1108,19 @@ public class CelestialMageSkill : MonoBehaviour
     {
         if (idleFrames == null || idleFrames.Length == 0)
         {
+            var resIdle = Resources.LoadAll<Sprite>("Player6/Sprites/idle/sprite sheets/idle");
+            if (resIdle != null && resIdle.Length > 0) idleFrames = resIdle;
+
 #if UNITY_EDITOR
-            var idleAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player6/sample(idle&walk)/idle/sprite sheets/idle.png");
-            if (idleAssets != null && idleAssets.Length > 0)
+            if (idleFrames == null || idleFrames.Length == 0)
             {
-                List<Sprite> list = new List<Sprite>();
-                foreach (var a in idleAssets) if (a is Sprite s) list.Add(s);
-                if (list.Count > 0) idleFrames = list.ToArray();
+                var idleAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player6/sample(idle&walk)/idle/sprite sheets/idle.png");
+                if (idleAssets != null && idleAssets.Length > 0)
+                {
+                    List<Sprite> list = new List<Sprite>();
+                    foreach (var a in idleAssets) if (a is Sprite s) list.Add(s);
+                    if (list.Count > 0) idleFrames = list.ToArray();
+                }
             }
 #endif
             if (idleFrames == null || idleFrames.Length == 0)
@@ -1125,13 +1131,19 @@ public class CelestialMageSkill : MonoBehaviour
 
         if (walkFrames == null || walkFrames.Length == 0)
         {
+            var resWalk = Resources.LoadAll<Sprite>("Player6/Sprites/walk/sprite sheets/walk");
+            if (resWalk != null && resWalk.Length > 0) walkFrames = resWalk;
+
 #if UNITY_EDITOR
-            var walkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player6/sample(idle&walk)/walk/sprite sheets/walk.png");
-            if (walkAssets != null && walkAssets.Length > 0)
+            if (walkFrames == null || walkFrames.Length == 0)
             {
-                List<Sprite> list = new List<Sprite>();
-                foreach (var a in walkAssets) if (a is Sprite s) list.Add(s);
-                if (list.Count > 0) walkFrames = list.ToArray();
+                var walkAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player6/sample(idle&walk)/walk/sprite sheets/walk.png");
+                if (walkAssets != null && walkAssets.Length > 0)
+                {
+                    List<Sprite> list = new List<Sprite>();
+                    foreach (var a in walkAssets) if (a is Sprite s) list.Add(s);
+                    if (list.Count > 0) walkFrames = list.ToArray();
+                }
             }
 #endif
             if (walkFrames == null || walkFrames.Length == 0)
@@ -1216,6 +1228,15 @@ public class CelestialMageSkill : MonoBehaviour
     public static Sprite[] LoadFramesFromFolder(string folderPath, string prefix)
     {
         List<Sprite> list = new List<Sprite>();
+        string sub = folderPath.Replace("Assets/ART/Player6/sample(idle&walk)/", "").Replace("Assets/ART/Player6/", "");
+        var resFrames = Resources.LoadAll<Sprite>("Player6/Sprites/" + sub);
+        if (resFrames != null && resFrames.Length > 0)
+        {
+            var sorted = new List<Sprite>(resFrames);
+            sorted.Sort((a, b) => string.Compare(a.name, b.name, System.StringComparison.Ordinal));
+            return sorted.ToArray();
+        }
+
 #if UNITY_EDITOR
         if (System.IO.Directory.Exists(folderPath))
         {

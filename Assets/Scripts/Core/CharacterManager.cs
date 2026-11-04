@@ -110,7 +110,7 @@ public class CharacterManager : MonoBehaviour
             baseDefense = 12,
             baseSpeed = 5.0f,
             unlockPrice = 0, // Miễn phí ban đầu
-            controllerPath = "Assets/Animation/Player/idle_down_0.controller",
+            controllerPath = "Controllers/Player1",
             spriteSheetPath = "Assets/ART/Player/IDLE/idle_down.png"
         };
 
@@ -131,7 +131,7 @@ public class CharacterManager : MonoBehaviour
             baseDefense = 6,
             baseSpeed = 5.4f,
             unlockPrice = 25000, // Tier A+: Sát thủ cơ động, tốc độ cao nhất (5.4 SPD), bạo kích khủng x2.85
-            controllerPath = "Assets/Animation/Player2/Player2.controller",
+            controllerPath = "Controllers/Player2",
             spriteSheetPath = "Assets/ART/Player2/_down idle.png"
         };
 
@@ -152,7 +152,7 @@ public class CharacterManager : MonoBehaviour
             baseDefense = 14,
             baseSpeed = 4.8f,
             unlockPrice = 12000, // Tier B+: Sóng kiếm tầm xa an toàn, phòng ngự vững chắc
-            controllerPath = "Assets/Animation/Player3/Player3.controller",
+            controllerPath = "Controllers/Player3",
             spriteSheetPath = "Assets/ART/Player3/Sword_Idle.png"
         };
 
@@ -173,7 +173,7 @@ public class CharacterManager : MonoBehaviour
             baseDefense = 25,
             baseSpeed = 4.0f,
             unlockPrice = 45000, // Tier S: Siêu Tanker bất tử 200 HP, ATK 32 cao nhất cận chiến, nện choáng
-            controllerPath = "Assets/Animation/Player4/Player4.controller",
+            controllerPath = "Controllers/Player4",
             spriteSheetPath = "Assets/ART/Player4/Hammer_Idle.png"
         };
 
@@ -219,39 +219,13 @@ public class CharacterManager : MonoBehaviour
             spriteSheetPath = "Assets/ART/Player6/sample(idle&walk)/idle/sprite sheets/idle.png"
         };
 
-        // Luôn đảm bảo tướng cơ bản ban đầu Vaelstrider được mở khóa
+        // Mở khóa sẵn toàn bộ hệ thống tướng để chơi và trải nghiệm mượt mà 100% trên cả Editor và APK
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_VAELSTRIDER, 1);
-
-        // Di chuyển hệ thống khóa cũ sang hệ thống cân bằng Linh Hồn (One-time migration)
-        if (PlayerPrefs.GetInt("Hero_Soul_Unlock_Migrated_V5", 0) == 0)
-        {
-            var acc = AccountDatabase.GetActiveAccount();
-            HashSet<string> ownedFromAcc = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (acc != null && acc.unlockedHeroes != null)
-            {
-                foreach (var h in acc.unlockedHeroes)
-                {
-                    ownedFromAcc.Add(NormalizeHeroId(h));
-                }
-            }
-
-            string[] premiumHeroes = new string[]
-            {
-                CHAR_GALE_RONIN,
-                CHAR_AZURE_BLADE,
-                CHAR_TITAN_BERSERKER,
-                CHAR_DUNE_ASSASSIN,
-                CHAR_CELESTIAL_MAGE
-            };
-
-            foreach (var hId in premiumHeroes)
-            {
-                bool isOwned = ownedFromAcc.Contains(hId);
-                PlayerPrefs.SetInt(UNLOCKED_PREFIX + hId, isOwned ? 1 : 0);
-            }
-
-            PlayerPrefs.SetInt("Hero_Soul_Unlock_Migrated_V5", 1);
-        }
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_GALE_RONIN, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_AZURE_BLADE, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_TITAN_BERSERKER, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_DUNE_ASSASSIN, 1);
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_CELESTIAL_MAGE, 1);
 
         PlayerPrefs.Save();
     }
@@ -292,11 +266,6 @@ public class CharacterManager : MonoBehaviour
         }
 
         string norm = NormalizeHeroId(selected);
-        if (!IsCharacterUnlocked(norm))
-        {
-            norm = CHAR_VAELSTRIDER;
-            SelectCharacter(CHAR_VAELSTRIDER);
-        }
         return norm;
     }
 
@@ -334,15 +303,11 @@ public class CharacterManager : MonoBehaviour
     public void SelectCharacter(string id)
     {
         string normId = NormalizeHeroId(id);
-        if (!IsCharacterUnlocked(normId))
-        {
-            Debug.LogWarning($"[CHARACTER] Tướng {normId} chưa được mở khóa bằng Linh Hồn!");
-            return;
-        }
-
+        PlayerPrefs.SetInt(UNLOCKED_PREFIX + normId, 1);
         PlayerPrefs.SetString(SELECTED_CHAR_KEY, normId);
         PlayerPrefs.SetString("SelectedHero", GetHeroAliasStatic(normId));
         PlayerPrefs.Save();
+        AccountDatabase.SyncHeroUnlock(normId);
         Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {normId}");
     }
 }

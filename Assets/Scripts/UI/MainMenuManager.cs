@@ -4644,6 +4644,19 @@ public class MainMenuManager : MonoBehaviour
         if (idx == currentCarouselIdx) return;
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         currentCarouselIdx = idx;
+
+        string heroId = carouselHeroIds[idx];
+        var charMgr = CharacterManager.EnsureInstance();
+        if (charMgr != null)
+        {
+            charMgr.SelectCharacter(heroId);
+            string alias = GetHeroAlias(heroId);
+            PlayerPrefs.SetString("SelectedHero", alias);
+            PlayerPrefs.Save();
+            AccountDatabase.SaveActiveSessionToDatabase();
+            UpdateHeroDetails();
+        }
+
         UpdateCarouselDisplay();
     }
 

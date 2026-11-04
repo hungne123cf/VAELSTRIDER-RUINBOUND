@@ -96,6 +96,21 @@ public class TitanBerserkerSkill : MonoBehaviour
     {
         if (chargePoseSprite != null) return chargePoseSprite;
 
+        var resObjs = Resources.LoadAll<Sprite>("Player4/Sprites/Hammer_Attack");
+        if (resObjs != null && resObjs.Length > 0)
+        {
+            foreach (var s in resObjs)
+            {
+                if (s.name == "Hammer_Attack_0_0")
+                {
+                    chargePoseSprite = s;
+                    return s;
+                }
+            }
+            chargePoseSprite = resObjs[0];
+            return chargePoseSprite;
+        }
+
 #if UNITY_EDITOR
         var objs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Attack.png");
         if (objs != null)
@@ -763,6 +778,18 @@ public class TitanBerserkerSkill : MonoBehaviour
     private Sprite[] GetSpinSprites()
     {
         if (spinSpritesCache != null && spinSpritesCache.Length > 0) return spinSpritesCache;
+
+        var resObjs = Resources.LoadAll<Sprite>("Player4/Sprites/Hammer_Spin");
+        if (resObjs != null && resObjs.Length > 0)
+        {
+            var list = new System.Collections.Generic.List<Sprite>(resObjs);
+            var sorted = System.Linq.Enumerable.ToList(System.Linq.Enumerable.ThenBy(System.Linq.Enumerable.OrderByDescending(list, s => s.rect.y), s => s.rect.x));
+            if (sorted.Count > 0)
+            {
+                spinSpritesCache = sorted.ToArray();
+                return spinSpritesCache;
+            }
+        }
 
 #if UNITY_EDITOR
         var objs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Spin.png");

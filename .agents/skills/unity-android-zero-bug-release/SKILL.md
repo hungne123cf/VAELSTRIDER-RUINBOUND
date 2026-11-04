@@ -201,19 +201,43 @@ Logo lập phương màu trắng của Unity đè lên chính giữa hình icon 
 
 ---
 
-## 8. CHECKLIST 9 BƯỚC "ZERO-BUG" TRƯỚC KHI BẤM BUILD APK
+## 8. BẢO TOÀN ĐỒNG BỘ 100% TƯỚNG (HERO RUNTIME PARITY): KHÔNG ĐỂ SPAWN SAI NHÂN VẬT TRÊN APK
 
-Trước khi xuất bất kỳ bản APK nào cho người dùng, AI Agent bắt buộc phải duyệt qua 9 bước:
+### Hiện tượng lỗi:
+Ở Unity Editor chọn nhân vật nào (Player 2, Player 3, Player 4, v.v.) thì vào trận đúng nhân vật đó với vũ khí và chiêu thức riêng biệt. Nhưng khi xuất ra file APK cài lên Android, **bấm chọn Player 4 (Titan Berserker) nhưng vào trận lại biến thành Player 1 (Vaelstrider), không có búa, không có tuyệt kỹ nện đất và nút bấm bị sai**.
+
+### Nguyên nhân gốc rễ:
+1. **Thiếu Runtime Resources cho Animator Controllers:**
+   Controller của nhân vật (`Player4.controller`, `Player3.controller`, `Player2.controller`) nằm ngoài thư mục `Resources/`, và script áp dụng tướng (`GameAutoBootstrap`) nạp controller bằng `UnityEditor.AssetDatabase.LoadAssetAtPath`. Khi build APK, `#if UNITY_EDITOR` bị tước bỏ hoàn toàn, dẫn đến `anim.runtimeAnimatorController` không bao giờ được gán và nhân vật bị kẹt ở Controller mặc định (Player 1).
+2. **Thiếu Resources cho Sprites hành động:**
+   Các sprite như đòn gồng chấn địa (`Hammer_Attack`), xoay búa (`Hammer_Spin`) dùng `AssetDatabase` nạp ảnh từ `Assets/ART/...` thay vì `Resources.LoadAll<Sprite>`.
+3. **Cơ chế kiểm tra mở khóa làm rớt nhân vật về mặc định:**
+   Khi chuyển scene, nếu `CharacterManager` kiểm tra `IsCharacterUnlocked` mà tài khoản trên điện thoại chưa có dữ liệu mở khóa, code tự động ép ngược nhân vật về Player 1 (`norm = CHAR_VAELSTRIDER`).
+
+### Quy tắc bất di bất dịch:
+1. **Toàn bộ Animator Controllers của tất cả tướng phải nằm trong `Assets/Resources/Controllers/`:**
+   Nạp runtime bằng `Resources.Load<RuntimeAnimatorController>("Controllers/PlayerX")`. Cơ chế này hoạt động 100% trên cả PC và Android APK.
+2. **Spritesheets và Sprites kỹ năng phải nằm trong `Assets/Resources/PlayerX/Sprites/`:**
+   Nạp an toàn bằng `Resources.LoadAll<Sprite>("PlayerX/Sprites/...")`.
+3. **Không bao giờ âm thầm ghi đè nhân vật người chơi đã chọn:**
+   Khi người chơi đã chọn Player X trong Menu/Carousel, hệ thống phải đảm bảo nhân vật đó được lưu bền vững vào `PlayerPrefs` và `AccountDatabase`, mở khóa tức thời và giữ nguyên 100% khi sang Scene gameplay.
+
+---
+
+## 9. CHECKLIST 10 BƯỚC "ZERO-BUG" TRƯỚC KHI BẤM BUILD APK
+
+Trước khi xuất bất kỳ bản APK nào cho người dùng, AI Agent bắt buộc phải duyệt qua 10 bước:
 
 | Bước | Hạng mục kiểm tra | Tiêu chuẩn đạt |
 |---|---|---|
 | **1** | **Missing Scripts** | Quét toàn bộ `.unity` và `.prefab` để đảm bảo không có bất kỳ component nào bị `m_Script: {fileID: 0}`. |
 | **2** | **Build Scenes List** | `EditorBuildSettings.scenes` chứa đầy đủ các màn chơi theo đúng thứ tự: Scene khởi động đầu tiên ở index 0. |
-| **3** | **No AssetDatabase** | Không có đoạn code runtime nào gọi `AssetDatabase` mà thiếu guard `#if UNITY_EDITOR`. |
+| **3** | **No AssetDatabase** | Không có đoạn code runtime nào gọi `AssetDatabase` mà thiếu guard `#if UNITY_EDITOR`. Mọi Animator Controller nằm trong `Assets/Resources/Controllers/`. |
 | **4** | **Tilemap & Background** | Không có hàm nào tự tiện xóa gạch (`ClearAllTiles()`) khi đã có gạch sẵn trong scene. Hình nền nằm trong `Resources`. |
-| **5** | **Graphics API** | Đã chọn `OpenGLES3` cho Android, không dùng `Vulkan` mặc định nếu chưa bake shader. |
-| **6** | **Screen Orientation** | Đã khóa cứng `LandscapeLeft` (hoặc `Portrait` nếu là game dọc). |
-| **7** | **Touch Controls** | Virtual Joystick và Action Buttons có Procedural Fallback và có độ mờ an toàn $\ge 0.25$. |
-| **8** | **Adaptive Icon & Splash** | Cả 6 cấp Adaptive Icon có đủ 2 layer (Layer 1 = Art, Layer 2 = Transparent PNG). Đã tắt Unity Splash. |
-| **9** | **Zero-Tofu & No Text Leak** | 100% chuỗi UI không chứa emoji/ký tự lạ gây ô vuông `▯`. Mọi InputField đều có `RectMask2D` và Auto-Sizing chống lem chữ. |
+| **5** | **Hero Parity (Đồng bộ tướng)** | Chọn tướng nào trong Menu thì vào trận đúng 100% tướng đó (Sprite, Animator Controller, Chiêu thức, Nút kỹ năng di động), không bị rớt về Player 1. |
+| **6** | **Graphics API** | Đã chọn `OpenGLES3` cho Android, không dùng `Vulkan` mặc định nếu chưa bake shader. |
+| **7** | **Screen Orientation** | Đã khóa cứng `LandscapeLeft` (hoặc `Portrait` nếu là game dọc). |
+| **8** | **Touch Controls** | Virtual Joystick và Action Buttons có Procedural Fallback và có độ mờ an toàn $\ge 0.25$. |
+| **9** | **Adaptive Icon & Splash** | Cả 6 cấp Adaptive Icon có đủ 2 layer (Layer 1 = Art, Layer 2 = Transparent PNG). Đã tắt Unity Splash. |
+| **10** | **Zero-Tofu & No Text Leak** | 100% chuỗi UI không chứa emoji/ký tự lạ gây ô vuông `▯`. Mọi InputField đều có `RectMask2D` và Auto-Sizing chống lem chữ. |
 

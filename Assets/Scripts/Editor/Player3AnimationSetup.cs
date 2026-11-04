@@ -10,7 +10,7 @@ public class Player3AnimationSetup
 {
     public const string ART_DIR = "Assets/ART/Player3";
     public const string ANIM_DIR = "Assets/Animation/Player3";
-    public const string CONTROLLER_PATH = ANIM_DIR + "/Player3.controller";
+    public const string CONTROLLER_PATH = "Assets/Resources/Controllers/Player3.controller";
 
     static Player3AnimationSetup()
     {
