@@ -243,15 +243,15 @@ public class InGameInventoryUI : MonoBehaviour
 
         List<string> statLines = new List<string>
         {
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "SINH LỰC (HP):" : "HEALTH (HP):")}</b> <color=#22C55E>{totalHp}</color>{hpAdd}{regenStr}",
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "GIÁP PHÒNG THỦ:" : "DEFENSE (DEF):")}</b> <color=#38BDF8>{totalDef}</color>{defAdd}",
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "TỔNG CÔNG KÍCH:" : "TOTAL ATTACK:")}</b> <color=#FF3B30>{totalAtk}</color>{atkAdd}",
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "PHÂN LOẠI SÁT THƯƠNG:" : "DAMAGE TYPE:")}</b> {dmgBreakdownStr}",
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "CHÍ MẠNG / BẠO KÍCH:" : "CRITICAL STATS:")}</b> <color=#F59E0B>{totalCritPct}%</color>{critBonusStr} | <color=#F59E0B>{critDmgValStr}</color>{critDmgBonusStr}",
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "NĂNG LƯỢNG (MANA):" : "ENERGY (MANA):")}</b> <color=#00E5FF>{100 + (int)sMaxEn}</color>{manaAdd}{manaRegenStr}",
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "HÚT MÁU / HỒI PHỤC:" : "VAMP & HEALING:")}</b> <color=#F43F5E>{physLife}% {(isVi ? "VL" : "Phys")}</color> | <color=#E879F9>{spellVamp}% {(isVi ? "Phép" : "Spell")}</color>",
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "TỐC ĐỘ DI CHUYỂN:" : "MOVE SPEED:")}</b> <color=#38BDF8>{totalSpeed:0.#}</color>{speedBonusStr}",
-            $"<color=#E2E8F0>•</color> <b>{(isVi ? "GIẢM COOLDOWN:" : "CD REDUCTION:")}</b> <color=#C084FC>{cdTag}</color>" + (shardPct > 0 ? $" | <b>SHARD:</b> <color=#FBBF24>+{shardPct}%</color>" : "")
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "SINH LỰC (HP):" : "HEALTH (HP):")}</b> <color=#22C55E>{totalHp}</color>{hpAdd}{regenStr}",
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "GIÁP PHÒNG THỦ:" : "DEFENSE (DEF):")}</b> <color=#38BDF8>{totalDef}</color>{defAdd}",
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "TỔNG CÔNG KÍCH:" : "TOTAL ATTACK:")}</b> <color=#FF3B30>{totalAtk}</color>{atkAdd}",
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "PHÂN LOẠI SÁT THƯƠNG:" : "DAMAGE TYPE:")}</b> {dmgBreakdownStr}",
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "CHÍ MẠNG / BẠO KÍCH:" : "CRITICAL STATS:")}</b> <color=#F59E0B>{totalCritPct}%</color>{critBonusStr} | <color=#F59E0B>{critDmgValStr}</color>{critDmgBonusStr}",
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "NĂNG LƯỢNG (MANA):" : "ENERGY (MANA):")}</b> <color=#00E5FF>{100 + (int)sMaxEn}</color>{manaAdd}{manaRegenStr}",
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "HÚT MÁU / HỒI PHỤC:" : "VAMP & HEALING:")}</b> <color=#F43F5E>{physLife}% {(isVi ? "VL" : "Phys")}</color> | <color=#E879F9>{spellVamp}% {(isVi ? "Phép" : "Spell")}</color>",
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "TỐC ĐỘ DI CHUYỂN:" : "MOVE SPEED:")}</b> <color=#38BDF8>{totalSpeed:0.#}</color>{speedBonusStr}",
+            $"<color=#E2E8F0>-</color> <b>{(isVi ? "GIẢM COOLDOWN:" : "CD REDUCTION:")}</b> <color=#C084FC>{cdTag}</color>" + (shardPct > 0 ? $" | <b>SHARD:</b> <color=#FBBF24>+{shardPct}%</color>" : "")
         };
 
         if (AugmentManager.Instance != null && AugmentManager.Instance.HasActiveTimedAugments())
@@ -265,7 +265,7 @@ public class InGameInventoryUI : MonoBehaviour
             }
             if (buffTags.Count > 0)
             {
-                statLines.Add($"<color=#E2E8F0>•</color> <b>{(isVi ? "BUFF THỜI HẠN:" : "ACTIVE BUFFS:")}</b> {string.Join(", ", buffTags)}");
+                statLines.Add($"<color=#E2E8F0>-</color> <b>{(isVi ? "BUFF THỜI HẠN:" : "ACTIVE BUFFS:")}</b> {string.Join(", ", buffTags)}");
             }
         }
 
@@ -754,15 +754,15 @@ public class InGameInventoryUI : MonoBehaviour
             // Toàn bộ Lõi Nâng Cấp (Augments) đã được cộng gộp trực tiếp vào từng chỉ số tương ứng ở trên
             List<string> statLines = new List<string>
             {
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "SINH LỰC (HP):" : "HEALTH (HP):")}</b> <color=#22C55E>{totalHp}</color>{hpAdd}{regenStr}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "GIÁP PHÒNG THỦ:" : "DEFENSE (DEF):")}</b> <color=#38BDF8>{totalDef}</color>{defAdd}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "TỔNG CÔNG KÍCH:" : "TOTAL ATTACK:")}</b> <color=#FF3B30>{totalAtk}</color>{atkAdd}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "PHÂN LOẠI SÁT THƯƠNG:" : "DAMAGE TYPE:")}</b> {dmgBreakdownStr}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "CHÍ MẠNG / BẠO KÍCH:" : "CRITICAL STATS:")}</b> <color=#F59E0B>{totalCritPct}%</color>{critBonusStr} | <color=#F59E0B>{critDmgValStr}</color>{critDmgBonusStr}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "NĂNG LƯỢNG (MANA):" : "ENERGY (MANA):")}</b> <color=#00E5FF>{100 + (int)sMaxEn}</color>{manaAdd}{manaRegenStr}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "HÚT MÁU / HỒI PHỤC:" : "VAMP & HEALING:")}</b> <color=#F43F5E>{physLife}% {(isVi ? "VL" : "Phys")}</color> | <color=#E879F9>{spellVamp}% {(isVi ? "Phép" : "Spell")}</color>",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "TỐC ĐỘ DI CHUYỂN:" : "MOVE SPEED:")}</b> <color=#38BDF8>{totalSpeed:0.#}</color>{speedBonusStr}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "GIẢM COOLDOWN:" : "CD REDUCTION:")}</b> <color=#C084FC>{cdTag}</color>" + (shardPct > 0 ? $" | <b>SHARD:</b> <color=#FBBF24>+{shardPct}%</color>" : "")
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "SINH LỰC (HP):" : "HEALTH (HP):")}</b> <color=#22C55E>{totalHp}</color>{hpAdd}{regenStr}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "GIÁP PHÒNG THỦ:" : "DEFENSE (DEF):")}</b> <color=#38BDF8>{totalDef}</color>{defAdd}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "TỔNG CÔNG KÍCH:" : "TOTAL ATTACK:")}</b> <color=#FF3B30>{totalAtk}</color>{atkAdd}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "PHÂN LOẠI SÁT THƯƠNG:" : "DAMAGE TYPE:")}</b> {dmgBreakdownStr}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "CHÍ MẠNG / BẠO KÍCH:" : "CRITICAL STATS:")}</b> <color=#F59E0B>{totalCritPct}%</color>{critBonusStr} | <color=#F59E0B>{critDmgValStr}</color>{critDmgBonusStr}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "NĂNG LƯỢNG (MANA):" : "ENERGY (MANA):")}</b> <color=#00E5FF>{100 + (int)sMaxEn}</color>{manaAdd}{manaRegenStr}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "HÚT MÁU / HỒI PHỤC:" : "VAMP & HEALING:")}</b> <color=#F43F5E>{physLife}% {(isVi ? "VL" : "Phys")}</color> | <color=#E879F9>{spellVamp}% {(isVi ? "Phép" : "Spell")}</color>",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "TỐC ĐỘ DI CHUYỂN:" : "MOVE SPEED:")}</b> <color=#38BDF8>{totalSpeed:0.#}</color>{speedBonusStr}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "GIẢM COOLDOWN:" : "CD REDUCTION:")}</b> <color=#C084FC>{cdTag}</color>" + (shardPct > 0 ? $" | <b>SHARD:</b> <color=#FBBF24>+{shardPct}%</color>" : "")
             };
 
             // Hiển thị các Lõi Tạm Thời (Timed Buffs) đang có hiệu lực
@@ -777,7 +777,7 @@ public class InGameInventoryUI : MonoBehaviour
                 }
                 if (buffTags.Count > 0)
                 {
-                    statLines.Add($"<color=#E2E8F0>•</color> <b>{(isVi ? "BUFF THỜI HẠN:" : "ACTIVE BUFFS:")}</b> {string.Join(", ", buffTags)}");
+                    statLines.Add($"<color=#E2E8F0>-</color> <b>{(isVi ? "BUFF THỜI HẠN:" : "ACTIVE BUFFS:")}</b> {string.Join(", ", buffTags)}");
                 }
             }
 

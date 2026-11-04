@@ -77562,6 +77562,8 @@ MonoBehaviour:
   rosterButton: {fileID: 291340383}
   skillButton: {fileID: 942310618}
   settingsButton: {fileID: 1264051624}
+  mailboxButton: {fileID: 0}
+  dailyLoginButton: {fileID: 0}
   exitButton: {fileID: 0}
   logoutButton: {fileID: 1969809623}
   shopButton: {fileID: 413690460}

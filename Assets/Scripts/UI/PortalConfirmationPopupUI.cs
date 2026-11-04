@@ -394,8 +394,8 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             if (destinationDescText != null)
             {
                 destinationDescText.text = LocalizationManager.T(
-                    "Thanh tẩy hoàn toàn cõi tàn tích • Xem bảng vàng chiến tích anh hùng",
-                    "Total realm purification • Conclude your heroic journey"
+                    "Thanh tẩy hoàn toàn cõi tàn tích - Xem bảng vàng chiến tích anh hùng",
+                    "Total realm purification - Conclude your heroic journey"
                 );
             }
             if (warningNoticeText != null)
@@ -512,8 +512,8 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             if (destinationDescText != null)
             {
                 destinationDescText.text = LocalizationManager.T(
-                    "Vùng đất hoang tàn • Xuất hiện Bọ Cạp Độc và Tộc Goblin",
-                    "Perilous canyon • Poison Spitters and fierce Goblins"
+                    "Vùng đất hoang tàn - Xuất hiện Bọ Cạp Độc và Tộc Goblin",
+                    "Perilous canyon - Poison Spitters and fierce Goblins"
                 );
             }
         }
@@ -527,8 +527,8 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             if (destinationDescText != null)
             {
                 destinationDescText.text = LocalizationManager.T(
-                    "Cõi tâm thức cổ xưa • Nơi ngự trị của Skeleton King",
-                    "Ancient sanctum • Realm of the dread Skeleton King"
+                    "Cõi tâm thức cổ xưa - Nơi ngự trị của Skeleton King",
+                    "Ancient sanctum - Realm of the dread Skeleton King"
                 );
             }
         }
@@ -542,8 +542,8 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             if (destinationDescText != null)
             {
                 destinationDescText.text = LocalizationManager.T(
-                    "Thanh tẩy hoàn toàn tàn tích • Ghi danh chiến công sử thi",
-                    "Total realm purification • Complete your legendary run"
+                    "Thanh tẩy hoàn toàn tàn tích - Ghi danh chiến công sử thi",
+                    "Total realm purification - Complete your legendary run"
                 );
             }
         }

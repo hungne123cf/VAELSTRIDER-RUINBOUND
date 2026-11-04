@@ -514,9 +514,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
 
         if (statsText != null)
         {
-            statsText.text = $"{LocalizationManager.T("🏰 PHÒNG ĐÃ DỌN", "🏰 CLEARED")}: <color=#2ED573><b>{clearedRooms}/{totalRooms}</b></color>\n" +
-                             $"{LocalizationManager.T("⚔️ KẺ THÙ", "⚔️ ENEMIES")}: <color=#FF4757><b>{enemyCount} {LocalizationManager.T("Quái", "Foes")}</b></color>\n" +
-                             $"{LocalizationManager.T("💎 LINH HỒN", "💎 SHARDS")}: <color=#00D2D3><b>{shards}</b></color>";
+            statsText.text = $"{LocalizationManager.T("[THANH] PHÒNG ĐÃ DỌN", "[THANH] CLEARED")}: <color=#2ED573><b>{clearedRooms}/{totalRooms}</b></color>\n" +
+                             $"{LocalizationManager.T("️ KẺ THÙ", "️ ENEMIES")}: <color=#FF4757><b>{enemyCount} {LocalizationManager.T("Quái", "Foes")}</b></color>\n" +
+                             $"{LocalizationManager.T("[NGOC] LINH HỒN", "[NGOC] SHARDS")}: <color=#00D2D3><b>{shards}</b></color>";
         }
 
         // 3. Gợi ý Nâng Cấp Thông Minh (Smart Tactical Hints)
@@ -532,12 +532,12 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
             }
             else if (shards >= 150)
             {
-                hintText.text = $"<color=#FFD700><b>💡 {LocalizationManager.T("GỢI Ý CƯỜNG HÓA:", "UPGRADE AVAILABLE:")}</b></color>\n" +
+                hintText.text = $"<color=#FFD700><b>* {LocalizationManager.T("GỢI Ý CƯỜNG HÓA:", "UPGRADE AVAILABLE:")}</b></color>\n" +
                                 $"{LocalizationManager.T("Đang có dồi dào Linh Hồn! Hãy đến Đài Thần Bí để nâng cấp Sát Thương và Thể Lực.", "You hold abundant Shards! Visit Ancient Shrine to boost ATK & HP.")}";
             }
             else if (enemyCount > 0)
             {
-                hintText.text = $"<color=#70A1FF><b>⚔️ {LocalizationManager.T("CHIẾN THUẬT:", "TACTIC:")}</b></color>\n" +
+                hintText.text = $"<color=#70A1FF><b>️ {LocalizationManager.T("CHIẾN THUẬT:", "TACTIC:")}</b></color>\n" +
                                 $"{LocalizationManager.T("Dùng Lướt (Dash) để né đòn quét và tập trung hạ gục các chấm đỏ.", "Use Dash to dodge incoming swings and focus down red blips.")}";
             }
             else
@@ -807,7 +807,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
 
         CreateControlButton(ctrlPanel.transform, "+", new Vector2(0f, 45f), () => AdjustZoom(0.25f));
         CreateControlButton(ctrlPanel.transform, "-", new Vector2(0f, 0f), () => AdjustZoom(-0.25f));
-        CreateControlButton(ctrlPanel.transform, "🎯", new Vector2(0f, -45f), FocusOnPlayer);
+        CreateControlButton(ctrlPanel.transform, "[MUC TIEU]", new Vector2(0f, -45f), FocusOnPlayer);
     }
 
     private void CreateControlButton(Transform parent, string label, Vector2 pos, UnityEngine.Events.UnityAction onClick)

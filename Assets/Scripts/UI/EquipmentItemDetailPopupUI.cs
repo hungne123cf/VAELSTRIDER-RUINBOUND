@@ -558,13 +558,13 @@ public class EquipmentItemDetailPopupUI : MonoBehaviour
             if (slotIndex >= 0)
             {
                 string absorbedMsg = isVi ? $"Đã hợp nhất {currentLevel} viên" : $"Absorbed {currentLevel} gems";
-                itemSubInfoText.text = $"<color=#22C55E><b>Lv.{currentLevel}</b></color>   <color=#00E5FF><b>(x{mult:F2})</b></color>   <color=#94A3B8>• {absorbedMsg}</color>";
+                itemSubInfoText.text = $"<color=#22C55E><b>Lv.{currentLevel}</b></color>   <color=#00E5FF><b>(x{mult:F2})</b></color>   <color=#94A3B8>- {absorbedMsg}</color>";
             }
             else
             {
                 int bagQty = AccountDatabase.GetActiveUserItemCount(gemId);
                 if (bagQty <= 0) bagQty = currentLevel;
-                itemSubInfoText.text = $"<color=#00FF88><b>{(isVi ? $"Số lượng trong túi: x{bagQty}" : $"Bag Quantity: x{bagQty}")}</b></color>   <color=#94A3B8>• {(isVi ? "Chưa trang bị" : "Unsocketed")}</color>";
+                itemSubInfoText.text = $"<color=#00FF88><b>{(isVi ? $"Số lượng trong túi: x{bagQty}" : $"Bag Quantity: x{bagQty}")}</b></color>   <color=#94A3B8>- {(isVi ? "Chưa trang bị" : "Unsocketed")}</color>";
             }
         }
 
@@ -624,43 +624,43 @@ public class EquipmentItemDetailPopupUI : MonoBehaviour
         List<string> statLines = new List<string>();
 
         if (bPhysAtk > 0)
-            statLines.Add($"<color=#FF3B30>• {(isVi ? "Sát Thương Vật Lý:" : "Physical ATK:")} <b>+{bPhysAtk} ATK</b></color>");
+            statLines.Add($"<color=#FF3B30>- {(isVi ? "Sát Thương Vật Lý:" : "Physical ATK:")} <b>+{bPhysAtk} ATK</b></color>");
         if (bMagicAtk > 0)
-            statLines.Add($"<color=#B84DFF>• {(isVi ? "Sát Thương Phép:" : "Magic ATK:")} <b>+{bMagicAtk} AP</b></color>");
+            statLines.Add($"<color=#B84DFF>- {(isVi ? "Sát Thương Phép:" : "Magic ATK:")} <b>+{bMagicAtk} AP</b></color>");
         if (bTrueAtk > 0)
-            statLines.Add($"<color=#E2E8F0>• {(isVi ? "Sát Thương Chuẩn:" : "True Damage:")} <b>+{bTrueAtk} TD</b></color>");
+            statLines.Add($"<color=#E2E8F0>- {(isVi ? "Sát Thương Chuẩn:" : "True Damage:")} <b>+{bTrueAtk} TD</b></color>");
         if (bPhysAtk == 0 && bMagicAtk == 0 && bTrueAtk == 0 && bAtk > 0)
-            statLines.Add($"<color=#FF3B30>• {(isVi ? "Công Kích:" : "Total ATK:")} <b>+{bAtk} ATK</b></color>");
+            statLines.Add($"<color=#FF3B30>- {(isVi ? "Công Kích:" : "Total ATK:")} <b>+{bAtk} ATK</b></color>");
 
         if (bHp > 0)
-            statLines.Add($"<color=#22C55E>• {(isVi ? "Máu Tối Đa:" : "Max HP:")} <b>+{bHp} HP</b></color>");
+            statLines.Add($"<color=#22C55E>- {(isVi ? "Máu Tối Đa:" : "Max HP:")} <b>+{bHp} HP</b></color>");
         if (bDef > 0)
-            statLines.Add($"<color=#38BDF8>• {(isVi ? "Giáp Phòng Thủ:" : "Armor DEF:")} <b>+{bDef} DEF</b></color>");
+            statLines.Add($"<color=#38BDF8>- {(isVi ? "Giáp Phòng Thủ:" : "Armor DEF:")} <b>+{bDef} DEF</b></color>");
 
         if (critChancePct > 0.001f)
-            statLines.Add($"<color=#F59E0B>• {(isVi ? "Tỉ Lệ Chí Mạng:" : "CRIT Rate:")} <b>+{Mathf.RoundToInt(critChancePct * 100f)}% CRIT</b></color>");
+            statLines.Add($"<color=#F59E0B>- {(isVi ? "Tỉ Lệ Chí Mạng:" : "CRIT Rate:")} <b>+{Mathf.RoundToInt(critChancePct * 100f)}% CRIT</b></color>");
 
         if (physLifePct > 0.001f)
-            statLines.Add($"<color=#F43F5E>• {(isVi ? "Hút Máu Vật Lý:" : "Phys Lifesteal:")} <b>+{Mathf.RoundToInt(physLifePct * 100f)}%</b></color>");
+            statLines.Add($"<color=#F43F5E>- {(isVi ? "Hút Máu Vật Lý:" : "Phys Lifesteal:")} <b>+{Mathf.RoundToInt(physLifePct * 100f)}%</b></color>");
         if (spellVampPct > 0.001f)
-            statLines.Add($"<color=#E879F9>• {(isVi ? "Hút Máu Phép:" : "Spell Vamp:")} <b>+{Mathf.RoundToInt(spellVampPct * 100f)}%</b></color>");
+            statLines.Add($"<color=#E879F9>- {(isVi ? "Hút Máu Phép:" : "Spell Vamp:")} <b>+{Mathf.RoundToInt(spellVampPct * 100f)}%</b></color>");
         if (physLifePct <= 0.001f && spellVampPct <= 0.001f && lifestealPct > 0.001f)
-            statLines.Add($"<color=#F43F5E>• {(isVi ? "Hút Máu:" : "Lifesteal:")} <b>+{Mathf.RoundToInt(lifestealPct * 100f)}%</b></color>");
+            statLines.Add($"<color=#F43F5E>- {(isVi ? "Hút Máu:" : "Lifesteal:")} <b>+{Mathf.RoundToInt(lifestealPct * 100f)}%</b></color>");
 
         if (cdReductionPct > 0.001f)
-            statLines.Add($"<color=#C084FC>• {(isVi ? "Giảm Hồi Chiêu:" : "CD Reduction:")} <b>-{Mathf.RoundToInt(cdReductionPct * 100f)}% CD</b></color>");
+            statLines.Add($"<color=#C084FC>- {(isVi ? "Giảm Hồi Chiêu:" : "CD Reduction:")} <b>-{Mathf.RoundToInt(cdReductionPct * 100f)}% CD</b></color>");
 
         if (shardBonusPct > 0.001f)
-            statLines.Add($"<color=#FBBF24>• {(isVi ? "Thưởng Shards:" : "Aethel Shards:")} <b>+{Mathf.RoundToInt(shardBonusPct * 100f)}% Shards</b></color>");
+            statLines.Add($"<color=#FBBF24>- {(isVi ? "Thưởng Shards:" : "Aethel Shards:")} <b>+{Mathf.RoundToInt(shardBonusPct * 100f)}% Shards</b></color>");
 
         if (hpRegenPerSec > 0.01f)
-            statLines.Add($"<color=#10B981>• {(isVi ? "Hồi Máu Tự Nhiên:" : "HP Regeneration:")} <b>+{hpRegenPerSec:F1} HP/s</b></color>");
+            statLines.Add($"<color=#10B981>- {(isVi ? "Hồi Máu Tự Nhiên:" : "HP Regeneration:")} <b>+{hpRegenPerSec:F1} HP/s</b></color>");
 
         if (bonusMaxEnergy > 0.01f)
-            statLines.Add($"<color=#00E5FF>• {(isVi ? "Năng Lượng Tối Đa:" : "Max Mana:")} <b>+{Mathf.RoundToInt(bonusMaxEnergy)} Mana</b></color>");
+            statLines.Add($"<color=#00E5FF>- {(isVi ? "Năng Lượng Tối Đa:" : "Max Mana:")} <b>+{Mathf.RoundToInt(bonusMaxEnergy)} Mana</b></color>");
 
         if (energyRegenPerSec > 0.01f)
-            statLines.Add($"<color=#06B6D4>• {(isVi ? "Hồi Năng Lượng:" : "Mana Regeneration:")} <b>+{energyRegenPerSec:F1} Mana/s</b></color>");
+            statLines.Add($"<color=#06B6D4>- {(isVi ? "Hồi Năng Lượng:" : "Mana Regeneration:")} <b>+{energyRegenPerSec:F1} Mana/s</b></color>");
 
         if (statLines.Count == 0)
         {

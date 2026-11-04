@@ -423,7 +423,7 @@ public class OAuthAuthenticator : MonoBehaviour
 </head>
 <body>
     <div class=""card"">
-        <h2>⚔️ VAELSTRIDER: RUINBOUND ⚔️</h2>
+        <h2>️ VAELSTRIDER: RUINBOUND ️</h2>
         <div class=""badge"">CỔNG XÁC THỰC WEB OAUTH 2.0</div>
         <h1>Đăng nhập bằng {icon}</h1>
         <p>Xác nhận thông tin tài khoản của bạn để liên kết dữ liệu nhân vật vào hệ thống máy chủ trò chơi.</p>
@@ -499,7 +499,7 @@ public class OAuthAuthenticator : MonoBehaviour
 </head>
 <body>
     <div class=""card"">
-        <h2>⚔️ VAELSTRIDER: RUINBOUND ⚔️</h2>
+        <h2>️ VAELSTRIDER: RUINBOUND ️</h2>
         <h1>{title}</h1>
         <p>{sub}</p>
         <p style=""font-size: 13px; color: #7f8fa6; margin-top: 20px;"">Hệ thống xác thực OAuth 2.0 Web Authentication</p>

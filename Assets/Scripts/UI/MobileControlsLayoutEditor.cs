@@ -245,7 +245,7 @@ public class MobileControlsLayoutEditor : MonoBehaviour
 
         // 3. ĐÓNG (Close X button) - 56px x 56px, square icon button matching row height
         CreateCleanActionButton(topBar.transform, "Btn_Back", new Vector2(curX, 0f), new Vector2(56f, 56f),
-            "<b>✕</b>", new Color(0.42f, 0.14f, 0.16f, 0.95f), new Color(0.95f, 0.35f, 0.35f, 0.75f), OnBackClicked);
+            "<b>X</b>", new Color(0.42f, 0.14f, 0.16f, 0.95f), new Color(0.95f, 0.35f, 0.35f, 0.75f), OnBackClicked);
 
         // Adjust topBar width precisely based on curX
         tbRt.sizeDelta = new Vector2(curX + 74f, 74f);
@@ -262,8 +262,8 @@ public class MobileControlsLayoutEditor : MonoBehaviour
 
         var tipTmp = tipObj.AddComponent<TextMeshProUGUI>();
         tipTmp.text = isVi 
-            ? "<color=#55EFC4>💡 Chạm vào nút bất kỳ và kéo đến vị trí thuận tay nhất, sau đó nhấn <b>LƯU & VÀO TRẬN</b>.</color>"
-            : "<color=#55EFC4>💡 Touch and drag any button to your preferred position, then tap <b>SAVE & PLAY</b>.</color>";
+            ? "<color=#55EFC4>* Chạm vào nút bất kỳ và kéo đến vị trí thuận tay nhất, sau đó nhấn <b>LƯU & VÀO TRẬN</b>.</color>"
+            : "<color=#55EFC4>* Touch and drag any button to your preferred position, then tap <b>SAVE & PLAY</b>.</color>";
         tipTmp.fontSize = 14f;
         tipTmp.alignment = TextAlignmentOptions.Center;
 

@@ -181,7 +181,7 @@ public static class AugmentDatabase
             descEN = "Gain <color=#60A5FA><b>+{v} Armor</b></color> and reduce <color=#38BDF8><b>8% incoming damage</b></color>.",
             flavorVN = "«Tấm khiên rèn từ quặng thép đen vĩnh cửu.»",
             flavorEN = "«Forged from black iron unyielding against fate.»",
-            emoji = "🛡️", value = 16f, duration = -1f,
+            emoji = "️", value = 16f, duration = -1f,
             cardColor = new Color(0.4f, 0.65f, 1f), rarity = AugmentData.Rarity.Common
         },
         new AugmentData {
@@ -231,7 +231,7 @@ public static class AugmentDatabase
             descEN = "Instantly gain <color=#38BDF8><b>+{v} Virtual Shield</b></color> protecting for <color=#FFEAA7><b>{d}s</b></color>.",
             flavorVN = "«Màng bảo vệ cổ đại ngăn chặn mọi đòn hiểm độc.»",
             flavorEN = "«Ancient energy barrier warding off fatal strikes.»",
-            emoji = "🛡️", value = 200f, duration = 40f,
+            emoji = "️", value = 200f, duration = 40f,
             cardColor = new Color(0.35f, 0.65f, 1f), rarity = AugmentData.Rarity.Common
         },
 
@@ -295,7 +295,7 @@ public static class AugmentDatabase
             descEN = "When falling below 35% HP, immediately gain <color=#38BDF8><b>+{v} Shield</b></color> and heal <color=#55EFC4><b>25% HP</b></color> (CD: 45s).",
             flavorVN = "«Ánh sáng thần thánh bảo hộ linh hồn trước vực thẳm diệt vong.»",
             flavorEN = "«Divine radiance shielding souls from the brink of oblivion.»",
-            emoji = "🛡️", value = 250f, duration = -1f,
+            emoji = "️", value = 250f, duration = -1f,
             cardColor = new Color(0.35f, 0.65f, 1f), rarity = AugmentData.Rarity.Rare
         },
         new AugmentData {
@@ -315,7 +315,7 @@ public static class AugmentDatabase
             descEN = "Gain <color=#55EFC4><b>+25% Attack Speed</b></color>, combo chain reset window cut by <color=#FFEAA7><b>+{v}%</b></color>.",
             flavorVN = "«Vũ đạo đoạt mạng liên hoàn không thể cản phá.»",
             flavorEN = "«An unstoppable unbroken ballet of mortal slashes.»",
-            emoji = "⚔️", value = 50f, duration = -1f,
+            emoji = "️", value = 50f, duration = -1f,
             cardColor = new Color(0.95f, 0.65f, 0.15f), rarity = AugmentData.Rarity.Rare
         },
         new AugmentData {
@@ -335,7 +335,7 @@ public static class AugmentDatabase
             descEN = "For <color=#FFEAA7><b>{d}s</b></color>, ignite your blade granting <color=#FFEAA7><b>+{v}% Physical Attack</b></color>.",
             flavorVN = "«Lửa giận ngút trời thiêu rụi quân thù thành tro bụi.»",
             flavorEN = "«Blazing fury reducing foes to charred cinders.»",
-            emoji = "🔥", value = 40f, duration = 35f,
+            emoji = "", value = 40f, duration = 35f,
             cardColor = new Color(1f, 0.4f, 0.15f), rarity = AugmentData.Rarity.Rare
         },
 
@@ -349,7 +349,7 @@ public static class AugmentDatabase
             descEN = "Sacrifice <color=#FF7675><b>15% Max HP</b></color> for <color=#FFEAA7><b>+{v} Attack</b></color>, <color=#38BDF8><b>+20% Speed</b></color> and <color=#EF4444><b>+15% Omnivamp</b></color>!",
             flavorVN = "«Ký bằng huyết lệ trên tấm bia da quỷ... Đổi lấy sức mạnh hủy diệt.»",
             flavorEN = "«Signed in blood upon demon parchment... Boundless destruction gained.»",
-            emoji = "🔥", value = 45f, duration = -1f,
+            emoji = "", value = 45f, duration = -1f,
             cardColor = new Color(1f, 0.15f, 0.35f), rarity = AugmentData.Rarity.Epic
         },
         new AugmentData {
@@ -423,7 +423,7 @@ public static class AugmentDatabase
             descEN = "Gain <color=#38BDF8><b>+{v} Virtual Shield</b></color> and permanently increase <color=#60A5FA><b>+10 Armor</b></color>.",
             flavorVN = "«Màng chắn kết tinh từ linh hồn các cổ thuật sư.»",
             flavorEN = "«Crystallized soul-shards of ancient sorcerers.»",
-            emoji = "🛡️", value = 150f, duration = -1f,
+            emoji = "️", value = 150f, duration = -1f,
             cardColor = new Color(0.35f, 0.65f, 1f), rarity = AugmentData.Rarity.Common
         },
         new AugmentData {
@@ -433,7 +433,7 @@ public static class AugmentDatabase
             descEN = "Grant <color=#55EFC4><b>+{v}% Attack Speed</b></color> and <color=#FFEAA7><b>+10 Physical Attack</b></color>.",
             flavorVN = "«Mũi kiếm vung lên không ngừng nghỉ như bão táp.»",
             flavorEN = "«A relentless tempest of whistling sword strokes.»",
-            emoji = "⚔️", value = 15f, duration = -1f,
+            emoji = "️", value = 15f, duration = -1f,
             cardColor = new Color(0.9f, 0.4f, 0.25f), rarity = AugmentData.Rarity.Common
         },
         new AugmentData {
@@ -507,7 +507,7 @@ public static class AugmentDatabase
             descEN = "Gain <color=#60A5FA><b>+{v} Permanent Armor</b></color> and <color=#55EFC4><b>+150 Max Health</b></color>.",
             flavorVN = "«Ý chí gang thép không thể suy suyển trước nghịch cảnh.»",
             flavorEN = "«Adamantine will unbending before ruinous storm.»",
-            emoji = "🛡️", value = 30f, duration = -1f,
+            emoji = "️", value = 30f, duration = -1f,
             cardColor = new Color(0.35f, 0.65f, 1f), rarity = AugmentData.Rarity.Rare
         },
         new AugmentData {
@@ -517,7 +517,7 @@ public static class AugmentDatabase
             descEN = "Gain <color=#FFEAA7><b>+{v} Attack</b></color>, <color=#EF4444><b>+12% Omnivamp</b></color> and <color=#38BDF8><b>+10% Move Speed</b></color>.",
             flavorVN = "«Càng chém giết hăng say, sức mạnh càng cuộn trào.»",
             flavorEN = "«The fiercer the fray, the higher the crimson tide.»",
-            emoji = "🔥", value = 25f, duration = -1f,
+            emoji = "", value = 25f, duration = -1f,
             cardColor = new Color(1f, 0.45f, 0.15f), rarity = AugmentData.Rarity.Rare
         },
 
@@ -551,7 +551,7 @@ public static class AugmentDatabase
             descEN = "Gain <color=#55EFC4><b>+{v} Max Health</b></color>, <color=#60A5FA><b>+40 Armor</b></color> and 250 Virtual Shield!",
             flavorVN = "«Sừng sững như đỉnh núi cổ thụ ngạo nghễ trước sấm sét.»",
             flavorEN = "«Towering like monoliths standing unyielding in thunder.»",
-            emoji = "🛡️", value = 500f, duration = -1f,
+            emoji = "️", value = 500f, duration = -1f,
             cardColor = new Color(0.35f, 0.75f, 1f), rarity = AugmentData.Rarity.Epic
         },
         new AugmentData {
@@ -575,7 +575,7 @@ public static class AugmentDatabase
             descEN = "Reduce Fire & Burn damage by <color=#F59E0B><b>60%</b></color>. Taking damage fires back a <color=#EF4444><b>Magma Fireball</b></color> dealing 140 damage and 1s stun!",
             flavorVN = "«Cơ thể hòa quyện với nham thạch, biến ngọn lửa hủy diệt thành vũ khí phản đòn.»",
             flavorEN = "«Flesh merging with molten slag, weaponizing destructive flames.»",
-            emoji = "🔥", value = 60f, duration = -1f,
+            emoji = "", value = 60f, duration = -1f,
             realmFilter = new[] { CalamityRealm.MagmaCalamity },
             cardColor = new Color(1f, 0.35f, 0.1f), rarity = AugmentData.Rarity.Epic
         },
@@ -697,7 +697,7 @@ public static class AugmentDatabase
             descEN = "Vaelstrider's Parry or Heavy Charge unleashes <color=#FBBF24><b>3 RUIN GALE SWORD WAVES</b></color> fanning out, piercing and repelling all targets!",
             flavorVN = "«Lưỡi kiếm cổ xưa rít gào, mở đường máu giữa bầy tàn ma.»",
             flavorEN = "«The ancient blade howls, carving a path of ruin through fiendish hordes.»",
-            emoji = "⚔️", value = 3f, duration = -1f,
+            emoji = "️", value = 3f, duration = -1f,
             heroFilter = new[] { CharacterManager.CHAR_VAELSTRIDER },
             cardColor = new Color(1f, 0.85f, 0.25f), rarity = AugmentData.Rarity.Epic
         },

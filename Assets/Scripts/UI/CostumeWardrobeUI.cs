@@ -353,14 +353,14 @@ public class CostumeWardrobeUI : MonoBehaviour
         if (heroCostumeBuffsText != null && activeCostume != null)
         {
             string buffs = $"<b>{LocalizationManager.T("HIỆU QUẢ TRANG PHỤC:", "COSTUME BUFFS:")}</b>\n";
-            if (activeCostume.bonusHp > 0) buffs += $"• {LocalizationManager.T("Máu tối đa", "Max HP")}: +{activeCostume.bonusHp}\n";
-            if (activeCostume.bonusAtk > 0) buffs += $"• {LocalizationManager.T("Lực công kích", "Attack Damage")}: +{activeCostume.bonusAtk}\n";
-            if (activeCostume.bonusDefPercent > 0) buffs += $"• {LocalizationManager.T("Giảm sát thương", "Damage Reduction")}: +{activeCostume.bonusDefPercent:0}%\n";
-            if (activeCostume.bonusSpeed > 0) buffs += $"• {LocalizationManager.T("Tốc chạy", "Move Speed")}: +{activeCostume.bonusSpeed:0.1}\n";
+            if (activeCostume.bonusHp > 0) buffs += $"- {LocalizationManager.T("Máu tối đa", "Max HP")}: +{activeCostume.bonusHp}\n";
+            if (activeCostume.bonusAtk > 0) buffs += $"- {LocalizationManager.T("Lực công kích", "Attack Damage")}: +{activeCostume.bonusAtk}\n";
+            if (activeCostume.bonusDefPercent > 0) buffs += $"- {LocalizationManager.T("Giảm sát thương", "Damage Reduction")}: +{activeCostume.bonusDefPercent:0}%\n";
+            if (activeCostume.bonusSpeed > 0) buffs += $"- {LocalizationManager.T("Tốc chạy", "Move Speed")}: +{activeCostume.bonusSpeed:0.1}\n";
 
             if (activeCostume.bonusHp == 0 && activeCostume.bonusAtk == 0 && activeCostume.bonusDefPercent == 0)
             {
-                buffs += LocalizationManager.T("• Trang phục mặc định căn bản.", "• Standard default outfit.");
+                buffs += LocalizationManager.T("- Trang phục mặc định căn bản.", "- Standard default outfit.");
             }
 
             heroCostumeBuffsText.text = buffs;

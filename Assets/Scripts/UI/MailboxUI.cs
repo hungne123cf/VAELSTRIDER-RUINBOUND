@@ -29,6 +29,7 @@ public class MailboxUI : MonoBehaviour
 
     // UI References
     private Transform mailListContent;
+    private TextMeshProUGUI emptyMailNoticeText;
     private TextMeshProUGUI detailTitleText;
     private TextMeshProUGUI detailSenderText;
     private TextMeshProUGUI detailDateText;
@@ -37,6 +38,7 @@ public class MailboxUI : MonoBehaviour
     private TextMeshProUGUI detailRewardValText;
     private Button detailClaimButton;
     private TextMeshProUGUI detailClaimBtnText;
+    private Button detailDeleteButton;
 
     private TMP_InputField giftcodeInput;
     private TextMeshProUGUI giftcodeFeedbackText;
@@ -67,11 +69,16 @@ public class MailboxUI : MonoBehaviour
             titleEn = "[UPDATE v1.3] NEW CONTROLS & ATTENDANCE",
             senderVi = "Đội Ngũ Phát Triển",
             senderEn = "Dev Team",
-            contentVi = "Bản cập nhật v1.3 chính thức ra mắt hệ thống Tùy chỉnh nút cảm ứng trực tiếp trong trận đấu, Điểm danh nhận quà mỗi 7:00 sáng và Hòm thư hiệp sĩ.\n\nCảm ơn bạn đã luôn đồng hành cùng Vaelstrider!",
-            contentEn = "Update v1.3 introduces live in-match controls customization, 7:00 AM Daily Attendance, and the Knight's Mailbox.\n\nThank you for supporting Vaelstrider!",
+            contentVi = "Bản cập nhật v1.3 chính thức ra mắt hệ thống Tùy chỉnh nút cảm ứng trực tiếp trong trận đấu, Điểm danh nhận quà mỗi 07:00 sáng và Hòm thư hiệp sĩ.\n\nCảm ơn bạn đã luôn đồng hành cùng Vaelstrider!",
+            contentEn = "Update v1.3 introduces live in-match controls customization, 07:00 AM Daily Attendance, and the Knight's Mailbox.\n\nThank you for supporting Vaelstrider!",
             rewardShards = 500,
             date = "04/11/2026"
         });
+    }
+
+    public static bool IsMailDeleted(string id)
+    {
+        return PlayerPrefs.GetInt("Mail_Deleted_" + id, 0) == 1;
     }
 
     public static bool HasUnclaimedMail()
@@ -80,6 +87,7 @@ public class MailboxUI : MonoBehaviour
 
         foreach (var m in _mails)
         {
+            if (IsMailDeleted(m.id)) continue;
             if (m.rewardShards > 0 && PlayerPrefs.GetInt("Mail_Claimed_" + m.id, 0) == 0)
             {
                 return true;
@@ -119,7 +127,7 @@ public class MailboxUI : MonoBehaviour
         rt.offsetMax = Vector2.zero;
 
         Image bg = mbObj.GetComponent<Image>();
-        bg.color = new Color(0f, 0f, 0f, 0.75f); // Dim backdrop
+        bg.color = new Color(0f, 0f, 0f, 0.75f);
         bg.raycastTarget = true;
 
         Instance = mbObj.AddComponent<MailboxUI>();
@@ -185,7 +193,7 @@ public class MailboxUI : MonoBehaviour
         stTmp.color = new Color(0.70f, 0.80f, 0.92f, 0.8f);
         stTmp.alignment = TextAlignmentOptions.Center;
 
-        // Close Button
+        // Close Button (ASCII X)
         GameObject closeBtnObj = new GameObject("Btn_Close", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         closeBtnObj.layer = 5;
         closeBtnObj.transform.SetParent(win.transform, false);
@@ -208,8 +216,9 @@ public class MailboxUI : MonoBehaviour
         ctRt.anchorMax = Vector2.one;
         ctRt.sizeDelta = Vector2.zero;
         var ctTmp = cTxtObj.AddComponent<TextMeshProUGUI>();
-        ctTmp.text = "<b>✕</b>";
+        ctTmp.text = "<b>X</b>";
         ctTmp.fontSize = 24f;
+        ctTmp.fontStyle = FontStyles.Bold;
         ctTmp.alignment = TextAlignmentOptions.Center;
         ctTmp.color = Color.white;
 
@@ -217,7 +226,7 @@ public class MailboxUI : MonoBehaviour
         closeBtn.targetGraphic = cImg;
         closeBtn.onClick.AddListener(CloseMailbox);
 
-        // --- LEFT COLUMN: Mail List (width 390px) ---
+        // --- LEFT COLUMN: Mail List (width 380px) ---
         GameObject leftCol = new GameObject("LeftColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         leftCol.transform.SetParent(win.transform, false);
         RectTransform lcRt = leftCol.GetComponent<RectTransform>();
@@ -232,9 +241,94 @@ public class MailboxUI : MonoBehaviour
         lcImg.type = Image.Type.Sliced;
         lcImg.color = new Color(0.03f, 0.05f, 0.08f, 0.85f);
 
-        mailListContent = leftCol.transform;
+        // Header inside Left Col with "XÓA ĐÃ ĐỌC" button
+        GameObject listHeadObj = new GameObject("ListHeader", typeof(RectTransform));
+        listHeadObj.transform.SetParent(leftCol.transform, false);
+        RectTransform lhRt = listHeadObj.GetComponent<RectTransform>();
+        lhRt.anchorMin = new Vector2(0f, 1f);
+        lhRt.anchorMax = new Vector2(1f, 1f);
+        lhRt.pivot = new Vector2(0.5f, 1f);
+        lhRt.anchoredPosition = new Vector2(0f, -8f);
+        lhRt.sizeDelta = new Vector2(360f, 36f);
 
-        // --- RIGHT COLUMN: Mail Detail (width 510px) ---
+        GameObject lhTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        lhTxtObj.transform.SetParent(listHeadObj.transform, false);
+        RectTransform lhtRt = lhTxtObj.GetComponent<RectTransform>();
+        lhtRt.anchorMin = new Vector2(0f, 0f);
+        lhtRt.anchorMax = new Vector2(0f, 1f);
+        lhtRt.pivot = new Vector2(0f, 0.5f);
+        lhtRt.anchoredPosition = new Vector2(6f, 0f);
+        lhtRt.sizeDelta = new Vector2(180f, 32f);
+
+        var lhtTmp = lhTxtObj.AddComponent<TextMeshProUGUI>();
+        lhtTmp.text = isVi ? "<b>DANH SÁCH THƯ</b>" : "<b>MAIL LIST</b>";
+        lhtTmp.fontSize = 13.5f;
+        lhtTmp.color = new Color(0.85f, 0.90f, 0.96f);
+        lhtTmp.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Button "XÓA ĐÃ ĐỌC" (Delete Read Mails)
+        GameObject delAllBtnObj = new GameObject("Btn_DeleteRead", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        delAllBtnObj.transform.SetParent(listHeadObj.transform, false);
+        RectTransform daRt = delAllBtnObj.GetComponent<RectTransform>();
+        daRt.anchorMin = new Vector2(1f, 0.5f);
+        daRt.anchorMax = new Vector2(1f, 0.5f);
+        daRt.pivot = new Vector2(1f, 0.5f);
+        daRt.anchoredPosition = new Vector2(-4f, 0f);
+        daRt.sizeDelta = new Vector2(135f, 32f);
+
+        Image daImg = delAllBtnObj.GetComponent<Image>();
+        daImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        daImg.type = Image.Type.Sliced;
+        daImg.color = new Color(0.32f, 0.14f, 0.16f, 0.95f);
+
+        var daOut = delAllBtnObj.AddComponent<Outline>();
+        daOut.effectColor = new Color(0.85f, 0.3f, 0.3f, 0.6f);
+        daOut.effectDistance = new Vector2(1f, -1f);
+
+        GameObject datObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        datObj.transform.SetParent(delAllBtnObj.transform, false);
+        RectTransform datRt = datObj.GetComponent<RectTransform>();
+        datRt.anchorMin = Vector2.zero;
+        datRt.anchorMax = Vector2.one;
+        datRt.sizeDelta = Vector2.zero;
+
+        var datTmp = datObj.AddComponent<TextMeshProUGUI>();
+        datTmp.text = isVi ? "<b>XÓA ĐÃ ĐỌC</b>" : "<b>DELETE READ</b>";
+        datTmp.fontSize = 12f;
+        datTmp.alignment = TextAlignmentOptions.Center;
+        datTmp.color = Color.white;
+
+        Button delAllBtn = delAllBtnObj.GetComponent<Button>();
+        delAllBtn.targetGraphic = daImg;
+        delAllBtn.onClick.AddListener(OnDeleteAllReadMails);
+
+        // Scroll Container for mail items
+        GameObject itemsContainer = new GameObject("ItemsScrollContent", typeof(RectTransform));
+        itemsContainer.transform.SetParent(leftCol.transform, false);
+        RectTransform icRt = itemsContainer.GetComponent<RectTransform>();
+        icRt.anchorMin = new Vector2(0f, 0f);
+        icRt.anchorMax = new Vector2(1f, 1f);
+        icRt.offsetMin = new Vector2(6f, 8f);
+        icRt.offsetMax = new Vector2(-6f, -48f);
+
+        mailListContent = itemsContainer.transform;
+
+        // Empty state notice
+        GameObject empObj = new GameObject("EmptyNotice", typeof(RectTransform), typeof(CanvasRenderer));
+        empObj.transform.SetParent(leftCol.transform, false);
+        RectTransform empRt = empObj.GetComponent<RectTransform>();
+        empRt.anchorMin = Vector2.zero;
+        empRt.anchorMax = Vector2.one;
+        empRt.sizeDelta = Vector2.zero;
+
+        emptyMailNoticeText = empObj.AddComponent<TextMeshProUGUI>();
+        emptyMailNoticeText.text = isVi ? "<i>Hòm thư hiện đang trống</i>" : "<i>Mailbox is empty</i>";
+        emptyMailNoticeText.fontSize = 14f;
+        emptyMailNoticeText.color = new Color(0.6f, 0.7f, 0.8f, 0.6f);
+        emptyMailNoticeText.alignment = TextAlignmentOptions.Center;
+        emptyMailNoticeText.gameObject.SetActive(false);
+
+        // --- RIGHT COLUMN: Mail Detail (width 515px) ---
         GameObject rightCol = new GameObject("RightColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rightCol.transform.SetParent(win.transform, false);
         RectTransform rcRt = rightCol.GetComponent<RectTransform>();
@@ -328,7 +422,7 @@ public class MailboxUI : MonoBehaviour
         detailRewardValText.alignment = TextAlignmentOptions.Center;
         detailRewardValText.color = new Color(1f, 0.92f, 0.55f);
 
-        // Claim Button
+        // Claim Button (Centered)
         GameObject claimBtnObj = new GameObject("Btn_Claim", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         claimBtnObj.layer = 5;
         claimBtnObj.transform.SetParent(rightCol.transform, false);
@@ -336,8 +430,8 @@ public class MailboxUI : MonoBehaviour
         clRt.anchorMin = new Vector2(0.5f, 0f);
         clRt.anchorMax = new Vector2(0.5f, 0f);
         clRt.pivot = new Vector2(0.5f, 0f);
-        clRt.anchoredPosition = new Vector2(0f, 14f);
-        clRt.sizeDelta = new Vector2(280f, 46f);
+        clRt.anchoredPosition = new Vector2(-60f, 14f);
+        clRt.sizeDelta = new Vector2(250f, 46f);
 
         Image clImg = claimBtnObj.GetComponent<Image>();
         clImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -365,17 +459,51 @@ public class MailboxUI : MonoBehaviour
         detailClaimButton.targetGraphic = clImg;
         detailClaimButton.onClick.AddListener(OnClaimSelectedMail);
 
-        // --- BOTTOM SECTION: Giftcode Bar (height 52px) ---
+        // Delete Single Mail Button
+        GameObject delOneBtnObj = new GameObject("Btn_DeleteThis", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        delOneBtnObj.layer = 5;
+        delOneBtnObj.transform.SetParent(rightCol.transform, false);
+        RectTransform dotRt = delOneBtnObj.GetComponent<RectTransform>();
+        dotRt.anchorMin = new Vector2(0.5f, 0f);
+        dotRt.anchorMax = new Vector2(0.5f, 0f);
+        dotRt.pivot = new Vector2(0.5f, 0f);
+        dotRt.anchoredPosition = new Vector2(160f, 14f);
+        dotRt.sizeDelta = new Vector2(150f, 46f);
+
+        Image dotImg = delOneBtnObj.GetComponent<Image>();
+        dotImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        dotImg.type = Image.Type.Sliced;
+        dotImg.color = new Color(0.35f, 0.15f, 0.16f, 0.95f);
+
+        var dotOut = delOneBtnObj.AddComponent<Outline>();
+        dotOut.effectColor = new Color(0.85f, 0.35f, 0.35f, 0.70f);
+        dotOut.effectDistance = new Vector2(1.5f, -1.5f);
+
+        GameObject dottObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        dottObj.transform.SetParent(delOneBtnObj.transform, false);
+        RectTransform dottRt = dottObj.GetComponent<RectTransform>();
+        dottRt.anchorMin = Vector2.zero;
+        dottRt.anchorMax = Vector2.one;
+        dottRt.sizeDelta = Vector2.zero;
+
+        var dottTmp = dottObj.AddComponent<TextMeshProUGUI>();
+        dottTmp.text = isVi ? "<b>XÓA THƯ</b>" : "<b>DELETE</b>";
+        dottTmp.fontSize = 14f;
+        dottTmp.alignment = TextAlignmentOptions.Center;
+        dottTmp.color = Color.white;
+
+        detailDeleteButton = delOneBtnObj.GetComponent<Button>();
+        detailDeleteButton.targetGraphic = dotImg;
+        detailDeleteButton.onClick.AddListener(OnDeleteSelectedMail);
+
+        // --- BOTTOM SECTION: Giftcode Bar (height 48px) ---
         BuildGiftcodeBar(win.transform);
 
         // Populate List
         RefreshMailList();
 
-        // Auto select first mail
-        if (_mails.Count > 0)
-        {
-            SelectMail(_mails[0]);
-        }
+        // Select first valid mail
+        SelectFirstAvailableMail();
     }
 
     private void BuildGiftcodeBar(Transform parent)
@@ -523,13 +651,24 @@ public class MailboxUI : MonoBehaviour
             Destroy(mailListContent.GetChild(i).gameObject);
         }
 
+        List<MailItemData> visibleMails = new List<MailItemData>();
+        foreach (var m in _mails)
+        {
+            if (!IsMailDeleted(m.id)) visibleMails.Add(m);
+        }
+
+        if (emptyMailNoticeText != null)
+        {
+            emptyMailNoticeText.gameObject.SetActive(visibleMails.Count == 0);
+        }
+
         float itemHeight = 78f;
         float gap = 8f;
-        float startY = -12f;
+        float startY = -4f;
 
-        for (int i = 0; i < _mails.Count; i++)
+        for (int i = 0; i < visibleMails.Count; i++)
         {
-            var mail = _mails[i];
+            var mail = visibleMails[i];
             bool isClaimed = mail.rewardShards <= 0 || PlayerPrefs.GetInt("Mail_Claimed_" + mail.id, 0) == 1;
 
             GameObject item = new GameObject("MailItem_" + mail.id, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -568,7 +707,7 @@ public class MailboxUI : MonoBehaviour
             tTmp.color = isClaimed ? new Color(0.65f, 0.72f, 0.82f) : new Color(1f, 0.88f, 0.45f);
             tTmp.overflowMode = TextOverflowModes.Ellipsis;
 
-            // Sender & Date
+            // Sender & Status
             GameObject subObj = new GameObject("Meta", typeof(RectTransform), typeof(CanvasRenderer));
             subObj.transform.SetParent(item.transform, false);
             RectTransform sRt = subObj.GetComponent<RectTransform>();
@@ -581,9 +720,9 @@ public class MailboxUI : MonoBehaviour
             var sTmp = subObj.AddComponent<TextMeshProUGUI>();
             string sender = isVi ? mail.senderVi : mail.senderEn;
             string statusStr = isClaimed 
-                ? (isVi ? "<color=#88A0C0>Đã nhận</color>" : "<color=#88A0C0>Claimed</color>") 
+                ? (isVi ? "<color=#88A0C0>[Đã nhận]</color>" : "<color=#88A0C0>[Claimed]</color>") 
                 : $"<color=#55EFC4><b>+{mail.rewardShards:N0} Linh Hồn</b></color>";
-            sTmp.text = $"{sender} • {statusStr}";
+            sTmp.text = $"{sender} | {statusStr}";
             sTmp.fontSize = 11.5f;
 
             // Red Dot if unclaimed
@@ -611,8 +750,39 @@ public class MailboxUI : MonoBehaviour
         }
     }
 
+    private void SelectFirstAvailableMail()
+    {
+        foreach (var m in _mails)
+        {
+            if (!IsMailDeleted(m.id))
+            {
+                SelectMail(m);
+                return;
+            }
+        }
+        ClearDetailDisplay();
+    }
+
+    private void ClearDetailDisplay()
+    {
+        selectedMail = null;
+        bool isVi = LocalizationManager.IsVietnamese;
+        if (detailTitleText != null) detailTitleText.text = isVi ? "Không có thư nào được chọn" : "No mail selected";
+        if (detailSenderText != null) detailSenderText.text = "";
+        if (detailBodyText != null) detailBodyText.text = isVi ? "Hòm thư của bạn hiện đang trống." : "Your mailbox is currently empty.";
+        if (detailRewardBox != null) detailRewardBox.SetActive(false);
+        if (detailClaimButton != null) detailClaimButton.gameObject.SetActive(false);
+        if (detailDeleteButton != null) detailDeleteButton.gameObject.SetActive(false);
+    }
+
     private void SelectMail(MailItemData mail)
     {
+        if (mail == null || IsMailDeleted(mail.id))
+        {
+            SelectFirstAvailableMail();
+            return;
+        }
+
         selectedMail = mail;
         bool isVi = LocalizationManager.IsVietnamese;
 
@@ -635,8 +805,8 @@ public class MailboxUI : MonoBehaviour
             if (hasReward)
             {
                 detailRewardValText.text = isVi 
-                    ? $"🎁 ĐÍNH KÈM: <b>+{mail.rewardShards:N0} MẢNH LINH HỒN</b>"
-                    : $"🎁 ATTACHMENT: <b>+{mail.rewardShards:N0} SOUL SHARDS</b>";
+                    ? $"PHẦN THƯỞNG: <b>+{mail.rewardShards:N0} MẢNH LINH HỒN</b>"
+                    : $"REWARD: <b>+{mail.rewardShards:N0} SOUL SHARDS</b>";
             }
         }
 
@@ -658,6 +828,12 @@ public class MailboxUI : MonoBehaviour
                 detailClaimBtnText.text = isVi ? "<b>NHẬN QUÀ</b>" : "<b>CLAIM GIFT</b>";
                 detailClaimBtnText.color = Color.white;
             }
+        }
+
+        if (detailDeleteButton != null)
+        {
+            // Only allow deleting mail if it has been claimed or has no reward
+            detailDeleteButton.gameObject.SetActive(isClaimed || !hasReward);
         }
 
         RefreshMailList();
@@ -687,6 +863,41 @@ public class MailboxUI : MonoBehaviour
         // 4. Update UI
         SelectMail(selectedMail);
         UpdateLobbyBadge();
+    }
+
+    private void OnDeleteSelectedMail()
+    {
+        if (selectedMail == null) return;
+
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        PlayerPrefs.SetInt("Mail_Deleted_" + selectedMail.id, 1);
+        PlayerPrefs.Save();
+
+        SelectFirstAvailableMail();
+        UpdateLobbyBadge();
+    }
+
+    private void OnDeleteAllReadMails()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+
+        int deletedCount = 0;
+        foreach (var m in _mails)
+        {
+            bool isClaimed = m.rewardShards <= 0 || PlayerPrefs.GetInt("Mail_Claimed_" + m.id, 0) == 1;
+            if (isClaimed && !IsMailDeleted(m.id))
+            {
+                PlayerPrefs.SetInt("Mail_Deleted_" + m.id, 1);
+                deletedCount++;
+            }
+        }
+
+        if (deletedCount > 0)
+        {
+            PlayerPrefs.Save();
+            SelectFirstAvailableMail();
+            UpdateLobbyBadge();
+        }
     }
 
     private void OnRedeemGiftcode()

@@ -3317,12 +3317,12 @@ public class MainMenuManager : MonoBehaviour
             if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#FFA502>[ĐỠ ĐÒN]</color> Đại Chùy Chiến Thần / Tanker & Chấn Địa", "<color=#FFA502>[TANKER]</color> Heavy War Hammer / Tanker & CC");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: CUỒNG CHIẾN ĐẠI CHÙY", "SKILLSET: TITAN WAR HAMMER");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
-                "• <b>Đòn Đánh & Gồng Địa Chấn:</b> Nện đại chùy càn quét diện rộng (Nội tại: Giảm 20% sát thương). Nhấn Giữ gồng Thế Thủ: <color=#55FF88><b>Bất tử 100%</b></color>, thả tay nện đất bộc phá gây <color=#FFAA33><b>Choáng 1.0s</b></color>!\n" +
-                "• <b>Lướt (Chiến Xa Xoay Búa 360°):</b> Lướt tốc độ cao xoay búa 360° chém quét mọi kẻ địch trên đường lướt & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>.\n" +
-                "• <b>Tuyệt Kỹ (Cuồng Nộ Chấn Địa):</b> Hút toàn bộ quái vật vào tâm chấn, bật nhảy nện búa dung nham bộc phát chấn động hủy diệt hất tung toàn bộ kẻ địch.",
-                "• <b>Attack & Earthshaker:</b> Massive hammer smashes (Innate 20% DR). Hold attack for Earthshaker Stance: <color=#55FF88><b>100% Invulnerable</b></color>, release to smash the ground and <color=#FFAA33><b>Stun for 1.0s</b></color>!\n" +
-                "• <b>Dash (Juggernaut 360° Spin):</b> Heavy spin dash slashing all enemies along the path & <color=#FFAA33><b>Reduces Ultimate CD by 2.0s</b></color>.\n" +
-                "• <b>Ultimate (Cataclysm Slam):</b> Pulls enemies into the vortex epicenter and leaps to smash down volcanic cataclysmic shockwaves.");
+                "- <b>Đòn Đánh & Gồng Địa Chấn:</b> Nện đại chùy càn quét diện rộng (Nội tại: Giảm 20% sát thương). Nhấn Giữ gồng Thế Thủ: <color=#55FF88><b>Bất tử 100%</b></color>, thả tay nện đất bộc phá gây <color=#FFAA33><b>Choáng 1.0s</b></color>!\n" +
+                "- <b>Lướt (Chiến Xa Xoay Búa 360 deg):</b> Lướt tốc độ cao xoay búa 360 deg chém quét mọi kẻ địch trên đường lướt & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>.\n" +
+                "- <b>Tuyệt Kỹ (Cuồng Nộ Chấn Địa):</b> Hút toàn bộ quái vật vào tâm chấn, bật nhảy nện búa dung nham bộc phát chấn động hủy diệt hất tung toàn bộ kẻ địch.",
+                "- <b>Attack & Earthshaker:</b> Massive hammer smashes (Innate 20% DR). Hold attack for Earthshaker Stance: <color=#55FF88><b>100% Invulnerable</b></color>, release to smash the ground and <color=#FFAA33><b>Stun for 1.0s</b></color>!\n" +
+                "- <b>Dash (Juggernaut 360 deg Spin):</b> Heavy spin dash slashing all enemies along the path & <color=#FFAA33><b>Reduces Ultimate CD by 2.0s</b></color>.\n" +
+                "- <b>Ultimate (Cataclysm Slam):</b> Pulls enemies into the vortex epicenter and leaps to smash down volcanic cataclysmic shockwaves.");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 200   CÔNG: 32   TỐC: 4.0", "HP: 200   ATK: 32   SPD: 4.0");
@@ -3334,12 +3334,12 @@ public class MainMenuManager : MonoBehaviour
             if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#A855F7>[SÁT THỦ]</color> Song Đoản Đao / Tốc Biến & Phản Đòn", "<color=#A855F7>[ASSASSIN]</color> Dual Scimitars / Speed & Counter");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: SA MẠC THÍCH KHÁCH", "SKILLSET: DUNE SHADOW ASSASSIN");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
-                "• <b>Đòn Đánh & Thủ Phản Kích:</b> Combo 3 đòn song đao chém lướt bạo kích cao. Nhấn Giữ vào Thế Thủ Sa Mạc: Giảm 70% sát thương và tung đòn <color=#FFAA33><b>Phản Kích Kiếm Khí Choáng 1.2s</b></color>!\n" +
-                "• <b>Lướt (Ảo Ảnh Sa Lướt):</b> Tích lũy tối đa <color=#55FFFF><b>3 lần lướt liên hoàn</b></color> cực cơ động, tạo tàn ảnh cát & <color=#FFAA33><b>Giảm 1.5s hồi Tuyệt Kỹ</b></color> mỗi lần lướt.\n" +
-                "• <b>Tuyệt Kỹ (Cuồng Bão Sa Ảnh X-Rend):</b> Tạo lốc xoáy bão cát vây hãm và trảm kích chữ X xé toạc chiến trường gây sát thương cực lớn và hiệu ứng <b>Chảy Máu Sa Mạc</b>.",
-                "• <b>Attack & Mirage Counter:</b> Fast 3-hit dagger combos with high crit chance. Hold attack for Mirage Defend: reduces damage by 70% and unleashes an Air Slash Counter (<color=#FFAA33><b>1.2s Stun</b></color>)!\n" +
-                "• <b>Dash (Triple Sand Mirage):</b> Stores up to <color=#55FFFF><b>3 Consecutive Dash Charges</b></color>, leaves sand mirages & <color=#FFAA33><b>Reduces Ultimate CD by 1.5s</b></color> per dash.\n" +
-                "• <b>Ultimate (Sandstorm X-Rend):</b> Summons a sand vortex and executes a devastating Cross-X Slash with Sand Bleed.");
+                "- <b>Đòn Đánh & Thủ Phản Kích:</b> Combo 3 đòn song đao chém lướt bạo kích cao. Nhấn Giữ vào Thế Thủ Sa Mạc: Giảm 70% sát thương và tung đòn <color=#FFAA33><b>Phản Kích Kiếm Khí Choáng 1.2s</b></color>!\n" +
+                "- <b>Lướt (Ảo Ảnh Sa Lướt):</b> Tích lũy tối đa <color=#55FFFF><b>3 lần lướt liên hoàn</b></color> cực cơ động, tạo tàn ảnh cát & <color=#FFAA33><b>Giảm 1.5s hồi Tuyệt Kỹ</b></color> mỗi lần lướt.\n" +
+                "- <b>Tuyệt Kỹ (Cuồng Bão Sa Ảnh X-Rend):</b> Tạo lốc xoáy bão cát vây hãm và trảm kích chữ X xé toạc chiến trường gây sát thương cực lớn và hiệu ứng <b>Chảy Máu Sa Mạc</b>.",
+                "- <b>Attack & Mirage Counter:</b> Fast 3-hit dagger combos with high crit chance. Hold attack for Mirage Defend: reduces damage by 70% and unleashes an Air Slash Counter (<color=#FFAA33><b>1.2s Stun</b></color>)!\n" +
+                "- <b>Dash (Triple Sand Mirage):</b> Stores up to <color=#55FFFF><b>3 Consecutive Dash Charges</b></color>, leaves sand mirages & <color=#FFAA33><b>Reduces Ultimate CD by 1.5s</b></color> per dash.\n" +
+                "- <b>Ultimate (Sandstorm X-Rend):</b> Summons a sand vortex and executes a devastating Cross-X Slash with Sand Bleed.");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 110   CÔNG: 18   TỐC: 4.8", "HP: 110   ATK: 18   SPD: 4.8");
@@ -3351,12 +3351,12 @@ public class MainMenuManager : MonoBehaviour
             if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#00D2FF>[XẠ THỦ]</color> Trọng Kiếm Khí / Sóng Kiếm Băng Tầm Xa", "<color=#00D2FF>[MARKSMAN]</color> Heavy Crescent Blade / Ranged Waves");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: TRỌNG KIẾM BĂNG KHÍ", "SKILLSET: AZURE CRESCENT BLADE");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
-                "• <b>Đòn Đánh & Sóng Kiếm:</b> Đòn chém uy lực phóng <color=#55FFFF><b>Sóng Kiếm Băng</b></color> xuyên thấu quái vật (tầm 6.5m), trúng đích hồi <color=#38BDF8><b>+6 Mana</b></color> & giảm 50% thời gian chờ đòn đánh.\n" +
-                "• <b>Lướt (Hàn Băng Trượt Tuyết):</b> Lướt né đòn và <color=#55FFFF><b>Hồi ngay lập tức đòn đánh thường</b></color> kế tiếp.\n" +
-                "• <b>Tuyệt Kỹ (Bão Sóng Kiếm Nan Quạt):</b> Tụ khí phóng 5 đợt kiếm khí hình nan quạt khổng lồ quét sạch toàn bộ chiến trường.",
-                "• <b>Attack & Frost Wave:</b> Heavy slashes unleashing <color=#55FFFF><b>Frost Sword Waves</b></color> piercing enemies (6.5m), restores <color=#38BDF8><b>+6 Mana</b></color> & cuts attack cooldown by 50% on hit.\n" +
-                "• <b>Dash (Frost Glide):</b> Swift dash dodging attacks & <color=#55FFFF><b>Instantly resets basic attack</b></color>.\n" +
-                "• <b>Ultimate (Crescent Tempest):</b> Releases 5 massive crescent sword waves in a fan spread across the battlefield.");
+                "- <b>Đòn Đánh & Sóng Kiếm:</b> Đòn chém uy lực phóng <color=#55FFFF><b>Sóng Kiếm Băng</b></color> xuyên thấu quái vật (tầm 6.5m), trúng đích hồi <color=#38BDF8><b>+6 Mana</b></color> & giảm 50% thời gian chờ đòn đánh.\n" +
+                "- <b>Lướt (Hàn Băng Trượt Tuyết):</b> Lướt né đòn và <color=#55FFFF><b>Hồi ngay lập tức đòn đánh thường</b></color> kế tiếp.\n" +
+                "- <b>Tuyệt Kỹ (Bão Sóng Kiếm Nan Quạt):</b> Tụ khí phóng 5 đợt kiếm khí hình nan quạt khổng lồ quét sạch toàn bộ chiến trường.",
+                "- <b>Attack & Frost Wave:</b> Heavy slashes unleashing <color=#55FFFF><b>Frost Sword Waves</b></color> piercing enemies (6.5m), restores <color=#38BDF8><b>+6 Mana</b></color> & cuts attack cooldown by 50% on hit.\n" +
+                "- <b>Dash (Frost Glide):</b> Swift dash dodging attacks & <color=#55FFFF><b>Instantly resets basic attack</b></color>.\n" +
+                "- <b>Ultimate (Crescent Tempest):</b> Releases 5 massive crescent sword waves in a fan spread across the battlefield.");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 110   CÔNG: 24   TỐC: 4.8", "HP: 110   ATK: 24   SPD: 4.8");
@@ -3368,12 +3368,12 @@ public class MainMenuManager : MonoBehaviour
             if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#A855F7>[SÁT THỦ]</color> Bạch Dạ Kiếm Khách / Nhất Kích Tất Sát", "<color=#A855F7>[ASSASSIN]</color> Phantom Blade / Iaido Precision");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: PHONG LÔI KIẾM THUẬT", "SKILLSET: GALE PHANTOM BLADE");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
-                "• <b>Đòn Đánh & Phong Trảm:</b> Chém quét bán nguyệt 180° siêu nhanh tích <color=#55FFFF><b>Phong Ấn</b></color> (3 tầng nổ <color=#FFAA33><b>240% Crit</b></color> + Lốc Xoáy hút quái). Khi có Khiên Nội Năng: Nhấn Giữ Tụ Lực chém rách không gian & phóng Nguyệt Kiếm Khí <color=#FFAA33><b>x2.85 Crit DMG</b></color>!\n" +
-                "• <b>Lướt (Tàn Ảnh Tốc Biến - Murad Style):</b> Nhịp 1 tốc biến 4.8m tới trước & cắm lại <b>Tàn Ảnh Bóng Ma</b> (4.5s). Nhịp 2 (Bấm lại) lập tức Teleport quay về vị trí bóng & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>!\n" +
-                "• <b>Tuyệt Kỹ (Ảo Ảnh Trảm Sát):</b> Lướt ảo ảnh chớp nhoáng trảm sát liên hoàn toàn bộ kẻ địch trong không gian, <color=#55FF88><b>Bất tử hoàn toàn</b></color> trong lúc xuất chiêu.",
-                "• <b>Attack & Wind Marks:</b> Fast 180° crescent cleave stacking <color=#55FFFF><b>Wind Marks</b></color> (3 stacks bursts for <color=#FFAA33><b>240% Crit</b></color> + Vacuum Vortex). When Inner Energy Shield is active: Hold attack to charge Iaido Spatial Slash & shoot Gale Crescent Wave (<color=#FFAA33><b>x2.85 Crit DMG</b></color>)!\n" +
-                "• <b>Dash (Shadow Phantom Warp):</b> Stage 1 warps 4.8m forward leaving a <b>Shadow Clone</b> (4.5s). Stage 2 (Cast again) instantly Warps back to clone & <color=#FFAA33><b>Cuts Ultimate CD by 2.0s</b></color>!\n" +
-                "• <b>Ultimate (Phantom Flash Cleave):</b> Executes blinding phantom dash slashes cutting all enemies in space with <color=#55FF88><b>Complete Invincibility</b></color>.");
+                "- <b>Đòn Đánh & Phong Trảm:</b> Chém quét bán nguyệt 180 deg siêu nhanh tích <color=#55FFFF><b>Phong Ấn</b></color> (3 tầng nổ <color=#FFAA33><b>240% Crit</b></color> + Lốc Xoáy hút quái). Khi có Khiên Nội Năng: Nhấn Giữ Tụ Lực chém rách không gian & phóng Nguyệt Kiếm Khí <color=#FFAA33><b>x2.85 Crit DMG</b></color>!\n" +
+                "- <b>Lướt (Tàn Ảnh Tốc Biến - Murad Style):</b> Nhịp 1 tốc biến 4.8m tới trước & cắm lại <b>Tàn Ảnh Bóng Ma</b> (4.5s). Nhịp 2 (Bấm lại) lập tức Teleport quay về vị trí bóng & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>!\n" +
+                "- <b>Tuyệt Kỹ (Ảo Ảnh Trảm Sát):</b> Lướt ảo ảnh chớp nhoáng trảm sát liên hoàn toàn bộ kẻ địch trong không gian, <color=#55FF88><b>Bất tử hoàn toàn</b></color> trong lúc xuất chiêu.",
+                "- <b>Attack & Wind Marks:</b> Fast 180 deg crescent cleave stacking <color=#55FFFF><b>Wind Marks</b></color> (3 stacks bursts for <color=#FFAA33><b>240% Crit</b></color> + Vacuum Vortex). When Inner Energy Shield is active: Hold attack to charge Iaido Spatial Slash & shoot Gale Crescent Wave (<color=#FFAA33><b>x2.85 Crit DMG</b></color>)!\n" +
+                "- <b>Dash (Shadow Phantom Warp):</b> Stage 1 warps 4.8m forward leaving a <b>Shadow Clone</b> (4.5s). Stage 2 (Cast again) instantly Warps back to clone & <color=#FFAA33><b>Cuts Ultimate CD by 2.0s</b></color>!\n" +
+                "- <b>Ultimate (Phantom Flash Cleave):</b> Executes blinding phantom dash slashes cutting all enemies in space with <color=#55FF88><b>Complete Invincibility</b></color>.");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 95   CÔNG: 28   TỐC: 5.4", "HP: 95   ATK: 28   SPD: 5.4");
@@ -3385,12 +3385,12 @@ public class MainMenuManager : MonoBehaviour
             if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#E056FD>[PHÁP SƯ]</color> Tinh Vân Ma Pháp / Triệu Hồi Thiên Thạch & Hộ Thể", "<color=#E056FD>[MAGE]</color> Arcane Sorcery / Meteor Tempest & Barrier");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: TINH VÂN MA PHÁP", "SKILLSET: CELESTIAL ARCANE");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
-                "• <b>Đòn Đánh & Cầu Ma Pháp:</b> Bắn cầu ma pháp tự dẫn đường và bộc phát sét lan. <color=#FFDF66>Nhấn Giữ Hộ Thể Ma Trận:</color> Giảm 60% sát thương, bộc phá sóng năng lượng đẩy lùi & hồi <color=#38BDF8><b>+10 Mana</b></color>!\n" +
-                "• <b>Lướt (Tốc Biến Hư Không):</b> Dịch chuyển tức thời 3.2m né đòn, để lại Vết Rách Hư Không gây AP liên tục & hồi <color=#38BDF8><b>+12 Mana</b></color>.\n" +
-                "• <b>Tuyệt Kỹ & Thần Nộ:</b> Triệu hồi mưa thiên thạch ma pháp toàn màn hình. <color=#FFDF66>Đầy 100% Nội Năng tím kích hoạt Overdrive (8s):</color> Hồi chiêu cuối giảm về <color=#55FF88><b>1.0s</b></color> để xả bão thiên thạch liên tục!",
-                "• <b>Attack & Arcane Orbs:</b> Fires homing arcane star orbs chaining lightning. <color=#FFDF66>Hold attack for Barrier:</color> absorbs 60% damage, bursts back enemies & grants <color=#38BDF8><b>+10 Mana</b></color>!\n" +
-                "• <b>Dash (Arcane Blink):</b> Instantly warps 3.2m dodging hits, leaves Singularity Rift dealing continuous AP & restores <color=#38BDF8><b>+12 Mana</b></color>.\n" +
-                "• <b>Ultimate & Overdrive:</b> Summons meteor tempest across battlefield. <color=#FFDF66>100% Inner Energy triggers Overdrive (8s):</color> Ultimate CD drops to <color=#55FF88><b>1.0s</b></color> for continuous meteor spam!");
+                "- <b>Đòn Đánh & Cầu Ma Pháp:</b> Bắn cầu ma pháp tự dẫn đường và bộc phát sét lan. <color=#FFDF66>Nhấn Giữ Hộ Thể Ma Trận:</color> Giảm 60% sát thương, bộc phá sóng năng lượng đẩy lùi & hồi <color=#38BDF8><b>+10 Mana</b></color>!\n" +
+                "- <b>Lướt (Tốc Biến Hư Không):</b> Dịch chuyển tức thời 3.2m né đòn, để lại Vết Rách Hư Không gây AP liên tục & hồi <color=#38BDF8><b>+12 Mana</b></color>.\n" +
+                "- <b>Tuyệt Kỹ & Thần Nộ:</b> Triệu hồi mưa thiên thạch ma pháp toàn màn hình. <color=#FFDF66>Đầy 100% Nội Năng tím kích hoạt Overdrive (8s):</color> Hồi chiêu cuối giảm về <color=#55FF88><b>1.0s</b></color> để xả bão thiên thạch liên tục!",
+                "- <b>Attack & Arcane Orbs:</b> Fires homing arcane star orbs chaining lightning. <color=#FFDF66>Hold attack for Barrier:</color> absorbs 60% damage, bursts back enemies & grants <color=#38BDF8><b>+10 Mana</b></color>!\n" +
+                "- <b>Dash (Arcane Blink):</b> Instantly warps 3.2m dodging hits, leaves Singularity Rift dealing continuous AP & restores <color=#38BDF8><b>+12 Mana</b></color>.\n" +
+                "- <b>Ultimate & Overdrive:</b> Summons meteor tempest across battlefield. <color=#FFDF66>100% Inner Energy triggers Overdrive (8s):</color> Ultimate CD drops to <color=#55FF88><b>1.0s</b></color> for continuous meteor spam!");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 90   CÔNG: 30   TỐC: 4.5", "HP: 90   ATK: 30   SPD: 4.5");
@@ -3402,12 +3402,12 @@ public class MainMenuManager : MonoBehaviour
             if (heroRoleText != null) heroRoleText.text = LocalizationManager.T("<color=#FF4757>[ĐẤU SĨ]</color> Hiệp Sĩ Tiên Phong / Thánh Kiếm Cổ Tộc", "<color=#FF4757>[WARRIOR]</color> Holy Vanguard / Ancient Blade Master");
             if (heroSkillText != null) heroSkillText.text = LocalizationManager.T("BỘ KỸ NĂNG: THÁNH QUANG HIỆP SĨ", "SKILLSET: HOLY VANGUARD");
             if (heroSkillDescText != null) heroSkillDescText.text = LocalizationManager.T(
-                "• <b>Đòn Đánh & Thế Thủ Phản Kích:</b> Chém kiếm 3 nhịp liên hoàn (hồi <color=#38BDF8><b>+8 Mana</b></color>). Nhấn Giữ gồng Thế Thủ: Giảm 20% sát thương, thả tay bộc phá <color=#FFAA33><b>Thần Kiếm Phản Kích (x3.2 Crit DMG)</b></color> phóng cột sóng thánh quang xuyên phá!\n" +
-                "• <b>Lướt (Thánh Thuẫn Phản Đòn):</b> Lướt nhanh với vòng Thánh Quang (<color=#55FF88><b>Bất tử khi lướt</b></color>). Lướt qua quái hoặc đỡ đòn thành công sẽ <color=#FFAA33><b>Hồi 50% CD Lướt</b></color>, hồi <color=#38BDF8><b>+15 Mana</b></color> & phóng <b>3 luồng Thánh Kiếm Khí</b> phản công!\n" +
-                "• <b>Tuyệt Kỹ (Thánh Kiếm Thiên Nham):</b> Xoay bão lốc kiếm 360° hút quái vật vào tâm bão và triệu hồi Thánh Kiếm Thiên Nham giáng thế từ không trung hủy diệt diện rộng.",
-                "• <b>Attack & Divine Parry:</b> 3-hit sword combo (restores <color=#38BDF8><b>+8 Mana</b></color>). Hold attack for Parry Stance: 20% DR, release to unleash <color=#FFAA33><b>Divine Riposte (x3.2 Crit DMG)</b></color> firing holy shockwave pillars!\n" +
-                "• <b>Dash (Radiant Riposte Dash):</b> Swift dash with holy aegis (<color=#55FF88><b>Invulnerable during dash</b></color>). Dashing through enemies or deflecting attacks <color=#FFAA33><b>Refunds 50% Dash CD</b></color>, restores <color=#38BDF8><b>+15 Mana</b></color> & fires <b>3 Holy Sword Waves</b>!\n" +
-                "• <b>Ultimate (Holy Sword Tempest):</b> 360° sword vortex storm pulling enemies and summons a gigantic Holy Sword of the Heavens slamming down with massive AoE damage.");
+                "- <b>Đòn Đánh & Thế Thủ Phản Kích:</b> Chém kiếm 3 nhịp liên hoàn (hồi <color=#38BDF8><b>+8 Mana</b></color>). Nhấn Giữ gồng Thế Thủ: Giảm 20% sát thương, thả tay bộc phá <color=#FFAA33><b>Thần Kiếm Phản Kích (x3.2 Crit DMG)</b></color> phóng cột sóng thánh quang xuyên phá!\n" +
+                "- <b>Lướt (Thánh Thuẫn Phản Đòn):</b> Lướt nhanh với vòng Thánh Quang (<color=#55FF88><b>Bất tử khi lướt</b></color>). Lướt qua quái hoặc đỡ đòn thành công sẽ <color=#FFAA33><b>Hồi 50% CD Lướt</b></color>, hồi <color=#38BDF8><b>+15 Mana</b></color> & phóng <b>3 luồng Thánh Kiếm Khí</b> phản công!\n" +
+                "- <b>Tuyệt Kỹ (Thánh Kiếm Thiên Nham):</b> Xoay bão lốc kiếm 360 deg hút quái vật vào tâm bão và triệu hồi Thánh Kiếm Thiên Nham giáng thế từ không trung hủy diệt diện rộng.",
+                "- <b>Attack & Divine Parry:</b> 3-hit sword combo (restores <color=#38BDF8><b>+8 Mana</b></color>). Hold attack for Parry Stance: 20% DR, release to unleash <color=#FFAA33><b>Divine Riposte (x3.2 Crit DMG)</b></color> firing holy shockwave pillars!\n" +
+                "- <b>Dash (Radiant Riposte Dash):</b> Swift dash with holy aegis (<color=#55FF88><b>Invulnerable during dash</b></color>). Dashing through enemies or deflecting attacks <color=#FFAA33><b>Refunds 50% Dash CD</b></color>, restores <color=#38BDF8><b>+15 Mana</b></color> & fires <b>3 Holy Sword Waves</b>!\n" +
+                "- <b>Ultimate (Holy Sword Tempest):</b> 360 deg sword vortex storm pulling enemies and summons a gigantic Holy Sword of the Heavens slamming down with massive AoE damage.");
             if (heroStatsSummaryText != null)
             {
                 heroStatsSummaryText.text = LocalizationManager.T("MÁU: 100   CÔNG: 20   TỐC: 5.0", "HP: 100   ATK: 20   SPD: 5.0");
@@ -3461,8 +3461,8 @@ public class MainMenuManager : MonoBehaviour
             // 2. CHIÊU 2 (LƯỚT)
             SetHeroSkillCard(2, MobileActionButton.GetHeroActionIcon("titan", MobileActionButton.ButtonType.Dash),
                 LocalizationManager.T("LƯỚT", "DASH"),
-                LocalizationManager.T("2. CHIẾN XA XOAY BÚA 360°", "2. JUGGERNAUT 360° SPIN"),
-                LocalizationManager.T("Lướt tốc độ cao xoay búa 360° càn quét gây <color=#FF3B30><b>ATK</b></color> & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>.",
+                LocalizationManager.T("2. CHIẾN XA XOAY BÚA 360 deg", "2. JUGGERNAUT 360 deg SPIN"),
+                LocalizationManager.T("Lướt tốc độ cao xoay búa 360 deg càn quét gây <color=#FF3B30><b>ATK</b></color> & <color=#FFAA33><b>Giảm 2.0s hồi Tuyệt Kỹ</b></color>.",
                                      "Heavy spin dash slashing all enemies along path with <color=#FF3B30><b>ATK</b></color> & <color=#FFAA33><b>Reduces Ultimate CD by 2.0s</b></color>."),
                 baseCds[1], sCd, upDashCd, upUltiCd, "<color=#10B981><b>[0 Mana]</b></color>");
 
@@ -3554,8 +3554,8 @@ public class MainMenuManager : MonoBehaviour
             SetHeroSkillCard(1, MobileActionButton.GetHeroActionIcon("ronin", MobileActionButton.ButtonType.Attack),
                 LocalizationManager.T("GỒNG / IAIDO", "HOLD / IAIDO"),
                 LocalizationManager.T("1. PHONG TRẢM (GỒNG TỤ LỰC)", "1. GALE SLASH (CHARGE)"),
-                LocalizationManager.T("Chém quét 180° gây <color=#FF3B30><b>ATK</b></color>. <color=#FFDF66><b>[ĐIỀU KIỆN: ĐẦY NỘI NĂNG / KHIÊN HỘ THÂN]:</b></color> Nhấn giữ gồng Iaido phóng Nguyệt Kiếm Khí xuyên thấu <color=#FFAA33><b>x2.85 Crit DMG</b></color>! Max Charge trúng quái giúp <color=#FFAA33><b>Giảm 35% CD Tuyệt Kỹ</b></color> & hồi ngay <color=#38BDF8><b>+25 Mana</b></color>!",
-                                     "180° slashes dealing <color=#FF3B30><b>ATK</b></color>. <color=#FFDF66><b>[REQ: FULL ENERGY / SHIELD ACTIVE]:</b></color> Hold to charge Iaido unleashing Crescent Wave for <color=#FFAA33><b>x2.85 Crit DMG</b></color>! Max Charge hit cuts <color=#FFAA33><b>Ulti CD by 35%</b></color> & restores <color=#38BDF8><b>+25 Mana</b></color>!"),
+                LocalizationManager.T("Chém quét 180 deg gây <color=#FF3B30><b>ATK</b></color>. <color=#FFDF66><b>[ĐIỀU KIỆN: ĐẦY NỘI NĂNG / KHIÊN HỘ THÂN]:</b></color> Nhấn giữ gồng Iaido phóng Nguyệt Kiếm Khí xuyên thấu <color=#FFAA33><b>x2.85 Crit DMG</b></color>! Max Charge trúng quái giúp <color=#FFAA33><b>Giảm 35% CD Tuyệt Kỹ</b></color> & hồi ngay <color=#38BDF8><b>+25 Mana</b></color>!",
+                                     "180 deg slashes dealing <color=#FF3B30><b>ATK</b></color>. <color=#FFDF66><b>[REQ: FULL ENERGY / SHIELD ACTIVE]:</b></color> Hold to charge Iaido unleashing Crescent Wave for <color=#FFAA33><b>x2.85 Crit DMG</b></color>! Max Charge hit cuts <color=#FFAA33><b>Ulti CD by 35%</b></color> & restores <color=#38BDF8><b>+25 Mana</b></color>!"),
                 baseCds[0], sCd, upDashCd, upUltiCd, "<color=#10B981><b>[0 Mana]</b></color>");
 
             // 2. CHIÊU 2 (LƯỚT / TỐC BIẾN)
@@ -3720,8 +3720,8 @@ public class MainMenuManager : MonoBehaviour
             SetHeroSkillCard(3, MobileActionButton.GetHeroActionIcon("vael", MobileActionButton.ButtonType.Skill),
                 LocalizationManager.T("TUYỆT KỸ", "ULTIMATE"),
                 LocalizationManager.T("3. THÁNH KIẾM THIÊN NHAM", "3. HOLY SWORD TEMPEST"),
-                LocalizationManager.T("Xoay bão kiếm 360° hút gom toàn bộ kẻ địch vào tâm bão và triệu hồi Thánh Kiếm Thiên Nham khổng lồ giáng thế từ không trung gây sát thương cực đại diện rộng.",
-                                     "360° sword vortex storm pulling enemies and summons a gigantic Holy Sword of the Heavens slamming down with devastating AoE impact."),
+                LocalizationManager.T("Xoay bão kiếm 360 deg hút gom toàn bộ kẻ địch vào tâm bão và triệu hồi Thánh Kiếm Thiên Nham khổng lồ giáng thế từ không trung gây sát thương cực đại diện rộng.",
+                                     "360 deg sword vortex storm pulling enemies and summons a gigantic Holy Sword of the Heavens slamming down with devastating AoE impact."),
                 baseCds[2], sCd, upDashCd, upUltiCd, "<color=#00E5FF><b>[50 Mana]</b></color>");
 
             bool isSelected = (currentSelected == CharacterManager.CHAR_VAELSTRIDER);
@@ -3861,14 +3861,14 @@ public class MainMenuManager : MonoBehaviour
             // Từng dòng thông số xếp thành hàng dọc với gạch đầu dòng rõ ràng, font lớn dễ đọc trên mobile
             List<string> statLines = new List<string>
             {
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "SINH LỰC (HP):" : "HEALTH (HP):")}</b> <color=#22C55E>{totalHp}</color>{hpAdd}{regenStr}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "GIÁP PHÒNG THỦ:" : "DEFENSE (DEF):")}</b> <color=#38BDF8>{sDef}</color>{defAdd}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "TỔNG CÔNG KÍCH:" : "TOTAL ATTACK:")}</b> <color=#FF3B30>{totalAtk}</color>{atkAdd}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "PHÂN LOẠI SÁT THƯƠNG:" : "DAMAGE TYPE:")}</b> {dmgBreakdownStr}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "CHÍ MẠNG / BẠO KÍCH:" : "CRITICAL STATS:")}</b> <color=#F59E0B>{totalCritPct}%</color>{critBonusStr} | <color=#F59E0B>x1.75</color>",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "NĂNG LƯỢNG (MANA):" : "ENERGY (MANA):")}</b> <color=#00E5FF>{100 + (int)sMaxEn}</color>{manaAdd}{manaRegenStr}",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "HÚT MÁU / HỒI PHỤC:" : "VAMP & HEALING:")}</b> <color=#F43F5E>{physLife}% {(isVi ? "VL" : "Phys")}</color> | <color=#E879F9>{spellVamp}% {(isVi ? "Phép" : "Spell")}</color>",
-                $"<color=#E2E8F0>•</color> <b>{(isVi ? "GIẢM COOLDOWN:" : "CD REDUCTION:")}</b> <color=#C084FC>{cdTag}</color>" + (shardPct > 0 ? $" | <b>SHARD:</b> <color=#FBBF24>+{shardPct}%</color>" : "")
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "SINH LỰC (HP):" : "HEALTH (HP):")}</b> <color=#22C55E>{totalHp}</color>{hpAdd}{regenStr}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "GIÁP PHÒNG THỦ:" : "DEFENSE (DEF):")}</b> <color=#38BDF8>{sDef}</color>{defAdd}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "TỔNG CÔNG KÍCH:" : "TOTAL ATTACK:")}</b> <color=#FF3B30>{totalAtk}</color>{atkAdd}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "PHÂN LOẠI SÁT THƯƠNG:" : "DAMAGE TYPE:")}</b> {dmgBreakdownStr}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "CHÍ MẠNG / BẠO KÍCH:" : "CRITICAL STATS:")}</b> <color=#F59E0B>{totalCritPct}%</color>{critBonusStr} | <color=#F59E0B>x1.75</color>",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "NĂNG LƯỢNG (MANA):" : "ENERGY (MANA):")}</b> <color=#00E5FF>{100 + (int)sMaxEn}</color>{manaAdd}{manaRegenStr}",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "HÚT MÁU / HỒI PHỤC:" : "VAMP & HEALING:")}</b> <color=#F43F5E>{physLife}% {(isVi ? "VL" : "Phys")}</color> | <color=#E879F9>{spellVamp}% {(isVi ? "Phép" : "Spell")}</color>",
+                $"<color=#E2E8F0>-</color> <b>{(isVi ? "GIẢM COOLDOWN:" : "CD REDUCTION:")}</b> <color=#C084FC>{cdTag}</color>" + (shardPct > 0 ? $" | <b>SHARD:</b> <color=#FBBF24>+{shardPct}%</color>" : "")
             };
 
             int equippedCount = 0;
@@ -3879,7 +3879,7 @@ public class MainMenuManager : MonoBehaviour
 
             if (equippedCount == 6)
             {
-                statLines.Add($"<color=#FBBF24><b>★ {(isVi ? "CỘNG HƯỞNG LỤC BẢO:" : "HEXA RESONANCE:")}</b></color> <color=#34D399>+10% {(isVi ? "Toàn bộ Sát Thương & Kháng Hiệu Ứng" : "All Damage & Tenacity")}</color>");
+                statLines.Add($"<color=#FBBF24><b>* {(isVi ? "CỘNG HƯỞNG LỤC BẢO:" : "HEXA RESONANCE:")}</b></color> <color=#34D399>+10% {(isVi ? "Toàn bộ Sát Thương & Kháng Hiệu Ứng" : "All Damage & Tenacity")}</color>");
             }
             else
             {
@@ -3915,17 +3915,17 @@ public class MainMenuManager : MonoBehaviour
                     string gHex = ColorUtility.ToHtmlStringRGB(gCol);
                     string rawSummary = eff.HasValue ? (isVi ? eff.Value.effectSummaryVi : eff.Value.effectSummaryEn) : "";
                     string coloredSummary = EquipmentSocketManager.FormatColoredStatSummary(rawSummary);
-                    gemLines.Add($"<color=#E2E8F0>•</color> <b>{sName}:</b> <color=#{gHex}>{gName} Lv.{lv}</color>\n    {coloredSummary}");
+                    gemLines.Add($"<color=#E2E8F0>-</color> <b>{sName}:</b> <color=#{gHex}>{gName} Lv.{lv}</color>\n    {coloredSummary}");
                 }
                 else
                 {
-                    gemLines.Add($"<color=#64748B>•</color> <color=#94A3B8><b>{sName}:</b></color> <color=#64748B><i>{(isVi ? "Trống (Kéo vật phẩm vào ô)" : "Empty (Drag item here)")}</i></color>");
+                    gemLines.Add($"<color=#64748B>-</color> <color=#94A3B8><b>{sName}:</b></color> <color=#64748B><i>{(isVi ? "Trống (Kéo vật phẩm vào ô)" : "Empty (Drag item here)")}</i></color>");
                 }
             }
 
             if (equippedCount == 6)
             {
-                gemLines.Add($"\n<color=#FBBF24><b>★ {(isVi ? "CỘNG HƯỞNG LỤC BẢO KÍCH HOẠT!" : "HEXA RESONANCE ACTIVE!")}</b></color>\n<color=#34D399>+10% {(isVi ? "Toàn bộ Sát Thương & Kháng Hiệu Ứng" : "All Damage & Tenacity")}</color>");
+                gemLines.Add($"\n<color=#FBBF24><b>* {(isVi ? "CỘNG HƯỞNG LỤC BẢO KÍCH HOẠT!" : "HEXA RESONANCE ACTIVE!")}</b></color>\n<color=#34D399>+10% {(isVi ? "Toàn bộ Sát Thương & Kháng Hiệu Ứng" : "All Damage & Tenacity")}</color>");
             }
             else
             {
@@ -4684,7 +4684,7 @@ public class MainMenuManager : MonoBehaviour
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
 
                 string hName = cData != null ? (LocalizationManager.IsVietnamese ? cData.nameVN : cData.nameEN) : heroId;
-                ShowCarouselToast(LocalizationManager.T($"✨ ĐÃ MỞ KHÓA THÀNH CÔNG {hName.ToUpper()}! ✨", $"✨ UNLOCKED {hName.ToUpper()} SUCCESSFULLY! ✨"), new Color(0.35f, 1f, 0.65f, 1f));
+                ShowCarouselToast(LocalizationManager.T($" ĐÃ MỞ KHÓA THÀNH CÔNG {hName.ToUpper()}! ", $" UNLOCKED {hName.ToUpper()} SUCCESSFULLY! "), new Color(0.35f, 1f, 0.65f, 1f));
 
                 UpdateCarouselDisplay();
                 UpdateCurrencyDisplay();
@@ -4827,7 +4827,7 @@ public class MainMenuManager : MonoBehaviour
             info.attackTitle = isVN ? "Nguyệt Kiếm & Tụ Lực Cư Hợp Trảm" : "Crescent Blades & Iaido Charge";
             info.attackDesc = isVN
                 ? "Đòn chém bán nguyệt quét rộng 180 độ tích tầng Phong Ấn. Khi có khiên nộ, tụ lực Cư Hợp chém rách không gian x2.85 sát thương."
-                : "Wide 180° slashes applying Wind Marks. With shield active, charge Iaido to rip space for x2.85 DMG.";
+                : "Wide 180 deg slashes applying Wind Marks. With shield active, charge Iaido to rip space for x2.85 DMG.";
             info.guardTitle = isVN ? "Khiên Nội Năng & Ảo Ảnh Phản Thân" : "Inner Shield & Phantom Evasion";
             info.guardDesc = isVN
                 ? "Kích hoạt khiên nội năng hấp thụ sát thương. Né tránh tạo tàn ảnh gây phân tâm và đánh lừa kẻ địch."
@@ -4883,7 +4883,7 @@ public class MainMenuManager : MonoBehaviour
             info.ultiTitle = isVN ? "Bão Lốc Tàn Tích" : "Ruin Whirlwind";
             info.ultiDesc = isVN
                 ? "Xoay kiếm 360 độ hút quái vật vào tâm bão và tung vụ nổ hoàng kim hất văng mọi kẻ địch."
-                : "Spins 360° pulling enemies into the vortex before detonating with an expansive blast.";
+                : "Spins 360 deg pulling enemies into the vortex before detonating with an expansive blast.";
         }
 
         return info;
@@ -5661,11 +5661,11 @@ public class MainMenuManager : MonoBehaviour
         {
             if (isUnlocked)
             {
-                carouselHeroRoleText.text = $"{heroRole}  •  <color=#55FFAA>✔ {LocalizationManager.T("ĐÃ SỞ HỮU", "OWNED")}</color>";
+                carouselHeroRoleText.text = $"{heroRole}  |  <color=#55FFAA>[{LocalizationManager.T(\"ĐÃ SỞ HỮU\", \"OWNED\")}]</color>";
             }
             else
             {
-                carouselHeroRoleText.text = $"{heroRole}  •  <color=#FFD700>🔒 {price:N0} {LocalizationManager.T("LINH HỒN", "SOULS")}</color>";
+                carouselHeroRoleText.text = $"{heroRole}  |  <color=#FFD700>[{LocalizationManager.T(\"KHÓA\", \"LOCKED\")}] {price:N0} {LocalizationManager.T(\"LINH HỒN\", \"SOULS\")}</color>";
             }
         }
 

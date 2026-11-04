@@ -180,23 +180,23 @@ public static class CorruptedCycleManager
         {
             case CalamityRealm.VoidNightmare:
                 return LocalizationManager.T(
-                    "• Quái có hào quang Hư Không & phát nổ khi bị tiêu diệt\n• Boss hồi chiêu nhanh hơn và ra đòn dồn dập tàn khốc\n• Toàn bộ Cấp Độ, Trang Bị và Mảnh Linh Hồn được BẢO LƯU!",
-                    "• Enemies wield Void Auras & detonate upon defeat\n• Bosses recover faster and unleash unrelenting combos\n• ALL Level, Equipment and Shards are KEPT!"
+                    "- Quái có hào quang Hư Không & phát nổ khi bị tiêu diệt\n- Boss hồi chiêu nhanh hơn và ra đòn dồn dập tàn khốc\n- Toàn bộ Cấp Độ, Trang Bị và Mảnh Linh Hồn được BẢO LƯU!",
+                    "- Enemies wield Void Auras & detonate upon defeat\n- Bosses recover faster and unleash unrelenting combos\n- ALL Level, Equipment and Shards are KEPT!"
                 );
             case CalamityRealm.MagmaCalamity:
                 return LocalizationManager.T(
-                    "• Thiên thạch nham thạch rơi ngẫu nhiên xuống đấu trường\n• Vũng dung nham thiêu đốt buộc bạn phải vừa đánh vừa né\n• Toàn bộ Cấp Độ, Trang Bị và Mảnh Linh Hồn được BẢO LƯU!",
-                    "• Molten meteors rain down randomly upon the arena\n• Scorching magma pools force constant movement and dashing\n• ALL Level, Equipment and Shards are KEPT!"
+                    "- Thiên thạch nham thạch rơi ngẫu nhiên xuống đấu trường\n- Vũng dung nham thiêu đốt buộc bạn phải vừa đánh vừa né\n- Toàn bộ Cấp Độ, Trang Bị và Mảnh Linh Hồn được BẢO LƯU!",
+                    "- Molten meteors rain down randomly upon the arena\n- Scorching magma pools force constant movement and dashing\n- ALL Level, Equipment and Shards are KEPT!"
                 );
             case CalamityRealm.AcidDownpour:
                 return LocalizationManager.T(
-                    "• Mưa axit ăn mòn bào mòn sinh lực liên tục theo thời gian\n• Cơ chế Khát Máu: Đánh quái liên tục để kích hoạt Khiên Trung Hòa\n• Toàn bộ Cấp Độ, Trang Bị và Mảnh Linh Hồn được BẢO LƯU!",
-                    "• Toxic acid rain steadily erodes your health over time\n• Bloodrush Rule: Attack enemies constantly to gain Neutralization Shields\n• ALL Level, Equipment and Shards are KEPT!"
+                    "- Mưa axit ăn mòn bào mòn sinh lực liên tục theo thời gian\n- Cơ chế Khát Máu: Đánh quái liên tục để kích hoạt Khiên Trung Hòa\n- Toàn bộ Cấp Độ, Trang Bị và Mảnh Linh Hồn được BẢO LƯU!",
+                    "- Toxic acid rain steadily erodes your health over time\n- Bloodrush Rule: Attack enemies constantly to gain Neutralization Shields\n- ALL Level, Equipment and Shards are KEPT!"
                 );
             case CalamityRealm.FrostfallBlizzard:
                 return LocalizationManager.T(
-                    "• Bông tuyết băng giá làm chậm tốc chạy và tốc đánh\n• Ngẫu nhiên đóng băng và khóa chiêu trong 0.5 giây\n• Toàn bộ Cấp Độ, Trang Bị và Mảnh Linh Hồn được BẢO LƯU!",
-                    "• Drifting frostflakes slow down movement and attack speed\n• Chance to freeze and silence skills for 0.5s upon contact\n• ALL Level, Equipment and Shards are KEPT!"
+                    "- Bông tuyết băng giá làm chậm tốc chạy và tốc đánh\n- Ngẫu nhiên đóng băng và khóa chiêu trong 0.5 giây\n- Toàn bộ Cấp Độ, Trang Bị và Mảnh Linh Hồn được BẢO LƯU!",
+                    "- Drifting frostflakes slow down movement and attack speed\n- Chance to freeze and silence skills for 0.5s upon contact\n- ALL Level, Equipment and Shards are KEPT!"
                 );
             default:
                 return LocalizationManager.T(

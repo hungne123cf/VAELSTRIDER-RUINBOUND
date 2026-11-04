@@ -512,6 +512,27 @@ public class AugmentHUDBar : MonoBehaviour
         iconImg.color = typeColor;
         iconImg.preserveAspect = true;
         iconImg.raycastTarget = false;
+        if (iconImg.sprite != null)
+        {
+            iconImg.enabled = true;
+        }
+        else
+        {
+            iconImg.enabled = false;
+            var fbTxtObj = new GameObject("IconFallbackTxt", typeof(RectTransform), typeof(TextMeshProUGUI));
+            fbTxtObj.transform.SetParent(badgeObj.transform, false);
+            var fbRt = fbTxtObj.GetComponent<RectTransform>();
+            fbRt.anchorMin = Vector2.zero;
+            fbRt.anchorMax = Vector2.one;
+            fbRt.offsetMin = fbRt.offsetMax = Vector2.zero;
+            var fbTmp = fbTxtObj.GetComponent<TextMeshProUGUI>();
+            fbTmp.text = AugmentIconHelper.GetAugmentShortCode(aug.type);
+            fbTmp.fontSize = 11f;
+            fbTmp.fontStyle = FontStyles.Bold;
+            fbTmp.alignment = TextAlignmentOptions.Center;
+            fbTmp.color = typeColor;
+            fbTmp.raycastTarget = false;
+        }
 
         // Lớp phủ Cooldown Radial & Chữ đếm giây (Hỗ trợ cả Lõi có thời hạn VÀ Lõi có hồi chiêu nội tại như Thánh Khiên Hộ Mệnh)
         bool hasCooldownSupport = (aug.duration > 0f) || 
@@ -742,7 +763,7 @@ public class AugmentHUDBar : MonoBehaviour
         string typeName = LevelUpChoiceUI.GetDamageTypeName(aug.type, isVi);
         if (_tooltipTierText != null)
         {
-            _tooltipTierText.text = $"{tierName} • {typeName}";
+            _tooltipTierText.text = $"{tierName} - {typeName}";
             _tooltipTierText.color = tierColor;
         }
 
@@ -1342,6 +1363,26 @@ public class AugmentHUDBar : MonoBehaviour
             iconImg.sprite = AugmentIconHelper.GetAugmentSprite(type);
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
+            if (iconImg.sprite != null)
+            {
+                iconImg.enabled = true;
+            }
+            else
+            {
+                iconImg.enabled = false;
+                var fbTxtObj = new GameObject("IconFallbackTxt", typeof(RectTransform), typeof(TextMeshProUGUI));
+                fbTxtObj.transform.SetParent(medalObj.transform, false);
+                var fbRt = fbTxtObj.GetComponent<RectTransform>();
+                fbRt.anchorMin = Vector2.zero;
+                fbRt.anchorMax = Vector2.one;
+                fbRt.offsetMin = fbRt.offsetMax = Vector2.zero;
+                var fbTmp = fbTxtObj.GetComponent<TextMeshProUGUI>();
+                fbTmp.text = AugmentIconHelper.GetAugmentShortCode(type);
+                fbTmp.fontSize = 12f;
+                fbTmp.fontStyle = FontStyles.Bold;
+                fbTmp.alignment = TextAlignmentOptions.Center;
+                fbTmp.color = Color.white;
+            }
 
             if (rank > 1)
             {
@@ -1370,7 +1411,7 @@ public class AugmentHUDBar : MonoBehaviour
 
             var textTmp = textObj.GetComponent<TextMeshProUGUI>();
             string rankStr = rank > 1 ? $" <color=#FBBF24>Lv.{rank}</color>" : "";
-            textTmp.text = $"<size=15><b><color=#{tierHex}>{tierName} • {typeName}</color>  <color=#FFFFFF>{title}</color>{rankStr}</b></size>\n<size=12><color=#CBD5E1>{desc}</color></size>";
+            textTmp.text = $"<size=15><b><color=#{tierHex}>{tierName} - {typeName}</color>  <color=#FFFFFF>{title}</color>{rankStr}</b></size>\n<size=12><color=#CBD5E1>{desc}</color></size>";
             textTmp.enableWordWrapping = true;
             SoulslikeHUDStyler.SetSafeOutline(textTmp, 0.25f, Color.black);
 

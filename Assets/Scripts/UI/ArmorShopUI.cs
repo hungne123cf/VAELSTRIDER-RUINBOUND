@@ -1360,8 +1360,8 @@ public class ArmorShopUI : MonoBehaviour
                 if (actualBuyMultiplier > 1)
                 {
                     buyActionBtnText.text = LocalizationManager.T(
-                        $"<b>MUA x{actualBuyMultiplier:N0}</b>\n<size=74%><color=#FFF176>Chi phí: {FormatCompactNumber(totalCost)} Linh Hồn  •  Nhận: {FormatCompactNumber(totalQuantityGained)} cái</color></size>",
-                        $"<b>BUY x{actualBuyMultiplier:N0}</b>\n<size=74%><color=#FFF176>Cost: {FormatCompactNumber(totalCost)} Shards  •  Get: {FormatCompactNumber(totalQuantityGained)} pcs</color></size>"
+                        $"<b>MUA x{actualBuyMultiplier:N0}</b>\n<size=74%><color=#FFF176>Chi phí: {FormatCompactNumber(totalCost)} Linh Hồn  -  Nhận: {FormatCompactNumber(totalQuantityGained)} cái</color></size>",
+                        $"<b>BUY x{actualBuyMultiplier:N0}</b>\n<size=74%><color=#FFF176>Cost: {FormatCompactNumber(totalCost)} Shards  -  Get: {FormatCompactNumber(totalQuantityGained)} pcs</color></size>"
                     );
                 }
                 else

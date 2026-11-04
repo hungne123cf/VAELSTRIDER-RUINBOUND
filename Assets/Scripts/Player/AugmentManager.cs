@@ -513,8 +513,8 @@ public class AugmentManager : MonoBehaviour
         if (player != null)
         {
             string title = LocalizationManager.IsVietnamese 
-                ? $"★ {nameVN}: ĐÃ HỒI PHỤC! ★" 
-                : $"★ {nameEN}: READY! ★";
+                ? $"* {nameVN}: ĐÃ HỒI PHỤC! *" 
+                : $"* {nameEN}: READY! *";
             DamagePopup.CreateText(player.transform.position + Vector3.up * 1.6f, title, new Color(0.35f, 0.90f, 1f));
         }
         SoundManager.EnsureInstance()?.PlayHeavenlyAscension();

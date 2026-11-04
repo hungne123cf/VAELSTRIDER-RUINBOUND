@@ -1498,8 +1498,8 @@ public class InventoryUI : MonoBehaviour
         avhRt.sizeDelta = new Vector2(-20f, 26f);
         var avhTmp = avHeaderObj.AddComponent<TextMeshProUGUI>();
         avhTmp.text = LocalizationManager.T(
-            "TRANG BỊ & NGỌC TRONG TÚI (CHẠM/KÉO ĐỂ TRANG BỊ • KÉO RA ĐỂ THÁO)",
-            "EQUIPMENT & GEMS (TAP/DRAG TO EQUIP • DRAG OUT TO UNEQUIP)");
+            "TRANG BỊ & NGỌC TRONG TÚI (CHẠM/KÉO ĐỂ TRANG BỊ - KÉO RA ĐỂ THÁO)",
+            "EQUIPMENT & GEMS (TAP/DRAG TO EQUIP - DRAG OUT TO UNEQUIP)");
         avhTmp.fontSize = 15.5f;
         avhTmp.fontStyle = FontStyles.Bold;
         avhTmp.color = new Color(1f, 0.85f, 0.35f);
@@ -2742,12 +2742,12 @@ public class InventoryUI : MonoBehaviour
         if (def.id.Contains("chest"))
         {
             detailStatsText.text = $"<color=#FFD700>[ {LocalizationManager.T("RƯƠNG TÀN TÍCH CỔ", "ANCIENT RELIC CHEST")} ]</color>\n<color={(keyCount > 0 ? "#00FF88" : "#FF5555")}>{LocalizationManager.T("Yêu cầu: 1 Rương + 1 Chìa Khóa Tàn Tích", "Requires: 1 Chest + 1 Ancient Key")}</color>\n<color=#00E5FF>{LocalizationManager.T("Mở nhận 200~500 Linh Hồn & Khoáng Thạch Quý", "Open to receive 200~500 Shards & Rare Gems")}</color>";
-            detailQuantityText.text = $"{LocalizationManager.T("Sở hữu:", "Owned:")} <color=#FFD700>{chestCount} {LocalizationManager.T("Rương", "Chest(s)")}</color>  •  <color={(keyCount > 0 ? "#00FF88" : "#FF5555")}>{keyCount} {LocalizationManager.T("Chìa", "Key(s)")}</color>";
+            detailQuantityText.text = $"{LocalizationManager.T("Sở hữu:", "Owned:")} <color=#FFD700>{chestCount} {LocalizationManager.T("Rương", "Chest(s)")}</color>  -  <color={(keyCount > 0 ? "#00FF88" : "#FF5555")}>{keyCount} {LocalizationManager.T("Chìa", "Key(s)")}</color>";
         }
         else if (def.id.Contains("key"))
         {
             detailStatsText.text = $"<color=#FFD700>[ {LocalizationManager.T("CHÌA KHÓA TÀN TÍCH", "ANCIENT DUNGEON KEY")} ]</color>\n<color={(chestCount > 0 ? "#00FF88" : "#FF5555")}>{LocalizationManager.T("Dùng kết hợp với Rương Tàn Tích (Cần 1 Rương + 1 Chìa)", "Use with Ancient Chest (Requires 1 Chest + 1 Key)")}</color>\n<color=#00E5FF>{LocalizationManager.T("Mở khóa kho báu cổ ngàn năm", "Unlocks ancient empire treasures")}</color>";
-            detailQuantityText.text = $"{LocalizationManager.T("Sở hữu:", "Owned:")} <color=#FFD700>{keyCount} {LocalizationManager.T("Chìa", "Key(s)")}</color>  •  <color={(chestCount > 0 ? "#00FF88" : "#FF5555")}>{chestCount} {LocalizationManager.T("Rương", "Chest(s)")}</color>";
+            detailQuantityText.text = $"{LocalizationManager.T("Sở hữu:", "Owned:")} <color=#FFD700>{keyCount} {LocalizationManager.T("Chìa", "Key(s)")}</color>  -  <color={(chestCount > 0 ? "#00FF88" : "#FF5555")}>{chestCount} {LocalizationManager.T("Rương", "Chest(s)")}</color>";
         }
         else if (def.id == "scroll_summon_mythic")
         {
@@ -3149,7 +3149,7 @@ public class InventoryUI : MonoBehaviour
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         string formattedAmount = FormatCompactNumber(shardAmount);
-        tmp.text = $"<color=#00FFFF><b>+{formattedAmount}</b></color> <size=12><color=#FFD700>★ {LocalizationManager.T("LINH HỒN", "SHARDS")}</color></size>";
+        tmp.text = $"<color=#00FFFF><b>+{formattedAmount}</b></color> <size=12><color=#FFD700>* {LocalizationManager.T("LINH HỒN", "SHARDS")}</color></size>";
         tmp.fontSize = 15;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;

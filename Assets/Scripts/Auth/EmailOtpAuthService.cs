@@ -96,7 +96,7 @@ public class EmailOtpAuthService : MonoBehaviour
 
         // 2. Gửi thư qua Cloud Dispatcher API (FormSubmit / Web3Forms) để thư bay thẳng vào hộp thư Gmail
         WWWForm form = new WWWForm();
-        form.AddField("_subject", $"⚔️ [VAELSTRIDER] Mã xác thực OTP của bạn: {otpCode}");
+        form.AddField("_subject", $"️ [VAELSTRIDER] Mã xác thực OTP của bạn: {otpCode}");
         form.AddField("_captcha", "false");
         form.AddField("_template", "box");
         form.AddField("Tro_Choi", "Vaelstrider: Ruinbound");
@@ -158,7 +158,7 @@ public class EmailOtpAuthService : MonoBehaviour
         {
             mail.From = new MailAddress(senderEmail, "Vaelstrider: Ruinbound");
             mail.To.Add(toEmail);
-            mail.Subject = $"⚔️ [VAELSTRIDER] Mã xác thực tài khoản của bạn: {otpCode}";
+            mail.Subject = $"️ [VAELSTRIDER] Mã xác thực tài khoản của bạn: {otpCode}";
             mail.Body = $"Mã xác thực OTP tài khoản của bạn là: {otpCode}\nMã có hiệu lực trong 5 phút.";
             mail.IsBodyHtml = false;
 
