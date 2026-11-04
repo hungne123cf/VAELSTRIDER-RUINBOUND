@@ -343,7 +343,11 @@ public class CelestialMageSkill : MonoBehaviour
 
         bool isMoving = (playerController != null && playerController.IsMoving);
         Sprite[] frames = isMoving ? walkFrames : idleFrames;
-        float frameInterval = isMoving ? 0.075f : 0.10f;
+        // ĐỒNG BỘ TỐC ĐỘ HOẠT ẢNH BƯỚC ĐI TƯƠNG THÍCH 100% VỚI TỐC ĐỘ DI CHUYỂN HIỆN TẠI (Celestial Mage)
+        float speedRatio = (playerController != null && playerController.MoveSpeed > 0.1f)
+            ? (playerController.MoveSpeed / 4.8f)
+            : 1.0f;
+        float frameInterval = isMoving ? (0.075f / Mathf.Clamp(speedRatio, 0.5f, 3.0f)) : 0.10f;
 
         if (frames == null || frames.Length == 0) frames = idleFrames;
         if (frames == null || frames.Length == 0) return;

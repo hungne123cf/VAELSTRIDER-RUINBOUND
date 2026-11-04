@@ -632,6 +632,17 @@ public class PlayerController : MonoBehaviour
 
         float animSpeed = isBlocked ? 0f : moveInput.sqrMagnitude;
         animator.SetFloat(SpeedHash, animSpeed);
+
+        // ĐỒNG BỘ TỐC ĐỘ HOẠT ẢNH CHẠY TƯƠNG THÍCH 100% VỚI TỐC ĐỘ DI CHUYỂN HIỆN TẠI (Player 1, 2, 3, 4)
+        if (animSpeed > 0.01f)
+        {
+            float speedRatio = moveSpeed / Mathf.Max(3f, baseMoveSpeed);
+            animator.speed = Mathf.Clamp(speedRatio, 0.5f, 3.0f);
+        }
+        else
+        {
+            animator.speed = 1.0f; // Trả về tốc độ 1.0x khi đứng yên để hoạt ảnh thở/idle tự nhiên
+        }
     }
 
     public void SetFacingDirection(Vector2 dir)

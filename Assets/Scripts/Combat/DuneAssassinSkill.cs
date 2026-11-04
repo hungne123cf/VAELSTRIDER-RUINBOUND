@@ -142,6 +142,7 @@ public class DuneAssassinSkill : MonoBehaviour
         playerHealth = GetComponent<PlayerHealth>();
         playerController = GetComponent<PlayerController>();
         animator = GetComponent<Animator>();
+        if (animator != null) animator.enabled = false;
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         if (enemyLayers.value == 0)
@@ -267,7 +268,11 @@ public class DuneAssassinSkill : MonoBehaviour
         bool isMoving = (playerController != null && playerController.IsMoving);
 
         Sprite[] frames = isMoving ? runFrames : idleFrames;
-        float frameInterval = isMoving ? 0.08f : 0.12f;
+        // ĐỒNG BỘ TỐC ĐỘ HOẠT ẢNH CHẠY TƯƠNG THÍCH 100% VỚI TỐC ĐỘ CHẠY HIỆN TẠI CỦA TƯỚNG
+        float speedRatio = (playerController != null && playerController.MoveSpeed > 0.1f)
+            ? (playerController.MoveSpeed / 5.0f)
+            : 1.0f;
+        float frameInterval = isMoving ? (0.08f / Mathf.Clamp(speedRatio, 0.5f, 3.0f)) : 0.12f;
 
         if (frames == null || frames.Length == 0) frames = idleFrames;
         if (frames == null || frames.Length == 0) return;
@@ -325,9 +330,23 @@ public class DuneAssassinSkill : MonoBehaviour
         var resAll = Resources.LoadAll<Sprite>(resPath);
         if (resAll != null && resAll.Length > 0)
         {
-            var resList = new List<Sprite>(resAll);
-            resList.Sort((a, b) => ExtractNumber(a.name).CompareTo(ExtractNumber(b.name)));
-            return resList.ToArray();
+            var heroOnlyList = new List<Sprite>();
+            foreach (var s in resAll)
+            {
+                if (s == null) continue;
+                // QUAN TRỌNG: CHỈ LẤY SPRITE CƠ THỂ NHÂN VẬT CHÍNH (kết thúc bằng _0)
+                // Tuyệt đối không lấy các lát cắt hiệu ứng lốc xoáy/chém (_1, _2...) vào cơ thể tướng
+                if (s.name.EndsWith("_0"))
+                {
+                    heroOnlyList.Add(s);
+                }
+            }
+            if (heroOnlyList.Count == 0)
+            {
+                heroOnlyList.AddRange(resAll);
+            }
+            heroOnlyList.Sort((a, b) => ExtractNumber(a.name).CompareTo(ExtractNumber(b.name)));
+            return heroOnlyList.ToArray();
         }
 
 #if UNITY_EDITOR
@@ -389,13 +408,23 @@ public class DuneAssassinSkill : MonoBehaviour
         return list.ToArray();
     }
 
-    private static int ExtractNumber(string path)
+    public static int ExtractNumber(string path)
     {
         string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
-        int underscore = fileName.LastIndexOf('_');
-        if (underscore >= 0 && int.TryParse(fileName.Substring(underscore + 1), out int n))
+        string[] parts = fileName.Split('_');
+        // Đối với sprite atlas con (VD: 3_atk_16_0 hoặc 3_atk_20_2)
+        if (parts.Length >= 3 && int.TryParse(parts[parts.Length - 1], out _) && int.TryParse(parts[parts.Length - 2], out int frameNum))
         {
-            return n;
+            return frameNum;
+        }
+        // Đối với file texture thông thường (VD: 3_atk_16 hoặc run_5)
+        if (parts.Length >= 2 && int.TryParse(parts[parts.Length - 1], out int lastNum))
+        {
+            return lastNum;
+        }
+        if (int.TryParse(fileName, out int directNum))
+        {
+            return directNum;
         }
         return 0;
     }
@@ -1197,24 +1226,63 @@ public class SandBladeVortexProjectile : MonoBehaviour
         var repList = new List<Sprite>();
         var hitList = new List<Sprite>();
 
-#if UNITY_EDITOR
-        for (int i = 16; i <= 22; i++)
+        var all3Atk = Resources.LoadAll<Sprite>("Player5/Sprites/3_atk");
+        if (all3Atk != null && all3Atk.Length > 0)
         {
-            string path = $"Assets/ART/Player5/PNG/3_atk/3_atk_{i}.png";
-            var allAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
-            if (allAssets != null && allAssets.Length > 0)
+            var nonHeroSprites = new List<Sprite>();
+            foreach (var s in all3Atk)
             {
-                foreach (var a in allAssets)
+                if (s == null) continue;
+                // Lấy các lát cắt hiệu ứng lốc xoáy (khác _0)
+                if (!s.name.EndsWith("_0"))
                 {
-                    if (a is Sprite s && !s.name.EndsWith("_0"))
+                    nonHeroSprites.Add(s);
+                }
+            }
+
+            nonHeroSprites.Sort((a, b) =>
+            {
+                int frameA = DuneAssassinSkill.ExtractNumber(a.name);
+                int frameB = DuneAssassinSkill.ExtractNumber(b.name);
+                if (frameA != frameB) return frameA.CompareTo(frameB);
+                return string.Compare(a.name, b.name, System.StringComparison.Ordinal);
+            });
+
+            foreach (var s in nonHeroSprites)
+            {
+                int frameNum = DuneAssassinSkill.ExtractNumber(s.name);
+                if (frameNum >= 16 && frameNum <= 20)
+                {
+                    repList.Add(s);
+                }
+                else if (frameNum > 20)
+                {
+                    hitList.Add(s);
+                }
+            }
+        }
+
+#if UNITY_EDITOR
+        if (repList.Count == 0)
+        {
+            for (int i = 16; i <= 22; i++)
+            {
+                string path = $"Assets/ART/Player5/PNG/3_atk/3_atk_{i}.png";
+                var allAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+                if (allAssets != null && allAssets.Length > 0)
+                {
+                    foreach (var a in allAssets)
                     {
-                        if (i <= 20)
+                        if (a is Sprite s && !s.name.EndsWith("_0"))
                         {
-                            repList.Add(s);
-                        }
-                        else
-                        {
-                            hitList.Add(s);
+                            if (i <= 20)
+                            {
+                                repList.Add(s);
+                            }
+                            else
+                            {
+                                hitList.Add(s);
+                            }
                         }
                     }
                 }

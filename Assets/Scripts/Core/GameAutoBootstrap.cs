@@ -848,8 +848,19 @@ public class GameAutoBootstrap : MonoBehaviour
             if (sr != null)
             {
                 sr.material = new Material(Shader.Find("Sprites/Default"));
-                var spr = Resources.Load<Sprite>("Player5/Sprites/idle/idle_1");
-                if (spr != null) sr.sprite = spr;
+                var idles = Resources.LoadAll<Sprite>("Player5/Sprites/idle");
+                if (idles != null && idles.Length > 0)
+                {
+                    foreach (var s in idles)
+                    {
+                        if (s != null && s.name.EndsWith("_0"))
+                        {
+                            sr.sprite = s;
+                            break;
+                        }
+                    }
+                    if (sr.sprite == null) sr.sprite = idles[0];
+                }
 #if UNITY_EDITOR
                 if (sr.sprite == null)
                 {
@@ -858,6 +869,9 @@ public class GameAutoBootstrap : MonoBehaviour
                 }
 #endif
             }
+
+            var anim = player.GetComponent<Animator>();
+            if (anim != null) anim.enabled = false;
 
             var titan = player.GetComponent<TitanBerserkerSkill>();
             if (titan != null) Object.Destroy(titan);
