@@ -915,7 +915,19 @@ public class MailboxUI : MonoBehaviour
         }
 
         int reward = 0;
-        if (rawCode == "VAELSTRIDER" || rawCode == "RUINBOUND")
+        if (rawCode == "HUNGNE123")
+        {
+            reward = 5000; // Ma Dac Quyen Tac Gia Game
+        }
+        else if (rawCode == "VIP888")
+        {
+            reward = 2000; // Ma Sieu Cap VIP
+        }
+        else if (rawCode == "DARKFANTASY")
+        {
+            reward = 1500; // Ma Tri An Cong Dong Dark Fantasy
+        }
+        else if (rawCode == "VAELSTRIDER" || rawCode == "RUINBOUND" || rawCode == "DISCORD2026")
         {
             reward = 1000;
         }
