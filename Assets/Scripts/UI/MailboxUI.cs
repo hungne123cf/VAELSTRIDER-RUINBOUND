@@ -582,7 +582,7 @@ public class MailboxUI : MonoBehaviour
         kbtRt.anchorMax = Vector2.one;
         kbtRt.sizeDelta = Vector2.zero;
         var kbtTmp = kbtObj.AddComponent<TextMeshProUGUI>();
-        kbtTmp.text = isVi ? "<b>⌨ PHÍM</b>" : "<b>KEYBD</b>";
+        kbtTmp.text = isVi ? "<b>PHÍM</b>" : "<b>KEYBD</b>";
         kbtTmp.fontSize = 12f;
         kbtTmp.alignment = TextAlignmentOptions.Center;
         kbtTmp.color = new Color(0.9f, 0.85f, 1f);
@@ -603,10 +603,10 @@ public class MailboxUI : MonoBehaviour
         giftcodeInput.targetGraphic = inBg;
         giftcodeInput.keyboardType = TouchScreenKeyboardType.Default;
         giftcodeInput.shouldHideMobileInput = false;
-        giftcodeInput.characterLimit = 25;
+        giftcodeInput.characterLimit = 22;
 
-        // Text area
-        GameObject taObj = new GameObject("TextArea", typeof(RectTransform));
+        // Text area WITH RECTMASK2D - Ngăn 100% chữ tràn hoặc lem ra ngoài ô nhập!
+        GameObject taObj = new GameObject("TextArea", typeof(RectTransform), typeof(RectMask2D));
         taObj.transform.SetParent(inputObj.transform, false);
         RectTransform taRt = taObj.GetComponent<RectTransform>();
         taRt.anchorMin = Vector2.zero;
@@ -622,14 +622,17 @@ public class MailboxUI : MonoBehaviour
         phRt.anchorMax = Vector2.one;
         phRt.sizeDelta = Vector2.zero;
         var phTmp = phObj.AddComponent<TextMeshProUGUI>();
-        phTmp.text = isVi ? "Chạm để mở bàn phím..." : "Tap to open keyboard...";
-        phTmp.fontSize = 13f;
+        phTmp.text = isVi ? "Chạm để nhập mã..." : "Tap to enter code...";
+        phTmp.fontSize = 12.5f;
+        phTmp.enableAutoSizing = true;
+        phTmp.fontSizeMin = 8.5f;
+        phTmp.fontSizeMax = 12.5f;
         phTmp.fontStyle = FontStyles.Italic;
         phTmp.color = new Color(0.5f, 0.6f, 0.7f, 0.7f);
         phTmp.alignment = TextAlignmentOptions.MidlineLeft;
         phTmp.raycastTarget = false; // CRITICAL: Never block touches to InputField on mobile
 
-        // Input Text
+        // Input Text with Auto-Sizing (Tự động co nhỏ chữ khi chuỗi dài, không bao giờ lem ra ngoài)
         GameObject itObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
         itObj.transform.SetParent(taObj.transform, false);
         RectTransform itRt = itObj.GetComponent<RectTransform>();
@@ -637,7 +640,11 @@ public class MailboxUI : MonoBehaviour
         itRt.anchorMax = Vector2.one;
         itRt.sizeDelta = Vector2.zero;
         var itTmp = itObj.AddComponent<TextMeshProUGUI>();
-        itTmp.fontSize = 14f;
+        itTmp.fontSize = 13.5f;
+        itTmp.enableAutoSizing = true;
+        itTmp.fontSizeMin = 8.5f;
+        itTmp.fontSizeMax = 13.5f;
+        itTmp.overflowMode = TextOverflowModes.Truncate;
         itTmp.fontStyle = FontStyles.Bold;
         itTmp.color = Color.white;
         itTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -654,7 +661,10 @@ public class MailboxUI : MonoBehaviour
         trigger.triggers.Add(entry);
 
         giftcodeInput.onSelect.AddListener((s) => OpenMobileKeyboard());
-        giftcodeInput.onValueChanged.AddListener((s) => UpdateKeyboardPreview());
+        giftcodeInput.onValueChanged.AddListener((s) => {
+            AdjustInputFontSize(s);
+            UpdateKeyboardPreview();
+        });
 
         // 1-Click Paste Button (DÁN MÃ TỪ BỘ NHỚ TẠM) - Cực tiện lợi cho điện thoại!
         GameObject pasteBtnObj = new GameObject("Btn_Paste", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -779,6 +789,7 @@ public class MailboxUI : MonoBehaviour
         if (!string.IsNullOrEmpty(clip) && giftcodeInput != null)
         {
             giftcodeInput.text = clip.Trim().ToUpperInvariant();
+            AdjustInputFontSize(giftcodeInput.text);
             if (giftcodeFeedbackText != null)
             {
                 giftcodeFeedbackText.text = LocalizationManager.IsVietnamese 
@@ -1367,6 +1378,28 @@ public class MailboxUI : MonoBehaviour
         }
     }
 
+    private void AdjustInputFontSize(string s)
+    {
+        if (giftcodeInput == null || giftcodeInput.textComponent == null) return;
+        int len = string.IsNullOrEmpty(s) ? 0 : s.Length;
+        if (len >= 18)
+        {
+            giftcodeInput.textComponent.fontSize = 8.5f;
+        }
+        else if (len >= 14)
+        {
+            giftcodeInput.textComponent.fontSize = 10f;
+        }
+        else if (len >= 10)
+        {
+            giftcodeInput.textComponent.fontSize = 11.5f;
+        }
+        else
+        {
+            giftcodeInput.textComponent.fontSize = 13.5f;
+        }
+    }
+
     private void OnVirtualKeyPress(char c)
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
@@ -1374,6 +1407,7 @@ public class MailboxUI : MonoBehaviour
         if (giftcodeInput.text.Length >= giftcodeInput.characterLimit) return;
 
         giftcodeInput.text += char.ToUpperInvariant(c);
+        AdjustInputFontSize(giftcodeInput.text);
         UpdateKeyboardPreview();
     }
 
@@ -1384,6 +1418,7 @@ public class MailboxUI : MonoBehaviour
         if (!string.IsNullOrEmpty(giftcodeInput.text))
         {
             giftcodeInput.text = giftcodeInput.text.Substring(0, giftcodeInput.text.Length - 1);
+            AdjustInputFontSize(giftcodeInput.text);
             UpdateKeyboardPreview();
         }
     }
@@ -1454,22 +1489,26 @@ public class MailboxUI : MonoBehaviour
         titRt.sizeDelta = new Vector2(150f, 32f);
 
         var titTmp = titObj.AddComponent<TextMeshProUGUI>();
-        titTmp.text = isVi ? "<b>📱 BÀN PHÍM</b>" : "<b>PHONE KEYBOARD</b>";
+        titTmp.text = isVi ? "<b>BÀN PHÍM</b>" : "<b>KEYBOARD</b>";
         titTmp.fontSize = 13f;
         titTmp.color = new Color(1f, 0.88f, 0.45f);
         titTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
-        // Preview Text
-        GameObject prevObj = new GameObject("PreviewText", typeof(RectTransform), typeof(CanvasRenderer));
+        // Preview Text with RectMask2D and auto-sizing
+        GameObject prevObj = new GameObject("PreviewText", typeof(RectTransform), typeof(RectMask2D));
         prevObj.transform.SetParent(dispBar.transform, false);
         RectTransform prevRt = prevObj.GetComponent<RectTransform>();
         prevRt.anchorMin = new Vector2(0f, 0.5f);
         prevRt.anchorMax = new Vector2(1f, 0.5f);
-        prevRt.offsetMin = new Vector2(170f, -16f);
-        prevRt.offsetMax = new Vector2(-190f, 16f);
+        prevRt.offsetMin = new Vector2(140f, -16f);
+        prevRt.offsetMax = new Vector2(-160f, 16f);
 
         keyboardPreviewText = prevObj.AddComponent<TextMeshProUGUI>();
-        keyboardPreviewText.fontSize = 14f;
+        keyboardPreviewText.fontSize = 13.5f;
+        keyboardPreviewText.enableAutoSizing = true;
+        keyboardPreviewText.fontSizeMin = 8.5f;
+        keyboardPreviewText.fontSizeMax = 13.5f;
+        keyboardPreviewText.overflowMode = TextOverflowModes.Ellipsis;
         keyboardPreviewText.alignment = TextAlignmentOptions.MidlineLeft;
         keyboardPreviewText.color = Color.white;
 
@@ -1495,7 +1534,7 @@ public class MailboxUI : MonoBehaviour
         hbtRt.anchorMax = Vector2.one;
         hbtRt.sizeDelta = Vector2.zero;
         var hbtTmp = hbtObj.AddComponent<TextMeshProUGUI>();
-        hbtTmp.text = isVi ? "<b>✕ THU GỌN</b>" : "<b>✕ HIDE</b>";
+        hbtTmp.text = isVi ? "<b>THU GỌN</b>" : "<b>HIDE</b>";
         hbtTmp.fontSize = 12f;
         hbtTmp.alignment = TextAlignmentOptions.Center;
         hbtTmp.color = Color.white;
@@ -1658,7 +1697,7 @@ public class MailboxUI : MonoBehaviour
         bstRt.sizeDelta = Vector2.zero;
 
         var bstTmp = bstObj.AddComponent<TextMeshProUGUI>();
-        bstTmp.text = LocalizationManager.IsVietnamese ? "<b>⌫ XÓA</b>" : "<b>⌫ BACK</b>";
+        bstTmp.text = LocalizationManager.IsVietnamese ? "<b>XÓA</b>" : "<b>BACK</b>";
         bstTmp.fontSize = 14f;
         bstTmp.alignment = TextAlignmentOptions.Center;
         bstTmp.color = Color.white;
@@ -1682,28 +1721,28 @@ public class MailboxUI : MonoBehaviour
 
         // 1. Paste Button
         float x1 = startX + w1 * 0.5f;
-        CreateSingleActionButton(parent, "Btn_VkPaste", isVi ? "<b>📋 DÁN MÃ</b>" : "<b>📋 PASTE</b>",
+        CreateSingleActionButton(parent, "Btn_VkPaste", isVi ? "<b>DÁN MÃ</b>" : "<b>PASTE</b>",
             new Vector2(x1, yPos - keyHeight * 0.5f), new Vector2(w1, keyHeight),
             new Color(0.20f, 0.26f, 0.38f, 0.96f), new Color(0.4f, 0.7f, 1f, 0.6f),
             OnPasteFromClipboard);
 
         // 2. Code List Modal Button
         float x2 = startX + w1 + gap + w2 * 0.5f;
-        CreateSingleActionButton(parent, "Btn_VkCodeList", isVi ? "<b>🎁 MÃ CÓ SẴN</b>" : "<b>🎁 GIFTCODES</b>",
+        CreateSingleActionButton(parent, "Btn_VkCodeList", isVi ? "<b>MÃ CÓ SẴN</b>" : "<b>GIFTCODES</b>",
             new Vector2(x2, yPos - keyHeight * 0.5f), new Vector2(w2, keyHeight),
             new Color(0.32f, 0.24f, 0.12f, 0.96f), new Color(1f, 0.85f, 0.35f, 0.7f),
             OpenCodeListModal);
 
         // 3. Space Bar
         float x3 = startX + w1 + gap + w2 + gap + w3 * 0.5f;
-        CreateSingleActionButton(parent, "Btn_VkSpace", isVi ? "<b>␣ DẤU CÁCH</b>" : "<b>␣ SPACE</b>",
+        CreateSingleActionButton(parent, "Btn_VkSpace", isVi ? "<b>DẤU CÁCH</b>" : "<b>SPACE</b>",
             new Vector2(x3, yPos - keyHeight * 0.5f), new Vector2(w3, keyHeight),
             new Color(0.18f, 0.23f, 0.30f, 0.96f), new Color(0.4f, 0.55f, 0.75f, 0.5f),
             () => OnVirtualKeyPress(' '));
 
         // 4. Redeem Button
         float x4 = startX + w1 + gap + w2 + gap + w3 + gap + w4 * 0.5f;
-        CreateSingleActionButton(parent, "Btn_VkRedeem", isVi ? "<b>✔ ĐỔI CODE</b>" : "<b>✔ REDEEM</b>",
+        CreateSingleActionButton(parent, "Btn_VkRedeem", isVi ? "<b>ĐỔI CODE</b>" : "<b>REDEEM</b>",
             new Vector2(x4, yPos - keyHeight * 0.5f), new Vector2(w4, keyHeight),
             new Color(0.10f, 0.46f, 0.24f, 0.98f), new Color(0.35f, 1f, 0.65f, 0.75f),
             OnRedeemGiftcode);

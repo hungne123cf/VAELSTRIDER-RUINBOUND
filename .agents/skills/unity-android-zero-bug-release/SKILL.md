@@ -161,9 +161,49 @@ Logo lập phương màu trắng của Unity đè lên chính giữa hình icon 
 
 ---
 
-## 7. CHECKLIST 8 BƯỚC "ZERO-BUG" TRƯỚC KHI BẤM BUILD APK
+## 7. NGUYÊN TẮC "ZERO-TOFU": TRIỆT TIÊU 100% KÝ TỰ Ô VUÔNG & BẢO VỆ TEXT FIELD KHÔNG TRÀN CHỮ
 
-Trước khi xuất bất kỳ bản APK nào cho người dùng, AI Agent bắt buộc phải duyệt qua 8 bước:
+### Hiện tượng lỗi:
+1. Trên giao diện UI (nút bấm, nhãn chữ, thông báo, tiêu đề) xuất hiện các **ký tự ô vuông rỗng `▯` (hiện tượng Tofu)** thay cho các biểu tượng/icon.
+2. Khi người chơi gõ chữ vào ô nhập (`TMP_InputField`), chữ dài bị **tràn qua mép khung, lem đè lên các nút bấm và chữ khác**.
+
+### Nguyên nhân:
+1. **Thiếu Glyph trong Font Asset TextMesh Pro:** Font chữ mặc định của game (`LiberationSans SDF`) hoặc font Việt hóa chỉ chứa bảng mã ký tự cơ bản (ASCII, Latin và các nguyên âm tiếng Việt). Font này **hoàn toàn KHÔNG chứa** các ký tự Emoji hoặc Unicode đặc biệt (ví dụ: `⌨`, `📱`, `📋`, `🎁`, `␣`, `✔`, `✕`, `⌫`, `⚡`, `⚠️`, `❖`, `←`, `✓`...). Khi gặp ký tự thiếu, TextMesh Pro mặc định vẽ hình ô vuông `▯`.
+2. **Thiếu `RectMask2D` và thiếu `enableAutoSizing` trên InputField:** Đối tượng `TextArea` bên trong `TMP_InputField` nếu không có component `RectMask2D` sẽ để cho các ký tự vượt ngoài kích thước khung vẽ tự do ra ngoài màn hình. Đồng thời nếu không bật co chữ tự động, chữ sẽ giữ nguyên size to và bị lem ra ngoài.
+
+### Quy tắc bất di bất dịch:
+1. **TUYỆT ĐỐI CẤM SỬ DỤNG EMOJI & KÝ TỰ BIỂU TƯỢNG TRONG TEXT UI:**
+   * Tuyệt đối không chèn emoji điện thoại hoặc ký tự vẽ hình unicode vào text (`string`).
+   * Luôn dùng từ ngữ tiếng Việt / tiếng Anh rõ nghĩa:
+     * Dùng `[PHÍM]` thay vì `[⌨ PHÍM]`
+     * Dùng `BÀN PHÍM` thay vì `📱 BÀN PHÍM`
+     * Dùng `THU GỌN` hoặc `[X]` thay vì `✕ THU GỌN`
+     * Dùng `XÓA` thay vì `⌫ XÓA`
+     * Dùng `DÁN MÃ` thay vì `📋 DÁN MÃ`
+     * Dùng `MÃ CÓ SẴN` thay vì `🎁 MÃ CÓ SẴN`
+     * Dùng `DẤU CÁCH` thay vì `␣ DẤU CÁCH`
+     * Dùng `ĐỔI CODE` thay vì `✔ ĐỔI CODE`
+   * Nếu cần hiển thị icon đồ họa, **bắt buộc dùng Component `Image`** nạp sprite từ `Resources` hoặc dùng TMP Sprite Asset (`<sprite=0>`), tuyệt đối không gõ emoji vào chuỗi.
+
+2. **BẮT BUỘC DÙNG `RectMask2D` & TỰ ĐỘNG THU NHỎ CHỮ (AUTO-SIZING) TRÊN MỌI INPUT FIELD:**
+   * Gắn `RectMask2D` trực tiếp vào `TextArea` của InputField để khóa cứng vùng hiển thị, không bao giờ để chữ lem ra ngoài:
+     ```csharp
+     GameObject taObj = new GameObject("TextArea", typeof(RectTransform), typeof(RectMask2D));
+     ```
+   * Cấu hình tự động co chữ (`enableAutoSizing = true`) và cắt chữ gọn (`overflowMode = Truncate`):
+     ```csharp
+     itTmp.enableAutoSizing = true;
+     itTmp.fontSizeMin = 8.5f;
+     itTmp.fontSizeMax = 13.5f;
+     itTmp.overflowMode = TextOverflowModes.Truncate;
+     ```
+   * Kết hợp hàm điều chỉnh font size theo độ dài chuỗi trong sự kiện `onValueChanged` để chữ dài tự động thu nhỏ vừa khít với lòng khung nhập.
+
+---
+
+## 8. CHECKLIST 9 BƯỚC "ZERO-BUG" TRƯỚC KHI BẤM BUILD APK
+
+Trước khi xuất bất kỳ bản APK nào cho người dùng, AI Agent bắt buộc phải duyệt qua 9 bước:
 
 | Bước | Hạng mục kiểm tra | Tiêu chuẩn đạt |
 |---|---|---|
@@ -175,4 +215,5 @@ Trước khi xuất bất kỳ bản APK nào cho người dùng, AI Agent bắt
 | **6** | **Screen Orientation** | Đã khóa cứng `LandscapeLeft` (hoặc `Portrait` nếu là game dọc). |
 | **7** | **Touch Controls** | Virtual Joystick và Action Buttons có Procedural Fallback và có độ mờ an toàn $\ge 0.25$. |
 | **8** | **Adaptive Icon & Splash** | Cả 6 cấp Adaptive Icon có đủ 2 layer (Layer 1 = Art, Layer 2 = Transparent PNG). Đã tắt Unity Splash. |
+| **9** | **Zero-Tofu & No Text Leak** | 100% chuỗi UI không chứa emoji/ký tự lạ gây ô vuông `▯`. Mọi InputField đều có `RectMask2D` và Auto-Sizing chống lem chữ. |
 

@@ -4156,7 +4156,7 @@ public class MainMenuManager : MonoBehaviour
                 RectTransform runeRt = runeObj.GetComponent<RectTransform>();
                 runeRt.anchorMin = Vector2.zero; runeRt.anchorMax = Vector2.one; runeRt.sizeDelta = Vector2.zero;
                 var runeTmp = runeObj.AddComponent<TextMeshProUGUI>();
-                runeTmp.text = "<color=#334155><size=18>❖</size></color>";
+                runeTmp.text = "<color=#334155><size=18>+</size></color>";
                 runeTmp.alignment = TextAlignmentOptions.Center;
                 runeTmp.raycastTarget = false;
             }
@@ -4694,7 +4694,7 @@ public class MainMenuManager : MonoBehaviour
                 // Không đủ Linh Hồn
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeFail();
                 long missing = price - currentShards;
-                ShowCarouselToast(LocalizationManager.T($"⚠ KHÔNG ĐỦ LINH HỒN! CẦN THÊM {missing:N0} LINH HỒN NỮA", $"⚠ NOT ENOUGH SOULS! NEED {missing:N0} MORE SOULS"), new Color(1f, 0.4f, 0.4f, 1f));
+                ShowCarouselToast(LocalizationManager.T($"KHÔNG ĐỦ LINH HỒN! CẦN THÊM {missing:N0} LINH HỒN NỮA", $"NOT ENOUGH SOULS! NEED {missing:N0} MORE SOULS"), new Color(1f, 0.4f, 0.4f, 1f));
             }
             return;
         }
@@ -4967,7 +4967,7 @@ public class MainMenuManager : MonoBehaviour
         RectTransform btRt = bTxtObj.GetComponent<RectTransform>();
         btRt.anchorMin = Vector2.zero; btRt.anchorMax = Vector2.one; btRt.sizeDelta = Vector2.zero;
         var bTxt = bTxtObj.GetComponent<TextMeshProUGUI>();
-        bTxt.text = LocalizationManager.T("← TRỞ VỀ", "← BACK");
+        bTxt.text = LocalizationManager.T("TRỞ VỀ", "BACK");
         bTxt.fontSize = 15f;
         bTxt.fontStyle = FontStyles.Bold;
         bTxt.alignment = TextAlignmentOptions.Center;

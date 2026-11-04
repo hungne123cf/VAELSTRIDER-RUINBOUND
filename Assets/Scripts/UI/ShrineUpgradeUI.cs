@@ -140,7 +140,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         // Cập nhật nút Upgrade All
         if (upgradeAllBtnText != null)
         {
-            upgradeAllBtnText.text = isVi ? "⚡ NÂNG TẤT CẢ (MAX)" : "⚡ UPGRADE ALL (MAX)";
+            upgradeAllBtnText.text = isVi ? "NÂNG TẤT CẢ (MAX)" : "UPGRADE ALL (MAX)";
         }
         if (upgradeAllBtn != null)
         {
@@ -462,7 +462,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         abtRt.anchorMax = Vector2.one;
         abtRt.sizeDelta = Vector2.zero;
         var abtTmp = abTxtObj.AddComponent<TextMeshProUGUI>();
-        abtTmp.text = LocalizationManager.T("⚡ NÂNG TẤT CẢ (MAX)", "⚡ UPGRADE ALL (MAX)");
+        abtTmp.text = LocalizationManager.T("NÂNG TẤT CẢ (MAX)", "UPGRADE ALL (MAX)");
         abtTmp.fontSize = 14f;
         abtTmp.fontStyle = FontStyles.Bold;
         abtTmp.alignment = TextAlignmentOptions.Center;

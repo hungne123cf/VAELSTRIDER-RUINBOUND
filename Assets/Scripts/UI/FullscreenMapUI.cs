@@ -515,7 +515,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         if (statsText != null)
         {
             statsText.text = $"{LocalizationManager.T("[THANH] PHÒNG ĐÃ DỌN", "[THANH] CLEARED")}: <color=#2ED573><b>{clearedRooms}/{totalRooms}</b></color>\n" +
-                             $"{LocalizationManager.T("️ KẺ THÙ", "️ ENEMIES")}: <color=#FF4757><b>{enemyCount} {LocalizationManager.T("Quái", "Foes")}</b></color>\n" +
+                             $"{LocalizationManager.T("KẺ THÙ", "ENEMIES")}: <color=#FF4757><b>{enemyCount} {LocalizationManager.T("Quái", "Foes")}</b></color>\n" +
                              $"{LocalizationManager.T("[NGOC] LINH HỒN", "[NGOC] SHARDS")}: <color=#00D2D3><b>{shards}</b></color>";
         }
 
@@ -527,7 +527,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
 
             if (hpPercent < 0.4f)
             {
-                hintText.text = $"<color=#FF4757><b>⚠️ {LocalizationManager.T("CẢNH BÁO NGUY CẤP:", "CRITICAL HEALTH:")}</b></color>\n" +
+                hintText.text = $"<color=#FF4757><b>{LocalizationManager.T("CẢNH BÁO NGUY CẤP:", "CRITICAL HEALTH:")}</b></color>\n" +
                                 $"{LocalizationManager.T("Máu dưới 40%! Tìm Bình Máu (chấm xanh) hoặc ghé Đài Thần Bí để hồi phục.", "Health critical! Gather Potions (green dots) or visit a Shrine.")}";
             }
             else if (shards >= 150)
@@ -542,7 +542,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
             }
             else
             {
-                hintText.text = $"<color=#2ED573><b>✓ {LocalizationManager.T("KHU VỰC AN TOÀN:", "AREA SECURE:")}</b></color>\n" +
+                hintText.text = $"<color=#2ED573><b>{LocalizationManager.T("KHU VỰC AN TOÀN:", "AREA SECURE:")}</b></color>\n" +
                                 $"{LocalizationManager.T("Mọi phòng đã dọn sạch! Hãy nhặt rương báu và tiến vào Cổng Dịch Chuyển.", "Area cleared! Collect remaining chests and enter the Ruin Portal.")}";
             }
         }
