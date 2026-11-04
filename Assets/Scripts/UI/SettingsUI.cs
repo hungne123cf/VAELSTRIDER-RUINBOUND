@@ -435,7 +435,7 @@ public class SettingsUI : MonoBehaviour
         controlsCardTitle.color = new Color(1f, 0.88f, 0.45f);
 
         // Description inside Card
-        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt, Tuyệt kỹ & Bình máu trực tiếp trên màn hình trận đấu. Bạn có thể phóng to, thu nhỏ và chỉnh độ mờ các nút ngay tại đó để vừa vặn nhất với tay cầm của mình.\n\nVị trí và kích thước mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(22f, -46f), new Vector2(626f, 85f));
+        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt & Tuyệt kỹ trực tiếp trên màn hình trận đấu. Bạn có thể phóng to, thu nhỏ và chỉnh độ mờ các nút ngay tại đó để vừa vặn nhất với tay cầm của mình.\n\nVị trí và kích thước mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(22f, -46f), new Vector2(626f, 85f));
         controlsCardDesc.fontSize = 13.5f;
         controlsCardDesc.color = new Color(0.82f, 0.88f, 0.95f, 0.9f);
 
@@ -999,8 +999,8 @@ public class SettingsUI : MonoBehaviour
         if (controlsCardDesc != null)
         {
             controlsCardDesc.text = isVi
-                ? "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt, Tuyệt kỹ & Bình máu trực tiếp trên màn hình trận đấu để phù hợp nhất với cỡ tay của bạn.\n\nVị trí mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!"
-                : "Touch and drag the Joystick, Attack, Dash, Skill & Potion buttons directly on screen to fit your hand grip.\n\nCustom positions are saved automatically and applied for all future battles!";
+                ? "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt & Tuyệt kỹ trực tiếp trên màn hình trận đấu để phù hợp nhất với cỡ tay của bạn.\n\nVị trí mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!"
+                : "Touch and drag the Joystick, Attack, Dash & Skill buttons directly on screen to fit your hand grip.\n\nCustom positions are saved automatically and applied for all future battles!";
         }
 
         if (customizeLayoutBtnText != null)

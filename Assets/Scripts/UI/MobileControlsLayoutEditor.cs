@@ -11,19 +11,17 @@ public class MobileControlsLayoutEditor : MonoBehaviour
     private Canvas parentCanvas;
     private RectTransform canvasRect;
 
-    // Draggable Item Rects
+    // Draggable Item Rects (Only the 4 actual combat controls: Joystick, Attack, Dash, Skill)
     private RectTransform joyItem;
     private RectTransform atkItem;
     private RectTransform dashItem;
     private RectTransform skillItem;
-    private RectTransform potionItem;
 
     // CanvasGroups for live Opacity preview
     private CanvasGroup joyCg;
     private CanvasGroup atkCg;
     private CanvasGroup dashCg;
     private CanvasGroup skillCg;
-    private CanvasGroup potionCg;
 
     private float currentScale = 1.25f;
     private float currentOpacity = 1.0f;
@@ -42,8 +40,6 @@ public class MobileControlsLayoutEditor : MonoBehaviour
     private const float DEFAULT_DASH_Y = 160f;
     private const float DEFAULT_SKILL_X = -350f;
     private const float DEFAULT_SKILL_Y = 290f;
-    private const float DEFAULT_POTION_X = -220f;
-    private const float DEFAULT_POTION_Y = 360f;
 
     public static void OpenEditor(System.Action onClose = null)
     {
@@ -97,6 +93,7 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         if (currentOpacity < 0.3f) currentOpacity = 1.0f;
 
         // 1. Sleek Minimal Single-Row Top Bar (No bulky borders, no gothic frame corner brackets)
+        // Height 74px provides ample space for 56x56 touch buttons with comfortable margins
         GameObject topBar = new GameObject("TopBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         topBar.layer = 5;
         topBar.transform.SetParent(transform, false);
@@ -106,17 +103,17 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         tbRt.anchorMax = new Vector2(0.5f, 1f);
         tbRt.pivot = new Vector2(0.5f, 1f);
         tbRt.anchoredPosition = new Vector2(0f, -14f);
-        tbRt.sizeDelta = new Vector2(1040f, 54f);
+        tbRt.sizeDelta = new Vector2(1150f, 74f);
 
         Image tbImg = topBar.GetComponent<Image>();
         tbImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
         tbImg.type = Image.Type.Sliced;
-        tbImg.color = new Color(0.04f, 0.06f, 0.10f, 0.92f);
+        tbImg.color = new Color(0.04f, 0.06f, 0.10f, 0.94f);
 
         // Subtle thin outline for the top bar (clean modern feel, no thick gothic brackets)
         var tbOutline = topBar.AddComponent<Outline>();
-        tbOutline.effectColor = new Color(0.20f, 0.40f, 0.55f, 0.60f);
-        tbOutline.effectDistance = new Vector2(1f, -1f);
+        tbOutline.effectColor = new Color(0.20f, 0.45f, 0.65f, 0.65f);
+        tbOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
         // Layout container on Top Bar
         float curX = 18f;
@@ -129,19 +126,19 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         tRt.anchorMax = new Vector2(0f, 0.5f);
         tRt.pivot = new Vector2(0f, 0.5f);
         tRt.anchoredPosition = new Vector2(curX, 0f);
-        tRt.sizeDelta = new Vector2(175f, 32f);
+        tRt.sizeDelta = new Vector2(160f, 38f);
 
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = isVi ? "<b>TÙY CHỈNH NÚT</b>" : "<b>CUSTOM CONTROLS</b>";
-        titleTmp.fontSize = 15.5f;
+        titleTmp.fontSize = 16f;
         titleTmp.color = new Color(1f, 0.88f, 0.45f);
         titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
-        curX += 180f;
+        curX += 165f;
 
         // Separator 1
         curX += CreateSmallDivider(topBar.transform, curX);
 
-        // Cỡ Nút (Scale) Section: Label + [-] + 125% + [+]
+        // --- Cỡ Nút (Scale) Section: Label + Large [-] (56x56) + 125% + Large [+] (56x56) ---
         GameObject scaleLblObj = new GameObject("ScaleLabel", typeof(RectTransform), typeof(CanvasRenderer));
         scaleLblObj.transform.SetParent(topBar.transform, false);
         RectTransform slRt = scaleLblObj.GetComponent<RectTransform>();
@@ -149,19 +146,21 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         slRt.anchorMax = new Vector2(0f, 0.5f);
         slRt.pivot = new Vector2(0f, 0.5f);
         slRt.anchoredPosition = new Vector2(curX, 0f);
-        slRt.sizeDelta = new Vector2(65f, 28f);
+        slRt.sizeDelta = new Vector2(68f, 32f);
 
         var slTmp = scaleLblObj.AddComponent<TextMeshProUGUI>();
-        slTmp.text = isVi ? "<b>CỠ NÚT:</b>" : "<b>SIZE:</b>";
-        slTmp.fontSize = 13.5f;
+        slTmp.text = isVi ? "<b>CỠ NÚT</b>" : "<b>SIZE</b>";
+        slTmp.fontSize = 14f;
         slTmp.color = new Color(0.85f, 0.90f, 0.96f);
         slTmp.alignment = TextAlignmentOptions.MidlineLeft;
-        curX += 70f;
+        curX += 72f;
 
-        CreateIconButton(topBar.transform, "Btn_ScaleDown", new Vector2(curX, 0f), new Vector2(36f, 36f),
-            "<b>-</b>", new Color(0.28f, 0.16f, 0.18f), () => ChangeScale(-0.10f));
-        curX += 40f;
+        // Big Touch Button [-] for Scale
+        CreateTouchStepButton(topBar.transform, "Btn_ScaleDown", new Vector2(curX, 0f), new Vector2(56f, 56f),
+            "<b>-</b>", new Color(0.38f, 0.16f, 0.18f, 0.95f), () => ChangeScale(-0.10f));
+        curX += 62f;
 
+        // Scale Value Text
         GameObject scaleValObj = new GameObject("ScaleVal", typeof(RectTransform), typeof(CanvasRenderer));
         scaleValObj.transform.SetParent(topBar.transform, false);
         RectTransform svRt = scaleValObj.GetComponent<RectTransform>();
@@ -169,23 +168,24 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         svRt.anchorMax = new Vector2(0f, 0.5f);
         svRt.pivot = new Vector2(0f, 0.5f);
         svRt.anchoredPosition = new Vector2(curX, 0f);
-        svRt.sizeDelta = new Vector2(52f, 28f);
+        svRt.sizeDelta = new Vector2(58f, 36f);
 
         scaleValText = scaleValObj.AddComponent<TextMeshProUGUI>();
         scaleValText.text = $"<b>{Mathf.RoundToInt(currentScale * 100)}%</b>";
-        scaleValText.fontSize = 14.5f;
+        scaleValText.fontSize = 16.5f;
         scaleValText.alignment = TextAlignmentOptions.Center;
         scaleValText.color = new Color(0.35f, 0.95f, 0.85f);
-        curX += 54f;
+        curX += 62f;
 
-        CreateIconButton(topBar.transform, "Btn_ScaleUp", new Vector2(curX, 0f), new Vector2(36f, 36f),
-            "<b>+</b>", new Color(0.14f, 0.35f, 0.24f), () => ChangeScale(0.10f));
-        curX += 44f;
+        // Big Touch Button [+] for Scale
+        CreateTouchStepButton(topBar.transform, "Btn_ScaleUp", new Vector2(curX, 0f), new Vector2(56f, 56f),
+            "<b>+</b>", new Color(0.12f, 0.42f, 0.26f, 0.95f), () => ChangeScale(0.10f));
+        curX += 64f;
 
         // Separator 2
         curX += CreateSmallDivider(topBar.transform, curX);
 
-        // Độ Mờ (Opacity) Section: Label + [-] + 100% + [+]
+        // --- Độ Mờ (Opacity) Section: Label + Large [-] (56x56) + 100% + Large [+] (56x56) ---
         GameObject opcLblObj = new GameObject("OpacityLabel", typeof(RectTransform), typeof(CanvasRenderer));
         opcLblObj.transform.SetParent(topBar.transform, false);
         RectTransform olRt = opcLblObj.GetComponent<RectTransform>();
@@ -193,19 +193,21 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         olRt.anchorMax = new Vector2(0f, 0.5f);
         olRt.pivot = new Vector2(0f, 0.5f);
         olRt.anchoredPosition = new Vector2(curX, 0f);
-        olRt.sizeDelta = new Vector2(65f, 28f);
+        olRt.sizeDelta = new Vector2(68f, 32f);
 
         var olTmp = opcLblObj.AddComponent<TextMeshProUGUI>();
-        olTmp.text = isVi ? "<b>ĐỘ MỜ:</b>" : "<b>OPACITY:</b>";
-        olTmp.fontSize = 13.5f;
+        olTmp.text = isVi ? "<b>ĐỘ MỜ</b>" : "<b>OPACITY</b>";
+        olTmp.fontSize = 14f;
         olTmp.color = new Color(0.85f, 0.90f, 0.96f);
         olTmp.alignment = TextAlignmentOptions.MidlineLeft;
-        curX += 70f;
+        curX += 72f;
 
-        CreateIconButton(topBar.transform, "Btn_OpacityDown", new Vector2(curX, 0f), new Vector2(36f, 36f),
-            "<b>-</b>", new Color(0.28f, 0.16f, 0.18f), () => ChangeOpacity(-0.10f));
-        curX += 40f;
+        // Big Touch Button [-] for Opacity
+        CreateTouchStepButton(topBar.transform, "Btn_OpacityDown", new Vector2(curX, 0f), new Vector2(56f, 56f),
+            "<b>-</b>", new Color(0.38f, 0.16f, 0.18f, 0.95f), () => ChangeOpacity(-0.10f));
+        curX += 62f;
 
+        // Opacity Value Text
         GameObject opcValObj = new GameObject("OpacityVal", typeof(RectTransform), typeof(CanvasRenderer));
         opcValObj.transform.SetParent(topBar.transform, false);
         RectTransform ovRt = opcValObj.GetComponent<RectTransform>();
@@ -213,33 +215,40 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         ovRt.anchorMax = new Vector2(0f, 0.5f);
         ovRt.pivot = new Vector2(0f, 0.5f);
         ovRt.anchoredPosition = new Vector2(curX, 0f);
-        ovRt.sizeDelta = new Vector2(52f, 28f);
+        ovRt.sizeDelta = new Vector2(58f, 36f);
 
         opacityValText = opcValObj.AddComponent<TextMeshProUGUI>();
         opacityValText.text = $"<b>{Mathf.RoundToInt(currentOpacity * 100)}%</b>";
-        opacityValText.fontSize = 14.5f;
+        opacityValText.fontSize = 16.5f;
         opacityValText.alignment = TextAlignmentOptions.Center;
         opacityValText.color = new Color(1f, 0.85f, 0.35f);
-        curX += 54f;
+        curX += 62f;
 
-        CreateIconButton(topBar.transform, "Btn_OpacityUp", new Vector2(curX, 0f), new Vector2(36f, 36f),
-            "<b>+</b>", new Color(0.14f, 0.35f, 0.24f), () => ChangeOpacity(0.10f));
-        curX += 48f;
+        // Big Touch Button [+] for Opacity
+        CreateTouchStepButton(topBar.transform, "Btn_OpacityUp", new Vector2(curX, 0f), new Vector2(56f, 56f),
+            "<b>+</b>", new Color(0.12f, 0.42f, 0.26f, 0.95f), () => ChangeOpacity(0.10f));
+        curX += 68f;
 
-        // Action Buttons on Top Bar: Mặc định, Lưu & Vào trận, Đóng
-        CreateTopBarButton(topBar.transform, "Btn_Reset", new Vector2(curX, 0f), new Vector2(105f, 38f),
-            isVi ? "MẶC ĐỊNH" : "RESET", "Repeat-Right", new Color(0.18f, 0.24f, 0.35f), OnResetClicked);
-        curX += 112f;
+        // Separator 3
+        curX += CreateSmallDivider(topBar.transform, curX);
 
-        CreateTopBarButton(topBar.transform, "Btn_Save", new Vector2(curX, 0f), new Vector2(150f, 38f),
-            isVi ? "LƯU & VÀO TRẬN" : "SAVE & PLAY", "Tick", new Color(0.12f, 0.48f, 0.26f), OnSaveClicked);
-        curX += 157f;
+        // --- Action Buttons on Top Bar: MẶC ĐỊNH, LƯU & VÀO TRẬN (2 lines), ĐÓNG ---
+        // 1. MẶC ĐỊNH (Reset to Default) - 130px x 56px, comfortable text
+        CreateCleanActionButton(topBar.transform, "Btn_Reset", new Vector2(curX, 0f), new Vector2(130f, 56f),
+            isVi ? "<b>MẶC ĐỊNH</b>" : "<b>RESET</b>", new Color(0.16f, 0.22f, 0.32f, 0.95f), new Color(0.35f, 0.65f, 0.95f, 0.75f), OnResetClicked);
+        curX += 138f;
 
-        CreateTopBarButton(topBar.transform, "Btn_Back", new Vector2(curX, 0f), new Vector2(75f, 38f),
-            isVi ? "ĐÓNG" : "CLOSE", "Close", new Color(0.32f, 0.15f, 0.16f), OnBackClicked);
+        // 2. LƯU & VÀO TRẬN (Save & Play) - 155px x 56px, two clean lines so text is NEVER truncated
+        CreateCleanActionButton(topBar.transform, "Btn_Save", new Vector2(curX, 0f), new Vector2(155f, 56f),
+            isVi ? "<b>LƯU &<br>VÀO TRẬN</b>" : "<b>SAVE &<br>PLAY</b>", new Color(0.10f, 0.46f, 0.24f, 0.98f), new Color(0.25f, 0.95f, 0.55f, 0.85f), OnSaveClicked);
+        curX += 163f;
+
+        // 3. ĐÓNG (Close X button) - 56px x 56px, square icon button matching row height
+        CreateCleanActionButton(topBar.transform, "Btn_Back", new Vector2(curX, 0f), new Vector2(56f, 56f),
+            "<b>✕</b>", new Color(0.42f, 0.14f, 0.16f, 0.95f), new Color(0.95f, 0.35f, 0.35f, 0.75f), OnBackClicked);
 
         // Adjust topBar width precisely based on curX
-        tbRt.sizeDelta = new Vector2(curX + 18f, 54f);
+        tbRt.sizeDelta = new Vector2(curX + 74f, 74f);
 
         // 2. Bottom Tip Banner (clean and non-intrusive)
         GameObject tipObj = new GameObject("BottomTip", typeof(RectTransform), typeof(CanvasRenderer));
@@ -258,7 +267,7 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         tipTmp.fontSize = 14f;
         tipTmp.alignment = TextAlignmentOptions.Center;
 
-        // 3. Draggable Items Setup
+        // 3. Draggable Items Setup (Only the 4 actual combat controls)
         string curHero = PlayerPrefs.GetString("SelectedHero", "Hero1");
 
         // 3.1 Joystick (Cần di chuyển)
@@ -295,18 +304,6 @@ public class MobileControlsLayoutEditor : MonoBehaviour
             new Vector2(curSkillX, curSkillY), new Vector2(130f, 130f), new Vector2(1f, 0f),
             skillSpr, false, out skillCg);
 
-        // 3.5 Potion (Bình máu)
-        float curPotionX = PlayerPrefs.GetFloat("Game_Controls_Potion_PosX", DEFAULT_POTION_X);
-        float curPotionY = PlayerPrefs.GetFloat("Game_Controls_Potion_PosY", DEFAULT_POTION_Y);
-        Sprite potSpr = Resources.Load<Sprite>("Items/health_potion");
-#if UNITY_EDITOR
-        if (potSpr == null) potSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/health_potion.png");
-#endif
-        if (potSpr == null) potSpr = WhiteIconLoader.GetSprite("Heart");
-        potionItem = CreateDraggableControlItem("Drag_Potion", isVi ? "BÌNH MÁU" : "POTION",
-            new Vector2(curPotionX, curPotionY), new Vector2(95f, 95f), new Vector2(1f, 0f),
-            potSpr, false, out potionCg);
-
         ApplyScaleAndOpacityToPreview();
     }
 
@@ -319,14 +316,15 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         dRt.anchorMax = new Vector2(0f, 0.5f);
         dRt.pivot = new Vector2(0f, 0.5f);
         dRt.anchoredPosition = new Vector2(curX, 0f);
-        dRt.sizeDelta = new Vector2(1.5f, 28f);
+        dRt.sizeDelta = new Vector2(2f, 38f);
 
         Image img = divObj.GetComponent<Image>();
-        img.color = new Color(1f, 1f, 1f, 0.15f);
-        return 14f;
+        img.color = new Color(1f, 1f, 1f, 0.18f);
+        return 18f;
     }
 
-    private Button CreateIconButton(Transform parent, string name, Vector2 pos, Vector2 size, string text, Color color, UnityEngine.Events.UnityAction action)
+    // Large, comfortable touch target for [-] and [+] on mobile (56px x 56px)
+    private Button CreateTouchStepButton(Transform parent, string name, Vector2 pos, Vector2 size, string symbol, Color color, UnityEngine.Events.UnityAction action)
     {
         GameObject btnObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         btnObj.layer = 5;
@@ -344,6 +342,10 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         img.type = Image.Type.Sliced;
         img.color = color;
 
+        var outline = btnObj.AddComponent<Outline>();
+        outline.effectColor = new Color(color.r * 1.5f, color.g * 1.5f, color.b * 1.5f, 0.75f);
+        outline.effectDistance = new Vector2(1f, -1f);
+
         Button btn = btnObj.GetComponent<Button>();
         btn.targetGraphic = img;
 
@@ -355,8 +357,9 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         txtRt.sizeDelta = Vector2.zero;
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = text;
-        tmp.fontSize = 17f;
+        tmp.text = symbol;
+        tmp.fontSize = 28f;
+        tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = Color.white;
 
@@ -367,7 +370,8 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         return btn;
     }
 
-    private Button CreateTopBarButton(Transform parent, string name, Vector2 pos, Vector2 size, string text, string icon, Color color, UnityEngine.Events.UnityAction action)
+    // Clean Action Button with full text wrapping and zero truncation
+    private Button CreateCleanActionButton(Transform parent, string name, Vector2 pos, Vector2 size, string text, Color bgColor, Color outlineColor, UnityEngine.Events.UnityAction action)
     {
         GameObject btnObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         btnObj.layer = 5;
@@ -383,7 +387,11 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         Image img = btnObj.GetComponent<Image>();
         img.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
         img.type = Image.Type.Sliced;
-        img.color = color;
+        img.color = bgColor;
+
+        var outline = btnObj.AddComponent<Outline>();
+        outline.effectColor = outlineColor;
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
 
         Button btn = btnObj.GetComponent<Button>();
         btn.targetGraphic = img;
@@ -393,30 +401,35 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         RectTransform txtRt = txtObj.GetComponent<RectTransform>();
         txtRt.anchorMin = Vector2.zero;
         txtRt.anchorMax = Vector2.one;
-        txtRt.sizeDelta = Vector2.zero;
+        txtRt.offsetMin = new Vector2(6f, 4f);
+        txtRt.offsetMax = new Vector2(-6f, -4f);
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         tmp.text = text;
-        tmp.fontSize = 13.5f;
+        tmp.fontSize = (text.Contains("<br>") || text.Contains("\n")) ? 14f : 14.5f;
+        tmp.lineSpacing = -10f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = Color.white;
+        tmp.enableWordWrapping = true;
+        tmp.overflowMode = TextOverflowModes.Overflow; // No ellipsis, never truncate!
 
-        WhiteIconLoader.SetButtonIconAndText(btn, icon, text, Color.white, Color.white, true);
-
-        btn.onClick.AddListener(action);
+        btn.onClick.AddListener(() => {
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+            action?.Invoke();
+        });
         return btn;
     }
 
     private void ChangeScale(float delta)
     {
-        currentScale = Mathf.Clamp(currentScale + delta, 0.75f, 2.00f);
+        currentScale = Mathf.Clamp(currentScale + delta, 0.70f, 2.00f);
         ApplyScaleAndOpacityToPreview();
     }
 
     private void ChangeOpacity(float delta)
     {
-        currentOpacity = Mathf.Clamp(currentOpacity + delta, 0.35f, 1.0f);
+        currentOpacity = Mathf.Clamp(currentOpacity + delta, 0.30f, 1.0f);
         ApplyScaleAndOpacityToPreview();
     }
 
@@ -436,13 +449,11 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         if (atkItem != null) atkItem.localScale = sc;
         if (dashItem != null) dashItem.localScale = sc;
         if (skillItem != null) skillItem.localScale = sc;
-        if (potionItem != null) potionItem.localScale = sc;
 
         if (joyCg != null) joyCg.alpha = currentOpacity;
         if (atkCg != null) atkCg.alpha = currentOpacity;
         if (dashCg != null) dashCg.alpha = currentOpacity;
         if (skillCg != null) skillCg.alpha = currentOpacity;
-        if (potionCg != null) potionCg.alpha = currentOpacity;
 
         PlayerPrefs.SetFloat("Game_Controls_ButtonScale", currentScale);
         PlayerPrefs.SetFloat("Game_Controls_Opacity", currentOpacity);
@@ -617,11 +628,6 @@ public class MobileControlsLayoutEditor : MonoBehaviour
             PlayerPrefs.SetFloat("Game_Controls_Skill_PosX", skillItem.anchoredPosition.x);
             PlayerPrefs.SetFloat("Game_Controls_Skill_PosY", skillItem.anchoredPosition.y);
         }
-        if (potionItem != null)
-        {
-            PlayerPrefs.SetFloat("Game_Controls_Potion_PosX", potionItem.anchoredPosition.x);
-            PlayerPrefs.SetFloat("Game_Controls_Potion_PosY", potionItem.anchoredPosition.y);
-        }
 
         PlayerPrefs.SetFloat("Game_Controls_ButtonScale", currentScale);
         PlayerPrefs.SetFloat("Game_Controls_Opacity", currentOpacity);
@@ -650,7 +656,6 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         if (atkItem != null) atkItem.anchoredPosition = new Vector2(DEFAULT_ATK_X, DEFAULT_ATK_Y);
         if (dashItem != null) dashItem.anchoredPosition = new Vector2(DEFAULT_DASH_X, DEFAULT_DASH_Y);
         if (skillItem != null) skillItem.anchoredPosition = new Vector2(DEFAULT_SKILL_X, DEFAULT_SKILL_Y);
-        if (potionItem != null) potionItem.anchoredPosition = new Vector2(DEFAULT_POTION_X, DEFAULT_POTION_Y);
 
         currentScale = 1.25f;
         currentOpacity = 1.0f;
