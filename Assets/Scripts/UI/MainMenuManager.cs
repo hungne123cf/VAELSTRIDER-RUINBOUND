@@ -5661,11 +5661,14 @@ public class MainMenuManager : MonoBehaviour
         {
             if (isUnlocked)
             {
-                carouselHeroRoleText.text = $"{heroRole}  |  <color=#55FFAA>[{LocalizationManager.T(\"ĐÃ SỞ HỮU\", \"OWNED\")}]</color>";
+                string ownedStr = LocalizationManager.T("ĐÃ SỞ HỮU", "OWNED");
+                carouselHeroRoleText.text = $"{heroRole}  |  <color=#55FFAA>[{ownedStr}]</color>";
             }
             else
             {
-                carouselHeroRoleText.text = $"{heroRole}  |  <color=#FFD700>[{LocalizationManager.T(\"KHÓA\", \"LOCKED\")}] {price:N0} {LocalizationManager.T(\"LINH HỒN\", \"SOULS\")}</color>";
+                string lockedStr = LocalizationManager.T("KHÓA", "LOCKED");
+                string soulsStr = LocalizationManager.T("LINH HỒN", "SOULS");
+                carouselHeroRoleText.text = $"{heroRole}  |  <color=#FFD700>[{lockedStr}] {price:N0} {soulsStr}</color>";
             }
         }
 
