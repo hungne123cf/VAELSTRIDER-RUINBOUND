@@ -160,44 +160,36 @@ public static class AugmentIconHelper
             return cached;
         }
 
-        string assetPath = $"Assets/Sprites/UI/Augments/{filename}";
+        string nameNoExt = Path.GetFileNameWithoutExtension(filename);
         Sprite spr = null;
 
+        // 1. Ưu tiên Resources/UI/Augments (Chuẩn 100% trên Android & PC Standalone Build)
+        spr = Resources.Load<Sprite>("UI/Augments/" + nameNoExt);
+        if (spr == null)
+        {
+            var all = Resources.LoadAll<Sprite>("UI/Augments/" + nameNoExt);
+            if (all != null && all.Length > 0) spr = all[0];
+        }
+        if (spr == null) spr = Resources.Load<Sprite>(nameNoExt);
+
 #if UNITY_EDITOR
-        spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        if (spr == null)
+        {
+            string assetPath = $"Assets/Sprites/UI/Augments/{filename}";
+            spr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        }
 #endif
 
+        // 2. Fallback an toàn qua WhiteIconLoader (Khắc phục triệt để lỗi ô vuông màu trắng!)
         if (spr == null)
         {
-            string diskPath = Path.Combine(Application.dataPath, "Sprites/UI/Augments", filename);
-            if (File.Exists(diskPath))
-            {
-                try
-                {
-                    byte[] bytes = File.ReadAllBytes(diskPath);
-                    Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                    if (tex.LoadImage(bytes))
-                    {
-                        tex.filterMode = FilterMode.Bilinear;
-                        tex.wrapMode = TextureWrapMode.Clamp;
-                        spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Debug.LogWarning($"[AugmentIconHelper] Không thể tải icon từ {diskPath}: {ex.Message}");
-                }
-            }
-        }
-
-        // Fallback sang các sprite cơ bản của project nếu cần
-        if (spr == null)
-        {
-            if (filename.Contains("sword")) spr = WhiteIconLoader.GetSprite("Sword") ?? Resources.Load<Sprite>("UI/Attack");
-            else if (filename.Contains("wing") || filename.Contains("dash")) spr = Resources.Load<Sprite>("UI/Dash");
-            else if (filename.Contains("shield")) spr = WhiteIconLoader.GetSprite("Hero");
-            else if (filename.Contains("meteor") || filename.Contains("lightning")) spr = WhiteIconLoader.GetSprite("Star");
-            else spr = Resources.Load<Sprite>("UI/Ulti");
+            if (filename.Contains("sword")) spr = WhiteIconLoader.GetSprite("Sword");
+            else if (filename.Contains("heart") || filename.Contains("vitality")) spr = WhiteIconLoader.GetSprite("Player");
+            else if (filename.Contains("wing") || filename.Contains("fleet")) spr = WhiteIconLoader.GetSprite("SolidArrow-Right");
+            else if (filename.Contains("shield") || filename.Contains("aegis")) spr = WhiteIconLoader.GetSprite("Hero");
+            else if (filename.Contains("hour") || filename.Contains("cdr")) spr = WhiteIconLoader.GetSprite("Repeat-Right");
+            else if (filename.Contains("eye")) spr = WhiteIconLoader.GetSprite("Question");
+            else spr = WhiteIconLoader.GetSprite("Star");
         }
 
         if (spr != null)

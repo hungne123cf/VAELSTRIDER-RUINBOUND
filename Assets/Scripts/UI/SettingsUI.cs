@@ -71,6 +71,12 @@ public class SettingsUI : MonoBehaviour
     private TextMeshProUGUI customizeLayoutBtnText;
     private Button resetControlsDefaultBtn;
     private TextMeshProUGUI resetControlsDefaultBtnText;
+    private TextMeshProUGUI btnScaleLabel;
+    private Slider btnScaleSlider;
+    private TextMeshProUGUI btnScaleValueText;
+    private TextMeshProUGUI btnOpacityLabel;
+    private Slider btnOpacitySlider;
+    private TextMeshProUGUI btnOpacityValueText;
 
     [Header("Game Data Controls")]
     private TextMeshProUGUI resetDataDesc;
@@ -199,7 +205,7 @@ public class SettingsUI : MonoBehaviour
                 btnRt.anchorMax = new Vector2(1f, 1f);
                 btnRt.pivot = new Vector2(1f, 1f);
                 btnRt.anchoredPosition = new Vector2(-20f, -20f);
-                btnRt.sizeDelta = new Vector2(46f, 46f);
+                btnRt.sizeDelta = new Vector2(68f, 68f);
 
                 Image btnImg = btnObj.GetComponent<Image>();
                 btnImg.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
@@ -216,7 +222,7 @@ public class SettingsUI : MonoBehaviour
                     else EnsureUIExists()?.OpenSettings();
                 });
 
-                WhiteIconLoader.ReplaceTextWithIcon(btn, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(28f, 28f));
+                WhiteIconLoader.ReplaceTextWithIcon(btn, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(42f, 42f));
             }
         }
 
@@ -415,7 +421,7 @@ public class SettingsUI : MonoBehaviour
         ccRt.anchorMax = new Vector2(0f, 1f);
         ccRt.pivot = new Vector2(0f, 1f);
         ccRt.anchoredPosition = new Vector2(25f, -76f);
-        ccRt.sizeDelta = new Vector2(670f, 235f);
+        ccRt.sizeDelta = new Vector2(670f, 180f);
 
         Image ccImg = controlsCard.GetComponent<Image>();
         ccImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -424,24 +430,45 @@ public class SettingsUI : MonoBehaviour
         WhiteIconLoader.ApplyGothicFrame(controlsCard, new Color(0.35f, 0.55f, 0.75f, 0.55f), 0.45f);
 
         // Title inside Card
-        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>KÉO THẢ PHÍM TRỰC TIẾP TRONG TRẬN ĐẤU</b>", new Vector2(22f, -18f), new Vector2(626f, 26f));
+        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>KÉO THẢ PHÍM TRỰC TIẾP TRONG TRẬN ĐẤU</b>", new Vector2(22f, -16f), new Vector2(626f, 26f));
         controlsCardTitle.fontSize = 16.5f;
         controlsCardTitle.color = new Color(1f, 0.88f, 0.45f);
 
         // Description inside Card
-        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt, Tuyệt kỹ & Bình máu trực tiếp trên màn hình trận đấu để phù hợp nhất với cỡ tay của bạn.\n\nVị trí mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(22f, -50f), new Vector2(626f, 85f));
-        controlsCardDesc.fontSize = 14f;
+        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt, Tuyệt kỹ & Bình máu trực tiếp trên màn hình trận đấu để phù hợp nhất với cỡ tay của bạn.\n\nVị trí mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(22f, -44f), new Vector2(626f, 60f));
+        controlsCardDesc.fontSize = 13.5f;
         controlsCardDesc.color = new Color(0.82f, 0.88f, 0.95f, 0.9f);
 
         // 2 Big Action Buttons inside Card
-        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(22f, -150f), new Vector2(370f, 54f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
+        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(22f, -114f), new Vector2(370f, 48f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
         customizeLayoutBtnText.fontSize = 15.5f;
 
-        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(405f, -150f), new Vector2(243f, 54f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
+        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(405f, -114f), new Vector2(243f, 48f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
         resetControlsDefaultBtnText.fontSize = 15f;
 
+        // Sliders for Button Scale and Opacity
+        btnScaleLabel = CreateLabel(pageControls.transform, "BtnScaleLabel", "Cỡ phím điều khiển (Button Size Scale):", new Vector2(25f, -270f), new Vector2(500f, 24f));
+        btnScaleLabel.fontSize = 15.5f;
+        btnScaleSlider = CreateSlider(pageControls.transform, "BtnScaleSlider", new Vector2(25f, -298f), new Vector2(550f, 28f));
+        btnScaleSlider.minValue = 0.75f;
+        btnScaleSlider.maxValue = 2.20f;
+        btnScaleValueText = CreateLabel(pageControls.transform, "BtnScaleVal", "125%", new Vector2(590f, -298f), new Vector2(80f, 28f));
+        btnScaleValueText.fontSize = 16.5f;
+        btnScaleValueText.fontStyle = FontStyles.Bold;
+        btnScaleValueText.color = new Color(0.35f, 0.95f, 0.85f);
+
+        btnOpacityLabel = CreateLabel(pageControls.transform, "BtnOpacityLabel", "Độ rõ / mờ phím bấm (Button Opacity):", new Vector2(25f, -338f), new Vector2(500f, 24f));
+        btnOpacityLabel.fontSize = 15.5f;
+        btnOpacitySlider = CreateSlider(pageControls.transform, "BtnOpacitySlider", new Vector2(25f, -366f), new Vector2(550f, 28f));
+        btnOpacitySlider.minValue = 0.35f;
+        btnOpacitySlider.maxValue = 1.0f;
+        btnOpacityValueText = CreateLabel(pageControls.transform, "BtnOpacityVal", "100%", new Vector2(590f, -366f), new Vector2(80f, 28f));
+        btnOpacityValueText.fontSize = 16.5f;
+        btnOpacityValueText.fontStyle = FontStyles.Bold;
+        btnOpacityValueText.color = new Color(1f, 0.85f, 0.35f);
+
         // Bottom Tip below Card
-        controlsCardTip = CreateLabel(pageControls.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí các nút.</color></i>", new Vector2(25f, -320f), new Vector2(670f, 24f));
+        controlsCardTip = CreateLabel(pageControls.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí và kích thước các nút.</color></i>", new Vector2(25f, -410f), new Vector2(670f, 24f));
         controlsCardTip.fontSize = 13.5f;
 
         // --- PAGE 3: GAME DATA & SYSTEM ---
@@ -758,7 +785,7 @@ public class SettingsUI : MonoBehaviour
     {
         float bgmVal = 0.8f;
         float sfxVal = 0.8f;
-        float btnSizeVal = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.0f);
+        float btnSizeVal = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.25f);
         float btnOpacityVal = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
         float joyX = PlayerPrefs.GetFloat("Game_Controls_Joy_PosX", 250f);
         float joyY = PlayerPrefs.GetFloat("Game_Controls_Joy_PosY", 250f);
@@ -773,6 +800,13 @@ public class SettingsUI : MonoBehaviour
             bgmVal = PlayerPrefs.GetFloat("Game_BGM_Volume", 0.8f);
             sfxVal = PlayerPrefs.GetFloat("Game_SFX_Volume", 0.8f);
         }
+
+        if (btnSizeVal < 0.6f) btnSizeVal = 1.25f;
+        if (btnScaleSlider != null) btnScaleSlider.value = btnSizeVal;
+        if (btnScaleValueText != null) btnScaleValueText.text = $"{Mathf.RoundToInt(btnSizeVal * 100)}%";
+
+        if (btnOpacitySlider != null) btnOpacitySlider.value = btnOpacityVal;
+        if (btnOpacityValueText != null) btnOpacityValueText.text = $"{Mathf.RoundToInt(btnOpacityVal * 100)}%";
 
         if (bgmSlider != null) bgmSlider.value = bgmVal;
         if (sfxSlider != null) sfxSlider.value = sfxVal;
@@ -837,6 +871,28 @@ public class SettingsUI : MonoBehaviour
 
 
 
+        if (btnScaleSlider != null)
+        {
+            btnScaleSlider.onValueChanged.RemoveAllListeners();
+            btnScaleSlider.onValueChanged.AddListener((val) => {
+                if (btnScaleValueText != null) btnScaleValueText.text = $"{Mathf.RoundToInt(val * 100)}%";
+                PlayerPrefs.SetFloat("Game_Controls_ButtonScale", val);
+                PlayerPrefs.Save();
+                ApplyControlSettingsLive();
+            });
+        }
+
+        if (btnOpacitySlider != null)
+        {
+            btnOpacitySlider.onValueChanged.RemoveAllListeners();
+            btnOpacitySlider.onValueChanged.AddListener((val) => {
+                if (btnOpacityValueText != null) btnOpacityValueText.text = $"{Mathf.RoundToInt(val * 100)}%";
+                PlayerPrefs.SetFloat("Game_Controls_Opacity", val);
+                PlayerPrefs.Save();
+                ApplyControlSettingsLive();
+            });
+        }
+
         if (customizeLayoutBtn != null)
         {
             customizeLayoutBtn.onClick.RemoveAllListeners();
@@ -895,7 +951,7 @@ public class SettingsUI : MonoBehaviour
     private void OnResetControlsDefault()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        PlayerPrefs.SetFloat("Game_Controls_ButtonScale", 1.0f);
+        PlayerPrefs.SetFloat("Game_Controls_ButtonScale", 1.25f);
         PlayerPrefs.SetFloat("Game_Controls_Opacity", 1.0f);
 
         PlayerPrefs.SetFloat("Game_Controls_Joy_PosX", 250f);
@@ -919,7 +975,7 @@ public class SettingsUI : MonoBehaviour
         MobileActionButton.ApplyToAllButtons();
         VirtualJoystick.ApplyToAllJoysticks();
 
-        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.0f);
+        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.25f);
         float opacity = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
         var potionSlot = GameObject.Find("Btn_Potion");
         if (potionSlot != null)
@@ -958,7 +1014,9 @@ public class SettingsUI : MonoBehaviour
 
         // Page 2
         if (pageControlsHeader != null) pageControlsHeader.text = isVi ? "<b><color=#55EFC4>2. PHÍM ĐIỀU KHIỂN CẢM ỨNG</color></b>" : "<b><color=#55EFC4>2. TOUCH CONTROLS SETTINGS</color></b>";
-        if (pageControlsSub != null) pageControlsSub.text = isVi ? "Kéo thả trực tiếp vị trí các phím trên màn hình trận đấu" : "Drag and drop button positions directly on the battle screen";
+        if (pageControlsSub != null) pageControlsSub.text = isVi ? "Kéo thả vị trí & tùy chỉnh kích thước phím trên màn hình" : "Custom position and scale buttons on the battle screen";
+        if (btnScaleLabel != null) btnScaleLabel.text = isVi ? "Cỡ phím điều khiển (Button Size Scale):" : "Button Size Scale:";
+        if (btnOpacityLabel != null) btnOpacityLabel.text = isVi ? "Độ rõ / mờ phím bấm (Button Opacity):" : "Button Opacity:";
 
         if (controlsCardTitle != null) controlsCardTitle.text = isVi ? "<b>KÉO THẢ PHÍM TRỰC TIẾP TRONG TRẬN ĐẤU</b>" : "<b>DIRECT IN-MATCH CONTROLS CUSTOMIZATION</b>";
         if (controlsCardDesc != null)

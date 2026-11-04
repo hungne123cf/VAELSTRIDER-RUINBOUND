@@ -105,7 +105,7 @@ public class MainMenuDynamicBackground : MonoBehaviour
         cityArtRt.anchorMin = Vector2.zero;
         cityArtRt.anchorMax = Vector2.one;
         // Overflow margin so smooth mouse parallax movement never reveals canvas edges
-        cityArtRt.sizeDelta = new Vector2(80f, 50f);
+        cityArtRt.sizeDelta = new Vector2(180f, 120f);
         cityArtRt.anchoredPosition = Vector2.zero;
 
         cityArtImg = artObj.GetComponent<Image>();
@@ -265,18 +265,20 @@ public class MainMenuDynamicBackground : MonoBehaviour
         return spr;
     }
 
+    private Vector2 touchPanOffset = Vector2.zero;
+
     private void Update()
     {
         timer += Time.deltaTime;
 
-        // 1. Unified Mouse Parallax (Safe on mobile / touch)
-        Vector2 mouseNorm = Vector2.zero;
+        // 1. PC Mouse Parallax
+        Vector2 inputNorm = Vector2.zero;
         try
         {
-            if (UnityEngine.InputSystem.Mouse.current != null)
+            if (UnityEngine.InputSystem.Mouse.current != null && UnityEngine.InputSystem.Mouse.current.wasUpdatedThisFrame)
             {
                 Vector2 mousePos = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
-                mouseNorm = new Vector2(
+                inputNorm = new Vector2(
                     (mousePos.x / Screen.width - 0.5f) * 2f,
                     (mousePos.y / Screen.height - 0.5f) * 2f
                 );
@@ -284,14 +286,58 @@ public class MainMenuDynamicBackground : MonoBehaviour
         }
         catch {}
 
+        // 2. Mobile Touch & Drag Parallax
+        try
+        {
+            if (Input.touchCount > 0)
+            {
+                Touch t = Input.GetTouch(0);
+                if (t.phase == TouchPhase.Moved)
+                {
+                    touchPanOffset.x -= t.deltaPosition.x * 0.08f;
+                    touchPanOffset.y -= t.deltaPosition.y * 0.08f;
+                    touchPanOffset.x = Mathf.Clamp(touchPanOffset.x, -25f, 25f);
+                    touchPanOffset.y = Mathf.Clamp(touchPanOffset.y, -18f, 18f);
+                }
+            }
+            else
+            {
+                // Slowly relax touch pan back to center
+                touchPanOffset = Vector2.Lerp(touchPanOffset, Vector2.zero, Time.deltaTime * 1.5f);
+            }
+        }
+        catch {}
+
+        // 3. Mobile Device Gyroscope / Accelerometer Tilt (Nghiêng điện thoại tạo chiều sâu 3D Parallax)
+        Vector2 tiltNorm = Vector2.zero;
+        try
+        {
+            Vector3 accel = Input.acceleration;
+            if (accel != Vector3.zero)
+            {
+                // In Landscape orientation: X is horizontal tilt, Y is vertical tilt
+                tiltNorm.x = Mathf.Clamp(accel.x * 1.2f, -1f, 1f);
+                tiltNorm.y = Mathf.Clamp((accel.y + 0.55f) * 1.2f, -1f, 1f);
+            }
+        }
+        catch {}
+
+        // 4. Autonomous Cinematic Camera Drift (Luôn luôn lượn sóng chuyển động mượt mà kể cả khi không chạm)
+        float autoSwayX = Mathf.Sin(timer * 0.42f) * 20f + Mathf.Cos(timer * 0.21f) * 10f;
+        float autoSwayY = Mathf.Cos(timer * 0.35f) * 14f + Mathf.Sin(timer * 0.18f) * 8f;
+
         if (cityArtRt != null)
         {
-            float breath = Mathf.Sin(timer * 0.3f);
-            float scale = 1.02f + breath * 0.01f;
+            // Nhịp thở điện ảnh sống động (breathing zoom)
+            float breath = Mathf.Sin(timer * 0.38f);
+            float scale = 1.05f + breath * 0.025f;
             cityArtRt.localScale = new Vector3(scale, scale, 1f);
 
-            Vector2 targetPos = new Vector2(-mouseNorm.x * 20f, -mouseNorm.y * 14f);
-            cityArtRt.anchoredPosition = Vector2.Lerp(cityArtRt.anchoredPosition, targetPos, Time.deltaTime * 2.5f);
+            float targetX = autoSwayX - (inputNorm.x * 24f) - (tiltNorm.x * 22f) + touchPanOffset.x;
+            float targetY = autoSwayY - (inputNorm.y * 16f) - (tiltNorm.y * 15f) + touchPanOffset.y;
+            Vector2 targetPos = new Vector2(targetX, targetY);
+
+            cityArtRt.anchoredPosition = Vector2.Lerp(cityArtRt.anchoredPosition, targetPos, Time.deltaTime * 2.8f);
         }
 
         // 2. Update Ambient Wasteland Dust Motes

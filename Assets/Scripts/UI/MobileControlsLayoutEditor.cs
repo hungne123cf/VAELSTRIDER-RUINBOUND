@@ -17,6 +17,10 @@ public class MobileControlsLayoutEditor : MonoBehaviour
     private RectTransform dashItem;
     private RectTransform skillItem;
 
+    private float currentScale = 1.25f;
+    private TextMeshProUGUI scaleValText;
+    public float GetCurrentScale() => currentScale;
+
     private const float DEFAULT_JOY_X = 250f;
     private const float DEFAULT_JOY_Y = 250f;
     private const float DEFAULT_ATK_X = -220f;
@@ -132,26 +136,151 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         tipTmp.fontSize = 15;
         tipTmp.alignment = TextAlignmentOptions.Center;
 
+        // 2.5 Scale Control Toolbar (Thu phóng kích thước nút)
+        currentScale = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.25f);
+        if (currentScale < 0.6f) currentScale = 1.25f;
+
+        GameObject scaleBar = new GameObject("ScaleBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        scaleBar.layer = 5;
+        scaleBar.transform.SetParent(transform, false);
+
+        RectTransform sbRt = scaleBar.GetComponent<RectTransform>();
+        sbRt.anchorMin = new Vector2(0.5f, 1f);
+        sbRt.anchorMax = new Vector2(0.5f, 1f);
+        sbRt.pivot = new Vector2(0.5f, 1f);
+        sbRt.anchoredPosition = new Vector2(0f, -92f);
+        sbRt.sizeDelta = new Vector2(820f, 50f);
+
+        Image sbImg = scaleBar.GetComponent<Image>();
+        sbImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        sbImg.type = Image.Type.Sliced;
+        sbImg.color = new Color(0.04f, 0.07f, 0.12f, 0.96f);
+        WhiteIconLoader.ApplyGothicFrame(scaleBar, new Color(0.2f, 0.85f, 1f, 0.7f), 0.4f);
+
+        // Label
+        GameObject sbLabelObj = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer));
+        sbLabelObj.transform.SetParent(scaleBar.transform, false);
+        RectTransform slRt = sbLabelObj.GetComponent<RectTransform>();
+        slRt.anchorMin = new Vector2(0f, 0.5f);
+        slRt.anchorMax = new Vector2(0f, 0.5f);
+        slRt.pivot = new Vector2(0f, 0.5f);
+        slRt.anchoredPosition = new Vector2(18f, 0f);
+        slRt.sizeDelta = new Vector2(250f, 32f);
+
+        scaleValText = sbLabelObj.AddComponent<TextMeshProUGUI>();
+        scaleValText.text = isVi ? $"<b>CỠ PHÍM: <color=#55EFC4>{Mathf.RoundToInt(currentScale * 100)}%</color></b>" : $"<b>BUTTON SIZE: <color=#55EFC4>{Mathf.RoundToInt(currentScale * 100)}%</color></b>";
+        scaleValText.fontSize = 15f;
+        scaleValText.alignment = TextAlignmentOptions.MidlineLeft;
+        scaleValText.color = new Color(1f, 0.92f, 0.65f);
+
+        // Minus Button
+        CreateScaleButton(scaleBar.transform, "Btn_ScaleDown", new Vector2(275f, 0f), new Vector2(115f, 36f),
+            isVi ? "[-] THU NHỎ" : "[-] SMALLER", new Color(0.35f, 0.18f, 0.18f), () => ChangeScale(-0.15f));
+
+        // Plus Button
+        CreateScaleButton(scaleBar.transform, "Btn_ScaleUp", new Vector2(398f, 0f), new Vector2(125f, 36f),
+            isVi ? "[+] PHÓNG TO" : "[+] LARGER", new Color(0.15f, 0.42f, 0.28f), () => ChangeScale(0.15f));
+
+        // Quick Preset Buttons: 100%, 130%, 160%
+        CreateScaleButton(scaleBar.transform, "Btn_P1", new Vector2(532f, 0f), new Vector2(80f, 36f),
+            "100%", new Color(0.16f, 0.22f, 0.32f), () => SetScalePreset(1.0f));
+
+        CreateScaleButton(scaleBar.transform, "Btn_P2", new Vector2(620f, 0f), new Vector2(80f, 36f),
+            "130%", new Color(0.20f, 0.35f, 0.52f), () => SetScalePreset(1.30f));
+
+        CreateScaleButton(scaleBar.transform, "Btn_P3", new Vector2(708f, 0f), new Vector2(80f, 36f),
+            "160%", new Color(0.25f, 0.45f, 0.65f), () => SetScalePreset(1.60f));
+
         // 3. Spawn Draggable Items
         float curJoyX = PlayerPrefs.GetFloat("Game_Controls_Joy_PosX", DEFAULT_JOY_X);
         float curJoyY = PlayerPrefs.GetFloat("Game_Controls_Joy_PosY", DEFAULT_JOY_Y);
         joyItem = CreateDraggableControlItem("Drag_Joystick", isVi ? "CẦN DI CHUYỂN" : "JOYSTICK",
-            new Vector2(curJoyX, curJoyY), new Vector2(180f, 180f), new Vector2(0f, 0f), "Sound-None", true);
+            new Vector2(curJoyX, curJoyY), new Vector2(210f, 210f), new Vector2(0f, 0f), "Sound-None", true);
 
         float curAtkX = PlayerPrefs.GetFloat("Game_Controls_Atk_PosX", DEFAULT_ATK_X);
         float curAtkY = PlayerPrefs.GetFloat("Game_Controls_Atk_PosY", DEFAULT_ATK_Y);
         atkItem = CreateDraggableControlItem("Drag_Attack", isVi ? "TẤN CÔNG" : "ATTACK",
-            new Vector2(curAtkX, curAtkY), new Vector2(145f, 145f), new Vector2(1f, 0f), "icon_attack", false);
+            new Vector2(curAtkX, curAtkY), new Vector2(165f, 165f), new Vector2(1f, 0f), "icon_attack", false);
 
         float curDashX = PlayerPrefs.GetFloat("Game_Controls_Dash_PosX", DEFAULT_DASH_X);
         float curDashY = PlayerPrefs.GetFloat("Game_Controls_Dash_PosY", DEFAULT_DASH_Y);
         dashItem = CreateDraggableControlItem("Drag_Dash", isVi ? "LƯỚT DASH" : "DASH",
-            new Vector2(curDashX, curDashY), new Vector2(115f, 115f), new Vector2(1f, 0f), "icon_dash", false);
+            new Vector2(curDashX, curDashY), new Vector2(130f, 130f), new Vector2(1f, 0f), "icon_dash", false);
 
         float curSkillX = PlayerPrefs.GetFloat("Game_Controls_Skill_PosX", DEFAULT_SKILL_X);
         float curSkillY = PlayerPrefs.GetFloat("Game_Controls_Skill_PosY", DEFAULT_SKILL_Y);
         skillItem = CreateDraggableControlItem("Drag_Skill", isVi ? "TUYỆT KỸ" : "SKILL",
-            new Vector2(curSkillX, curSkillY), new Vector2(115f, 115f), new Vector2(1f, 0f), "icon_ulti", false);
+            new Vector2(curSkillX, curSkillY), new Vector2(130f, 130f), new Vector2(1f, 0f), "icon_ulti", false);
+
+        ApplyScaleToPreviewItems();
+    }
+
+    private Button CreateScaleButton(Transform parent, string name, Vector2 pos, Vector2 size, string text, Color color, UnityEngine.Events.UnityAction action)
+    {
+        GameObject btnObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        btnObj.layer = 5;
+        btnObj.transform.SetParent(parent, false);
+
+        RectTransform rt = btnObj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0f, 0.5f);
+        rt.anchorMax = new Vector2(0f, 0.5f);
+        rt.pivot = new Vector2(0f, 0.5f);
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = size;
+
+        Image img = btnObj.GetComponent<Image>();
+        img.color = color;
+        Button btn = btnObj.GetComponent<Button>();
+        btn.targetGraphic = img;
+
+        SoulslikeHUDStyler.StyleButton(btn);
+
+        GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        txtObj.transform.SetParent(btnObj.transform, false);
+        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.sizeDelta = Vector2.zero;
+
+        var tmp = txtObj.AddComponent<TextMeshProUGUI>();
+        tmp.text = text;
+        tmp.fontSize = 13.5f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        btn.onClick.AddListener(action);
+        return btn;
+    }
+
+    private void ChangeScale(float delta)
+    {
+        currentScale = Mathf.Clamp(currentScale + delta, 0.70f, 2.20f);
+        ApplyScaleToPreviewItems();
+    }
+
+    private void SetScalePreset(float scale)
+    {
+        currentScale = Mathf.Clamp(scale, 0.70f, 2.20f);
+        ApplyScaleToPreviewItems();
+    }
+
+    private void ApplyScaleToPreviewItems()
+    {
+        bool isVi = LocalizationManager.IsVietnamese;
+        if (scaleValText != null)
+        {
+            scaleValText.text = isVi ? $"<b>CỠ PHÍM: <color=#55EFC4>{Mathf.RoundToInt(currentScale * 100)}%</color></b>" : $"<b>BUTTON SIZE: <color=#55EFC4>{Mathf.RoundToInt(currentScale * 100)}%</color></b>";
+        }
+
+        Vector3 sc = Vector3.one * currentScale;
+        if (joyItem != null) joyItem.localScale = sc;
+        if (atkItem != null) atkItem.localScale = sc;
+        if (dashItem != null) dashItem.localScale = sc;
+        if (skillItem != null) skillItem.localScale = sc;
+
+        PlayerPrefs.SetFloat("Game_Controls_ButtonScale", currentScale);
+        SettingsUI.ApplyControlSettingsLive();
     }
 
     private RectTransform CreateDraggableControlItem(string name, string label, Vector2 pos, Vector2 size, Vector2 anchor, string iconName, bool isJoystick)
@@ -330,6 +459,7 @@ public class MobileControlsLayoutEditor : MonoBehaviour
             PlayerPrefs.SetFloat("Game_Controls_Skill_PosY", skillItem.anchoredPosition.y);
         }
 
+        PlayerPrefs.SetFloat("Game_Controls_ButtonScale", currentScale);
         PlayerPrefs.Save();
         SettingsUI.ApplyControlSettingsLive();
 
@@ -355,6 +485,8 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         if (atkItem != null) atkItem.anchoredPosition = new Vector2(DEFAULT_ATK_X, DEFAULT_ATK_Y);
         if (dashItem != null) dashItem.anchoredPosition = new Vector2(DEFAULT_DASH_X, DEFAULT_DASH_Y);
         if (skillItem != null) skillItem.anchoredPosition = new Vector2(DEFAULT_SKILL_X, DEFAULT_SKILL_Y);
+        currentScale = 1.25f;
+        ApplyScaleToPreviewItems();
     }
 
     public void OnBackClicked()
@@ -431,6 +563,6 @@ public class ControlItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHan
             outline.effectColor = new Color(0.2f, 0.9f, 1f, 0.95f);
             outline.effectDistance = new Vector2(3f, -3f);
         }
-        myRt.localScale = Vector3.one;
+        myRt.localScale = Vector3.one * (editor != null ? editor.GetCurrentScale() : 1.25f);
     }
 }

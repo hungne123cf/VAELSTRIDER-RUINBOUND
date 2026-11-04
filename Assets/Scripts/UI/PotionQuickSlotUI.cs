@@ -334,7 +334,7 @@ public class PotionQuickSlotUI : MonoBehaviour
         rect.anchorMax = new Vector2(1, 0);
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = new Vector2(-220, 360);
-        rect.sizeDelta = new Vector2(75, 75);
+        rect.sizeDelta = new Vector2(95, 95);
 
         Image bgImage = btnObj.AddComponent<Image>();
         Sprite potSlotSprite = Resources.Load<Sprite>("UI/potion_slot_circle");
@@ -349,7 +349,7 @@ public class PotionQuickSlotUI : MonoBehaviour
         GameObject iconObj = new GameObject("PotionIcon");
         iconObj.transform.SetParent(btnObj.transform, false);
         RectTransform iconRect = iconObj.AddComponent<RectTransform>();
-        iconRect.sizeDelta = new Vector2(50, 50);
+        iconRect.sizeDelta = new Vector2(64, 64);
         iconRect.anchoredPosition = new Vector2(0, 3);
         Image iconImage = iconObj.AddComponent<Image>();
         Sprite potSprite = Resources.Load<Sprite>("Items/health_potion");

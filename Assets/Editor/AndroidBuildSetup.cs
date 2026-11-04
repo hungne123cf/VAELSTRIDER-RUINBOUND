@@ -59,8 +59,8 @@ public static class AndroidBuildSetup
     public static void BuildAPK()
     {
         ApplyAndroidSettings();
-        PlayerSettings.bundleVersion = "1.1";
-        PlayerSettings.Android.bundleVersionCode = 2;
+        PlayerSettings.bundleVersion = "1.2";
+        PlayerSettings.Android.bundleVersionCode = 3;
 
         string[] scenes = new string[] {
             "Assets/Scenes/LoginScene.unity",
@@ -70,7 +70,7 @@ public static class AndroidBuildSetup
             "Assets/Scenes/Map3_ForgottenMemories.unity"
         };
 
-        string outputApk = "Vaelstrider_v3.apk";
+        string outputApk = "Vaelstrider_v4.apk";
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
         buildPlayerOptions.scenes = scenes;
         buildPlayerOptions.locationPathName = outputApk;

@@ -546,10 +546,10 @@ public class MainMenuManager : MonoBehaviour
 
         if (navParent == null) return;
 
-        // 2. Play Button (Xuất Trận) - Centered at bottom
-        float playWidth = 240f;
-        float playHeight = 60f;
-        float playPosY = 56f;
+        // 2. Play Button (Xuất Trận) - Centered at bottom (Phóng to chuẩn di động)
+        float playWidth = 330f;
+        float playHeight = 82f;
+        float playPosY = 68f;
 
         playButton = EnsureNavButton(navParent, playButton, "Btn_Play", LocalizationManager.Get("BTN_PLAY"), new Vector2(0f, playPosY), new Vector2(playWidth, playHeight), new Color(0.85f, 0.55f, 0.15f, 1f), out playBtnText);
         if (playButton != null)
@@ -587,7 +587,8 @@ public class MainMenuManager : MonoBehaviour
         if (rootCanvas == null) rootCanvas = FindAnyObjectByType<Canvas>();
         if (rootCanvas != null) topParent = rootCanvas.transform;
 
-        settingsButton = EnsureNavButton(topParent, settingsButton, "Btn_Settings", "", Vector2.zero, new Vector2(50f, 50f), new Color(0.12f, 0.16f, 0.24f, 0.94f), out settingsBtnText);
+        // Phóng to nút Cài Đặt (Gear) góc trên để ngón tay dễ chạm trên điện thoại
+        settingsButton = EnsureNavButton(topParent, settingsButton, "Btn_Settings", "", Vector2.zero, new Vector2(72f, 72f), new Color(0.12f, 0.16f, 0.24f, 0.94f), out settingsBtnText);
         if (settingsButton != null)
         {
             settingsButton.transform.SetParent(topParent, false);
@@ -596,9 +597,9 @@ public class MainMenuManager : MonoBehaviour
             sRt.anchorMax = new Vector2(1f, 1f);
             sRt.pivot = new Vector2(1f, 1f);
             sRt.anchoredPosition = new Vector2(-28f, -28f);
-            sRt.sizeDelta = new Vector2(50f, 50f);
+            sRt.sizeDelta = new Vector2(72f, 72f);
             settingsButton.gameObject.SetActive(true);
-            WhiteIconLoader.ReplaceTextWithIcon(settingsButton, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(30f, 30f));
+            WhiteIconLoader.ReplaceTextWithIcon(settingsButton, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(44f, 44f));
         }
 
         HookButtons();
@@ -691,7 +692,7 @@ public class MainMenuManager : MonoBehaviour
         btnTxt = txtObj.GetComponent<TextMeshProUGUI>();
         if (btnTxt == null) btnTxt = txtObj.AddComponent<TextMeshProUGUI>();
         if (string.IsNullOrEmpty(btnTxt.text)) btnTxt.text = defaultText;
-        btnTxt.fontSize = 18;
+        btnTxt.fontSize = (name == "Btn_Play") ? 27f : 18f;
         btnTxt.fontStyle = FontStyles.Bold;
         btnTxt.alignment = TextAlignmentOptions.Center;
         btnTxt.color = new Color(0.96f, 0.88f, 0.65f, 1f); // Vàng kim cổ Soulslike

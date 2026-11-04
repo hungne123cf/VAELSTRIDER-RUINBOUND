@@ -72,7 +72,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             if (baseScale == Vector3.zero) baseScale = Vector3.one;
         }
 
-        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.0f);
+        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.25f);
         float opacity = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
 
         originalScale = baseScale * scaleMod;
