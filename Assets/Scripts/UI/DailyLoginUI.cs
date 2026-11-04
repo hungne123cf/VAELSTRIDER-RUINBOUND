@@ -173,8 +173,8 @@ public class DailyLoginUI : MonoBehaviour
         GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
         titleObj.transform.SetParent(win.transform, false);
         RectTransform tRt = titleObj.GetComponent<RectTransform>();
-        tRt.anchorMin = new Vector2(0f, 1f);
-        tRt.anchorMax = new Vector2(1f, 1f);
+        tRt.anchorMin = new Vector2(0.5f, 1f);
+        tRt.anchorMax = new Vector2(0.5f, 1f);
         tRt.pivot = new Vector2(0.5f, 1f);
         tRt.anchoredPosition = new Vector2(0f, -20f);
         tRt.sizeDelta = new Vector2(900f, 36f);
@@ -189,8 +189,8 @@ public class DailyLoginUI : MonoBehaviour
         GameObject subObj = new GameObject("SubTitle", typeof(RectTransform), typeof(CanvasRenderer));
         subObj.transform.SetParent(win.transform, false);
         RectTransform stRt = subObj.GetComponent<RectTransform>();
-        stRt.anchorMin = new Vector2(0f, 1f);
-        stRt.anchorMax = new Vector2(1f, 1f);
+        stRt.anchorMin = new Vector2(0.5f, 1f);
+        stRt.anchorMax = new Vector2(0.5f, 1f);
         stRt.pivot = new Vector2(0.5f, 1f);
         stRt.anchoredPosition = new Vector2(0f, -54f);
         stRt.sizeDelta = new Vector2(900f, 24f);
@@ -383,8 +383,8 @@ public class DailyLoginUI : MonoBehaviour
             GameObject topObj = new GameObject("Header", typeof(RectTransform), typeof(CanvasRenderer));
             topObj.transform.SetParent(card.transform, false);
             RectTransform thRt = topObj.GetComponent<RectTransform>();
-            thRt.anchorMin = new Vector2(0f, 1f);
-            thRt.anchorMax = new Vector2(1f, 1f);
+            thRt.anchorMin = new Vector2(0.5f, 1f);
+            thRt.anchorMax = new Vector2(0.5f, 1f);
             thRt.pivot = new Vector2(0.5f, 1f);
             thRt.anchoredPosition = new Vector2(0f, -10f);
             thRt.sizeDelta = new Vector2(cardW - 10f, 24f);
@@ -400,8 +400,8 @@ public class DailyLoginUI : MonoBehaviour
             GameObject rwObj = new GameObject("RewardText", typeof(RectTransform), typeof(CanvasRenderer));
             rwObj.transform.SetParent(card.transform, false);
             RectTransform rwRt = rwObj.GetComponent<RectTransform>();
-            rwRt.anchorMin = new Vector2(0f, 0.5f);
-            rwRt.anchorMax = new Vector2(1f, 0.5f);
+            rwRt.anchorMin = new Vector2(0.5f, 0.5f);
+            rwRt.anchorMax = new Vector2(0.5f, 0.5f);
             rwRt.pivot = new Vector2(0.5f, 0.5f);
             rwRt.anchoredPosition = new Vector2(0f, 10f);
             rwRt.sizeDelta = new Vector2(cardW - 10f, 40f);
@@ -416,8 +416,8 @@ public class DailyLoginUI : MonoBehaviour
             GameObject stObj = new GameObject("StatusBadge", typeof(RectTransform), typeof(CanvasRenderer));
             stObj.transform.SetParent(card.transform, false);
             RectTransform stRt = stObj.GetComponent<RectTransform>();
-            stRt.anchorMin = new Vector2(0f, 0f);
-            stRt.anchorMax = new Vector2(1f, 0f);
+            stRt.anchorMin = new Vector2(0.5f, 0f);
+            stRt.anchorMax = new Vector2(0.5f, 0f);
             stRt.pivot = new Vector2(0.5f, 0f);
             stRt.anchoredPosition = new Vector2(0f, 12f);
             stRt.sizeDelta = new Vector2(cardW - 14f, 28f);

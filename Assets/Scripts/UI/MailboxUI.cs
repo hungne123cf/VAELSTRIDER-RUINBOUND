@@ -165,8 +165,8 @@ public class MailboxUI : MonoBehaviour
         GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
         titleObj.transform.SetParent(win.transform, false);
         RectTransform tRt = titleObj.GetComponent<RectTransform>();
-        tRt.anchorMin = new Vector2(0f, 1f);
-        tRt.anchorMax = new Vector2(1f, 1f);
+        tRt.anchorMin = new Vector2(0.5f, 1f);
+        tRt.anchorMax = new Vector2(0.5f, 1f);
         tRt.pivot = new Vector2(0.5f, 1f);
         tRt.anchoredPosition = new Vector2(0f, -20f);
         tRt.sizeDelta = new Vector2(900f, 36f);
@@ -181,8 +181,8 @@ public class MailboxUI : MonoBehaviour
         GameObject subObj = new GameObject("SubTitle", typeof(RectTransform), typeof(CanvasRenderer));
         subObj.transform.SetParent(win.transform, false);
         RectTransform stRt = subObj.GetComponent<RectTransform>();
-        stRt.anchorMin = new Vector2(0f, 1f);
-        stRt.anchorMax = new Vector2(1f, 1f);
+        stRt.anchorMin = new Vector2(0.5f, 1f);
+        stRt.anchorMax = new Vector2(0.5f, 1f);
         stRt.pivot = new Vector2(0.5f, 1f);
         stRt.anchoredPosition = new Vector2(0f, -54f);
         stRt.sizeDelta = new Vector2(900f, 24f);
@@ -247,9 +247,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform lhRt = listHeadObj.GetComponent<RectTransform>();
         lhRt.anchorMin = new Vector2(0f, 1f);
         lhRt.anchorMax = new Vector2(1f, 1f);
-        lhRt.pivot = new Vector2(0.5f, 1f);
-        lhRt.anchoredPosition = new Vector2(0f, -8f);
-        lhRt.sizeDelta = new Vector2(360f, 36f);
+        lhRt.offsetMin = new Vector2(8f, -42f);
+        lhRt.offsetMax = new Vector2(-8f, -8f);
 
         GameObject lhTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
         lhTxtObj.transform.SetParent(listHeadObj.transform, false);
@@ -257,8 +256,8 @@ public class MailboxUI : MonoBehaviour
         lhtRt.anchorMin = new Vector2(0f, 0f);
         lhtRt.anchorMax = new Vector2(0f, 1f);
         lhtRt.pivot = new Vector2(0f, 0.5f);
-        lhtRt.anchoredPosition = new Vector2(6f, 0f);
-        lhtRt.sizeDelta = new Vector2(180f, 32f);
+        lhtRt.anchoredPosition = new Vector2(4f, 0f);
+        lhtRt.sizeDelta = new Vector2(185f, 0f);
 
         var lhtTmp = lhTxtObj.AddComponent<TextMeshProUGUI>();
         lhtTmp.text = isVi ? "<b>DANH SÁCH THƯ</b>" : "<b>MAIL LIST</b>";
@@ -273,8 +272,8 @@ public class MailboxUI : MonoBehaviour
         daRt.anchorMin = new Vector2(1f, 0.5f);
         daRt.anchorMax = new Vector2(1f, 0.5f);
         daRt.pivot = new Vector2(1f, 0.5f);
-        daRt.anchoredPosition = new Vector2(-4f, 0f);
-        daRt.sizeDelta = new Vector2(135f, 32f);
+        daRt.anchoredPosition = new Vector2(-2f, 0f);
+        daRt.sizeDelta = new Vector2(138f, 30f);
 
         Image daImg = delAllBtnObj.GetComponent<Image>();
         daImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -349,9 +348,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform dtRt = dtObj.GetComponent<RectTransform>();
         dtRt.anchorMin = new Vector2(0f, 1f);
         dtRt.anchorMax = new Vector2(1f, 1f);
-        dtRt.pivot = new Vector2(0f, 1f);
-        dtRt.anchoredPosition = new Vector2(22f, -18f);
-        dtRt.sizeDelta = new Vector2(470f, 32f);
+        dtRt.offsetMin = new Vector2(20f, -44f);
+        dtRt.offsetMax = new Vector2(-20f, -14f);
 
         detailTitleText = dtObj.AddComponent<TextMeshProUGUI>();
         detailTitleText.fontSize = 16f;
@@ -364,9 +362,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform dsRt = dsObj.GetComponent<RectTransform>();
         dsRt.anchorMin = new Vector2(0f, 1f);
         dsRt.anchorMax = new Vector2(1f, 1f);
-        dsRt.pivot = new Vector2(0f, 1f);
-        dsRt.anchoredPosition = new Vector2(22f, -48f);
-        dsRt.sizeDelta = new Vector2(470f, 22f);
+        dsRt.offsetMin = new Vector2(20f, -68f);
+        dsRt.offsetMax = new Vector2(-20f, -46f);
 
         detailSenderText = dsObj.AddComponent<TextMeshProUGUI>();
         detailSenderText.fontSize = 12.5f;
@@ -513,8 +510,8 @@ public class MailboxUI : MonoBehaviour
         GameObject gcBar = new GameObject("GiftcodeBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         gcBar.transform.SetParent(parent, false);
         RectTransform gcRt = gcBar.GetComponent<RectTransform>();
-        gcRt.anchorMin = new Vector2(0f, 0f);
-        gcRt.anchorMax = new Vector2(1f, 0f);
+        gcRt.anchorMin = new Vector2(0.5f, 0f);
+        gcRt.anchorMax = new Vector2(0.5f, 0f);
         gcRt.pivot = new Vector2(0.5f, 0f);
         gcRt.anchoredPosition = new Vector2(0f, 16f);
         gcRt.sizeDelta = new Vector2(930f, 48f);
@@ -531,12 +528,12 @@ public class MailboxUI : MonoBehaviour
         lRt.anchorMin = new Vector2(0f, 0.5f);
         lRt.anchorMax = new Vector2(0f, 0.5f);
         lRt.pivot = new Vector2(0f, 0.5f);
-        lRt.anchoredPosition = new Vector2(18f, 0f);
-        lRt.sizeDelta = new Vector2(160f, 32f);
+        lRt.anchoredPosition = new Vector2(16f, 0f);
+        lRt.sizeDelta = new Vector2(145f, 32f);
 
         var lTmp = lblObj.AddComponent<TextMeshProUGUI>();
         lTmp.text = isVi ? "<b>MÃ QUÀ TẶNG:</b>" : "<b>GIFTCODE:</b>";
-        lTmp.fontSize = 14f;
+        lTmp.fontSize = 13.5f;
         lTmp.color = new Color(1f, 0.88f, 0.45f);
         lTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -547,8 +544,8 @@ public class MailboxUI : MonoBehaviour
         inRt.anchorMin = new Vector2(0f, 0.5f);
         inRt.anchorMax = new Vector2(0f, 0.5f);
         inRt.pivot = new Vector2(0f, 0.5f);
-        inRt.anchoredPosition = new Vector2(185f, 0f);
-        inRt.sizeDelta = new Vector2(380f, 36f);
+        inRt.anchoredPosition = new Vector2(168f, 0f);
+        inRt.sizeDelta = new Vector2(360f, 36f);
 
         Image inBg = inputObj.GetComponent<Image>();
         inBg.color = new Color(0.08f, 0.11f, 0.16f, 0.95f);
@@ -573,7 +570,7 @@ public class MailboxUI : MonoBehaviour
         phRt.sizeDelta = Vector2.zero;
         var phTmp = phObj.AddComponent<TextMeshProUGUI>();
         phTmp.text = isVi ? "Nhập code (VD: VAELSTRIDER, RUINBOUND)..." : "Enter code (e.g. VAELSTRIDER)...";
-        phTmp.fontSize = 13.5f;
+        phTmp.fontSize = 13f;
         phTmp.fontStyle = FontStyles.Italic;
         phTmp.color = new Color(0.5f, 0.6f, 0.7f, 0.7f);
         phTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -586,7 +583,7 @@ public class MailboxUI : MonoBehaviour
         itRt.anchorMax = Vector2.one;
         itRt.sizeDelta = Vector2.zero;
         var itTmp = itObj.AddComponent<TextMeshProUGUI>();
-        itTmp.fontSize = 14f;
+        itTmp.fontSize = 13.5f;
         itTmp.fontStyle = FontStyles.Bold;
         itTmp.color = Color.white;
         itTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -602,8 +599,8 @@ public class MailboxUI : MonoBehaviour
         rdRt.anchorMin = new Vector2(0f, 0.5f);
         rdRt.anchorMax = new Vector2(0f, 0.5f);
         rdRt.pivot = new Vector2(0f, 0.5f);
-        rdRt.anchoredPosition = new Vector2(580f, 0f);
-        rdRt.sizeDelta = new Vector2(140f, 36f);
+        rdRt.anchoredPosition = new Vector2(538f, 0f);
+        rdRt.sizeDelta = new Vector2(130f, 36f);
 
         Image rdImg = rdBtnObj.GetComponent<Image>();
         rdImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -618,7 +615,7 @@ public class MailboxUI : MonoBehaviour
         rdtRt.sizeDelta = Vector2.zero;
         var rdtTmp = rdtObj.AddComponent<TextMeshProUGUI>();
         rdtTmp.text = isVi ? "<b>ĐỔI CODE</b>" : "<b>REDEEM</b>";
-        rdtTmp.fontSize = 13.5f;
+        rdtTmp.fontSize = 13f;
         rdtTmp.alignment = TextAlignmentOptions.Center;
         rdtTmp.color = Color.white;
 
@@ -632,8 +629,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform fbRt = fbObj.GetComponent<RectTransform>();
         fbRt.anchorMin = new Vector2(0f, 0.5f);
         fbRt.anchorMax = new Vector2(1f, 0.5f);
-        fbRt.offsetMin = new Vector2(730f, -18f);
-        fbRt.offsetMax = new Vector2(-15f, 18f);
+        fbRt.offsetMin = new Vector2(678f, -18f);
+        fbRt.offsetMax = new Vector2(-12f, 18f);
 
         giftcodeFeedbackText = fbObj.AddComponent<TextMeshProUGUI>();
         giftcodeFeedbackText.fontSize = 12f;
@@ -696,9 +693,8 @@ public class MailboxUI : MonoBehaviour
             RectTransform tRt = titleObj.GetComponent<RectTransform>();
             tRt.anchorMin = new Vector2(0f, 1f);
             tRt.anchorMax = new Vector2(1f, 1f);
-            tRt.pivot = new Vector2(0f, 1f);
-            tRt.anchoredPosition = new Vector2(14f, -10f);
-            tRt.sizeDelta = new Vector2(328f, 22f);
+            tRt.offsetMin = new Vector2(12f, -30f);
+            tRt.offsetMax = new Vector2(-24f, -8f);
 
             var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
             tTmp.text = isVi ? mail.titleVi : mail.titleEn;
@@ -713,9 +709,8 @@ public class MailboxUI : MonoBehaviour
             RectTransform sRt = subObj.GetComponent<RectTransform>();
             sRt.anchorMin = new Vector2(0f, 0f);
             sRt.anchorMax = new Vector2(1f, 0f);
-            sRt.pivot = new Vector2(0f, 0f);
-            sRt.anchoredPosition = new Vector2(14f, 10f);
-            sRt.sizeDelta = new Vector2(328f, 20f);
+            sRt.offsetMin = new Vector2(12f, 8f);
+            sRt.offsetMax = new Vector2(-12f, 26f);
 
             var sTmp = subObj.AddComponent<TextMeshProUGUI>();
             string sender = isVi ? mail.senderVi : mail.senderEn;
