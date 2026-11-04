@@ -44,6 +44,9 @@ public class MailboxUI : MonoBehaviour
     private TMP_InputField giftcodeInput;
     private TouchScreenKeyboard mobileKeyboard;
     private TextMeshProUGUI giftcodeFeedbackText;
+    private GameObject virtualKeyboardObj;
+    private TextMeshProUGUI keyboardPreviewText;
+    private RectTransform modalWindowRect;
 
     public static void InitializeDefaultMails()
     {
@@ -148,6 +151,7 @@ public class MailboxUI : MonoBehaviour
         win.transform.SetParent(transform, false);
 
         RectTransform wRt = win.GetComponent<RectTransform>();
+        modalWindowRect = wRt;
         wRt.anchorMin = new Vector2(0.5f, 0.5f);
         wRt.anchorMax = new Vector2(0.5f, 0.5f);
         wRt.pivot = new Vector2(0.5f, 0.5f);
@@ -503,6 +507,9 @@ public class MailboxUI : MonoBehaviour
 
         // Select first valid mail
         SelectFirstAvailableMail();
+
+        // Build Phone Virtual Keyboard
+        BuildVirtualKeyboard(transform);
     }
 
     private void BuildGiftcodeBar(Transform parent)
@@ -546,8 +553,43 @@ public class MailboxUI : MonoBehaviour
         inRt.anchorMin = new Vector2(0f, 0.5f);
         inRt.anchorMax = new Vector2(0f, 0.5f);
         inRt.pivot = new Vector2(0f, 0.5f);
-        inRt.anchoredPosition = new Vector2(140f, 0f);
-        inRt.sizeDelta = new Vector2(250f, 40f);
+        inRt.anchoredPosition = new Vector2(128f, 0f);
+        inRt.sizeDelta = new Vector2(210f, 40f);
+
+        // Button [⌨ PHÍM] - Mở bàn phím ảo điện thoại trực tiếp
+        GameObject kbdBtnObj = new GameObject("Btn_ToggleKeyboard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        kbdBtnObj.transform.SetParent(gcBar.transform, false);
+        RectTransform kbRt = kbdBtnObj.GetComponent<RectTransform>();
+        kbRt.anchorMin = new Vector2(0f, 0.5f);
+        kbRt.anchorMax = new Vector2(0f, 0.5f);
+        kbRt.pivot = new Vector2(0f, 0.5f);
+        kbRt.anchoredPosition = new Vector2(344f, 0f);
+        kbRt.sizeDelta = new Vector2(80f, 40f);
+
+        Image kbImg = kbdBtnObj.GetComponent<Image>();
+        kbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        kbImg.type = Image.Type.Sliced;
+        kbImg.color = new Color(0.24f, 0.22f, 0.38f, 0.95f);
+
+        var kbOut = kbdBtnObj.AddComponent<Outline>();
+        kbOut.effectColor = new Color(0.70f, 0.60f, 1f, 0.60f);
+        kbOut.effectDistance = new Vector2(1f, -1f);
+
+        GameObject kbtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        kbtObj.transform.SetParent(kbdBtnObj.transform, false);
+        RectTransform kbtRt = kbtObj.GetComponent<RectTransform>();
+        kbtRt.anchorMin = Vector2.zero;
+        kbtRt.anchorMax = Vector2.one;
+        kbtRt.sizeDelta = Vector2.zero;
+        var kbtTmp = kbtObj.AddComponent<TextMeshProUGUI>();
+        kbtTmp.text = isVi ? "<b>⌨ PHÍM</b>" : "<b>KEYBD</b>";
+        kbtTmp.fontSize = 12f;
+        kbtTmp.alignment = TextAlignmentOptions.Center;
+        kbtTmp.color = new Color(0.9f, 0.85f, 1f);
+
+        Button kbdBtn = kbdBtnObj.GetComponent<Button>();
+        kbdBtn.targetGraphic = kbImg;
+        kbdBtn.onClick.AddListener(ToggleVirtualKeyboard);
 
         Image inBg = inputObj.GetComponent<Image>();
         inBg.color = new Color(0.08f, 0.11f, 0.16f, 0.95f);
@@ -612,6 +654,7 @@ public class MailboxUI : MonoBehaviour
         trigger.triggers.Add(entry);
 
         giftcodeInput.onSelect.AddListener((s) => OpenMobileKeyboard());
+        giftcodeInput.onValueChanged.AddListener((s) => UpdateKeyboardPreview());
 
         // 1-Click Paste Button (DÁN MÃ TỪ BỘ NHỚ TẠM) - Cực tiện lợi cho điện thoại!
         GameObject pasteBtnObj = new GameObject("Btn_Paste", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -620,8 +663,8 @@ public class MailboxUI : MonoBehaviour
         pRt.anchorMin = new Vector2(0f, 0.5f);
         pRt.anchorMax = new Vector2(0f, 0.5f);
         pRt.pivot = new Vector2(0f, 0.5f);
-        pRt.anchoredPosition = new Vector2(398f, 0f);
-        pRt.sizeDelta = new Vector2(75f, 40f);
+        pRt.anchoredPosition = new Vector2(430f, 0f);
+        pRt.sizeDelta = new Vector2(65f, 40f);
 
         Image pImg = pasteBtnObj.GetComponent<Image>();
         pImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -651,8 +694,8 @@ public class MailboxUI : MonoBehaviour
         clRt.anchorMin = new Vector2(0f, 0.5f);
         clRt.anchorMax = new Vector2(0f, 0.5f);
         clRt.pivot = new Vector2(0f, 0.5f);
-        clRt.anchoredPosition = new Vector2(480f, 0f);
-        clRt.sizeDelta = new Vector2(115f, 40f);
+        clRt.anchoredPosition = new Vector2(501f, 0f);
+        clRt.sizeDelta = new Vector2(95f, 40f);
 
         Image clImg = listBtnObj.GetComponent<Image>();
         clImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1242,6 +1285,7 @@ public class MailboxUI : MonoBehaviour
             : $"<color=#55EFC4><b>Success! Received +{reward:N0} Souls!</b></color>";
 
         giftcodeInput.text = "";
+        UpdateKeyboardPreview();
     }
 
     public static void UpdateLobbyBadge()
@@ -1254,6 +1298,17 @@ public class MailboxUI : MonoBehaviour
 
     public void OpenMobileKeyboard()
     {
+        if (virtualKeyboardObj != null)
+        {
+            virtualKeyboardObj.SetActive(true);
+            UpdateKeyboardPreview();
+        }
+
+        if (modalWindowRect != null)
+        {
+            modalWindowRect.anchoredPosition = new Vector2(0f, 135f);
+        }
+
         if (giftcodeInput != null)
         {
             giftcodeInput.Select();
@@ -1285,6 +1340,412 @@ public class MailboxUI : MonoBehaviour
             }
         }
 #endif
+    }
+
+    public void CloseVirtualKeyboard()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        if (virtualKeyboardObj != null)
+        {
+            virtualKeyboardObj.SetActive(false);
+        }
+        if (modalWindowRect != null)
+        {
+            modalWindowRect.anchoredPosition = Vector2.zero;
+        }
+    }
+
+    public void ToggleVirtualKeyboard()
+    {
+        if (virtualKeyboardObj != null && virtualKeyboardObj.activeSelf)
+        {
+            CloseVirtualKeyboard();
+        }
+        else
+        {
+            OpenMobileKeyboard();
+        }
+    }
+
+    private void OnVirtualKeyPress(char c)
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        if (giftcodeInput == null) return;
+        if (giftcodeInput.text.Length >= giftcodeInput.characterLimit) return;
+
+        giftcodeInput.text += char.ToUpperInvariant(c);
+        UpdateKeyboardPreview();
+    }
+
+    private void OnVirtualKeyBackspace()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        if (giftcodeInput == null) return;
+        if (!string.IsNullOrEmpty(giftcodeInput.text))
+        {
+            giftcodeInput.text = giftcodeInput.text.Substring(0, giftcodeInput.text.Length - 1);
+            UpdateKeyboardPreview();
+        }
+    }
+
+    private void UpdateKeyboardPreview()
+    {
+        if (keyboardPreviewText == null) return;
+        bool isVi = LocalizationManager.IsVietnamese;
+        string current = giftcodeInput != null ? giftcodeInput.text : "";
+        string label = isVi ? "MÃ:" : "CODE:";
+        if (string.IsNullOrEmpty(current))
+        {
+            keyboardPreviewText.text = $"<b>{label}</b> <color=#718096><i>{(isVi ? "Chạm các phím bên dưới để nhập..." : "Tap keys below to type...")}</i></color>";
+        }
+        else
+        {
+            keyboardPreviewText.text = $"<b>{label}</b> <color=#FFE066><b>{current}</b></color><color=#74B9FF>_</color>";
+        }
+    }
+
+    private void BuildVirtualKeyboard(Transform parent)
+    {
+        bool isVi = LocalizationManager.IsVietnamese;
+
+        virtualKeyboardObj = new GameObject("VirtualKeyboard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        virtualKeyboardObj.layer = 5;
+        virtualKeyboardObj.transform.SetParent(parent, false);
+
+        RectTransform vkRt = virtualKeyboardObj.GetComponent<RectTransform>();
+        vkRt.anchorMin = new Vector2(0.5f, 0f);
+        vkRt.anchorMax = new Vector2(0.5f, 0f);
+        vkRt.pivot = new Vector2(0.5f, 0f);
+        vkRt.anchoredPosition = new Vector2(0f, 10f);
+        vkRt.sizeDelta = new Vector2(960f, 320f);
+
+        Image vkImg = virtualKeyboardObj.GetComponent<Image>();
+        vkImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        vkImg.type = Image.Type.Sliced;
+        vkImg.color = new Color(0.04f, 0.06f, 0.10f, 0.98f);
+
+        var vkOut = virtualKeyboardObj.AddComponent<Outline>();
+        vkOut.effectColor = new Color(0.35f, 0.60f, 0.85f, 0.80f);
+        vkOut.effectDistance = new Vector2(2f, -2f);
+
+        // Header / Display Bar (Height 42px)
+        GameObject dispBar = new GameObject("DisplayBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        dispBar.transform.SetParent(virtualKeyboardObj.transform, false);
+        RectTransform dbRt = dispBar.GetComponent<RectTransform>();
+        dbRt.anchorMin = new Vector2(0f, 1f);
+        dbRt.anchorMax = new Vector2(1f, 1f);
+        dbRt.pivot = new Vector2(0.5f, 1f);
+        dbRt.anchoredPosition = new Vector2(0f, -8f);
+        dbRt.sizeDelta = new Vector2(-16f, 40f);
+
+        Image dbImg = dispBar.GetComponent<Image>();
+        dbImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        dbImg.type = Image.Type.Sliced;
+        dbImg.color = new Color(0.02f, 0.03f, 0.06f, 0.95f);
+
+        // Title on Display Bar
+        GameObject titObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
+        titObj.transform.SetParent(dispBar.transform, false);
+        RectTransform titRt = titObj.GetComponent<RectTransform>();
+        titRt.anchorMin = new Vector2(0f, 0.5f);
+        titRt.anchorMax = new Vector2(0f, 0.5f);
+        titRt.pivot = new Vector2(0f, 0.5f);
+        titRt.anchoredPosition = new Vector2(14f, 0f);
+        titRt.sizeDelta = new Vector2(150f, 32f);
+
+        var titTmp = titObj.AddComponent<TextMeshProUGUI>();
+        titTmp.text = isVi ? "<b>📱 BÀN PHÍM</b>" : "<b>PHONE KEYBOARD</b>";
+        titTmp.fontSize = 13f;
+        titTmp.color = new Color(1f, 0.88f, 0.45f);
+        titTmp.alignment = TextAlignmentOptions.MidlineLeft;
+
+        // Preview Text
+        GameObject prevObj = new GameObject("PreviewText", typeof(RectTransform), typeof(CanvasRenderer));
+        prevObj.transform.SetParent(dispBar.transform, false);
+        RectTransform prevRt = prevObj.GetComponent<RectTransform>();
+        prevRt.anchorMin = new Vector2(0f, 0.5f);
+        prevRt.anchorMax = new Vector2(1f, 0.5f);
+        prevRt.offsetMin = new Vector2(170f, -16f);
+        prevRt.offsetMax = new Vector2(-190f, 16f);
+
+        keyboardPreviewText = prevObj.AddComponent<TextMeshProUGUI>();
+        keyboardPreviewText.fontSize = 14f;
+        keyboardPreviewText.alignment = TextAlignmentOptions.MidlineLeft;
+        keyboardPreviewText.color = Color.white;
+
+        // Close / Minimize Keyboard Button
+        GameObject hideBtnObj = new GameObject("Btn_HideKeyboard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        hideBtnObj.transform.SetParent(dispBar.transform, false);
+        RectTransform hbRt = hideBtnObj.GetComponent<RectTransform>();
+        hbRt.anchorMin = new Vector2(1f, 0.5f);
+        hbRt.anchorMax = new Vector2(1f, 0.5f);
+        hbRt.pivot = new Vector2(1f, 0.5f);
+        hbRt.anchoredPosition = new Vector2(-8f, 0f);
+        hbRt.sizeDelta = new Vector2(105f, 32f);
+
+        Image hbImg = hideBtnObj.GetComponent<Image>();
+        hbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        hbImg.type = Image.Type.Sliced;
+        hbImg.color = new Color(0.38f, 0.16f, 0.18f, 0.95f);
+
+        GameObject hbtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        hbtObj.transform.SetParent(hideBtnObj.transform, false);
+        RectTransform hbtRt = hbtObj.GetComponent<RectTransform>();
+        hbtRt.anchorMin = Vector2.zero;
+        hbtRt.anchorMax = Vector2.one;
+        hbtRt.sizeDelta = Vector2.zero;
+        var hbtTmp = hbtObj.AddComponent<TextMeshProUGUI>();
+        hbtTmp.text = isVi ? "<b>✕ THU GỌN</b>" : "<b>✕ HIDE</b>";
+        hbtTmp.fontSize = 12f;
+        hbtTmp.alignment = TextAlignmentOptions.Center;
+        hbtTmp.color = Color.white;
+
+        Button hideBtn = hideBtnObj.GetComponent<Button>();
+        hideBtn.targetGraphic = hbImg;
+        hideBtn.onClick.AddListener(CloseVirtualKeyboard);
+
+        // Row 1: Numbers (10 keys)
+        string[] row1 = new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
+        CreateKeyRow(virtualKeyboardObj.transform, row1, -54f, 86f, 42f, 7f);
+
+        // Row 2: QWERTY (10 keys)
+        string[] row2 = new string[] { "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P" };
+        CreateKeyRow(virtualKeyboardObj.transform, row2, -102f, 86f, 42f, 7f);
+
+        // Row 3: ASDF (9 keys)
+        string[] row3 = new string[] { "A", "S", "D", "F", "G", "H", "J", "K", "L" };
+        CreateKeyRow(virtualKeyboardObj.transform, row3, -150f, 94f, 42f, 8f);
+
+        // Row 4: ZXCV (7 keys) + Backspace (1 key)
+        CreateRow4WithBackspace(virtualKeyboardObj.transform, -198f);
+
+        // Row 5: Action Row (Dán, Mã Sẵn, Dấu Cách, Đổi Code)
+        CreateActionRow(virtualKeyboardObj.transform, -248f, isVi);
+
+        virtualKeyboardObj.SetActive(false);
+    }
+
+    private void CreateKeyRow(Transform parent, string[] keys, float yPos, float keyWidth, float keyHeight, float gap)
+    {
+        int count = keys.Length;
+        float totalWidth = count * keyWidth + (count - 1) * gap;
+        float startX = -totalWidth * 0.5f + keyWidth * 0.5f;
+
+        for (int i = 0; i < count; i++)
+        {
+            string keyChar = keys[i];
+            float xPos = startX + i * (keyWidth + gap);
+
+            GameObject keyObj = new GameObject("Key_" + keyChar, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            keyObj.transform.SetParent(parent, false);
+
+            RectTransform kRt = keyObj.GetComponent<RectTransform>();
+            kRt.anchorMin = new Vector2(0.5f, 1f);
+            kRt.anchorMax = new Vector2(0.5f, 1f);
+            kRt.pivot = new Vector2(0.5f, 0.5f);
+            kRt.anchoredPosition = new Vector2(xPos, yPos - keyHeight * 0.5f);
+            kRt.sizeDelta = new Vector2(keyWidth, keyHeight);
+
+            Image kImg = keyObj.GetComponent<Image>();
+            kImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+            kImg.type = Image.Type.Sliced;
+            kImg.color = new Color(0.16f, 0.22f, 0.32f, 0.96f);
+
+            var kOut = keyObj.AddComponent<Outline>();
+            kOut.effectColor = new Color(0.35f, 0.55f, 0.80f, 0.50f);
+            kOut.effectDistance = new Vector2(1f, -1f);
+
+            GameObject tObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+            tObj.transform.SetParent(keyObj.transform, false);
+            RectTransform tRt = tObj.GetComponent<RectTransform>();
+            tRt.anchorMin = Vector2.zero;
+            tRt.anchorMax = Vector2.one;
+            tRt.sizeDelta = Vector2.zero;
+
+            var tmp = tObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = $"<b>{keyChar}</b>";
+            tmp.fontSize = 19f;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = new Color(0.92f, 0.95f, 1f);
+
+            Button btn = keyObj.GetComponent<Button>();
+            btn.targetGraphic = kImg;
+            char c = keyChar[0];
+            btn.onClick.AddListener(() => OnVirtualKeyPress(c));
+        }
+    }
+
+    private void CreateRow4WithBackspace(Transform parent, float yPos)
+    {
+        string[] letters = new string[] { "Z", "X", "C", "V", "B", "N", "M" };
+        float keyWidth = 92f;
+        float keyHeight = 42f;
+        float gap = 8f;
+        float backspaceWidth = 170f;
+
+        float totalWidth = 7 * keyWidth + 6 * gap + gap + backspaceWidth;
+        float startX = -totalWidth * 0.5f + keyWidth * 0.5f;
+
+        for (int i = 0; i < 7; i++)
+        {
+            string keyChar = letters[i];
+            float xPos = startX + i * (keyWidth + gap);
+
+            GameObject keyObj = new GameObject("Key_" + keyChar, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            keyObj.transform.SetParent(parent, false);
+
+            RectTransform kRt = keyObj.GetComponent<RectTransform>();
+            kRt.anchorMin = new Vector2(0.5f, 1f);
+            kRt.anchorMax = new Vector2(0.5f, 1f);
+            kRt.pivot = new Vector2(0.5f, 0.5f);
+            kRt.anchoredPosition = new Vector2(xPos, yPos - keyHeight * 0.5f);
+            kRt.sizeDelta = new Vector2(keyWidth, keyHeight);
+
+            Image kImg = keyObj.GetComponent<Image>();
+            kImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+            kImg.type = Image.Type.Sliced;
+            kImg.color = new Color(0.16f, 0.22f, 0.32f, 0.96f);
+
+            var kOut = keyObj.AddComponent<Outline>();
+            kOut.effectColor = new Color(0.35f, 0.55f, 0.80f, 0.50f);
+            kOut.effectDistance = new Vector2(1f, -1f);
+
+            GameObject tObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+            tObj.transform.SetParent(keyObj.transform, false);
+            RectTransform tRt = tObj.GetComponent<RectTransform>();
+            tRt.anchorMin = Vector2.zero;
+            tRt.anchorMax = Vector2.one;
+            tRt.sizeDelta = Vector2.zero;
+
+            var tmp = tObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = $"<b>{keyChar}</b>";
+            tmp.fontSize = 19f;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = new Color(0.92f, 0.95f, 1f);
+
+            Button btn = keyObj.GetComponent<Button>();
+            btn.targetGraphic = kImg;
+            char c = keyChar[0];
+            btn.onClick.AddListener(() => OnVirtualKeyPress(c));
+        }
+
+        // Backspace key
+        float bsX = startX + 6 * (keyWidth + gap) + keyWidth * 0.5f + gap + backspaceWidth * 0.5f;
+        GameObject bsObj = new GameObject("Key_Backspace", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        bsObj.transform.SetParent(parent, false);
+
+        RectTransform bsRt = bsObj.GetComponent<RectTransform>();
+        bsRt.anchorMin = new Vector2(0.5f, 1f);
+        bsRt.anchorMax = new Vector2(0.5f, 1f);
+        bsRt.pivot = new Vector2(0.5f, 0.5f);
+        bsRt.anchoredPosition = new Vector2(bsX, yPos - keyHeight * 0.5f);
+        bsRt.sizeDelta = new Vector2(backspaceWidth, keyHeight);
+
+        Image bsImg = bsObj.GetComponent<Image>();
+        bsImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        bsImg.type = Image.Type.Sliced;
+        bsImg.color = new Color(0.38f, 0.18f, 0.20f, 0.96f);
+
+        var bsOut = bsObj.AddComponent<Outline>();
+        bsOut.effectColor = new Color(0.85f, 0.40f, 0.40f, 0.65f);
+        bsOut.effectDistance = new Vector2(1f, -1f);
+
+        GameObject bstObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        bstObj.transform.SetParent(bsObj.transform, false);
+        RectTransform bstRt = bstObj.GetComponent<RectTransform>();
+        bstRt.anchorMin = Vector2.zero;
+        bstRt.anchorMax = Vector2.one;
+        bstRt.sizeDelta = Vector2.zero;
+
+        var bstTmp = bstObj.AddComponent<TextMeshProUGUI>();
+        bstTmp.text = LocalizationManager.IsVietnamese ? "<b>⌫ XÓA</b>" : "<b>⌫ BACK</b>";
+        bstTmp.fontSize = 14f;
+        bstTmp.alignment = TextAlignmentOptions.Center;
+        bstTmp.color = Color.white;
+
+        Button bsBtn = bsObj.GetComponent<Button>();
+        bsBtn.targetGraphic = bsImg;
+        bsBtn.onClick.AddListener(OnVirtualKeyBackspace);
+    }
+
+    private void CreateActionRow(Transform parent, float yPos, bool isVi)
+    {
+        float keyHeight = 44f;
+        float gap = 12f;
+        float w1 = 150f; // Paste
+        float w2 = 170f; // Available codes
+        float w3 = 190f; // Space
+        float w4 = 210f; // Redeem
+
+        float totalWidth = w1 + w2 + w3 + w4 + 3 * gap;
+        float startX = -totalWidth * 0.5f;
+
+        // 1. Paste Button
+        float x1 = startX + w1 * 0.5f;
+        CreateSingleActionButton(parent, "Btn_VkPaste", isVi ? "<b>📋 DÁN MÃ</b>" : "<b>📋 PASTE</b>",
+            new Vector2(x1, yPos - keyHeight * 0.5f), new Vector2(w1, keyHeight),
+            new Color(0.20f, 0.26f, 0.38f, 0.96f), new Color(0.4f, 0.7f, 1f, 0.6f),
+            OnPasteFromClipboard);
+
+        // 2. Code List Modal Button
+        float x2 = startX + w1 + gap + w2 * 0.5f;
+        CreateSingleActionButton(parent, "Btn_VkCodeList", isVi ? "<b>🎁 MÃ CÓ SẴN</b>" : "<b>🎁 GIFTCODES</b>",
+            new Vector2(x2, yPos - keyHeight * 0.5f), new Vector2(w2, keyHeight),
+            new Color(0.32f, 0.24f, 0.12f, 0.96f), new Color(1f, 0.85f, 0.35f, 0.7f),
+            OpenCodeListModal);
+
+        // 3. Space Bar
+        float x3 = startX + w1 + gap + w2 + gap + w3 * 0.5f;
+        CreateSingleActionButton(parent, "Btn_VkSpace", isVi ? "<b>␣ DẤU CÁCH</b>" : "<b>␣ SPACE</b>",
+            new Vector2(x3, yPos - keyHeight * 0.5f), new Vector2(w3, keyHeight),
+            new Color(0.18f, 0.23f, 0.30f, 0.96f), new Color(0.4f, 0.55f, 0.75f, 0.5f),
+            () => OnVirtualKeyPress(' '));
+
+        // 4. Redeem Button
+        float x4 = startX + w1 + gap + w2 + gap + w3 + gap + w4 * 0.5f;
+        CreateSingleActionButton(parent, "Btn_VkRedeem", isVi ? "<b>✔ ĐỔI CODE</b>" : "<b>✔ REDEEM</b>",
+            new Vector2(x4, yPos - keyHeight * 0.5f), new Vector2(w4, keyHeight),
+            new Color(0.10f, 0.46f, 0.24f, 0.98f), new Color(0.35f, 1f, 0.65f, 0.75f),
+            OnRedeemGiftcode);
+    }
+
+    private void CreateSingleActionButton(Transform parent, string name, string label, Vector2 pos, Vector2 size, Color bgColor, Color outColor, UnityEngine.Events.UnityAction action)
+    {
+        GameObject obj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        obj.transform.SetParent(parent, false);
+
+        RectTransform rt = obj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 1f);
+        rt.anchorMax = new Vector2(0.5f, 1f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = size;
+
+        Image img = obj.GetComponent<Image>();
+        img.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        img.type = Image.Type.Sliced;
+        img.color = bgColor;
+
+        var outComp = obj.AddComponent<Outline>();
+        outComp.effectColor = outColor;
+        outComp.effectDistance = new Vector2(1.2f, -1.2f);
+
+        GameObject tObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        tObj.transform.SetParent(obj.transform, false);
+        RectTransform tRt = tObj.GetComponent<RectTransform>();
+        tRt.anchorMin = Vector2.zero;
+        tRt.anchorMax = Vector2.one;
+        tRt.sizeDelta = Vector2.zero;
+
+        var tmp = tObj.AddComponent<TextMeshProUGUI>();
+        tmp.text = label;
+        tmp.fontSize = 13f;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        Button btn = obj.GetComponent<Button>();
+        btn.targetGraphic = img;
+        btn.onClick.AddListener(action);
     }
 
     void Update()
