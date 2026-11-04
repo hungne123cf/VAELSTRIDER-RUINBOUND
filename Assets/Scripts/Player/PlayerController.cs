@@ -711,7 +711,15 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                DestroyImmediate(box);
+#if UNITY_EDITOR
+                var b = box;
+                UnityEditor.EditorApplication.delayCall += () =>
+                {
+                    if (b != null) DestroyImmediate(b);
+                };
+#else
+                Destroy(box);
+#endif
             }
 
             if (cap == null)
