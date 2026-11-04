@@ -74,6 +74,8 @@ public class PlayerController : MonoBehaviour
     public float StunTimerRemaining => Mathf.Max(0f, stunTimerRemaining);
     private bool isStunned = false;
     private float stunTimerRemaining = 0f;
+    private float lastStunEndTime = -10f;
+    public const float STUN_IMMUNITY_GRACE_PERIOD = 3.5f; // Thời gian miễn nhiễm choáng sau khi hồi phục để chống perma-stun
 
     public void ApplyStun(float duration)
     {
@@ -86,6 +88,18 @@ public class PlayerController : MonoBehaviour
         var combat = GetComponent<PlayerCombat>();
         if (combat != null && combat.IsParrying) return;
 
+        // Cơ chế Kháng Choáng & Chống Choáng Liên Tục (Anti-Perma-Stun)
+        if (Time.time < lastStunEndTime + STUN_IMMUNITY_GRACE_PERIOD)
+        {
+            ApplySlow(0.75f, 0.8f);
+            DamagePopup.CreateText(transform.position + Vector3.up * 1.4f, 
+                LocalizationManager.T("KHÁNG CHOÁNG!", "STUN RESIST!"), 
+                new Color(0.35f, 0.85f, 1f));
+            return;
+        }
+
+        // Giới hạn thời gian 1 lần choáng tối đa 0.85s để người chơi luôn có cửa phản xạ
+        duration = Mathf.Min(duration, 0.85f);
         StartCoroutine(StunRoutine(duration));
     }
 
@@ -103,9 +117,15 @@ public class PlayerController : MonoBehaviour
         webTrap.transform.SetParent(transform, false);
         webTrap.transform.localPosition = new Vector3(0f, 0.2f, 0f);
         var srWeb = webTrap.AddComponent<SpriteRenderer>();
+        var obsSpr = Resources.Load<Sprite>("Combat/circle_fill");
 #if UNITY_EDITOR
-        srWeb.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_0.png");
+        if (obsSpr == null)
+        {
+            obsSpr = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_0.png");
+        }
 #endif
+        if (obsSpr == null) obsSpr = MagmaCalamityHazardManager.GetSoftCircleSprite();
+        srWeb.sprite = obsSpr;
         srWeb.color = new Color(1f, 1f, 1f, 0.8f);
         srWeb.sortingOrder = 3000;
         webTrap.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
@@ -119,6 +139,7 @@ public class PlayerController : MonoBehaviour
         if (webTrap != null) Destroy(webTrap);
         isStunned = false;
         canMove = true;
+        lastStunEndTime = Time.time;
     }
 
     public void ApplySlow(float slowMultiplier, float duration)
@@ -135,7 +156,12 @@ public class PlayerController : MonoBehaviour
 
     public void ApplyFreeze(float duration)
     {
-        if (isStunned) return;
+        if (isStunned || Time.time < lastStunEndTime + STUN_IMMUNITY_GRACE_PERIOD)
+        {
+            ApplySlow(0.6f, 1.0f);
+            return;
+        }
+        duration = Mathf.Min(duration, 0.85f);
         StartCoroutine(FreezeRoutine(duration));
     }
 
@@ -168,6 +194,7 @@ public class PlayerController : MonoBehaviour
         if (iceBlock != null) Destroy(iceBlock);
         isStunned = false;
         canMove = true;
+        lastStunEndTime = Time.time;
     }
 
     // Animator Hashes

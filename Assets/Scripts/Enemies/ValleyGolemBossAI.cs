@@ -50,14 +50,32 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
         if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 5000;
 
-#if UNITY_EDITOR
         if (sr.sprite == null)
         {
-            sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/ART/Map/Valley Ruin Asset Pack V0.3/Objects/Extracted/obj_63_79x89.png"
-            );
-        }
+            sr.sprite = Resources.Load<Sprite>("Enemies/Map2/obj_63_79x89");
+            if (sr.sprite == null)
+            {
+                var all = Resources.LoadAll<Sprite>("Enemies/Map2/obj_63_79x89");
+                if (all != null && all.Length > 0) sr.sprite = all[0];
+            }
+#if UNITY_EDITOR
+            if (sr.sprite == null)
+            {
+                sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                    "Assets/ART/Map/Valley Ruin Asset Pack V0.3/Objects/Extracted/obj_63_79x89.png"
+                );
+            }
 #endif
+            if (sr.sprite == null)
+            {
+                Texture2D tex = new Texture2D(32, 32);
+                for (int x = 0; x < 32; x++)
+                    for (int y = 0; y < 32; y++)
+                        tex.SetPixel(x, y, new Color(0.6f, 0.4f, 0.25f, 1f));
+                tex.Apply();
+                sr.sprite = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 16f);
+            }
+        }
 
         // Boss khong lo (scale 1.8x)
         transform.localScale = Vector3.one * 1.8f;
@@ -339,6 +357,15 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
 
         var srProj = proj.AddComponent<SpriteRenderer>();
         var sprite = Resources.Load<Sprite>("Combat/enemy_projectile");
+        if (sprite == null)
+        {
+            var all = Resources.LoadAll<Sprite>("Combat/enemy_projectile");
+            if (all != null && all.Length > 0) sprite = all[0];
+        }
+        if (sprite == null)
+        {
+            sprite = Resources.Load<Sprite>("Combat/enemy_projectile_runtime");
+        }
 #if UNITY_EDITOR
         if (sprite == null)
         {

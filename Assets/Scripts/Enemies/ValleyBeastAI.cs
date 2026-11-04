@@ -71,6 +71,16 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
         {
             sr.sprite = idleSprites[0];
         }
+        else if (sr.sprite == null)
+        {
+            // Procedural fallback to ensure zero-invisible bug on Android
+            Texture2D tex = new Texture2D(32, 32);
+            for (int x = 0; x < 32; x++)
+                for (int y = 0; y < 32; y++)
+                    tex.SetPixel(x, y, new Color(0.85f, 0.45f, 0.15f, 1f));
+            tex.Apply();
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 16f);
+        }
     }
 
     void Start()
@@ -277,25 +287,44 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
 
     private void LoadSprites()
     {
-        if (idleSprites != null && runSprites != null) return;
+        if (idleSprites != null && runSprites != null && idleSprites.Count > 0 && runSprites.Count > 0) return;
 
         idleSprites = new List<Sprite>();
         runSprites = new List<Sprite>();
 
-#if UNITY_EDITOR
-        string idlePath = "Assets/ART/EPIC RPG World Pack - [FREE Demo]Ancient Ruins - Copia/Characters/luck creature-idle.png";
-        string runPath = "Assets/ART/EPIC RPG World Pack - [FREE Demo]Ancient Ruins - Copia/Characters/luck creature-run.png";
-
-        var idles = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(idlePath);
-        foreach (var obj in idles)
+        // 1. Safe Resource Loading for Android runtime
+        var idles = Resources.LoadAll<Sprite>("Enemies/Map2/luck creature-idle");
+        if (idles != null && idles.Length > 0)
         {
-            if (obj is Sprite s) idleSprites.Add(s);
+            foreach (var s in idles) if (s != null) idleSprites.Add(s);
         }
 
-        var runs = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(runPath);
-        foreach (var obj in runs)
+        var runs = Resources.LoadAll<Sprite>("Enemies/Map2/luck creature-run");
+        if (runs != null && runs.Length > 0)
         {
-            if (obj is Sprite s) runSprites.Add(s);
+            foreach (var s in runs) if (s != null) runSprites.Add(s);
+        }
+
+#if UNITY_EDITOR
+        // 2. Editor AssetDatabase fallback
+        if (idleSprites.Count == 0)
+        {
+            string idlePath = "Assets/ART/EPIC RPG World Pack - [FREE Demo]Ancient Ruins - Copia/Characters/luck creature-idle.png";
+            var editorIdles = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(idlePath);
+            if (editorIdles != null)
+            {
+                foreach (var obj in editorIdles) if (obj is Sprite s) idleSprites.Add(s);
+            }
+        }
+
+        if (runSprites.Count == 0)
+        {
+            string runPath = "Assets/ART/EPIC RPG World Pack - [FREE Demo]Ancient Ruins - Copia/Characters/luck creature-run.png";
+            var editorRuns = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(runPath);
+            if (editorRuns != null)
+            {
+                foreach (var obj in editorRuns) if (obj is Sprite s) runSprites.Add(s);
+            }
         }
 #endif
     }

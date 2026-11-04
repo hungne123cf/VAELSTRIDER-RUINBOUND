@@ -306,6 +306,14 @@ public class DuneAssassinSkill : MonoBehaviour
         }
     }
 
+    public static Sprite[] GetDeathFrames()
+    {
+        LoadAllPlayer5Sprites();
+        if (deathFrames != null && deathFrames.Length > 0) return deathFrames;
+        deathFrames = LoadFramesFromDirectory("Assets/ART/Player5/PNG/death", "death");
+        return deathFrames;
+    }
+
     public static void LoadAllPlayer5Sprites()
     {
         if (idleFrames != null && idleFrames.Length > 0) return;

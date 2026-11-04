@@ -581,9 +581,9 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
     private IEnumerator PerformSanguineSiphonRoutine()
     {
         isAttacking = true;
-        // Phase cuoi cooldown 0.1s theo yeu cau!
-        siphonTimer = (currentBossPhase == 1) ? 0.1f : 6.0f;
-        attackTimer = (currentBossPhase == 1) ? 0.8f : 1.6f;
+        // Can bang cooldown de nguoi choi co cua phan xa, tranh perma-lock
+        siphonTimer = (currentBossPhase == 1) ? 5.5f : 7.0f;
+        attackTimer = (currentBossPhase == 1) ? 1.5f : 2.0f;
         rb.linearVelocity = Vector2.zero;
         SetMoving(false);
 
@@ -593,10 +593,10 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
 
         if (player != null)
         {
-            // GAY CHOANG PLAYER TRONG SUOT THOI GIAN HUT MAU
-            float siphonDuration = (currentBossPhase == 1) ? 0.9f : 1.1f;
-            StartCoroutine(StunPlayerRoutine(player, siphonDuration));
-            DamagePopup.CreateText(player.position + Vector3.up * 1.4f, LocalizationManager.T("KHÓA HỒN!", "SOUL LOCK!"), new Color(1f, 0.85f, 0f));
+            // Choang ngat nhe 0.35s de ngat nhip danh nhung khong khoa cung nguoi choi suot ca chieu
+            float siphonDuration = (currentBossPhase == 1) ? 0.75f : 0.9f;
+            StartCoroutine(StunPlayerRoutine(player, 0.35f));
+            DamagePopup.CreateText(player.position + Vector3.up * 1.4f, LocalizationManager.T("HÚT HỒN!", "SOUL SIPHON!"), new Color(1f, 0.85f, 0f));
 
             int ticks = (currentBossPhase == 1) ? 4 : 3;
             float tickInterval = siphonDuration / (float)ticks;
@@ -706,7 +706,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
                         playerRb.linearVelocity = Vector2.zero;
                         playerRb.AddForce(knockDir * 18f, ForceMode2D.Impulse);
                     }
-                    StartCoroutine(StunPlayerRoutine(player, 0.65f));
+                    StartCoroutine(StunPlayerRoutine(player, 0.30f));
                     DamagePopup.CreateText(player.position + Vector3.up * 1.3f, LocalizationManager.T("CHOÁNG!", "STUNNED!"), new Color(1f, 0.85f, 0f));
                 }
             }
@@ -882,12 +882,12 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
         currentBossPhase--;
         currentHealth = phaseMaxHealth;
         normalAttackCount = 0;
-        pounceTimer = 0f;
-        spikesTimer = 0f;
-        crescentTimer = 0f;
-        siphonTimer = 0f;
-        blinkTimer = 0f;
-        attackTimer = 0f;
+        pounceTimer = 2.5f;
+        spikesTimer = 1.5f;
+        crescentTimer = 2.0f;
+        siphonTimer = 4.5f;
+        blinkTimer = 2.0f;
+        attackTimer = 1.0f;
 
         rb.linearVelocity = Vector2.zero;
         SetMoving(false);

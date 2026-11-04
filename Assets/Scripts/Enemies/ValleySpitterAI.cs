@@ -38,14 +38,32 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
         if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 5000;
 
-#if UNITY_EDITOR
         if (sr.sprite == null)
         {
-            sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/ART/Map/Valley Ruin Asset Pack V0.3/Objects/Extracted/obj_48_48x47.png"
-            );
-        }
+            sr.sprite = Resources.Load<Sprite>("Enemies/Map2/obj_48_48x47");
+            if (sr.sprite == null)
+            {
+                var all = Resources.LoadAll<Sprite>("Enemies/Map2/obj_48_48x47");
+                if (all != null && all.Length > 0) sr.sprite = all[0];
+            }
+#if UNITY_EDITOR
+            if (sr.sprite == null)
+            {
+                sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                    "Assets/ART/Map/Valley Ruin Asset Pack V0.3/Objects/Extracted/obj_48_48x47.png"
+                );
+            }
 #endif
+            if (sr.sprite == null)
+            {
+                Texture2D tex = new Texture2D(32, 32);
+                for (int x = 0; x < 32; x++)
+                    for (int y = 0; y < 32; y++)
+                        tex.SetPixel(x, y, new Color(0.2f, 0.75f, 0.35f, 1f));
+                tex.Apply();
+                sr.sprite = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 16f);
+            }
+        }
 
         myCol = GetComponent<Collider2D>();
         if (myCol == null)
@@ -190,6 +208,15 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable
 
         var srProj = proj.AddComponent<SpriteRenderer>();
         var sprite = Resources.Load<Sprite>("Combat/enemy_projectile");
+        if (sprite == null)
+        {
+            var all = Resources.LoadAll<Sprite>("Combat/enemy_projectile");
+            if (all != null && all.Length > 0) sprite = all[0];
+        }
+        if (sprite == null)
+        {
+            sprite = Resources.Load<Sprite>("Combat/enemy_projectile_runtime");
+        }
 #if UNITY_EDITOR
         if (sprite == null)
         {

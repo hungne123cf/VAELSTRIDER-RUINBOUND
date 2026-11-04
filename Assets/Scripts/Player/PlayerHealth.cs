@@ -795,15 +795,16 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         if (curHero.Contains("titan") || curHero.Contains("player4") || GetComponent<TitanBerserkerSkill>() != null)
         {
-            var anim = GetComponent<Animator>();
-            float moveX = anim != null ? anim.GetFloat("MoveX") : 0f;
-            float moveY = anim != null ? anim.GetFloat("MoveY") : -1f;
-
+            var res = Resources.LoadAll<Sprite>("Player4/Sprites/Hammer_Death");
+            if (res != null && res.Length > 0)
+            {
+                return res.OrderByDescending(s => s.rect.y).ThenBy(s => s.rect.x).ToArray();
+            }
 #if UNITY_EDITOR
             var sprites = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player4/Hammer_Death.png");
             if (sprites != null)
             {
-                var list = new List<Sprite>();
+                var list = new System.Collections.Generic.List<Sprite>();
                 foreach (var o in sprites) if (o is Sprite s) list.Add(s);
                 if (list.Count > 0)
                 {
@@ -811,8 +812,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
                 }
             }
 #endif
-            var res = MainMenuManager.LoadSpritesFromPath("Assets/ART/Player4/Hammer_Death.png", 64, 64);
-            if (res != null && res.Length > 0) return res;
+            var resFallback = MainMenuManager.LoadSpritesFromPath("Assets/ART/Player4/Hammer_Death.png", 64, 64);
+            if (resFallback != null && resFallback.Length > 0) return resFallback;
         }
         else if (curHero.Contains("azure") || curHero.Contains("player3") || GetComponent<AzureBladeSkill>() != null)
         {
@@ -820,34 +821,36 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             float moveX = anim != null ? anim.GetFloat("MoveX") : 0f;
             float moveY = anim != null ? anim.GetFloat("MoveY") : -1f;
 
+            var res = Resources.LoadAll<Sprite>("Player3/Sprites/Sword_Death");
+            if (res == null || res.Length == 0)
+            {
+                res = Resources.LoadAll<Sprite>("Player3/Sword_Death");
+            }
+            if (res != null && res.Length >= 28)
+            {
+                var ordered = res.OrderByDescending(s => s.rect.y).ThenBy(s => s.rect.x).ToList();
+                if (moveY > 0.35f) return ordered.Skip(3 * 7).Take(7).ToArray();
+                if (moveX > 0.25f) { flipX = true; return ordered.Skip(1 * 7).Take(7).ToArray(); }
+                if (moveX < -0.25f) { flipX = false; return ordered.Skip(1 * 7).Take(7).ToArray(); }
+                return ordered.Skip(0 * 7).Take(7).ToArray();
+            }
+            else if (res != null && res.Length > 0)
+            {
+                return res.OrderByDescending(s => s.rect.y).ThenBy(s => s.rect.x).Take(7).ToArray();
+            }
 #if UNITY_EDITOR
             var sprites = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player3/Sword_Death.png");
             if (sprites != null)
             {
-                var list = new List<Sprite>();
+                var list = new System.Collections.Generic.List<Sprite>();
                 foreach (var o in sprites) if (o is Sprite s) list.Add(s);
                 if (list.Count >= 28)
                 {
-                    // Row 0: Down (0..6), Row 1: Left (7..13), Row 2: Up-Left (14..20), Row 3: Up (21..27)
                     var ordered = list.OrderByDescending(s => s.rect.y).ThenBy(s => s.rect.x).ToList();
-                    if (moveY > 0.35f)
-                    {
-                        return ordered.Skip(3 * 7).Take(7).ToArray(); // Up
-                    }
-                    else if (moveX > 0.25f)
-                    {
-                        flipX = true;
-                        return ordered.Skip(1 * 7).Take(7).ToArray(); // Right
-                    }
-                    else if (moveX < -0.25f)
-                    {
-                        flipX = false;
-                        return ordered.Skip(1 * 7).Take(7).ToArray(); // Left
-                    }
-                    else
-                    {
-                        return ordered.Skip(0 * 7).Take(7).ToArray(); // Down
-                    }
+                    if (moveY > 0.35f) return ordered.Skip(3 * 7).Take(7).ToArray();
+                    if (moveX > 0.25f) { flipX = true; return ordered.Skip(1 * 7).Take(7).ToArray(); }
+                    if (moveX < -0.25f) { flipX = false; return ordered.Skip(1 * 7).Take(7).ToArray(); }
+                    return ordered.Skip(0 * 7).Take(7).ToArray();
                 }
                 else if (list.Count > 0)
                 {
@@ -855,28 +858,50 @@ public class PlayerHealth : MonoBehaviour, IDamageable
                 }
             }
 #endif
-            var res = Resources.LoadAll<Sprite>("Player3/Sword_Death");
-            if (res != null && res.Length > 0) return res;
         }
         else if (curHero.Contains("ronin") || curHero.Contains("gale") || GetComponent<GaleRoninSkill>() != null)
         {
+            var res = Resources.LoadAll<Sprite>("Player2/Sprites/_pick up");
+            if (res != null && res.Length > 0)
+            {
+                return res.OrderBy(s => s.rect.x).ToArray();
+            }
 #if UNITY_EDITOR
             var sprites = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player2/_pick up.png");
             if (sprites != null)
             {
-                var list = new List<Sprite>();
+                var list = new System.Collections.Generic.List<Sprite>();
                 foreach (var o in sprites) if (o is Sprite s) list.Add(s);
-                if (list.Count > 0)
-                {
-                    return list.OrderBy(s => s.rect.x).ToArray();
-                }
+                if (list.Count > 0) return list.OrderBy(s => s.rect.x).ToArray();
             }
 #endif
-            var res = MainMenuManager.LoadSpritesFromPath("Assets/ART/Player2/_pick up.png", 64, 64);
-            if (res != null && res.Length > 0) return res;
+            var resFallback = MainMenuManager.LoadSpritesFromPath("Assets/ART/Player2/_pick up.png", 64, 64);
+            if (resFallback != null && resFallback.Length > 0) return resFallback;
         }
         else if (curHero.Contains("dune") || curHero.Contains("player5") || GetComponent<DuneAssassinSkill>() != null)
         {
+            var duneFrames = DuneAssassinSkill.GetDeathFrames();
+            if (duneFrames != null && duneFrames.Length > 0) return duneFrames;
+
+            var resAll = Resources.LoadAll<Sprite>("Player5/Sprites/death");
+            if (resAll != null && resAll.Length > 0)
+            {
+                var list = new System.Collections.Generic.List<Sprite>();
+                foreach (var s in resAll)
+                {
+                    if (s != null && (s.name.EndsWith("_0") || !s.name.Contains("_"))) list.Add(s);
+                }
+                if (list.Count == 0) list.AddRange(resAll);
+                list.Sort((a, b) => {
+                    int nA = 0, nB = 0;
+                    var mA = System.Text.RegularExpressions.Regex.Match(a.name, @"\d+");
+                    var mB = System.Text.RegularExpressions.Regex.Match(b.name, @"\d+");
+                    if (mA.Success) int.TryParse(mA.Value, out nA);
+                    if (mB.Success) int.TryParse(mB.Value, out nB);
+                    return nA.CompareTo(nB);
+                });
+                return list.ToArray();
+            }
 #if UNITY_EDITOR
             var duneDeathDir = "Assets/ART/Player5/PNG/death";
             if (System.IO.Directory.Exists(duneDeathDir))
@@ -892,7 +917,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
                 if (frameFiles.Length > 0)
                 {
-                    var frameList = new List<Sprite>();
+                    var frameList = new System.Collections.Generic.List<Sprite>();
                     foreach (var path in frameFiles)
                     {
                         var s = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path.Replace("\\", "/"));
@@ -907,9 +932,18 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         {
             var mageDeathFrames = CelestialMageSkill.GetDeathFrames();
             if (mageDeathFrames != null && mageDeathFrames.Length > 0) return mageDeathFrames;
+
+            var resMage = Resources.LoadAll<Sprite>("Player6/Sprites/death");
+            if (resMage != null && resMage.Length > 0) return resMage;
         }
 
         // Default: Player 1 (Vaelstrider)
+        var p1Res = Resources.LoadAll<Sprite>("Player/player_death");
+        if (p1Res != null && p1Res.Length > 0)
+        {
+            return p1Res.OrderBy(s => s.rect.x).ToArray();
+        }
+
 #if UNITY_EDITOR
         var deathDir = "Assets/ART/Player/DEATH";
         if (System.IO.Directory.Exists(deathDir))
@@ -919,7 +953,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
                 .ToArray();
             if (frameFiles.Length > 0)
             {
-                var frameList = new List<Sprite>();
+                var frameList = new System.Collections.Generic.List<Sprite>();
                 foreach (var path in frameFiles)
                 {
                     var s = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path.Replace("\\", "/"));
@@ -932,7 +966,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         var p1Sprites = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player/DEATH/player_death.png");
         if (p1Sprites != null)
         {
-            var list = new List<Sprite>();
+            var list = new System.Collections.Generic.List<Sprite>();
             foreach (var o in p1Sprites) if (o is Sprite s) list.Add(s);
             if (list.Count > 0)
             {
@@ -940,11 +974,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             }
         }
 #endif
-        var p1Res = Resources.LoadAll<Sprite>("Player/player_death");
-        if (p1Res != null && p1Res.Length > 0)
-        {
-            return p1Res.OrderBy(s => s.rect.x).ToArray();
-        }
 
         return null;
     }
