@@ -83,6 +83,16 @@ public class BossIntroCutsceneUI : MonoBehaviour
         }
     }
 
+    private static GameObject CreateUIGameObject(string name, Transform parent)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform));
+        if (parent != null)
+        {
+            go.transform.SetParent(parent, false);
+        }
+        return go;
+    }
+
     public static BossIntroCutsceneUI EnsureInstance()
     {
         if (Instance != null) return Instance;
@@ -103,18 +113,16 @@ public class BossIntroCutsceneUI : MonoBehaviour
 
         if (parentCanvas == null)
         {
-            GameObject cObj = new GameObject("BossIntroCanvas");
-            parentCanvas = cObj.AddComponent<Canvas>();
+            GameObject cObj = new GameObject("BossIntroCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            parentCanvas = cObj.GetComponent<Canvas>();
             parentCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
             parentCanvas.sortingOrder = 9500;
-            var scaler = cObj.AddComponent<CanvasScaler>();
+            var scaler = cObj.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
-            cObj.AddComponent<GraphicRaycaster>();
         }
 
-        GameObject root = new GameObject("BossIntroCutsceneUI");
-        root.transform.SetParent(parentCanvas.transform, false);
+        GameObject root = CreateUIGameObject("BossIntroCutsceneUI", parentCanvas.transform);
 
         var ui = root.AddComponent<BossIntroCutsceneUI>();
         ui.BuildUIStructure(root, parentCanvas);
@@ -130,18 +138,20 @@ public class BossIntroCutsceneUI : MonoBehaviour
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
 
-        RectTransform rootRt = root.GetComponent<RectTransform>() ?? root.AddComponent<RectTransform>();
-        rootRt.anchorMin = Vector2.zero;
-        rootRt.anchorMax = Vector2.one;
-        rootRt.offsetMin = Vector2.zero;
-        rootRt.offsetMax = Vector2.zero;
+        RectTransform rootRt = root.GetComponent<RectTransform>();
+        if (rootRt != null)
+        {
+            rootRt.anchorMin = Vector2.zero;
+            rootRt.anchorMax = Vector2.one;
+            rootRt.offsetMin = Vector2.zero;
+            rootRt.offsetMax = Vector2.zero;
+        }
 
         TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") ?? Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
 
         // 1. TOP LETTERBOX BAR
-        GameObject topBarObj = new GameObject("TopLetterbox");
-        topBarObj.transform.SetParent(root.transform, false);
-        topLetterbox = topBarObj.AddComponent<RectTransform>();
+        GameObject topBarObj = CreateUIGameObject("TopLetterbox", root.transform);
+        topLetterbox = topBarObj.GetComponent<RectTransform>();
         topLetterbox.anchorMin = new Vector2(0f, 1f);
         topLetterbox.anchorMax = new Vector2(1f, 1f);
         topLetterbox.pivot = new Vector2(0.5f, 1f);
@@ -151,9 +161,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         topImg.color = new Color(0.04f, 0.04f, 0.05f, 0.98f);
 
         // 2. BOTTOM LETTERBOX BAR
-        GameObject bottomBarObj = new GameObject("BottomLetterbox");
-        bottomBarObj.transform.SetParent(root.transform, false);
-        bottomLetterbox = bottomBarObj.AddComponent<RectTransform>();
+        GameObject bottomBarObj = CreateUIGameObject("BottomLetterbox", root.transform);
+        bottomLetterbox = bottomBarObj.GetComponent<RectTransform>();
         bottomLetterbox.anchorMin = new Vector2(0f, 0f);
         bottomLetterbox.anchorMax = new Vector2(1f, 0f);
         bottomLetterbox.pivot = new Vector2(0.5f, 0f);
@@ -163,9 +172,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         btmImg.color = new Color(0.04f, 0.04f, 0.05f, 0.98f);
 
         // 3. CENTER BOSS SPLASH CARD CONTAINER
-        GameObject cardObj = new GameObject("BossSplashCard");
-        cardObj.transform.SetParent(root.transform, false);
-        cardContainer = cardObj.AddComponent<RectTransform>();
+        GameObject cardObj = CreateUIGameObject("BossSplashCard", root.transform);
+        cardContainer = cardObj.GetComponent<RectTransform>();
         cardContainer.anchorMin = new Vector2(0f, 0.5f);
         cardContainer.anchorMax = new Vector2(1f, 0.5f);
         cardContainer.pivot = new Vector2(0.5f, 0.5f);
@@ -180,9 +188,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         cardImg.color = new Color(0.06f, 0.02f, 0.02f, 0.92f);
 
         // Top Gold Border Line
-        GameObject topLine = new GameObject("TopBorder");
-        topLine.transform.SetParent(cardObj.transform, false);
-        var tlRt = topLine.AddComponent<RectTransform>();
+        GameObject topLine = CreateUIGameObject("TopBorder", cardObj.transform);
+        var tlRt = topLine.GetComponent<RectTransform>();
         tlRt.anchorMin = new Vector2(0f, 1f);
         tlRt.anchorMax = new Vector2(1f, 1f);
         tlRt.pivot = new Vector2(0.5f, 1f);
@@ -191,9 +198,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         topLine.AddComponent<Image>().color = new Color(1f, 0.75f, 0.2f, 0.85f);
 
         // Bottom Gold Border Line
-        GameObject btmLine = new GameObject("BottomBorder");
-        btmLine.transform.SetParent(cardObj.transform, false);
-        var blRt = btmLine.AddComponent<RectTransform>();
+        GameObject btmLine = CreateUIGameObject("BottomBorder", cardObj.transform);
+        var blRt = btmLine.GetComponent<RectTransform>();
         blRt.anchorMin = new Vector2(0f, 0f);
         blRt.anchorMax = new Vector2(1f, 0f);
         blRt.pivot = new Vector2(0.5f, 0f);
@@ -202,9 +208,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         btmLine.AddComponent<Image>().color = new Color(1f, 0.75f, 0.2f, 0.85f);
 
         // 3.1. Threat Level Tag Text (Top of Card)
-        GameObject threatObj = new GameObject("ThreatLevelText");
-        threatObj.transform.SetParent(cardObj.transform, false);
-        var thRt = threatObj.AddComponent<RectTransform>();
+        GameObject threatObj = CreateUIGameObject("ThreatLevelText", cardObj.transform);
+        var thRt = threatObj.GetComponent<RectTransform>();
         thRt.anchorMin = new Vector2(0.5f, 1f);
         thRt.anchorMax = new Vector2(0.5f, 1f);
         thRt.pivot = new Vector2(0.5f, 1f);
@@ -220,9 +225,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         threatText.text = "★★★ CẤP ĐỘ NGUY HIỂM: THẢM HỌA TITAN ★★★";
 
         // 3.2. Big Boss Name Text (Center of Card)
-        GameObject nameObj = new GameObject("BossNameText");
-        nameObj.transform.SetParent(cardObj.transform, false);
-        var nmRt = nameObj.AddComponent<RectTransform>();
+        GameObject nameObj = CreateUIGameObject("BossNameText", cardObj.transform);
+        var nmRt = nameObj.GetComponent<RectTransform>();
         nmRt.anchorMin = new Vector2(0.5f, 0.5f);
         nmRt.anchorMax = new Vector2(0.5f, 0.5f);
         nmRt.pivot = new Vector2(0.5f, 0.5f);
@@ -238,9 +242,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         bossNameText.text = "GOLIATH GIKK";
 
         // 3.3. Subtitle / Title Description (Bottom of Card)
-        GameObject titleObj = new GameObject("BossTitleText");
-        titleObj.transform.SetParent(cardObj.transform, false);
-        var ttRt = titleObj.AddComponent<RectTransform>();
+        GameObject titleObj = CreateUIGameObject("BossTitleText", cardObj.transform);
+        var ttRt = titleObj.GetComponent<RectTransform>();
         ttRt.anchorMin = new Vector2(0.5f, 0f);
         ttRt.anchorMax = new Vector2(0.5f, 0f);
         ttRt.pivot = new Vector2(0.5f, 0f);
@@ -256,9 +259,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         bossTitleText.text = "[ PHÁO ĐÀI BÁNH XE CỔ ĐẠI // THE ANCIENT TITAN WHEEL ]";
 
         // 4. "FIGHT! / CHIẾN ĐẤU!" FLASH TEXT
-        GameObject fightObj = new GameObject("FightBannerText");
-        fightObj.transform.SetParent(root.transform, false);
-        var fgRt = fightObj.AddComponent<RectTransform>();
+        GameObject fightObj = CreateUIGameObject("FightBannerText", root.transform);
+        var fgRt = fightObj.GetComponent<RectTransform>();
         fgRt.anchorMin = new Vector2(0.5f, 0.5f);
         fgRt.anchorMax = new Vector2(0.5f, 0.5f);
         fgRt.pivot = new Vector2(0.5f, 0.5f);
@@ -275,9 +277,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
         fightObj.SetActive(false);
 
         // 5. SKIP PROMPT TEXT
-        GameObject skipObj = new GameObject("SkipPromptText");
-        skipObj.transform.SetParent(root.transform, false);
-        var skRt = skipObj.AddComponent<RectTransform>();
+        GameObject skipObj = CreateUIGameObject("SkipPromptText", root.transform);
+        var skRt = skipObj.GetComponent<RectTransform>();
         skRt.anchorMin = new Vector2(1f, 0f);
         skRt.anchorMax = new Vector2(1f, 0f);
         skRt.pivot = new Vector2(1f, 0f);
