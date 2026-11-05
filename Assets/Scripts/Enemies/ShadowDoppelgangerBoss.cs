@@ -59,11 +59,11 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
     [Header("Combat Timers")]
     private float attackTimer = 0.2f;
-    private float attackCooldown = 0.85f;
+    public float attackCooldown = 0.85f;
     private float dashTimer = 1.2f;
-    private float dashCooldown = 3.6f;
+    public float dashCooldown = 3.6f;
     private float skillTimer = 3.0f;
-    private float skillCooldown = 6.0f;
+    public float skillCooldown = 6.0f;
     private float parryTimer = 5.0f;
     private float parryCooldown = 8.5f;
 

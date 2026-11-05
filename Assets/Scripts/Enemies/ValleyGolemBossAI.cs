@@ -18,7 +18,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     [SerializeField] private int slamDamage = 22;
     [SerializeField] private int stoneDamage = 8;
     [SerializeField] private float moveSpeed = 1.8f;
-    [SerializeField] private float skillCooldown = 5.0f;
+    [SerializeField] public float skillCooldown = 5.0f;
 
     private Transform player;
     private PlayerHealth playerHealth;

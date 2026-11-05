@@ -17,6 +17,12 @@ public class EnemyProjectile : MonoBehaviour
         damage = dmg;
         speed = spd;
 
+        // Lõi Đầm Lầy Thời Không: Làm chậm toàn bộ tốc độ đạn quái bắn ra 35%
+        if (EnemyChronoSlowEffect.IsChronoSlowActive)
+        {
+            speed *= EnemyChronoSlowEffect.SLOW_FACTOR;
+        }
+
         rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {

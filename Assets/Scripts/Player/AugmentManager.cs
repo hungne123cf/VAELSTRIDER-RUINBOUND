@@ -685,11 +685,11 @@ public class AugmentManager : MonoBehaviour
 
             if (curHp > 0)
             {
-                int execDmg = Mathf.RoundToInt(curHp * 0.50f);
+                int execDmg = Mathf.RoundToInt(curHp * 0.30f);
                 if (isBoss)
                 {
-                    // Giới hạn sát thương lên Boss tối đa 15% Max HP (hoặc trần 1200 dmg) để tránh làm mất cân bằng trận đấu
-                    int bossCap = Mathf.Min(1200, Mathf.RoundToInt(maxHp * 0.15f));
+                    // Giới hạn sát thương lên Boss là 5% Max HP (trần 600 dmg)
+                    int bossCap = Mathf.Min(600, Mathf.RoundToInt(maxHp * 0.05f));
                     execDmg = Mathf.Min(execDmg, bossCap);
                 }
                 execDmg = Mathf.Max(1, execDmg);

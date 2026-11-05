@@ -15,7 +15,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     [SerializeField] private int maxHealth = 110; // Quai thuong can bang (110 HP)
     [SerializeField] private float moveSpeed = 3.0f;
     [SerializeField] private int attackDamage = 11;
-    [SerializeField] private float attackCooldown = 2.0f;
+    [SerializeField] public float attackCooldown = 2.0f;
 
     [Header("Boss 3 Health Bars")]
     public int totalBossPhases = 3;

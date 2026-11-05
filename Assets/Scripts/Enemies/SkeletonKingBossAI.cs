@@ -20,9 +20,9 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     [SerializeField] private int slamDamage = 18;
     [SerializeField] private int earthquakeDamage = 9;
     [SerializeField] private float meleeRange = 2.4f;
-    [SerializeField] private float meleeCooldown = 1.35f;
-    [SerializeField] private float skillCooldown = 5.0f;
-    [SerializeField] private float webSpitCooldown = 4.5f;
+    [SerializeField] public float meleeCooldown = 1.35f;
+    [SerializeField] public float skillCooldown = 5.0f;
+    [SerializeField] public float webSpitCooldown = 4.5f;
 
     private Transform player;
     private Rigidbody2D rb;

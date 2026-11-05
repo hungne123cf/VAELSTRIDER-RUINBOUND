@@ -81,6 +81,12 @@ public static class EnemyHealthHelper
                 eh.MultiplyHealth(1.50f);
             }
         }
+
+        // Lõi Đầm Lầy Thời Không: Làm chậm quái và giãn cooldown ngay khi sinh ra
+        if (EnemyChronoSlowEffect.IsChronoSlowActive)
+        {
+            EnemyChronoSlowEffect.Apply(enemy);
+        }
     }
 }
 

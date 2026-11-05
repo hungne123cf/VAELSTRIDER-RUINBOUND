@@ -14,7 +14,7 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable, IEnemyHealth
     [SerializeField] private int maxHealth = 95;
     [SerializeField] private int currentHealth;
     [SerializeField] private float attackRange = 8.0f;
-    [SerializeField] private float attackCooldown = 3.0f;
+    [SerializeField] public float attackCooldown = 3.0f;
     [SerializeField] private int projectileDamage = 11;
     [SerializeField] private float projectileSpeed = 6.5f;
 
@@ -327,6 +327,12 @@ public class ValleyThornProjectile : MonoBehaviour
     {
         velocity = vel;
         damage = dmg;
+
+        // Lõi Đầm Lầy Thời Không: Giảm tốc độ đạn gai 35%
+        if (EnemyChronoSlowEffect.IsChronoSlowActive)
+        {
+            velocity *= EnemyChronoSlowEffect.SLOW_FACTOR;
+        }
 
         ApplyDressCode();
         CheckProximity();

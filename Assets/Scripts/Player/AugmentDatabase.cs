@@ -757,11 +757,11 @@ public static class AugmentDatabase
         new AugmentData {
             type = AugmentType.PercentCurrentHpExecute,
             nameVN = "Trảm Sát Trảm Kích",      nameEN = "Guillotine Execute",
-            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Đòn đánh gây thêm sát thương bằng <color=#FFEAA7><b>50% Máu Hiện Tại</b></color> của kẻ địch.\n<color=#FDCB6E><b>[HẠN CHẾ]</b></color> Sát thương lên Boss tối đa <color=#FDCB6E><b>15% Max HP</b></color> (trần 1200 dmg).",
-            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Attacks deal bonus damage equal to <color=#FFEAA7><b>50% Target Current HP</b></color>.\n<color=#FDCB6E><b>[LIMIT]</b></color> Capped at <color=#FDCB6E><b>15% Max HP</b></color> on Bosses (max 1200 dmg).",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Gây thêm sát thương bằng <color=#FFEAA7><b>30% Máu Hiện Tại</b></color> của quái vật.\n<color=#FDCB6E><b>[HẠN CHẾ]</b></color> Sát thương lên Boss là <color=#FDCB6E><b>5% Máu</b></color> (trần 600 dmg).",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Deals bonus damage equal to <color=#FFEAA7><b>30% Target Current HP</b></color> on monsters.\n<color=#FDCB6E><b>[LIMIT]</b></color> Deals <color=#FDCB6E><b>5% HP</b></color> on Bosses (max 600 dmg).",
             flavorVN = "«Một trảm đoạn tuyệt sinh cơ, không màng giáp sắt hay khiên dày.»",
             flavorEN = "«A single cleave that severs life itself, regardless of armor.»",
-            emoji = "⚔️", value = 50f, duration = -1f,
+            emoji = "⚔️", value = 30f, duration = -1f,
             cardColor = new Color(0.96f, 0.26f, 0.21f), rarity = AugmentData.Rarity.Epic
         },
         new AugmentData {

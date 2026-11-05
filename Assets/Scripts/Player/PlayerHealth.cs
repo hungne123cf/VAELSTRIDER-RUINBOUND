@@ -97,9 +97,26 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public void ApplyCurseDrain(int amount)
     {
         if (isDead || amount <= 0) return;
-        if (currentHealth > 1)
+
+        int remainingDrain = amount;
+
+        // 1. UU TIEN TRU VAO LOP MAU AO (VIRTUAL HEALTH) TRUOC!
+        if (isVirtualHealthActive && currentVirtualHealth > 0)
         {
-            int loss = Mathf.Min(amount, currentHealth - 1);
+            int vLoss = Mathf.Min(remainingDrain, currentVirtualHealth);
+            currentVirtualHealth -= vLoss;
+            remainingDrain -= vLoss;
+            if (currentVirtualHealth <= 0)
+            {
+                isVirtualHealthActive = false;
+            }
+            DamagePopup.CreateText(transform.position + Vector3.up * 0.6f, $"-{vLoss}", new Color(1f, 0.85f, 0.25f));
+        }
+
+        // 2. KHI HET MAU AO MOI TRU TIEP VAO MAU THAT (GOC) (toi thieu 1 HP)
+        if (remainingDrain > 0 && currentHealth > 1)
+        {
+            int loss = Mathf.Min(remainingDrain, currentHealth - 1);
             currentHealth -= loss;
             PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
             DamagePopup.CreateText(transform.position + Vector3.up * 0.5f, $"-{loss}", new Color(0.95f, 0.20f, 0.20f));

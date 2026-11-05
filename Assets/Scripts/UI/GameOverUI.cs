@@ -136,11 +136,16 @@ public class GameOverUI : MonoBehaviour
         if (subtitleText != null) 
         {
             subtitleText.text = isVi ? "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này." : "Your journey ends here. Battle levels and augments only exist within this run.";
+            subtitleText.fontSize = 15f;
+            subtitleText.enableAutoSizing = true;
+            subtitleText.fontSizeMin = 12f;
+            subtitleText.fontSizeMax = 16f;
+            subtitleText.enableWordWrapping = false;
             var sRt = subtitleText.rectTransform;
             if (sRt != null)
             {
-                sRt.sizeDelta = new Vector2(780f, 44f);
-                sRt.anchoredPosition = new Vector2(0f, 136f);
+                sRt.sizeDelta = new Vector2(840f, 32f);
+                sRt.anchoredPosition = new Vector2(0f, 120f);
             }
         }
 
@@ -504,28 +509,32 @@ public class GameOverUI : MonoBehaviour
         Instance.titleText = titleTmp;
 
         // Title Bottom Symmetric Divider
-        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 172), new Vector2(740, 10), new Color(1f, 0.9f, 0.65f, 0.85f));
+        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 150), new Vector2(740, 10), new Color(1f, 0.9f, 0.65f, 0.85f));
 
         // ─── Subtitle ──────────────────────────────────────────────────────────
         GameObject subObj = new GameObject("Subtitle", typeof(RectTransform));
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRect = subObj.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 136);
-        subRect.sizeDelta = new Vector2(780, 44);
+        subRect.anchoredPosition = new Vector2(0, 120);
+        subRect.sizeDelta = new Vector2(840, 32);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         subTmp.text = "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này.";
-        subTmp.fontSize = 18f;
+        subTmp.fontSize = 15f;
+        subTmp.enableAutoSizing = true;
+        subTmp.fontSizeMin = 12f;
+        subTmp.fontSizeMax = 16f;
+        subTmp.enableWordWrapping = false;
         subTmp.color = new Color(0.75f, 0.78f, 0.86f);
         subTmp.alignment = TextAlignmentOptions.Center;
         Instance.subtitleText = subTmp;
 
-        // ─── Run Summary Indicator ─────────────────────────────────────────────
+        // ─── Run Summary Indicator (Linh Hồn / Aethel Shards) ────────────────────
         GameObject statusObj = new GameObject("RespawnStatus", typeof(RectTransform));
         statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
         RectTransform statusRect = statusObj.GetComponent<RectTransform>();
-        statusRect.anchoredPosition = new Vector2(0, 78);
+        statusRect.anchoredPosition = new Vector2(0, 75);
         statusRect.sizeDelta = new Vector2(780, 40);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
         statusTmp.fontSize = 24f;

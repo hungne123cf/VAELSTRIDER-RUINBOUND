@@ -1315,8 +1315,8 @@ public class AugmentHUDBar : MonoBehaviour
             cardObj.transform.SetParent(_popupContentContainer, false);
 
             var le = cardObj.GetComponent<LayoutElement>();
-            le.preferredHeight = 84f;
-            le.minHeight = 84f;
+            le.preferredHeight = 94f;
+            le.minHeight = 94f;
 
             var cardImg = cardObj.GetComponent<Image>();
             cardImg.sprite = GetPanelBg();
@@ -1400,14 +1400,14 @@ public class AugmentHUDBar : MonoBehaviour
                 SoulslikeHUDStyler.SetSafeOutline(rkTmp, 0.35f, Color.black);
             }
 
-            // Text column
+            // Text column (offsetMax -155f để không bao giờ chạm/đè lên cột trạng thái bên phải)
             var textObj = new GameObject("TextCol", typeof(RectTransform), typeof(TextMeshProUGUI));
             textObj.transform.SetParent(cardObj.transform, false);
             var textRt = textObj.GetComponent<RectTransform>();
             textRt.anchorMin = new Vector2(0f, 0f);
             textRt.anchorMax = new Vector2(1f, 1f);
             textRt.offsetMin = new Vector2(68f, 4f);
-            textRt.offsetMax = new Vector2(-120f, -4f);
+            textRt.offsetMax = new Vector2(-155f, -4f);
 
             var textTmp = textObj.GetComponent<TextMeshProUGUI>();
             string rankStr = rank > 1 ? $" <color=#FBBF24>Lv.{rank}</color>" : "";
@@ -1423,7 +1423,7 @@ public class AugmentHUDBar : MonoBehaviour
             statusRt.anchorMax = new Vector2(1f, 1f);
             statusRt.pivot = new Vector2(1f, 0.5f);
             statusRt.anchoredPosition = new Vector2(-10f, 0f);
-            statusRt.sizeDelta = new Vector2(110f, 60f);
+            statusRt.sizeDelta = new Vector2(125f, 65f);
 
             var statusTmp = statusObj.GetComponent<TextMeshProUGUI>();
             statusTmp.alignment = TextAlignmentOptions.Right;

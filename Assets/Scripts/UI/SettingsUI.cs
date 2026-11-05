@@ -442,9 +442,15 @@ public class SettingsUI : MonoBehaviour
         // 2 Big Action Buttons inside Card (Xếp dọc toàn hàng ngang 626px cho chữ to rõ, không bị cụt ba chấm)
         customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(22f, -130f), new Vector2(626f, 56f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
         customizeLayoutBtnText.fontSize = 16.5f;
+        customizeLayoutBtnText.enableAutoSizing = true;
+        customizeLayoutBtnText.fontSizeMin = 13f;
+        customizeLayoutBtnText.fontSizeMax = 18f;
 
         resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(22f, -198f), new Vector2(626f, 52f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
         resetControlsDefaultBtnText.fontSize = 16f;
+        resetControlsDefaultBtnText.enableAutoSizing = true;
+        resetControlsDefaultBtnText.fontSizeMin = 13f;
+        resetControlsDefaultBtnText.fontSizeMax = 18f;
 
         // Bottom Tip below Card
         controlsCardTip = CreateLabel(pageControls.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí và kích thước các nút.</color></i>", new Vector2(25f, -365f), new Vector2(670f, 24f));

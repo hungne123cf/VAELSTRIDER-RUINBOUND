@@ -1040,7 +1040,9 @@ public class WanderingShopUI : MonoBehaviour
         });
 
         shopCatalog.Add(new ShopRelicItem
+
         {
+
             id = "relic_abyssal",
             categoryVN = "TOÀN NĂNG THẦN THOẠI", categoryEN = "MYTHIC COVENANT",
             badgeColor = new Color(0.95f, 0.45f, 0.90f), // Hồng Tinh Vân
@@ -1865,29 +1867,31 @@ public class WanderingShopUI : MonoBehaviour
             var descObj = new GameObject("ItemDesc");
             descObj.transform.SetParent(card.transform, false);
             var descRT = descObj.AddComponent<RectTransform>();
-            descRT.anchorMin = new Vector2(0.06f, 0.270f);
-            descRT.anchorMax = new Vector2(0.94f, 0.510f);
+            descRT.anchorMin = new Vector2(0.05f, 0.258f);
+            descRT.anchorMax = new Vector2(0.95f, 0.525f);
             descRT.offsetMin = descRT.offsetMax = Vector2.zero;
 
             var descTMP = descObj.AddComponent<TextMeshProUGUI>();
             descTMP.text = fullDesc;
-            descTMP.fontSize = 14.5f;
+            descTMP.fontSize = 13.5f;
+            descTMP.enableAutoSizing = true;
+            descTMP.fontSizeMin = 11.5f;
+            descTMP.fontSizeMax = 14.0f;
             descTMP.alignment = TextAlignmentOptions.Center;
             descTMP.color = new Color(0.92f, 0.95f, 1f);
             descTMP.enableWordWrapping = true;
             SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.25f, new Color(0f, 0f, 0f, 0.85f));
 
             // 8. Ornamental Divider 2
-            CreateOrnamentDivider(card.transform, "Divider2",
-                new Vector2(0.08f, 0.250f), new Vector2(0.92f, 0.265f),
+            CreateOrnamentDivider(card.transform, "Divider2", new Vector2(0.08f, 0.238f), new Vector2(0.92f, 0.250f),
                 tierFrameColor * 0.85f);
 
             // 9. Tiến độ Cấp Độ Cổ Vật (Upgrade Tier Progress Indicator) - Bỏ dấu ngoặc vuông "[ ]"
             var progObj = new GameObject("UpgradeTier");
             progObj.transform.SetParent(card.transform, false);
             var progRT = progObj.AddComponent<RectTransform>();
-            progRT.anchorMin = new Vector2(0.06f, 0.200f);
-            progRT.anchorMax = new Vector2(0.94f, 0.245f);
+            progRT.anchorMin = new Vector2(0.06f, 0.175f);
+            progRT.anchorMax = new Vector2(0.94f, 0.230f);
             progRT.offsetMin = progRT.offsetMax = Vector2.zero;
 
             var progTMP = progObj.AddComponent<TextMeshProUGUI>();
@@ -1901,8 +1905,8 @@ public class WanderingShopUI : MonoBehaviour
             var btnObj = new GameObject("BuyBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
             btnObj.transform.SetParent(card.transform, false);
             var btnRT = btnObj.GetComponent<RectTransform>();
-            btnRT.anchorMin = new Vector2(0.06f, 0.035f);
-            btnRT.anchorMax = new Vector2(0.94f, 0.220f);
+            btnRT.anchorMin = new Vector2(0.06f, 0.030f);
+            btnRT.anchorMax = new Vector2(0.94f, 0.165f);
             btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
             var btnImg = btnObj.GetComponent<Image>();

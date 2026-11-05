@@ -30,6 +30,12 @@ public class SpiderWebProjectile : MonoBehaviour
         direction = dir.normalized;
         damage = MapScalingManager.ScaleDamage(damage);
 
+        // Lõi Đầm Lầy Thời Không: Giảm tốc độ kén nhện 35%
+        if (EnemyChronoSlowEffect.IsChronoSlowActive)
+        {
+            speed *= EnemyChronoSlowEffect.SLOW_FACTOR;
+        }
+
         sr = gameObject.AddComponent<SpriteRenderer>();
         bulletSprites = SpiderWebSpriteFactory.GetBulletSprites();
         if (bulletSprites != null && bulletSprites.Length > 0 && bulletSprites[0] != null)
