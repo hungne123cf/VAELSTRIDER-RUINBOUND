@@ -151,6 +151,12 @@ public static class AccountDatabase
         ClearTransientGameplayPlayerPrefs();
         HeroCostumeManager.ResetAllCostumes();
         SetAethelShards(0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_VAELSTRIDER, 1);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_GALE_RONIN, 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_AZURE_BLADE, 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_TITAN_BERSERKER, 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_DUNE_ASSASSIN, 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_CELESTIAL_MAGE, 0);
         PlayerPrefs.SetInt("Save_HealthPotions", 0);
         PlayerPrefs.SetInt("Saved_HealthPotions", 0);
         PlayerPrefs.SetInt("Player_Health_Potions", 0);
@@ -432,13 +438,20 @@ public static class AccountDatabase
         PlayerPrefs.SetInt("Map2_Completed", acc.map2Completed ? 1 : 0);
         PlayerPrefs.SetInt("Map3_Completed", acc.map3Completed ? 1 : 0);
 
-        // Nhân vật đã chọn & Tướng đã mở khóa: Mở khóa toàn bộ 6 vị tướng (Option 2)
+        // Nhân vật đã chọn & Tướng đã mở khóa: Chỉ mở Vaelstrider cho tân thủ, các tướng khác theo acc.unlockedHeroes
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_VAELSTRIDER, 1);
-        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_GALE_RONIN, 1);
-        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_AZURE_BLADE, 1);
-        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_TITAN_BERSERKER, 1);
-        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_DUNE_ASSASSIN, 1);
-        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_CELESTIAL_MAGE, 1);
+
+        bool hasRonin = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("ronin") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_GALE_RONIN));
+        bool hasAzure = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("azure") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_AZURE_BLADE));
+        bool hasTitan = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("titan") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_TITAN_BERSERKER));
+        bool hasDune  = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("dune")  || acc.unlockedHeroes.Contains(CharacterManager.CHAR_DUNE_ASSASSIN));
+        bool hasMage  = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("mage")  || acc.unlockedHeroes.Contains(CharacterManager.CHAR_CELESTIAL_MAGE));
+
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_GALE_RONIN, hasRonin ? 1 : 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_AZURE_BLADE, hasAzure ? 1 : 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_TITAN_BERSERKER, hasTitan ? 1 : 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_DUNE_ASSASSIN, hasDune ? 1 : 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_CELESTIAL_MAGE, hasMage ? 1 : 0);
 
         // Bảo tồn nhân vật đã chọn: Không bao giờ ghi đè lựa chọn của người chơi nếu đã chọn tướng khác Vaelstrider
         string existingSelection = PlayerPrefs.GetString("Selected_Character_ID", "");
