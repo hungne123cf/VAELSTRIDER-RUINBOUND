@@ -312,7 +312,7 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
     private void UpdateBossHealthUI()
     {
-        string title = LocalizationManager.T($"BÓNG MA BẢN NGÃ - {heroDisplayName.ToUpper()}", $"SHADOW DOPPELGÄNGER - {heroDisplayName.ToUpper()}");
+        string title = LocalizationManager.T($"BÓNG MA BẢN NGÃ - {heroDisplayName.ToUpper()}", $"SHADOW DOPPELGANGER - {heroDisplayName.ToUpper()}");
         BossHealthBarUI.EnsureInstance()?.ShowBoss(title, 1);
         BossHealthBarUI.EnsureInstance()?.UpdateHealth(currentHealth, maxHealth, 1);
     }
