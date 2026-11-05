@@ -302,6 +302,16 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable, IEnemyHealth
         var ai = go.AddComponent<ValleySpitterAI>();
         return ai;
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => false;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
 }
 
 public class ValleyThornProjectile : MonoBehaviour
@@ -464,16 +474,6 @@ public class ValleyThornProjectile : MonoBehaviour
             hasHit = true;
             Destroy(gameObject);
         }
-    }
-
-    // ─── IEnemyHealth Implementation ───────────────────────
-    public int CurrentHealth => currentHealth;
-    public int MaxHealth => maxHealth;
-    public bool IsBoss => false;
-    public void MultiplyHealth(float mult)
-    {
-        maxHealth = Mathf.RoundToInt(maxHealth * mult);
-        currentHealth = Mathf.RoundToInt(currentHealth * mult);
     }
 
 }

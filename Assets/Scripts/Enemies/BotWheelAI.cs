@@ -864,7 +864,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     // ─── IEnemyHealth Implementation ───────────────────────
     public int CurrentHealth => currentHealth;
     public int MaxHealth => isBoss ? phaseMaxHealth : maxHealth;
-    public bool IsBoss => isBoss;
+    // IsBoss already defined at line 12
     public void MultiplyHealth(float mult)
     {
         maxHealth = Mathf.RoundToInt(maxHealth * mult);

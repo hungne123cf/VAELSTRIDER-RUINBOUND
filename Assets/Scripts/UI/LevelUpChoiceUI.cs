@@ -975,13 +975,15 @@ public class LevelUpChoiceUI : MonoBehaviour
         var descObj = new GameObject("Desc");
         descObj.transform.SetParent(card.transform, false);
         var descRT = descObj.AddComponent<RectTransform>();
-        descRT.anchorMin = new Vector2(0.06f, 0.255f);
-        descRT.anchorMax = new Vector2(0.94f, 0.510f);
+        descRT.anchorMin = new Vector2(0.05f, 0.242f);
+        descRT.anchorMax = new Vector2(0.95f, 0.520f);
         descRT.offsetMin = descRT.offsetMax = Vector2.zero;
 
         var descTMP = descObj.AddComponent<TextMeshProUGUI>();
         descTMP.text = fullDesc;
-        descTMP.fontSize = 15.5f;
+        descTMP.enableAutoSizing = true;
+        descTMP.fontSizeMin = 11f;
+        descTMP.fontSizeMax = 15.5f;
         descTMP.alignment = TextAlignmentOptions.Center;
         descTMP.color = new Color(0.92f, 0.95f, 1f);
         descTMP.enableWordWrapping = true;

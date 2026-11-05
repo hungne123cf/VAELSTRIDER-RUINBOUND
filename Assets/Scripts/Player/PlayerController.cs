@@ -377,6 +377,29 @@ public class PlayerController : MonoBehaviour
         var ph = GetComponent<PlayerHealth>();
         if (ph != null && ph.IsDead) return;
 
+        // Golden Sanctuary (Kim Thân Bất Hoại: đếm ngược 10s & pulse hào quang vàng)
+        if (hasGoldenSanctuary && !isGoldenImmunityReady)
+        {
+            goldenImmunityCooldownTimer -= Time.deltaTime;
+            if (goldenImmunityCooldownTimer <= 0f)
+            {
+                goldenImmunityCooldownTimer = 0f;
+                isGoldenImmunityReady = true;
+                UpdateGoldenAuraVisual();
+                DamagePopup.CreateText(
+                    transform.position + Vector3.up * 1.5f,
+                    LocalizationManager.T("KIM THÂN SẴN SÀNG!", "GOLDEN SANCTUARY READY!"),
+                    new Color(1f, 0.88f, 0.20f)
+                );
+                SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+            }
+        }
+        if (goldenAuraObject != null && goldenAuraObject.activeSelf)
+        {
+            float pulse = 1f + Mathf.PingPong(Time.time * 1.5f, 0.15f);
+            goldenAuraObject.transform.localScale = new Vector3(pulse * 1.3f, pulse * 1.3f, 1f);
+        }
+
         if (dashCooldownTimer > 0)
         {
             dashCooldownTimer -= Time.deltaTime;

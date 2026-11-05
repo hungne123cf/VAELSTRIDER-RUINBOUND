@@ -622,6 +622,8 @@ public class AugmentManager : MonoBehaviour
             mult *= GrievousWoundsDebuff.GetDamageMultiplier(targetEnemy);
         }
 
+        var augMgr = Instance;
+
         // Minh Ước Hắc Thiết (IroncladPact): Quái & Lính nhận thêm 5% miễn thương vĩnh viễn
         if (augMgr != null && augMgr.HasIroncladPact)
         {
@@ -629,7 +631,6 @@ public class AugmentManager : MonoBehaviour
         }
 
         // 3. Diệt Khổng Lồ (Giant Slayer: Tăng thêm 25% sát thương lên Boss)
-        var augMgr = Instance;
         if (augMgr != null && augMgr.HasAugment(AugmentDatabase.AugmentType.GiantSlayer))
         {
             var bot = targetEnemy.GetComponent<BotWheelAI>();

@@ -14,3 +14,4 @@ public interface IEnemyHealth
     bool IsBoss { get; }
     void MultiplyHealth(float mult);
 }
+

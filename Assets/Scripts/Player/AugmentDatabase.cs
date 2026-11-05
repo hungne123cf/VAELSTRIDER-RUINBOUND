@@ -749,6 +749,90 @@ public static class AugmentDatabase
             emoji = "🔨", value = 3f, duration = -1f,
             heroFilter = new[] { CharacterManager.CHAR_TITAN_BERSERKER },
             cardColor = new Color(0.95f, 0.55f, 0.20f), rarity = AugmentData.Rarity.Epic
+        },
+
+        // =========================================================================
+        // ─── LÕI NÂNG CẤP MỚI & LÕI HAI MẶT ĐÁNH ĐỔI (CURSED & MECHANICS) ───────
+        // =========================================================================
+        new AugmentData {
+            type = AugmentType.PercentCurrentHpExecute,
+            nameVN = "Trảm Sát Trảm Kích",      nameEN = "Guillotine Execute",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Đòn đánh gây thêm sát thương bằng <color=#FFEAA7><b>50% Máu Hiện Tại</b></color> của kẻ địch.\n<color=#FDCB6E><b>[HẠN CHẾ]</b></color> Sát thương lên Boss tối đa <color=#FDCB6E><b>15% Max HP</b></color> (trần 1200 dmg).",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Attacks deal bonus damage equal to <color=#FFEAA7><b>50% Target Current HP</b></color>.\n<color=#FDCB6E><b>[LIMIT]</b></color> Capped at <color=#FDCB6E><b>15% Max HP</b></color> on Bosses (max 1200 dmg).",
+            flavorVN = "«Một trảm đoạn tuyệt sinh cơ, không màng giáp sắt hay khiên dày.»",
+            flavorEN = "«A single cleave that severs life itself, regardless of armor.»",
+            emoji = "⚔️", value = 50f, duration = -1f,
+            cardColor = new Color(0.96f, 0.26f, 0.21f), rarity = AugmentData.Rarity.Epic
+        },
+        new AugmentData {
+            type = AugmentType.GoldenSanctuary,
+            nameVN = "Kim Thân Bất Hoại",      nameEN = "Golden Sanctuary",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Mỗi <color=#FFEAA7><b>10 Giây</b></color> ban Hào Quang Vàng bọc thân, <color=#55EFC4><b>Miễn Nhiễm 100% Khống Chế</b></color> (Choáng, Băng, Nhện).\n<color=#FDCB6E><b>[CƠ CHẾ]</b></color> Tự động kích hoạt khi trúng đòn khống chế, sau đó đếm ngược 10s hồi lại.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Every <color=#FFEAA7><b>10s</b></color> grants Golden Aura, <color=#55EFC4><b>100% Immunity to CC</b></color> (Stun, Freeze, Web).\n<color=#FDCB6E><b>[MECHANIC]</b></color> Consumed on trigger, recharges after 10s cooldown.",
+            flavorVN = "«Thân như kim cương bất hoại, vạn tà bất xâm.»",
+            flavorEN = "«Body forged in diamond brilliance, impervious to all afflictions.»",
+            emoji = "🛡️", value = 10f, duration = -1f,
+            cardColor = new Color(1.00f, 0.82f, 0.20f), rarity = AugmentData.Rarity.Epic
+        },
+        new AugmentData {
+            type = AugmentType.CursedMight,
+            nameVN = "Khế Ước Cuồng Nộ",      nameEN = "Cursed Might",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận vĩnh viễn <color=#FFEAA7><b>+100 Sát Thương Đòn Đánh (ATK)</b></color>.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Toàn bộ Quái vật & Boss tăng thêm <color=#FF7675><b>+50% Máu Tối Đa & Hiện Tại</b></color>.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Permanently gain <color=#FFEAA7><b>+100 Attack Damage (ATK)</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> All Enemies & Bosses permanently gain <color=#FF7675><b>+50% Max HP</b></color>.",
+            flavorVN = "«Sức mạnh hủy diệt đổi lấy sự thức tỉnh của bầy quái hung bạo.»",
+            flavorEN = "«Catastrophic power granted at the cost of awakening monstrosities.»",
+            emoji = "🩸", value = 100f, duration = -1f,
+            cardColor = new Color(0.95f, 0.15f, 0.25f), rarity = AugmentData.Rarity.Epic
+        },
+        new AugmentData {
+            type = AugmentType.IroncladPact,
+            nameVN = "Minh Ước Hắc Thiết",      nameEN = "Ironclad Pact",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận thêm <color=#74B9FF><b>+50 Giáp Phòng Thủ</b></color>.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Quái & Lính nhận thêm <color=#FF7675><b>5% Miễn Thương</b></color> vĩnh viễn.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#74B9FF><b>+50 Armor Defense</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> All Minions & Monsters gain <color=#FF7675><b>+5% Damage Reduction</b></color>.",
+            flavorVN = "«Lớp giáp dày như thành lũy rèn từ quặng hắc thiết bị nguyền rủa.»",
+            flavorEN = "«Impenetrable fortress armor forged with cursed black iron.»",
+            emoji = "🛡️", value = 50f, duration = -1f,
+            cardColor = new Color(0.35f, 0.65f, 0.95f), rarity = AugmentData.Rarity.Rare
+        },
+        new AugmentData {
+            type = AugmentType.ChronoStasis,
+            nameVN = "Đầm Lầy Thời Không",    nameEN = "Chrono Stasis",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Toàn bộ quái vật bị <color=#00CEC9><b>Làm Chậm 35%</b></color> tốc đánh và di chuyển.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Bản thân bị <color=#FF7675><b>Giảm 50% Tốc Chạy</b></color>.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> All enemies suffer <color=#00CEC9><b>-35% Attack & Move Speed</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Hero's Move Speed is <color=#FF7675><b>Reduced by 50%</b></color>.",
+            flavorVN = "«Dòng chảy thời gian bị bóp méo, từng bước chân như chìm trong đầm lầy hắc ám.»",
+            flavorEN = "«Time itself turns viscous, drowning footsteps in the eternal mire.»",
+            emoji = "⏳", value = 35f, duration = -1f,
+            cardColor = new Color(0.00f, 0.85f, 0.85f), rarity = AugmentData.Rarity.Rare
+        },
+        new AugmentData {
+            type = AugmentType.BloodTitheBlade,
+            nameVN = "Ma Kiếm Huyết Tế",      nameEN = "Blood Tithe Blade",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận <color=#FFEAA7><b>+40 ATK</b></color> và <color=#55EFC4><b>+40% Hút Máu Toàn Phần</b></color>.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Ma kiếm ăn mòn sinh lực, <color=#FF7675><b>Mất 1% Máu mỗi giây</b></color> (tối thiểu 1 HP).",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#FFEAA7><b>+40 ATK</b></color> and <color=#55EFC4><b>+40% Omnivamp</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Drains <color=#FF7675><b>1% Max HP per second</b></color> (caps at 1 HP).",
+            flavorVN = "«Lưỡi kiếm uống máu của kẻ thù lẫn sinh lực của chủ nhân.»",
+            flavorEN = "«A thirsting blade that feeds equally upon its foes and bearer.»",
+            emoji = "🗡️", value = 40f, duration = -1f,
+            cardColor = new Color(0.95f, 0.15f, 0.20f), rarity = AugmentData.Rarity.Rare
+        },
+        new AugmentData {
+            type = AugmentType.GlassCannonTitan,
+            nameVN = "Bản Thể Thủy Tinh",      nameEN = "Glass Cannon Titan",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận <color=#FFEAA7><b>+75% Tỉ Lệ Crit</b></color> và <color=#FFEAA7><b>+80% Sát Thương Crit</b></color>.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Thân thể pha lê: <color=#FF7675><b>Nhận Thêm +30% Sát Thương</b></color> từ kẻ địch.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#FFEAA7><b>+75% Crit</b></color> and <color=#FFEAA7><b>+80% Crit DMG</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Fragile body takes <color=#FF7675><b>+30% More Damage</b></color> from enemies.",
+            flavorVN = "«Sắc bén khôn cùng nhưng mỏng manh tựa pha lê trước đòn thù.»",
+            flavorEN = "«Unmatched lethality encased in fragile crystalline glass.»",
+            emoji = "💎", value = 75f, duration = -1f,
+            cardColor = new Color(1.00f, 0.80f, 0.10f), rarity = AugmentData.Rarity.Epic
+        },
+        new AugmentData {
+            type = AugmentType.PhantomRush,
+            nameVN = "Bóng Ma Cuồng Nộ",      nameEN = "Phantom Rush",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận thêm <color=#74B9FF><b>+50% Hồi Chiêu (CDR)</b></color> mọi kỹ năng.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Hy sinh vĩnh viễn <color=#FF7675><b>25% Máu Tối Đa</b></color>.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#74B9FF><b>+50% Cooldown Reduction</b></color> across all abilities.\n<color=#FF7675><b>[CURSE]</b></color> Permanently sacrifice <color=#FF7675><b>25% Max HP</b></color>.",
+            flavorVN = "«Tốc biến xuất quỷ nhập thần đổi lấy sinh mệnh hao gầy.»",
+            flavorEN = "«Ghostly haste achieved by shaving away mortal vitality.»",
+            emoji = "⚡", value = 50f, duration = -1f,
+            cardColor = new Color(0.65f, 0.35f, 0.95f), rarity = AugmentData.Rarity.Rare
         }
     };
 
