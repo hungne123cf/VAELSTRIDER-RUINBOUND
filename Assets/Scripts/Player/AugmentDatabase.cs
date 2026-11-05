@@ -594,12 +594,12 @@ public static class AugmentDatabase
         new AugmentData {
             type = AugmentType.MagmaEruption,
             nameVN = "Hỏa Nham Bộc Phát",     nameEN = "Magma Eruption",
-            descVN = "Đòn đánh và kỹ năng tạo vệt <color=#EF4444><b>Dung Nham Thiêu Đốt</b></color> trong 3.5s, gây 40 sát thương/s và làm chậm <color=#F59E0B><b>35% Tốc Chạy</b></color> của kẻ địch!",
-            descEN = "Attacks and skills scorch the earth with <color=#EF4444><b>Molten Magma</b></color> for 3.5s, dealing 40 dmg/s and slowing by <color=#F59E0B><b>35%</b></color>!",
+            descVN = "Lướt và đòn đánh tạo vệt <color=#EF4444><b>Dung Nham Thiêu Đốt (Hellfire Trail)</b></color> thiêu rụi mặt đất, gây 40 sát thương/s và làm chậm <color=#F59E0B><b>35% Tốc Chạy</b></color>!",
+            descEN = "Dash and attacks scorch earth with <color=#EF4444><b>Hellfire Trail</b></color>, dealing 40 dmg/s and slowing by <color=#F59E0B><b>35%</b></color>!",
             flavorVN = "«Bước chân rực lửa nung chảy cả mặt đất hoang tàn.»",
             flavorEN = "«Blazing footsteps liquifying scorched earth beneath.»",
             emoji = "🌋", value = 40f, duration = -1f,
-            realmFilter = new[] { CalamityRealm.MagmaCalamity },
+            realmFilter = null,
             cardColor = new Color(0.95f, 0.45f, 0.15f), rarity = AugmentData.Rarity.Rare
         },
 
@@ -640,12 +640,12 @@ public static class AugmentDatabase
         new AugmentData {
             type = AugmentType.AbsoluteZeroNova,
             nameVN = "Hàn Băng Cực Độ",       nameEN = "Absolute Zero Nova",
-            descVN = "Đòn đánh có <color=#38BDF8><b>30%</b></color> cơ hội kích hoạt Hàn Băng Cực Độ, gây <color=#60A5FA><b>+95 Sát Thương Phép</b></color> và đóng băng kẻ địch trong 1.2s!",
-            descEN = "Attacks have a <color=#38BDF8><b>30%</b></color> chance to trigger Absolute Zero, dealing <color=#60A5FA><b>+95 Magic Damage</b></color> and freezing foes for 1.2s!",
+            descVN = "Đòn đánh có <color=#38BDF8><b>35%</b></color> tỉ lệ bộc phát <color=#38BDF8><b>Băng Vực Tuyệt Đối (Frost Nova)</b></color> nổ diện rộng gây 120 Sát Thương và <color=#0284C7><b>Đóng Băng</b></color> toàn bộ kẻ địch trong 1.8s!",
+            descEN = "Attacks have <color=#38BDF8><b>35%</b></color> chance to unleash <color=#38BDF8><b>Absolute Frost Nova</b></color> dealing 120 Magic Dmg and <color=#0284C7><b>Freezing</b></color> all nearby enemies for 1.8s!",
             flavorVN = "«Điểm không tuyệt đối làm đóng băng cả huyết quản đối thủ.»",
             flavorEN = "«Subzero frost crystallizing blood in victims veins.»",
             emoji = "🧊", value = 95f, duration = -1f,
-            realmFilter = new[] { CalamityRealm.FrostfallBlizzard },
+            realmFilter = null,
             cardColor = new Color(0.30f, 0.80f, 1f), rarity = AugmentData.Rarity.Rare
         },
 

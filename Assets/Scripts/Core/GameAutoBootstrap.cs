@@ -1193,6 +1193,18 @@ public class GameAutoBootstrap : MonoBehaviour
             BreakableProp.Create(new Vector3(5f, 4f, 0), BreakableProp.PropType.Foliage, 2, root.transform);
             BreakableProp.Create(new Vector3(-5f, -4f, 0), BreakableProp.PropType.Foliage, 3, root.transform);
         }
+        else if (currentScene.Contains("Map3"))
+        {
+            // Các cụm bình gốm cổ tàn tích tuyết lạnh Map 3
+            BreakableProp.Create(new Vector3(-5f, 2f, 0), BreakableProp.PropType.Pot, 0, root.transform);
+            BreakableProp.Create(new Vector3(-3f, -2f, 0), BreakableProp.PropType.Pot, 1, root.transform);
+            BreakableProp.Create(new Vector3(4f, 3f, 0), BreakableProp.PropType.Pot, 2, root.transform);
+            BreakableProp.Create(new Vector3(6f, -1f, 0), BreakableProp.PropType.Pot, 3, root.transform);
+            BreakableProp.Create(new Vector3(15f, 4f, 0), BreakableProp.PropType.Pot, 0, root.transform);
+            BreakableProp.Create(new Vector3(15f, -4f, 0), BreakableProp.PropType.Pot, 1, root.transform);
+            BreakableProp.Create(new Vector3(25f, 2f, 0), BreakableProp.PropType.Pot, 2, root.transform);
+            BreakableProp.Create(new Vector3(25f, -2f, 0), BreakableProp.PropType.Pot, 3, root.transform);
+        }
         else
         {
             // Map 1 (SampleScene)

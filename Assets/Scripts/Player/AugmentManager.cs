@@ -491,6 +491,18 @@ public class AugmentManager : MonoBehaviour
                 }
             }
         }
+    
+        // 5. Vệt Lửa Hư Không / Dung Nham Thiêu Đốt khi Lướt (Hellfire Dash Trail)
+        if (HasAugment(AugmentDatabase.AugmentType.MagmaEruption))
+        {
+            CombatBlessingFX.SpawnHellfirePatch(playerPos, duration: 2.8f, damagePerTick: 40);
+            var pc = Object.FindAnyObjectByType<PlayerController>();
+            if (pc != null)
+            {
+                Vector3 midPoint = (playerPos + pc.transform.position) * 0.5f;
+                CombatBlessingFX.SpawnHellfirePatch(midPoint, duration: 2.8f, damagePerTick: 40);
+            }
+        }
     }
 
     private IEnumerator TimedSpeedBuff(float frac, float dur)
@@ -740,13 +752,13 @@ public class AugmentManager : MonoBehaviour
             DamagePopup.Create(targetEnemy.transform.position + Vector3.up * 0.35f, burnDmg, DamageType.TrueDamage, isCritical: false);
         }
 
-        // 3. Lôi Đình Song Trảm (EchoStrike): Cơ hội giáng sấm sét lan
-        if (augMgr.HasEchoStrike() && UnityEngine.Random.value <= augMgr.EchoStrikeChance())
+        // 3. Lôi Đình Song Trảm & Quá Tải Lôi Quang (EchoStrike / StaticOverload): Phóng tia sét lan qua 3 kẻ địch xung quanh
+        bool isStaticOverload = augMgr.HasAugment(AugmentDatabase.AugmentType.StaticOverload);
+        float echoChance = isStaticOverload ? 0.35f : (augMgr.HasEchoStrike() ? augMgr.EchoStrikeChance() : 0f);
+        if ((augMgr.HasEchoStrike() || isStaticOverload) && UnityEngine.Random.value <= echoChance)
         {
-            int echoDmg = Mathf.RoundToInt(actualDamage * 0.65f);
-            damageable?.TakeDamage(echoDmg);
-            DamagePopup.Create(targetEnemy.transform.position + Vector3.up * 0.4f, echoDmg, DamageType.Magic, isCritical: false);
-            SoundManager.EnsureInstance()?.PlayChainLightning();
+            int echoDmg = Mathf.Max(25, Mathf.RoundToInt(actualDamage * 0.85f));
+            CombatBlessingFX.TriggerChainLightning(attacker, targetEnemy, echoDmg, maxChains: 3, chainRadius: 5.0f);
         }
 
         // 4. Vọng Âm Tinh Tú (CelestialCascade): Đòn thứ 3 gọi Mưa Thiên Thạch
@@ -767,19 +779,16 @@ public class AugmentManager : MonoBehaviour
             }
         }
 
-        // 6. Hỏa Nham Bộc Phát (MagmaEruption): Gây thêm 40 sát thương thiêu đốt & làm chậm 35%
+        // 6. Hỏa Nham Bộc Phát (MagmaEruption): Tạo vệt dung nham thiêu đốt dưới chân mục tiêu
         if (augMgr.HasAugment(AugmentDatabase.AugmentType.MagmaEruption))
         {
-            damageable?.TakeDamage(40);
-            DamagePopup.Create(targetEnemy.transform.position + Vector3.up * 0.45f, 40, DamageType.TrueDamage, isCritical: false);
+            CombatBlessingFX.SpawnHellfirePatch(targetEnemy.transform.position, duration: 2.8f, damagePerTick: 35);
         }
 
-        // 7. Hàn Băng Cực Độ (AbsoluteZeroNova): 30% cơ hội nổ Hàn Băng gây 95 dmg và đông cứng
-        if (augMgr.HasAugment(AugmentDatabase.AugmentType.AbsoluteZeroNova) && UnityEngine.Random.value <= 0.30f)
+        // 7. Hàn Băng Cực Độ (AbsoluteZeroNova): 35% cơ hội nổ Hàn Băng Vực Tuyệt Đối gây 120 dmg và đóng băng diện rộng trong 1.8s
+        if (augMgr.HasAugment(AugmentDatabase.AugmentType.AbsoluteZeroNova) && UnityEngine.Random.value <= 0.35f)
         {
-            damageable?.TakeDamage(95);
-            DamagePopup.Create(targetEnemy.transform.position + Vector3.up * 0.6f, 95, DamageType.Magic, isCritical: true);
-            EnemyFreezeEffect.ApplyFreeze(targetEnemy, 1.2f);
+            CombatBlessingFX.SpawnFrostNova(targetEnemy.transform.position, radius: 4.0f, freezeDuration: 1.8f, damage: 120);
         }
 
         // 8. Hoa Độc Bùng Nổ (VirulentBloom): Nọc độc cực mạnh & lây lan
