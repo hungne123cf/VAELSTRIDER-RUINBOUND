@@ -703,11 +703,11 @@ public static class AccountDatabase
                 var cm = CharacterManager.EnsureInstance();
                 if (cm != null)
                 {
-                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_GALE_RONIN)) acc.unlockedHeroes.Add("ronin");
-                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_AZURE_BLADE)) acc.unlockedHeroes.Add("azure");
-                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_TITAN_BERSERKER)) acc.unlockedHeroes.Add("titan");
-                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_DUNE_ASSASSIN)) acc.unlockedHeroes.Add("dune");
-                    if (cm.IsCharacterUnlocked(CharacterManager.CHAR_CELESTIAL_MAGE)) acc.unlockedHeroes.Add("mage");
+                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_GALE_RONIN)) acc.unlockedHeroes.Add("ronin");
+                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_AZURE_BLADE)) acc.unlockedHeroes.Add("azure");
+                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_TITAN_BERSERKER)) acc.unlockedHeroes.Add("titan");
+                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_DUNE_ASSASSIN)) acc.unlockedHeroes.Add("dune");
+                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_CELESTIAL_MAGE)) acc.unlockedHeroes.Add("mage");
                 }
 
                 acc.lastLoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

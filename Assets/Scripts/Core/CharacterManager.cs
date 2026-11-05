@@ -280,6 +280,22 @@ public class CharacterManager : MonoBehaviour
     public bool IsCharacterUnlocked(string id)
     {
         string normId = NormalizeHeroId(id);
+        // Tướng mặc định Vaelstrider luôn mở khóa trên mọi nền tảng
+        if (normId == CHAR_VAELSTRIDER) return true;
+
+        // TRÊN PC & UNITY EDITOR: Mở khóa toàn bộ 100% tướng để trải nghiệm và thử nghiệm tự do
+        if (Application.isEditor || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.LinuxPlayer)
+        {
+            return true;
+        }
+
+        // ĐỐI VỚI BẢN APK TẢI VỀ (Android Device): Khóa toàn bộ tướng, người chơi phải dùng Linh Hồn để mở khóa
+        return IsCharacterPurchased(normId);
+    }
+
+    public bool IsCharacterPurchased(string id)
+    {
+        string normId = NormalizeHeroId(id);
         if (normId == CHAR_VAELSTRIDER) return true;
         return PlayerPrefs.GetInt(UNLOCKED_PREFIX + normId, 0) == 1;
     }
