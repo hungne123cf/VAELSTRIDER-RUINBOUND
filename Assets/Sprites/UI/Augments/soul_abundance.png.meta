@@ -1,0 +1,57 @@
+fileFormatVersion: 2
+guid: a7fb4a16f78d35c9e21
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: []
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    linearTexture: 0
+    borderMipMap: 0
+    sRGBTexture: 1
+  bumpmap:
+    convertToNormalMap: 0
+    defaultWeight: 0.5
+  isReadable: 1
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
+  assetStoreMetaData:
+    assetStoreVersion: 1.0.0
+  textureFormat: 1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbook: 0
+  ignorePngGamma: 0
+  cookieLightType: 0
+  filterMode: 1
+  aniso: 1
+  mipBias: 0
+  wrapU: 1
+  wrapV: 1
+  wrapW: 1
+  normalMap: 0
+  lightmap: 0
+  alphaIsTransparency: 1
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1

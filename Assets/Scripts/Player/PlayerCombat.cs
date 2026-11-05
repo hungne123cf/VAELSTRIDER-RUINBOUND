@@ -958,7 +958,7 @@ public class PlayerCombat : MonoBehaviour
             var ronin = GetComponent<GaleRoninSkill>();
             if (ronin == null) ronin = gameObject.AddComponent<GaleRoninSkill>();
             ronin.enabled = true;
-            return ronin.TriggerSpecialSkill();
+            bool rRes = ronin.TriggerSpecialSkill(); if (rRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return rRes;
         }
 
         // Kích hoạt Tuyệt kỹ Azure Blade (Player 3)
@@ -967,7 +967,7 @@ public class PlayerCombat : MonoBehaviour
             var azureBlade = GetComponent<AzureBladeSkill>();
             if (azureBlade == null) azureBlade = gameObject.AddComponent<AzureBladeSkill>();
             azureBlade.enabled = true;
-            return azureBlade.TriggerSpecialSkill();
+            bool aRes = azureBlade.TriggerSpecialSkill(); if (aRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return aRes;
         }
 
         // Kích hoạt Tuyệt kỹ Titan Berserker (Player 4)
@@ -976,7 +976,7 @@ public class PlayerCombat : MonoBehaviour
             var titan = GetComponent<TitanBerserkerSkill>();
             if (titan == null) titan = gameObject.AddComponent<TitanBerserkerSkill>();
             titan.enabled = true;
-            return titan.TriggerSpecialSkill();
+            bool tRes = titan.TriggerSpecialSkill(); if (tRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return tRes;
         }
 
         // Kích hoạt Tuyệt kỹ Dune Assassin (Player 5)
@@ -985,7 +985,7 @@ public class PlayerCombat : MonoBehaviour
             var dune = GetComponent<DuneAssassinSkill>();
             if (dune == null) dune = gameObject.AddComponent<DuneAssassinSkill>();
             dune.enabled = true;
-            return dune.TriggerSpecialSkill();
+            bool dRes = dune.TriggerSpecialSkill(); if (dRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return dRes;
         }
 
         // Kích hoạt Tuyệt kỹ Celestial Mage (Player 6)
@@ -994,7 +994,7 @@ public class PlayerCombat : MonoBehaviour
             var mage = GetComponent<CelestialMageSkill>();
             if (mage == null) mage = gameObject.AddComponent<CelestialMageSkill>();
             mage.enabled = true;
-            return mage.TriggerSpecialSkill();
+            bool mRes = mage.TriggerSpecialSkill(); if (mRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return mRes;
         }
 
         // Kích hoạt Tuyệt kỹ Sweep The Weak nếu là Maid
@@ -1004,6 +1004,7 @@ public class PlayerCombat : MonoBehaviour
             var energySysMaid = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
             if (energySysMaid != null && !energySysMaid.TryConsumeEnergy(50f)) return false;
             StartCoroutine(sweepSkill.ExecuteSkillRoutine());
+            AugmentManager.Instance?.OnSkillCasted(transform.position);
             return true;
         }
 
@@ -1021,6 +1022,7 @@ public class PlayerCombat : MonoBehaviour
         lastSpecialSkillFrame = Time.frameCount;
 
         StartCoroutine(CinematicSpecialSkillRoutine());
+        AugmentManager.Instance?.OnSkillCasted(transform.position);
         return true;
     }
 

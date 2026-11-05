@@ -964,8 +964,8 @@ public class WanderingShopUI : MonoBehaviour
             iconName = "Star",
             augmentType = AugmentDatabase.AugmentType.ChronoStasis,
             titleVN = "Đầm Lầy Thời Không", titleEN = "Chrono Stasis",
-            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Toàn bộ quái vật bị <color=#00CEC9><b>Làm Chậm 35%</b></color> tốc đánh và di chuyển.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Bản thân bị <color=#FF7675><b>Giảm 50% Tốc Chạy</b></color>.",
-            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> All enemies suffer <color=#00CEC9><b>-35% Attack & Move Speed</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Hero's Move Speed is <color=#FF7675><b>Reduced by 50%</b></color>.",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Trong <color=#FFEAA7><b>60 Giây</b></color>, toàn bộ quái vật bị <color=#00CEC9><b>Làm Chậm 35%</b></color> tốc đánh, đạn bay và di chuyển.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Bản thân bị <color=#FF7675><b>Giảm 50% Tốc Chạy</b></color> trong thời gian hiệu lực.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> For <color=#FFEAA7><b>60s</b></color>, all enemies suffer <color=#00CEC9><b>-35% Attack & Projectile Speed & Move Speed</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Hero's Move Speed is <color=#FF7675><b>Reduced by 50%</b></color> for the duration.",
             flavorVN = "«Dòng chảy thời gian bị bóp méo, từng bước chân như chìm trong đầm lầy hắc ám.»",
             flavorEN = "«Time itself turns viscous, drowning footsteps in the eternal mire.»",
             cost = 250,
@@ -1035,6 +1035,48 @@ public class WanderingShopUI : MonoBehaviour
             onPurchase = () =>
             {
                 var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.PhantomRush);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_soul_abundance",
+            categoryVN = "LINH HỒN BỘI THU", categoryEN = "SOUL ABUNDANCE",
+            badgeColor = new Color(0.15f, 0.85f, 0.95f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Rare,
+            iconName = "Hero",
+            augmentType = AugmentDatabase.AugmentType.SoulHarvesterMultiplier,
+            titleVN = "Linh Hồn Bội Thu", titleEN = "Soul Abundance",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận thêm <color=#00FFFF><b>+50% Linh Hồn (x1.5 Lần)</b></color> từ mọi nguồn thu thập trong trận đấu.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#00FFFF><b>+50% More Shards (x1.5 Multiplier)</b></color> from all soul drops in battle.",
+            flavorVN = "«Linh khí đất trời hội tụ, mỗi tàn hồn tiêu tán đều kết tinh thành bảo vật.»",
+            flavorEN = "«Spiritual aether converges, condensing every fallen essence into crystal bounty.»",
+            cost = 280,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.SoulHarvesterMultiplier);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_skill_soul_burst",
+            categoryVN = "KHAI HOA LINH HỒN", categoryEN = "SKILL SOUL SURGE",
+            badgeColor = new Color(0.75f, 0.40f, 1.00f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Epic,
+            iconName = "Ulti",
+            augmentType = AugmentDatabase.AugmentType.SkillSoulSurge,
+            titleVN = "Khai Hoa Linh Hồn", titleEN = "Skill Soul Surge",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Mỗi khi thi triển <color=#FFEAA7><b>Tuyệt Kỹ / Kỹ Năng</b></color>, có <color=#A29BFE><b>50% Tỉ Lệ</b></color> khai mở bộc phát rơi ra <color=#00FFFF><b>3 đến 6 Mảnh Linh Hồn</b></color>.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Whenever casting a <color=#FFEAA7><b>Special Skill</b></color>, have a <color=#A29BFE><b>50% Chance</b></color> to surge and burst forth <color=#00FFFF><b>3-6 Aethel Shards</b></color>.",
+            flavorVN = "«Tuyệt kỹ xé rách ranh giới hư vô, giải phóng nguồn linh hồn ẩn sâu trong vạn vật.»",
+            flavorEN = "«Supreme prowess sunders the veil, releasing boundless dormant souls into the realm.»",
+            cost = 360,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.SkillSoulSurge);
                 if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
             }
         });
@@ -1890,8 +1932,8 @@ public class WanderingShopUI : MonoBehaviour
             var progObj = new GameObject("UpgradeTier");
             progObj.transform.SetParent(card.transform, false);
             var progRT = progObj.AddComponent<RectTransform>();
-            progRT.anchorMin = new Vector2(0.06f, 0.175f);
-            progRT.anchorMax = new Vector2(0.94f, 0.230f);
+            progRT.anchorMin = new Vector2(0.06f, 0.180f);
+            progRT.anchorMax = new Vector2(0.94f, 0.232f);
             progRT.offsetMin = progRT.offsetMax = Vector2.zero;
 
             var progTMP = progObj.AddComponent<TextMeshProUGUI>();
@@ -1905,8 +1947,8 @@ public class WanderingShopUI : MonoBehaviour
             var btnObj = new GameObject("BuyBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
             btnObj.transform.SetParent(card.transform, false);
             var btnRT = btnObj.GetComponent<RectTransform>();
-            btnRT.anchorMin = new Vector2(0.06f, 0.030f);
-            btnRT.anchorMax = new Vector2(0.94f, 0.165f);
+            btnRT.anchorMin = new Vector2(0.06f, 0.025f);
+            btnRT.anchorMax = new Vector2(0.94f, 0.155f);
             btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
             var btnImg = btnObj.GetComponent<Image>();

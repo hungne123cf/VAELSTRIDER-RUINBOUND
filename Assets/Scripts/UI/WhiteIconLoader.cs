@@ -217,7 +217,7 @@ public static class WhiteIconLoader
                 txtRt.offsetMax = new Vector2(-20f, 0f);
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.enableAutoSizing = true;
-                tmp.fontSizeMin = 18f;
+                tmp.fontSizeMin = 11f;
                 tmp.fontSizeMax = 32f;
                 tmp.enableWordWrapping = false;
                 tmp.overflowMode = TextOverflowModes.Ellipsis;
@@ -246,7 +246,6 @@ public static class WhiteIconLoader
             iconObj.transform.SetParent(btn.transform, false);
         }
 
-        iconObj.SetActive(true);
         RectTransform iconRt = iconObj.GetComponent<RectTransform>();
         if (iconOnLeft)
         {
@@ -266,10 +265,14 @@ public static class WhiteIconLoader
         }
 
         Image img = iconObj.GetComponent<Image>();
-        img.sprite = GetSprite(iconName);
+        Sprite iconSpr = GetSprite(iconName);
+        img.sprite = iconSpr;
         img.preserveAspect = true;
         img.color = iconColor ?? Color.white;
         img.raycastTarget = false;
+
+        // Nếu không tìm thấy sprite tương ứng, ẩn GameObject để tránh hiện ô chữ nhật đơn sắc
+        iconObj.SetActive(iconSpr != null);
 
         return img;
     }

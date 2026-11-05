@@ -93,6 +93,30 @@ public class AugmentManager : MonoBehaviour
     private bool hasIroncladPact       = false;
     public bool HasIroncladPact => hasIroncladPact;
 
+    // Soul Bounty & Surge Augments
+    private bool hasSoulHarvestMultiplier = false;
+    private bool hasSkillSoulSurge        = false;
+    public bool HasSoulMultiplier() => hasSoulHarvestMultiplier || HasAugment(AugmentDatabase.AugmentType.SoulHarvesterMultiplier);
+    public bool HasSkillSoulSurge() => hasSkillSoulSurge || HasAugment(AugmentDatabase.AugmentType.SkillSoulSurge);
+
+    public void OnSkillCasted(Vector3 playerPos)
+    {
+        if (!HasSkillSoulSurge()) return;
+
+        // 50% tỉ lệ kích hoạt rơi 3-6 mảnh Linh Hồn
+        if (Random.value <= 0.50f)
+        {
+            int shardCount = Random.Range(3, 7);
+            AethelShard.SpawnShards(playerPos, shardCount);
+            DamagePopup.CreateText(
+                playerPos + Vector3.up * 1.6f,
+                LocalizationManager.IsVietnamese ? $"+{shardCount} LINH HỒN [TUYỆT KỸ]" : $"+{shardCount} SOULS [SKILL SURGE]",
+                new Color(0.2f, 0.95f, 1f)
+            );
+            Debug.Log($"<color=cyan>[SKILL SOUL SURGE]</color> Tung chiêu bộc phát +{shardCount} mảnh Linh Hồn!");
+        }
+    }
+
     // Cached delegates
     private System.Action<GoblinAI>           _goblin;
     private System.Action<SkeletonAI>         _skeleton;
@@ -335,6 +359,8 @@ public class AugmentManager : MonoBehaviour
         hasSurgingPulse = false;
         hasBloodTitheBlade = false;
         bloodTitheTimer = 0f;
+        hasSoulHarvestMultiplier = false;
+        hasSkillSoulSurge = false;
         hasIroncladPact = false;
 
         StopAllCoroutines();
@@ -1154,6 +1180,18 @@ public class AugmentManager : MonoBehaviour
                     FlushStatsToHealth();
                 }
                 Debug.Log("<color=purple>[PHANTOM RUSH]</color> Nhận +50% CDR! Đã hy sinh 25% Máu tối đa!");
+                break;
+
+            case AugmentDatabase.AugmentType.SoulHarvesterMultiplier:
+                // Linh Hồn Bội Thu: Tăng x1.5 lần (+50%) toàn bộ Linh Hồn nhận được trong trận
+                hasSoulHarvestMultiplier = true;
+                Debug.Log("<color=cyan>[SOUL HARVEST SURGE]</color> Đã kích hoạt x1.5 Lần (+50%) toàn bộ Linh Hồn thu thập!");
+                break;
+
+            case AugmentDatabase.AugmentType.SkillSoulSurge:
+                // Khai Hoa Linh Hồn: Tung chiêu có 50% tỉ lệ tạo ra 3-6 mảnh Linh Hồn
+                hasSkillSoulSurge = true;
+                Debug.Log("<color=purple>[SKILL SOUL SURGE]</color> Đã kích hoạt Khai Hoa Linh Hồn: 50% tỉ lệ rơi 3-6 Linh Hồn khi tung chiêu!");
                 break;
 
             // ── Timed buffs (Cộng dồn thời gian nếu nhận lại cùng Lõi) ────────────

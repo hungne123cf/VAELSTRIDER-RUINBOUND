@@ -76,6 +76,12 @@ public class PlayerInventory : MonoBehaviour
     {
         if (amount <= 0) return;
 
+        // Lõi Linh Hồn Bội Thu: Tăng x1.5 Lần (+50%) toàn bộ Linh Hồn nhận được trong trận
+        if (IsBattleScene() && AugmentManager.Instance != null && AugmentManager.Instance.HasSoulMultiplier())
+        {
+            amount = Mathf.Max(1, Mathf.RoundToInt(amount * 1.5f));
+        }
+
         if (IsBattleScene())
         {
             currentRunShards += amount;

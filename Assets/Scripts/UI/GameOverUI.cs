@@ -136,16 +136,17 @@ public class GameOverUI : MonoBehaviour
         if (subtitleText != null) 
         {
             subtitleText.text = isVi ? "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này." : "Your journey ends here. Battle levels and augments only exist within this run.";
-            subtitleText.fontSize = 15f;
+            subtitleText.fontSize = 14f;
             subtitleText.enableAutoSizing = true;
-            subtitleText.fontSizeMin = 12f;
-            subtitleText.fontSizeMax = 16f;
+            subtitleText.fontSizeMin = 10f;
+            subtitleText.fontSizeMax = 15f;
             subtitleText.enableWordWrapping = false;
+            subtitleText.overflowMode = TextOverflowModes.Ellipsis;
             var sRt = subtitleText.rectTransform;
             if (sRt != null)
             {
-                sRt.sizeDelta = new Vector2(840f, 32f);
-                sRt.anchoredPosition = new Vector2(0f, 120f);
+                sRt.sizeDelta = new Vector2(860f, 28f);
+                sRt.anchoredPosition = new Vector2(0f, 115f);
             }
         }
 
@@ -164,6 +165,13 @@ public class GameOverUI : MonoBehaviour
                 ? $"<color=#00FFFF><b>LINH HỒN: {shards:N0}</b></color>"
                 : $"<color=#00FFFF><b>AETHEL SHARDS: {shards:N0}</b></color>";
             respawnStatusText.color = Color.white;
+            respawnStatusText.enableWordWrapping = false;
+            var stRt = respawnStatusText.rectTransform;
+            if (stRt != null)
+            {
+                stRt.sizeDelta = new Vector2(780f, 36f);
+                stRt.anchoredPosition = new Vector2(0f, 68f);
+            }
         }
 
         // 1. Nút Chơi lại run mới từ đầu
@@ -516,15 +524,16 @@ public class GameOverUI : MonoBehaviour
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRect = subObj.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 120);
-        subRect.sizeDelta = new Vector2(840, 32);
+        subRect.anchoredPosition = new Vector2(0, 115);
+        subRect.sizeDelta = new Vector2(860, 28);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         subTmp.text = "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này.";
-        subTmp.fontSize = 15f;
+        subTmp.fontSize = 14f;
         subTmp.enableAutoSizing = true;
-        subTmp.fontSizeMin = 12f;
-        subTmp.fontSizeMax = 16f;
+        subTmp.fontSizeMin = 10f;
+        subTmp.fontSizeMax = 15f;
         subTmp.enableWordWrapping = false;
+        subTmp.overflowMode = TextOverflowModes.Ellipsis;
         subTmp.color = new Color(0.75f, 0.78f, 0.86f);
         subTmp.alignment = TextAlignmentOptions.Center;
         Instance.subtitleText = subTmp;
@@ -534,8 +543,8 @@ public class GameOverUI : MonoBehaviour
         statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
         RectTransform statusRect = statusObj.GetComponent<RectTransform>();
-        statusRect.anchoredPosition = new Vector2(0, 75);
-        statusRect.sizeDelta = new Vector2(780, 40);
+        statusRect.anchoredPosition = new Vector2(0, 68);
+        statusRect.sizeDelta = new Vector2(780, 36);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
         statusTmp.fontSize = 24f;
         statusTmp.fontStyle = FontStyles.Bold;

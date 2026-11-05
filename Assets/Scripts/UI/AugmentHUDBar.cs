@@ -1431,6 +1431,7 @@ public class AugmentHUDBar : MonoBehaviour
             if (aug.duration > 0f)
             {
                 float rem = AugmentManager.Instance != null ? AugmentManager.Instance.GetRemainingDurationByType(type) : aug.duration;
+                if (rem <= 0f) rem = aug.duration;
                 string remStr = rem >= 10f ? $"{Mathf.CeilToInt(rem)}s" : $"{rem:0.#}s";
                 statusTmp.text = $"<size=11><color=#94A3B8>{(isVi ? "Thời gian" : "Duration")}</color></size>\n<size=14><b><color=#55EFC4>{remStr}</color></b></size>";
             }

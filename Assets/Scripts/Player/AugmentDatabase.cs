@@ -96,7 +96,9 @@ public static class AugmentDatabase
         ChronoStasis,            // Đầm Lầy Thời Không: Quái bị làm chậm 35% tốc đánh & di chuyển, nhưng bạn giảm 50% tốc chạy
         BloodTitheBlade,         // Ma Kiếm Huyết Tế: +40 ATK, +40% Hút Máu, nhưng mất 1% HP mỗi giây
         GlassCannonTitan,        // Bản Thể Thủy Tinh: +75% Tỉ lệ Crit, +80% Sát thương Crit, nhưng nhận thêm +30% Sát thương
-        PhantomRush              // Bóng Ma Cuồng Nộ: +50% Giảm Hồi Chiêu (CDR), nhưng giảm 25% Máu tối đa
+        PhantomRush,             // Bóng Ma Cuồng Nộ: +50% Giảm Hồi Chiêu (CDR), nhưng giảm 25% Máu tối đa
+        SoulHarvesterMultiplier, // Linh Hồn Bội Thu: Tăng x1.5 lần (+50%) toàn bộ Linh Hồn nhận được trong trận
+        SkillSoulSurge           // Khai Hoa Linh Hồn: Tung chiêu có 50% tỉ lệ tạo ra 3-6 mảnh Linh Hồn
     }
 
     public class AugmentData
@@ -833,6 +835,26 @@ public static class AugmentDatabase
             flavorEN = "«Ghostly haste achieved by shaving away mortal vitality.»",
             emoji = "⚡", value = 50f, duration = -1f,
             cardColor = new Color(0.65f, 0.35f, 0.95f), rarity = AugmentData.Rarity.Rare
+        },
+        new AugmentData {
+            type = AugmentType.SoulHarvesterMultiplier,
+            nameVN = "Linh Hồn Bội Thu",      nameEN = "Soul Abundance",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận thêm <color=#00FFFF><b>+50% Linh Hồn (x1.5 Lần)</b></color> từ mọi nguồn thu thập trong trận đấu.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#00FFFF><b>+50% More Shards (x1.5 Multiplier)</b></color> from all soul drops in battle.",
+            flavorVN = "«Linh khí đất trời hội tụ, mỗi tàn hồn tiêu tán đều kết tinh thành bảo vật.»",
+            flavorEN = "«Spiritual aether converges, condensing every fallen essence into crystal bounty.»",
+            emoji = "💠", value = 1.5f, duration = -1f,
+            cardColor = new Color(0.15f, 0.85f, 0.95f), rarity = AugmentData.Rarity.Rare
+        },
+        new AugmentData {
+            type = AugmentType.SkillSoulSurge,
+            nameVN = "Khai Hoa Linh Hồn",      nameEN = "Skill Soul Surge",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Mỗi khi thi triển <color=#FFEAA7><b>Tuyệt Kỹ / Kỹ Năng</b></color>, có <color=#A29BFE><b>50% Tỉ Lệ</b></color> khai mở bộc phát rơi ra <color=#00FFFF><b>3 đến 6 Mảnh Linh Hồn</b></color>.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Whenever casting a <color=#FFEAA7><b>Special Skill</b></color>, have a <color=#A29BFE><b>50% Chance</b></color> to surge and burst forth <color=#00FFFF><b>3-6 Aethel Shards</b></color>.",
+            flavorVN = "«Tuyệt kỹ xé rách ranh giới hư vô, giải phóng nguồn linh hồn ẩn sâu trong vạn vật.»",
+            flavorEN = "«Supreme prowess sunders the veil, releasing boundless dormant souls into the realm.»",
+            emoji = "✨", value = 50f, duration = -1f,
+            cardColor = new Color(0.75f, 0.40f, 1.00f), rarity = AugmentData.Rarity.Epic
         }
     };
 
@@ -895,6 +917,8 @@ public static class AugmentDatabase
             case AugmentType.BloodTitheBlade:
             case AugmentType.GlassCannonTitan:
             case AugmentType.PhantomRush:
+            case AugmentType.SoulHarvesterMultiplier:
+            case AugmentType.SkillSoulSurge:
                 return true;
             default:
                 return false;

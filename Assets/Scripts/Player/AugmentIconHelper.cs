@@ -169,6 +169,10 @@ public static class AugmentIconHelper
                 return "glass_cannon.png";
             case AugmentDatabase.AugmentType.PhantomRush:
                 return "phantom_rush.png";
+            case AugmentDatabase.AugmentType.SoulHarvesterMultiplier:
+                return "soul_abundance.png";
+            case AugmentDatabase.AugmentType.SkillSoulSurge:
+                return "skill_soul_burst.png";
 
             default:
                 return "sword_slash.png";
