@@ -560,11 +560,18 @@ public class PlayerCombat : MonoBehaviour
                         }
                         roninSkill.UpdateIaidoCharge(aimDir, attackHoldDuration);
                     }
-                    else if (attackHoldDuration >= 0.15f)
+                    else
                     {
-                        if (playerController != null) playerController.SetFacingDirection(aimDir);
-                        Vector2 playerPos = (Vector2)transform.position;
-                        SkillAimIndicator.EnsureExists(gameObject)?.ShowAimArc(playerPos, aimDir, roninSkill.SlashRadius, 180f, new Color(0.15f, 0.95f, 0.85f, 0.85f));
+                        if (roninSkill.IsChargingIaido)
+                        {
+                            roninSkill.CancelIaidoCharge();
+                        }
+                        if (attackHoldDuration >= 0.15f)
+                        {
+                            if (playerController != null) playerController.SetFacingDirection(aimDir);
+                            Vector2 playerPos = (Vector2)transform.position;
+                            SkillAimIndicator.EnsureExists(gameObject)?.ShowAimArc(playerPos, aimDir, roninSkill.SlashRadius, 180f, new Color(0.15f, 0.95f, 0.85f, 0.85f));
+                        }
                     }
                 }
                 else if (titan == null && azureBlade == null && roninSkill == null && duneSkill == null && mageSkill == null)

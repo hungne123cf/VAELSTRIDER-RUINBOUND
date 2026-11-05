@@ -503,7 +503,17 @@ public class PlayerController : MonoBehaviour
         {
             float curSpeed = moveSpeed;
             var ronin = GetComponent<GaleRoninSkill>();
-            if (ronin != null && ronin.IsChargingIaido) curSpeed *= 0.5f;
+            if (ronin != null && ronin.IsChargingIaido)
+            {
+                if (!ronin.CanUseIaidoCharge)
+                {
+                    ronin.CancelIaidoCharge();
+                }
+                else
+                {
+                    curSpeed *= 0.5f;
+                }
+            }
             rb.linearVelocity = moveInput * curSpeed;
         }
     }
@@ -551,7 +561,17 @@ public class PlayerController : MonoBehaviour
         {
             float curSpeed = moveSpeed;
             var ronin = GetComponent<GaleRoninSkill>();
-            if (ronin != null && ronin.IsChargingIaido) curSpeed *= 0.5f;
+            if (ronin != null && ronin.IsChargingIaido)
+            {
+                if (!ronin.CanUseIaidoCharge)
+                {
+                    ronin.CancelIaidoCharge();
+                }
+                else
+                {
+                    curSpeed *= 0.5f;
+                }
+            }
             rb.linearVelocity = moveInput * curSpeed;
         }
         UpdateAnimations();

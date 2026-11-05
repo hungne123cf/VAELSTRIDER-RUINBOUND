@@ -156,6 +156,12 @@ public class GaleRoninSkill : MonoBehaviour
         // Dọn dẹp các mục tiêu đã hết hạn dấu ấn (sau 6s không bị đánh)
         CleanupExpiredMarks();
 
+        // Tự động hủy gồng tụ lực và khôi phục 100% tốc độ di chuyển khi hết hoặc vỡ khiên
+        if (isChargingIaido && !CanUseIaidoCharge)
+        {
+            CancelIaidoCharge();
+        }
+
         // PC Key test
         if (Input.GetKeyDown(KeyCode.K) || Input.GetKeyDown(KeyCode.Alpha2))
         {
@@ -383,6 +389,7 @@ public class GaleRoninSkill : MonoBehaviour
         hasPlayedMaxGlint = false;
         DestroyChargeAura();
         SkillAimIndicator.Instance?.Hide();
+        if (playerController != null) playerController.RefreshMoveInput();
     }
 
     public void ReleaseIaidoCharge(Vector2 aimDir, int bonusAtkDamage)

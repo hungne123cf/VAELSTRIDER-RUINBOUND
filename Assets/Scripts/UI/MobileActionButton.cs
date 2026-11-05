@@ -181,7 +181,21 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 {
                     float holdDur = Time.time - pointerDownTime;
                     Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
-                    if (holdDur >= 0.15f || currentDragAimDir.sqrMagnitude > 0.01f)
+                    Vector2 playerPos = (Vector2)playerCombat.transform.position;
+
+                    // 1. Kéo joystick định hướng bắn đạn sao (Aim Line Indicator)
+                    if (currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        if (playerController != null) playerController.SetFacingDirection(aimDir);
+                        if (mage.IsChargingBarrier)
+                        {
+                            mage.ReleaseBarrierCharge(aimDir, 0);
+                        }
+                        SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimLine(playerPos, aimDir, 10.5f, new Color(0.85f, 0.45f, 1f, 0.85f), 0.22f);
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                    }
+                    // 2. Nhấn giữ tại chỗ >= 0.35s: Tụ lực Khiên Tinh Tú & Vụ Nổ Thiên Quang (Astral Aegis Nova)
+                    else if (holdDur >= 0.35f)
                     {
                         if (playerController != null) playerController.SetFacingDirection(aimDir);
                         if (!mage.IsChargingBarrier && mage.IsAttackReady)
@@ -190,7 +204,6 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         }
                         mage.UpdateBarrierCharge(aimDir, holdDur);
 
-                        Vector2 playerPos = (Vector2)playerCombat.transform.position;
                         float novaRadius = 2.6f + Mathf.Clamp01(holdDur / mage.maxChargeDuration) * 1.6f;
                         SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, novaRadius, new Color(0.85f, 0.35f, 1f, 0.85f));
                         SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
@@ -1946,12 +1959,16 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
             if (mageSkill != null && mageSkill.enabled)
             {
-                if (mageSkill.IsChargingBarrier)
+                if (mageSkill.IsChargingBarrier && holdDur >= 0.35f && currentDragAimDir.sqrMagnitude <= 0.01f)
                 {
                     mageSkill.ReleaseBarrierCharge(aimDir, bonusAtk);
                 }
                 else
                 {
+                    if (mageSkill.IsChargingBarrier)
+                    {
+                        mageSkill.ReleaseBarrierCharge(aimDir, 0);
+                    }
                     if (currentDragAimDir.sqrMagnitude > 0.01f && playerController != null)
                     {
                         playerController.SetFacingDirection(currentDragAimDir);

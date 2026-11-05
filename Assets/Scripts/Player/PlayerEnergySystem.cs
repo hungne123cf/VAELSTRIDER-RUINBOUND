@@ -258,7 +258,13 @@ public class PlayerEnergySystem : MonoBehaviour
 
         isShieldActive = false;
         currentShieldHealth = 0;
-        currentInnerEnergy = 0f; // Reset ve 0 de tiep tuc tich luy cho lan sau
+        currentInnerEnergy = 0f;
+
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null && ronin.IsChargingIaido)
+        {
+            ronin.CancelIaidoCharge();
+        } // Reset ve 0 de tiep tuc tich luy cho lan sau
 
         if (shieldVisual != null)
         {

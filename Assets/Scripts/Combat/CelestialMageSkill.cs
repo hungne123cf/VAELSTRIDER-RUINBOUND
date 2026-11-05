@@ -302,6 +302,7 @@ public class CelestialMageSkill : MonoBehaviour
 
     private float animTimer = 0f;
     private int animIndex = 0;
+    private bool wasMoving = false;
 
     void LateUpdate()
     {
@@ -342,15 +343,25 @@ public class CelestialMageSkill : MonoBehaviour
         if (currentActionState != MageAnimState.Idle) return;
 
         bool isMoving = (playerController != null && playerController.IsMoving);
+        if (wasMoving != isMoving)
+        {
+            wasMoving = isMoving;
+            animIndex = 0;
+            animTimer = 0f;
+        }
+
         Sprite[] frames = isMoving ? walkFrames : idleFrames;
+        if (frames == null || frames.Length == 0) frames = isMoving ? idleFrames : walkFrames;
+        if (frames == null || frames.Length == 0) return;
+
         // ĐỒNG BỘ TỐC ĐỘ HOẠT ẢNH BƯỚC ĐI TƯƠNG THÍCH 100% VỚI TỐC ĐỘ DI CHUYỂN HIỆN TẠI (Celestial Mage)
+        // 1 chu kỳ bước đi đầy đủ (18 frames) hoàn tất nhanh chóng trong ~0.40s ở tốc độ chạy cơ bản
         float speedRatio = (playerController != null && playerController.MoveSpeed > 0.1f)
             ? (playerController.MoveSpeed / 4.8f)
             : 1.0f;
-        float frameInterval = isMoving ? (0.075f / Mathf.Clamp(speedRatio, 0.5f, 3.0f)) : 0.10f;
-
-        if (frames == null || frames.Length == 0) frames = idleFrames;
-        if (frames == null || frames.Length == 0) return;
+        float frameInterval = isMoving 
+            ? ((0.40f / Mathf.Max(1, frames.Length)) / Mathf.Clamp(speedRatio, 0.5f, 3.0f))
+            : (1.0f / Mathf.Max(1, frames.Length));
 
         animTimer += Time.deltaTime;
         if (animTimer >= frameInterval)
@@ -610,7 +621,7 @@ public class CelestialMageSkill : MonoBehaviour
         }
 
         float chargeRatio = Mathf.Clamp01(currentChargeDuration / maxChargeDuration);
-        if (chargeRatio >= 0.18f)
+        if (chargeRatio >= 0.18f && bonusDamage > 0)
         {
             var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
             if (energySys != null && !energySys.TryConsumeEnergy(20f))
@@ -1113,7 +1124,13 @@ public class CelestialMageSkill : MonoBehaviour
         if (idleFrames == null || idleFrames.Length == 0)
         {
             var resIdle = Resources.LoadAll<Sprite>("Player6/Sprites/idle/sprite sheets/idle");
-            if (resIdle != null && resIdle.Length > 0) idleFrames = resIdle;
+            if (resIdle == null || resIdle.Length == 0) resIdle = Resources.LoadAll<Sprite>("Player6/idle/sprite sheets/idle");
+            if (resIdle != null && resIdle.Length > 0)
+            {
+                var sorted = new List<Sprite>(resIdle);
+                sorted.Sort((a, b) => NaturalCompare(a.name, b.name));
+                idleFrames = sorted.ToArray();
+            }
 
 #if UNITY_EDITOR
             if (idleFrames == null || idleFrames.Length == 0)
@@ -1123,7 +1140,11 @@ public class CelestialMageSkill : MonoBehaviour
                 {
                     List<Sprite> list = new List<Sprite>();
                     foreach (var a in idleAssets) if (a is Sprite s) list.Add(s);
-                    if (list.Count > 0) idleFrames = list.ToArray();
+                    if (list.Count > 0)
+                    {
+                        list.Sort((a, b) => NaturalCompare(a.name, b.name));
+                        idleFrames = list.ToArray();
+                    }
                 }
             }
 #endif
@@ -1136,7 +1157,13 @@ public class CelestialMageSkill : MonoBehaviour
         if (walkFrames == null || walkFrames.Length == 0)
         {
             var resWalk = Resources.LoadAll<Sprite>("Player6/Sprites/walk/sprite sheets/walk");
-            if (resWalk != null && resWalk.Length > 0) walkFrames = resWalk;
+            if (resWalk == null || resWalk.Length == 0) resWalk = Resources.LoadAll<Sprite>("Player6/walk/sprite sheets/walk");
+            if (resWalk != null && resWalk.Length > 0)
+            {
+                var sorted = new List<Sprite>(resWalk);
+                sorted.Sort((a, b) => NaturalCompare(a.name, b.name));
+                walkFrames = sorted.ToArray();
+            }
 
 #if UNITY_EDITOR
             if (walkFrames == null || walkFrames.Length == 0)
@@ -1146,7 +1173,11 @@ public class CelestialMageSkill : MonoBehaviour
                 {
                     List<Sprite> list = new List<Sprite>();
                     foreach (var a in walkAssets) if (a is Sprite s) list.Add(s);
-                    if (list.Count > 0) walkFrames = list.ToArray();
+                    if (list.Count > 0)
+                    {
+                        list.Sort((a, b) => NaturalCompare(a.name, b.name));
+                        walkFrames = list.ToArray();
+                    }
                 }
             }
 #endif
@@ -1181,34 +1212,34 @@ public class CelestialMageSkill : MonoBehaviour
             ultiFrames = LoadFramesFromFolder("Assets/ART/Player6/sample(idle&walk)/ulti", "ulti");
         }
 
-        // Tải 7 Bộ Hiệu Ứng Pixel VFX Chuyên Nghiệp từ Assets/ART/Player6/VFX/
+        // Tải 7 Bộ Hiệu Ứng Pixel VFX Chuyên Nghiệp từ Resources Player6/VFX/
         if (vfxCastMuzzleFlashFrames == null || vfxCastMuzzleFlashFrames.Length == 0)
         {
-            vfxCastMuzzleFlashFrames = LoadFramesFromFolder("Assets/ART/Player6/VFX/CastMuzzleFlash", "frame");
+            vfxCastMuzzleFlashFrames = LoadFramesFromFolder("CastMuzzleFlash", "frame");
         }
         if (vfxHitImpactFrames == null || vfxHitImpactFrames.Length == 0)
         {
-            vfxHitImpactFrames = LoadFramesFromFolder("Assets/ART/Player6/VFX/HitImpact", "frame");
+            vfxHitImpactFrames = LoadFramesFromFolder("HitImpact", "frame");
         }
         if (vfxAstralAegisFrames == null || vfxAstralAegisFrames.Length == 0)
         {
-            vfxAstralAegisFrames = LoadFramesFromFolder("Assets/ART/Player6/VFX/AstralAegis", "frame");
+            vfxAstralAegisFrames = LoadFramesFromFolder("AstralAegis", "frame");
         }
         if (vfxNovaBurstFrames == null || vfxNovaBurstFrames.Length == 0)
         {
-            vfxNovaBurstFrames = LoadFramesFromFolder("Assets/ART/Player6/VFX/NovaBurst", "frame");
+            vfxNovaBurstFrames = LoadFramesFromFolder("NovaBurst", "frame");
         }
         if (vfxBlinkWarpFrames == null || vfxBlinkWarpFrames.Length == 0)
         {
-            vfxBlinkWarpFrames = LoadFramesFromFolder("Assets/ART/Player6/VFX/BlinkWarp", "frame");
+            vfxBlinkWarpFrames = LoadFramesFromFolder("BlinkWarp", "frame");
         }
         if (vfxMeteorRuneFrames == null || vfxMeteorRuneFrames.Length == 0)
         {
-            vfxMeteorRuneFrames = LoadFramesFromFolder("Assets/ART/Player6/VFX/MeteorRune", "frame");
+            vfxMeteorRuneFrames = LoadFramesFromFolder("MeteorRune", "frame");
         }
         if (vfxMeteorExplosionFrames == null || vfxMeteorExplosionFrames.Length == 0)
         {
-            vfxMeteorExplosionFrames = LoadFramesFromFolder("Assets/ART/Player6/VFX/MeteorExplosion", "frame");
+            vfxMeteorExplosionFrames = LoadFramesFromFolder("MeteorExplosion", "frame");
         }
     }
 
@@ -1229,27 +1260,64 @@ public class CelestialMageSkill : MonoBehaviour
         return vfxObj;
     }
 
+    public static int NaturalCompare(string a, string b)
+    {
+        if (a == b) return 0;
+        if (a == null) return -1;
+        if (b == null) return 1;
+
+        int numA = ExtractNumber(a);
+        int numB = ExtractNumber(b);
+        if (numA != numB) return numA.CompareTo(numB);
+        return string.Compare(a, b, System.StringComparison.Ordinal);
+    }
+
+    private static int ExtractNumber(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return 0;
+        var match = System.Text.RegularExpressions.Regex.Match(s, @"\d+");
+        if (match.Success && int.TryParse(match.Value, out int n)) return n;
+        return 0;
+    }
+
     public static Sprite[] LoadFramesFromFolder(string folderPath, string prefix)
     {
         List<Sprite> list = new List<Sprite>();
-        string sub = folderPath.Replace("Assets/ART/Player6/sample(idle&walk)/", "").Replace("Assets/ART/Player6/", "");
-        var resFrames = Resources.LoadAll<Sprite>("Player6/Sprites/" + sub);
+        string cleanFolder = folderPath.Replace("\\", "/").TrimEnd('/');
+        string folderOnly = System.IO.Path.GetFileName(cleanFolder);
+        string sub = cleanFolder.Replace("Assets/ART/Player6/sample(idle&walk)/", "")
+                                .Replace("Assets/ART/Player6/VFX/", "")
+                                .Replace("Assets/ART/Player6/", "")
+                                .Replace("Assets/Resources/Player6/Sprites/VFX/", "")
+                                .Replace("Assets/Resources/Player6/Sprites/", "")
+                                .Replace("Assets/Resources/Player6/VFX/", "")
+                                .Replace("Assets/Resources/Player6/", "");
+
+        // 1. Ưu tiên nạp từ Resources (Tương thích 100% Android APK - Zero Bug)
+        Sprite[] resFrames = Resources.LoadAll<Sprite>("Player6/VFX/" + folderOnly);
+        if (resFrames == null || resFrames.Length == 0)
+            resFrames = Resources.LoadAll<Sprite>("Player6/Sprites/VFX/" + folderOnly);
+        if (resFrames == null || resFrames.Length == 0)
+            resFrames = Resources.LoadAll<Sprite>("Player6/Sprites/" + sub);
+        if (resFrames == null || resFrames.Length == 0)
+            resFrames = Resources.LoadAll<Sprite>("Player6/" + sub);
+        if (resFrames == null || resFrames.Length == 0)
+            resFrames = Resources.LoadAll<Sprite>("Player6/Sprites/" + folderOnly);
+        if (resFrames == null || resFrames.Length == 0)
+            resFrames = Resources.LoadAll<Sprite>(sub);
+
         if (resFrames != null && resFrames.Length > 0)
         {
             var sorted = new List<Sprite>(resFrames);
-            sorted.Sort((a, b) => string.Compare(a.name, b.name, System.StringComparison.Ordinal));
+            sorted.Sort((a, b) => NaturalCompare(a.name, b.name));
             return sorted.ToArray();
         }
 
 #if UNITY_EDITOR
-        if (System.IO.Directory.Exists(folderPath))
+        if (System.IO.Directory.Exists(cleanFolder))
         {
-            var files = System.IO.Directory.GetFiles(folderPath, prefix + "*.png");
-            System.Array.Sort(files, (a, b) => {
-                string fA = System.IO.Path.GetFileNameWithoutExtension(a);
-                string fB = System.IO.Path.GetFileNameWithoutExtension(b);
-                return string.Compare(fA, fB, System.StringComparison.Ordinal);
-            });
+            var files = System.IO.Directory.GetFiles(cleanFolder, prefix + "*.png");
+            System.Array.Sort(files, (a, b) => NaturalCompare(System.IO.Path.GetFileNameWithoutExtension(a), System.IO.Path.GetFileNameWithoutExtension(b)));
 
             foreach (var f in files)
             {
@@ -1260,15 +1328,11 @@ public class CelestialMageSkill : MonoBehaviour
 #endif
         if (list.Count == 0)
         {
-            string fullDir = System.IO.Path.Combine(Application.dataPath, folderPath.Replace("Assets/", ""));
+            string fullDir = System.IO.Path.Combine(Application.dataPath, cleanFolder.Replace("Assets/", ""));
             if (System.IO.Directory.Exists(fullDir))
             {
                 var files = System.IO.Directory.GetFiles(fullDir, prefix + "*.png");
-                System.Array.Sort(files, (a, b) => {
-                    string fA = System.IO.Path.GetFileNameWithoutExtension(a);
-                    string fB = System.IO.Path.GetFileNameWithoutExtension(b);
-                    return string.Compare(fA, fB, System.StringComparison.Ordinal);
-                });
+                System.Array.Sort(files, (a, b) => NaturalCompare(System.IO.Path.GetFileNameWithoutExtension(a), System.IO.Path.GetFileNameWithoutExtension(b)));
 
                 foreach (var f in files)
                 {
