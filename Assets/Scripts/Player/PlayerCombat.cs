@@ -1346,7 +1346,8 @@ public class PlayerCombat : MonoBehaviour
 
     public void AutoAlignCombat()
     {
-        string curChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        var cm = CharacterManager.EnsureInstance();
+        string curChar = (cm != null) ? cm.GetSelectedCharacterId() : PlayerPrefs.GetString("Selected_Character_ID", CharacterManager.CHAR_VAELSTRIDER);
         bool isTitan = (curChar == CharacterManager.CHAR_TITAN_BERSERKER || GetComponent<TitanBerserkerSkill>() != null);
         bool isVaelstrider = (curChar == CharacterManager.CHAR_VAELSTRIDER);
         bool isRonin = (curChar == CharacterManager.CHAR_GALE_RONIN || GetComponent<GaleRoninSkill>() != null);
@@ -2218,6 +2219,7 @@ public class PlayerCombat : MonoBehaviour
 #if UNITY_EDITOR
     void OnValidate()
     {
+        if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode || UnityEditor.BuildPipeline.isBuildingPlayer) return;
         AutoAlignCombat();
     }
 #endif

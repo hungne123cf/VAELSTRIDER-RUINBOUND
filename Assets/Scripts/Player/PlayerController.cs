@@ -947,6 +947,7 @@ public class PlayerController : MonoBehaviour
 #if UNITY_EDITOR
     void OnValidate()
     {
+        if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode || UnityEditor.BuildPipeline.isBuildingPlayer) return;
         AutoAlignCollider();
     }
 #endif
