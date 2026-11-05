@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
-public class SkeletonKingBossAI : MonoBehaviour, IDamageable
+public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<SkeletonKingBossAI> OnBossDied;
 
@@ -810,4 +810,15 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable
 
         AethelShard.SpawnShards(centerPos, 30);
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => phaseMaxHealth;
+    public bool IsBoss => true;
+    public void MultiplyHealth(float mult)
+    {
+        phaseMaxHealth = Mathf.RoundToInt(phaseMaxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

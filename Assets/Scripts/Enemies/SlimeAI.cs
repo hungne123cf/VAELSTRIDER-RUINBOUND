@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
-public class SlimeAI : MonoBehaviour, IDamageable
+public class SlimeAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<SlimeAI> OnEnemyDied;
 
@@ -225,4 +225,15 @@ public class SlimeAI : MonoBehaviour, IDamageable
         OnEnemyDied?.Invoke(this);
         Destroy(gameObject, 0.8f);
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => false;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

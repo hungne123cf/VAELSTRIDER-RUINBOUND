@@ -8,7 +8,7 @@ using System.Collections.Generic;
 /// Co co che vung canh bao mau do (Red Warning Zone) kem am thanh canh bao truoc dung 2 giay (2.0s) cho moi tuyet ky!
 /// Co ca don dap dat rung chan man hinh va don ban chum dan bay 360 do.
 /// </summary>
-public class ValleyGolemBossAI : MonoBehaviour, IDamageable
+public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<ValleyGolemBossAI> OnEnemyDied;
 
@@ -583,4 +583,15 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable
             }
         }
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => true;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

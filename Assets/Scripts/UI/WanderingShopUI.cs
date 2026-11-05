@@ -870,6 +870,175 @@ public class WanderingShopUI : MonoBehaviour
         });
 
         // 9. Khế Ước Vực Thẳm (Mythic Covenant)
+        // ─── CỔ VẬT MỚI & LÕI HAI MẶT ĐÁNH ĐỔI (CURSED & MECHANICS) ───
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_guillotine",
+            categoryVN = "TRẢM SÁT KIM CƯƠNG", categoryEN = "PRISMATIC EXECUTE",
+            badgeColor = new Color(0.96f, 0.26f, 0.21f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Epic,
+            iconName = "Attack",
+            augmentType = AugmentDatabase.AugmentType.PercentCurrentHpExecute,
+            titleVN = "Trảm Sát Trảm Kích", titleEN = "Guillotine Execute",
+            descVN = "Đòn đánh gây thêm sát thương bằng <color=#FF7675><b>50% Máu Hiện Tại</b></color> của mục tiêu (Boss nhận tối đa 15% Max HP).",
+            descEN = "Attacks deal bonus damage equal to <color=#FF7675><b>50% Target Current HP</b></color> (Capped at 15% Max HP on Bosses).",
+            flavorVN = "«Một trảm đoạn tuyệt sinh cơ, vạn vật quy về cát bụi.»",
+            flavorEN = "«A single cleave that severs life itself, regardless of armor.»",
+            cost = 380,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.PercentCurrentHpExecute);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_golden_sanctuary",
+            categoryVN = "HỘ THỂ HOÀNG KIM", categoryEN = "GOLDEN SANCTUARY",
+            badgeColor = new Color(1.00f, 0.82f, 0.20f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Epic,
+            iconName = "Hero",
+            augmentType = AugmentDatabase.AugmentType.GoldenSanctuary,
+            titleVN = "Kim Thân Bất Hoại", titleEN = "Golden Sanctuary",
+            descVN = "Mỗi <color=#FDCB6E><b>10 Giây</b></color> ban hào quang bọc thân, <color=#FDCB6E><b>Miễn Nhiễm 100% Khống Chế</b></color> (Choáng, Băng, Nhện).",
+            descEN = "Every <color=#FDCB6E><b>10 Seconds</b></color> grants golden holy aura, <color=#FDCB6E><b>Immunity to CC</b></color> (Stun, Freeze, Web).",
+            flavorVN = "«Thân như kim cương bất hoại, vạn tà bất xâm.»",
+            flavorEN = "«Body forged in diamond brilliance, impervious to all afflictions.»",
+            cost = 350,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.GoldenSanctuary);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_cursed_might",
+            categoryVN = "KHẾ ƯỚC NGỦA RỦA", categoryEN = "CURSED COVENANT",
+            badgeColor = new Color(0.85f, 0.15f, 0.25f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Epic,
+            iconName = "Attack",
+            augmentType = AugmentDatabase.AugmentType.CursedMight,
+            titleVN = "Khế Ước Cuồng Nộ", titleEN = "Cursed Might",
+            descVN = "Nhận thêm <color=#FF7675><b>+100 Sát Thương</b></color>, nhưng Quái & Boss tăng thêm <color=#D63031><b>+50% Máu</b></color>.",
+            descEN = "Gain <color=#FF7675><b>+100 Attack Damage</b></color>, but all Enemies & Bosses gain <color=#D63031><b>+50% Max HP</b></color>.",
+            flavorVN = "«Sức mạnh hủy diệt đổi lấy sự thức tỉnh của bầy quái hung bạo.»",
+            flavorEN = "«Catastrophic power granted at the cost of awakening monstrosities.»",
+            cost = 320,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.CursedMight);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_ironclad_pact",
+            categoryVN = "MINH ƯỚC HẮC THIẾT", categoryEN = "IRONCLAD PACT",
+            badgeColor = new Color(0.35f, 0.65f, 0.95f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Rare,
+            iconName = "Hero",
+            augmentType = AugmentDatabase.AugmentType.IroncladPact,
+            titleVN = "Minh Ước Hắc Thiết", titleEN = "Ironclad Pact",
+            descVN = "Nhận thêm <color=#74B9FF><b>+50 Giáp</b></color>, bù lại Quái & Lính nhận thêm <color=#FAB1A0><b>5% Miễn Thương</b></color> vĩnh viễn.",
+            descEN = "Gain <color=#74B9FF><b>+50 Armor</b></color>, but all Minions & Monsters gain <color=#FAB1A0><b>+5% Damage Reduction</b></color>.",
+            flavorVN = "«Lớp giáp dày như thành lũy rèn từ quặng hắc thiết bị nguyền rủa.»",
+            flavorEN = "«Impenetrable fortress armor forged with cursed black iron.»",
+            cost = 240,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.IroncladPact);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_chrono_stasis",
+            categoryVN = "ĐẦM LẦY THỜI KHÔNG", categoryEN = "CHRONO STASIS",
+            badgeColor = new Color(0.0f, 0.80f, 0.80f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Rare,
+            iconName = "Star",
+            augmentType = AugmentDatabase.AugmentType.ChronoStasis,
+            titleVN = "Đầm Lầy Thời Không", titleEN = "Chrono Stasis",
+            descVN = "Quái vật bị <color=#00CEC9><b>Làm Chậm 35%</b></color> tốc đánh và di chuyển, bù lại bạn bị <color=#D63031><b>Giảm 50% Tốc Chạy</b></color>.",
+            descEN = "Enemies suffer <color=#00CEC9><b>-35% Attack & Move Speed</b></color>, but your <color=#D63031><b>Move Speed is reduced by 50%</b></color>.",
+            flavorVN = "«Dòng chảy thời gian bị bóp méo, từng bước chân như chìm trong đầm lầy hắc ám.»",
+            flavorEN = "«Time itself turns viscous, drowning footsteps in the eternal mire.»",
+            cost = 250,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.ChronoStasis);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_blood_tithe",
+            categoryVN = "MA KIẾM HUYẾT TẾ", categoryEN = "BLOOD TITHE BLADE",
+            badgeColor = new Color(0.95f, 0.15f, 0.20f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Rare,
+            iconName = "Attack",
+            augmentType = AugmentDatabase.AugmentType.BloodTitheBlade,
+            titleVN = "Ma Kiếm Huyết Tế", titleEN = "Blood Tithe Blade",
+            descVN = "Nhận <color=#FF7675><b>+40 ATK</b></color> và <color=#FF7675><b>+40% Hút Máu</b></color>, nhưng mất <color=#D63031><b>1% HP mỗi giây</b></color>.",
+            descEN = "Gain <color=#FF7675><b>+40 ATK</b></color> and <color=#FF7675><b>+40% Lifesteal</b></color>, but lose <color=#D63031><b>1% Max HP per second</b></color>.",
+            flavorVN = "«Lưỡi kiếm uống máu của kẻ thù lẫn sinh lực của chủ nhân.»",
+            flavorEN = "«A thirsting blade that feeds equally upon its foes and bearer.»",
+            cost = 260,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.BloodTitheBlade);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_glass_cannon",
+            categoryVN = "BẢN THỂ THỦY TINH", categoryEN = "GLASS CANNON",
+            badgeColor = new Color(1.0f, 0.80f, 0.10f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Epic,
+            iconName = "Star",
+            augmentType = AugmentDatabase.AugmentType.GlassCannonTitan,
+            titleVN = "Bản Thể Thủy Tinh", titleEN = "Glass Cannon Titan",
+            descVN = "Nhận <color=#FDCB6E><b>+75% Crit</b></color> và <color=#FDCB6E><b>+80% Crit DMG</b></color>, nhưng nhận thêm <color=#D63031><b>+30% Sát Thương</b></color>.",
+            descEN = "Gain <color=#FDCB6E><b>+75% Crit</b></color> and <color=#FDCB6E><b>+80% Crit DMG</b></color>, but take <color=#D63031><b>+30% More Damage</b></color>.",
+            flavorVN = "«Sắc bén khôn cùng nhưng mỏng manh tựa pha lê trước đòn thù.»",
+            flavorEN = "«Unmatched lethality encased in fragile crystalline glass.»",
+            cost = 330,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.GlassCannonTitan);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
+        shopCatalog.Add(new ShopRelicItem
+        {
+            id = "relic_phantom_rush",
+            categoryVN = "BÓNG MA CUỒNG NỘ", categoryEN = "PHANTOM RUSH",
+            badgeColor = new Color(0.65f, 0.35f, 0.95f),
+            rarity = AugmentDatabase.AugmentData.Rarity.Rare,
+            iconName = "Star",
+            augmentType = AugmentDatabase.AugmentType.PhantomRush,
+            titleVN = "Bóng Ma Cuồng Nộ", titleEN = "Phantom Rush",
+            descVN = "Nhận thêm <color=#74B9FF><b>+50% Hồi Chiêu (CDR)</b></color>, nhưng hy sinh <color=#D63031><b>25% Máu Tối Đa</b></color>.",
+            descEN = "Gain <color=#74B9FF><b>+50% Cooldown Reduction</b></color>, but sacrifice <color=#D63031><b>25% Max HP</b></color>.",
+            flavorVN = "«Tốc biến xuất quỷ nhập thần đổi lấy sinh mệnh hao gầy.»",
+            flavorEN = "«Ghostly haste achieved by shaving away mortal vitality.»",
+            cost = 270,
+            onPurchase = () =>
+            {
+                var augData = AugmentDatabase.GetData(AugmentDatabase.AugmentType.PhantomRush);
+                if (augData != null) AugmentManager.EnsureInstance()?.ApplyAugment(augData);
+            }
+        });
+
         shopCatalog.Add(new ShopRelicItem
         {
             id = "relic_abyssal",

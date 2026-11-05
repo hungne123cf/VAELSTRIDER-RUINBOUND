@@ -126,6 +126,24 @@ public static class AugmentIconHelper
             case AugmentDatabase.AugmentType.ShadowMirroring:
                 return "scythe_harvest.png";
 
+            // ─── Lõi Nâng Cấp Mới & Cursed Double-Edged ───
+            case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
+                return "guillotine_execute.png";
+            case AugmentDatabase.AugmentType.GoldenSanctuary:
+                return "golden_sanctuary.png";
+            case AugmentDatabase.AugmentType.CursedMight:
+                return "cursed_might.png";
+            case AugmentDatabase.AugmentType.IroncladPact:
+                return "hex_ironclad.png";
+            case AugmentDatabase.AugmentType.ChronoStasis:
+                return "chrono_mire.png";
+            case AugmentDatabase.AugmentType.BloodTitheBlade:
+                return "blood_tithe.png";
+            case AugmentDatabase.AugmentType.GlassCannonTitan:
+                return "glass_cannon.png";
+            case AugmentDatabase.AugmentType.PhantomRush:
+                return "phantom_rush.png";
+
             default:
                 return "sword_slash.png";
         }
@@ -299,6 +317,24 @@ public static class AugmentIconHelper
             case AugmentDatabase.AugmentType.TwinFrostNova:
             case AugmentDatabase.AugmentType.CataclysmicQuake:
                 return "HERO";
+
+            // ─── Lõi Nâng Cấp Mới & Cursed Double-Edged ───
+            case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
+                return "EXEC";
+            case AugmentDatabase.AugmentType.GoldenSanctuary:
+                return "IMMUNE";
+            case AugmentDatabase.AugmentType.CursedMight:
+                return "CURSE";
+            case AugmentDatabase.AugmentType.IroncladPact:
+                return "HEX";
+            case AugmentDatabase.AugmentType.ChronoStasis:
+                return "CHRONO";
+            case AugmentDatabase.AugmentType.BloodTitheBlade:
+                return "BLOOD";
+            case AugmentDatabase.AugmentType.GlassCannonTitan:
+                return "GLASS";
+            case AugmentDatabase.AugmentType.PhantomRush:
+                return "RUSH";
 
             default:
                 return "MYTH";

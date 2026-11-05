@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
-public class GoblinAI : MonoBehaviour, IDamageable
+public class GoblinAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<GoblinAI> OnEnemyDied;
 
@@ -221,4 +221,15 @@ public class GoblinAI : MonoBehaviour, IDamageable
         OnEnemyDied?.Invoke(this);
         Destroy(gameObject, 0.65f);
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => false;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

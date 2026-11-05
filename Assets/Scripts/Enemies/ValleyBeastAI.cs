@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// Hoang thu nhanh nhen dac trung cua Thung Lung Tan Tich.
 /// Su dung sprite sheet luck creature voi hoat anh Chay (Run) va Dung yen (Idle) 4 huong.
 /// </summary>
-public class ValleyBeastAI : MonoBehaviour, IDamageable
+public class ValleyBeastAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<ValleyBeastAI> OnEnemyDied;
 
@@ -336,4 +336,15 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable
         var ai = go.AddComponent<ValleyBeastAI>();
         return ai;
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => false;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

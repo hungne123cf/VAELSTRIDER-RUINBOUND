@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(SpriteRenderer), typeof(CircleCollider2D))]
-public class BoneEggCocoon : MonoBehaviour, IDamageable
+public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<Vector3> OnEggHatched;
 
@@ -246,4 +246,15 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable
 
         Destroy(gameObject);
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => false;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

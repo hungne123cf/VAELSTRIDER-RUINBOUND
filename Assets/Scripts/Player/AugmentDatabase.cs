@@ -86,7 +86,17 @@ public static class AugmentDatabase
         TripleRuinGale,      // Tam Trảm Tàn Phong (Vaelstrider - 3 Đợt Sóng Kiếm Ruin Gale)
         EightWayTempest,     // Bát Hướng Cuồng Phong (Gale Ronin - Lướt/Chém tung kiếm khí 8 hướng)
         TwinFrostNova,       // Song Băng Trụ Thần Cực (Azure Blade - Tụ lực gọi 2 Cột Băng Đóng Băng diện rộng)
-        CataclysmicQuake     // Địa Chấn Tam Liên Hoàn (Titan Berserker - Nện đất tạo 3 đợt sóng xung kích)
+        CataclysmicQuake,    // Địa Chấn Tam Liên Hoàn (Titan Berserker - Nện đất tạo 3 đợt sóng xung kích)
+
+        // ─── Lõi Nâng Cấp Mới & Lõi Hai Mặt Đánh Đổi (Double-Edged Cursed Augments) ───
+        PercentCurrentHpExecute, // Trảm Sát Trảm Kích: Đòn đánh gây thêm 50% HP hiện tại của kẻ địch
+        GoldenSanctuary,         // Kim Thân Bất Hoại: Mỗi 10s nhận hiệu ứng miễn nhiễm khống chế (hào quang vàng bọc thân)
+        CursedMight,             // Khế Ước Cuồng Nộ: Nhận +100 Sát Thương nhưng Quái & Boss tăng thêm +50% HP
+        IroncladPact,            // Minh Ước Hắc Thiết: Nhận +50 Giáp nhưng Quái & Lính nhận thêm +5% Miễn Thương
+        ChronoStasis,            // Đầm Lầy Thời Không: Quái bị làm chậm 35% tốc đánh & di chuyển, nhưng bạn giảm 50% tốc chạy
+        BloodTitheBlade,         // Ma Kiếm Huyết Tế: +40 ATK, +40% Hút Máu, nhưng mất 1% HP mỗi giây
+        GlassCannonTitan,        // Bản Thể Thủy Tinh: +75% Tỉ lệ Crit, +80% Sát thương Crit, nhưng nhận thêm +30% Sát thương
+        PhantomRush              // Bóng Ma Cuồng Nộ: +50% Giảm Hồi Chiêu (CDR), nhưng giảm 25% Máu tối đa
     }
 
     public class AugmentData
@@ -792,6 +802,15 @@ public static class AugmentDatabase
             case AugmentType.EightWayTempest:
             case AugmentType.TwinFrostNova:
             case AugmentType.CataclysmicQuake:
+            // Lõi Nâng Cấp Mới & Hai Mặt Đánh Đổi (Chỉ sở hữu 1 lần mỗi Run)
+            case AugmentType.PercentCurrentHpExecute:
+            case AugmentType.GoldenSanctuary:
+            case AugmentType.CursedMight:
+            case AugmentType.IroncladPact:
+            case AugmentType.ChronoStasis:
+            case AugmentType.BloodTitheBlade:
+            case AugmentType.GlassCannonTitan:
+            case AugmentType.PhantomRush:
                 return true;
             default:
                 return false;

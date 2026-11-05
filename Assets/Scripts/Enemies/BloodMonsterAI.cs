@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
-public class BloodMonsterAI : MonoBehaviour, IDamageable
+public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<BloodMonsterAI> OnEnemyDied;
 
@@ -1118,4 +1118,16 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable
 #endif
         return a;
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => isBoss ? phaseMaxHealth : maxHealth;
+    public bool IsBoss => isBoss;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        phaseMaxHealth = Mathf.RoundToInt(phaseMaxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

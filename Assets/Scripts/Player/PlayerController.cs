@@ -75,10 +75,73 @@ public class PlayerController : MonoBehaviour
     private bool isStunned = false;
     private float stunTimerRemaining = 0f;
     private float lastStunEndTime = -10f;
-    public const float STUN_IMMUNITY_GRACE_PERIOD = 3.5f; // Thời gian miễn nhiễm choáng sau khi hồi phục để chống perma-stun
+
+    [Header("Golden Sanctuary (Lõi Kim Thân Bất Hoại - Miễn Khống Chế)")]
+    private bool hasGoldenSanctuary = false;
+    private bool isGoldenImmunityReady = false;
+    private float goldenImmunityCooldownTimer = 0f;
+    private const float GOLDEN_IMMUNITY_COOLDOWN = 10f;
+    private GameObject goldenAuraObject = null;
+    public const float STUN_IMMUNITY_GRACE_PERIOD = 3.5f;
+
+    public void EnableGoldenSanctuary()
+    {
+        hasGoldenSanctuary = true;
+        isGoldenImmunityReady = true;
+        goldenImmunityCooldownTimer = 0f;
+        UpdateGoldenAuraVisual();
+    }
+
+    public bool TryConsumeGoldenCCImmunity()
+    {
+        if (hasGoldenSanctuary && isGoldenImmunityReady)
+        {
+            isGoldenImmunityReady = false;
+            goldenImmunityCooldownTimer = GOLDEN_IMMUNITY_COOLDOWN;
+            UpdateGoldenAuraVisual();
+
+            DamagePopup.CreateText(
+                transform.position + Vector3.up * 1.5f,
+                LocalizationManager.T("KIM THÂN: MIỄN KHỐNG CHẾ!", "GOLDEN IMMUNITY: CC BLOCKED!"),
+                new Color(1f, 0.88f, 0.20f)
+            );
+            SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
+            return true;
+        }
+        return false;
+    }
+
+    private void UpdateGoldenAuraVisual()
+    {
+        if (!hasGoldenSanctuary)
+        {
+            if (goldenAuraObject != null) goldenAuraObject.SetActive(false);
+            return;
+        }
+
+        if (isGoldenImmunityReady)
+        {
+            if (goldenAuraObject == null)
+            {
+                goldenAuraObject = new GameObject("GoldenSanctuaryAura");
+                goldenAuraObject.transform.SetParent(transform, false);
+                goldenAuraObject.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+                var sr = goldenAuraObject.AddComponent<SpriteRenderer>();
+                sr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
+                sr.color = new Color(1f, 0.85f, 0.18f, 0.40f);
+                sr.sortingOrder = 5400;
+            }
+            goldenAuraObject.SetActive(true);
+        }
+        else
+        {
+            if (goldenAuraObject != null) goldenAuraObject.SetActive(false);
+        }
+    } // Thời gian miễn nhiễm choáng sau khi hồi phục để chống perma-stun
 
     public void ApplyStun(float duration)
     {
+        if (TryConsumeGoldenCCImmunity()) return;
         var ph = GetComponent<PlayerHealth>();
         if (ph != null && ph.isInvulnerable) return;
 
@@ -178,6 +241,7 @@ public class PlayerController : MonoBehaviour
 
     public void ApplyFreeze(float duration)
     {
+        if (TryConsumeGoldenCCImmunity()) return;
         if (isStunned || Time.time < lastStunEndTime + STUN_IMMUNITY_GRACE_PERIOD)
         {
             ApplySlow(0.6f, 1.0f);
@@ -204,7 +268,7 @@ public class PlayerController : MonoBehaviour
         srIce.sortingOrder = 5500;
         iceBlock.transform.localScale = new Vector3(1.2f, 1.4f, 1f);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.2f, LocalizationManager.T("❄ ĐÓNG BĂNG! (0.5s)", "❄ FROZEN! (0.5s)"), new Color(0.35f, 0.85f, 1f));
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.2f, LocalizationManager.T("ĐÓNG BĂNG! (0.5s)", "FROZEN! (0.5s)"), new Color(0.35f, 0.85f, 1f));
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         while (stunTimerRemaining > 0f)

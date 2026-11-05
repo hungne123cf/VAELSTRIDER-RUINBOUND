@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class DummyEnemy : MonoBehaviour, IDamageable
+public class DummyEnemy : MonoBehaviour, IDamageable, IEnemyHealth
 {
     [Header("Enemy Stats")]
     [SerializeField] private int maxHealth = 100;
@@ -52,4 +52,15 @@ public class DummyEnemy : MonoBehaviour, IDamageable
         AethelShard.SpawnShards(transform.position, Random.Range(2, 4));
         Destroy(gameObject);
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => false;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

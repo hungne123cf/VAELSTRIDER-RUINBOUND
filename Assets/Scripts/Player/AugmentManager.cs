@@ -87,6 +87,12 @@ public class AugmentManager : MonoBehaviour
     private bool hasPoisonTouch        = false;
     private bool hasSurgingPulse       = false;
 
+    // Cursed & Double-Edged Augments
+    private bool hasBloodTitheBlade    = false;
+    private float bloodTitheTimer      = 0f;
+    private bool hasIroncladPact       = false;
+    public bool HasIroncladPact => hasIroncladPact;
+
     // Cached delegates
     private System.Action<GoblinAI>           _goblin;
     private System.Action<SkeletonAI>         _skeleton;
@@ -188,6 +194,15 @@ public class AugmentManager : MonoBehaviour
         FlushStatsToHealth();
         FlushStatsToController();
         if (comboResetMult < 1f) ApplyComboMastery();
+        if (HasAugment(AugmentDatabase.AugmentType.GoldenSanctuary))
+        {
+            var pc = Object.FindAnyObjectByType<PlayerController>();
+            if (pc != null) pc.EnableGoldenSanctuary();
+        }
+        if (HasAugment(AugmentDatabase.AugmentType.ChronoStasis))
+        {
+            EnemyChronoSlowEffect.ApplyToAllEnemies();
+        }
         AugmentHUDBar.EnsureExists()?.RefreshBadges();
     }
 
@@ -222,6 +237,22 @@ public class AugmentManager : MonoBehaviour
         {
             shadowAmbushTimer -= dt;
             if (shadowAmbushTimer <= 0f) shadowAmbushActive = false;
+        }
+
+        // Ma Kiếm Huyết Tế: rút 1% HP mỗi giây
+        if (hasBloodTitheBlade)
+        {
+            bloodTitheTimer += dt;
+            if (bloodTitheTimer >= 1.0f)
+            {
+                bloodTitheTimer = 0f;
+                var ph = PlayerHealth.Instance;
+                if (ph != null && !PlayerHealth.IsPlayerDead)
+                {
+                    int drainAmount = Mathf.Max(1, Mathf.RoundToInt(ph.MaxHealth * 0.01f));
+                    ph.ApplyCurseDrain(drainAmount);
+                }
+            }
         }
 
         // Timed augments
@@ -302,6 +333,9 @@ public class AugmentManager : MonoBehaviour
         hasDeathsTouch = false;
         hasPoisonTouch = false;
         hasSurgingPulse = false;
+        hasBloodTitheBlade = false;
+        bloodTitheTimer = 0f;
+        hasIroncladPact = false;
 
         StopAllCoroutines();
         FlushStatsToCombat();
@@ -588,6 +622,12 @@ public class AugmentManager : MonoBehaviour
             mult *= GrievousWoundsDebuff.GetDamageMultiplier(targetEnemy);
         }
 
+        // Minh Ước Hắc Thiết (IroncladPact): Quái & Lính nhận thêm 5% miễn thương vĩnh viễn
+        if (augMgr != null && augMgr.HasIroncladPact)
+        {
+            mult *= 0.95f;
+        }
+
         // 3. Diệt Khổng Lồ (Giant Slayer: Tăng thêm 25% sát thương lên Boss)
         var augMgr = Instance;
         if (augMgr != null && augMgr.HasAugment(AugmentDatabase.AugmentType.GiantSlayer))
@@ -634,6 +674,29 @@ public class AugmentManager : MonoBehaviour
         bool isProp = (targetEnemy.GetComponent<BreakableProp>() != null || targetEnemy.GetComponentInParent<BreakableProp>() != null ||
                        targetEnemy.GetComponent<TreasureChest>() != null || targetEnemy.GetComponentInParent<TreasureChest>() != null);
         if (isProp) return;
+
+        // Trảm Sát Trảm Kích (PercentCurrentHpExecute): Đòn đánh gây thêm 50% HP hiện tại của mục tiêu
+        if (augMgr.HasAugment(AugmentDatabase.AugmentType.PercentCurrentHpExecute))
+        {
+            int curHp = EnemyHealthHelper.GetCurrentHealth(targetEnemy);
+            int maxHp = EnemyHealthHelper.GetMaxHealth(targetEnemy);
+            bool isBoss = EnemyHealthHelper.IsBossOrElite(targetEnemy);
+
+            if (curHp > 0)
+            {
+                int execDmg = Mathf.RoundToInt(curHp * 0.50f);
+                if (isBoss)
+                {
+                    // Giới hạn sát thương lên Boss tối đa 15% Max HP (hoặc trần 1200 dmg) để tránh làm mất cân bằng trận đấu
+                    int bossCap = Mathf.Min(1200, Mathf.RoundToInt(maxHp * 0.15f));
+                    execDmg = Mathf.Min(execDmg, bossCap);
+                }
+                execDmg = Mathf.Max(1, execDmg);
+                damageable?.TakeDamage(execDmg);
+                DamagePopup.Create(targetEnemy.transform.position + Vector3.up * 0.65f, execDmg, DamageType.TrueDamage, isCritical: true);
+                SoundManager.EnsureInstance()?.PlaySwordSlash();
+            }
+        }
 
         // 1. Độc Dược Ăn Mòn (PoisonTouch): Găm nọc độc ăn mòn khiến mục tiêu nhận thêm +20% Sát Thương trong 4s
         if (augMgr.HasPoisonTouch())

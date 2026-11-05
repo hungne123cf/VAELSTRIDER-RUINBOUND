@@ -53,6 +53,26 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     }
 
     /// <summary>Hồi HP trực tiếp (không vượt quá maxHealth). Dùng cho SoulHarvest / Regen.</summary>
+    /// <summary>
+    /// Rút máu nguyền rủa từ Lõi Hai Mặt Đánh Đổi (Blood Tithe Blade: 1% HP/s).
+    /// Không bao giờ giết người chơi trực tiếp (giữ lại tối thiểu 1 HP).
+    /// </summary>
+    public void ApplyCurseDrain(int amount)
+    {
+        if (isDead || amount <= 0) return;
+        if (currentHealth > 1)
+        {
+            int loss = Mathf.Min(amount, currentHealth - 1);
+            currentHealth -= loss;
+            PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+            DamagePopup.CreateText(transform.position + Vector3.up * 0.5f, $"-{loss}", new Color(0.95f, 0.20f, 0.20f));
+            if (spriteRenderer != null)
+            {
+                StartCoroutine(FlashColorRoutine(new Color(0.9f, 0.2f, 0.2f, 0.8f)));
+            }
+        }
+    }
+
     public void HealDirect(int amount)
     {
         if (isDead || amount <= 0) return;
@@ -442,6 +462,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (totalDef > 0)
         {
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - totalDef / 100f)));
+        }
+
+        // Lõi Bản Thể Thủy Tinh (GlassCannonTitan): Nhận thêm +30% Sát thương từ kẻ địch
+        if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.GlassCannonTitan))
+        {
+            damage = Mathf.RoundToInt(damage * 1.30f);
         }
 
         // Kiểm tra Lõi Thánh Khiên Hộ Mệnh (Divine Aegis) & Bất Diệt Cuồng Vương (Undying Sovereign)

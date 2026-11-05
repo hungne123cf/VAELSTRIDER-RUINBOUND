@@ -66,6 +66,11 @@ public static class MapScalingManager
     public static int ScaleHealth(int baseHealth)
     {
         float mapMult = GetCurrentMultiplier() * CorruptedCycleManager.HealthMultiplier;
+        // Lõi Khế Ước Cuồng Nộ (CursedMight): Toàn bộ Quái vật tăng thêm 50% HP
+        if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.CursedMight))
+        {
+            mapMult *= 1.50f;
+        }
         float growth = GetPlayerPowerGrowth();
 
         // Quái thường mạnh gấp ~2 lần tốc độ tăng trưởng của player
@@ -106,6 +111,11 @@ public static class MapScalingManager
         phases = Mathf.Max(1, phases);
         int pMaxHp = GetPlayerMaxHealth();
         float mapMult = GetCurrentMultiplier() * CorruptedCycleManager.HealthMultiplier;
+        // Lõi Khế Ước Cuồng Nộ (CursedMight): Boss tăng thêm 50% HP
+        if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.CursedMight))
+        {
+            mapMult *= 1.50f;
+        }
 
         // Mục tiêu: Tổng lượng HP của Boss = 5.0x Player Max HP
         // Máu mỗi phase = (PlayerMaxHP * 5.0f) / phases

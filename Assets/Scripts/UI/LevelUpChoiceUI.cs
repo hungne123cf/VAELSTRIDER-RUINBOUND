@@ -570,6 +570,23 @@ public class LevelUpChoiceUI : MonoBehaviour
             case AugmentDatabase.AugmentType.UndyingSovereign:
             case AugmentDatabase.AugmentType.GodforgedArsenal:
             case AugmentDatabase.AugmentType.AscendedDivinity:
+            // ─── Lõi Nâng Cấp Mới & Cursed Double-Edged ───
+            case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
+                return new Color(0.96f, 0.26f, 0.21f); // Đỏ Trảm Sát
+            case AugmentDatabase.AugmentType.GoldenSanctuary:
+                return new Color(1.00f, 0.82f, 0.20f); // Hoàng Kim
+            case AugmentDatabase.AugmentType.CursedMight:
+                return new Color(0.95f, 0.15f, 0.25f); // Huyết Nguyền
+            case AugmentDatabase.AugmentType.IroncladPact:
+                return new Color(0.35f, 0.65f, 1.00f); // Hắc Thiết Lam
+            case AugmentDatabase.AugmentType.ChronoStasis:
+                return new Color(0.00f, 0.85f, 0.85f); // Lam Ngọc Thời Không
+            case AugmentDatabase.AugmentType.BloodTitheBlade:
+                return new Color(0.95f, 0.15f, 0.20f); // Ma Huyết
+            case AugmentDatabase.AugmentType.GlassCannonTitan:
+                return new Color(1.00f, 0.80f, 0.10f); // Thủy Tinh Vàng
+            case AugmentDatabase.AugmentType.PhantomRush:
+                return new Color(0.65f, 0.35f, 0.95f); // Tím Bóng Ma
             default:
                 return new Color(0.95f, 0.45f, 0.90f); // Thần Thoại / Đa Năng: Hồng Tinh Vân (#F273E6)
         }
@@ -639,6 +656,23 @@ public class LevelUpChoiceUI : MonoBehaviour
             case AugmentDatabase.AugmentType.UndyingSovereign:
             case AugmentDatabase.AugmentType.GodforgedArsenal:
             case AugmentDatabase.AugmentType.AscendedDivinity:
+            // ─── Lõi Nâng Cấp Mới & Cursed Double-Edged ───
+            case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
+                return isVN ? "TRẢM SÁT" : "EXECUTE";
+            case AugmentDatabase.AugmentType.GoldenSanctuary:
+                return isVN ? "KIM THÂN" : "SANCTUARY";
+            case AugmentDatabase.AugmentType.CursedMight:
+                return isVN ? "NGUYỀN RỦA" : "CURSED";
+            case AugmentDatabase.AugmentType.IroncladPact:
+                return isVN ? "MINH ƯỚC" : "IRONCLAD";
+            case AugmentDatabase.AugmentType.ChronoStasis:
+                return isVN ? "THỜI KHÔNG" : "CHRONO";
+            case AugmentDatabase.AugmentType.BloodTitheBlade:
+                return isVN ? "HUYẾT TẾ" : "BLOOD TITHE";
+            case AugmentDatabase.AugmentType.GlassCannonTitan:
+                return isVN ? "THỦY TINH" : "GLASS CANNON";
+            case AugmentDatabase.AugmentType.PhantomRush:
+                return isVN ? "BÓNG MA" : "PHANTOM";
             default:
                 return isVN ? "TOÀN NĂNG" : "MYTHIC";
         }
@@ -708,6 +742,23 @@ public class LevelUpChoiceUI : MonoBehaviour
             case AugmentDatabase.AugmentType.UndyingSovereign:
             case AugmentDatabase.AugmentType.GodforgedArsenal:
             case AugmentDatabase.AugmentType.AscendedDivinity:
+            // ─── Lõi Nâng Cấp Mới & Cursed Double-Edged ───
+            case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
+                return "EXEC";
+            case AugmentDatabase.AugmentType.GoldenSanctuary:
+                return "IMMUNE";
+            case AugmentDatabase.AugmentType.CursedMight:
+                return "CURSE";
+            case AugmentDatabase.AugmentType.IroncladPact:
+                return "HEX";
+            case AugmentDatabase.AugmentType.ChronoStasis:
+                return "CHRONO";
+            case AugmentDatabase.AugmentType.BloodTitheBlade:
+                return "BLOOD";
+            case AugmentDatabase.AugmentType.GlassCannonTitan:
+                return "GLASS";
+            case AugmentDatabase.AugmentType.PhantomRush:
+                return "RUSH";
             default:
                 return "MYTH";
         }

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
-public class SkeletonAI : MonoBehaviour, IDamageable
+public class SkeletonAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<SkeletonAI> OnEnemyDied;
 
@@ -225,4 +225,15 @@ public class SkeletonAI : MonoBehaviour, IDamageable
         }
     }
 #endif
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => false;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

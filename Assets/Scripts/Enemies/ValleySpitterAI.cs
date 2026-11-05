@@ -6,7 +6,7 @@ using System.Collections;
 /// Sinh vat thuc vat / gai doc thung lung tan tich.
 /// Co vung ngam canh bao mau do truoc khi ban chum gai doc ve phia Player.
 /// </summary>
-public class ValleySpitterAI : MonoBehaviour, IDamageable
+public class ValleySpitterAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<ValleySpitterAI> OnEnemyDied;
 
@@ -465,4 +465,15 @@ public class ValleyThornProjectile : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => false;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }

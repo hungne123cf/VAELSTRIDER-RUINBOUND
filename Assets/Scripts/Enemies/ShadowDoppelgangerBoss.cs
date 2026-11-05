@@ -21,7 +21,7 @@ using System.Collections.Generic;
 /// 4. ĐÃ BỎ TOÀN BỘ CHỮ TEXT DAME (Crit, Độc, Vết Thương Sâu...) chỉ hiển thị số sát thương với màu đặc trưng!
 /// 5. Khi tiêu diệt xong Phase 3: Mới chính thức xuất hiện NPC Shop và Cổng Không Gian!
 /// </summary>
-public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable
+public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 {
     private static ShadowDoppelgangerBoss activeBoss;
     public static ShadowDoppelgangerBoss ActiveBoss => activeBoss;
@@ -1269,4 +1269,15 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable
     }
 
     #endregion
+
+    // ─── IEnemyHealth Implementation ───────────────────────
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public bool IsBoss => true;
+    public void MultiplyHealth(float mult)
+    {
+        maxHealth = Mathf.RoundToInt(maxHealth * mult);
+        currentHealth = Mathf.RoundToInt(currentHealth * mult);
+    }
+
 }
