@@ -196,13 +196,23 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         runtimeBloodOrbSprite = Sprite.Create(tex, new Rect(0,0,size,size), new Vector2(0.5f,0.5f), 32);
     }
 
+    private bool hasPlayedIntro = false;
+
+    public void TriggerBossIntro()
+    {
+        if (hasPlayedIntro || !isBoss) return;
+        hasPlayedIntro = true;
+        BossIntroCutsceneUI.PlayGorMok(transform);
+    }
+
     void Start()
     {
         FindPlayerTarget();
         if (isBoss)
         {
-            BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK - HUYET THU CO TU", totalBossPhases);
+            BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK - HUYẾT THÚ CỔ THỤ", totalBossPhases);
             BossHealthBarUI.EnsureInstance()?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
+            TriggerBossIntro();
         }
     }
 
@@ -217,7 +227,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (isDead) return;
 
         // Đóng băng hoàn toàn AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
-        if (LevelUpChoiceUI.IsShowing)
+        if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive)
         {
             rb.linearVelocity = Vector2.zero;
             SetMoving(false);
@@ -308,7 +318,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     void LateUpdate()
     {
-        if (LevelUpChoiceUI.IsShowing) return;
+        if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
         ClampInsideRoomBounds();
     }
 

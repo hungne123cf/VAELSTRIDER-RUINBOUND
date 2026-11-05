@@ -238,6 +238,23 @@ public class CameraFollow : MonoBehaviour
         }
     }
 
+    private Transform originalTarget;
+
+    public void FocusOn(Transform temporaryTarget, float zoomSize = 3.8f)
+    {
+        if (temporaryTarget == null) return;
+        if (originalTarget == null) originalTarget = target;
+        target = temporaryTarget;
+        SetCinematicZoom(zoomSize);
+    }
+
+    public void RestoreFocus()
+    {
+        if (originalTarget != null) target = originalTarget;
+        originalTarget = null;
+        ResetZoom();
+    }
+
     public void SetCinematicZoom(float orthoSize)
     {
         currentZoomSmoothTime = 0.12f;

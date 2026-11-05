@@ -80,10 +80,20 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (GetComponent<AutoDepthSort>() == null) gameObject.AddComponent<AutoDepthSort>();
     }
 
+    private bool hasPlayedIntro = false;
+
+    public void TriggerBossIntro()
+    {
+        if (hasPlayedIntro) return;
+        hasPlayedIntro = true;
+        BossIntroCutsceneUI.PlaySkeletonKing(transform);
+    }
+
     void Start()
     {
         FindPlayer();
         StartCoroutine(InitBossHealthBarRoutine());
+        TriggerBossIntro();
     }
 
     private IEnumerator InitBossHealthBarRoutine()
@@ -110,7 +120,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     void Update()
     {
-        if (isDead || isPhaseTransitioning) return;
+        if (isDead || isPhaseTransitioning || BossIntroCutsceneUI.IsCutsceneActive) return;
 
         if (PlayerHealth.IsPlayerDead)
         {
@@ -580,7 +590,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     // =========================================================================
     public void TakeDamage(int damage)
     {
-        if (isDead || isPhaseTransitioning) return;
+        if (isDead || isPhaseTransitioning || BossIntroCutsceneUI.IsCutsceneActive) return;
 
         // Giới hạn sát thương tối đa trên 1 đòn không quá 25% máu của Phase để người chơi late-game không bỏ qua giai đoạn
         int maxPerHit = Mathf.Max(100, Mathf.RoundToInt(phaseMaxHealth * 0.25f));

@@ -121,6 +121,15 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         }
     }
 
+    private bool hasPlayedIntro = false;
+
+    public void TriggerBossIntro()
+    {
+        if (hasPlayedIntro || !isBoss || isClone) return;
+        hasPlayedIntro = true;
+        BossIntroCutsceneUI.PlayGoliathGikk(transform);
+    }
+
     void Start()
     {
         FindPlayerTarget();
@@ -129,8 +138,9 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
             string scene = SceneManager.GetActiveScene().name;
             string bName = scene.Contains("Map2") || scene.Contains("Valley")
                 ? "VALENTHUS - HỘ VỆ THẦN THỤ"
-                : "TITAN CRUSHER - CỖ MÁY TÀN TÍCH";
+                : "GOLIATH GIKK - PHÁO ĐÀI BÁNH XE";
             BossHealthBarUI.EnsureInstance()?.ShowBoss(this, bName);
+            TriggerBossIntro();
         }
     }
 
@@ -148,7 +158,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (isDead) return;
 
         // Đóng băng hoàn toàn AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
-        if (LevelUpChoiceUI.IsShowing)
+        if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive)
         {
             rb.linearVelocity = Vector2.zero;
             SetMoving(false);
@@ -231,7 +241,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     void LateUpdate()
     {
-        if (LevelUpChoiceUI.IsShowing) return;
+        if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
         ClampInsideRoomBounds();
     }
 

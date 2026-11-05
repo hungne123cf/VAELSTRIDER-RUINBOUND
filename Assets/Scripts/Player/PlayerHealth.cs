@@ -469,7 +469,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage)
     {
-        if (isDead || isInvulnerable) return;
+        if (isDead || isInvulnerable || BossIntroCutsceneUI.IsCutsceneActive) return;
 
         // Tuyệt đối miễn nhiễm mọi sát thương khi đang chọn Lõi Nâng Cấp hoặc khi trò chơi đang Tạm dừng
         if (LevelUpChoiceUI.IsShowing || Time.timeScale <= 0f) return;

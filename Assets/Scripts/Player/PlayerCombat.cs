@@ -432,6 +432,7 @@ public class PlayerCombat : MonoBehaviour
 
     void Update()
     {
+        if (BossIntroCutsceneUI.IsCutsceneActive) return;
         if (playerHealth != null && playerHealth.IsDead)
         {
             if (isAttackHolding)

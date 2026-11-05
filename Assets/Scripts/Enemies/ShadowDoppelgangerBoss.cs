@@ -204,6 +204,9 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         // Hiển thị thanh máu Boss 3 Phase
         UpdateBossHealthUI();
 
+        // Kích hoạt Màn Giới Thiệu Boss Hư Không chuẩn Soul Knight
+        BossIntroCutsceneUI.PlayShadowDoppelganger(transform);
+
         // Xuất hiện hào quang bùng nổ
         StartCoroutine(IntroShockwaveRoutine());
     }
@@ -451,7 +454,7 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
     void Update()
     {
-        if (isDead || isInvulnerable) return;
+        if (isDead || isInvulnerable || BossIntroCutsceneUI.IsCutsceneActive) return;
 
         // Xoay 4 quả cầu lửa quanh Boss ở Phase 3
         if (abyssalFlamesHolder != null)
@@ -1138,7 +1141,7 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
     public void TakeDamage(int damage)
     {
-        if (isDead || isInvulnerable) return;
+        if (isDead || isInvulnerable || BossIntroCutsceneUI.IsCutsceneActive) return;
 
         if (isParrying)
         {

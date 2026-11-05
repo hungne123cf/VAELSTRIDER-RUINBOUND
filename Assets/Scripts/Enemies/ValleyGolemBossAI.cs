@@ -101,6 +101,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     {
         FindPlayer();
         IgnorePlayerCollision();
+        BossIntroCutsceneUI.PlayValleyGolem(transform);
 
         // Thong bao Boss tren UI
         var waveUI = FindAnyObjectByType<WaveUI>();
@@ -118,7 +119,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (isDead) return;
 
         // Đóng băng hoàn toàn Boss AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
-        if (LevelUpChoiceUI.IsShowing)
+        if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive)
         {
             rb.linearVelocity = Vector2.zero;
             // Reset timer để boss không tấn công ngay khi màn hình đóng

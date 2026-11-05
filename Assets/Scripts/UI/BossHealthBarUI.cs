@@ -296,6 +296,43 @@ public class BossHealthBarUI : MonoBehaviour
         }
     }
 
+    public void AnimateFillFromZero(float duration = 0.8f)
+    {
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(AnimateFillRoutine(duration));
+        }
+        else
+        {
+            if (healthSlider != null) healthSlider.value = 1f;
+            if (ghostSlider != null) ghostSlider.value = 1f;
+            if (hpPercentText != null) hpPercentText.text = "100%";
+        }
+    }
+
+    private IEnumerator AnimateFillRoutine(float duration)
+    {
+        if (healthSlider != null) healthSlider.value = 0f;
+        if (ghostSlider != null) ghostSlider.value = 0f;
+        if (hpPercentText != null) hpPercentText.text = "0%";
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float eased = 1f - Mathf.Pow(1f - t, 3f);
+            if (healthSlider != null) healthSlider.value = eased;
+            if (ghostSlider != null) ghostSlider.value = eased;
+            if (hpPercentText != null) hpPercentText.text = $"{Mathf.CeilToInt(eased * 100f)}%";
+            yield return null;
+        }
+
+        if (healthSlider != null) healthSlider.value = 1f;
+        if (ghostSlider != null) ghostSlider.value = 1f;
+        if (hpPercentText != null) hpPercentText.text = "100%";
+    }
+
     public void UpdateHealth(int currentHp, int maxHp, int phase)
     {
         if (maxHp <= 0) return;
