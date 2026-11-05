@@ -3,13 +3,36 @@ using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// Hieu ung Choang (Stun) ap dung cho tat ca cac loai quai vat va Boss trong game.
-/// - Ngung di chuyen, tan cong va lam cham Animator trong thoi gian choang.
-/// - Hien thi VFX Vòng Sao Choang (Dizzy Stars) xoay chính xác trên đỉnh đầu quái/Boss.
+/// VAELSTRIDER: RUINBOUND - Enemy & Boss Stun Effect System
+/// Hiệu ứng Choáng (Stun) áp dụng cho tất cả quái vật và Boss trong game:
+/// 1. QUY TẮC KHÔNG CỘNG DỒN CHOÁNG (NO STUN STACKING):
+///    - Khi quái/Boss đang bị choáng, mọi đòn stun tiếp theo từ player đều bị vô hiệu hóa (không cộng dồn thời gian).
+/// 2. THỜI GIAN HỒI MIỄN NHIỄM CHOÁNG (ANTI-PERMA-STUNLOCK GRACE PERIOD):
+///    - Sau khi hết choáng, Boss được miễn nhiễm choáng 4.0s, Quái thường được miễn nhiễm 2.5s.
+///    - Đòn stun đánh vào lúc này sẽ hiện "KHÁNG CHOÁNG!" và bị triệt tiêu hoàn toàn.
+/// 3. KHẢ NĂNG MIỄN CHOÁNG LÊN ĐẾN 50% (50% STUN IMMUNITY):
+///    - 50% tỷ lệ né/miễn hoàn toàn đòn choáng (hiện "MIỄN CHOÁNG (50%)!").
+///    - 50% giảm thời lượng choáng nếu bị dính (Boss tối đa 0.35s ngắt chiêu, Quái thường tối đa 0.75s).
+/// 4. MIỄN CHOÁNG KHI CHUYỂN PHASE / BẤT TỬ (BOSS SUPER ARMOR):
+///    - Tuyệt đối không choáng khi Boss đang đổi phase hoặc bất tử.
 /// </summary>
 public class EnemyStunEffect : MonoBehaviour
 {
+    // Cooldown thời gian miễn nhiễm choáng sau khi hồi phục để chống perma-stun
+    public const float BOSS_IMMUNITY_COOLDOWN = 4.0f; // Boss: 4.0s miễn nhiễm choáng sau khi hết choáng
+    public const float MONSTER_IMMUNITY_COOLDOWN = 2.5f; // Quái thường: 2.5s miễn nhiễm choáng sau khi hết choáng
+
+    // Khả năng miễn choáng lên đến 50%
+    public const float STUN_IMMUNITY_CHANCE = 0.50f; // 50% tỷ lệ né / miễn choáng hoàn toàn
+    public const float STUN_DURATION_REDUCTION = 0.50f; // Giảm 50% thời gian choáng nếu dính
+
+    public const float BOSS_MAX_STUN_DURATION = 0.35f; // Trần thời gian choáng tối đa của Boss (ngắt chiêu)
+    public const float MONSTER_MAX_STUN_DURATION = 0.75f; // Trần thời gian choáng tối đa của Quái thường
+
+    private static readonly Dictionary<int, float> s_LastStunEndTimes = new Dictionary<int, float>();
+
     private float stunTimer = 0f;
+    private float lastStunEndTime = -999f;
     private Rigidbody2D rb;
     private List<MonoBehaviour> disabledScripts = new List<MonoBehaviour>();
     private GameObject dizzyVfx;
@@ -21,17 +44,19 @@ public class EnemyStunEffect : MonoBehaviour
     private float originalAnimSpeed = 1f;
     private bool hasSavedAnimSpeed = false;
 
-    public static void ApplyStun(GameObject target, float duration = 1.0f)
+    public bool IsStunned => stunTimer > 0f;
+
+    public static bool ApplyStun(GameObject target, float duration = 1.0f)
     {
-        if (target == null) return;
+        if (target == null) return false;
 
         // 1. Tuyệt đối không choáng Player
-        if (target.CompareTag("Player") || target.GetComponent<PlayerHealth>() != null || target.GetComponentInParent<PlayerHealth>() != null) return;
+        if (target.CompareTag("Player") || target.GetComponent<PlayerHealth>() != null || target.GetComponentInParent<PlayerHealth>() != null) return false;
 
         // 2. Không choáng các vật thể môi trường (Props, Chests, Barrels, Eggs, Rocks, Obstacles)
-        if (target.GetComponent<BreakableProp>() != null || target.GetComponentInParent<BreakableProp>() != null) return;
-        if (target.GetComponent<TreasureChest>() != null || target.GetComponentInParent<TreasureChest>() != null) return;
-        if (target.GetComponent<BoneEggObstacle>() != null || target.GetComponentInParent<BoneEggObstacle>() != null) return;
+        if (target.GetComponent<BreakableProp>() != null || target.GetComponentInParent<BreakableProp>() != null) return false;
+        if (target.GetComponent<TreasureChest>() != null || target.GetComponentInParent<TreasureChest>() != null) return false;
+        if (target.GetComponent<BoneEggObstacle>() != null || target.GetComponentInParent<BoneEggObstacle>() != null) return false;
 
         // 3. Tìm đúng GameObject gốc của Quái / Boss (phòng trường hợp va chạm trúng child collider / hitbox)
         GameObject enemyRoot = target;
@@ -46,7 +71,7 @@ public class EnemyStunEffect : MonoBehaviour
         }
 
         // Kiểm tra xác thực là Enemy hoặc Boss
-        bool isEnemyOrBoss = enemyRoot.CompareTag("Enemy") || (damageable != null && !(damageable is PlayerHealth));
+        bool isEnemyOrBoss = enemyRoot.CompareTag("Enemy") || enemyRoot.CompareTag("Boss") || (damageable != null && !(damageable is PlayerHealth));
         if (!isEnemyOrBoss)
         {
             var behaviours = enemyRoot.GetComponentsInChildren<MonoBehaviour>();
@@ -62,28 +87,151 @@ public class EnemyStunEffect : MonoBehaviour
             }
         }
 
-        if (!isEnemyOrBoss) return;
+        if (!isEnemyOrBoss) return false;
 
+        bool isBoss = IsBoss(enemyRoot);
+
+        // 4. KIỂM TRA ĐANG TRONG GIAI ĐOẠN BẤT TỬ HOẶC CHUYỂN PHASE (BOSS SUPER ARMOR)
+        if (IsInvulnerableOrTransitioning(enemyRoot))
+        {
+            Vector3 headPos = GetHeadTopWorldPosition(enemyRoot);
+            DamagePopup.CreateText(headPos, LocalizationManager.T("BẤT KHẢ XÂM PHẠM!", "INVULNERABLE!"), new Color(1f, 0.85f, 0.2f));
+            return false;
+        }
+
+        // 5. QUY TẮC KHÔNG CỘNG DỒN CHOÁNG (NO STUN STACKING):
+        // Nếu Quái hoặc Boss đang trong trạng thái Choáng, tuyệt đối không cộng dồn thời gian!
         var existing = enemyRoot.GetComponent<EnemyStunEffect>();
+        if (existing != null && existing.IsStunned)
+        {
+            // Bỏ qua hoàn toàn đòn gây choáng tiếp theo của Player
+            return false;
+        }
+
+        // 6. KIỂM TRA THỜI GIAN HỒI MIỄN NHIỄM CHOÁNG (STUN IMMUNITY GRACE PERIOD)
+        int targetId = enemyRoot.GetInstanceID();
+        float lastEndTime = -999f;
+        if (existing != null) lastEndTime = existing.lastStunEndTime;
+        if (s_LastStunEndTimes.TryGetValue(targetId, out float recordedTime))
+        {
+            lastEndTime = Mathf.Max(lastEndTime, recordedTime);
+        }
+
+        float immunityCooldown = isBoss ? BOSS_IMMUNITY_COOLDOWN : MONSTER_IMMUNITY_COOLDOWN;
+        if (Time.time < lastEndTime + immunityCooldown)
+        {
+            // Đang trong thời gian miễn nhiễm phục hồi -> Kháng choáng 100%!
+            Vector3 headPos = GetHeadTopWorldPosition(enemyRoot);
+            DamagePopup.CreateText(headPos, LocalizationManager.T("KHÁNG CHOÁNG!", "STUN RESIST!"), new Color(0.35f, 0.85f, 1f));
+            return false;
+        }
+
+        // 7. KHẢ NĂNG MIỄN CHOÁNG LÊN ĐẾN 50% (50% STUN IMMUNITY CHANCE)
+        // Cả Boss và Quái có 50% cơ hội miễn nhiễm hoàn toàn đòn choáng
+        if (Random.value < STUN_IMMUNITY_CHANCE)
+        {
+            Vector3 headPos = GetHeadTopWorldPosition(enemyRoot);
+            DamagePopup.CreateText(headPos, LocalizationManager.T("MIỄN CHOÁNG (50%)!", "STUN IMMUNE (50%)!"), new Color(1f, 0.75f, 0.2f));
+            return false;
+        }
+
+        // 8. GIẢM 50% THỜI LƯỢNG CHOÁNG (50% DURATION REDUCTION)
+        float effectiveDuration = duration * STUN_DURATION_REDUCTION;
+        if (isBoss)
+        {
+            effectiveDuration = Mathf.Min(effectiveDuration, BOSS_MAX_STUN_DURATION);
+        }
+        else
+        {
+            effectiveDuration = Mathf.Min(effectiveDuration, MONSTER_MAX_STUN_DURATION);
+        }
+
+        // 9. ÁP DỤNG CHOÁNG
         if (existing == null)
         {
             existing = enemyRoot.AddComponent<EnemyStunEffect>();
         }
-        existing.SetStunDuration(duration);
+        existing.enabled = true;
+        existing.SetStunDuration(effectiveDuration, isBoss);
+
+        CleanExpiredImmunities();
+        return true;
     }
 
-    public void SetStunDuration(float duration)
+    public static bool IsBoss(GameObject enemy)
     {
-        stunTimer = Mathf.Max(stunTimer, duration);
+        if (enemy == null) return false;
+        if (enemy.CompareTag("Boss")) return true;
+
+        var eh = enemy.GetComponent<IEnemyHealth>() ?? enemy.GetComponentInParent<IEnemyHealth>();
+        if (eh != null && eh.IsBoss) return true;
+
+        if (enemy.GetComponent<ValleyGolemBossAI>() != null || enemy.GetComponentInParent<ValleyGolemBossAI>() != null) return true;
+        if (enemy.GetComponent<SkeletonKingBossAI>() != null || enemy.GetComponentInParent<SkeletonKingBossAI>() != null) return true;
+        if (enemy.GetComponent<BotWheelAI>() != null || enemy.GetComponentInParent<BotWheelAI>() != null) return true;
+        if (enemy.GetComponent<BloodMonsterAI>() != null || enemy.GetComponentInParent<BloodMonsterAI>() != null) return true;
+        if (enemy.GetComponent<ShadowDoppelgangerBoss>() != null || enemy.GetComponentInParent<ShadowDoppelgangerBoss>() != null) return true;
+        if (enemy.GetComponent<BossGigapackSkills>() != null || enemy.GetComponentInParent<BossGigapackSkills>() != null) return true;
+
+        string nameLower = enemy.name.ToLower();
+        if (nameLower.Contains("boss") || nameLower.Contains("titan") || nameLower.Contains("gormok") || 
+            nameLower.Contains("valthor") || nameLower.Contains("valenthus")) return true;
+
+        return false;
+    }
+
+    public static bool IsInvulnerableOrTransitioning(GameObject enemyRoot)
+    {
+        if (enemyRoot == null) return false;
+
+        // BotWheel
+        var bot = enemyRoot.GetComponent<BotWheelAI>() ?? enemyRoot.GetComponentInParent<BotWheelAI>();
+        if (bot != null && (bot.IsTransitioningPhase || bot.IsDead)) return true;
+
+        // Skeleton King
+        var sk = enemyRoot.GetComponent<SkeletonKingBossAI>() ?? enemyRoot.GetComponentInParent<SkeletonKingBossAI>();
+        if (sk != null && (sk.IsPhaseTransitioning || sk.IsDead)) return true;
+
+        // Blood Monster
+        var bm = enemyRoot.GetComponent<BloodMonsterAI>() ?? enemyRoot.GetComponentInParent<BloodMonsterAI>();
+        if (bm != null && (bm.IsTransitioningPhase || bm.IsDead)) return true;
+
+        // Shadow Doppelganger
+        var sd = enemyRoot.GetComponent<ShadowDoppelgangerBoss>() ?? enemyRoot.GetComponentInParent<ShadowDoppelgangerBoss>();
+        if (sd != null && (sd.IsInvulnerable || sd.IsDead)) return true;
+
+        // Valley Golem
+        var vg = enemyRoot.GetComponent<ValleyGolemBossAI>() ?? enemyRoot.GetComponentInParent<ValleyGolemBossAI>();
+        if (vg != null && vg.IsDead) return true;
+
+        // General IEnemyHealth dead check
+        var eh = enemyRoot.GetComponent<IEnemyHealth>() ?? enemyRoot.GetComponentInParent<IEnemyHealth>();
+        if (eh != null && eh.CurrentHealth <= 0) return true;
+
+        return false;
+    }
+
+    public void SetStunDuration(float duration, bool isBossTarget)
+    {
+        // Gán thời gian choáng chính xác (KHÔNG cộng dồn)
+        stunTimer = duration;
+
         if (rb == null) rb = GetComponent<Rigidbody2D>();
         if (rb != null) rb.linearVelocity = Vector2.zero;
 
-        Vector3 headPos = CalculateHeadTopWorldPosition();
         SoundManager.EnsureInstance()?.PlayHitImpact();
 
         EnsureDizzyVFX();
+        if (dizzyVfx != null) dizzyVfx.SetActive(true);
+
         DisableAIScripts();
         PauseAnimator();
+    }
+
+    // Tương thích ngược với các hàm gọi cũ
+    public void SetStunDuration(float duration)
+    {
+        SetStunDuration(duration, IsBoss(gameObject));
     }
 
     void Awake()
@@ -113,14 +261,14 @@ public class EnemyStunEffect : MonoBehaviour
         if (dizzyVfx == null || starTransforms == null) return;
 
         // Tính vị trí tâm thực tế của đỉnh đầu quái/Boss trong World Space từng frame
-        Vector3 headWorldPos = CalculateHeadTopWorldPosition();
+        Vector3 headWorldPos = GetHeadTopWorldPosition(gameObject);
         dizzyVfx.transform.position = headWorldPos;
         dizzyVfx.transform.rotation = Quaternion.identity;
         dizzyVfx.transform.localScale = Vector3.one;
 
         // Xoay vòng sao quanh đỉnh đầu theo hình elip vừa vặn
         orbitAngle += 360f * Time.deltaTime * 1.5f;
-        
+
         float enemyWidth = GetEnemyWidth();
         float radiusX = Mathf.Clamp(enemyWidth * 0.32f, 0.30f, 0.85f);
         float radiusY = radiusX * 0.35f;
@@ -138,50 +286,41 @@ public class EnemyStunEffect : MonoBehaviour
             float y = Mathf.Sin(rad) * radiusY + (Mathf.Sin(Time.time * 5f + i) * 0.025f);
 
             starTransforms[i].localPosition = new Vector3(x, y, 0f);
-            // Tự xoay từng ngôi sao quanh trục của nó
             starTransforms[i].localRotation = Quaternion.Euler(0f, 0f, -orbitAngle * 2.5f);
 
-            // Chiều sâu 3D (sao phía trước to hơn phía sau)
             float depthScale = Mathf.Lerp(starBaseScale * 0.82f, starBaseScale * 1.18f, (Mathf.Sin(rad) + 1f) * 0.5f);
             starTransforms[i].localScale = Vector3.one * depthScale;
         }
     }
 
-    private Vector3 CalculateHeadTopWorldPosition()
+    public static Vector3 GetHeadTopWorldPosition(GameObject target)
     {
-        // 1. Tìm tâm ngang (X) chính xác của nhân vật
-        float headCenterX = transform.position.x;
+        if (target == null) return Vector3.zero;
+
+        float headCenterX = target.transform.position.x;
         bool hasCenterX = false;
 
-        // Ưu tiên Collider2D vì Collider luôn bám theo trọng tâm hitbox thật của quái/Boss (tránh lệch do padding của sprite sheet)
-        Collider2D mainCol = GetComponent<Collider2D>();
-        if (mainCol == null) mainCol = GetComponentInChildren<Collider2D>();
-
+        Collider2D mainCol = target.GetComponent<Collider2D>() ?? target.GetComponentInChildren<Collider2D>();
         if (mainCol != null && !mainCol.isTrigger)
         {
             headCenterX = mainCol.bounds.center.x;
             hasCenterX = true;
         }
 
-        // 2. Tìm điểm cao nhất (Y) của đỉnh đầu
-        float maxTopY = transform.position.y + 0.9f;
-
+        float maxTopY = target.transform.position.y + 0.9f;
         if (mainCol != null && !mainCol.isTrigger)
         {
             maxTopY = Mathf.Max(maxTopY, mainCol.bounds.max.y);
         }
 
-        // Kiểm tra các SpriteRenderer hiển thị thân thể
-        var allSrs = GetComponentsInChildren<SpriteRenderer>();
+        var allSrs = target.GetComponentsInChildren<SpriteRenderer>();
         foreach (var sr in allSrs)
         {
             if (sr == null || sr.sprite == null) continue;
-            if (dizzyVfx != null && sr.transform.IsChildOf(dizzyVfx.transform)) continue;
-
             string nameLower = sr.gameObject.name.ToLower();
             if (nameLower.Contains("popup") || nameLower.Contains("shadow") || nameLower.Contains("text") || 
                 nameLower.Contains("shield") || nameLower.Contains("circle") || nameLower.Contains("cone") || 
-                nameLower.Contains("indicator") || nameLower.Contains("range")) continue;
+                nameLower.Contains("indicator") || nameLower.Contains("range") || nameLower.Contains("dizzy") || nameLower.Contains("star")) continue;
 
             if (!hasCenterX)
             {
@@ -189,7 +328,6 @@ public class EnemyStunEffect : MonoBehaviour
                 hasCenterX = true;
             }
 
-            // Bỏ qua nếu bounds SpriteRenderer quá lớn so với Collider do khung ảnh trong suốt
             if (mainCol != null && !mainCol.isTrigger && sr.bounds.max.y > mainCol.bounds.max.y + 0.6f)
             {
                 continue;
@@ -198,15 +336,13 @@ public class EnemyStunEffect : MonoBehaviour
             maxTopY = Mathf.Max(maxTopY, sr.bounds.max.y);
         }
 
-        // 3. Đảm bảo chiều cao tối thiểu tương xứng tỉ lệ Scale nếu là Boss khổng lồ
-        float scaleY = Mathf.Abs(transform.lossyScale.y);
+        float scaleY = Mathf.Abs(target.transform.lossyScale.y);
         if (scaleY > 1.15f)
         {
-            maxTopY = Mathf.Max(maxTopY, transform.position.y + (1.25f * scaleY));
+            maxTopY = Mathf.Max(maxTopY, target.transform.position.y + (1.25f * scaleY));
         }
 
-        // 4. Vị trí vòng sao: Lơ lửng ngay phía trên chóp đầu/sừng +0.22m
-        return new Vector3(headCenterX, maxTopY + 0.22f, transform.position.z - 0.25f);
+        return new Vector3(headCenterX, maxTopY + 0.22f, target.transform.position.z - 0.25f);
     }
 
     private float GetEnemyWidth()
@@ -226,7 +362,7 @@ public class EnemyStunEffect : MonoBehaviour
             string nameLower = sr.gameObject.name.ToLower();
             if (nameLower.Contains("popup") || nameLower.Contains("shadow") || nameLower.Contains("text") || 
                 nameLower.Contains("shield") || nameLower.Contains("circle") || nameLower.Contains("cone") || 
-                nameLower.Contains("indicator") || nameLower.Contains("range")) continue;
+                nameLower.Contains("indicator") || nameLower.Contains("range") || nameLower.Contains("dizzy") || nameLower.Contains("star")) continue;
 
             width = Mathf.Max(width, sr.bounds.size.x);
         }
@@ -279,11 +415,10 @@ public class EnemyStunEffect : MonoBehaviour
         if (dizzyVfx == null)
         {
             dizzyVfx = new GameObject("Stun_Dizzy_Stars");
-            dizzyVfx.transform.position = CalculateHeadTopWorldPosition();
+            dizzyVfx.transform.position = GetHeadTopWorldPosition(gameObject);
             dizzyVfx.transform.rotation = Quaternion.identity;
             dizzyVfx.transform.localScale = Vector3.one;
 
-            // Tìm sortingOrder cao nhất của quái để sao luôn hiển thị nổi trên đỉnh đầu
             int highestOrder = 5000;
             string targetLayer = "Default";
             var allSrs = GetComponentsInChildren<SpriteRenderer>();
@@ -345,7 +480,6 @@ public class EnemyStunEffect : MonoBehaviour
                 float angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg + 90f;
                 if (angle < 0f) angle += 360f;
 
-                // 4-cánh sao lấp lánh (4-Point Golden Star)
                 float modAngle = Mathf.Repeat(angle, 90f);
                 float normAngle = Mathf.Abs(modAngle - 45f) / 45f;
                 float expectedR = Mathf.Lerp(innerR, outerR, Mathf.Pow(normAngle, 2.2f));
@@ -387,10 +521,31 @@ public class EnemyStunEffect : MonoBehaviour
 
         if (dizzyVfx != null)
         {
-            Destroy(dizzyVfx);
+            dizzyVfx.SetActive(false);
         }
 
-        Destroy(this);
+        stunTimer = 0f;
+        lastStunEndTime = Time.time;
+        s_LastStunEndTimes[gameObject.GetInstanceID()] = Time.time;
+
+        enabled = false;
+    }
+
+    private static void CleanExpiredImmunities()
+    {
+        if (s_LastStunEndTimes.Count > 150)
+        {
+            float now = Time.time;
+            var expiredKeys = new List<int>();
+            foreach (var kvp in s_LastStunEndTimes)
+            {
+                if (now - kvp.Value > 10f) expiredKeys.Add(kvp.Key);
+            }
+            for (int i = 0; i < expiredKeys.Count; i++)
+            {
+                s_LastStunEndTimes.Remove(expiredKeys[i]);
+            }
+        }
     }
 
     void OnDestroy()

@@ -1404,20 +1404,24 @@ public class SandBladeVortexProjectile : MonoBehaviour
 
                         if (isBoss)
                         {
-                            // Boss có kháng khống chế: Chỉ bị ngắt chiêu nhẹ (micro-interrupt 0.20s), không bị choáng cứng
+                            // Boss có kháng khống chế: Chỉ bị ngắt chiêu nhẹ, có 50% miễn choáng và thời gian hồi phục
                             if (!hasRecentStun)
                             {
                                 s_EnemyLastStunTime[targetId] = Time.time;
-                                EnemyStunEffect.ApplyStun(col.gameObject, 0.20f);
-                                DamagePopup.CreateText(col.transform.position + Vector3.up * 0.45f, "NGẮT CHIÊU!", new Color(1f, 0.75f, 0.2f));
+                                if (EnemyStunEffect.ApplyStun(col.gameObject, 0.40f))
+                                {
+                                    DamagePopup.CreateText(col.transform.position + Vector3.up * 0.45f, LocalizationManager.T("NGẮT CHIÊU!", "INTERRUPT!"), new Color(1f, 0.75f, 0.2f));
+                                }
                             }
                         }
                         else if (!hasRecentStun)
                         {
-                            // Quái thường: Choáng 0.75s (giảm từ 2.0s) và có thời gian hồi miễn nhiễm 3.0s
+                            // Quái thường: Choáng và có thời gian hồi phục chống cộng dồn
                             s_EnemyLastStunTime[targetId] = Time.time;
-                            EnemyStunEffect.ApplyStun(col.gameObject, 0.75f);
-                            DamagePopup.CreateText(col.transform.position + Vector3.up * 0.45f, "CHOÁNG!", new Color(1f, 0.9f, 0.2f));
+                            if (EnemyStunEffect.ApplyStun(col.gameObject, 0.75f))
+                            {
+                                DamagePopup.CreateText(col.transform.position + Vector3.up * 0.45f, LocalizationManager.T("CHOÁNG!", "STUN!"), new Color(1f, 0.9f, 0.2f));
+                            }
                         }
                     }
 

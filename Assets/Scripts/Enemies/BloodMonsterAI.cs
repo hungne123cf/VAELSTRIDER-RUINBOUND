@@ -44,6 +44,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
     public bool IsDead => isDead;
     private bool isKnockedBack = false;
     private bool isTransitioningPhase = false;
+    public bool IsTransitioningPhase => isTransitioningPhase;
     private bool isStunned = false;
 
     // Component references

@@ -48,7 +48,21 @@ public class EnemyFreezeEffect : MonoBehaviour
             enemyRoot = target.transform.parent.gameObject;
         }
 
+        bool isBoss = enemyRoot.CompareTag("Boss") || EnemyStunEffect.IsBoss(enemyRoot);
+        if (EnemyStunEffect.IsInvulnerableOrTransitioning(enemyRoot)) return;
+
         var existing = enemyRoot.GetComponent<EnemyFreezeEffect>();
+        if (existing != null && existing.freezeTimer > 0f)
+        {
+            // Không cộng dồn đóng băng khi đang bị đóng băng
+            return;
+        }
+
+        if (isBoss)
+        {
+            duration = Mathf.Min(duration * 0.5f, 0.6f);
+        }
+
         if (existing == null)
         {
             existing = enemyRoot.AddComponent<EnemyFreezeEffect>();

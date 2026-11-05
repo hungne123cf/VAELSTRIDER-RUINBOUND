@@ -37,7 +37,9 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
     private float baseMoveSpeed = 4.8f;
     private float currentMoveSpeed = 4.8f;
     private bool isDead = false;
+    public bool IsDead => isDead;
     private bool isInvulnerable = false;
+    public bool IsInvulnerable => isInvulnerable;
     private bool isAttacking = false;
     private bool isParrying = false;
     private bool wasParryTriggered = false;

@@ -23,6 +23,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     public int CurrentBossPhase => currentBossPhase;
     private int phaseMaxHealth = 420;
     private bool isTransitioningPhase = false;
+    public bool IsTransitioningPhase => isTransitioningPhase;
 
     [Header("Boss Clone & Teleport Mechanics")]
     [SerializeField] public bool isClone = false;

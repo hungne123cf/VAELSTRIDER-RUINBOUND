@@ -28,7 +28,9 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     private float lastSkillTime = -10f;
     private bool isDead = false;
+    public bool IsDead => isDead;
     private bool isCasting = false;
+    public bool IsCasting => isCasting;
     private int attackCycle = 0;
 
     // Visual warning indicators

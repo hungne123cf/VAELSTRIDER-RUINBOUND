@@ -37,6 +37,8 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     private float corruptedBlinkTimer = 4.5f;
     private bool isBusy = false;
     private bool isPhaseTransitioning = false;
+    public bool IsPhaseTransitioning => isPhaseTransitioning;
+    public bool IsDead => isDead;
     private bool isDead = false;
 
     // Animator Hashes
