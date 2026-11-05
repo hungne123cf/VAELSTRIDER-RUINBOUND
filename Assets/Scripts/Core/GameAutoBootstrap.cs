@@ -84,6 +84,7 @@ public class GameAutoBootstrap : MonoBehaviour
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
+            HD2DEnvironmentManager.EnsureInstance();
             MapSpiritSparksManager.EnsureInstance();
             CorruptedAtmosphereManager.EnsureAtmosphere();
             MagmaCalamityHazardManager.EnsureManager();
@@ -122,6 +123,7 @@ public class GameAutoBootstrap : MonoBehaviour
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
             EnsureBreakables();
+            HD2DEnvironmentManager.EnsureInstance();
             CorruptedAtmosphereManager.EnsureAtmosphere();
             MagmaCalamityHazardManager.EnsureManager();
             AcidDownpourHazardManager.EnsureManager();
