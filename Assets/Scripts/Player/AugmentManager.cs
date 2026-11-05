@@ -1111,11 +1111,14 @@ public class AugmentManager : MonoBehaviour
                 break;
 
             case AugmentDatabase.AugmentType.ChronoStasis:
-                // Đầm Lầy Thời Không: Quái bị làm chậm 35%, bản thân giảm 50% tốc chạy
+                // Đầm Lầy Thời Không (chiêu duy trì 60s):
+                // Quái bị làm chậm 35%, bản thân giảm 50% tốc chạy trong 60s
                 augBonusSpeed -= 0.50f;
                 FlushStatsToController();
                 EnemyChronoSlowEffect.ApplyToAllEnemies();
-                Debug.Log("<color=teal>[CHRONO STASIS]</color> Quái bị làm chậm 35%! Tốc chạy bản thân giảm 50%!");
+                float curChrono = _timedRemaining.ContainsKey(augment) ? _timedRemaining[augment] : 0f;
+                _timedRemaining[augment] = curChrono + (augment.duration > 0f ? augment.duration : 60f);
+                Debug.Log("<color=teal>[CHRONO STASIS]</color> Kích hoạt chiêu Đầm Lầy Thời Không trong 60s! Quái bị làm chậm 35%, bản thân giảm 50% tốc chạy.");
                 break;
 
             case AugmentDatabase.AugmentType.BloodTitheBlade:
@@ -1240,6 +1243,19 @@ public class AugmentManager : MonoBehaviour
                     StopCoroutine(c);
                     _timedRegenCoroutines.Remove(a);
                 }
+                break;
+
+            case AugmentDatabase.AugmentType.ChronoStasis:
+                // Hết chiêu Đầm Lầy Thời Không (sau 60s):
+                augBonusSpeed += 0.50f;
+                FlushStatsToController();
+                EnemyChronoSlowEffect.RemoveFromAllEnemies();
+                DamagePopup.CreateText(
+                    PlayerHealth.Instance != null ? PlayerHealth.Instance.transform.position + Vector3.up * 1.5f : Vector3.zero,
+                    LocalizationManager.IsVietnamese ? "HẾT CHIÊU: ĐẦM LẦY THỜI KHÔNG" : "CHRONO STASIS EXPIRED",
+                    new Color(0.2f, 0.95f, 0.85f)
+                );
+                Debug.Log("<color=teal>[CHRONO STASIS]</color> Đã hết 60s hiệu lực chiêu Đầm Lầy Thời Không! Hồi phục tốc độ quái vật và bản thân.");
                 break;
         }
     }

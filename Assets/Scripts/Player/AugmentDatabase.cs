@@ -797,11 +797,11 @@ public static class AugmentDatabase
         new AugmentData {
             type = AugmentType.ChronoStasis,
             nameVN = "Đầm Lầy Thời Không",    nameEN = "Chrono Stasis",
-            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Toàn bộ quái vật bị <color=#00CEC9><b>Làm Chậm 35%</b></color> tốc đánh và di chuyển.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Bản thân bị <color=#FF7675><b>Giảm 50% Tốc Chạy</b></color>.",
-            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> All enemies suffer <color=#00CEC9><b>-35% Attack & Move Speed</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Hero's Move Speed is <color=#FF7675><b>Reduced by 50%</b></color>.",
+            descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Trong <color=#FFEAA7><b>60 Giây</b></color>, toàn bộ quái vật bị <color=#00CEC9><b>Làm Chậm 35%</b></color> tốc đánh, đạn bay và di chuyển.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Bản thân bị <color=#FF7675><b>Giảm 50% Tốc Chạy</b></color> trong thời gian hiệu lực.",
+            descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> For <color=#FFEAA7><b>60s</b></color>, all enemies suffer <color=#00CEC9><b>-35% Attack & Projectile Speed & Move Speed</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Hero's Move Speed is <color=#FF7675><b>Reduced by 50%</b></color> for the duration.",
             flavorVN = "«Dòng chảy thời gian bị bóp méo, từng bước chân như chìm trong đầm lầy hắc ám.»",
             flavorEN = "«Time itself turns viscous, drowning footsteps in the eternal mire.»",
-            emoji = "⏳", value = 35f, duration = -1f,
+            emoji = "⏳", value = 35f, duration = 60f,
             cardColor = new Color(0.00f, 0.85f, 0.85f), rarity = AugmentData.Rarity.Rare
         },
         new AugmentData {

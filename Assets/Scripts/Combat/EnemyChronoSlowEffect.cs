@@ -3,9 +3,10 @@ using UnityEngine;
 /// <summary>
 /// Hiệu ứng ĐẦM LẦY THỜI GIAN (Chrono Stasis Effect) áp dụng cho Quái vật & Boss
 /// khi người chơi sở hữu Lõi Nâng Cấp Hai Mặt "Đầm Lầy Thời Gian":
+/// - Có thời hạn hiệu lực là 60 Giây.
 /// - Quái vật và Boss bị đánh chậm lại và di chuyển chậm lại 35%.
 /// - Toàn bộ đạn quái bắn ra bay chậm lại 35%.
-/// - Có hiệu ứng tinh vân thời gian ngưng đọng (Chrono Glow) bao quanh quái.
+/// - Khi hết 60s sẽ tự động phục hồi toàn bộ vận tốc, cooldown và xóa VFX.
 /// </summary>
 public class EnemyChronoSlowEffect : MonoBehaviour
 {
@@ -28,6 +29,8 @@ public class EnemyChronoSlowEffect : MonoBehaviour
 
     public static void ApplyToAllEnemies()
     {
+        if (!IsChronoSlowActive) return;
+
         var all = Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var mb in all)
         {
@@ -38,8 +41,21 @@ public class EnemyChronoSlowEffect : MonoBehaviour
         }
     }
 
+    public static void RemoveFromAllEnemies()
+    {
+        var all = Object.FindObjectsByType<EnemyChronoSlowEffect>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var effect in all)
+        {
+            if (effect != null)
+            {
+                effect.RestoreAndDestroy();
+            }
+        }
+    }
+
     public static void Apply(GameObject enemy)
     {
+        if (!IsChronoSlowActive) return;
         if (enemy == null) return;
         if (enemy.CompareTag("Player") || enemy.GetComponent<PlayerHealth>() != null) return;
         if (enemy.GetComponent<BreakableProp>() != null || enemy.GetComponent<TreasureChest>() != null) return;
@@ -68,22 +84,13 @@ public class EnemyChronoSlowEffect : MonoBehaviour
 
         // Giãn hồi chiêu của các quái bắn xa và quái cận chiến
         var spitter = GetComponent<ValleySpitterAI>();
-        if (spitter != null)
-        {
-            spitter.attackCooldown *= COOLDOWN_FACTOR;
-        }
+        if (spitter != null) spitter.attackCooldown *= COOLDOWN_FACTOR;
 
         var botWheel = GetComponent<BotWheelAI>();
-        if (botWheel != null)
-        {
-            botWheel.attackCooldown *= COOLDOWN_FACTOR;
-        }
+        if (botWheel != null) botWheel.attackCooldown *= COOLDOWN_FACTOR;
 
         var bloodMonster = GetComponent<BloodMonsterAI>();
-        if (bloodMonster != null)
-        {
-            bloodMonster.attackCooldown *= COOLDOWN_FACTOR;
-        }
+        if (bloodMonster != null) bloodMonster.attackCooldown *= COOLDOWN_FACTOR;
 
         var skeletonKing = GetComponent<SkeletonKingBossAI>();
         if (skeletonKing != null)
@@ -94,10 +101,7 @@ public class EnemyChronoSlowEffect : MonoBehaviour
         }
 
         var golem = GetComponent<ValleyGolemBossAI>();
-        if (golem != null)
-        {
-            golem.skillCooldown *= COOLDOWN_FACTOR;
-        }
+        if (golem != null) golem.skillCooldown *= COOLDOWN_FACTOR;
 
         var doppel = GetComponent<ShadowDoppelgangerBoss>();
         if (doppel != null)
@@ -108,8 +112,68 @@ public class EnemyChronoSlowEffect : MonoBehaviour
         }
     }
 
+    public void RestoreAndDestroy()
+    {
+        // 1. Phục hồi tốc độ hoạt ảnh
+        if (anim != null && hasSlowedAnim)
+        {
+            anim.speed /= SLOW_FACTOR;
+            hasSlowedAnim = false;
+        }
+
+        // 2. Phục hồi cooldown tấn công
+        if (hasSlowedCooldowns)
+        {
+            hasSlowedCooldowns = false;
+
+            var spitter = GetComponent<ValleySpitterAI>();
+            if (spitter != null) spitter.attackCooldown /= COOLDOWN_FACTOR;
+
+            var botWheel = GetComponent<BotWheelAI>();
+            if (botWheel != null) botWheel.attackCooldown /= COOLDOWN_FACTOR;
+
+            var bloodMonster = GetComponent<BloodMonsterAI>();
+            if (bloodMonster != null) bloodMonster.attackCooldown /= COOLDOWN_FACTOR;
+
+            var skeletonKing = GetComponent<SkeletonKingBossAI>();
+            if (skeletonKing != null)
+            {
+                skeletonKing.meleeCooldown /= COOLDOWN_FACTOR;
+                skeletonKing.skillCooldown /= COOLDOWN_FACTOR;
+                skeletonKing.webSpitCooldown /= COOLDOWN_FACTOR;
+            }
+
+            var golem = GetComponent<ValleyGolemBossAI>();
+            if (golem != null) golem.skillCooldown /= COOLDOWN_FACTOR;
+
+            var doppel = GetComponent<ShadowDoppelgangerBoss>();
+            if (doppel != null)
+            {
+                doppel.attackCooldown /= COOLDOWN_FACTOR;
+                doppel.skillCooldown /= COOLDOWN_FACTOR;
+                doppel.dashCooldown /= COOLDOWN_FACTOR;
+            }
+        }
+
+        // 3. Hủy hiệu ứng VFX hào quang ngưng đọng thời gian
+        if (chronoVfx != null)
+        {
+            Destroy(chronoVfx);
+            chronoVfx = null;
+        }
+
+        Destroy(this);
+    }
+
     void FixedUpdate()
     {
+        // Nếu Lõi Đầm Lầy Thời Không đã hết hạn 60s: tự động phục hồi và hủy hiệu ứng
+        if (!IsChronoSlowActive)
+        {
+            RestoreAndDestroy();
+            return;
+        }
+
         if (rb != null && rb.linearVelocity.sqrMagnitude > 0.01f)
         {
             rb.linearVelocity *= SLOW_FACTOR;
