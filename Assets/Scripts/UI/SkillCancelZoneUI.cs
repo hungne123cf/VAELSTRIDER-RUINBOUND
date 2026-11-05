@@ -27,6 +27,7 @@ public class SkillCancelZoneUI : MonoBehaviour
     private bool isVisible = false;
     private float targetScale = 1f;
     private float currentScale = 1f;
+    private float baseScale = 1.0f;
 
     public bool IsHovered => isHovered && isVisible;
 
@@ -72,8 +73,8 @@ public class SkillCancelZoneUI : MonoBehaviour
         zoneRect.anchorMin = new Vector2(1f, 0f);
         zoneRect.anchorMax = new Vector2(1f, 0f);
         zoneRect.pivot = new Vector2(0.5f, 0.5f);
-        zoneRect.anchoredPosition = new Vector2(-230f, 420f);
         zoneRect.sizeDelta = new Vector2(92f, 92f);
+        ApplyCustomPreferences();
 
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
@@ -157,10 +158,11 @@ public class SkillCancelZoneUI : MonoBehaviour
     public void Show()
     {
         if (this == null) return;
+        ApplyCustomPreferences();
         isVisible = true;
         isHovered = false;
-        targetScale = 1.0f;
-        currentScale = 0.5f;
+        targetScale = baseScale;
+        currentScale = baseScale * 0.5f;
         transform.localScale = Vector3.one * currentScale;
         if (labelText != null) labelText.text = LocalizationManager.T("HỦY CHIÊU", "CANCEL");
         if (gameObject != null) gameObject.SetActive(true);
@@ -188,6 +190,25 @@ public class SkillCancelZoneUI : MonoBehaviour
     /// <summary>
     /// Kiểm tra vị trí ngón tay có nằm trong phạm vi vùng hủy chiêu không (hỗ trợ mọi Canvas Render Mode)
     /// </summary>
+    public void ApplyCustomPreferences()
+    {
+        if (zoneRect == null) zoneRect = GetComponent<RectTransform>();
+        if (zoneRect != null)
+        {
+            float posX = PlayerPrefs.GetFloat("Game_Controls_Cancel_PosX", -230f);
+            float posY = PlayerPrefs.GetFloat("Game_Controls_Cancel_PosY", 420f);
+            zoneRect.anchoredPosition = new Vector2(posX, posY);
+        }
+
+        float s = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.25f);
+        if (s < 0.6f) s = 1.25f;
+        baseScale = s;
+        if (!isVisible)
+        {
+            transform.localScale = Vector3.one * baseScale;
+        }
+    }
+
     public bool CheckIfInside(Vector2 screenPos)
     {
         if (zoneRect == null) return false;
@@ -234,7 +255,7 @@ public class SkillCancelZoneUI : MonoBehaviour
 
         if (hovered)
         {
-            targetScale = 1.25f; // Phóng to báo hiệu đã vào vùng hủy
+            targetScale = baseScale * 1.25f; // Phóng to báo hiệu đã vào vùng hủy
 
             if (bgImage != null) bgImage.color = new Color(0.85f, 0.08f, 0.12f, 0.90f);
             if (ringImage != null) ringImage.color = new Color(1f, 0.95f, 0.95f, 1f);
@@ -252,7 +273,7 @@ public class SkillCancelZoneUI : MonoBehaviour
         }
         else
         {
-            targetScale = 1.0f;
+            targetScale = baseScale;
 
             if (bgImage != null) bgImage.color = new Color(0.15f, 0.04f, 0.06f, 0.75f);
             if (ringImage != null) ringImage.color = new Color(1f, 0.25f, 0.25f, 0.70f);

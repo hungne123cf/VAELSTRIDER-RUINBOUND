@@ -30,7 +30,7 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
     private string copiedHeroId = "vaelstrider";
     private string heroDisplayName = "Vaelstrider";
     private float baseHeroScale = 1.0f;
-    private int currentPhase = 3; // 3 -> 2 -> 1 (Phase I -> Phase II -> Phase III)
+    private int currentPhase = 1; // 1 Phase máu duy nhất theo yêu cầu
     private int maxHealth = 700;
     private int currentHealth = 700;
     private int baseAttackDamage = 18;
@@ -198,7 +198,7 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         }
 
         // Bắt đầu ở Phase 1: Bản Ngã Đối Thủ
-        currentPhase = 3; // 3 bars: Phase 1
+        currentPhase = 1; // 1 thanh máu duy nhất
         ApplyPhase1Aesthetics();
 
         // Hiển thị thanh máu Boss 3 Phase
@@ -276,6 +276,20 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
     private static Sprite[] LoadSpritesFromFolder(string folderPath)
     {
         List<Sprite> list = new List<Sprite>();
+        // 1. Thử load từ Resources nếu folderPath liên quan Player5 hoặc Player6
+        if (folderPath.Contains("Player6"))
+        {
+            string subFolder = folderPath.Substring(folderPath.LastIndexOf('/') + 1);
+            var res = Resources.LoadAll<Sprite>($"Player6/Sprites/{subFolder}");
+            if (res != null && res.Length > 0) return res;
+        }
+        else if (folderPath.Contains("Player5"))
+        {
+            string subFolder = folderPath.Substring(folderPath.LastIndexOf('/') + 1);
+            var res = Resources.LoadAll<Sprite>($"Player5/Sprites/{subFolder}");
+            if (res != null && res.Length > 0) return res;
+        }
+
 #if UNITY_EDITOR
         string[] guids = UnityEditor.AssetDatabase.FindAssets("t:Sprite", new[] { folderPath });
         System.Array.Sort(guids, (a, b) => {
@@ -296,8 +310,8 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
     private void UpdateBossHealthUI()
     {
         string title = LocalizationManager.T($"BÓNG MA BẢN NGÃ - {heroDisplayName.ToUpper()}", $"SHADOW DOPPELGÄNGER - {heroDisplayName.ToUpper()}");
-        BossHealthBarUI.EnsureInstance()?.ShowBoss(title, 3);
-        BossHealthBarUI.EnsureInstance()?.UpdateHealth(currentHealth, maxHealth, currentPhase);
+        BossHealthBarUI.EnsureInstance()?.ShowBoss(title, 1);
+        BossHealthBarUI.EnsureInstance()?.UpdateHealth(currentHealth, maxHealth, 1);
     }
 
     #region Phase Aesthetics & Transformations
@@ -1137,21 +1151,8 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (currentHealth <= 0)
         {
-            if (currentPhase == 3)
-            {
-                // Hết thanh máu Phase 1 -> Chuyển sang Phase 2
-                StartCoroutine(PhaseTransitionRoutine(2));
-            }
-            else if (currentPhase == 2)
-            {
-                // Hết thanh máu Phase 2 -> Chuyển sang Phase 3
-                StartCoroutine(PhaseTransitionRoutine(1));
-            }
-            else
-            {
-                // Hết thanh máu Phase 3 -> Boss chính thức chết!
-                Die();
-            }
+            // Chế độ Ác Mộng: Chỉ 1 phase máu duy nhất -> Hết máu là chết ngay lập tức!
+            Die();
         }
         else
         {

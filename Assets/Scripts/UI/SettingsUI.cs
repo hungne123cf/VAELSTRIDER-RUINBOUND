@@ -950,6 +950,8 @@ public class SettingsUI : MonoBehaviour
         PlayerPrefs.SetFloat("Game_Controls_Skill_PosY", 290f);
         PlayerPrefs.SetFloat("Game_Controls_Potion_PosX", -220f);
         PlayerPrefs.SetFloat("Game_Controls_Potion_PosY", 360f);
+        PlayerPrefs.SetFloat("Game_Controls_Cancel_PosX", -230f);
+        PlayerPrefs.SetFloat("Game_Controls_Cancel_PosY", 420f);
 
         PlayerPrefs.Save();
 
@@ -960,6 +962,7 @@ public class SettingsUI : MonoBehaviour
     {
         MobileActionButton.ApplyToAllButtons();
         VirtualJoystick.ApplyToAllJoysticks();
+        SkillCancelZoneUI.Instance?.ApplyCustomPreferences();
 
         float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.55f);
         if (scaleMod < 1.50f) scaleMod = 1.55f;

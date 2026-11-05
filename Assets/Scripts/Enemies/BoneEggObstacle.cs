@@ -38,10 +38,16 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
         breakSprites = new Sprite[4];
         for (int i = 0; i < 4; i++)
         {
+            idleSprites[i] = Resources.Load<Sprite>($"Enemies/Map3/SkeletonKing_Obstacle_{i}");
+            breakSprites[i] = Resources.Load<Sprite>($"Enemies/Map3/SkeletonKing_Ostacle_Death_{i}");
 #if UNITY_EDITOR
-            idleSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_{i}.png");
-            breakSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Ostacle_Death_{i}.png");
+            if (idleSprites[i] == null)
+                idleSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Obstacle_{i}.png");
+            if (breakSprites[i] == null)
+                breakSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Ostacle_Death_{i}.png");
 #endif
+            if (idleSprites[i] == null) idleSprites[i] = MagmaCalamityHazardManager.GetSoftCircleSprite();
+            if (breakSprites[i] == null) breakSprites[i] = idleSprites[i];
         }
 
         if (idleSprites[0] != null) sr.sprite = idleSprites[0];

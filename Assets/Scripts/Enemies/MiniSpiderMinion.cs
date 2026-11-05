@@ -56,20 +56,81 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         sr.sortingOrder = 1200;
         transform.localScale = new Vector3(0.35f, 0.35f, 1f);
 
-        // Load Sprites
+        // Load Sprites (100% Android Runtime Safe via Resources + Procedural Fallback)
         walkSprites = new Sprite[4];
         for (int i = 0; i < 4; i++)
         {
+            walkSprites[i] = Resources.Load<Sprite>($"Enemies/Map3/SkeletonKing_Walk_{i}");
 #if UNITY_EDITOR
-            walkSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Walk_{i}.png");
+            if (walkSprites[i] == null)
+                walkSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Walk_{i}.png");
 #endif
         }
+
+        deathSprite = Resources.Load<Sprite>("Enemies/Map3/SkeletonKing_Death_1");
 #if UNITY_EDITOR
-        deathSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Death_1.png");
+        if (deathSprite == null)
+            deathSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Death_1.png");
 #endif
-        if (walkSprites[0] != null) sr.sprite = walkSprites[0];
+
+        // Zero-Bug Android Guarantee: Never allow invisible spider minions!
+        if (walkSprites[0] == null)
+        {
+            Sprite fallback = GetProceduralSpiderSprite();
+            for (int i = 0; i < 4; i++)
+            {
+                walkSprites[i] = fallback;
+            }
+        }
+        if (deathSprite == null) deathSprite = walkSprites[0];
+
+        sr.sprite = walkSprites[0];
+        sr.color = Color.white;
 
         gameObject.AddComponent<AutoDepthSort>();
+    }
+
+    private static Sprite proceduralSpiderCache;
+    private static Sprite GetProceduralSpiderSprite()
+    {
+        if (proceduralSpiderCache != null) return proceduralSpiderCache;
+
+        int size = 32;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Point;
+        Color transparent = new Color(0, 0, 0, 0);
+        Color spiderBody = new Color(0.18f, 0.15f, 0.22f, 1f);
+        Color spiderEyes = new Color(0.95f, 0.2f, 0.2f, 1f);
+        Color spiderLegs = new Color(0.35f, 0.3f, 0.4f, 1f);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x - 16f;
+                float dy = y - 16f;
+                float dist = Mathf.Sqrt(dx * dx + dy * dy);
+
+                if (dist <= 8.5f)
+                {
+                    if (dy > 1.5f && (Mathf.Abs(dx - 3f) < 2f || Mathf.Abs(dx + 3f) < 2f))
+                        tex.SetPixel(x, y, spiderEyes);
+                    else
+                        tex.SetPixel(x, y, spiderBody);
+                }
+                else if (dist <= 13.5f && (Mathf.Abs(dx) > 5f || Mathf.Abs(dy) > 5f))
+                {
+                    tex.SetPixel(x, y, spiderLegs);
+                }
+                else
+                {
+                    tex.SetPixel(x, y, transparent);
+                }
+            }
+        }
+        tex.Apply();
+        proceduralSpiderCache = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 32f);
+        return proceduralSpiderCache;
     }
 
     void Start()

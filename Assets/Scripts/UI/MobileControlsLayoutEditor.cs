@@ -11,17 +11,19 @@ public class MobileControlsLayoutEditor : MonoBehaviour
     private Canvas parentCanvas;
     private RectTransform canvasRect;
 
-    // Draggable Item Rects (Only the 4 actual combat controls: Joystick, Attack, Dash, Skill)
+    // Draggable Item Rects (Joystick, Attack, Dash, Skill, Cancel Zone)
     private RectTransform joyItem;
     private RectTransform atkItem;
     private RectTransform dashItem;
     private RectTransform skillItem;
+    private RectTransform cancelItem;
 
     // CanvasGroups for live Opacity preview
     private CanvasGroup joyCg;
     private CanvasGroup atkCg;
     private CanvasGroup dashCg;
     private CanvasGroup skillCg;
+    private CanvasGroup cancelCg;
 
     private float currentScale = 1.25f;
     private float currentOpacity = 1.0f;
@@ -40,6 +42,8 @@ public class MobileControlsLayoutEditor : MonoBehaviour
     private const float DEFAULT_DASH_Y = 160f;
     private const float DEFAULT_SKILL_X = -350f;
     private const float DEFAULT_SKILL_Y = 290f;
+    private const float DEFAULT_CANCEL_X = -230f;
+    private const float DEFAULT_CANCEL_Y = 420f;
 
     public static void OpenEditor(System.Action onClose = null)
     {
@@ -304,6 +308,12 @@ public class MobileControlsLayoutEditor : MonoBehaviour
             new Vector2(curSkillX, curSkillY), new Vector2(130f, 130f), new Vector2(1f, 0f),
             skillSpr, false, out skillCg);
 
+        // 3.5 Cancel (Nút hủy chiêu)
+        float curCancelX = PlayerPrefs.GetFloat("Game_Controls_Cancel_PosX", DEFAULT_CANCEL_X);
+        float curCancelY = PlayerPrefs.GetFloat("Game_Controls_Cancel_PosY", DEFAULT_CANCEL_Y);
+        cancelItem = CreateDraggableCancelItem("Drag_Cancel", isVi ? "HỦY CHIÊU" : "CANCEL",
+            new Vector2(curCancelX, curCancelY), new Vector2(105f, 105f), new Vector2(1f, 0f), out cancelCg);
+
         ApplyScaleAndOpacityToPreview();
     }
 
@@ -449,15 +459,104 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         if (atkItem != null) atkItem.localScale = sc;
         if (dashItem != null) dashItem.localScale = sc;
         if (skillItem != null) skillItem.localScale = sc;
+        if (cancelItem != null) cancelItem.localScale = sc;
 
         if (joyCg != null) joyCg.alpha = currentOpacity;
         if (atkCg != null) atkCg.alpha = currentOpacity;
         if (dashCg != null) dashCg.alpha = currentOpacity;
         if (skillCg != null) skillCg.alpha = currentOpacity;
+        if (cancelCg != null) cancelCg.alpha = currentOpacity;
 
         PlayerPrefs.SetFloat("Game_Controls_ButtonScale", currentScale);
         PlayerPrefs.SetFloat("Game_Controls_Opacity", currentOpacity);
         SettingsUI.ApplyControlSettingsLive();
+    }
+
+    private RectTransform CreateDraggableCancelItem(string name, string label, Vector2 pos, Vector2 size, Vector2 anchor, out CanvasGroup outCg)
+    {
+        GameObject itemObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(CanvasGroup));
+        itemObj.layer = 5;
+        itemObj.transform.SetParent(transform, false);
+
+        outCg = itemObj.GetComponent<CanvasGroup>();
+        outCg.alpha = currentOpacity;
+
+        RectTransform rt = itemObj.GetComponent<RectTransform>();
+        rt.anchorMin = anchor;
+        rt.anchorMax = anchor;
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = size;
+
+        Image img = itemObj.GetComponent<Image>();
+        img.sprite = SoulslikeHUDStyler.GetActionButtonCoreSprite();
+        if (img.sprite == null) img.sprite = Resources.Load<Sprite>("Combat/circle_fill");
+        img.color = new Color(0.22f, 0.05f, 0.08f, 0.90f);
+
+        var outline = itemObj.AddComponent<Outline>();
+        outline.effectColor = new Color(1f, 0.30f, 0.30f, 0.90f);
+        outline.effectDistance = new Vector2(2.5f, -2.5f);
+
+        GameObject ringObj = new GameObject("RingFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        ringObj.transform.SetParent(itemObj.transform, false);
+        RectTransform rRt = ringObj.GetComponent<RectTransform>();
+        rRt.anchorMin = Vector2.zero;
+        rRt.anchorMax = Vector2.one;
+        rRt.sizeDelta = Vector2.zero;
+
+        Image ringImg = ringObj.GetComponent<Image>();
+        ringImg.sprite = SoulslikeHUDStyler.GetActionButtonRingSprite();
+        ringImg.color = new Color(1f, 0.35f, 0.35f, 0.95f);
+        ringImg.raycastTarget = false;
+
+        GameObject xObj = new GameObject("XIcon", typeof(RectTransform), typeof(CanvasRenderer));
+        xObj.transform.SetParent(itemObj.transform, false);
+        RectTransform xRt = xObj.GetComponent<RectTransform>();
+        xRt.anchorMin = new Vector2(0.15f, 0.15f);
+        xRt.anchorMax = new Vector2(0.85f, 0.85f);
+        xRt.sizeDelta = Vector2.zero;
+
+        var xTmp = xObj.AddComponent<TextMeshProUGUI>();
+        xTmp.text = "<b>X</b>";
+        xTmp.fontSize = 34f;
+        xTmp.fontStyle = FontStyles.Bold;
+        xTmp.alignment = TextAlignmentOptions.Center;
+        xTmp.color = new Color(1f, 0.40f, 0.40f, 1f);
+        xTmp.raycastTarget = false;
+
+        GameObject badgeObj = new GameObject("Badge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        badgeObj.transform.SetParent(itemObj.transform, false);
+        RectTransform bgRt = badgeObj.GetComponent<RectTransform>();
+        bgRt.anchorMin = new Vector2(0.5f, 1f);
+        bgRt.anchorMax = new Vector2(0.5f, 1f);
+        bgRt.pivot = new Vector2(0.5f, 0f);
+        bgRt.anchoredPosition = new Vector2(0f, 6f);
+        bgRt.sizeDelta = new Vector2(120f, 24f);
+
+        Image bgImg = badgeObj.GetComponent<Image>();
+        bgImg.color = new Color(0.12f, 0.03f, 0.05f, 0.92f);
+        var bOut = badgeObj.AddComponent<Outline>();
+        bOut.effectColor = new Color(1f, 0.30f, 0.30f, 0.70f);
+        bOut.effectDistance = new Vector2(1f, -1f);
+
+        GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        txtObj.transform.SetParent(badgeObj.transform, false);
+        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.sizeDelta = Vector2.zero;
+
+        var tmp = txtObj.AddComponent<TextMeshProUGUI>();
+        tmp.text = $"<b>{label}</b>";
+        tmp.fontSize = 11.5f;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = new Color(1f, 0.85f, 0.85f);
+        tmp.raycastTarget = false;
+
+        var dragHandler = itemObj.AddComponent<ControlItemDragHandler>();
+        dragHandler.Init(this, rt, anchor, outline);
+
+        return rt;
     }
 
     private RectTransform CreateDraggableControlItem(string name, string label, Vector2 pos, Vector2 size, Vector2 anchor, Sprite heroIcon, bool isJoystick, out CanvasGroup outCg)
@@ -628,6 +727,11 @@ public class MobileControlsLayoutEditor : MonoBehaviour
             PlayerPrefs.SetFloat("Game_Controls_Skill_PosX", skillItem.anchoredPosition.x);
             PlayerPrefs.SetFloat("Game_Controls_Skill_PosY", skillItem.anchoredPosition.y);
         }
+        if (cancelItem != null)
+        {
+            PlayerPrefs.SetFloat("Game_Controls_Cancel_PosX", cancelItem.anchoredPosition.x);
+            PlayerPrefs.SetFloat("Game_Controls_Cancel_PosY", cancelItem.anchoredPosition.y);
+        }
 
         PlayerPrefs.SetFloat("Game_Controls_ButtonScale", currentScale);
         PlayerPrefs.SetFloat("Game_Controls_Opacity", currentOpacity);
@@ -656,6 +760,7 @@ public class MobileControlsLayoutEditor : MonoBehaviour
         if (atkItem != null) atkItem.anchoredPosition = new Vector2(DEFAULT_ATK_X, DEFAULT_ATK_Y);
         if (dashItem != null) dashItem.anchoredPosition = new Vector2(DEFAULT_DASH_X, DEFAULT_DASH_Y);
         if (skillItem != null) skillItem.anchoredPosition = new Vector2(DEFAULT_SKILL_X, DEFAULT_SKILL_Y);
+        if (cancelItem != null) cancelItem.anchoredPosition = new Vector2(DEFAULT_CANCEL_X, DEFAULT_CANCEL_Y);
 
         currentScale = 1.25f;
         currentOpacity = 1.0f;
