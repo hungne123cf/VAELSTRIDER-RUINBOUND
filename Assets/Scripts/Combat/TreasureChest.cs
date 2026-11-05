@@ -50,7 +50,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
 
         if (closedSprite == null)
         {
-            closedSprite = LoadChestSprite("Props/AncientChest/ancient_chest", "Items/chest_closed");
+            closedSprite = Resources.Load<Sprite>("Items/chest_closed");
 #if UNITY_EDITOR
             if (closedSprite == null)
                 closedSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/chest_closed.png");
@@ -58,7 +58,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
         }
         if (openSprite == null)
         {
-            openSprite = LoadChestSprite("Props/AncientChest/ancient_chest_open", "Items/chest_open");
+            openSprite = Resources.Load<Sprite>("Items/chest_open");
 #if UNITY_EDITOR
             if (openSprite == null)
                 openSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/chest_open.png");
@@ -344,33 +344,13 @@ public class TreasureChest : MonoBehaviour, IDamageable
         bounceRoutine = null;
     }
 
-    private static Sprite LoadChestSprite(string primaryPath, string fallbackPath)
-    {
-        Sprite sp = Resources.Load<Sprite>(primaryPath);
-        if (sp == null)
-        {
-            var all = Resources.LoadAll<Sprite>(primaryPath);
-            if (all != null && all.Length > 0) sp = all[0];
-        }
-        if (sp == null && !string.IsNullOrEmpty(fallbackPath))
-        {
-            sp = Resources.Load<Sprite>(fallbackPath);
-            if (sp == null)
-            {
-                var all = Resources.LoadAll<Sprite>(fallbackPath);
-                if (all != null && all.Length > 0) sp = all[0];
-            }
-        }
-        return sp;
-    }
-
     public static TreasureChest SpawnChest(Vector3 pos)
     {
         GameObject chestObj = new GameObject("TreasureChest");
         chestObj.transform.position = pos;
 
         var sr = chestObj.AddComponent<SpriteRenderer>();
-        var sprite = LoadChestSprite("Props/AncientChest/ancient_chest", "Items/chest_closed");
+        var sprite = Resources.Load<Sprite>("Items/chest_closed");
 #if UNITY_EDITOR
         if (sprite == null) sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Items/chest_closed.png");
 #endif
