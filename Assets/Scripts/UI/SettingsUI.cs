@@ -421,7 +421,7 @@ public class SettingsUI : MonoBehaviour
         ccRt.anchorMax = new Vector2(0f, 1f);
         ccRt.pivot = new Vector2(0f, 1f);
         ccRt.anchoredPosition = new Vector2(25f, -76f);
-        ccRt.sizeDelta = new Vector2(670f, 235f);
+        ccRt.sizeDelta = new Vector2(670f, 275f);
 
         Image ccImg = controlsCard.GetComponent<Image>();
         ccImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -435,19 +435,19 @@ public class SettingsUI : MonoBehaviour
         controlsCardTitle.color = new Color(1f, 0.88f, 0.45f);
 
         // Description inside Card
-        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt & Tuyệt kỹ trực tiếp trên màn hình trận đấu. Bạn có thể phóng to, thu nhỏ và chỉnh độ mờ các nút ngay tại đó để vừa vặn nhất với tay cầm của mình.\n\nVị trí và kích thước mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(22f, -46f), new Vector2(626f, 85f));
+        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt & Tuyệt kỹ trực tiếp trên màn hình trận đấu.\n\nVị trí và kích thước mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(22f, -44f), new Vector2(626f, 75f));
         controlsCardDesc.fontSize = 13.5f;
         controlsCardDesc.color = new Color(0.82f, 0.88f, 0.95f, 0.9f);
 
-        // 2 Big Action Buttons inside Card
-        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(22f, -148f), new Vector2(370f, 54f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
-        customizeLayoutBtnText.fontSize = 15.5f;
+        // 2 Big Action Buttons inside Card (Xếp dọc toàn hàng ngang 626px cho chữ to rõ, không bị cụt ba chấm)
+        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(22f, -130f), new Vector2(626f, 56f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
+        customizeLayoutBtnText.fontSize = 16.5f;
 
-        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(405f, -148f), new Vector2(243f, 54f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
-        resetControlsDefaultBtnText.fontSize = 15f;
+        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(22f, -198f), new Vector2(626f, 52f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
+        resetControlsDefaultBtnText.fontSize = 16f;
 
         // Bottom Tip below Card
-        controlsCardTip = CreateLabel(pageControls.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí và kích thước các nút.</color></i>", new Vector2(25f, -330f), new Vector2(670f, 24f));
+        controlsCardTip = CreateLabel(pageControls.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí và kích thước các nút.</color></i>", new Vector2(25f, -365f), new Vector2(670f, 24f));
         controlsCardTip.fontSize = 13.5f;
 
         // --- PAGE 3: GAME DATA & SYSTEM ---

@@ -139,8 +139,8 @@ public class GameOverUI : MonoBehaviour
             var sRt = subtitleText.rectTransform;
             if (sRt != null)
             {
-                sRt.sizeDelta = new Vector2(620f, 32f);
-                sRt.anchoredPosition = new Vector2(0f, 110f);
+                sRt.sizeDelta = new Vector2(780f, 44f);
+                sRt.anchoredPosition = new Vector2(0f, 136f);
             }
         }
 
@@ -503,19 +503,19 @@ public class GameOverUI : MonoBehaviour
         SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.35f, Color.black);
         Instance.titleText = titleTmp;
 
-        // Title Bottom Symmetric Divider (No overlapping flanking wings)
-        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 205), new Vector2(740, 12), new Color(1f, 0.9f, 0.65f, 0.85f));
+        // Title Bottom Symmetric Divider
+        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 172), new Vector2(740, 10), new Color(1f, 0.9f, 0.65f, 0.85f));
 
         // ─── Subtitle ──────────────────────────────────────────────────────────
         GameObject subObj = new GameObject("Subtitle", typeof(RectTransform));
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRect = subObj.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 165);
-        subRect.sizeDelta = new Vector2(800, 38);
+        subRect.anchoredPosition = new Vector2(0, 136);
+        subRect.sizeDelta = new Vector2(780, 44);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         subTmp.text = "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này.";
-        subTmp.fontSize = 19f;
+        subTmp.fontSize = 18f;
         subTmp.color = new Color(0.75f, 0.78f, 0.86f);
         subTmp.alignment = TextAlignmentOptions.Center;
         Instance.subtitleText = subTmp;
@@ -525,8 +525,8 @@ public class GameOverUI : MonoBehaviour
         statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
         RectTransform statusRect = statusObj.GetComponent<RectTransform>();
-        statusRect.anchoredPosition = new Vector2(0, 98);
-        statusRect.sizeDelta = new Vector2(800, 48);
+        statusRect.anchoredPosition = new Vector2(0, 78);
+        statusRect.sizeDelta = new Vector2(780, 40);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
         statusTmp.fontSize = 24f;
         statusTmp.fontStyle = FontStyles.Bold;
@@ -534,13 +534,13 @@ public class GameOverUI : MonoBehaviour
         Instance.respawnStatusText = statusTmp;
 
         // Section Divider before buttons
-        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, 55), new Vector2(740, 10), ColorDividerLine);
+        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, 42), new Vector2(740, 10), ColorDividerLine);
 
         // ─── 1. Button: START NEW RUN (LEVEL 1) ────────────────────────────────
-        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI", new Vector2(0, -32), new Vector2(720, 92), ColorBtnRestartBg, ColorBtnFrame, 28, out Instance.restartBtnText);
+        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI", new Vector2(0, -32), new Vector2(720, 84), ColorBtnRestartBg, ColorBtnFrame, 28, out Instance.restartBtnText);
 
         // ─── 2. Button: RETURN TO SANCTUARY ────────────────────────────────────
-        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH", new Vector2(0, -145), new Vector2(720, 92), ColorBtnMainMenuBg, ColorBtnFrame, 28, out Instance.mainMenuBtnText);
+        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH", new Vector2(0, -145), new Vector2(720, 84), ColorBtnMainMenuBg, ColorBtnFrame, 28, out Instance.mainMenuBtnText);
 
         // Đảm bảo khung ngoài của CenterBox nếu có luôn hiển thị trên cùng
         Transform frame = boxObj.transform.Find("FrameBorder");

@@ -890,12 +890,17 @@ public class AugmentManager : MonoBehaviour
                 augBonusSpeed += 0.20f;
                 augBonusLifesteal += 0.15f;
                 augBonusSpellVamp += 0.15f;
-                // Hy sinh 15% Máu tối đa
-                int sacrificeHp = PlayerHealth.Instance != null ? Mathf.RoundToInt(PlayerHealth.Instance.MaxHealth * 0.15f) : 60;
-                augBonusHp -= sacrificeHp;
                 FlushStatsToCombat();
                 FlushStatsToController();
-                FlushStatsToHealth();
+                if (PlayerHealth.Instance != null)
+                {
+                    PlayerHealth.Instance.ApplySacrificeHealth(0.15f, "Khế Ước Quỷ Dữ");
+                }
+                else
+                {
+                    augBonusHp -= 60;
+                    FlushStatsToHealth();
+                }
                 break;
 
             case AugmentDatabase.AugmentType.UndyingSovereign:
@@ -1077,6 +1082,75 @@ public class AugmentManager : MonoBehaviour
                 augBonusSpellVamp += 0.25f;
                 augBonusAtk += 40;
                 FlushStatsToCombat();
+                break;
+
+            // ─── 8 Lõi Nâng Cấp Mới & Cursed Double-Edged ───
+            case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
+                // Trảm Sát Trảm Kích: Đòn đánh gây thêm 50% HP hiện tại của mục tiêu
+                break;
+
+            case AugmentDatabase.AugmentType.GoldenSanctuary:
+                // Kim Thân Bất Hoại: Mỗi 10s nhận hiệu ứng miễn nhiễm khống chế
+                FindAnyObjectByType<PlayerController>()?.EnableGoldenSanctuary();
+                break;
+
+            case AugmentDatabase.AugmentType.CursedMight:
+                // Khế Ước Cuồng Nộ: Nhận +100 Sát Thương Đòn Đánh, nhưng Quái & Boss tăng thêm +50% Máu
+                augBonusAtk += 100;
+                FlushStatsToCombat();
+                EnemyHealthHelper.MultiplyHealthOfAllActiveEnemies(1.50f);
+                Debug.Log("<color=purple>[CURSED MIGHT]</color> Nhận +100 ATK! Toàn bộ Quái & Boss tăng +50% HP!");
+                break;
+
+            case AugmentDatabase.AugmentType.IroncladPact:
+                // Minh Ước Hắc Thiết: Nhận +50 Giáp, nhưng Quái & Lính nhận thêm +5% Miễn Thương
+                hasIroncladPact = true;
+                augBonusDef += 50;
+                FlushStatsToCombat();
+                Debug.Log("<color=cyan>[IRONCLAD PACT]</color> Nhận +50 Giáp! Quái & Lính nhận thêm +5% Miễn Thương!");
+                break;
+
+            case AugmentDatabase.AugmentType.ChronoStasis:
+                // Đầm Lầy Thời Không: Quái bị làm chậm 35%, bản thân giảm 50% tốc chạy
+                augBonusSpeed -= 0.50f;
+                FlushStatsToController();
+                EnemyChronoSlowEffect.ApplyToAllEnemies();
+                Debug.Log("<color=teal>[CHRONO STASIS]</color> Quái bị làm chậm 35%! Tốc chạy bản thân giảm 50%!");
+                break;
+
+            case AugmentDatabase.AugmentType.BloodTitheBlade:
+                // Ma Kiếm Huyết Tế: Nhận +40 ATK, +40% Hút Máu, nhưng mất 1% HP mỗi giây
+                hasBloodTitheBlade = true;
+                bloodTitheTimer = 0f;
+                augBonusAtk += 40;
+                augBonusLifesteal += 0.40f;
+                augBonusSpellVamp += 0.40f;
+                FlushStatsToCombat();
+                Debug.Log("<color=red>[BLOOD TITHE BLADE]</color> Nhận +40 ATK, +40% Hút Máu! Ma kiếm bắt đầu rút 1% HP/giây!");
+                break;
+
+            case AugmentDatabase.AugmentType.GlassCannonTitan:
+                // Bản Thể Thủy Tinh: +75% Crit, +80% Sát thương Crit, nhưng nhận thêm +30% Sát thương
+                augBonusCrit += 0.75f;
+                augBonusCritDmg += 0.80f;
+                FlushStatsToCombat();
+                Debug.Log("<color=yellow>[GLASS CANNON]</color> Nhận +75% Crit & +80% Crit DMG! Nhận thêm +30% sát thương từ địch!");
+                break;
+
+            case AugmentDatabase.AugmentType.PhantomRush:
+                // Bóng Ma Cuồng Nộ: Nhận +50% CDR, nhưng giảm 25% Máu tối đa
+                augBonusCDR += 0.50f;
+                FlushStatsToCombat();
+                if (PlayerHealth.Instance != null)
+                {
+                    PlayerHealth.Instance.ApplySacrificeHealth(0.25f, "Bóng Ma Cuồng Nộ");
+                }
+                else
+                {
+                    augBonusHp -= 80;
+                    FlushStatsToHealth();
+                }
+                Debug.Log("<color=purple>[PHANTOM RUSH]</color> Nhận +50% CDR! Đã hy sinh 25% Máu tối đa!");
                 break;
 
             // ── Timed buffs (Cộng dồn thời gian nếu nhận lại cùng Lõi) ────────────

@@ -372,6 +372,7 @@ public class Map3WaveSpawner : MonoBehaviour
 
         g.AddComponent<AutoDepthSort>();
         g.AddComponent<GoblinAI>();
+        EnemyHealthHelper.OnEnemySpawned(g);
     }
 
     private void SpawnSkeleton(Vector3 pos)
@@ -403,6 +404,7 @@ public class Map3WaveSpawner : MonoBehaviour
 
         s.AddComponent<AutoDepthSort>();
         s.AddComponent<SkeletonAI>();
+        EnemyHealthHelper.OnEnemySpawned(s);
     }
 
     private void SpawnSlime(Vector3 pos)

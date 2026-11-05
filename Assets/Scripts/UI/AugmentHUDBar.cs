@@ -1315,8 +1315,8 @@ public class AugmentHUDBar : MonoBehaviour
             cardObj.transform.SetParent(_popupContentContainer, false);
 
             var le = cardObj.GetComponent<LayoutElement>();
-            le.preferredHeight = 72f;
-            le.minHeight = 72f;
+            le.preferredHeight = 84f;
+            le.minHeight = 84f;
 
             var cardImg = cardObj.GetComponent<Image>();
             cardImg.sprite = GetPanelBg();
@@ -1335,7 +1335,7 @@ public class AugmentHUDBar : MonoBehaviour
             medalRt.anchorMax = new Vector2(0f, 0.5f);
             medalRt.pivot = new Vector2(0f, 0.5f);
             medalRt.anchoredPosition = new Vector2(12f, 0f);
-            medalRt.sizeDelta = new Vector2(46f, 46f);
+            medalRt.sizeDelta = new Vector2(52f, 52f);
 
             var medalImg = medalObj.GetComponent<Image>();
             medalImg.sprite = GetObsidianCore();
@@ -1411,7 +1411,7 @@ public class AugmentHUDBar : MonoBehaviour
 
             var textTmp = textObj.GetComponent<TextMeshProUGUI>();
             string rankStr = rank > 1 ? $" <color=#FBBF24>Lv.{rank}</color>" : "";
-            textTmp.text = $"<size=15><b><color=#{tierHex}>{tierName} - {typeName}</color>  <color=#FFFFFF>{title}</color>{rankStr}</b></size>\n<size=12><color=#CBD5E1>{desc}</color></size>";
+            textTmp.text = $"<size=16.5><b><color=#{tierHex}>{tierName} - {typeName}</color>  <color=#FFFFFF>{title}</color>{rankStr}</b></size>\n<size=13.5><color=#CBD5E1>{desc}</color></size>";
             textTmp.enableWordWrapping = true;
             SoulslikeHUDStyler.SetSafeOutline(textTmp, 0.25f, Color.black);
 

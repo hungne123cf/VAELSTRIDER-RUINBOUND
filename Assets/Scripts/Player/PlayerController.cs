@@ -343,6 +343,10 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         GameAutoBootstrap.ApplySelectedCharacterToPlayer();
+        if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.GoldenSanctuary))
+        {
+            EnableGoldenSanctuary();
+        }
     }
 
     public bool IsMovementBlocked()

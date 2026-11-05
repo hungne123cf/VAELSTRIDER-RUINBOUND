@@ -66,5 +66,21 @@ public static class EnemyHealthHelper
             }
         }
     }
+
+    /// <summary>
+    /// Kích hoạt khi quái mới xuất hiện trong trận đấu (Áp dụng bùa hại CursedMight nếu người chơi đã chọn)
+    /// </summary>
+    public static void OnEnemySpawned(GameObject enemy)
+    {
+        if (enemy == null) return;
+        if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.CursedMight))
+        {
+            var eh = enemy.GetComponent<IEnemyHealth>() ?? enemy.GetComponentInParent<IEnemyHealth>();
+            if (eh != null)
+            {
+                eh.MultiplyHealth(1.50f);
+            }
+        }
+    }
 }
 

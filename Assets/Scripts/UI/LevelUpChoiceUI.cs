@@ -982,8 +982,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         var descTMP = descObj.AddComponent<TextMeshProUGUI>();
         descTMP.text = fullDesc;
         descTMP.enableAutoSizing = true;
-        descTMP.fontSizeMin = 11f;
-        descTMP.fontSizeMax = 15.5f;
+        descTMP.fontSizeMin = 13f;
+        descTMP.fontSizeMax = 17f;
         descTMP.alignment = TextAlignmentOptions.Center;
         descTMP.color = new Color(0.92f, 0.95f, 1f);
         descTMP.enableWordWrapping = true;

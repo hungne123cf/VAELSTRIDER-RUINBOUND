@@ -142,6 +142,7 @@ public class WaveSpawner : MonoBehaviour
                 currentWaveEnemies.Add(newEnemy);
 
                 IgnorePlayerCollision(newEnemy);
+                EnemyHealthHelper.OnEnemySpawned(newEnemy);
 
                 if (isBoss)
                 {
@@ -380,6 +381,7 @@ public class WaveSpawner : MonoBehaviour
                     currentWaveEnemies.Add(newEnemy);
 
                     IgnorePlayerCollision(newEnemy);
+                    EnemyHealthHelper.OnEnemySpawned(newEnemy);
 
                     if (isBossWave)
                     {
