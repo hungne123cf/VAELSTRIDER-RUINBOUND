@@ -118,7 +118,7 @@ public class ChestLootPopupUI : MonoBehaviour
         boxObj.transform.SetParent(root, false);
 
         RectTransform boxRt = boxObj.GetComponent<RectTransform>();
-        boxRt.sizeDelta = new Vector2(660f, 490f);
+        boxRt.sizeDelta = new Vector2(800f, 580f);
         boxRt.anchoredPosition = Vector2.zero;
 
         Image boxImg = boxObj.GetComponent<Image>();
@@ -221,20 +221,20 @@ public class ChestLootPopupUI : MonoBehaviour
         btnBarObj.layer = 5;
         btnBarObj.transform.SetParent(boxObj.transform, false);
         RectTransform barRt = btnBarObj.GetComponent<RectTransform>();
-        barRt.anchoredPosition = new Vector2(0f, -195f);
-        barRt.sizeDelta = new Vector2(600f, 70f);
+        barRt.anchoredPosition = new Vector2(0f, -225f);
+        barRt.sizeDelta = new Vector2(740f, 88f);
 
         // Claim All Button (Green)
         claimAllBtn = CreateActionButton(btnBarObj.transform, "Btn_ClaimAll",
             LocalizationManager.T("LẤY TẤT CẢ", "CLAIM ALL"),
-            new Vector2(110f, 0f), new Vector2(300f, 66f), new Color(0.18f, 0.65f, 0.38f, 1f));
+            new Vector2(135f, 0f), new Vector2(360f, 82f), new Color(0.18f, 0.65f, 0.38f, 1f));
         claimAllBtnText = claimAllBtn.GetComponentInChildren<TextMeshProUGUI>();
         claimAllBtn.onClick.AddListener(OnClaimAllClicked);
 
         // Close Button (Dark Slate)
         closeBtn = CreateActionButton(btnBarObj.transform, "Btn_Close",
             LocalizationManager.T("ĐÓNG", "CLOSE"),
-            new Vector2(-165f, 0f), new Vector2(190f, 66f), new Color(0.24f, 0.28f, 0.38f, 1f));
+            new Vector2(-205f, 0f), new Vector2(240f, 82f), new Color(0.24f, 0.28f, 0.38f, 1f));
         closeBtnText = closeBtn.GetComponentInChildren<TextMeshProUGUI>();
         closeBtn.onClick.AddListener(Close);
     }
@@ -512,7 +512,7 @@ public class ChestLootPopupUI : MonoBehaviour
         bRt.anchorMax = new Vector2(1f, 0.5f);
         bRt.pivot = new Vector2(1f, 0.5f);
         bRt.anchoredPosition = new Vector2(-10f, 0f);
-        bRt.sizeDelta = new Vector2(115f, 46f);
+        bRt.sizeDelta = new Vector2(135f, 54f);
 
         Image bImg = btnObj.GetComponent<Image>();
         bImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);
@@ -530,7 +530,7 @@ public class ChestLootPopupUI : MonoBehaviour
 
         var bTmp = bTxtObj.AddComponent<TextMeshProUGUI>();
         bTmp.text = LocalizationManager.T("NHẬN", "LOOT");
-        bTmp.fontSize = 16f;
+        bTmp.fontSize = 19f;
         bTmp.fontStyle = FontStyles.Bold;
         bTmp.color = Color.white;
         bTmp.alignment = TextAlignmentOptions.Center;

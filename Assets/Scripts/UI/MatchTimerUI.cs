@@ -181,7 +181,7 @@ public class MatchTimerUI : MonoBehaviour
             if (exRt != null)
             {
                 exRt.anchoredPosition = new Vector2(0f, -8f);
-                exRt.sizeDelta = new Vector2(120f, 26f);
+                exRt.sizeDelta = new Vector2(150f, 34f);
             }
             Instance = existing.GetComponent<MatchTimerUI>();
             if (Instance != null)
@@ -201,7 +201,7 @@ public class MatchTimerUI : MonoBehaviour
         rt.anchorMax = new Vector2(0.5f, 1f);
         rt.pivot = new Vector2(0.5f, 1f);
         rt.anchoredPosition = new Vector2(0f, -8f);
-        rt.sizeDelta = new Vector2(120f, 26f);
+        rt.sizeDelta = new Vector2(150f, 34f);
 
         Image bgImg = rootObj.GetComponent<Image>();
         bgImg.color = new Color(0.05f, 0.07f, 0.12f, 0.92f);

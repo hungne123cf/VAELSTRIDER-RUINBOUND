@@ -175,7 +175,7 @@ public class EquipmentItemDetailPopupUI : MonoBehaviour
         dialogBoxRt.anchorMax = new Vector2(0.5f, 0.5f);
         dialogBoxRt.pivot = new Vector2(0.5f, 0.5f);
         dialogBoxRt.anchoredPosition = Vector2.zero;
-        dialogBoxRt.sizeDelta = new Vector2(470f, 550f);
+        dialogBoxRt.sizeDelta = new Vector2(560f, 640f);
 
         Image boxImg = dialogBox.GetComponent<Image>();
         boxImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -216,7 +216,7 @@ public class EquipmentItemDetailPopupUI : MonoBehaviour
         xRt.anchorMax = new Vector2(1f, 0.5f);
         xRt.pivot = new Vector2(1f, 0.5f);
         xRt.anchoredPosition = Vector2.zero;
-        xRt.sizeDelta = new Vector2(32f, 32f);
+        xRt.sizeDelta = new Vector2(56f, 56f);
         Button xBtn = xBtnObj.GetComponent<Button>();
         xBtn.onClick.AddListener(Hide);
         SoulslikeHUDStyler.StyleCloseButton(xBtn);
@@ -422,7 +422,7 @@ public class EquipmentItemDetailPopupUI : MonoBehaviour
         bbRt.anchorMax = new Vector2(1f, 0f);
         bbRt.pivot = new Vector2(0.5f, 0f);
         bbRt.anchoredPosition = new Vector2(0f, 16f);
-        bbRt.sizeDelta = new Vector2(-36f, 44f);
+        bbRt.sizeDelta = new Vector2(-36f, 68f);
 
         var hlgBtns = btnBar.AddComponent<HorizontalLayoutGroup>();
         hlgBtns.childControlWidth = true;

@@ -347,7 +347,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         cRt.anchorMax = new Vector2(1f, 1f);
         cRt.pivot = new Vector2(1f, 1f);
         cRt.anchoredPosition = new Vector2(-16, -14);
-        cRt.sizeDelta = new Vector2(36, 36);
+        cRt.sizeDelta = new Vector2(60, 60);
         Button closeBtn = closeBtnObj.GetComponent<Button>();
         closeBtn.onClick.AddListener(() => instance.Close());
         SoulslikeHUDStyler.StyleCloseButton(closeBtn);
@@ -440,7 +440,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         abRt.anchorMax = new Vector2(1f, 1f);
         abRt.pivot = new Vector2(1f, 0.5f);
         abRt.anchoredPosition = new Vector2(-28f, toolbarY);
-        abRt.sizeDelta = new Vector2(230, 34);
+        abRt.sizeDelta = new Vector2(260, 48);
 
         Image abImg = allBtnObj.GetComponent<Image>();
         abImg.color = new Color(0.85f, 0.50f, 0.05f, 1f); // Vàng cam nổi bật
@@ -560,7 +560,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             uBtnRt.anchorMax = new Vector2(1f, 0.5f);
             uBtnRt.pivot = new Vector2(1f, 0.5f);
             uBtnRt.anchoredPosition = new Vector2(-22, 0);
-            uBtnRt.sizeDelta = new Vector2(200, 62);
+            uBtnRt.sizeDelta = new Vector2(230, 72);
 
             Image uBtnBg = uBtnObj.GetComponent<Image>();
             uBtnBg.color = new Color(0.18f, 0.48f, 0.36f, 1f);

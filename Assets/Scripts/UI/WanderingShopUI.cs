@@ -442,7 +442,7 @@ public class WanderingShopUI : MonoBehaviour
         RectTransform closeRt = closeBtnObj.GetComponent<RectTransform>();
         closeRt.anchorMin = new Vector2(1f, 1f);
         closeRt.anchorMax = new Vector2(1f, 1f);
-        closeRt.sizeDelta = new Vector2(36f, 36f);
+        closeRt.sizeDelta = new Vector2(60f, 60f);
         closeRt.anchoredPosition = new Vector2(-18f, -18f);
 
         Image closeImg = closeBtnObj.GetComponent<Image>();
@@ -527,7 +527,7 @@ public class WanderingShopUI : MonoBehaviour
         RectTransform rerollRt = rerollBtnObj.GetComponent<RectTransform>();
         rerollRt.anchorMin = new Vector2(0.5f, 0f);
         rerollRt.anchorMax = new Vector2(0.5f, 0f);
-        rerollRt.sizeDelta = new Vector2(280f, 44f);
+        rerollRt.sizeDelta = new Vector2(320f, 58f);
         rerollRt.anchoredPosition = new Vector2(-160f, 22f);
 
         Image rerollImg = rerollBtnObj.GetComponent<Image>();
@@ -563,7 +563,7 @@ public class WanderingShopUI : MonoBehaviour
         RectTransform contRt = continueBtnObj.GetComponent<RectTransform>();
         contRt.anchorMin = new Vector2(0.5f, 0f);
         contRt.anchorMax = new Vector2(0.5f, 0f);
-        contRt.sizeDelta = new Vector2(280f, 44f);
+        contRt.sizeDelta = new Vector2(320f, 58f);
         contRt.anchoredPosition = new Vector2(160f, 22f);
 
         Image contImg = continueBtnObj.GetComponent<Image>();
@@ -1732,8 +1732,8 @@ public class WanderingShopUI : MonoBehaviour
             var btnObj = new GameObject("BuyBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
             btnObj.transform.SetParent(card.transform, false);
             var btnRT = btnObj.GetComponent<RectTransform>();
-            btnRT.anchorMin = new Vector2(0.08f, 0.045f);
-            btnRT.anchorMax = new Vector2(0.92f, 0.190f);
+            btnRT.anchorMin = new Vector2(0.06f, 0.035f);
+            btnRT.anchorMax = new Vector2(0.94f, 0.220f);
             btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
             var btnImg = btnObj.GetComponent<Image>();
@@ -1757,7 +1757,7 @@ public class WanderingShopUI : MonoBehaviour
             btnTxtRT.offsetMin = btnTxtRT.offsetMax = Vector2.zero;
 
             var btnTMP = btnTxtObj.AddComponent<TextMeshProUGUI>();
-            btnTMP.fontSize = 16f;
+            btnTMP.fontSize = 19f;
             btnTMP.fontStyle = FontStyles.Bold;
             btnTMP.alignment = TextAlignmentOptions.Center;
             btnTMP.color = Color.white;

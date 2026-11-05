@@ -212,7 +212,7 @@ public class DailyLoginUI : MonoBehaviour
         cRt.anchorMax = new Vector2(1f, 1f);
         cRt.pivot = new Vector2(1f, 1f);
         cRt.anchoredPosition = new Vector2(-18f, -18f);
-        cRt.sizeDelta = new Vector2(50f, 50f);
+        cRt.sizeDelta = new Vector2(62f, 62f);
 
         Image cImg = closeBtnObj.GetComponent<Image>();
         cImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -274,7 +274,7 @@ public class DailyLoginUI : MonoBehaviour
         clRt.anchorMax = new Vector2(0.5f, 0f);
         clRt.pivot = new Vector2(0.5f, 0f);
         clRt.anchoredPosition = new Vector2(0f, 20f);
-        clRt.sizeDelta = new Vector2(480f, 54f);
+        clRt.sizeDelta = new Vector2(560f, 74f);
 
         Image clImg = claimBtnObj.GetComponent<Image>();
         clImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -291,7 +291,7 @@ public class DailyLoginUI : MonoBehaviour
         cltRt.sizeDelta = Vector2.zero;
 
         claimBtnText = clTxtObj.AddComponent<TextMeshProUGUI>();
-        claimBtnText.fontSize = 16f;
+        claimBtnText.fontSize = 22f;
         claimBtnText.fontStyle = FontStyles.Bold;
         claimBtnText.alignment = TextAlignmentOptions.Center;
 

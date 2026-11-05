@@ -181,7 +181,7 @@ public static class WhiteIconLoader
         iconRt.pivot = new Vector2(0.5f, 0.5f);
         iconRt.anchoredPosition = Vector2.zero;
         
-        Vector2 finalSize = iconSize ?? new Vector2(36f, 36f);
+        Vector2 finalSize = iconSize ?? new Vector2(44f, 44f);
         iconRt.sizeDelta = finalSize;
 
         Image img = iconObj.GetComponent<Image>();
@@ -213,12 +213,12 @@ public static class WhiteIconLoader
             {
                 txtRt.anchorMin = Vector2.zero;
                 txtRt.anchorMax = Vector2.one;
-                txtRt.offsetMin = new Vector2(65f, 0f);
+                txtRt.offsetMin = new Vector2(75f, 0f);
                 txtRt.offsetMax = new Vector2(-20f, 0f);
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.enableAutoSizing = true;
-                tmp.fontSizeMin = 16f;
-                tmp.fontSizeMax = 25f;
+                tmp.fontSizeMin = 18f;
+                tmp.fontSizeMax = 32f;
                 tmp.enableWordWrapping = false;
                 tmp.overflowMode = TextOverflowModes.Ellipsis;
             }
@@ -253,8 +253,8 @@ public static class WhiteIconLoader
             iconRt.anchorMin = new Vector2(0f, 0.5f);
             iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.anchoredPosition = new Vector2(28f, 0f);
-            iconRt.sizeDelta = new Vector2(34f, 34f);
+            iconRt.anchoredPosition = new Vector2(32f, 0f);
+            iconRt.sizeDelta = new Vector2(40f, 40f);
         }
         else
         {
@@ -262,7 +262,7 @@ public static class WhiteIconLoader
             iconRt.anchorMax = new Vector2(0.5f, 0.5f);
             iconRt.pivot = new Vector2(0.5f, 0.5f);
             iconRt.anchoredPosition = Vector2.zero;
-            iconRt.sizeDelta = new Vector2(34f, 34f);
+            iconRt.sizeDelta = new Vector2(40f, 40f);
         }
 
         Image img = iconObj.GetComponent<Image>();

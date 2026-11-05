@@ -43,8 +43,8 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
             if (baseScale == Vector3.zero) baseScale = Vector3.one;
         }
 
-        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.40f);
-        if (scaleMod < 1.35f) scaleMod = 1.40f;
+        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.55f);
+        if (scaleMod < 1.50f) scaleMod = 1.55f;
         float opacity = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
         if (opacity < 0.25f) opacity = 1.0f; // Bảo vệ an toàn: tránh vô tình bị mờ tịt
 

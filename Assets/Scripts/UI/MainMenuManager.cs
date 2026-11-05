@@ -4967,7 +4967,7 @@ public class MainMenuManager : MonoBehaviour
         bRt.anchorMax = new Vector2(0f, 0.5f);
         bRt.pivot = new Vector2(0f, 0.5f);
         bRt.anchoredPosition = new Vector2(35f, 0f);
-        bRt.sizeDelta = new Vector2(170f, 54f);
+        bRt.sizeDelta = new Vector2(190f, 58f);
 
         Image bImg = backBtnObj.GetComponent<Image>();
         bImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -4985,7 +4985,7 @@ public class MainMenuManager : MonoBehaviour
         btRt.anchorMin = Vector2.zero; btRt.anchorMax = Vector2.one; btRt.sizeDelta = Vector2.zero;
         var bTxt = bTxtObj.GetComponent<TextMeshProUGUI>();
         bTxt.text = LocalizationManager.T("TRỞ VỀ", "BACK");
-        bTxt.fontSize = 18f;
+        bTxt.fontSize = 20f;
         bTxt.fontStyle = FontStyles.Bold;
         bTxt.alignment = TextAlignmentOptions.Center;
         bTxt.color = new Color(0.96f, 0.88f, 0.65f, 1f);
@@ -5145,7 +5145,7 @@ public class MainMenuManager : MonoBehaviour
         prevRt.anchorMax = new Vector2(0f, 0.5f);
         prevRt.pivot = new Vector2(0f, 0.5f);
         prevRt.anchoredPosition = new Vector2(10f, 0f);
-        prevRt.sizeDelta = new Vector2(68f, 96f);
+        prevRt.sizeDelta = new Vector2(78f, 110f);
         Image prevImg = prevObj.GetComponent<Image>();
         prevImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
         prevImg.type = Image.Type.Sliced;
@@ -5161,7 +5161,7 @@ public class MainMenuManager : MonoBehaviour
         ptRt.anchorMin = Vector2.zero; ptRt.anchorMax = Vector2.one; ptRt.sizeDelta = Vector2.zero;
         var prevTxt = prevTxtObj.GetComponent<TextMeshProUGUI>();
         prevTxt.text = "<";
-        prevTxt.fontSize = 40f;
+        prevTxt.fontSize = 44f;
         prevTxt.fontStyle = FontStyles.Bold;
         prevTxt.alignment = TextAlignmentOptions.Center;
         prevTxt.color = new Color(1f, 0.88f, 0.45f, 1f);
@@ -5176,7 +5176,7 @@ public class MainMenuManager : MonoBehaviour
         nextRt.anchorMax = new Vector2(1f, 0.5f);
         nextRt.pivot = new Vector2(1f, 0.5f);
         nextRt.anchoredPosition = new Vector2(-10f, 0f);
-        nextRt.sizeDelta = new Vector2(68f, 96f);
+        nextRt.sizeDelta = new Vector2(78f, 110f);
         Image nextImg = nextObj.GetComponent<Image>();
         nextImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
         nextImg.type = Image.Type.Sliced;
@@ -5318,7 +5318,7 @@ public class MainMenuManager : MonoBehaviour
         cfbRt.anchorMax = new Vector2(1f, 0.5f);
         cfbRt.pivot = new Vector2(1f, 0.5f);
         cfbRt.anchoredPosition = new Vector2(-45f, 0f);
-        cfbRt.sizeDelta = new Vector2(295f, 76f);
+        cfbRt.sizeDelta = new Vector2(330f, 86f);
 
         Image cfbImg = confirmBtnObj.GetComponent<Image>();
         cfbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();

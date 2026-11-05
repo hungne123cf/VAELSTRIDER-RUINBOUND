@@ -400,8 +400,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         var btnObj = new GameObject("RerollButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         btnObj.transform.SetParent(parent, false);
         var btnRT = btnObj.GetComponent<RectTransform>();
-        btnRT.anchorMin = new Vector2(0.35f, 0.015f);
-        btnRT.anchorMax = new Vector2(0.65f, 0.078f);
+        btnRT.anchorMin = new Vector2(0.25f, 0.010f);
+        btnRT.anchorMax = new Vector2(0.75f, 0.098f);
         btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
         var btnImg = btnObj.GetComponent<Image>();
@@ -442,7 +442,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         txtRT.offsetMin = txtRT.offsetMax = Vector2.zero;
 
         _rerollBtnText = txtObj.AddComponent<TextMeshProUGUI>();
-        _rerollBtnText.fontSize = 17f;
+        _rerollBtnText.fontSize = 23f;
         _rerollBtnText.fontStyle = FontStyles.Bold;
         _rerollBtnText.alignment = TextAlignmentOptions.Center;
         SoulslikeHUDStyler.SetSafeOutline(_rerollBtnText, 0.40f, new Color(0f, 0f, 0f, 0.95f));
@@ -945,8 +945,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         var btnObj = new GameObject("PickButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         btnObj.transform.SetParent(card.transform, false);
         var btnRT = btnObj.GetComponent<RectTransform>();
-        btnRT.anchorMin = new Vector2(0.08f, 0.050f);
-        btnRT.anchorMax = new Vector2(0.92f, 0.210f);
+        btnRT.anchorMin = new Vector2(0.06f, 0.035f);
+        btnRT.anchorMax = new Vector2(0.94f, 0.225f);
         btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
         var btnImg = btnObj.GetComponent<Image>();
@@ -977,7 +977,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         var btnTMP = btnTxtObj.AddComponent<TextMeshProUGUI>();
         btnTMP.text = isVN ? "CHỌN NÂNG CẤP" : "ACQUIRE AUGMENT";
-        btnTMP.fontSize = 17f;
+        btnTMP.fontSize = 20f;
         btnTMP.fontStyle = FontStyles.Bold;
         btnTMP.alignment = TextAlignmentOptions.Center;
         btnTMP.color = Color.white;

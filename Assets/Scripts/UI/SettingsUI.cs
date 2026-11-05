@@ -205,7 +205,7 @@ public class SettingsUI : MonoBehaviour
                 btnRt.anchorMax = new Vector2(1f, 1f);
                 btnRt.pivot = new Vector2(1f, 1f);
                 btnRt.anchoredPosition = new Vector2(-20f, -20f);
-                btnRt.sizeDelta = new Vector2(80f, 80f);
+                btnRt.sizeDelta = new Vector2(92f, 92f);
 
                 Image btnImg = btnObj.GetComponent<Image>();
                 btnImg.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
@@ -222,7 +222,7 @@ public class SettingsUI : MonoBehaviour
                     else EnsureUIExists()?.OpenSettings();
                 });
 
-                WhiteIconLoader.ReplaceTextWithIcon(btn, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(50f, 50f));
+                WhiteIconLoader.ReplaceTextWithIcon(btn, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(58f, 58f));
             }
         }
 
@@ -473,13 +473,13 @@ public class SettingsUI : MonoBehaviour
         offlineNoteText.fontSize = 14f;
 
         // 5. BOTTOM ROW: CLOSE BUTTON
-        closeButton = CreateStyledButton(dialogBox.transform, "Btn_Close", Vector2.zero, new Vector2(360f, 48f), new Color(0.12f, 0.48f, 0.24f), out closeBtnText);
+        closeButton = CreateStyledButton(dialogBox.transform, "Btn_Close", Vector2.zero, new Vector2(460f, 68f), new Color(0.12f, 0.48f, 0.24f), out closeBtnText);
         RectTransform cbRt = closeButton.GetComponent<RectTransform>();
         cbRt.anchorMin = new Vector2(0.5f, 0f);
         cbRt.anchorMax = new Vector2(0.5f, 0f);
         cbRt.pivot = new Vector2(0.5f, 0.5f);
-        cbRt.anchoredPosition = new Vector2(0f, 42f);
-        closeBtnText.fontSize = 19;
+        cbRt.anchoredPosition = new Vector2(0f, 46f);
+        closeBtnText.fontSize = 24;
 
         // 6. Reset Confirmation Modal
         BuildResetConfirmModal(dialogBox.transform);
@@ -764,8 +764,8 @@ public class SettingsUI : MonoBehaviour
     {
         float bgmVal = 0.8f;
         float sfxVal = 0.8f;
-        float btnSizeVal = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.40f);
-        if (btnSizeVal < 1.35f) btnSizeVal = 1.40f;
+        float btnSizeVal = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.55f);
+        if (btnSizeVal < 1.50f) btnSizeVal = 1.55f;
         float btnOpacityVal = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
         float joyX = PlayerPrefs.GetFloat("Game_Controls_Joy_PosX", 250f);
         float joyY = PlayerPrefs.GetFloat("Game_Controls_Joy_PosY", 250f);
@@ -931,7 +931,7 @@ public class SettingsUI : MonoBehaviour
     private void OnResetControlsDefault()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        PlayerPrefs.SetFloat("Game_Controls_ButtonScale", 1.40f);
+        PlayerPrefs.SetFloat("Game_Controls_ButtonScale", 1.55f);
         PlayerPrefs.SetFloat("Game_Controls_Opacity", 1.0f);
 
         PlayerPrefs.SetFloat("Game_Controls_Joy_PosX", 250f);
@@ -955,8 +955,8 @@ public class SettingsUI : MonoBehaviour
         MobileActionButton.ApplyToAllButtons();
         VirtualJoystick.ApplyToAllJoysticks();
 
-        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.40f);
-        if (scaleMod < 1.35f) scaleMod = 1.40f;
+        float scaleMod = PlayerPrefs.GetFloat("Game_Controls_ButtonScale", 1.55f);
+        if (scaleMod < 1.50f) scaleMod = 1.55f;
         float opacity = PlayerPrefs.GetFloat("Game_Controls_Opacity", 1.0f);
         var potionSlot = GameObject.Find("Btn_Potion");
         if (potionSlot != null)

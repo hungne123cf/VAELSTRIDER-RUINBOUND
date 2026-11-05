@@ -151,7 +151,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         boxObj.transform.SetParent(root, false);
 
         RectTransform boxRt = boxObj.GetComponent<RectTransform>();
-        boxRt.sizeDelta = new Vector2(680f, 500f);
+        boxRt.sizeDelta = new Vector2(800f, 580f);
         boxRt.anchoredPosition = Vector2.zero;
 
         Image boxImg = boxObj.GetComponent<Image>();
@@ -168,12 +168,12 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchoredPosition = new Vector2(0f, 195f);
-        titleRt.sizeDelta = new Vector2(600f, 36f);
+        titleRt.anchoredPosition = new Vector2(0f, 225f);
+        titleRt.sizeDelta = new Vector2(700f, 42f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = LocalizationManager.T("DỊCH CHUYỂN CÕI GIỚI", "REALM WARP GATE");
-        titleText.fontSize = 28f;
+        titleText.fontSize = 32f;
         titleText.fontStyle = FontStyles.Bold;
         titleText.color = new Color(1f, 0.92f, 0.65f, 1f); // Antique Gold
         titleText.alignment = TextAlignmentOptions.Center;
@@ -184,26 +184,26 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchoredPosition = new Vector2(0f, 160f);
-        subRt.sizeDelta = new Vector2(600f, 26f);
+        subRt.anchoredPosition = new Vector2(0f, 182f);
+        subRt.sizeDelta = new Vector2(700f, 30f);
 
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = LocalizationManager.T("Vết nứt không gian kết nối tới cõi tiếp theo", "Traverse the spatial rift into the next realm");
-        subtitleText.fontSize = 15f;
+        subtitleText.fontSize = 17f;
         subtitleText.fontStyle = FontStyles.Normal;
         subtitleText.color = new Color(0.75f, 0.80f, 0.90f, 0.85f);
         subtitleText.alignment = TextAlignmentOptions.Center;
 
         // Filigree Divider
-        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 142f), new Vector2(560f, 10f));
+        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 160f), new Vector2(660f, 10f));
 
         // 3. Destination Plaque Card
         GameObject plaqueObj = new GameObject("DestinationCard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         plaqueObj.layer = 5;
         plaqueObj.transform.SetParent(boxObj.transform, false);
         RectTransform plaqueRt = plaqueObj.GetComponent<RectTransform>();
-        plaqueRt.anchoredPosition = new Vector2(0f, 48f);
-        plaqueRt.sizeDelta = new Vector2(600f, 150f);
+        plaqueRt.anchoredPosition = new Vector2(0f, 52f);
+        plaqueRt.sizeDelta = new Vector2(700f, 165f);
 
         Image pImg = plaqueObj.GetComponent<Image>();
         pImg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
@@ -266,7 +266,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         warnRt.sizeDelta = new Vector2(470f, 38f);
 
         warningNoticeText = warnObj.AddComponent<TextMeshProUGUI>();
-        warningNoticeText.fontSize = 15f;
+        warningNoticeText.fontSize = 16f;
         warningNoticeText.lineSpacing = 2f;
         warningNoticeText.alignment = TextAlignmentOptions.Center;
         warningNoticeText.text = LocalizationManager.T(
@@ -279,13 +279,13 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         btnBarObj.layer = 5;
         btnBarObj.transform.SetParent(boxObj.transform, false);
         RectTransform barRt = btnBarObj.GetComponent<RectTransform>();
-        barRt.anchoredPosition = new Vector2(0f, -180f);
-        barRt.sizeDelta = new Vector2(600f, 74f);
+        barRt.anchoredPosition = new Vector2(0f, -212f);
+        barRt.sizeDelta = new Vector2(720f, 92f);
 
         // Button 1: CANCEL [ Ở LẠI ]
         cancelBtn = CreateActionButton(btnBarObj.transform, "Btn_Cancel",
             LocalizationManager.T("Ở LẠI", "STAY"),
-            new Vector2(-150f, 0f), new Vector2(275f, 68f),
+            new Vector2(-180f, 0f), new Vector2(335f, 86f),
             new Color(0.25f, 0.28f, 0.38f, 1f),
             new Color(0.85f, 0.88f, 0.95f),
             new Color(0.40f, 0.45f, 0.58f, 0.7f));
@@ -295,7 +295,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         // Button 2: PROCEED [ TIẾN VÀO ]
         proceedBtn = CreateActionButton(btnBarObj.transform, "Btn_Proceed",
             LocalizationManager.T("TIẾN VÀO", "ENTER"),
-            new Vector2(150f, 0f), new Vector2(275f, 68f),
+            new Vector2(180f, 0f), new Vector2(335f, 86f),
             new Color(0.50f, 0.18f, 0.78f, 1f),
             new Color(1f, 0.96f, 0.65f),
             new Color(1f, 0.85f, 0.35f, 0.9f));

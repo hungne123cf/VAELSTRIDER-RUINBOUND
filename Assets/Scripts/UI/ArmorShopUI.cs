@@ -593,7 +593,7 @@ public class ArmorShopUI : MonoBehaviour
         cbRt.anchorMax = new Vector2(1f, 1f);
         cbRt.pivot = new Vector2(1f, 1f);
         cbRt.anchoredPosition = new Vector2(-30f, -30f);
-        cbRt.sizeDelta = new Vector2(52f, 52f);
+        cbRt.sizeDelta = new Vector2(64f, 64f);
 
         Button closeBtn = closeBtnObj.GetComponent<Button>();
         closeBtn.onClick.AddListener(Close);
@@ -1003,7 +1003,7 @@ public class ArmorShopUI : MonoBehaviour
         buyRt.anchorMax = new Vector2(1f, 0f);
         buyRt.pivot = new Vector2(0.5f, 0f);
         buyRt.anchoredPosition = new Vector2(0f, 82f);
-        buyRt.sizeDelta = new Vector2(-40f, 56f);
+        buyRt.sizeDelta = new Vector2(-30f, 68f);
 
         buyActionBtnImg = buyObj.GetComponent<Image>();
         buyActionBtnImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);

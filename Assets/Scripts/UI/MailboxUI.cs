@@ -208,7 +208,7 @@ public class MailboxUI : MonoBehaviour
         cRt.anchorMax = new Vector2(1f, 1f);
         cRt.pivot = new Vector2(1f, 1f);
         cRt.anchoredPosition = new Vector2(-18f, -18f);
-        cRt.sizeDelta = new Vector2(50f, 50f);
+        cRt.sizeDelta = new Vector2(62f, 62f);
 
         Image cImg = closeBtnObj.GetComponent<Image>();
         cImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -279,7 +279,7 @@ public class MailboxUI : MonoBehaviour
         daRt.anchorMax = new Vector2(1f, 0.5f);
         daRt.pivot = new Vector2(1f, 0.5f);
         daRt.anchoredPosition = new Vector2(-2f, 0f);
-        daRt.sizeDelta = new Vector2(138f, 30f);
+        daRt.sizeDelta = new Vector2(165f, 42f);
 
         Image daImg = delAllBtnObj.GetComponent<Image>();
         daImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -523,7 +523,7 @@ public class MailboxUI : MonoBehaviour
         gcRt.anchorMax = new Vector2(0.5f, 0f);
         gcRt.pivot = new Vector2(0.5f, 0f);
         gcRt.anchoredPosition = new Vector2(0f, 16f);
-        gcRt.sizeDelta = new Vector2(930f, 48f);
+        gcRt.sizeDelta = new Vector2(930f, 56f);
 
         Image gcImg = gcBar.GetComponent<Image>();
         gcImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -554,7 +554,7 @@ public class MailboxUI : MonoBehaviour
         inRt.anchorMax = new Vector2(0f, 0.5f);
         inRt.pivot = new Vector2(0f, 0.5f);
         inRt.anchoredPosition = new Vector2(128f, 0f);
-        inRt.sizeDelta = new Vector2(210f, 40f);
+        inRt.sizeDelta = new Vector2(210f, 48f);
 
         // Button [⌨ PHÍM] - Mở bàn phím ảo điện thoại trực tiếp
         GameObject kbdBtnObj = new GameObject("Btn_ToggleKeyboard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -564,7 +564,7 @@ public class MailboxUI : MonoBehaviour
         kbRt.anchorMax = new Vector2(0f, 0.5f);
         kbRt.pivot = new Vector2(0f, 0.5f);
         kbRt.anchoredPosition = new Vector2(344f, 0f);
-        kbRt.sizeDelta = new Vector2(80f, 40f);
+        kbRt.sizeDelta = new Vector2(80f, 48f);
 
         Image kbImg = kbdBtnObj.GetComponent<Image>();
         kbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -674,7 +674,7 @@ public class MailboxUI : MonoBehaviour
         pRt.anchorMax = new Vector2(0f, 0.5f);
         pRt.pivot = new Vector2(0f, 0.5f);
         pRt.anchoredPosition = new Vector2(430f, 0f);
-        pRt.sizeDelta = new Vector2(65f, 40f);
+        pRt.sizeDelta = new Vector2(65f, 48f);
 
         Image pImg = pasteBtnObj.GetComponent<Image>();
         pImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -705,7 +705,7 @@ public class MailboxUI : MonoBehaviour
         clRt.anchorMax = new Vector2(0f, 0.5f);
         clRt.pivot = new Vector2(0f, 0.5f);
         clRt.anchoredPosition = new Vector2(501f, 0f);
-        clRt.sizeDelta = new Vector2(95f, 40f);
+        clRt.sizeDelta = new Vector2(105f, 48f);
 
         Image clImg = listBtnObj.GetComponent<Image>();
         clImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -740,7 +740,7 @@ public class MailboxUI : MonoBehaviour
         rdRt.anchorMax = new Vector2(0f, 0.5f);
         rdRt.pivot = new Vector2(0f, 0.5f);
         rdRt.anchoredPosition = new Vector2(602f, 0f);
-        rdRt.sizeDelta = new Vector2(120f, 40f);
+        rdRt.sizeDelta = new Vector2(130f, 48f);
 
         Image rdImg = rdBtnObj.GetComponent<Image>();
         rdImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -869,7 +869,7 @@ public class MailboxUI : MonoBehaviour
         RectTransform cbRt = closeBtn.GetComponent<RectTransform>();
         cbRt.anchorMin = cbRt.anchorMax = cbRt.pivot = new Vector2(1f, 1f);
         cbRt.anchoredPosition = new Vector2(-12f, -12f);
-        cbRt.sizeDelta = new Vector2(36f, 36f);
+        cbRt.sizeDelta = new Vector2(54f, 54f);
         Image cbImg = closeBtn.GetComponent<Image>();
         cbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
         cbImg.color = new Color(0.38f, 0.15f, 0.16f);
