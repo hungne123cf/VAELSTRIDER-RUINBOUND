@@ -31,11 +31,11 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
     private string heroDisplayName = "Vaelstrider";
     private float baseHeroScale = 1.0f;
     private int currentPhase = 1; // 1 Phase máu duy nhất theo yêu cầu
-    private int maxHealth = 550;
-    private int currentHealth = 550;
-    private int baseAttackDamage = 14;
-    private float baseMoveSpeed = 4.2f;
-    private float currentMoveSpeed = 4.2f;
+    private int maxHealth = 380; // Nerfed wave 2
+    private int currentHealth = 380;
+    private int baseAttackDamage = 10; // Nerfed wave 2
+    private float baseMoveSpeed = 3.6f; // Nerfed wave 2
+    private float currentMoveSpeed = 3.6f;
     private bool isDead = false;
     private bool isInvulnerable = false;
     public bool IsInvulnerable => isInvulnerable;
@@ -60,13 +60,13 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
     [Header("Combat Timers")]
     private float attackTimer = 0.5f;
-    public float attackCooldown = 1.35f; // Nerfed: Tăng thời gian hồi giữa các đòn đánh thường
+    public float attackCooldown = 1.85f; // Nerfed Đợt 2: Tăng hồi đòn thường lên 1.85s (cửa sổ phản công cực rộng)
     private float dashTimer = 2.0f;
-    public float dashCooldown = 5.0f; // Nerfed: Giảm tần suất lướt né
+    public float dashCooldown = 6.5f; // Nerfed Đợt 2: Giảm mạnh tần suất lướt né
     private float skillTimer = 4.0f;
-    public float skillCooldown = 8.5f; // Nerfed: Giảm tần suất tung tuyệt kỹ
+    public float skillCooldown = 11.5f; // Nerfed Đợt 2: Tuyệt kỹ hồi 11.5s
     private float parryTimer = 6.0f;
-    public float parryCooldown = 12.0f; // Nerfed: Giảm tần suất bật kiếm thuẫn
+    public float parryCooldown = 16.0f; // Nerfed Đợt 2: Thủ phản đòn hồi 16.0s
 
     // Sprite Animation cho Dune Assassin (Player 5)
     private static Sprite[] duneIdleFrames;
@@ -189,21 +189,21 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
                 }
             }
 
-            // Cân bằng Máu, Tốc độ & Sát thương Nerfed:
-            // - Máu Boss vừa phải (~2.2x Max HP player), không làm trận đấu lê thê
-            // - Tốc độ di chuyển chậm hơn Player một chút (0.90x) để người chơi có thể giữ khoảng cách và thả diều (kite)
-            // - Sát thương đòn thường chỉ chiếm ~10-12% Max HP của Player (thay vì 50-80% HP gây 1-shot)
+            // Cân bằng Máu, Tốc độ & Sát thương Nerfed Đợt 2:
+            // - Máu Boss giảm mạnh (~1.4x Max HP player, clamp 300 - 480 HP)
+            // - Tốc độ di chuyển chậm hơn Player rõ rệt (0.78x) để người chơi dễ dàng giữ cự ly và thả diều
+            // - Sát thương đòn thường chỉ chiếm ~7% Max HP của Player (khoảng 8 - 14 sát thương)
             int pMaxHp = playerHealth != null ? playerHealth.MaxHealth : MapScalingManager.GetPlayerMaxHealth();
             float mapSceneMult = MapScalingManager.GetMultiplierForScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
-            int targetHp = Mathf.RoundToInt(pMaxHp * 2.2f * mapSceneMult);
-            maxHealth = Mathf.Clamp(targetHp, 450, 850);
+            int targetHp = Mathf.RoundToInt(pMaxHp * 1.4f * mapSceneMult);
+            maxHealth = Mathf.Clamp(targetHp, 300, 480);
             currentHealth = maxHealth;
 
-            baseMoveSpeed = player.MoveSpeed * 0.90f;
+            baseMoveSpeed = player.MoveSpeed * 0.78f;
             currentMoveSpeed = baseMoveSpeed;
 
-            int scaledDmg = Mathf.RoundToInt(pMaxHp * 0.11f);
-            baseAttackDamage = Mathf.Clamp(scaledDmg, 12, 22);
+            int scaledDmg = Mathf.RoundToInt(pMaxHp * 0.07f);
+            baseAttackDamage = Mathf.Clamp(scaledDmg, 8, 14);
         }
 
         // Bắt đầu ở Phase 1: Bản Ngã Đối Thủ
@@ -518,8 +518,8 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
             return;
         }
 
-        // 2. THẾ THỦ KIẾM THUẪN & PHẢN KÍCH (Chỉ ở Kiếm sĩ, tỉ lệ giảm từ 60% xuống 20%)
-        if ((copiedHeroId == "vaelstrider" || copiedHeroId == "azure") && parryTimer <= 0f && distToPlayer <= 2.2f && Random.value < 0.20f)
+        // 2. THẾ THỦ KIẾM THUẪN & PHẢN KÍCH (Chỉ ở Kiếm sĩ, tỉ lệ giảm từ 20% xuống 8%)
+        if ((copiedHeroId == "vaelstrider" || copiedHeroId == "azure") && parryTimer <= 0f && distToPlayer <= 2.2f && Random.value < 0.08f)
         {
             StartCoroutine(PerformDivineParryStanceRoutine(dirToPlayer));
             return;
@@ -1138,8 +1138,8 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.2f)
         {
-            // Nerfed: Sát thương phản đòn giảm từ 2.2x xuống 1.15x (không 1-shot người chơi)
-            int riposteDmg = Mathf.RoundToInt(baseAttackDamage * 1.15f);
+            // Nerfed Đợt 2: Sát thương phản đòn giảm xuống 0.90x
+            int riposteDmg = Mathf.RoundToInt(baseAttackDamage * 0.90f);
             playerHealth?.TakeDamage(riposteDmg);
             DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, riposteDmg, isPlayer: true);
         }
@@ -1173,6 +1173,13 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
         currentHealth -= damage;
         StartCoroutine(FlashWhiteRoutine());
+
+        // Đòn đánh của người chơi gây đẩy lùi nhẹ Boss (Hit Flinch / Stagger)
+        if (playerTransform != null)
+        {
+            Vector2 knockDir = ((Vector2)transform.position - (Vector2)playerTransform.position).normalized;
+            rb.linearVelocity = knockDir * 1.5f;
+        }
 
         if (currentHealth <= 0)
         {

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 public class EnemyFreezeEffect : MonoBehaviour
 {
     private float freezeTimer = 0f;
+    public bool IsFrozen => freezeTimer > 0f;
     private float totalFreezeDuration = 1.2f;
     private Rigidbody2D rb;
     private Animator animator;
@@ -50,6 +51,15 @@ public class EnemyFreezeEffect : MonoBehaviour
 
         bool isBoss = enemyRoot.CompareTag("Boss") || EnemyStunEffect.IsBoss(enemyRoot);
         if (EnemyStunEffect.IsInvulnerableOrTransitioning(enemyRoot)) return;
+
+        // Cơ chế Cleanse 3s & Miễn nhiễm khống chế
+        if (EnemyCCCleanseSystem.IsCCImmune(enemyRoot))
+        {
+            Vector3 headPos = EnemyStunEffect.GetHeadTopWorldPosition(enemyRoot);
+            DamagePopup.CreateText(headPos, LocalizationManager.T("MIỄN KHỐNG CHẾ!", "CC IMMUNE!"), new Color(1f, 0.9f, 0.35f));
+            return;
+        }
+        EnemyCCCleanseSystem.EnsureAttached(enemyRoot);
 
         var existing = enemyRoot.GetComponent<EnemyFreezeEffect>();
         if (existing != null && existing.freezeTimer > 0f)
@@ -236,7 +246,7 @@ public class EnemyFreezeEffect : MonoBehaviour
         RemoveFreeze();
     }
 
-    private void RemoveFreeze()
+    public void RemoveFreeze()
     {
         ResumeAnimator();
 

@@ -99,6 +99,15 @@ public class EnemyStunEffect : MonoBehaviour
             return false;
         }
 
+        // Cơ chế Cleanse 3s & Miễn nhiễm khống chế
+        if (EnemyCCCleanseSystem.IsCCImmune(enemyRoot))
+        {
+            Vector3 headPos = GetHeadTopWorldPosition(enemyRoot);
+            DamagePopup.CreateText(headPos, LocalizationManager.T("MIỄN KHỐNG CHẾ!", "CC IMMUNE!"), new Color(1f, 0.9f, 0.35f));
+            return false;
+        }
+        EnemyCCCleanseSystem.EnsureAttached(enemyRoot);
+
         // 5. QUY TẮC KHÔNG CỘNG DỒN CHOÁNG (NO STUN STACKING):
         // Nếu Quái hoặc Boss đang trong trạng thái Choáng, tuyệt đối không cộng dồn thời gian!
         var existing = enemyRoot.GetComponent<EnemyStunEffect>();
@@ -509,7 +518,7 @@ public class EnemyStunEffect : MonoBehaviour
         return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 24f);
     }
 
-    private void RemoveStun()
+    public void RemoveStun()
     {
         ResumeAnimator();
 
