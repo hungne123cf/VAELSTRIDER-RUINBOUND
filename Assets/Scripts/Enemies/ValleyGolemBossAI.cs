@@ -111,7 +111,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         var bossUI = BossHealthBarUI.EnsureInstance();
         if (bossUI != null)
         {
-            bossUI.ShowBoss(LocalizationManager.T("GOLEM CỔ ĐẠI - CỰ THẠCH HỘ VỆ", "ANCIENT VALLEY GOLEM"), 1);
+            bossUI.ShowBoss(LocalizationManager.T("CỰ THẠCH HỘ VỆ THẦN THỤ", "ANCIENT VALLEY GOLEM"), 1);
             bossUI.UpdateHealth(currentHealth, maxHealth, 1);
         }
 
@@ -120,7 +120,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (waveUI != null)
         {
             waveUI.ShowBanner(
-                LocalizationManager.T("CẢNH BÁO: GOLEM CỔ ĐẠI XUẤT HIỆN!", "BOSS INCOMING: ANCIENT GOLEM!"), 
+                LocalizationManager.T("CẢNH BÁO: CỰ THẠCH HỘ VỆ XUẤT HIỆN!", "BOSS INCOMING: ANCIENT GOLEM!"), 
                 LocalizationManager.T("Cự Thạch Hộ Vệ Thung Lũng Tàn Tích", "Valley Ruins Ancient Stone Golem")
             );
         }

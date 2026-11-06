@@ -133,16 +133,22 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         BossIntroCutsceneUI.PlayGoliathGikk(transform);
     }
 
+    private string GetBossDisplayName()
+    {
+        string scene = SceneManager.GetActiveScene().name;
+        if (scene.Contains("Map2") || scene.Contains("Valley"))
+        {
+            return LocalizationManager.T("CỰ THẠCH HỘ VỆ THẦN THỤ", "ANCIENT VALLEY GOLEM");
+        }
+        return LocalizationManager.T("PHÁO ĐÀI BÁNH XE CỔ ĐẠI", "THE ANCIENT TITAN WHEEL");
+    }
+
     void Start()
     {
         FindPlayerTarget();
         if (isBoss && !isClone)
         {
-            string scene = SceneManager.GetActiveScene().name;
-            string bName = scene.Contains("Map2") || scene.Contains("Valley")
-                ? "VALENTHUS - HỘ VỆ THẦN THỤ"
-                : "GOLIATH GIKK - PHÁO ĐÀI BÁNH XE";
-            BossHealthBarUI.EnsureInstance()?.ShowBoss(this, bName);
+            BossHealthBarUI.EnsureInstance()?.ShowBoss(this, GetBossDisplayName());
             TriggerBossIntro();
         }
     }
@@ -420,11 +426,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
             {
                 if (!bossUI.IsVisible)
                 {
-                    string scene = SceneManager.GetActiveScene().name;
-                    string bName = scene.Contains("Map2") || scene.Contains("Valley")
-                        ? "VALENTHUS - HỘ VỆ THẦN THỤ"
-                        : "TITAN CRUSHER - CỖ MÁY TÀN TÍCH";
-                    bossUI.ShowBoss(this, bName);
+                    bossUI.ShowBoss(this, GetBossDisplayName());
                 }
                 bossUI.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
             }
@@ -462,8 +464,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         SoundManager.EnsureInstance()?.PlayPortalSpawn();
 
         string phaseTitle = currentBossPhase == 2 
-            ? LocalizationManager.T("GIAI ĐOẠN II: HƯ KHÔNG THỨC TỈNH!", "PHASE II: VOID AWAKENING!") 
-            : LocalizationManager.T("GIAI ĐOẠN CUỐI: CUỒNG NỘ TAM THỂ!", "FINAL PHASE: TRIPLE FRENZY!");
+            ? LocalizationManager.T("HƯ KHÔNG THỨC TỈNH!", "VOID AWAKENING!") 
+            : LocalizationManager.T("CUỒNG NỘ TAM THỂ!", "TRIPLE FRENZY!");
         Color titleColor = currentBossPhase == 2 
             ? new Color(0.85f, 0.45f, 1f) 
             : new Color(1f, 0.2f, 0.2f);
@@ -630,12 +632,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         }
 
         // Tự động kích hoạt thanh máu Boss 3 lớp
-        string scene = SceneManager.GetActiveScene().name;
-        string bName = scene.Contains("Map2") || scene.Contains("Valley")
-            ? "VALENTHUS - HỘ VỆ THẦN THỤ"
-            : "TITAN CRUSHER - CỖ MÁY TÀN TÍCH";
-
-        BossHealthBarUI.EnsureInstance()?.ShowBoss(this, bName);
+        BossHealthBarUI.EnsureInstance()?.ShowBoss(this, GetBossDisplayName());
     }
 
     // =========================================================================

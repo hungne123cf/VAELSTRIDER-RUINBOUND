@@ -103,7 +103,8 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         var bossUI = BossHealthBarUI.EnsureInstance();
         if (bossUI != null)
         {
-            bossUI.ShowBoss(bossName, totalBossPhases);
+            string dName = LocalizationManager.T("CHÚA TỂ NHỆN CỔ ĐẠI", "ANCIENT SPIDER LORD");
+            bossUI.ShowBoss(dName, totalBossPhases);
             bossUI.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
         }
     }
@@ -651,7 +652,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.5f, 0.7f);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 2f, LocalizationManager.T($"GIAI ĐOẠN {currentBossPhase} - CUỒNG NỘ!", $"PHASE {currentBossPhase} - ENRAGED!"), Color.red);
+        DamagePopup.CreateText(transform.position + Vector3.up * 2f, LocalizationManager.T("CUỒNG NỘ!", "ENRAGED!"), Color.red);
 
         moveSpeed += 0.5f;
         meleeCooldown = Mathf.Max(1.0f, meleeCooldown - 0.2f);

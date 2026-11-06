@@ -206,7 +206,8 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         FindPlayerTarget();
         if (isBoss)
         {
-            BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK - HUYẾT THÚ CỔ THỤ", totalBossPhases);
+            string dName = LocalizationManager.T("HUYẾT THÚ GOR'MOK", "GOR'MOK - PRIMAL BLOOD BEAST");
+            BossHealthBarUI.EnsureInstance()?.ShowBoss(dName, totalBossPhases);
             BossHealthBarUI.EnsureInstance()?.UpdateHealth(currentHealth, phaseMaxHealth, currentBossPhase);
             TriggerBossIntro();
         }
@@ -939,8 +940,8 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         SoundManager.EnsureInstance()?.PlayPortalSpawn();
 
         string title = currentBossPhase == 2 
-            ? LocalizationManager.T("GIAI ĐOẠN II: HUYẾT THẦN THỨC TỈNH!", "PHASE II: BLOOD GOD AWAKENING!") 
-            : LocalizationManager.T("GIAI ĐOẠN CUỐI: TẬN THẾ HUYẾT NGUYỆT!", "FINAL PHASE: BLOOD MOON ECLIPSE!");
+            ? LocalizationManager.T("HUYẾT THẦN THỨC TỈNH!", "BLOOD GOD AWAKENING!") 
+            : LocalizationManager.T("TẬN THẾ HUYẾT NGUYỆT!", "BLOOD MOON ECLIPSE!");
         DamagePopup.CreateText(transform.position + Vector3.up * 2.0f, title, new Color(1f, 0.15f, 0.15f));
 
         moveSpeed *= 1.08f;
@@ -1062,7 +1063,8 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
             originalColor = spriteRenderer.color;
         }
 
-        BossHealthBarUI.EnsureInstance()?.ShowBoss("GOR'MOK - HUYET THU CO TU", totalBossPhases);
+        string bName = LocalizationManager.T("HUYẾT THÚ GOR'MOK", "GOR'MOK - PRIMAL BLOOD BEAST");
+        BossHealthBarUI.EnsureInstance()?.ShowBoss(bName, totalBossPhases);
     }
 
     public static BloodMonsterAI Spawn(Vector3 pos, bool isBoss = false, int index = 1)

@@ -143,7 +143,7 @@ public class BossHealthBarUI : MonoBehaviour
         nameRt.sizeDelta = new Vector2(760f, 32f);
 
         var nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
-        nameTmp.text = "CHUA TE NHEN - SKELETON KING";
+        nameTmp.text = LocalizationManager.T("PHÁO ĐÀI BÁNH XE CỔ ĐẠI", "THE ANCIENT TITAN WHEEL");
         nameTmp.fontSize = 20;
         nameTmp.fontStyle = FontStyles.Bold;
         nameTmp.color = new Color(1f, 0.88f, 0.45f);
@@ -238,11 +238,12 @@ public class BossHealthBarUI : MonoBehaviour
         phaseRt.sizeDelta = new Vector2(740f, 20f);
 
         var pTmp = phaseObj.AddComponent<TextMeshProUGUI>();
-        pTmp.text = "[ 3 THANH MAU - GIAI DOAN 1 ]";
+        pTmp.text = "";
         pTmp.fontSize = 13;
         pTmp.fontStyle = FontStyles.Bold;
         pTmp.color = new Color(0.5f, 0.85f, 1f);
         pTmp.alignment = TextAlignmentOptions.Center;
+        phaseObj.SetActive(false);
         ui.phaseText = pTmp;
 
         Instance = ui;
@@ -393,27 +394,6 @@ public class BossHealthBarUI : MonoBehaviour
 
         if (phaseText != null)
         {
-            string roman = (phase == 3) ? "I" : ((phase == 2) ? "II" : "III");
-            string pColor = (phase == 3) ? "#ffd700" : ((phase == 2) ? "#d880ff" : "#ff4040");
-
-            string subTitle;
-            if (currentBoss != null)
-            {
-                subTitle = (phase == 3)
-                    ? LocalizationManager.T("KHỞI ĐỘNG CỖ MÁY", "CORE ACTIVATION")
-                    : ((phase == 2)
-                        ? LocalizationManager.T("BÁNH XE CUỒNG NỘ", "FRENZIED OVERDRIVE")
-                        : LocalizationManager.T("TẬN DIỆT TÀN TÍCH", "ANCIENT OVERLOAD"));
-            }
-            else
-            {
-                subTitle = (phase == 3)
-                    ? LocalizationManager.T("CHÚA TỂ THỨC TỈNH", "LORD AWAKENING")
-                    : ((phase == 2)
-                        ? LocalizationManager.T("BẦY NHỆN SĂN MỒI", "HUNTING SWARM")
-                        : LocalizationManager.T("CUỒNG NỘ HUYẾT NGUYỆT", "BLOOD MOON FRENZY"));
-            }
-
             string armorInfo = "";
             EnemyArmor armor = null;
             if (trackedBossObject != null)
@@ -433,11 +413,19 @@ public class BossHealthBarUI : MonoBehaviour
             {
                 string armLabel = LocalizationManager.T("GIÁP", "ARM");
                 string resLabel = LocalizationManager.T("KHÁNG", "RES");
-                armorInfo = $"  <size=10><color=#F97316>[{armLabel}: {armor.CurrentPhysicalArmor}]</color> <color=#A855F7>[{resLabel}: {armor.CurrentMagicArmor}]</color></size>";
+                armorInfo = $"<size=11><color=#F97316>[{armLabel}: {armor.CurrentPhysicalArmor}]</color>  <color=#A855F7>[{resLabel}: {armor.CurrentMagicArmor}]</color></size>";
             }
 
-            string phaseLabel = LocalizationManager.T("GIAI ĐOẠN", "PHASE");
-            phaseText.text = $"<color={pColor}>[ {roman} ]</color>  <size=11><color=#c4b89f>{phaseLabel} {roman}: {subTitle}</color></size>{armorInfo}";
+            if (!string.IsNullOrEmpty(armorInfo))
+            {
+                phaseText.text = armorInfo;
+                phaseText.gameObject.SetActive(true);
+            }
+            else
+            {
+                phaseText.text = "";
+                phaseText.gameObject.SetActive(false);
+            }
         }
     }
 

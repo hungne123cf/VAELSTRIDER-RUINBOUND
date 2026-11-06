@@ -214,7 +214,7 @@ public class BossIntroCutsceneUI : MonoBehaviour
         bottomNameText.fontStyle = FontStyles.Bold;
         bottomNameText.alignment = TextAlignmentOptions.Left;
         bottomNameText.color = Color.white;
-        bottomNameText.text = "GOLIATH GIKK";
+        bottomNameText.text = "";
 
         // Danh hiệu Boss ở dải dưới
         GameObject bTitleObj = CreateUIGameObject("BottomTitleText", bottomInfoObj.transform);
@@ -231,7 +231,7 @@ public class BossIntroCutsceneUI : MonoBehaviour
         bottomTitleText.fontStyle = FontStyles.Italic | FontStyles.Bold;
         bottomTitleText.alignment = TextAlignmentOptions.Left;
         bottomTitleText.color = new Color(1f, 0.85f, 0.35f);
-        bottomTitleText.text = "[ PHÁO ĐÀI BÁNH XE CỔ ĐẠI // THE ANCIENT TITAN WHEEL ]";
+        bottomTitleText.text = "";
 
         // Cấp độ nguy hiểm ở dải dưới
         GameObject bThreatObj = CreateUIGameObject("BottomThreatText", bottomInfoObj.transform);
@@ -248,7 +248,7 @@ public class BossIntroCutsceneUI : MonoBehaviour
         bottomThreatText.fontStyle = FontStyles.Bold;
         bottomThreatText.alignment = TextAlignmentOptions.Left;
         bottomThreatText.color = new Color(1f, 0.45f, 0.15f);
-        bottomThreatText.text = "[!] CẤP ĐỘ NGUY HIỂM: THẢM HỌA TITAN [!]";
+        bottomThreatText.text = "";
 
         // 3. SLANTED SOUL KNIGHT BANNER CONTAINER (GIỐNG HÌNH MẪU 100%)
         GameObject bannerObj = CreateUIGameObject("SlantedSoulKnightBanner", root.transform);
@@ -385,7 +385,7 @@ public class BossIntroCutsceneUI : MonoBehaviour
         skipPromptText.fontSize = 15;
         skipPromptText.alignment = TextAlignmentOptions.Right;
         skipPromptText.color = new Color(1f, 1f, 1f, 0.45f);
-        skipPromptText.text = LocalizationManager.T("Chạm để bỏ qua [TAP TO SKIP]", "Tap anywhere to skip");
+        skipPromptText.text = LocalizationManager.T("Chạm để bỏ qua", "Tap anywhere to skip");
     }
 
     public static void PlayGoliathGikk(Transform bossTransform, System.Action onFinished = null)
@@ -395,10 +395,10 @@ public class BossIntroCutsceneUI : MonoBehaviour
 
         var data = new BossIntroData
         {
-            bossName = "GOLIATH\nGIKK",
-            displayName = "GOLIATH GIKK",
-            bossTitle = LocalizationManager.T("[ PHÁO ĐÀI BÁNH XE CỔ ĐẠI // THE ANCIENT TITAN WHEEL ]", "[ THE ANCIENT TITAN WHEEL // RUIN COLOSSUS ]"),
-            threatLevel = LocalizationManager.T("[!] CẤP ĐỘ NGUY HIỂM: THẢM HỌA TITAN [!]", "[!] THREAT LEVEL: CALAMITY TITAN [!]"),
+            bossName = LocalizationManager.T("PHÁO ĐÀI\nBÁNH XE", "GOLIATH\nGIKK"),
+            displayName = LocalizationManager.T("PHÁO ĐÀI BÁNH XE CỔ ĐẠI", "GOLIATH GIKK"),
+            bossTitle = LocalizationManager.T("CỖ MÁY HUYỀN THOẠI TÀN TÍCH", "THE ANCIENT TITAN WHEEL"),
+            threatLevel = LocalizationManager.T("CẤP ĐỘ NGUY HIỂM: THẢM HỌA TITAN", "THREAT LEVEL: CALAMITY TITAN"),
             bossSplashSprite = splash,
             bannerColor = new Color(0.92f, 0.38f, 0.04f), // Cam lửa rực cháy
             titleColor = new Color(1f, 0.88f, 0.35f)
@@ -413,10 +413,10 @@ public class BossIntroCutsceneUI : MonoBehaviour
 
         var data = new BossIntroData
         {
-            bossName = "GOR'MOK\nPRIMAL",
-            displayName = "GOR'MOK",
-            bossTitle = LocalizationManager.T("[ HUYẾT THÚ NGUYÊN SINH CỔ THỤ // PRIMAL BLOOD BEAST ]", "[ PRIMAL BLOOD BEAST // ANCIENT TERROR ]"),
-            threatLevel = LocalizationManager.T("[!] CẤP ĐỘ NGUY HIỂM: HUYẾT THẦN TẾ LỄ [!]", "[!] THREAT LEVEL: PRIMAL BLOOD TITAN [!]"),
+            bossName = LocalizationManager.T("HUYẾT THÚ\nGOR'MOK", "GOR'MOK\nPRIMAL"),
+            displayName = LocalizationManager.T("HUYẾT THÚ GOR'MOK", "GOR'MOK"),
+            bossTitle = LocalizationManager.T("BÁ CHỦ MÁU CỔ THỤ NGUYÊN SINH", "PRIMAL BLOOD BEAST"),
+            threatLevel = LocalizationManager.T("CẤP ĐỘ NGUY HIỂM: HUYẾT THẦN TẾ LỄ", "THREAT LEVEL: PRIMAL BLOOD TITAN"),
             bossSplashSprite = splash,
             bannerColor = new Color(0.76f, 0.08f, 0.14f), // Đỏ máu nguyên sinh
             titleColor = new Color(1f, 0.45f, 0.45f)
@@ -431,10 +431,10 @@ public class BossIntroCutsceneUI : MonoBehaviour
 
         var data = new BossIntroData
         {
-            bossName = "DEATHLORD\nVALTHOR",
-            displayName = "DEATHLORD VALTHOR",
-            bossTitle = LocalizationManager.T("[ VUA XƯƠNG CỔ ĐẠI TÀN TÍCH // SKELETON KING ]", "[ SKELETON KING OF THE FORGOTTEN // DEATHLORD ]"),
-            threatLevel = LocalizationManager.T("[!] CẤP ĐỘ NGUY HIỂM: BẠO CHÚA BĂNG GIÁ [!]", "[!] THREAT LEVEL: FROSTFALL TYRANT [!]"),
+            bossName = LocalizationManager.T("CHÚA TỂ\nNHỆN CỔ", "DEATHLORD\nVALTHOR"),
+            displayName = LocalizationManager.T("CHÚA TỂ NHỆN CỔ ĐẠI", "DEATHLORD VALTHOR"),
+            bossTitle = LocalizationManager.T("VUA XƯƠNG CÕI LÃNG QUÊN", "SKELETON KING OF THE FORGOTTEN"),
+            threatLevel = LocalizationManager.T("CẤP ĐỘ NGUY HIỂM: BẠO CHÚA BĂNG GIÁ", "THREAT LEVEL: FROSTFALL TYRANT"),
             bossSplashSprite = splash,
             bannerColor = new Color(0.01f, 0.52f, 0.78f), // Xanh băng tuyết Frostfall
             titleColor = new Color(0.85f, 0.95f, 1f)
@@ -449,10 +449,10 @@ public class BossIntroCutsceneUI : MonoBehaviour
 
         var data = new BossIntroData
         {
-            bossName = "VALENTHUS\nGOLEM",
-            displayName = "VALENTHUS",
-            bossTitle = LocalizationManager.T("[ CỰ THẠCH HỘ VỆ THẦN THỤ // ANCIENT VALLEY GOLEM ]", "[ ANCIENT VALLEY GOLEM // GUARDIAN COLOSSUS ]"),
-            threatLevel = LocalizationManager.T("[!] CẤP ĐỘ NGUY HIỂM: THẠCH HỘ VỆ [!]", "[!] THREAT LEVEL: STONE GUARDIAN [!]"),
+            bossName = LocalizationManager.T("CỰ THẠCH\nVALENTHUS", "VALENTHUS\nGOLEM"),
+            displayName = LocalizationManager.T("CỰ THẠCH HỘ VỆ THẦN THỤ", "VALENTHUS"),
+            bossTitle = LocalizationManager.T("HỘ VỆ THẦN THỤ NGUYÊN BẢN", "ANCIENT VALLEY GOLEM"),
+            threatLevel = LocalizationManager.T("CẤP ĐỘ NGUY HIỂM: THẠCH HỘ VỆ", "THREAT LEVEL: STONE GUARDIAN"),
             bossSplashSprite = splash,
             bannerColor = new Color(0.08f, 0.52f, 0.25f), // Xanh ngọc lục bảo tàn tích
             titleColor = new Color(0.75f, 1f, 0.75f)
@@ -466,10 +466,10 @@ public class BossIntroCutsceneUI : MonoBehaviour
 
         var data = new BossIntroData
         {
-            bossName = "SHADOW\nDOPPELGANGER",
-            displayName = "SHADOW DOPPELGANGER",
-            bossTitle = LocalizationManager.T("[ BẢN NGÃ HƯ KHÔNG PHẢN CHIẾU // VOID APPARITION ]", "[ VOID REFLECTION // TRUE APPARITION ]"),
-            threatLevel = LocalizationManager.T("[!] MỐI ĐE DỌA TỐI THƯỢNG: ÁC MỘNG HƯ KHÔNG [!]", "[!] SUPREME THREAT: VOID NIGHTMARE [!]"),
+            bossName = LocalizationManager.T("BÓNG MA\nBẢN NGÃ", "SHADOW\nDOPPELGANGER"),
+            displayName = LocalizationManager.T("BÓNG MA BẢN NGÃ", "SHADOW DOPPELGANGER"),
+            bossTitle = LocalizationManager.T("BẢN NGÃ HƯ KHÔNG PHẢN CHIẾU", "VOID REFLECTION"),
+            threatLevel = LocalizationManager.T("MỐI ĐE DỌA: ÁC MỘNG HƯ KHÔNG", "SUPREME THREAT: VOID NIGHTMARE"),
             bossSplashSprite = splash,
             bannerColor = new Color(0.48f, 0.12f, 0.78f), // Tím hư không huyền bí
             titleColor = new Color(0.9f, 0.6f, 1f)
