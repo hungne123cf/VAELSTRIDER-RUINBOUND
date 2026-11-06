@@ -655,7 +655,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
 
                     // Boss hoi phuc mau (neu dinh Vet Thuong Sau / Trai Tim Nut thi giam 50%)
                     float healMult = GrievousWoundsDebuff.GetHealingMultiplier(gameObject);
-                    int healAmt = Mathf.RoundToInt(phaseMaxHealth * 0.045f * healMult);
+                    int healAmt = Mathf.RoundToInt(phaseMaxHealth * 0.022f * healMult); // Nerf từ 4.5% xuống 2.2% mỗi tick hút máu
                     currentHealth = Mathf.Min(currentHealth + healAmt, phaseMaxHealth);
                     DamagePopup.Create(transform.position + Vector3.up * 1.0f, healAmt, isPlayer: false);
                     if (healMult < 0.95f)
@@ -943,9 +943,9 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
             : LocalizationManager.T("GIAI ĐOẠN CUỐI: TẬN THẾ HUYẾT NGUYỆT!", "FINAL PHASE: BLOOD MOON ECLIPSE!");
         DamagePopup.CreateText(transform.position + Vector3.up * 2.0f, title, new Color(1f, 0.15f, 0.15f));
 
-        moveSpeed *= 1.22f;
-        attackDamage += 5;
-        attackCooldown = Mathf.Max(0.7f, attackCooldown * 0.8f);
+        moveSpeed *= 1.08f;
+        attackDamage += 2; // Nerf tăng sát thương chuyển phase từ 5 xuống 2
+        attackCooldown = Mathf.Max(0.9f, attackCooldown * 0.9f);
 
         if (spriteRenderer != null)
         {
@@ -1039,7 +1039,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         transform.localScale = Vector3.one * scaleMultiplier;
         totalBossPhases = 3;
         currentBossPhase = 3;
-        phaseMaxHealth = MapScalingManager.ScaleHealth(520);
+        phaseMaxHealth = MapScalingManager.ScaleHealth(380); // Nerf từ 520 -> 380 HP mỗi thanh (vừa sức cho Map 2)
         currentHealth = phaseMaxHealth;
 
         int el = LayerMask.NameToLayer("Enemy");
@@ -1049,11 +1049,11 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         enemyCol = DynamicSpriteColliderSync.EnsureAttached(gameObject);
         EnemyNavigationHelper.EnsureFrictionless(enemyCol);
 
-        attackDamage = MapScalingManager.ScaleDamage(18);
-        moveSpeed *= 1.15f;
-        projectileSpeed *= 1.25f;
-        meleeRange = 2.4f;
-        rangedAttackRange = 8.5f;
+        attackDamage = MapScalingManager.ScaleDamage(13); // Nerf từ 18 -> 13 base damage
+        moveSpeed *= 1.05f; // Giảm tốc độ lướt truy đuổi
+        projectileSpeed *= 1.10f;
+        meleeRange = 2.2f;
+        rangedAttackRange = 8.0f;
         detectionRange = 14.0f;
 
         if (spriteRenderer != null)
