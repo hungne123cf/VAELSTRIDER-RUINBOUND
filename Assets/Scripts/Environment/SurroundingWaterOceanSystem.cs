@@ -106,9 +106,10 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
         BuildWaterAndShorelinesForCurrentScene();
         SetupShorelineProximityAudio();
         cachedMainCam = Camera.main ?? FindAnyObjectByType<Camera>();
-        if (PlayerController.Instance != null)
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null)
         {
-            cachedPlayerTransform = PlayerController.Instance.transform;
+            cachedPlayerTransform = pc.transform;
         }
     }
 
@@ -597,19 +598,12 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
     {
         if (shoreWaveAudioSource == null || shoreAudioEdges.Count == 0) return;
 
-        // 1. Lấy vị trí của Player (ưu tiên PlayerController.Instance, dự phòng Camera nếu chưa tìm thấy)
-        if (cachedPlayerTransform == null)
+        // 1. Lấy vị trí của Player (ưu tiên PlayerController, dự phòng Camera nếu chưa tìm thấy)
+        if (cachedPlayerTransform == null && t >= nextPlayerSearchTime)
         {
-            if (PlayerController.Instance != null)
-            {
-                cachedPlayerTransform = PlayerController.Instance.transform;
-            }
-            else if (t >= nextPlayerSearchTime)
-            {
-                nextPlayerSearchTime = t + 0.5f;
-                var pc = FindAnyObjectByType<PlayerController>();
-                if (pc != null) cachedPlayerTransform = pc.transform;
-            }
+            nextPlayerSearchTime = t + 0.5f;
+            var pc = FindAnyObjectByType<PlayerController>();
+            if (pc != null) cachedPlayerTransform = pc.transform;
         }
 
         Vector2 listenerPos = cachedPlayerTransform != null
