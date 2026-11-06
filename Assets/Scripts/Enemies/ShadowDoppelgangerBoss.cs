@@ -31,11 +31,11 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
     private string heroDisplayName = "Vaelstrider";
     private float baseHeroScale = 1.0f;
     private int currentPhase = 1; // 1 Phase máu duy nhất theo yêu cầu
-    private int maxHealth = 700;
-    private int currentHealth = 700;
-    private int baseAttackDamage = 18;
-    private float baseMoveSpeed = 4.8f;
-    private float currentMoveSpeed = 4.8f;
+    private int maxHealth = 550;
+    private int currentHealth = 550;
+    private int baseAttackDamage = 14;
+    private float baseMoveSpeed = 4.2f;
+    private float currentMoveSpeed = 4.2f;
     private bool isDead = false;
     private bool isInvulnerable = false;
     public bool IsInvulnerable => isInvulnerable;
@@ -59,14 +59,14 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
     private GameObject parryShieldVisual;
 
     [Header("Combat Timers")]
-    private float attackTimer = 0.2f;
-    public float attackCooldown = 0.85f;
-    private float dashTimer = 1.2f;
-    public float dashCooldown = 3.6f;
-    private float skillTimer = 3.0f;
-    public float skillCooldown = 6.0f;
-    private float parryTimer = 5.0f;
-    private float parryCooldown = 8.5f;
+    private float attackTimer = 0.5f;
+    public float attackCooldown = 1.35f; // Nerfed: Tăng thời gian hồi giữa các đòn đánh thường
+    private float dashTimer = 2.0f;
+    public float dashCooldown = 5.0f; // Nerfed: Giảm tần suất lướt né
+    private float skillTimer = 4.0f;
+    public float skillCooldown = 8.5f; // Nerfed: Giảm tần suất tung tuyệt kỹ
+    private float parryTimer = 6.0f;
+    public float parryCooldown = 12.0f; // Nerfed: Giảm tần suất bật kiếm thuẫn
 
     // Sprite Animation cho Dune Assassin (Player 5)
     private static Sprite[] duneIdleFrames;
@@ -189,13 +189,21 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
                 }
             }
 
-            // Chỉ số máu và tốc độ (Cân bằng Boss gấp 5 lần Player cả về HP lẫn Sát thương)
+            // Cân bằng Máu, Tốc độ & Sát thương Nerfed:
+            // - Máu Boss vừa phải (~2.2x Max HP player), không làm trận đấu lê thê
+            // - Tốc độ di chuyển chậm hơn Player một chút (0.90x) để người chơi có thể giữ khoảng cách và thả diều (kite)
+            // - Sát thương đòn thường chỉ chiếm ~10-12% Max HP của Player (thay vì 50-80% HP gây 1-shot)
             int pMaxHp = playerHealth != null ? playerHealth.MaxHealth : MapScalingManager.GetPlayerMaxHealth();
-            maxHealth = MapScalingManager.ScaleBossHealth(pMaxHp, phases: 3);
+            float mapSceneMult = MapScalingManager.GetMultiplierForScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+            int targetHp = Mathf.RoundToInt(pMaxHp * 2.2f * mapSceneMult);
+            maxHealth = Mathf.Clamp(targetHp, 450, 850);
             currentHealth = maxHealth;
-            baseMoveSpeed = player.MoveSpeed * 1.05f;
+
+            baseMoveSpeed = player.MoveSpeed * 0.90f;
             currentMoveSpeed = baseMoveSpeed;
-            baseAttackDamage = MapScalingManager.ScaleBossDamage(20, isSpecialSkill: false);
+
+            int scaledDmg = Mathf.RoundToInt(pMaxHp * 0.11f);
+            baseAttackDamage = Mathf.Clamp(scaledDmg, 12, 22);
         }
 
         // Bắt đầu ở Phase 1: Bản Ngã Đối Thủ
@@ -510,15 +518,15 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
             return;
         }
 
-        // 2. THẾ THỦ KIẾM THUẪN & PHẢN KÍCH (Chỉ ở Phase 2 và 3 cho Kiếm sĩ)
-        if ((copiedHeroId == "vaelstrider" || copiedHeroId == "azure") && currentPhase <= 2 && parryTimer <= 0f && distToPlayer <= 2.5f && Random.value < 0.60f)
+        // 2. THẾ THỦ KIẾM THUẪN & PHẢN KÍCH (Chỉ ở Kiếm sĩ, tỉ lệ giảm từ 60% xuống 20%)
+        if ((copiedHeroId == "vaelstrider" || copiedHeroId == "azure") && parryTimer <= 0f && distToPlayer <= 2.2f && Random.value < 0.20f)
         {
             StartCoroutine(PerformDivineParryStanceRoutine(dirToPlayer));
             return;
         }
 
-        // 3. LƯỚT NÉ ĐÒN HOẶC ÁP SÁT NHANH
-        if (dashTimer <= 0f && (distToPlayer > 4.5f || (distToPlayer < 1.8f && Random.value < 0.35f)))
+        // 3. LƯỚT NÉ ĐÒN HOẶC ÁP SÁT NHANH (Tần suất giảm)
+        if (dashTimer <= 0f && (distToPlayer > 4.5f || (distToPlayer < 1.6f && Random.value < 0.25f)))
         {
             StartCoroutine(PerformBladeDashRoutine(dirToPlayer));
             return;
@@ -593,9 +601,8 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         attackTimer = attackCooldown;
         rb.linearVelocity = Vector2.zero;
 
+        // Sát thương đòn đánh thường chuẩn 1.0x (bỏ nhân 1.60x lỗi)
         int currentDmg = baseAttackDamage;
-        if (currentPhase == 2) currentDmg = Mathf.RoundToInt(baseAttackDamage * 1.30f);
-        else if (currentPhase == 1) currentDmg = Mathf.RoundToInt(baseAttackDamage * 1.60f);
 
         if (copiedHeroId == "dune")
         {
@@ -653,7 +660,7 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
                 if (sr != null) sr.sprite = duneAtk2Frames[i];
                 if (i == 1 && playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.4f)
                 {
-                    int heavyDmg = Mathf.RoundToInt(dmg * 1.35f);
+                    int heavyDmg = Mathf.RoundToInt(dmg * 1.20f); // Nerfed from 1.35f
                     playerHealth?.TakeDamage(heavyDmg);
                     DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, heavyDmg, isPlayer: true);
                     SoundManager.EnsureInstance()?.PlayHitImpact();
@@ -715,7 +722,7 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         rbOrb.gravityScale = 0f;
 
         var proj = orb.AddComponent<EnemyProjectile>();
-        proj.Initialize(shootDir, dmg, 8.5f);
+        proj.Initialize(shootDir, dmg, 6.2f); // Nerfed: Tốc độ đạn bay giảm từ 8.5 xuống 6.2 để dễ né
     }
 
     private IEnumerator PerformStandardMeleeComboRoutine(Vector2 dir, int dmg)
@@ -730,25 +737,21 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         PlayHeroAttackAudio(1);
         SpawnHeroSlashFX(transform.position + (Vector3)dir * 0.9f, dir, isHeavy: false);
 
-        rb.linearVelocity = dir * currentMoveSpeed * 1.3f;
+        rb.linearVelocity = dir * currentMoveSpeed * 1.15f;
         yield return new WaitForSeconds(0.10f);
         rb.linearVelocity = Vector2.zero;
 
-        if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.2f)
+        if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.0f)
         {
             playerHealth?.TakeDamage(dmg);
             DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, dmg, isPlayer: true);
             SoundManager.EnsureInstance()?.PlayHitImpact();
         }
 
-        if (currentPhase == 1)
-        {
-            SpawnGroundShockwave(transform.position + (Vector3)dir * 1.2f, dir);
-        }
-
+        // Nerfed: Bỏ nổ sóng địa chấn ở đòn đánh thường để tránh spam sát thương diện rộng
         yield return new WaitForSeconds(0.22f);
 
-        if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.5f)
+        if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.2f)
         {
             Vector2 newDir = (playerTransform.position - transform.position).normalized;
 
@@ -760,26 +763,21 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
             }
 
             PlayHeroAttackAudio(2);
-            SpawnHeroSlashFX(transform.position + (Vector3)newDir * 1.1f, newDir, isHeavy: true);
+            SpawnHeroSlashFX(transform.position + (Vector3)newDir * 1.0f, newDir, isHeavy: true);
 
-            rb.linearVelocity = newDir * currentMoveSpeed * 1.7f;
-            yield return new WaitForSeconds(0.14f);
+            rb.linearVelocity = newDir * currentMoveSpeed * 1.3f;
+            yield return new WaitForSeconds(0.12f);
             rb.linearVelocity = Vector2.zero;
 
-            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.4f)
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.2f)
             {
-                int heavyDmg = Mathf.RoundToInt(dmg * 1.45f);
+                int heavyDmg = Mathf.RoundToInt(dmg * 1.20f); // Nerfed from 1.45f
                 playerHealth?.TakeDamage(heavyDmg);
                 DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, heavyDmg, isPlayer: true);
                 SoundManager.EnsureInstance()?.PlayHitImpact();
 
                 var cam = FindAnyObjectByType<CameraFollow>();
-                if (cam != null) cam.Shake(0.20f, 0.30f);
-            }
-
-            if (currentPhase == 1)
-            {
-                SpawnGroundShockwave(transform.position + (Vector3)newDir * 1.4f, newDir);
+                if (cam != null) cam.Shake(0.15f, 0.20f);
             }
 
             yield return new WaitForSeconds(0.20f);
@@ -851,7 +849,8 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         skillTimer = skillCooldown;
         rb.linearVelocity = Vector2.zero;
 
-        int skillDmg = Mathf.RoundToInt(baseAttackDamage * (currentPhase == 1 ? 1.6f : (currentPhase == 2 ? 1.3f : 1.0f)));
+        // Nerfed: Sát thương tuyệt kỹ chuẩn 1.30x (thay vì 1.6x)
+        int skillDmg = Mathf.RoundToInt(baseAttackDamage * 1.30f);
 
         if (copiedHeroId == "dune")
         {
@@ -861,32 +860,35 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
 
             if (playerTransform != null)
             {
-                // Tốc biến luồn sau lưng người chơi
                 Vector3 behind = playerTransform.position + (Vector3)(-dir * 1.35f);
-                transform.position = behind;
+                // Nerfed: Thêm bóng mờ cảnh báo 0.2s để người chơi kịp phản ứng
+                SpawnShadowWarningFX(behind);
+                yield return new WaitForSeconds(0.20f);
+
+                if (playerTransform != null)
+                {
+                    transform.position = playerTransform.position + (Vector3)(-dir * 1.35f);
+                }
             }
 
             if (duneSpAtkFrames != null && duneSpAtkFrames.Length > 0)
             {
-                for (int loop = 0; loop < 2; loop++)
+                for (int i = 0; i < duneSpAtkFrames.Length; i++)
                 {
-                    for (int i = 0; i < duneSpAtkFrames.Length; i++)
-                    {
-                        if (sr != null) sr.sprite = duneSpAtkFrames[i];
-                        yield return new WaitForSeconds(0.04f);
-                    }
+                    if (sr != null) sr.sprite = duneSpAtkFrames[i];
+                    yield return new WaitForSeconds(0.045f);
                 }
             }
             else
             {
-                yield return new WaitForSeconds(0.35f);
+                yield return new WaitForSeconds(0.25f);
             }
 
-            // Quét bão cát diện rộng
+            // Quét bão cát - Bán kính nerfed từ 4.2m xuống 2.8m
             SoundManager.EnsureInstance()?.PlaySwordSlash();
             SpawnHeroSlashFX(transform.position, dir, isHeavy: true);
 
-            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 4.2f)
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.8f)
             {
                 playerHealth?.TakeDamage(skillDmg);
                 DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, skillDmg, isPlayer: true);
@@ -899,18 +901,19 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         {
             // === TITAN: ĐỊA CHẤN TẬN DIỆT ===
             SoundManager.EnsureInstance()?.PlayTitanSlam();
-            rb.linearVelocity = dir * currentMoveSpeed * 1.8f;
-            yield return new WaitForSeconds(0.25f);
+            rb.linearVelocity = dir * currentMoveSpeed * 1.3f; // Nerfed from 1.8f
+            yield return new WaitForSeconds(0.22f);
             rb.linearVelocity = Vector2.zero;
 
             var cam = FindAnyObjectByType<CameraFollow>();
-            if (cam != null) cam.Shake(0.45f, 0.7f);
+            if (cam != null) cam.Shake(0.30f, 0.4f);
 
             SpawnGroundShockwave(transform.position, dir);
 
-            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 3.8f)
+            // Bán kính nerfed từ 3.8m xuống 2.6m, damage multiplier nerfed từ 1.4f xuống 1.15f
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.6f)
             {
-                int titanDmg = Mathf.RoundToInt(skillDmg * 1.4f);
+                int titanDmg = Mathf.RoundToInt(skillDmg * 1.15f);
                 playerHealth?.TakeDamage(titanDmg);
                 DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, titanDmg, isPlayer: true);
                 SoundManager.EnsureInstance()?.PlayHitImpact();
@@ -920,12 +923,13 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         {
             // === GALE RONIN: ẢO ẢNH PHONG TRẢM ===
             SoundManager.EnsureInstance()?.PlaySwordSlash();
-            Vector3 dashTarget = transform.position + (Vector3)dir * 5.0f;
+            Vector3 dashTarget = transform.position + (Vector3)dir * 3.8f; // Nerfed from 5.0f
             transform.position = dashTarget;
 
             SpawnHeroSlashFX(transform.position, dir, isHeavy: true);
 
-            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 3.5f)
+            // Bán kính nerfed từ 3.5m xuống 2.5m
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.5f)
             {
                 playerHealth?.TakeDamage(skillDmg);
                 DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, skillDmg, isPlayer: true);
@@ -935,14 +939,15 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         {
             // === AZURE BLADE: BĂNG ĐOẠN HƯ KHÔNG ===
             SoundManager.EnsureInstance()?.PlaySwordSlash();
-            SpawnHeroSlashFX(transform.position + (Vector3)dir * 1.2f, dir, isHeavy: true);
+            SpawnHeroSlashFX(transform.position + (Vector3)dir * 1.0f, dir, isHeavy: true);
 
-            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 3.2f)
+            // Bán kính nerfed từ 3.2m xuống 2.4m, freeze nerfed từ 0.6s xuống 0.35s
+            if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.4f)
             {
                 playerHealth?.TakeDamage(skillDmg);
                 DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, skillDmg, isPlayer: true);
                 var pc = playerTransform.GetComponent<PlayerController>();
-                if (pc != null) pc.ApplyFreeze(0.6f);
+                if (pc != null) pc.ApplyFreeze(0.35f);
             }
         }
         else if (copiedHeroId == "mage")
@@ -951,11 +956,12 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
             isPlayingCustomAction = true;
             SoundManager.EnsureInstance()?.PlaySwordSlash();
 
-            for (int i = 0; i < 4; i++)
+            // Nerfed: Giảm từ 4 quả xuống 2 quả thiên thạch
+            for (int i = 0; i < 2; i++)
             {
-                Vector3 fallPos = (playerTransform != null) ? playerTransform.position + (Vector3)Random.insideUnitCircle * 1.8f : transform.position;
+                Vector3 fallPos = (playerTransform != null) ? playerTransform.position + (Vector3)Random.insideUnitCircle * 1.5f : transform.position;
                 SpawnDoppelgangerMeteor(fallPos, skillDmg);
-                yield return new WaitForSeconds(0.18f);
+                yield return new WaitForSeconds(0.25f);
             }
 
             isPlayingCustomAction = false;
@@ -966,17 +972,18 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
             SoundManager.EnsureInstance()?.PlaySwordSlash();
 
             float whirlTime = 0f;
-            while (whirlTime < 1.4f)
+            while (whirlTime < 0.9f) // Nerfed duration from 1.4s down to 0.9s
             {
-                whirlTime += 0.2f;
+                whirlTime += 0.25f;
                 transform.Rotate(0f, 0f, 180f);
-                if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 3.8f)
+                // Bán kính nerfed từ 3.8m xuống 2.5m, tick damage nerfed từ 25% xuống 18%
+                if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.5f)
                 {
-                    int tickDmg = Mathf.RoundToInt(skillDmg * 0.25f);
+                    int tickDmg = Mathf.RoundToInt(skillDmg * 0.18f);
                     playerHealth?.TakeDamage(tickDmg);
                     DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, tickDmg, isPlayer: true);
                 }
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(0.25f);
             }
             transform.rotation = Quaternion.identity;
         }
@@ -1021,10 +1028,11 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
             bSr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
             bSr.color = new Color(1.0f, 0.25f, 0.1f, 0.85f);
             bSr.sortingOrder = 5550;
-            blast.transform.localScale = Vector3.one * 3.2f;
+            blast.transform.localScale = Vector3.one * 2.2f; // Nerfed from 3.2f
             Destroy(blast, 0.25f);
 
-            if (playerTransform != null && Vector2.Distance(targetPos, playerTransform.position) <= 2.8f)
+            // Bán kính sát thương nerfed từ 2.8m xuống 2.0m
+            if (playerTransform != null && Vector2.Distance(targetPos, playerTransform.position) <= 2.0f)
             {
                 playerHealth?.TakeDamage(dmg);
                 DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, dmg, isPlayer: true);
@@ -1041,19 +1049,19 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         if (copiedHeroId == "dune" && duneRollFrames != null && duneRollFrames.Length > 0)
         {
             isPlayingCustomAction = true;
-            rb.linearVelocity = dir * currentMoveSpeed * 2.4f;
+            rb.linearVelocity = dir * currentMoveSpeed * 1.8f; // Nerfed from 2.4f
             for (int i = 0; i < duneRollFrames.Length; i++)
             {
                 if (sr != null) sr.sprite = duneRollFrames[i];
-                yield return new WaitForSeconds(0.04f);
+                yield return new WaitForSeconds(0.045f);
             }
             rb.linearVelocity = Vector2.zero;
             isPlayingCustomAction = false;
         }
         else
         {
-            rb.linearVelocity = dir * currentMoveSpeed * 2.2f;
-            yield return new WaitForSeconds(0.20f);
+            rb.linearVelocity = dir * currentMoveSpeed * 1.6f; // Nerfed from 2.2f
+            yield return new WaitForSeconds(0.18f);
             rb.linearVelocity = Vector2.zero;
         }
 
@@ -1122,18 +1130,31 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
     private IEnumerator PerformRiposteAttackRoutine(Vector2 dir)
     {
         SoundManager.EnsureInstance()?.PlaySwordSlash();
-        rb.linearVelocity = dir * currentMoveSpeed * 2.6f;
-        SpawnHeroSlashFX(transform.position + (Vector3)dir * 1.4f, dir, isHeavy: true);
+        rb.linearVelocity = dir * currentMoveSpeed * 1.6f; // Nerfed from 2.6f
+        SpawnHeroSlashFX(transform.position + (Vector3)dir * 1.1f, dir, isHeavy: true);
 
         yield return new WaitForSeconds(0.18f);
         rb.linearVelocity = Vector2.zero;
 
-        if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 3.0f)
+        if (playerTransform != null && Vector2.Distance(transform.position, playerTransform.position) <= 2.2f)
         {
-            int riposteDmg = Mathf.RoundToInt(baseAttackDamage * 2.2f);
+            // Nerfed: Sát thương phản đòn giảm từ 2.2x xuống 1.15x (không 1-shot người chơi)
+            int riposteDmg = Mathf.RoundToInt(baseAttackDamage * 1.15f);
             playerHealth?.TakeDamage(riposteDmg);
             DamagePopup.Create(playerTransform.position + Vector3.up * 0.8f, riposteDmg, isPlayer: true);
         }
+    }
+
+    private void SpawnShadowWarningFX(Vector3 pos)
+    {
+        GameObject fx = new GameObject("ShadowWarningFX");
+        fx.transform.position = pos;
+        var fSr = fx.AddComponent<SpriteRenderer>();
+        fSr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
+        fSr.color = new Color(0.6f, 0.1f, 0.8f, 0.45f);
+        fSr.sortingOrder = 4900;
+        fx.transform.localScale = Vector3.one * 1.8f;
+        Destroy(fx, 0.25f);
     }
 
     #endregion
