@@ -620,7 +620,6 @@ public class TitanBerserkerSkill : MonoBehaviour
                 animator.SetFloat("MoveX", facingDir.x);
                 animator.SetFloat("MoveY", facingDir.y);
                 animator.speed = atkSpdMult;
-            }
                 animator.SetInteger("ComboStep", comboStep);
                 animator.SetTrigger("AttackTrigger");
                 string stateName = (comboStep == 3) ? "Attack2" : "Attack1";
