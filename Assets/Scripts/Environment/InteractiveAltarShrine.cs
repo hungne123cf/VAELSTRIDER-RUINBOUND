@@ -139,7 +139,7 @@ public class InteractiveAltarShrine : MonoBehaviour
         {
             int healAmt = Mathf.RoundToInt(playerHealth.MaxHealth * 0.35f);
             playerHealth.Heal(healAmt);
-            DamagePopup.CreateHeal(playerTransform.position + Vector3.up * 0.8f, healAmt);
+            DamagePopup.CreateText(playerTransform.position + Vector3.up * 0.8f, $"+{healAmt} HP", new Color(0.25f, 1f, 0.4f));
         }
 
         // 2. Ban Phước: Tăng tốc chạy và tốc đánh
@@ -356,3 +356,4 @@ public class InteractiveAltarShrine : MonoBehaviour
         return altar;
     }
 }
+

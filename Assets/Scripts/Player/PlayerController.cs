@@ -49,24 +49,42 @@ public class PlayerController : MonoBehaviour
     public void SetBaseSpeed(float newBaseSpeed)
     {
         baseMoveSpeed = newBaseSpeed;
-        moveSpeed = baseMoveSpeed + bonusSpeed;
+        moveSpeed = baseMoveSpeed + bonusSpeed + augSpeedBonus + shrineSpeedBonus;
     }
 
     public void ApplyUpgradeBonus(float speedBonus, float dashCdReduction)
     {
         bonusSpeed = speedBonus;
         dashCooldownReduction = dashCdReduction;
-        moveSpeed = baseMoveSpeed + bonusSpeed + augSpeedBonus;
+        moveSpeed = baseMoveSpeed + bonusSpeed + augSpeedBonus + shrineSpeedBonus;
         dashCooldown = Mathf.Max(1.0f, baseDashCooldown - dashCooldownReduction);
     }
 
-    // ─── Augment speed bonus ───────────────────────────────────────────────────
+    // ─── Augment & Shrine speed bonus ──────────────────────────────────────────
     private float augSpeedBonus = 0f;
+    private float shrineSpeedBonus = 0f;
+    private Coroutine speedBuffRoutine;
 
     public void ApplyAugmentBonus(float speedBonusFraction)
     {
         augSpeedBonus = baseMoveSpeed * speedBonusFraction;
+        moveSpeed = baseMoveSpeed + bonusSpeed + augSpeedBonus + shrineSpeedBonus;
+    }
+
+    public void ApplySpeedBuff(float multiplier, float duration)
+    {
+        if (speedBuffRoutine != null) StopCoroutine(speedBuffRoutine);
+        speedBuffRoutine = StartCoroutine(SpeedBuffRoutine(multiplier, duration));
+    }
+
+    private System.Collections.IEnumerator SpeedBuffRoutine(float multiplier, float duration)
+    {
+        shrineSpeedBonus = baseMoveSpeed * Mathf.Max(0f, multiplier - 1f);
+        moveSpeed = baseMoveSpeed + bonusSpeed + augSpeedBonus + shrineSpeedBonus;
+        yield return new WaitForSeconds(duration);
+        shrineSpeedBonus = 0f;
         moveSpeed = baseMoveSpeed + bonusSpeed + augSpeedBonus;
+        speedBuffRoutine = null;
     }
 
 

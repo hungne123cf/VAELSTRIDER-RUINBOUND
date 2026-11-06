@@ -21,7 +21,6 @@ public static class MapEnvironmentEnhancer
         if (currentScene == "LoginScene" || currentScene == "MainMenuScene") return;
 
         GameObject root = new GameObject("MapEnvironmentEnhancement");
-        Object.DontDestroyOnLoad(root == null); // Giữ trong scene hiện tại
 
         // 1. Kích hoạt hiệu ứng Bầu không khí điện ảnh (Vệt nắng, Tàn tro, Bụi tuyết)
         MapAtmosphereFXManager.EnsureManager();
@@ -88,3 +87,4 @@ public static class MapEnvironmentEnhancer
         IceStalagmiteCrystal.Create(new Vector3(0f, -4.5f, 0f), parent);
     }
 }
+
