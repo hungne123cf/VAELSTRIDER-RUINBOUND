@@ -39,13 +39,11 @@ public class EnemyBurnEffect : MonoBehaviour
     {
         if (target == null) return;
 
-        // Không áp dụng lên Player hoặc vật thể môi trường
+        // Không áp dụng lên Player hoặc vật phẩm nhặt trên đất
         if (target.CompareTag("Player") || target.GetComponent<PlayerController>() != null || target.GetComponent<PlayerHealth>() != null)
             return;
-        if (target.GetComponent<BreakablePot>() != null || target.GetComponent<AncientChest>() != null ||
-            target.GetComponent<InteractiveAltarShrine>() != null || target.GetComponent<ExplosiveBarrel>() != null ||
-            target.GetComponent<WorldItemPickup>() != null || target.GetComponent<HealthPotion>() != null ||
-            target.GetComponent<GoldCoin>() != null || target.GetComponent<AethelShard>() != null)
+        if (target.GetComponent<WorldItemPickup>() != null || target.GetComponent<HealthPotion>() != null ||
+            target.GetComponent<AethelShard>() != null)
             return;
 
         // Tìm root của quái/Boss chứa IDamageable
@@ -457,3 +455,4 @@ public class EnemyBurnEffect : MonoBehaviour
         }
     }
 }
+
