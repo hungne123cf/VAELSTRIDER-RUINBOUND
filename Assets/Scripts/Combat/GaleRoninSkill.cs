@@ -198,7 +198,8 @@ public class GaleRoninSkill : MonoBehaviour
         if (playerHealth != null && playerHealth.IsDead) return false;
         if (!IsAttackReady || isPhantomActive) return false;
 
-        attackCooldownTimer = attackCooldown;
+        float atkSpdMult = (playerCombat != null) ? playerCombat.AttackSpeedMultiplier : 1.0f;
+        attackCooldownTimer = attackCooldown / atkSpdMult;
 
         if (facingDir.sqrMagnitude < 0.001f) facingDir = Vector2.down;
         facingDir = facingDir.normalized;
@@ -209,6 +210,7 @@ public class GaleRoninSkill : MonoBehaviour
             animator.SetFloat("MoveX", facingDir.x);
             animator.SetFloat("MoveY", facingDir.y);
             animator.SetTrigger("AttackTrigger");
+            animator.speed = atkSpdMult;
         }
 
         SoundManager.EnsureInstance()?.PlaySwordSlash();

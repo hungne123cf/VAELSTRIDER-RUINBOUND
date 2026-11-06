@@ -420,7 +420,8 @@ public class CelestialMageSkill : MonoBehaviour
     public void PerformAttack(Vector2 direction, int effectiveDamage)
     {
         if (attackCooldownTimer > 0f || isExecutingSkill || isChargingBarrier) return;
-        attackCooldownTimer = attackCooldown;
+        float atkSpdMult = (playerCombat != null) ? playerCombat.AttackSpeedMultiplier : 1.0f;
+        attackCooldownTimer = attackCooldown / atkSpdMult;
 
         if (direction.sqrMagnitude < 0.01f) direction = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
         direction = direction.normalized;

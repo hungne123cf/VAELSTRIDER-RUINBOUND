@@ -282,7 +282,8 @@ public class AzureBladeSkill : MonoBehaviour
 
         if (!IsAttackReady) return;
 
-        attackCooldownTimer = attackCooldown;
+        float atkSpdMult = (playerCombat != null) ? playerCombat.AttackSpeedMultiplier : 1.0f;
+        attackCooldownTimer = attackCooldown / atkSpdMult;
         isAiming = false;
 
         // Vung kiếm hoạt ảnh
@@ -290,6 +291,7 @@ public class AzureBladeSkill : MonoBehaviour
         {
             animator.SetTrigger("AttackTrigger");
             animator.Play("Attack2", 0, 0f);
+            animator.speed = atkSpdMult;
         }
 
         SoundManager.EnsureInstance()?.PlaySwordSlash();

@@ -612,12 +612,15 @@ public class TitanBerserkerSkill : MonoBehaviour
 
         if (comboStep < 4)
         {
-            attackCooldownTimer = attackCooldown;
+            float atkSpdMult = (playerCombat != null) ? playerCombat.AttackSpeedMultiplier : 1.0f;
+            attackCooldownTimer = attackCooldown / atkSpdMult;
             if (animator != null)
             {
                 animator.enabled = true;
                 animator.SetFloat("MoveX", facingDir.x);
                 animator.SetFloat("MoveY", facingDir.y);
+                animator.speed = atkSpdMult;
+            }
                 animator.SetInteger("ComboStep", comboStep);
                 animator.SetTrigger("AttackTrigger");
                 string stateName = (comboStep == 3) ? "Attack2" : "Attack1";

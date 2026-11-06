@@ -510,7 +510,8 @@ public class DuneAssassinSkill : MonoBehaviour
         // 1_atk (8 frames): 0.080s (~0.64s)
         // 2_atk (18 frames): 0.070s (~1.26s)
         // 3_atk (26 frames): 0.070s (~1.82s)
-        float frameTime = (step == 1) ? 0.080f : 0.070f;
+        float atkSpdMult = (playerCombat != null) ? playerCombat.AttackSpeedMultiplier : 1.0f;
+        float frameTime = ((step == 1) ? 0.080f : 0.070f) / atkSpdMult;
 
         // Điểm ra đòn gây sát thương
         int hitIndex1 = (step == 1) ? 3 : ((step == 2) ? 6 : 13);

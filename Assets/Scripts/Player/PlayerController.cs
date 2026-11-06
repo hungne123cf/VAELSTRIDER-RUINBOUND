@@ -801,7 +801,15 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            animator.speed = 1.0f; // Trả về tốc độ 1.0x khi đứng yên để hoạt ảnh thở/idle tự nhiên
+            var pcCombat = GetComponent<PlayerCombat>();
+            if (pcCombat != null && Time.time - pcCombat.LastAttackTime < 0.45f)
+            {
+                animator.speed = pcCombat.AttackSpeedMultiplier; // Giữ tốc độ chém nhanh mượt mà cho đòn tấn công
+            }
+            else
+            {
+                animator.speed = 1.0f; // Trả về tốc độ 1.0x khi đứng yên để hoạt ảnh thở/idle tự nhiên
+            }
         }
     }
 

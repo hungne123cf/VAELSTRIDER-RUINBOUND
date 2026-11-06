@@ -29,6 +29,7 @@ public class PlayerCombat : MonoBehaviour
 
     private int comboStep = 0;
     private float lastAttackTime = 0f;
+    public float LastAttackTime => lastAttackTime;
     private float skillCooldownTimer = 0f;
     private int lastAttackFrame = -1;
     private int lastSpecialSkillFrame = -1;
@@ -211,11 +212,15 @@ public class PlayerCombat : MonoBehaviour
     private float augBonusLifesteal= 0f;
     private float augBonusSpellVamp= 0f;
     private float augBonusCDR      = 0f;
+    private float augBonusAttackSpeed = 0f;
     private float comboResetMult   = 1f;
+
+    public float AttackSpeedMultiplier => Mathf.Clamp(1.0f + augBonusAttackSpeed, 0.5f, 2.5f);
 
     public void ApplyAugmentBonus(int bonusAtk, float bonusCrit, float bonusCritDmg,
                                    float bonusLifesteal, float bonusSpellVamp, float bonusCDR,
-                                   int bonusArmPen = 0, float bonusArmPenPct = 0f, int bonusMagPen = 0, float bonusMagPenPct = 0f)
+                                   int bonusArmPen = 0, float bonusArmPenPct = 0f, int bonusMagPen = 0, float bonusMagPenPct = 0f,
+                                   float bonusAttackSpeed = 0f)
     {
         augBonusAtk          = bonusAtk;
         augBonusCrit         = bonusCrit;
@@ -227,6 +232,7 @@ public class PlayerCombat : MonoBehaviour
         augBonusArmorPenPct  = bonusArmPenPct;
         augBonusMagicPenFlat = bonusMagPen;
         augBonusMagicPenPct  = bonusMagPenPct;
+        augBonusAttackSpeed  = bonusAttackSpeed;
         RecalculateCombatStats();
     }
 
@@ -833,7 +839,8 @@ public class PlayerCombat : MonoBehaviour
         }
 
         // Đòn đánh mặc định (Vaelstrider)
-        if (Time.time - lastAttackTime < 0.22f) return; // Min attack interval to prevent animation glitching
+        float minInterval = 0.22f / AttackSpeedMultiplier;
+        if (Time.time - lastAttackTime < minInterval) return; // Khoảng cách giữa 2 đòn thu ngắn lại theo Tốc Độ Đánh
         lastAttackTime = Time.time;
         comboStep++;
         if (comboStep > 2) comboStep = 1;
@@ -846,11 +853,11 @@ public class PlayerCombat : MonoBehaviour
 
             string attackState = (comboStep == 1) ? "Attack1" : "Attack2";
             animator.Play(attackState, 0, 0f);
+            animator.speed = AttackSpeedMultiplier; // Tốc độ chém vung kiếm mượt mà & chém nhanh hơn theo % Tốc Đánh
         }
 
-        // Đồng bộ thời điểm gây sát thương chính xác với khung hình vung kiếm (Impact Frame)
-        // Đòn 1 chém chéo vung tới đích sau ~0.10s, Đòn 2 bổ nặng kết chuỗi vung tới đích sau ~0.14s
-        float hitDelay = (comboStep == 1) ? 0.10f : 0.14f;
+        // Đồng bộ thời điểm gây sát thương chính xác với khung hình vung kiếm (Impact Frame) rút ngắn theo Tốc Đánh
+        float hitDelay = ((comboStep == 1) ? 0.10f : 0.14f) / AttackSpeedMultiplier;
         if (attackHitRoutine != null) StopCoroutine(attackHitRoutine);
         attackHitRoutine = StartCoroutine(DelayedHitDamageRoutine(comboStep, hitDelay));
     }

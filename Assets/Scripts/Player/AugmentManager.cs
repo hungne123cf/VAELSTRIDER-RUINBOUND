@@ -42,6 +42,7 @@ public class AugmentManager : MonoBehaviour
     private int augBonusAtk         = 0;
     private int augBonusHp          = 0;
     private float augBonusSpeed     = 0f;
+    private float augBonusAttackSpeed = 0f; // fraction (0.15 = +15% Tốc Độ Đánh thực tế)
     private float augBonusCrit      = 0f;    // fraction (0.08 = 8%)
     private float augBonusCritDmg   = 0f;    // fraction (0.20 = 20%)
     private float augBonusLifesteal = 0f;
@@ -328,6 +329,7 @@ public class AugmentManager : MonoBehaviour
         augBonusAtk = 0;
         augBonusHp = 0;
         augBonusSpeed = 0f;
+        augBonusAttackSpeed = 0f;
         augBonusCrit = 0f;
         augBonusCritDmg = 0f;
         augBonusLifesteal = 0f;
@@ -855,8 +857,13 @@ public class AugmentManager : MonoBehaviour
         switch (augment.type)
         {
             case AugmentDatabase.AugmentType.BonusAttack:
+                augBonusAtk += Mathf.RoundToInt(augment.value);
+                FlushStatsToCombat();
+                break;
+
             case AugmentDatabase.AugmentType.LaceratingEdge:
                 augBonusAtk += Mathf.RoundToInt(augment.value);
+                augBonusAttackSpeed += 0.08f; // +8% Tốc Độ Đánh
                 FlushStatsToCombat();
                 break;
 
@@ -1001,7 +1008,9 @@ public class AugmentManager : MonoBehaviour
 
             case AugmentDatabase.AugmentType.ComboMastery:
                 comboResetMult = 1f - (augment.value * 0.01f);
+                augBonusAttackSpeed += 0.25f; // +25% Tốc Độ Đánh
                 ApplyComboMastery();
+                FlushStatsToCombat();
                 break;
 
             case AugmentDatabase.AugmentType.UltimateCharge:
@@ -1023,6 +1032,7 @@ public class AugmentManager : MonoBehaviour
             case AugmentDatabase.AugmentType.RelentlessAssault:
                 augBonusAtk += 10;
                 augBonusSpeed += 0.05f;
+                augBonusAttackSpeed += 0.15f; // +15% Tốc Độ Đánh
                 FlushStatsToCombat();
                 FlushStatsToController();
                 break;
@@ -1042,6 +1052,7 @@ public class AugmentManager : MonoBehaviour
 
             case AugmentDatabase.AugmentType.StaticOverload:
                 augBonusAtk += Mathf.RoundToInt(augment.value);
+                augBonusAttackSpeed += 0.15f; // +15% Tốc Độ Đánh
                 hasEchoStrike = true;
                 echoStrikeChance = Mathf.Max(echoStrikeChance, 0.25f);
                 FlushStatsToCombat();
@@ -1367,6 +1378,13 @@ public class AugmentManager : MonoBehaviour
         return total;
     }
 
+    public float GetAugAttackSpeed()
+    {
+        float total = augBonusAttackSpeed;
+        if (hasBerserker && berserkerStacks >= MAX_BERSERKER) total += 0.25f; // Đạt max 25 stack Cuồng Nộ -> +25% Tốc Đánh
+        return total;
+    }
+
     public int GetAugBonusHp()        => augBonusHp;
     public float GetAugBonusSpeed()   => augBonusSpeed;
     public float GetAugCrit()         => augBonusCrit;
@@ -1393,7 +1411,12 @@ public class AugmentManager : MonoBehaviour
             GetAugCritDmg(),
             GetAugLifesteal(),
             GetAugSpellVamp(),
-            GetAugCDR()
+            GetAugCDR(),
+            bonusArmPen: 0,
+            bonusArmPenPct: 0f,
+            bonusMagPen: 0,
+            bonusMagPenPct: 0f,
+            bonusAttackSpeed: GetAugAttackSpeed()
         );
     }
 
