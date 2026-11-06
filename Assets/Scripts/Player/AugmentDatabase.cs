@@ -505,8 +505,8 @@ public static class AugmentDatabase
         new AugmentData {
             type = AugmentType.LifeTransfusion,
             nameVN = "Truyền Dẫn Sinh Mệnh", nameEN = "Life Transfusion",
-            descVN = "Nhận thêm <color=#EF4444><b>+{v}% Hút Máu Toàn Phần</b></color> và mỗi mạng hạ gục lập tức hồi phục <color=#55EFC4><b>35 HP</b></color>.",
-            descEN = "Grant <color=#EF4444><b>+{v}% Omnivamp</b></color> and each kill instantly restores <color=#55EFC4><b>35 HP</b></color>.",
+            descVN = "Nhận thêm <color=#EF4444><b>+{v}% Hút Máu Toàn Phần</b></color>, mỗi mạng hạ gục hồi ngay <color=#55EFC4><b>35 HP</b></color> và cộng vĩnh viễn <color=#FFEAA7><b>+5 Máu Tối Đa</b></color>.",
+            descEN = "Grant <color=#EF4444><b>+{v}% Omnivamp</b></color>, each kill restores <color=#55EFC4><b>35 HP</b></color> and permanently adds <color=#FFEAA7><b>+5 Max Health</b></color>.",
             flavorVN = "«Rút cạn sinh lực kẻ thù để nuôi dưỡng thể xác.»",
             flavorEN = "«Siphoning enemy vigor to rejuvenate mortal veins.»",
             emoji = "🩸", value = 10f, duration = -1f,
