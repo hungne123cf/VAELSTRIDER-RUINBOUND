@@ -100,12 +100,11 @@ public class PlayerStatPanelUI : MonoBehaviour
         // Nút thu gọn / mở rộng (luôn hiện)
         GameObject btnObj = new GameObject("ToggleBtn", typeof(RectTransform), typeof(Image), typeof(Button));
         btnObj.transform.SetParent(transform, false);
-        var bRt = btnObj.GetComponent<RectTransform>();
-        bRt.anchorMin = bRt.anchorMax = new Vector2(1f, 0f);
-        bRt.pivot = new Vector2(1f, 0f);
-        bRt.anchoredPosition = new Vector2(16f, -16f);
-        bRt.sizeDelta = new Vector2(44f, 44f);
-        btnObj.GetComponent<Image>().color = new Color(0.12f, 0.30f, 0.45f, 0.95f);
+        toggleRt = btnObj.GetComponent<RectTransform>();
+        toggleRt.sizeDelta = new Vector2(52f, 52f);
+        toggleImg = btnObj.GetComponent<Image>();
+        toggleImg.sprite = GetStatIconSprite();
+        toggleImg.color = Color.white;
         btnObj.GetComponent<Button>().onClick.AddListener(Toggle);
 
         GameObject lblObj = new GameObject("Label", typeof(RectTransform));
@@ -200,7 +199,62 @@ public class PlayerStatPanelUI : MonoBehaviour
     private void ApplyCollapsed()
     {
         if (contentObj != null) contentObj.SetActive(!collapsed);
-        if (toggleLabel != null) toggleLabel.text = collapsed ? "+" : "–";
+        if (toggleLabel != null) toggleLabel.text = "";
+        if (toggleRt != null)
+        {
+            if (collapsed)
+            {
+                // Thu gọn: icon nằm gọn ở góc trên-trái (ngay dưới thanh máu)
+                toggleRt.anchorMin = toggleRt.anchorMax = new Vector2(0f, 1f);
+                toggleRt.pivot = new Vector2(0f, 1f);
+                toggleRt.anchoredPosition = Vector2.zero;
+            }
+            else
+            {
+                // Mở rộng: icon nằm ở góc trên-phải của bảng
+                toggleRt.anchorMin = toggleRt.anchorMax = new Vector2(1f, 1f);
+                toggleRt.pivot = new Vector2(0.5f, 0.5f);
+                toggleRt.anchoredPosition = new Vector2(-4f, -4f);
+            }
+        }
+        if (toggleImg != null) toggleImg.color = collapsed ? Color.white : new Color(1f, 1f, 1f, 0.85f);
+    }
+
+    private RectTransform toggleRt;
+    private Image toggleImg;
+    private static Sprite statIconSprite;
+
+    /// <summary>Icon tròn: nền đá đen, viền vàng đồng, 3 cột chỉ số vàng (biểu tượng bảng chỉ số).</summary>
+    private static Sprite GetStatIconSprite()
+    {
+        if (statIconSprite != null) return statIconSprite;
+        const int s = 64;
+        var tex = new Texture2D(s, s, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear };
+        Color dark = new Color(0.07f, 0.09f, 0.13f, 0.95f);
+        Color gold = new Color(0.95f, 0.78f, 0.38f, 1f);
+        Color goldDim = new Color(0.62f, 0.50f, 0.26f, 1f);
+        Vector2 c = new Vector2(s * 0.5f, s * 0.5f);
+        float rOut = s * 0.5f - 1f, rRing = rOut - 4f;
+        // 3 cột: x-range, chiều cao
+        int[] bx = { 20, 29, 38 }; int[] bh = { 12, 22, 16 }; int bw = 6, baseY = 20;
+        for (int y = 0; y < s; y++)
+            for (int x = 0; x < s; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), c);
+                Color col = new Color(0, 0, 0, 0);
+                if (d <= rOut)
+                {
+                    col = d > rRing ? gold : (d > rRing - 1.5f ? goldDim : dark);
+                    for (int i = 0; i < 3; i++)
+                        if (x >= bx[i] && x < bx[i] + bw && y >= baseY && y < baseY + bh[i]) col = gold;
+                    if (y == baseY - 2 && x >= 17 && x < 47) col = goldDim;
+                    col.a *= Mathf.Clamp01(rOut - d + 0.5f);
+                }
+                tex.SetPixel(x, y, col);
+            }
+        tex.Apply();
+        statIconSprite = Sprite.Create(tex, new Rect(0, 0, s, s), new Vector2(0.5f, 0.5f), 100f);
+        return statIconSprite;
     }
 
     void Update()
@@ -248,3 +302,4 @@ public class PlayerStatPanelUI : MonoBehaviour
         return Mathf.RoundToInt(p) + "%";
     }
 }
+
