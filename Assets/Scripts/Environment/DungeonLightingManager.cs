@@ -175,7 +175,8 @@ public class DungeonLightingManager : MonoBehaviour
         {
             if (sr == null) continue;
             string name = sr.gameObject.name;
-            if (name.Contains("Popup") || name.Contains("Damage") || name.Contains("Prompt") || name.Contains("Ghost")) continue;
+            if (name.Contains("Popup") || name.Contains("Damage") || name.Contains("Prompt") || name.Contains("Ghost") ||
+                name.Contains("WaterOcean") || name.Contains("ShoreBank") || name.Contains("ShoreFoam")) continue;
 
             if (sr.sharedMaterial == null || 
                 sr.sharedMaterial.shader.name.Contains("Sprites/Default") || 
