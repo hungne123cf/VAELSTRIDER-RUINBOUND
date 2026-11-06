@@ -1,13 +1,13 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(CircleCollider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
 {
     private Transform player;
     private Rigidbody2D rb;
     private SpriteRenderer sr;
-    private CircleCollider2D col;
+    private Collider2D col;
 
     private int maxHealth = 65;
     private int currentHealth;
@@ -37,17 +37,11 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         biteDamage = MapScalingManager.ScaleDamage(biteDamage);
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<CircleCollider2D>();
         sr = gameObject.AddComponent<SpriteRenderer>();
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-
-        col.radius = 0.95f;
-        col.offset = Vector2.zero;
-        col.isTrigger = false;
-        EnemyNavigationHelper.EnsureFrictionless(col);
 
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
@@ -86,6 +80,9 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
 
         sr.sprite = walkSprites[0];
         sr.color = Color.white;
+
+        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        EnemyNavigationHelper.EnsureFrictionless(col);
 
         gameObject.AddComponent<AutoDepthSort>();
     }
@@ -162,9 +159,11 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (biteTimer > 0f) biteTimer -= Time.deltaTime;
 
-        // Bò nhanh tới player (luon lach qua vat can)
-        Vector2 dir = (player.position - transform.position).normalized;
-        Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, col, 0.25f, 0.8f);
+        Vector2 bodyPos = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
+
+        // Bò nhanh tới player (tính chuẩn từ tâm cơ thể nhện con thực tế)
+        Vector2 dir = ((Vector2)player.position - bodyPos).normalized;
+        Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(bodyPos, dir, col, 0.25f, 0.8f);
         rb.linearVelocity = moveDir * moveSpeed;
 
         // Lật mặt theo hướng đi
@@ -186,7 +185,7 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         }
 
         // Cắn cận chiến
-        if (Vector2.Distance(transform.position, player.position) <= 0.8f && biteTimer <= 0f)
+        if (Vector2.Distance(bodyPos, player.position) <= 0.95f && biteTimer <= 0f)
         {
             biteTimer = biteCooldown;
             var target = player.GetComponent<IDamageable>();
@@ -205,7 +204,8 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         currentHealth -= damage;
         EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
         StartCoroutine(DamageFlashRoutine());
-        DamagePopup.Create(transform.position, damage, false);
+        Vector2 bodyPos = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
+        DamagePopup.Create(bodyPos, damage, false);
 
         if (currentHealth <= 0)
         {

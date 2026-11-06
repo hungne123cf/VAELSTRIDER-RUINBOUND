@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class SlimeAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<SlimeAI> OnEnemyDied;
@@ -21,7 +21,7 @@ public class SlimeAI : MonoBehaviour, IDamageable, IEnemyHealth
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private Animator animator;
-    private BoxCollider2D col;
+    private Collider2D col;
     private Color originalColor;
 
     private float attackTimer = 0f;
@@ -40,7 +40,6 @@ public class SlimeAI : MonoBehaviour, IDamageable, IEnemyHealth
         attackDamage = MapScalingManager.ScaleDamage(attackDamage);
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
@@ -48,13 +47,8 @@ public class SlimeAI : MonoBehaviour, IDamageable, IEnemyHealth
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
         gameObject.tag = "Enemy";
 
-        if (col != null)
-        {
-            col.size = new Vector2(1.8f, 0.8f);
-            col.offset = new Vector2(0f, 0.4f);
-            col.isTrigger = false;
-            EnemyNavigationHelper.EnsureFrictionless(col);
-        }
+        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        EnemyNavigationHelper.EnsureFrictionless(col);
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 

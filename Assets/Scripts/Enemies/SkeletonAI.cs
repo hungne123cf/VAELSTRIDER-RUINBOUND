@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class SkeletonAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<SkeletonAI> OnEnemyDied;
@@ -19,7 +19,7 @@ public class SkeletonAI : MonoBehaviour, IDamageable, IEnemyHealth
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private Animator animator;
-    private CapsuleCollider2D col;
+    private Collider2D col;
     private Color originalColor;
 
     private float attackTimer = 0f;
@@ -38,7 +38,6 @@ public class SkeletonAI : MonoBehaviour, IDamageable, IEnemyHealth
         attackDamage = MapScalingManager.ScaleDamage(attackDamage);
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<CapsuleCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
@@ -46,14 +45,8 @@ public class SkeletonAI : MonoBehaviour, IDamageable, IEnemyHealth
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
         gameObject.tag = "Enemy";
 
-        if (col != null)
-        {
-            // Top-down 2D standard: chỉ bao bọc phần chân đế để không bị cấn đầu/vai vào prop
-            col.size = new Vector2(0.6f, 0.7f);
-            col.offset = new Vector2(0f, 0.35f);
-            col.isTrigger = false;
-            EnemyNavigationHelper.EnsureFrictionless(col);
-        }
+        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        EnemyNavigationHelper.EnsureFrictionless(col);
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
@@ -212,19 +205,6 @@ public class SkeletonAI : MonoBehaviour, IDamageable, IEnemyHealth
         OnEnemyDied?.Invoke(this);
         Destroy(gameObject, 0.75f);
     }
-
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-        var c = GetComponent<CapsuleCollider2D>();
-        if (c != null && (c.size.y > 1.0f || c.offset.y > 0.6f))
-        {
-            c.size = new Vector2(0.6f, 0.7f);
-            c.offset = new Vector2(0f, 0.35f);
-            UnityEditor.EditorUtility.SetDirty(this);
-        }
-    }
-#endif
 
     // ─── IEnemyHealth Implementation ───────────────────────
     public int CurrentHealth => currentHealth;

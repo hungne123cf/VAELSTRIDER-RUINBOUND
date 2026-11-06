@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<BotWheelAI> OnEnemyDied;
@@ -70,7 +70,6 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         currentHealth = maxHealth;
         initialSpawnPosition = transform.position;
         rb = GetComponent<Rigidbody2D>();
-        enemyCol = GetComponent<Collider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
@@ -81,6 +80,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         rb.freezeRotation = true;
         rb.linearDamping = 4.0f;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        enemyCol = DynamicSpriteColliderSync.EnsureAttached(gameObject);
         EnemyNavigationHelper.EnsureFrictionless(enemyCol);
         EnemyCCCleanseSystem.EnsureAttached(gameObject);
 

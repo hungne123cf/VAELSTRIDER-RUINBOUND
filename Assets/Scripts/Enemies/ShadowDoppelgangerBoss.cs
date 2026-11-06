@@ -122,13 +122,11 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         EnemyCCCleanseSystem.EnsureAttached(gameObject);
 
-        var cap = gameObject.AddComponent<CapsuleCollider2D>();
-        cap.size = new Vector2(1.1f, 1.4f);
-        cap.direction = CapsuleDirection2D.Vertical;
-        myCol = cap;
-
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 5000;
+
+        myCol = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        EnemyNavigationHelper.EnsureFrictionless(myCol);
 
         // 1. Nhận diện Hero Class mà người chơi đang chọn
         var player = FindAnyObjectByType<PlayerController>();

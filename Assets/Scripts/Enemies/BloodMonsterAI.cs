@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<BloodMonsterAI> OnEnemyDied;
@@ -75,7 +75,6 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         attackDamage = MapScalingManager.ScaleDamage(attackDamage);
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
-        enemyCol = GetComponent<Collider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
@@ -83,13 +82,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (enemyLayer != -1) gameObject.layer = enemyLayer;
         gameObject.tag = "Enemy";
 
-        if (enemyCol == null)
-        {
-            var cap = gameObject.AddComponent<CapsuleCollider2D>();
-            cap.size = isBoss ? new Vector2(1.5f, 1.4f) : new Vector2(1.0f, 1.0f);
-            cap.direction = CapsuleDirection2D.Vertical;
-            enemyCol = cap;
-        }
+        enemyCol = DynamicSpriteColliderSync.EnsureAttached(gameObject);
         EnemyNavigationHelper.EnsureFrictionless(enemyCol);
 
         if (animator == null) animator = gameObject.AddComponent<Animator>();
@@ -418,10 +411,15 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
                 used = true;
             }
         }
-        // Phase 3 (Normal): Nguyet Tram & Pounce
+        // Phase 3 (Normal): Nguyet Tram, Hut Mau & Pounce
         else
         {
-            if (crescentTimer <= 0f && distance <= 7.5f)
+            if (siphonTimer <= 0f && distance <= 6.5f)
+            {
+                StartCoroutine(PerformSanguineSiphonRoutine());
+                used = true;
+            }
+            else if (crescentTimer <= 0f && distance <= 7.5f)
             {
                 StartCoroutine(PerformCrescentWavesRoutine());
                 used = true;
@@ -1048,12 +1046,8 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (el != -1) gameObject.layer = el;
         gameObject.tag = "Enemy";
 
-        var cap = GetComponent<CapsuleCollider2D>();
-        if (cap == null) cap = gameObject.AddComponent<CapsuleCollider2D>();
-        cap.size = new Vector2(1.5f, 1.4f);
-        cap.direction = CapsuleDirection2D.Vertical;
-        cap.isTrigger = false;
-        enemyCol = cap;
+        enemyCol = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        EnemyNavigationHelper.EnsureFrictionless(enemyCol);
 
         attackDamage = MapScalingManager.ScaleDamage(18);
         moveSpeed *= 1.15f;
@@ -1089,9 +1083,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        var col = go.AddComponent<CapsuleCollider2D>();
-        col.size = isBoss ? new Vector2(1.5f, 1.4f) : new Vector2(1.0f, 1.0f);
-        col.direction = CapsuleDirection2D.Vertical;
+        var col = DynamicSpriteColliderSync.EnsureAttached(go);
 
         var po = Object.FindAnyObjectByType<PlayerController>();
         if (po != null)

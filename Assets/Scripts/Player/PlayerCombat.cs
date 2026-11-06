@@ -917,17 +917,18 @@ public class PlayerCombat : MonoBehaviour
                 damageable.TakeDamage(actualHitDmg);
                 OnPlayerHitEnemy?.Invoke(col.gameObject, actualHitDmg);
 
+                Vector3 hitPopupPos = DynamicSpriteColliderSync.GetBodyCenter(col.transform, col);
                 if (actualPhys > 0)
                 {
-                    DamagePopup.Create(col.transform.position, actualPhys, DamageType.Physical, isCritical: isCrit);
+                    DamagePopup.Create(hitPopupPos, actualPhys, DamageType.Physical, isCritical: isCrit);
                 }
                 if (actualMagic > 0)
                 {
-                    DamagePopup.Create(col.transform.position + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.25f, 0f), actualMagic, DamageType.Magic, isCritical: isCrit);
+                    DamagePopup.Create(hitPopupPos + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.25f, 0f), actualMagic, DamageType.Magic, isCritical: isCrit);
                 }
                 if (actualTrue > 0)
                 {
-                    DamagePopup.Create(col.transform.position + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.5f, 0f), actualTrue, DamageType.TrueDamage, isCritical: isCrit);
+                    DamagePopup.Create(hitPopupPos + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.5f, 0f), actualTrue, DamageType.TrueDamage, isCritical: isCrit);
                 }
 
                 var augMgr = AugmentManager.EnsureInstance();

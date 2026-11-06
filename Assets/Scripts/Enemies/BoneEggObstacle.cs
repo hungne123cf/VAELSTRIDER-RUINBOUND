@@ -1,11 +1,11 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(SpriteRenderer), typeof(CircleCollider2D))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class BoneEggObstacle : MonoBehaviour, IDamageable
 {
     private SpriteRenderer sr;
-    private CircleCollider2D col;
+    private Collider2D col;
     private int health = 80;
     private bool isDetonated = false;
 
@@ -23,10 +23,6 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
     {
         health = MapScalingManager.ScaleHealth(health);
         sr = GetComponent<SpriteRenderer>();
-        col = GetComponent<CircleCollider2D>();
-
-        col.radius = 0.55f;
-        col.offset = new Vector2(0f, 0.2f);
 
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
@@ -52,6 +48,7 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
 
         if (idleSprites[0] != null) sr.sprite = idleSprites[0];
         transform.localScale = Vector3.one * 1.1f;
+        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
     }
 
     void Start()

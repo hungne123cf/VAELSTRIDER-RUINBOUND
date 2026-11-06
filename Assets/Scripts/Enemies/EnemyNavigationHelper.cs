@@ -57,6 +57,10 @@ public static class EnemyNavigationHelper
     {
         if (col == null) return;
 
+        GameObject go = col.gameObject;
+        PolygonCollider2D syncedPoly = DynamicSpriteColliderSync.EnsureAttached(go);
+        if (syncedPoly != null) col = syncedPoly;
+
         if (sharedFrictionlessMat == null)
         {
             sharedFrictionlessMat = new PhysicsMaterial2D("EnemyFrictionlessMat")
@@ -67,7 +71,7 @@ public static class EnemyNavigationHelper
         }
 
         col.sharedMaterial = sharedFrictionlessMat;
-        CorruptedEnemyBuff.AttachIfCorrupted(col.gameObject);
+        CorruptedEnemyBuff.AttachIfCorrupted(go);
     }
 
     /// <summary>

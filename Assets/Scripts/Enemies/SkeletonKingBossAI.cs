@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<SkeletonKingBossAI> OnBossDied;
@@ -19,7 +19,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     [SerializeField] private int meleeDamage = 12;
     [SerializeField] private int slamDamage = 18;
     [SerializeField] private int earthquakeDamage = 9;
-    [SerializeField] private float meleeRange = 2.4f;
+    [SerializeField] private float meleeRange = 2.6f;
     [SerializeField] public float meleeCooldown = 1.35f;
     [SerializeField] public float skillCooldown = 5.0f;
     [SerializeField] public float webSpitCooldown = 4.5f;
@@ -28,7 +28,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private Animator animator;
-    private CapsuleCollider2D col;
+    private Collider2D col;
     private Color originalColor;
 
     private float meleeTimer = 0f;
@@ -56,7 +56,6 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         earthquakeDamage = MapScalingManager.ScaleBossDamage(earthquakeDamage, isSpecialSkill: true);
         currentHealth = phaseMaxHealth;
         rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<CapsuleCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
@@ -64,11 +63,9 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
         gameObject.tag = "Enemy";
 
+        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
         if (col != null)
         {
-            col.size = new Vector2(2.5f, 4.0f);
-            col.offset = new Vector2(0f, 2.0f);
-            col.direction = CapsuleDirection2D.Vertical;
             col.isTrigger = false;
             EnemyNavigationHelper.EnsureFrictionless(col);
         }
@@ -147,10 +144,11 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (isBusy) return;
 
-        float dist = Vector2.Distance(transform.position, player.position);
+        Vector2 bodyPos = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
+        float dist = Vector2.Distance(bodyPos, player.position);
 
         // Lat mat theo huong nguoi choi
-        Vector3 diff = player.position - transform.position;
+        Vector3 diff = (Vector3)player.position - (Vector3)bodyPos;
         if (Mathf.Abs(diff.x) > 0.05f)
         {
             transform.localScale = new Vector3(diff.x > 0 ? 1.2f : -1.2f, 1.2f, 1f);
@@ -208,9 +206,9 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         }
         else
         {
-            // Di chuyen san lung player (luon lach qua vat can)
-            Vector2 dir = (player.position - transform.position).normalized;
-            Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, col, 0.7f, 1.5f);
+            // Di chuyen san lung player (tinh tu tam co the nhen that su)
+            Vector2 dir = ((Vector2)player.position - bodyPos).normalized;
+            Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(bodyPos, dir, col, 0.7f, 1.5f);
             rb.linearVelocity = moveDir * moveSpeed;
             if (animator != null) animator.SetBool(IsMovingHash, true);
         }
@@ -264,9 +262,9 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         rb.linearVelocity = Vector2.zero;
         if (animator != null) animator.SetBool(IsMovingHash, false);
 
-        // Huong ve phia player
+        // Huong ve phia player tu tam dau/mieng nhen
         Vector2 targetPos = player.position;
-        Vector2 spawnOrigin = (Vector2)transform.position + Vector2.up * 1.5f;
+        Vector2 spawnOrigin = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
         Vector2 fireDir = (targetPos - spawnOrigin).normalized;
 
         // Vung canh bao tia ban
@@ -325,7 +323,8 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (isDead) yield break;
 
-        if (player != null && Vector2.Distance(transform.position, player.position) <= meleeRange + 0.8f)
+        Vector2 bodyPos = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
+        if (player != null && Vector2.Distance(bodyPos, player.position) <= meleeRange + 0.9f)
         {
             IDamageable target = player.GetComponent<IDamageable>();
             if (target != null)
@@ -352,8 +351,9 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (animator != null) animator.SetBool(IsMovingHash, false);
 
+        Vector3 slamCenter = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
         // Vong canh bao do
-        GameObject warningCircle = CreateWarningRing(transform.position, 3.5f, 0.5f);
+        GameObject warningCircle = CreateWarningRing(slamCenter, 3.5f, 0.5f);
 
         yield return new WaitForSeconds(0.45f);
 
@@ -363,8 +363,9 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         yield return new WaitForSeconds(0.25f);
 
+        slamCenter = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
         // Sat thuong lan xung quanh
-        if (player != null && Vector2.Distance(transform.position, player.position) <= 3.6f)
+        if (player != null && Vector2.Distance(slamCenter, player.position) <= 3.6f)
         {
             IDamageable target = player.GetComponent<IDamageable>();
             if (target != null) target.TakeDamage(slamDamage);
@@ -374,8 +375,8 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (cam != null) cam.Shake(0.45f, 0.5f);
 
         // Sinh 2 Qua Trung Nhen xung quanh (se no va de ra Nhen Con Mini)
-        Vector3 leftEgg = transform.position + new Vector3(-2.8f, Random.Range(-0.8f, 0.8f), 0f);
-        Vector3 rightEgg = transform.position + new Vector3(2.8f, Random.Range(-0.8f, 0.8f), 0f);
+        Vector3 leftEgg = slamCenter + new Vector3(-2.8f, Random.Range(-0.8f, 0.8f), 0f);
+        Vector3 rightEgg = slamCenter + new Vector3(2.8f, Random.Range(-0.8f, 0.8f), 0f);
         BoneEggObstacle.Spawn(leftEgg);
         BoneEggObstacle.Spawn(rightEgg);
 
@@ -392,8 +393,9 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         meleeTimer = meleeCooldown + 0.8f;
         rb.linearVelocity = Vector2.zero;
 
-        Vector2 dashDir = (player.position - transform.position).normalized;
-        GameObject warningLine = CreateWarningAimLine(transform.position, dashDir, 6.0f, 0.35f);
+        Vector2 startBodyPos = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
+        Vector2 dashDir = ((Vector2)player.position - startBodyPos).normalized;
+        GameObject warningLine = CreateWarningAimLine(startBodyPos, dashDir, 6.0f, 0.35f);
 
         yield return new WaitForSeconds(0.35f);
 
@@ -409,7 +411,8 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
             rb.linearVelocity = dashDir * (moveSpeed * 3.6f);
             elapsed += Time.deltaTime;
 
-            if (player != null && Vector2.Distance(transform.position, player.position) <= 2.2f)
+            Vector2 curBodyPos = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
+            if (player != null && Vector2.Distance(curBodyPos, player.position) <= 2.4f)
             {
                 var target = player.GetComponent<IDamageable>();
                 if (target != null) target.TakeDamage(Mathf.RoundToInt(meleeDamage * 1.25f));

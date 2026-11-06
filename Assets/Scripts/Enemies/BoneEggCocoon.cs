@@ -3,7 +3,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine.Rendering.Universal;
 
-[RequireComponent(typeof(SpriteRenderer), typeof(CircleCollider2D))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
 {
     public static event System.Action<Vector3> OnEggHatched;
@@ -13,7 +13,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
     [SerializeField] private int currentHealth;
 
     private SpriteRenderer sr;
-    private CircleCollider2D col;
+    private Collider2D col;
     private bool isDestroyed = false;
 
     private Sprite[] idleSprites;
@@ -33,13 +33,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
         // Kén phong ấn là vật thể phong ấn chuyển tiếp sang Boss thật, cố định 600 HP để đánh trúng là thấy máu tụt rõ rệt
         currentHealth = maxHealth;
         sr = GetComponent<SpriteRenderer>();
-        col = GetComponent<CircleCollider2D>();
         originalColor = sr.color;
-
-        // Collider can giua tam trung, ban kinh 2.0m rong rai
-        col.offset = new Vector2(0f, 0.35f);
-        col.radius = 0.85f;
-        col.isTrigger = false;
 
         // Layer Enemy (Layer 6) va Tag Enemy
         int enemyLayer = LayerMask.NameToLayer("Enemy");
@@ -48,6 +42,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
 
         sr.sortingOrder = 1500;
         LoadEggSprites();
+        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
         SetupGuidanceVisuals();
     }
 

@@ -342,13 +342,9 @@ public class Map3WaveSpawner : MonoBehaviour
         sr.sprite = spr;
         sr.sortingOrder = 1500;
 
-        var col = egg.AddComponent<CircleCollider2D>();
-        col.radius = 2.0f;
-        col.offset = Vector2.zero;
-        col.isTrigger = false;
-
         egg.AddComponent<AutoDepthSort>();
         egg.AddComponent<BoneEggCocoon>();
+        DynamicSpriteColliderSync.EnsureAttached(egg);
         return egg;
     }
 
@@ -375,11 +371,6 @@ public class Map3WaveSpawner : MonoBehaviour
         if (ctrl == null) ctrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Goblin/Goblin.controller");
 #endif
         anim.runtimeAnimatorController = ctrl;
-
-        var col = g.AddComponent<CapsuleCollider2D>();
-        col.size = new Vector2(0.8f, 1.3f);
-        col.offset = new Vector2(0f, 0.65f);
-        col.isTrigger = false;
 
         g.AddComponent<AutoDepthSort>();
         g.AddComponent<GoblinAI>();
@@ -411,11 +402,6 @@ public class Map3WaveSpawner : MonoBehaviour
 #endif
         anim.runtimeAnimatorController = ctrl;
 
-        var col = s.AddComponent<CapsuleCollider2D>();
-        col.size = new Vector2(0.9f, 2.0f);
-        col.offset = new Vector2(0f, 1.0f);
-        col.isTrigger = false;
-
         s.AddComponent<AutoDepthSort>();
         s.AddComponent<SkeletonAI>();
         EnemyHealthHelper.OnEnemySpawned(s);
@@ -445,11 +431,6 @@ public class Map3WaveSpawner : MonoBehaviour
         if (ctrl == null) ctrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/Slime/Slime.controller");
 #endif
         anim.runtimeAnimatorController = ctrl;
-
-        var col = sl.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(1.8f, 0.8f);
-        col.offset = new Vector2(0f, 0.4f);
-        col.isTrigger = false;
 
         sl.AddComponent<AutoDepthSort>();
         sl.AddComponent<SlimeAI>();
@@ -481,12 +462,6 @@ public class Map3WaveSpawner : MonoBehaviour
         if (ctrl == null) ctrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animation/SkeletonKing/SkeletonKing.controller");
 #endif
         anim.runtimeAnimatorController = ctrl;
-
-        var col = bk.AddComponent<CapsuleCollider2D>();
-        col.size = new Vector2(2.5f, 4.0f);
-        col.offset = new Vector2(0f, 2.0f);
-        col.direction = CapsuleDirection2D.Vertical;
-        col.isTrigger = false;
 
         bk.AddComponent<AutoDepthSort>();
         var boss = bk.AddComponent<SkeletonKingBossAI>();

@@ -73,6 +73,7 @@ public static class EnemyHealthHelper
     public static void OnEnemySpawned(GameObject enemy)
     {
         if (enemy == null) return;
+        DynamicSpriteColliderSync.EnsureAttached(enemy);
         if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.CursedMight))
         {
             var eh = enemy.GetComponent<IEnemyHealth>() ?? enemy.GetComponentInParent<IEnemyHealth>();

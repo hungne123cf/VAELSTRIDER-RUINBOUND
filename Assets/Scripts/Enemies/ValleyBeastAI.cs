@@ -52,16 +52,6 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 5000;
 
-        myCol = GetComponent<Collider2D>();
-        if (myCol == null)
-        {
-            var box = gameObject.AddComponent<BoxCollider2D>();
-            box.size = new Vector2(0.9f, 0.8f);
-            box.offset = new Vector2(0, 0);
-            myCol = box;
-        }
-        EnemyNavigationHelper.EnsureFrictionless(myCol);
-
         maxHealth = MapScalingManager.ScaleHealth(maxHealth);
         attackDamage = MapScalingManager.ScaleDamage(attackDamage);
         currentHealth = maxHealth;
@@ -81,6 +71,10 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable, IEnemyHealth
             tex.Apply();
             sr.sprite = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 16f);
         }
+
+        myCol = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        EnemyNavigationHelper.EnsureFrictionless(myCol);
+        EnemyCCCleanseSystem.EnsureAttached(gameObject);
     }
 
     void Start()

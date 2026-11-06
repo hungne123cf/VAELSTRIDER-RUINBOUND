@@ -316,8 +316,8 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             roomsRoot, 1, DungeonRoom.RoomType.Sanctuary,
             new Rect(-19f, -13f, 38f, 26f),
             "THUNG LŨNG TÀN TÍCH", "VALLEY RUIN SANCTUARY",
-            "Đi xuống Nhánh Nam (Đông Quái -> Trùm Gor'Mok) hoặc sang Nhánh Đông (Ít Quái -> Bóng Ma)!",
-            "Head South (Swarm -> Boss Gor'Mok) or East (Fast Path -> Shadow Boss)!",
+            "Đi xuống Nhánh Nam (Đông Quái) hoặc sang Nhánh Đông (Ít Quái) để quyết chiến Đại Trùm Đỏ Hút Máu Gor'Mok!",
+            "Head South (Swarm) or East (Fast Path) to battle Overlord Gor'Mok the Blood Beast!",
             null, null, null, null
         );
         hubRoom.isEntered = true;
@@ -334,7 +334,7 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             roomsRoot, 2, DungeonRoom.RoomType.SunkenHall,
             new Rect(-12f, -36f, 24f, 16f),
             "SẢNH THUNG LŨNG NAM (ĐÔNG QUÁI)", "SOUTH VALLEY HALL (SWARM)",
-            "Tiêu diệt 2 đợt bầy Huyết Thú & Hoàng Thú để mở cửa Huyết Điện!",
+            "Tiêu diệt 2 đợt bầy Huyết Thú & Hoàng Thú để mở cửa Huyết Điện Gor'Mok!",
             "Purge 2 waves of Blood Monsters & Valley Beasts!",
             bS1_in, bS1_out, bS2_in,
             r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.SwarmManyMonsters))
@@ -344,13 +344,13 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             roomsRoot, 3, DungeonRoom.RoomType.TitanSanctum,
             new Rect(-14f, -64f, 28f, 22f),
             "HUYẾT ĐIỆN ĐẠI TRÙM GOR'MOK", "SANCTUM OF OVERLORD GOR'MOK",
-            "ĐẠI CHIẾN BOSS MAP 2: GOR'MOK - HUYẾT THÚ CỔ THỤ!",
+            "ĐẠI CHIẾN BOSS MAP 2: GOR'MOK - HUYẾT THÚ CỔ THỤ HÚT MÁU!",
             "MAP 2 BOSS BATTLE: GOR'MOK THE ANCIENT BLOOD BEAST!",
             bS2_in, null, null,
             r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.GorMokBloodLord, isMap3: false))
         ));
 
-        // --- LỐI ĐI 2: NHÁNH ĐÔNG (+X) — ÍT QUÁI TINH ANH -> ĐẠI TRÙM BÓNG MA BẢN NGÃ ---
+        // --- LỐI ĐI 2: NHÁNH ĐÔNG (+X) — ÍT QUÁI TINH ANH -> ĐẠI TRÙM GỐC MAP 2: GOR'MOK ---
         var bE1_in  = CreateBarrier(barriersRoot, new Vector3(26f, 0f, 0f), true, 8.2f, "Barrier_E1_In");
         var bE1_out = CreateBarrier(barriersRoot, new Vector3(44f, 0f, 0f), true, 8.2f, "Barrier_E1_Out");
         var bE2_in  = CreateBarrier(barriersRoot, new Vector3(50f, 0f, 0f), true, 8.2f, "Barrier_E2_Boss");
@@ -359,8 +359,8 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             roomsRoot, 4, DungeonRoom.RoomType.CursedCrypt,
             new Rect(26f, -10f, 18f, 20f),
             "HÀNH LANG ĐÔNG (ÍT QUÁI - ĐƯỜNG NHANH)", "EAST HALL (LOW MONSTERS - FAST PATH)",
-            "Hạ gục toán hộ vệ tinh nhuệ để tiến thẳng vào Điện Thờ!",
-            "Defeat the elite guard squad to reach the Boss Sanctum!",
+            "Hạ gục toán hộ vệ tinh nhuệ để tiến thẳng vào Huyết Điện Gor'Mok!",
+            "Defeat the elite guard squad to reach Overlord Gor'Mok's Sanctum!",
             bE1_in, bE1_out, bE2_in,
             r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.EliteFewMonsters))
         ));
@@ -368,11 +368,11 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         mgr.rooms.Add(CreateCustomRoom(
             roomsRoot, 5, DungeonRoom.RoomType.TitanSanctum,
             new Rect(50f, -12f, 24f, 24f),
-            "ĐIỆN THỜ BÓNG MA & HUYẾT THÚ", "SHADOW & BLOOD SANCTUM",
-            "ĐẠI CHIẾN TRÙM NHÁNH ĐÔNG: BÓNG MA BẢN NGÃ!",
-            "EAST ROUTE BOSS: SHADOW DOPPELGANGER!",
+            "HUYẾT ĐIỆN ĐẠI TRÙM GOR'MOK (ĐÔNG)", "EAST SANCTUM OF OVERLORD GOR'MOK",
+            "ĐẠI CHIẾN BOSS MAP 2: GOR'MOK - HUYẾT THÚ CỔ THỤ HÚT MÁU!",
+            "MAP 2 BOSS BATTLE: GOR'MOK THE ANCIENT BLOOD BEAST!",
             bE2_in, null, null,
-            r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.ShadowDoppelganger, isMap3: false))
+            r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.GorMokBloodLord, isMap3: false))
         ));
     }
 
@@ -600,8 +600,8 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             roomsRoot, 1, DungeonRoom.RoomType.Sanctuary,
             new Rect(-16f, -11f, 32f, 22f),
             "ĐẢO CỔ KÝ ỨC", "FORGOTTEN ISLAND SANCTUARY",
-            "Đi lên Cầu Bắc (Đông Quái -> Chúa Tể Nhện) hoặc sang Cầu Đông (Ít Quái -> Bóng Ma)!",
-            "Head North (Swarm -> Spider Lord) or East (Fast Path -> Shadow Boss)!",
+            "Đi lên Cầu Bắc (Đông Quái) hoặc sang Cầu Đông (Ít Quái) để quyết chiến Chúa Tể Nhện Cổ Đại!",
+            "Head North (Swarm) or East (Fast Path) to battle the Ancient Spider Lord!",
             null, null, null, null
         );
         hubRoom.isEntered = true;
@@ -634,7 +634,7 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.AncientSpiderKing, isMap3: true))
         ));
 
-        // --- LỐI ĐI 2: NHÁNH ĐÔNG (+X) — ÍT QUÁI TINH ANH -> ĐẠI TRÙM BÓNG MA BẢN NGÃ ---
+        // --- LỐI ĐI 2: NHÁNH ĐÔNG (+X) — ÍT QUÁI TINH ANH -> ĐẠI TRÙM GỐC MAP 3: CHÚA TỂ NHỆN CỔ ĐẠI ---
         var bE1_in  = CreateBarrier(barriersRoot, new Vector3(23f, 0f, 0f), true, 8.2f, "Barrier_M3_E1_In");
         var bE1_out = CreateBarrier(barriersRoot, new Vector3(41f, 0f, 0f), true, 8.2f, "Barrier_M3_E1_Out");
         var bE2_in  = CreateBarrier(barriersRoot, new Vector3(47f, 0f, 0f), true, 8.2f, "Barrier_M3_E2_Boss");
@@ -643,8 +643,8 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             roomsRoot, 4, DungeonRoom.RoomType.CursedCrypt,
             new Rect(23f, -10f, 18f, 20f),
             "ĐẢO ĐÔNG (ÍT QUÁI - ĐƯỜNG NHANH)", "EAST ISLE (LOW MONSTERS - FAST PATH)",
-            "Hạ gục nhanh kỵ sĩ xương tinh nhuệ để tiến vào Đảo Trùm!",
-            "Swiftly slay the elite bone knights to enter the Boss Isle!",
+            "Hạ gục nhanh kỵ sĩ xương tinh nhuệ để tiến vào Thánh Đảo Chúa Tể Nhện!",
+            "Swiftly slay the elite bone knights to enter the Spider Lord's Isle!",
             bE1_in, bE1_out, bE2_in,
             r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.EliteFewMonsters))
         ));
@@ -652,11 +652,11 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         mgr.rooms.Add(CreateCustomRoom(
             roomsRoot, 5, DungeonRoom.RoomType.TitanSanctum,
             new Rect(47f, -12f, 24f, 24f),
-            "ĐẢO BÓNG MA BẢN NGÃ", "SHADOW DOPPELGANGER ISLE",
-            "ĐẠI CHIẾN TRÙM NHÁNH ĐÔNG: BÓNG MA BẢN NGÃ TỐI THƯỢNG!",
-            "EAST ROUTE BOSS: SUPREME SHADOW DOPPELGANGER!",
+            "THÁNH ĐẢO CHÚA TỂ NHỆN (ĐÔNG)", "EAST SANCTUM OF THE SPIDER LORD",
+            "PHÁ VỠ PHONG ẤN TRỨNG KÉN ĐỂ TRIỆU HỒI CHÚA TỂ NHỆN CỔ ĐẠI!",
+            "SHATTER THE COCOON SEAL TO AWAKEN THE ANCIENT SPIDER LORD!",
             bE2_in, null, null,
-            r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.ShadowDoppelganger, isMap3: true))
+            r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.AncientSpiderKing, isMap3: true))
         ));
     }
 
