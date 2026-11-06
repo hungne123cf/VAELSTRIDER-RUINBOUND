@@ -32,10 +32,8 @@ public class EnemyFreezeEffect : MonoBehaviour
         // 1. Tuyệt đối không đóng băng Player
         if (target.CompareTag("Player") || target.GetComponent<PlayerHealth>() != null || target.GetComponentInParent<PlayerHealth>() != null) return;
 
-        // 2. Không đóng băng vật thể môi trường (Props, Chests, Barrels, Crystals, Eggs, Obstacles)
+        // 2. Không đóng băng vật thể môi trường (Props, Chests, Eggs, Obstacles)
         if (target.GetComponent<BreakableProp>() != null || target.GetComponentInParent<BreakableProp>() != null) return;
-        if (target.GetComponent<ExplosiveBarrel>() != null || target.GetComponentInParent<ExplosiveBarrel>() != null) return;
-        if (target.GetComponent<IceStalagmiteCrystal>() != null || target.GetComponentInParent<IceStalagmiteCrystal>() != null) return;
         if (target.GetComponent<TreasureChest>() != null || target.GetComponentInParent<TreasureChest>() != null) return;
         if (target.GetComponent<BoneEggObstacle>() != null || target.GetComponentInParent<BoneEggObstacle>() != null) return;
 

@@ -89,7 +89,6 @@ public class GameAutoBootstrap : MonoBehaviour
             MagmaCalamityHazardManager.EnsureManager();
             AcidDownpourHazardManager.EnsureManager();
             FrostfallBlizzardHazardManager.EnsureManager();
-            MapEnvironmentEnhancer.EnsureEnhancements();
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 2 (Valley Ruin)! Đã khởi tạo Hệ thống Level Farm & Lõi TFT cùng hiệu ứng nguyên tố.");
             return;
         }
@@ -127,7 +126,6 @@ public class GameAutoBootstrap : MonoBehaviour
             MagmaCalamityHazardManager.EnsureManager();
             AcidDownpourHazardManager.EnsureManager();
             FrostfallBlizzardHazardManager.EnsureManager();
-            MapEnvironmentEnhancer.EnsureEnhancements();
             // Map 3 hoan toan do Map3WaveSpawner quan ly (Goblin, Skeleton, Slime, Skeleton King Boss)
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Forgotten Memories)! Tải toàn diện hệ thống Map 3.");
             return;
@@ -200,7 +198,6 @@ public class GameAutoBootstrap : MonoBehaviour
         AcidDownpourHazardManager.EnsureManager();
         FrostfallBlizzardHazardManager.EnsureManager();
 
-        MapEnvironmentEnhancer.EnsureEnhancements();
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
     }
 
