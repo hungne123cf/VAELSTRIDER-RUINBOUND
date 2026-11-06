@@ -503,7 +503,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - mage.barrierDamageReduction)));
         }
 
-        // Giảm sát thương theo Giáp căn bản của Tướng + Trang bị đang mặc + Khảm ngọc + Trang phục + Lõi Nâng Cấp (tối đa giảm 65% để người chơi luôn nhận sát thương thực tế)
+        // Giảm sát thương theo Giáp căn bản của Tướng + Trang bị đang mặc + Khảm ngọc + Trang phục + Lõi Nâng Cấp (No limit, tính theo công thức giảm sát thương thực: Reduction = Def / (Def + 100))
         string curCharId = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         var cData = CharacterManager.EnsureInstance()?.GetCharacter(curCharId);
         int baseDef = cData != null ? cData.baseDefense : 10;
@@ -512,10 +512,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out int sockDef, out _, out _, out _, out _);
         HeroCostumeManager.GetEquippedCostumeBonus(curCharId, out _, out _, out float costumeDef, out _);
         int augDef = AugmentManager.Instance != null ? AugmentManager.Instance.GetAugDef() : 0;
-        float totalDef = Mathf.Min(65f, baseDef + armorDef + sockDef + costumeDef + augDef);
+        float totalDef = Mathf.Max(0f, baseDef + armorDef + sockDef + costumeDef + augDef);
         if (totalDef > 0)
         {
-            damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - totalDef / 100f)));
+            float reductionPercent = totalDef / (totalDef + 100f);
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - reductionPercent)));
         }
 
         // Lõi Bản Thể Thủy Tinh (GlassCannonTitan): Nhận thêm +30% Sát thương từ kẻ địch

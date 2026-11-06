@@ -358,13 +358,23 @@ public class PlayerStatPanelUI : MonoBehaviour
             critTxt.text = Mathf.RoundToInt(cCombat.TotalCritChance * 100f) + "%";
             magTxt.text  = cCombat.BonusMagicDamage.ToString("N0");
             lsTxt.text   = FormatPercent(cCombat.PhysLifestealPercent);
-            cdrTxt.text  = cCombat.SkillCooldown.ToString("0.0") + "s";
+            // Hiển thị % Giảm Hồi Chiêu (CDR): Bắt đầu từ 0%, nhặt lõi cộng dồn lên 10%, 20%, 30%...
+            cdrTxt.text  = Mathf.RoundToInt(cCombat.TotalCDRPercent) + "%";
         }
 
         if (cCtrl != null) moveTxt.text = cCtrl.MoveSpeed.ToString("0.0");
 
-        ArmorShopUI.GetEquippedArmorBonus(out _, out float defPercent, out _);
-        defTxt.text = Mathf.RoundToInt(defPercent) + "%";
+        // Giáp hiển thị tổng hợp: Giáp cơ bản của tướng đã chọn + Đồ trang bị + Lõi nâng cấp
+        string curCharId = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        var cData = CharacterManager.EnsureInstance()?.GetCharacter(curCharId);
+        int baseDef = cData != null ? cData.baseDefense : 10;
+        ArmorShopUI.GetEquippedArmorBonus(out _, out float armorDef, out _);
+        if (armorDef > 0f && armorDef <= 1f) armorDef *= 100f;
+        EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out int sockDef, out _, out _, out _, out _);
+        HeroCostumeManager.GetEquippedCostumeBonus(curCharId, out _, out _, out float costumeDef, out _);
+        int augDef = AugmentManager.Instance != null ? AugmentManager.Instance.GetAugDef() : 0;
+        int totalDisplayDef = Mathf.RoundToInt(baseDef + armorDef + sockDef + costumeDef + augDef);
+        defTxt.text = $"{totalDisplayDef}%";
     }
 
     // Hút máu có thể lưu dạng 0.1 hoặc 10 -> chuẩn hóa về %

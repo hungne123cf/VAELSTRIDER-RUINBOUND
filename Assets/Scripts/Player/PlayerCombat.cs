@@ -178,12 +178,13 @@ public class PlayerCombat : MonoBehaviour
 
     public float BaseCritChance => baseCritChance;
     public float BonusCritChance => bonusCritChance;
-    public float TotalCritChance => Mathf.Clamp(baseCritChance + bonusCritChance + augBonusCrit, 0.05f, 0.95f);
+    // NO LIMIT: Tỉ lệ chí mạng không bị chặn ở 95%, người chơi có thể vượt 100% thoải mái
+    public float TotalCritChance => Mathf.Max(0.05f, baseCritChance + bonusCritChance + augBonusCrit);
     public float CritMultiplier => critMultiplier + augBonusCritDmg;
 
     public bool RollCritical(float extraChance, out float multiplier)
     {
-        float totalChance = Mathf.Clamp(TotalCritChance + extraChance, 0.05f, 0.95f);
+        float totalChance = Mathf.Max(0.05f, TotalCritChance + extraChance);
         bool isCrit = UnityEngine.Random.value < totalChance;
         multiplier = isCrit ? CritMultiplier : 1.0f;
         return isCrit;
@@ -215,7 +216,8 @@ public class PlayerCombat : MonoBehaviour
     private float augBonusAttackSpeed = 0f;
     private float comboResetMult   = 1f;
 
-    public float AttackSpeedMultiplier => Mathf.Clamp(1.0f + augBonusAttackSpeed, 0.5f, 2.5f);
+    // NO LIMIT: Tốc độ đánh không bị trần 2.5x, cộng dồn vô hạn
+    public float AttackSpeedMultiplier => Mathf.Max(0.5f, 1.0f + augBonusAttackSpeed);
 
     public void ApplyAugmentBonus(int bonusAtk, float bonusCrit, float bonusCritDmg,
                                    float bonusLifesteal, float bonusSpellVamp, float bonusCDR,
@@ -263,9 +265,19 @@ public class PlayerCombat : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         playerHealth = GetComponent<PlayerHealth>();
 
-        // Bat buoc ap dung chi so can ban Hardcore chuan (Vaelstrider = 18 + 28, Cooldown = 18s)
-        attack1Damage = 18;
-        attack2Damage = 28;
+        // Tự động nạp sát thương cơ bản và thời gian hồi chiêu chuẩn theo CharacterData của tướng được chọn
+        var charMgr = CharacterManager.EnsureInstance();
+        var charData = charMgr != null ? charMgr.GetSelectedCharacter() : null;
+        if (charData != null && charData.baseAttack > 0)
+        {
+            attack1Damage = charData.baseAttack;
+            attack2Damage = Mathf.RoundToInt(charData.baseAttack * 1.4f);
+        }
+        else
+        {
+            attack1Damage = 18;
+            attack2Damage = 28;
+        }
         skillCooldown = 18.0f;
 
         AutoAlignCombat();
@@ -373,6 +385,7 @@ public class PlayerCombat : MonoBehaviour
         bonusAttackDamage = bonusPhysAtk + bonusMagicAtk + bonusTrueAtk;
 
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out lifestealPercent, out float cdReduc, out _, out _);
+        socketCdReduc = cdReduc;
         float upUltiCd = 0f;
         var upgradeMgr = PlayerUpgradeManager.EnsureInstance();
         if (upgradeMgr != null)
@@ -419,6 +432,10 @@ public class PlayerCombat : MonoBehaviour
     public int TotalAttackDamage => attack1Damage + bonusAttackDamage;
     public Vector2 BodyCenterOffset => bodyCenterOffset;
     public float SkillCooldown => skillCooldown;
+
+    // Tổng % Giảm Hồi Chiêu (CDR): Bắt đầu từ 0%, cộng dồn lũy tiến khi nhặt lõi nâng cấp / khảm ngọc
+    public float TotalCDRPercent => Mathf.Max(0f, (augBonusCDR + (socketCdReduc > 0f ? socketCdReduc : 0f)) * 100f);
+    private float socketCdReduc = 0f;
 
     public void SetBaseAttackDamage(int hit1, int hit2)
     {

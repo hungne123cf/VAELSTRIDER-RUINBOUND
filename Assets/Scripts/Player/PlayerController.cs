@@ -297,6 +297,15 @@ public class PlayerController : MonoBehaviour
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         }
         animator = GetComponent<Animator>();
+
+        // Tự động nạp tốc độ cơ bản chuẩn theo CharacterData của tướng đã chọn (Dune: 4.8, Ronin: 5.4, Titan: 4.0, ...)
+        var charMgr = CharacterManager.EnsureInstance();
+        var charData = charMgr != null ? charMgr.GetSelectedCharacter() : null;
+        if (charData != null && charData.baseSpeed > 0f)
+        {
+            moveSpeed = charData.baseSpeed;
+        }
+
         baseMoveSpeed = moveSpeed;
 
         ArmorShopUI.GetEquippedArmorBonus(out int _, out float _, out float armorSpd);
