@@ -40,6 +40,7 @@ public class AugmentManager : MonoBehaviour
 
     // Tích lũy bonus augment
     private int augBonusAtk         = 0;
+    private int augBonusAP          = 0;
     private int augBonusHp          = 0;
     private float augBonusSpeed     = 0f;
     private float augBonusAttackSpeed = 0f; // fraction (0.15 = +15% Tốc Độ Đánh thực tế)
@@ -327,6 +328,7 @@ public class AugmentManager : MonoBehaviour
         _timedAtkBonus.Clear();
         _timedRegenCoroutines.Clear();
         augBonusAtk = 0;
+        augBonusAP = 0;
         augBonusHp = 0;
         augBonusSpeed = 0f;
         augBonusAttackSpeed = 0f;
@@ -856,6 +858,24 @@ public class AugmentManager : MonoBehaviour
 
         switch (augment.type)
         {
+            case AugmentDatabase.AugmentType.BonusAbilityPower:
+                augBonusAP += Mathf.RoundToInt(augment.value);
+                FlushStatsToCombat();
+                break;
+
+            case AugmentDatabase.AugmentType.ArcaneWand:
+                augBonusAP += Mathf.RoundToInt(augment.value);
+                augBonusCDR += 0.10f;
+                FlushStatsToCombat();
+                break;
+
+            case AugmentDatabase.AugmentType.RunicEmpowerment:
+                augBonusAP += Mathf.RoundToInt(augment.value);
+                augBonusSpellVamp += 0.15f;
+                augBonusCDR += 0.15f;
+                FlushStatsToCombat();
+                break;
+
             case AugmentDatabase.AugmentType.BonusAttack:
                 augBonusAtk += Mathf.RoundToInt(augment.value);
                 FlushStatsToCombat();
@@ -977,7 +997,7 @@ public class AugmentManager : MonoBehaviour
                 break;
 
             case AugmentDatabase.AugmentType.ArcaneOverdrive:
-                augBonusAtk += Mathf.RoundToInt(augment.value);
+                augBonusAP += Mathf.RoundToInt(augment.value);
                 augBonusSpellVamp += 0.12f;
                 augBonusCDR += 0.25f;
                 FlushStatsToCombat();
@@ -1385,6 +1405,7 @@ public class AugmentManager : MonoBehaviour
         return total;
     }
 
+    public int GetAugBonusAP()        => augBonusAP;
     public int GetAugBonusHp()        => augBonusHp;
     public float GetAugBonusSpeed()   => augBonusSpeed;
     public float GetAugCrit()         => augBonusCrit;
@@ -1416,7 +1437,8 @@ public class AugmentManager : MonoBehaviour
             bonusArmPenPct: 0f,
             bonusMagPen: 0,
             bonusMagPenPct: 0f,
-            bonusAttackSpeed: GetAugAttackSpeed()
+            bonusAttackSpeed: GetAugAttackSpeed(),
+            bonusAP: GetAugBonusAP()
         );
     }
 

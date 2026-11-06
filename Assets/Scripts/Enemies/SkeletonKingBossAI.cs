@@ -220,36 +220,68 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         ClampInsideRoomBounds();
     }
 
-    private void ClampInsideRoomBounds()
+    public static Vector3 ClampToValidArena(Vector3 pos, float padding = 1.0f)
     {
-        if (isDead) return;
-        float padding = 1.2f;
-        Vector3 pos = transform.position;
+        var builder = MultiPathMapExpansionBuilder.Instance;
+        if (builder != null && builder.WalkableRects != null && builder.WalkableRects.Count > 0)
+        {
+            foreach (var r in builder.WalkableRects)
+            {
+                if (pos.x >= r.xMin + padding && pos.x <= r.xMax - padding &&
+                    pos.y >= r.yMin + padding && pos.y <= r.yMax - padding)
+                {
+                    return pos;
+                }
+            }
+
+            RectInt closestRect = builder.WalkableRects[0];
+            float minDistSqr = float.MaxValue;
+            foreach (var r in builder.WalkableRects)
+            {
+                Vector2 center = new Vector2(r.xMin + r.width * 0.5f, r.yMin + r.height * 0.5f);
+                float distSqr = ((Vector2)pos - center).sqrMagnitude;
+                if (distSqr < minDistSqr)
+                {
+                    minDistSqr = distSqr;
+                    closestRect = r;
+                }
+            }
+
+            float cx = Mathf.Clamp(pos.x, closestRect.xMin + padding, closestRect.xMax - padding);
+            float cy = Mathf.Clamp(pos.y, closestRect.yMin + padding, closestRect.yMax - padding);
+            return new Vector3(cx, cy, pos.z);
+        }
+
         var roomMgr = DungeonRoomManager.Instance;
         if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
         {
             Rect b = roomMgr.currentRoom.roomBounds;
-            float clampedX = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
-            float clampedY = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
-
-            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
-            {
-                transform.position = new Vector3(clampedX, clampedY, pos.z);
-                if (rb != null) rb.linearVelocity = Vector2.zero;
-            }
+            float cx = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
+            float cy = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
+            return new Vector3(cx, cy, pos.z);
         }
-        else if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
+
+        if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
         {
             Vector2 min = MapBounds.Instance.MinBounds;
             Vector2 max = MapBounds.Instance.MaxBounds;
-            float clampedX = Mathf.Clamp(pos.x, min.x + padding, max.x - padding);
-            float clampedY = Mathf.Clamp(pos.y, min.y + padding, max.y - padding);
+            float cx = Mathf.Clamp(pos.x, min.x + padding, max.x - padding);
+            float cy = Mathf.Clamp(pos.y, min.y + padding, max.y - padding);
+            return new Vector3(cx, cy, pos.z);
+        }
 
-            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
-            {
-                transform.position = new Vector3(clampedX, clampedY, pos.z);
-                if (rb != null) rb.linearVelocity = Vector2.zero;
-            }
+        return pos;
+    }
+
+    private void ClampInsideRoomBounds()
+    {
+        if (isDead) return;
+        Vector3 pos = transform.position;
+        Vector3 clamped = ClampToValidArena(pos, 1.2f);
+        if (Mathf.Abs(pos.x - clamped.x) > 0.01f || Mathf.Abs(pos.y - clamped.y) > 0.01f)
+        {
+            transform.position = new Vector3(clamped.x, clamped.y, pos.z);
+            if (rb != null) rb.linearVelocity = Vector2.zero;
         }
     }
 
@@ -528,7 +560,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
             playerFaceDir = (player.localScale.x >= 0) ? Vector3.right : Vector3.left;
         }
 
-        Vector3 ambushPos = playerPos - playerFaceDir * 1.8f;
+        Vector3 ambushPos = ClampToValidArena(playerPos - playerFaceDir * 1.8f, 1.2f);
         transform.position = ambushPos;
 
         // Cảnh báo vệt chém liêm đỏ thẫm
@@ -678,14 +710,14 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     {
         if (currentBossPhase == 2)
         {
-            MiniSpiderMinion.Spawn(transform.position + Vector3.left * 2.5f);
-            MiniSpiderMinion.Spawn(transform.position + Vector3.right * 2.5f);
+            MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.left * 2.0f, 0.8f));
+            MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.right * 2.0f, 0.8f));
         }
         else if (currentBossPhase == 3)
         {
-            MiniSpiderMinion.Spawn(transform.position + Vector3.left * 2.5f);
-            MiniSpiderMinion.Spawn(transform.position + Vector3.right * 2.5f);
-            MiniSpiderMinion.Spawn(transform.position + Vector3.up * 2.0f);
+            MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.left * 2.0f, 0.8f));
+            MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.right * 2.0f, 0.8f));
+            MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.up * 1.8f, 0.8f));
         }
     }
 

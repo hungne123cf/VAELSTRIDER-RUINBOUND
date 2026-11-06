@@ -14,6 +14,9 @@ public static class AugmentDatabase
     {
         // ─── Chỉ số cơ bản ───
         BonusAttack,
+        BonusAbilityPower,   // Cổ Thư Bí Thuật (+AP)
+        ArcaneWand,          // Quyền Trượng Cổ Đại (+AP & +CDR)
+        RunicEmpowerment,    // Thần Chú Vĩnh Hằng (+AP, +SpellVamp, +CDR)
         BonusHealth,
         BonusSpeed,
         BonusCritChance,
@@ -147,6 +150,16 @@ public static class AugmentDatabase
         // ─── BẬC BẠC (COMMON / SILVER TIER - ✦) ──────────────────────────────────
         // =========================================================================
         new AugmentData {
+            type = AugmentType.BonusAbilityPower,
+            nameVN = "Cổ Thư Bí Thuật",      nameEN = "Ancient Grimoire",
+            descVN = "Tăng <color=#C084FC><b>+{v} Sức Mạnh Phép (AP)</b></color> cho đòn đánh và kỹ năng phép thuật.",
+            descEN = "Gain <color=#C084FC><b>+{v} Ability Power (AP)</b></color> for spells and magical strikes.",
+            flavorVN = "«Trang sách rách nát khắc ghi bí ngữ cấm kỵ của cổ nhân.»",
+            flavorEN = "«Tattered pages inscribed with the forbidden lexicon of the ancients.»",
+            emoji = "📖", value = 15f, duration = -1f,
+            cardColor = new Color(0.75f, 0.45f, 1f), rarity = AugmentData.Rarity.Common
+        },
+        new AugmentData {
             type = AugmentType.BonusAttack,
             nameVN = "Lưỡi Dao Xé Rách",      nameEN = "Lacerating Edge",
             descVN = "Tăng <color=#FFEAA7><b>+{v} Sát Thương Vật Lý</b></color> và nhận thêm <color=#55EFC4><b>+8% Tốc Độ Đánh</b></color>.",
@@ -251,6 +264,16 @@ public static class AugmentDatabase
         // ─── BẬC VÀNG (RARE / GOLD TIER - ✦✦) ────────────────────────────────────
         // =========================================================================
         new AugmentData {
+            type = AugmentType.ArcaneWand,
+            nameVN = "Quyền Trượng Cổ Đại",  nameEN = "Ancient Scepter",
+            descVN = "Tăng <color=#C084FC><b>+{v} Sức Mạnh Phép (AP)</b></color> và nhận thêm <color=#74B9FF><b>+10% Giảm Hồi Chiêu (CDR)</b></color>.",
+            descEN = "Gain <color=#C084FC><b>+{v} Ability Power (AP)</b></color> and <color=#74B9FF><b>+10% Cooldown Reduction (CDR)</b></color>.",
+            flavorVN = "«Đầu trượng đính viên ngọc ma thuật tinh khiết phát quang rực rỡ.»",
+            flavorEN = "«Crowned with a brilliant prism radiating pure arcane resonance.»",
+            emoji = "🔮", value = 30f, duration = -1f,
+            cardColor = new Color(0.85f, 0.40f, 1f), rarity = AugmentData.Rarity.Rare
+        },
+        new AugmentData {
             type = AugmentType.BerserkerMode,
             nameVN = "Cuồng Bạo Bất Tận",   nameEN = "Endless Berserk",
             descVN = "Mỗi mạng hạ gục nhận vĩnh viễn <color=#FFEAA7><b>+{v} Sát Thương</b></color> (tối đa 25 tầng). Ở tối đa tầng, nhận thêm <color=#55EFC4><b>+25% Tốc Đánh</b></color>.",
@@ -354,6 +377,16 @@ public static class AugmentDatabase
         // =========================================================================
         // ─── BẬC KIM CƯƠNG / LĂNG KÍNH (PRISMATIC TIER - ✦✦✦) ────────────────────
         // =========================================================================
+        new AugmentData {
+            type = AugmentType.RunicEmpowerment,
+            nameVN = "Thần Chú Vĩnh Hằng",   nameEN = "Eternal Incantation",
+            descVN = "Tăng cực đại <color=#C084FC><b>+{v} Sức Mạnh Phép (AP)</b></color>, đồng thời nhận thêm <color=#55EFC4><b>+15% Hút Máu Phép</b></color> và <color=#74B9FF><b>+15% Giảm Hồi Chiêu (CDR)</b></color>.",
+            descEN = "Grant massive <color=#C084FC><b>+{v} Ability Power (AP)</b></color>, <color=#55EFC4><b>+15% Spell Vamp</b></color> and <color=#74B9FF><b>+15% Cooldown Reduction</b></color>.",
+            flavorVN = "«Quyền năng tối thượng của các vì tinh tú kết tụ trong linh hồn.»",
+            flavorEN = "«The supreme cadence of the celestial stars bound to your very soul.»",
+            emoji = "✨", value = 60f, duration = -1f,
+            cardColor = new Color(0.80f, 0.35f, 1f), rarity = AugmentData.Rarity.Epic
+        },
         new AugmentData {
             type = AugmentType.DemonicPact,
             nameVN = "Khế Ước Quỷ Dữ",       nameEN = "Demonic Pact",
@@ -873,6 +906,8 @@ public static class AugmentDatabase
     {
         switch (type)
         {
+            case AugmentType.RunicEmpowerment:
+            case AugmentType.ArcaneWand:
             case AugmentType.DemonicPact:
             case AugmentType.UndyingSovereign:
             case AugmentType.CelestialCascade:

@@ -526,7 +526,7 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             }
         }
 
-        float thickness = 1.6f;
+        float thickness = 2.4f;
         CreateHorizontalWalls(wallGroup, northByY, +thickness * 0.5f, thickness);
         CreateHorizontalWalls(wallGroup, southByY, -thickness * 0.5f, thickness);
         CreateVerticalWalls(wallGroup, eastByX, +thickness * 0.5f, thickness);
@@ -580,6 +580,8 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         GameObject w = new GameObject("IslandBoundaryWall");
         w.transform.SetParent(parent, false);
         w.transform.position = new Vector3(center.x, center.y, 0f);
+        var rb = w.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Static;
         var box = w.AddComponent<BoxCollider2D>();
         box.size = size;
     }

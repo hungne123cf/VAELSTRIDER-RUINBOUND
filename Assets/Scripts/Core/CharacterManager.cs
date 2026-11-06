@@ -251,6 +251,18 @@ public class CharacterManager : MonoBehaviour
         return "vael";
     }
 
+    /// <summary>
+    /// Kiểm tra xem nhân vật có phải là Tướng hệ Sức Mạnh Phép (AP) hay không.
+    /// Hiện tại gồm có: Pháp Sư Tinh Tú (Celestial Mage) và Lam Kiếm Sĩ (Azure Blade).
+    /// </summary>
+    public static bool IsAbilityPowerHero(string heroId)
+    {
+        if (string.IsNullOrEmpty(heroId)) return false;
+        string lower = heroId.ToLower();
+        return lower == "azure" || lower == "azureblade" || lower == "player3" || lower == CHAR_AZURE_BLADE.ToLower() ||
+               lower == "mage" || lower == "celestialmage" || lower == "player6" || lower == CHAR_CELESTIAL_MAGE.ToLower();
+    }
+
     public string GetSelectedCharacterId()
     {
         string selected = PlayerPrefs.GetString(SELECTED_CHAR_KEY, "");

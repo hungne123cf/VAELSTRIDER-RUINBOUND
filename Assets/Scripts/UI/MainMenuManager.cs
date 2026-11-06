@@ -5692,16 +5692,16 @@ public class MainMenuManager : MonoBehaviour
         // 4. Stat Gauges
         if (cData != null)
         {
-            bool isMage = (heroId == CharacterManager.CHAR_CELESTIAL_MAGE || heroId.ToLower().Contains("mage") || heroId.ToLower().Contains("player6"));
+            bool isApHero = CharacterManager.IsAbilityPowerHero(heroId);
 
             // 4a. Sinh Lực (HP)
             if (carouselHpValText != null) carouselHpValText.text = $"{cData.baseHealth} / 250";
             if (carouselHpBarFill != null) carouselHpBarFill.fillAmount = Mathf.Clamp01(cData.baseHealth / 250f);
 
-            // 4b. Tấn Công (ATK) vs Sức Mạnh Phép (AP) - Pháp sư dùng Phép AP thay vì ATK
+            // 4b. Tấn Công (ATK) vs Sức Mạnh Phép (AP) - Tướng AP dùng Phép AP thay vì ATK
             if (carouselAtkLabelText != null)
             {
-                if (isMage)
+                if (isApHero)
                 {
                     carouselAtkLabelText.text = isVN ? "SỨC MẠNH PHÉP (AP)" : "MAGIC POWER (AP)";
                     carouselAtkLabelText.color = new Color(0.88f, 0.52f, 1f, 1f); // Tím Arcane
@@ -5715,7 +5715,7 @@ public class MainMenuManager : MonoBehaviour
 
             if (carouselAtkBarFill != null)
             {
-                if (isMage)
+                if (isApHero)
                 {
                     Sprite amethystSp = Resources.Load<Sprite>("UI/Soulslike/Bar_Amethyst_Fill");
                     if (amethystSp != null) carouselAtkBarFill.sprite = amethystSp;
@@ -5764,10 +5764,10 @@ public class MainMenuManager : MonoBehaviour
             if (carouselHeroStatsText != null)
             {
                 string hpLabel = isVN ? "MÁU" : "HP";
-                string atkLabel = isMage ? (isVN ? "PHÉP" : "AP") : (isVN ? "CÔNG" : "ATK");
+                string atkLabel = isApHero ? (isVN ? "PHÉP" : "AP") : (isVN ? "CÔNG" : "ATK");
                 string defLabel = isVN ? "GIÁP" : "DEF";
                 string spdLabel = isVN ? "TỐC ĐỘ" : "SPD";
-                carouselHeroStatsText.text = $"<color=#FF5555><b>[{hpLabel}]</b></color> {cData.baseHealth}    <color={(isMage ? "#C084FC" : "#FFB040")}><b>[{atkLabel}]</b></color> {cData.baseAttack}    <color=#38BDF8><b>[{defLabel}]</b></color> {totalArmor}%    <color=#50E0FF><b>[{spdLabel}]</b></color> {cData.baseSpeed:F1}";
+                carouselHeroStatsText.text = $"<color=#FF5555><b>[{hpLabel}]</b></color> {cData.baseHealth}    <color={(isApHero ? "#C084FC" : "#FFB040")}><b>[{atkLabel}]</b></color> {cData.baseAttack}    <color=#38BDF8><b>[{defLabel}]</b></color> {totalArmor}%    <color=#50E0FF><b>[{spdLabel}]</b></color> {cData.baseSpeed:F1}";
             }
         }
 

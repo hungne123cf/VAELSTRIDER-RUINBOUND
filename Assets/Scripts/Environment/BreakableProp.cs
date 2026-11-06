@@ -152,6 +152,11 @@ public class BreakableProp : MonoBehaviour, IDamageable
 #if UNITY_EDITOR
         if (sr.sprite == null) sr.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
 #endif
+        // Fallback cuoi cung de 100% khong bao gio bi tang hinh tren moi nen tang Android APK
+        if (sr.sprite == null)
+        {
+            sr.sprite = Resources.Load<Sprite>(type == PropType.Pot ? "Props/obj_83_16x17" : "Props/obj_11_14x18");
+        }
 
         var col = go.AddComponent<BoxCollider2D>();
         col.size = new Vector2(0.8f, 0.8f);

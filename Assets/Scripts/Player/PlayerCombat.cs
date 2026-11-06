@@ -208,6 +208,7 @@ public class PlayerCombat : MonoBehaviour
 
     // ─── Augment Bonuses (from Level-Up system) ────────────────────────────────
     private int   augBonusAtk      = 0;
+    private int   augBonusAP       = 0;
     private float augBonusCrit     = 0f;
     private float augBonusCritDmg  = 0f;
     private float augBonusLifesteal= 0f;
@@ -222,9 +223,10 @@ public class PlayerCombat : MonoBehaviour
     public void ApplyAugmentBonus(int bonusAtk, float bonusCrit, float bonusCritDmg,
                                    float bonusLifesteal, float bonusSpellVamp, float bonusCDR,
                                    int bonusArmPen = 0, float bonusArmPenPct = 0f, int bonusMagPen = 0, float bonusMagPenPct = 0f,
-                                   float bonusAttackSpeed = 0f)
+                                   float bonusAttackSpeed = 0f, int bonusAP = 0)
     {
         augBonusAtk          = bonusAtk;
+        augBonusAP           = bonusAP;
         augBonusCrit         = bonusCrit;
         augBonusCritDmg      = bonusCritDmg;
         augBonusLifesteal    = bonusLifesteal;
@@ -379,10 +381,21 @@ public class PlayerCombat : MonoBehaviour
             }
         }
 
-        bonusPhysAtk = upgradeBonusAtk + weaponPhysAtk + socketPhysAtk + costumeAtk + augBonusAtk;
-        bonusMagicAtk = weaponMagicAtk + socketMagicAtk + azureSpeedConvertedAP;
+        // Phân loại tướng hệ Sức Mạnh Phép (AP) hay Vật Lý (AD)
+        bool isApHero = IsAPHero;
+
+        // QUY TẮC PHÂN LOẠI LÕI ATK VS AP:
+        // - Tướng AP: Lõi ATK (vật lý) không cộng dồn sát thương cho tướng AP. Lõi AP cộng dồn trực tiếp vào công phép!
+        // - Tướng AD: Lõi AP (phép) không cộng dồn sát thương vật lý cho tướng AD. Lõi ATK cộng dồn trực tiếp vào công vật lý!
+        int effectiveAugAtk = isApHero ? 0 : augBonusAtk;
+        int effectiveAugAP  = isApHero ? augBonusAP : 0;
+
+        bonusPhysAtk = upgradeBonusAtk + weaponPhysAtk + socketPhysAtk + costumeAtk + effectiveAugAtk;
+        bonusMagicAtk = weaponMagicAtk + socketMagicAtk + azureSpeedConvertedAP + effectiveAugAP;
         bonusTrueAtk = weaponTrueAtk + socketTrueAtk;
-        bonusAttackDamage = bonusPhysAtk + bonusMagicAtk + bonusTrueAtk;
+
+        // Sát thương cộng thêm cơ bản khi tung đòn:
+        bonusAttackDamage = isApHero ? (bonusMagicAtk + bonusTrueAtk) : (bonusPhysAtk + bonusTrueAtk);
 
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out lifestealPercent, out float cdReduc, out _, out _);
         socketCdReduc = cdReduc;
@@ -426,10 +439,29 @@ public class PlayerCombat : MonoBehaviour
         PerformAttack();
     }
 
+    public bool IsAPHero
+    {
+        get
+        {
+            string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+            return CharacterManager.IsAbilityPowerHero(curHero) ||
+                   GetComponent<CelestialMageSkill>() != null ||
+                   GetComponent<AzureBladeSkill>() != null;
+        }
+    }
+
     public int BonusAttackDamage => bonusAttackDamage;
     public int Attack1Damage => attack1Damage;
     public int Attack2Damage => attack2Damage;
-    public int TotalAttackDamage => attack1Damage + bonusAttackDamage;
+
+    // Sát thương Vật Lý (ATK) tổng thể: Với tướng AD là Base ATK + Bonus ATK; với tướng AP là bonus vật lý (hoặc 0)
+    public int TotalPhysicalDamage => IsAPHero ? bonusPhysAtk : (attack1Damage + bonusPhysAtk);
+
+    // Sát thương Phép (AP) tổng thể: Với tướng AP là Base AP + Bonus AP; với tướng AD là bonus phép (hoặc 0)
+    public int TotalMagicDamage => IsAPHero ? (attack1Damage + bonusMagicAtk) : bonusMagicAtk;
+
+    // Sát thương đòn đánh chính: Tự động thích ứng theo bản chất của tướng (AP vs AD)
+    public int TotalAttackDamage => IsAPHero ? TotalMagicDamage : TotalPhysicalDamage;
     public Vector2 BodyCenterOffset => bodyCenterOffset;
     public float SkillCooldown => skillCooldown;
 
@@ -924,9 +956,20 @@ public class PlayerCombat : MonoBehaviour
                     critMult = Mathf.Max(critMult, 2.2f);
                 }
                 SoundManager.EnsureInstance()?.PlayHitImpact(isCrit, curStep == 2);
-                int baseAndPhys = baseDmg + bonusPhysAtk;
-                int finalPhys = Mathf.RoundToInt(baseAndPhys * critMult);
-                int finalMagic = (bonusMagicAtk > 0) ? Mathf.RoundToInt(bonusMagicAtk * critMult) : 0;
+                int finalPhys = 0;
+                int finalMagic = 0;
+                if (IsAPHero)
+                {
+                    int baseAndMagic = baseDmg + bonusMagicAtk;
+                    finalMagic = Mathf.RoundToInt(baseAndMagic * critMult);
+                    finalPhys  = (bonusPhysAtk > 0) ? Mathf.RoundToInt(bonusPhysAtk * critMult) : 0;
+                }
+                else
+                {
+                    int baseAndPhys = baseDmg + bonusPhysAtk;
+                    finalPhys  = Mathf.RoundToInt(baseAndPhys * critMult);
+                    finalMagic = (bonusMagicAtk > 0) ? Mathf.RoundToInt(bonusMagicAtk * critMult) : 0;
+                }
                 int finalTrue = (bonusTrueAtk > 0) ? Mathf.RoundToInt(bonusTrueAtk * critMult) : 0;
 
                 int actualPhys = (finalPhys > 0) ? AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, finalPhys, DamageType.Physical) : 0;

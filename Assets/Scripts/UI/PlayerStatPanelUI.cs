@@ -353,10 +353,14 @@ public class PlayerStatPanelUI : MonoBehaviour
 
         if (cCombat != null)
         {
-            atkTxt.text  = cCombat.TotalAttackDamage.ToString("N0");
+            // Hiển thị thống nhất với Carousel chọn tướng:
+            // - Tướng AP (Pháp Sư, Lam Kiếm Sĩ): Sát thương cơ bản nằm ở cột Phép ✦ (AP). Cột Kiếm ⚔ (Vật lý) là 0.
+            // - Tướng Vật Lý (Vael, Ronin, Titan, Dune): Sát thương cơ bản nằm ở cột Kiếm ⚔ (ATK). Cột Phép ✦ là 0.
+            atkTxt.text  = cCombat.TotalPhysicalDamage.ToString("N0");
+            magTxt.text  = cCombat.TotalMagicDamage.ToString("N0");
+
             aspdTxt.text = cCombat.AttackSpeedMultiplier.ToString("0.00") + "x";
             critTxt.text = Mathf.RoundToInt(cCombat.TotalCritChance * 100f) + "%";
-            magTxt.text  = cCombat.BonusMagicDamage.ToString("N0");
             lsTxt.text   = FormatPercent(cCombat.PhysLifestealPercent);
             // Hiển thị % Giảm Hồi Chiêu (CDR): Bắt đầu từ 0%, nhặt lõi cộng dồn lên 10%, 20%, 30%...
             cdrTxt.text  = Mathf.RoundToInt(cCombat.TotalCDRPercent) + "%";

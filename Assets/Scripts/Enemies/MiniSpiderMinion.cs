@@ -197,6 +197,18 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         }
     }
 
+    void LateUpdate()
+    {
+        if (isDead) return;
+        Vector3 pos = transform.position;
+        Vector3 clamped = SkeletonKingBossAI.ClampToValidArena(pos, 0.6f);
+        if (Mathf.Abs(pos.x - clamped.x) > 0.01f || Mathf.Abs(pos.y - clamped.y) > 0.01f)
+        {
+            transform.position = new Vector3(clamped.x, clamped.y, pos.z);
+            if (rb != null) rb.linearVelocity = Vector2.zero;
+        }
+    }
+
     public void TakeDamage(int damage)
     {
         if (isDead) return;
