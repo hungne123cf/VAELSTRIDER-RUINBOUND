@@ -35,11 +35,24 @@ public class DungeonRoom : MonoBehaviour
     public bool isEntered = false;
     public bool isCleared = false;
 
+    private static PlayerController s_cachedPlayer;
+    private static Rigidbody2D s_cachedPlayerRb;
+
+    private static PlayerController GetCachedPlayer()
+    {
+        if (s_cachedPlayer == null)
+        {
+            s_cachedPlayer = FindAnyObjectByType<PlayerController>();
+            s_cachedPlayerRb = s_cachedPlayer != null ? s_cachedPlayer.GetComponent<Rigidbody2D>() : null;
+        }
+        return s_cachedPlayer;
+    }
+
     void Update()
     {
         if (isEntered || isCleared) return;
 
-        var player = FindAnyObjectByType<PlayerController>();
+        var player = GetCachedPlayer();
         if (player != null)
         {
             Vector3 pos = player.transform.position;
@@ -57,7 +70,7 @@ public class DungeonRoom : MonoBehaviour
         // Tuyệt đối không cho phép lướt/teleport/kẹt xuyên tường hoặc vượt qua hành lang sang phòng khác khi đang đánh quái
         if (isEntered && !isCleared && roomType != RoomType.Sanctuary)
         {
-            var player = FindAnyObjectByType<PlayerController>();
+            var player = GetCachedPlayer();
             if (player != null)
             {
                 Vector3 p = player.transform.position;
@@ -66,8 +79,8 @@ public class DungeonRoom : MonoBehaviour
                 if (Mathf.Abs(clampedX - p.x) > 0.01f || Mathf.Abs(clampedY - p.y) > 0.01f)
                 {
                     player.transform.position = new Vector3(clampedX, clampedY, p.z);
-                    var rb = player.GetComponent<Rigidbody2D>();
-                    if (rb != null) rb.linearVelocity = Vector2.zero;
+                    if (s_cachedPlayerRb == null) s_cachedPlayerRb = player.GetComponent<Rigidbody2D>();
+                    if (s_cachedPlayerRb != null) s_cachedPlayerRb.linearVelocity = Vector2.zero;
                 }
             }
         }

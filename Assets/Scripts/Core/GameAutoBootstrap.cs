@@ -38,6 +38,7 @@ public class GameAutoBootstrap : MonoBehaviour
 
     public static void BootstrapAll()
     {
+        Application.targetFrameRate = 60;
         Time.timeScale = 1.0f; // Dam bao thoi gian luon chay binh thuong khi vao map
         AccountDatabase.EnsureActiveSessionLoaded();
         string currentScene = SceneManager.GetActiveScene().name;

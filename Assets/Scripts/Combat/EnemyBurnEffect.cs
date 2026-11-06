@@ -108,81 +108,108 @@ public class EnemyBurnEffect : MonoBehaviour
         }
     }
 
+    private Collider2D targetMainCol;
+    private float cachedFootWorldOffsetY = 0f;
+
     private void CreateOnBodyPixelFlames()
     {
         if (flameRootObj != null) Destroy(flameRootObj);
 
         EnsurePixelFireSprites();
 
+        targetMainCol = GetComponent<Collider2D>() ?? GetComponentInChildren<Collider2D>();
+
         flameRootObj = new GameObject("BurnFlame_PixelVFX");
         flameRootObj.transform.SetParent(transform, false);
 
-        // Tính toán kích thước và vị trí bám trên thân thể quái/Boss
-        float bodyHeightOffset = 0.25f;
-        float bodySpreadX = isBossTarget ? 0.48f : 0.28f;
-        float baseScale = isBossTarget ? 1.35f : 0.92f;
+        // Đo kích thước thực tế (World Space) của Quái/Boss để chỉnh lửa nhỏ gọn đúng phần chân
+        float worldWidth = 1.0f;
+        float worldHeight = 1.2f;
+        float bottomWorldY = transform.position.y - 0.35f;
 
-        var col = GetComponent<Collider2D>();
-        if (col != null)
+        if (targetMainCol != null && targetMainCol.bounds.size.y > 0.1f)
         {
-            bodyHeightOffset = Mathf.Clamp(col.offset.y, 0.05f, 1.2f);
+            Bounds cb = targetMainCol.bounds;
+            worldWidth = Mathf.Clamp(cb.size.x, 0.55f, 3.6f);
+            worldHeight = Mathf.Clamp(cb.size.y, 0.65f, 4.0f);
+            bottomWorldY = cb.min.y;
+        }
+        else if (targetMainSr != null && targetMainSr.bounds.size.y > 0.1f)
+        {
+            Bounds sb = targetMainSr.bounds;
+            worldWidth = Mathf.Clamp(sb.size.x * 0.65f, 0.55f, 3.6f);
+            worldHeight = Mathf.Clamp(sb.size.y * 0.75f, 0.65f, 4.0f);
+            bottomWorldY = sb.min.y;
         }
 
-        // Ước lượng scale thực tế của đối tượng cha để ngọn lửa không bị phóng đại quá mức trên Boss đã scale lớn
-        float parentScale = Mathf.Max(0.5f, Mathf.Abs(transform.localScale.y));
-        float normalizedScale = (baseScale / Mathf.Sqrt(parentScale));
+        // Đặt gốc ngọn lửa ngay tại phần chân (dưới đáy) của quái/Boss
+        cachedFootWorldOffsetY = (bottomWorldY - transform.position.y) + (worldHeight * 0.04f);
 
-        flameRootObj.transform.localPosition = new Vector3(0f, bodyHeightOffset, -0.05f);
-        flameRootObj.transform.localScale = Vector3.one * normalizedScale;
+        // Chiều cao ngọn lửa ngoài thế giới chỉ bằng ~24% chiều cao cơ thể (chỉ cháy dưới chân, không che mặt/thân)
+        float desiredFlameWorldHeight = Mathf.Clamp(worldHeight * 0.25f, 0.24f, 0.72f);
+        float desiredFlameWorldWidth  = Mathf.Clamp(worldWidth * 0.32f, 0.22f, 0.68f);
 
-        int baseSortOrder = targetMainSr != null ? targetMainSr.sortingOrder + 3 : 5100;
+        // Khử hoàn toàn hệ số phóng đại (lossyScale) của đối tượng cha (ví dụ Boss scale 1.8x - 2.5x)
+        Vector3 lossy = transform.lossyScale;
+        float parentScaleX = Mathf.Max(0.25f, Mathf.Abs(lossy.x));
+        float parentScaleY = Mathf.Max(0.25f, Mathf.Abs(lossy.y));
+
+        flameRootObj.transform.localPosition = new Vector3(0f, cachedFootWorldOffsetY / parentScaleY, -0.04f);
+        flameRootObj.transform.localScale = new Vector3(
+            desiredFlameWorldWidth / parentScaleX,
+            desiredFlameWorldHeight / parentScaleY,
+            1f
+        );
+
+        float footSpreadX = 0.42f;
+        int baseSortOrder = targetMainSr != null ? targetMainSr.sortingOrder + 2 : 5100;
         int sortLayerId = targetMainSr != null ? targetMainSr.sortingLayerID : 0;
 
-        // 1. Ngọn lửa trung tâm lớn (Ôm trọn phần thân giữa)
+        // 1. Ngọn lửa trung tâm ở ngay dưới chân
         GameObject mainObj = new GameObject("PixelFlame_Main");
         mainObj.transform.SetParent(flameRootObj.transform, false);
-        mainObj.transform.localPosition = new Vector3(0f, -0.10f, 0f);
-        mainObj.transform.localScale = Vector3.one * 1.05f;
+        mainObj.transform.localPosition = new Vector3(0f, 0f, 0f);
+        mainObj.transform.localScale = Vector3.one * 0.92f;
         mainFlameSr = mainObj.AddComponent<SpriteRenderer>();
         mainFlameSr.sprite = s_pixelFireFrames[0];
         mainFlameSr.sortingLayerID = sortLayerId;
         mainFlameSr.sortingOrder = baseSortOrder + 1;
-        mainFlameSr.color = new Color(1f, 1f, 1f, 0.94f);
+        mainFlameSr.color = new Color(1f, 1f, 1f, 0.85f);
 
-        // 2. Ngọn lửa bấu bên vai/hông trái
+        // 2. Ngọn lửa nhỏ bên chân trái
         GameObject leftObj = new GameObject("PixelFlame_Left");
         leftObj.transform.SetParent(flameRootObj.transform, false);
-        leftObj.transform.localPosition = new Vector3(-bodySpreadX, 0.08f, 0f);
-        leftObj.transform.localRotation = Quaternion.Euler(0f, 0f, 10f);
-        leftObj.transform.localScale = Vector3.one * 0.72f;
+        leftObj.transform.localPosition = new Vector3(-footSpreadX, 0.03f, 0f);
+        leftObj.transform.localRotation = Quaternion.Euler(0f, 0f, 8f);
+        leftObj.transform.localScale = Vector3.one * 0.68f;
         leftFlameSr = leftObj.AddComponent<SpriteRenderer>();
         leftFlameSr.sprite = s_pixelFireFrames[2 % s_pixelFireFrames.Length];
         leftFlameSr.sortingLayerID = sortLayerId;
         leftFlameSr.sortingOrder = baseSortOrder;
-        leftFlameSr.color = new Color(1f, 0.92f, 0.82f, 0.90f);
+        leftFlameSr.color = new Color(1f, 0.92f, 0.82f, 0.78f);
 
-        // 3. Ngọn lửa bấu bên vai/hông phải
+        // 3. Ngọn lửa nhỏ bên chân phải
         GameObject rightObj = new GameObject("PixelFlame_Right");
         rightObj.transform.SetParent(flameRootObj.transform, false);
-        rightObj.transform.localPosition = new Vector3(bodySpreadX, 0.06f, 0f);
-        rightObj.transform.localRotation = Quaternion.Euler(0f, 0f, -10f);
-        rightObj.transform.localScale = Vector3.one * 0.72f;
+        rightObj.transform.localPosition = new Vector3(footSpreadX, 0.02f, 0f);
+        rightObj.transform.localRotation = Quaternion.Euler(0f, 0f, -8f);
+        rightObj.transform.localScale = Vector3.one * 0.68f;
         rightFlameSr = rightObj.AddComponent<SpriteRenderer>();
         rightFlameSr.sprite = s_pixelFireFrames[4 % s_pixelFireFrames.Length];
         rightFlameSr.flipX = true;
         rightFlameSr.sortingLayerID = sortLayerId;
         rightFlameSr.sortingOrder = baseSortOrder;
-        rightFlameSr.color = new Color(1f, 0.92f, 0.82f, 0.90f);
+        rightFlameSr.color = new Color(1f, 0.92f, 0.82f, 0.78f);
 
-        // 4. Ánh sáng lửa ấm áp nhấp nháy trên cơ thể đang cháy
+        // 4. Ánh sáng lửa dịu nhẹ ở dưới chân (không làm lóa hình ảnh quái)
         fireLight = flameRootObj.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
         if (fireLight != null)
         {
             fireLight.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;
             fireLight.color = new Color(1.0f, 0.48f, 0.12f);
-            fireLight.intensity = isBossTarget ? 1.55f : 1.25f;
-            fireLight.pointLightInnerRadius = 0.25f;
-            fireLight.pointLightOuterRadius = isBossTarget ? 2.4f : 1.65f;
+            fireLight.intensity = isBossTarget ? 0.65f : 0.45f;
+            fireLight.pointLightInnerRadius = 0.15f;
+            fireLight.pointLightOuterRadius = isBossTarget ? 1.35f : 0.85f;
         }
     }
 
@@ -215,10 +242,10 @@ public class EnemyBurnEffect : MonoBehaviour
                 rightFlameSr.sprite = s_pixelFireFrames[(currentFrame + 4) % s_pixelFireFrames.Length];
         }
 
-        // 2. Đồng bộ sortingOrder để ngọn lửa luôn hiển thị nổi trên cơ thể quái/Boss
+        // 2. Đồng bộ sortingOrder để ngọn lửa hiển thị gọn ở chân quái/Boss
         if (targetMainSr != null && mainFlameSr != null)
         {
-            int sortOrder = targetMainSr.sortingOrder + 3;
+            int sortOrder = targetMainSr.sortingOrder + 2;
             mainFlameSr.sortingOrder = sortOrder + 1;
             if (leftFlameSr != null) leftFlameSr.sortingOrder = sortOrder;
             if (rightFlameSr != null) rightFlameSr.sortingOrder = sortOrder;
@@ -228,24 +255,24 @@ public class EnemyBurnEffect : MonoBehaviour
         float fadeAlpha = burnTimer < 0.45f ? Mathf.Clamp01(burnTimer / 0.45f) : 1.0f;
         if (fireLight != null)
         {
-            float flicker = 1.0f + Mathf.Sin(Time.time * 22f) * 0.16f;
-            fireLight.intensity = (isBossTarget ? 1.55f : 1.25f) * flicker * fadeAlpha;
+            float flicker = 1.0f + Mathf.Sin(Time.time * 18f) * 0.12f;
+            fireLight.intensity = (isBossTarget ? 0.65f : 0.45f) * flicker * fadeAlpha;
         }
         if (mainFlameSr != null)
         {
-            mainFlameSr.color = new Color(1f, 1f, 1f, 0.94f * fadeAlpha);
+            mainFlameSr.color = new Color(1f, 1f, 1f, 0.85f * fadeAlpha);
         }
         if (leftFlameSr != null)
         {
-            leftFlameSr.color = new Color(1f, 0.92f, 0.82f, 0.90f * fadeAlpha);
+            leftFlameSr.color = new Color(1f, 0.92f, 0.82f, 0.78f * fadeAlpha);
         }
         if (rightFlameSr != null)
         {
-            rightFlameSr.color = new Color(1f, 0.92f, 0.82f, 0.90f * fadeAlpha);
+            rightFlameSr.color = new Color(1f, 0.92f, 0.82f, 0.78f * fadeAlpha);
         }
 
-        // 4. Sinh tàn lửa Pixel bay lên từ cơ thể đang bốc cháy
-        if (emberTimer >= 0.15f && burnTimer > 0.25f)
+        // 4. Sinh tàn lửa Pixel nhỏ bay nhẹ từ dưới chân
+        if (emberTimer >= 0.25f && burnTimer > 0.25f)
         {
             emberTimer = 0f;
             SpawnRisingPixelEmber();
@@ -281,16 +308,17 @@ public class EnemyBurnEffect : MonoBehaviour
 
     private void SpawnRisingPixelEmber()
     {
+        if (flameRootObj == null) return;
         GameObject ember = new GameObject("PixelFireEmber");
-        float spread = isBossTarget ? 0.55f : 0.32f;
-        ember.transform.position = transform.position + new Vector3(Random.Range(-spread, spread), Random.Range(0.05f, 0.55f), -0.06f);
-        ember.transform.localScale = Vector3.one * Random.Range(0.12f, 0.20f);
+        float spread = isBossTarget ? 0.32f : 0.16f;
+        ember.transform.position = flameRootObj.transform.position + new Vector3(Random.Range(-spread, spread), Random.Range(0.02f, 0.16f), -0.06f);
+        ember.transform.localScale = Vector3.one * Random.Range(0.06f, 0.11f);
 
         var sr = ember.AddComponent<SpriteRenderer>();
         sr.sprite = GetPixelSquareSprite();
         sr.color = Random.value > 0.45f
-            ? new Color(1.0f, 0.88f, 0.25f, 0.95f)  // Searing gold spark
-            : new Color(1.0f, 0.38f, 0.08f, 0.95f); // Crimson-orange ember
+            ? new Color(1.0f, 0.88f, 0.25f, 0.90f)  // Searing gold spark
+            : new Color(1.0f, 0.38f, 0.08f, 0.90f); // Crimson-orange ember
         sr.sortingOrder = (mainFlameSr != null) ? mainFlameSr.sortingOrder + 2 : 5200;
 
         ember.AddComponent<RisingPixelEmberMover>();
@@ -339,11 +367,23 @@ public class EnemyBurnEffect : MonoBehaviour
         bool allLoaded = true;
         for (int i = 0; i < 6; i++)
         {
-            Sprite sp = Resources.Load<Sprite>($"Combat/FireBurn/fire_burn_{i}");
-            if (sp != null && sp.texture != null)
+            Texture2D loadedTex = Resources.Load<Texture2D>($"Combat/FireBurn/fire_burn_{i}");
+            if (loadedTex == null)
             {
-                sp.texture.filterMode = FilterMode.Point;
-                s_pixelFireFrames[i] = sp;
+                Sprite sp = Resources.Load<Sprite>($"Combat/FireBurn/fire_burn_{i}");
+                if (sp != null) loadedTex = sp.texture;
+            }
+            if (loadedTex != null)
+            {
+                loadedTex.filterMode = FilterMode.Point;
+                s_pixelFireFrames[i] = Sprite.Create(
+                    loadedTex,
+                    new Rect(0, 0, loadedTex.width, loadedTex.height),
+                    new Vector2(0.5f, 0.08f),
+                    40f,
+                    0,
+                    SpriteMeshType.FullRect
+                );
             }
             else
             {
@@ -419,14 +459,14 @@ public class EnemyBurnEffect : MonoBehaviour
             }
 
             tex.Apply();
-            s_pixelFireFrames[frame] = Sprite.Create(tex, new Rect(0, 0, W, H), new Vector2(0.5f, 0.35f), 24f, 0, SpriteMeshType.FullRect);
+            s_pixelFireFrames[frame] = Sprite.Create(tex, new Rect(0, 0, W, H), new Vector2(0.5f, 0.08f), 40f, 0, SpriteMeshType.FullRect);
         }
     }
 
     private class RisingPixelEmberMover : MonoBehaviour
     {
         private float elapsed = 0f;
-        private float lifetime = 0.42f;
+        private float lifetime = 0.28f;
         private Vector3 velocity;
         private SpriteRenderer sr;
         private Color baseColor;
@@ -435,7 +475,7 @@ public class EnemyBurnEffect : MonoBehaviour
         {
             sr = GetComponent<SpriteRenderer>();
             if (sr != null) baseColor = sr.color;
-            velocity = new Vector3(Random.Range(-0.45f, 0.45f), Random.Range(1.4f, 2.3f), 0f);
+            velocity = new Vector3(Random.Range(-0.22f, 0.22f), Random.Range(0.65f, 1.15f), 0f);
         }
 
         void Update()

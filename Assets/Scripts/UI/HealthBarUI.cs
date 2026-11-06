@@ -23,6 +23,10 @@ public class HealthBarUI : MonoBehaviour
     private Image virtualHpFillImage;
     private TextMeshProUGUI virtualHpText;
     private Outline virtualHpOutline;
+    private int lastDisplayedCurrentHP = -1;
+    private int lastDisplayedMaxHP = -1;
+    private int lastDisplayedVirtualHP = -1;
+    private bool hpTypographyApplied = false;
 
     void Awake()
     {
@@ -110,8 +114,9 @@ public class HealthBarUI : MonoBehaviour
                 virtualHpSlider.value = currentVHp;
             }
 
-            if (virtualHpText != null)
+            if (virtualHpText != null && currentVHp != lastDisplayedVirtualHP)
             {
+                lastDisplayedVirtualHP = currentVHp;
                 virtualHpText.text = $"+{currentVHp}";
             }
 
@@ -299,10 +304,18 @@ public class HealthBarUI : MonoBehaviour
     private void UpdateText(int current, int max)
     {
         EnsureTextComponent();
+        if (current == lastDisplayedCurrentHP && max == lastDisplayedMaxHP) return;
+        lastDisplayedCurrentHP = current;
+        lastDisplayedMaxHP = max;
+
         if (tmpHpText != null)
         {
             tmpHpText.text = $"<color=#f0d890>{current}</color> <size=9><color=#8c806a>/</color></size> <color=#c4b89f>{max}</color>";
-            ApplySoulslikeTypography(tmpHpText);
+            if (!hpTypographyApplied)
+            {
+                ApplySoulslikeTypography(tmpHpText);
+                hpTypographyApplied = true;
+            }
         }
         else if (hpText != null)
         {

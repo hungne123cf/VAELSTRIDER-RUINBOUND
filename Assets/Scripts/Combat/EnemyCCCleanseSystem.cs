@@ -32,8 +32,14 @@ public class EnemyCCCleanseSystem : MonoBehaviour
 
     private float accumulatedCCTime = 0f;
     private float periodicCheckTimer = 0f;
+    private float watchdogTimer = 0f;
     private Rigidbody2D rb;
     private Animator animator;
+    private EnemyStunEffect cachedStun;
+    private EnemyFreezeEffect cachedFreeze;
+    private EnemyChronoSlowEffect cachedSlow;
+    private readonly List<MonoBehaviour> cachedAIScripts = new List<MonoBehaviour>(4);
+    private bool aiScriptsCached = false;
 
     void Awake()
     {
@@ -44,6 +50,24 @@ public class EnemyCCCleanseSystem : MonoBehaviour
             rb.linearDamping = Mathf.Max(rb.linearDamping, 4.0f);
         }
         animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
+        CacheAIScripts();
+    }
+
+    private void CacheAIScripts()
+    {
+        cachedAIScripts.Clear();
+        var allBehaviours = GetComponents<MonoBehaviour>();
+        for (int i = 0; i < allBehaviours.Length; i++)
+        {
+            var mb = allBehaviours[i];
+            if (mb == null || mb == this) continue;
+            string typeName = mb.GetType().Name;
+            if (typeName.EndsWith("AI") || typeName.EndsWith("Enemy") || typeName.Contains("Boss") || typeName.Contains("Spawner"))
+            {
+                cachedAIScripts.Add(mb);
+            }
+        }
+        aiScriptsCached = true;
     }
 
     void Update()
@@ -62,12 +86,16 @@ public class EnemyCCCleanseSystem : MonoBehaviour
         }
         else
         {
-            // WATCHDOG MỖI FRAME: Khi KHÔNG bị Choáng / Đóng Băng, bắt buộc mọi script AI/Boss phải được bật lại ngay lập tức!
-            RestoreAllAIScripts();
-            if (animator == null) animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
-            if (animator != null && animator.speed < 0.4f)
+            // WATCHDOG: Khi KHÔNG bị Choáng / Đóng Băng, kiểm tra định kỳ mỗi 0.12s (không cấp phát bộ nhớ) để bật lại AI ngay lập tức!
+            watchdogTimer += Time.deltaTime;
+            if (watchdogTimer >= 0.12f)
             {
-                animator.speed = EnemyChronoSlowEffect.IsChronoSlowActive ? EnemyChronoSlowEffect.SLOW_FACTOR : 1.0f;
+                watchdogTimer = 0f;
+                RestoreAllAIScripts();
+                if (animator != null && animator.speed < 0.4f)
+                {
+                    animator.speed = EnemyChronoSlowEffect.IsChronoSlowActive ? EnemyChronoSlowEffect.SLOW_FACTOR : 1.0f;
+                }
             }
         }
 
@@ -102,11 +130,11 @@ public class EnemyCCCleanseSystem : MonoBehaviour
 
     public bool CheckIsUnderHardCC()
     {
-        var stun = GetComponent<EnemyStunEffect>();
-        if (stun != null && stun.IsStunned) return true;
+        if (cachedStun == null) cachedStun = GetComponent<EnemyStunEffect>();
+        if (cachedStun != null && cachedStun.IsStunned) return true;
 
-        var freeze = GetComponent<EnemyFreezeEffect>();
-        if (freeze != null && freeze.IsFrozen) return true;
+        if (cachedFreeze == null) cachedFreeze = GetComponent<EnemyFreezeEffect>();
+        if (cachedFreeze != null && cachedFreeze.IsFrozen) return true;
 
         return false;
     }
@@ -123,18 +151,17 @@ public class EnemyCCCleanseSystem : MonoBehaviour
     {
         if (CheckIsUnderHardCC()) return true;
 
-        var slow = GetComponent<EnemyChronoSlowEffect>();
-        if (slow != null) return true;
-
-        var allBehaviours = GetComponents<MonoBehaviour>();
-        foreach (var mb in allBehaviours)
+        if (EnemyChronoSlowEffect.IsChronoSlowActive)
         {
-            if (mb == null || mb == this) continue;
-            string typeName = mb.GetType().Name;
-            if (typeName.EndsWith("AI") || typeName.EndsWith("Enemy") || typeName.Contains("Boss"))
-            {
-                if (!mb.enabled) return true;
-            }
+            if (cachedSlow == null) cachedSlow = GetComponent<EnemyChronoSlowEffect>();
+            if (cachedSlow != null) return true;
+        }
+
+        if (!aiScriptsCached) CacheAIScripts();
+        for (int i = 0; i < cachedAIScripts.Count; i++)
+        {
+            var mb = cachedAIScripts[i];
+            if (mb != null && !mb.enabled) return true;
         }
 
         if (animator != null && animator.speed < 0.4f) return true;
@@ -195,14 +222,13 @@ public class EnemyCCCleanseSystem : MonoBehaviour
 
     private void RestoreAllAIScripts()
     {
-        var allBehaviours = GetComponents<MonoBehaviour>();
-        foreach (var mb in allBehaviours)
+        if (!aiScriptsCached) CacheAIScripts();
+        for (int i = 0; i < cachedAIScripts.Count; i++)
         {
-            if (mb == null || mb == this) continue;
-            string typeName = mb.GetType().Name;
-            if (typeName.EndsWith("AI") || typeName.EndsWith("Enemy") || typeName.Contains("Boss") || typeName.Contains("Spawner"))
+            var mb = cachedAIScripts[i];
+            if (mb != null && !mb.enabled)
             {
-                if (!mb.enabled) mb.enabled = true;
+                mb.enabled = true;
             }
         }
     }

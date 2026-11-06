@@ -25,6 +25,8 @@ public class PlayerExpBarUI : MonoBehaviour
 
     // UI refs
     private GameObject _root;
+    private RectTransform _rootRt;
+    private RectTransform _cachedHealthBarRt;
     private Slider _expSlider;
     private Image _expFill;
     private TextMeshProUGUI _expLabelText;
@@ -70,16 +72,20 @@ public class PlayerExpBarUI : MonoBehaviour
     public void AlignWithHealthBar()
     {
         if (_root == null) return;
-        Canvas mainCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (mainCanvas == null) mainCanvas = FindAnyObjectByType<Canvas>();
-        if (mainCanvas == null) return;
+        if (_cachedHealthBarRt == null)
+        {
+            Canvas mainCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
+            if (mainCanvas == null) mainCanvas = FindAnyObjectByType<Canvas>();
+            if (mainCanvas == null) return;
 
-        Transform healthBar = mainCanvas.transform.Find("PlayerHealthBar");
-        if (healthBar == null) healthBar = mainCanvas.transform.Find("HealthBar");
-        if (healthBar == null) return;
+            Transform healthBar = mainCanvas.transform.Find("PlayerHealthBar");
+            if (healthBar == null) healthBar = mainCanvas.transform.Find("HealthBar");
+            if (healthBar != null) _cachedHealthBarRt = healthBar.GetComponent<RectTransform>();
+        }
 
-        RectTransform hbRt = healthBar.GetComponent<RectTransform>();
-        RectTransform rootRt = _root.GetComponent<RectTransform>();
+        RectTransform hbRt = _cachedHealthBarRt;
+        if (_rootRt == null && _root != null) _rootRt = _root.GetComponent<RectTransform>();
+        RectTransform rootRt = _rootRt;
         if (hbRt != null && rootRt != null)
         {
             float startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);

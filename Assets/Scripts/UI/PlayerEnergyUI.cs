@@ -24,6 +24,13 @@ public class PlayerEnergyUI : MonoBehaviour
 
     private PlayerEnergySystem energySystem;
     private RectTransform rootRt;
+    private RectTransform cachedHealthBarRt;
+    private RectTransform cachedEnergySliderRt;
+    private RectTransform cachedInnerEnergySliderRt;
+    private RectTransform cachedShardsRt;
+    private CelestialMageSkill cachedMageSkill;
+    private bool mageSkillChecked = false;
+    private int lastDisplayedPct = -1;
 
     void Awake()
     {
@@ -34,6 +41,7 @@ public class PlayerEnergyUI : MonoBehaviour
     void Start()
     {
         FindEnergySystem();
+        AlignWithHealthBar();
         RepositionShardsCounter();
     }
 
@@ -48,21 +56,23 @@ public class PlayerEnergyUI : MonoBehaviour
         UpdateEnergyBar();
         UpdateInnerEnergyBar();
         AlignWithHealthBar();
-        RepositionShardsCounter();
     }
 
     public void AlignWithHealthBar()
     {
-        Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas == null) canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
-        if (canvas == null) return;
+        if (cachedHealthBarRt == null)
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+            if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return;
 
-        Transform healthBar = canvas.transform.Find("PlayerHealthBar");
-        if (healthBar == null) healthBar = canvas.transform.Find("HealthBar");
-        if (healthBar == null) return;
+            Transform healthBar = canvas.transform.Find("PlayerHealthBar");
+            if (healthBar == null) healthBar = canvas.transform.Find("HealthBar");
+            if (healthBar != null) cachedHealthBarRt = healthBar.GetComponent<RectTransform>();
+        }
 
-        RectTransform hbRt = healthBar.GetComponent<RectTransform>();
+        RectTransform hbRt = cachedHealthBarRt;
         if (hbRt != null && rootRt != null)
         {
             float startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
@@ -78,20 +88,20 @@ public class PlayerEnergyUI : MonoBehaviour
 
                 if (energySlider != null)
                 {
-                    var esRt = energySlider.GetComponent<RectTransform>();
-                    if (esRt != null)
+                    if (cachedEnergySliderRt == null) cachedEnergySliderRt = energySlider.GetComponent<RectTransform>();
+                    if (cachedEnergySliderRt != null)
                     {
-                        esRt.anchoredPosition = new Vector2(0f, 0f);
-                        esRt.sizeDelta = new Vector2(barWidth, 18f);
+                        cachedEnergySliderRt.anchoredPosition = new Vector2(0f, 0f);
+                        cachedEnergySliderRt.sizeDelta = new Vector2(barWidth, 18f);
                     }
                 }
                 if (innerEnergySlider != null)
                 {
-                    var iesRt = innerEnergySlider.GetComponent<RectTransform>();
-                    if (iesRt != null)
+                    if (cachedInnerEnergySliderRt == null) cachedInnerEnergySliderRt = innerEnergySlider.GetComponent<RectTransform>();
+                    if (cachedInnerEnergySliderRt != null)
                     {
-                        iesRt.anchoredPosition = new Vector2(0f, -21f);
-                        iesRt.sizeDelta = new Vector2(barWidth - 10f, 14f);
+                        cachedInnerEnergySliderRt.anchoredPosition = new Vector2(0f, -21f);
+                        cachedInnerEnergySliderRt.sizeDelta = new Vector2(barWidth - 10f, 14f);
                     }
                 }
             }
@@ -167,27 +177,29 @@ public class PlayerEnergyUI : MonoBehaviour
 
     private void RepositionShardsCounter()
     {
-        var shardsUI = FindAnyObjectByType<ShardsUI>();
-        if (shardsUI != null)
+        if (cachedShardsRt == null)
         {
-            RectTransform scRt = shardsUI.GetComponent<RectTransform>();
-            if (scRt != null)
-            {
-                scRt.anchoredPosition = new Vector2(175f, -118f);
-                scRt.sizeDelta = new Vector2(120f, 28f);
-            }
+            var shardsUI = FindAnyObjectByType<ShardsUI>();
+            if (shardsUI != null) cachedShardsRt = shardsUI.GetComponent<RectTransform>();
+        }
+        if (cachedShardsRt != null)
+        {
+            cachedShardsRt.anchoredPosition = new Vector2(175f, -118f);
+            cachedShardsRt.sizeDelta = new Vector2(120f, 28f);
         }
     }
 
     private DuneAssassinSkill duneSkill;
+    private bool duneSkillChecked = false;
 
     private void UpdateEnergyBar()
     {
         if (energySlider == null) return;
 
-        if (duneSkill == null && energySystem != null)
+        if (!duneSkillChecked && energySystem != null)
         {
             duneSkill = energySystem.GetComponent<DuneAssassinSkill>();
+            duneSkillChecked = true;
         }
 
         if (duneSkill != null && duneSkill.enabled)
@@ -209,8 +221,11 @@ public class PlayerEnergyUI : MonoBehaviour
             if (energyText != null)
             {
                 int pct = maxRage > 0 ? Mathf.Clamp(Mathf.RoundToInt((curRage / maxRage) * 100f), 0, 100) : 0;
-                energyText.text = $"{pct}%";
-                ApplyHighContrastStyle(energyText);
+                if (pct != lastDisplayedPct)
+                {
+                    lastDisplayedPct = pct;
+                    energyText.text = $"{pct}%";
+                }
             }
             return;
         }
@@ -231,8 +246,11 @@ public class PlayerEnergyUI : MonoBehaviour
         if (energyText != null)
         {
             int pct = max > 0 ? Mathf.Clamp(Mathf.RoundToInt((current / max) * 100f), 0, 100) : 0;
-            energyText.text = $"{pct}%";
-            ApplyHighContrastStyle(energyText);
+            if (pct != lastDisplayedPct)
+            {
+                lastDisplayedPct = pct;
+                energyText.text = $"{pct}%";
+            }
         }
     }
 
@@ -253,10 +271,15 @@ public class PlayerEnergyUI : MonoBehaviour
             innerEnergyText.gameObject.SetActive(false);
         }
 
-        // Kiểm tra riêng cho Player 6 (Celestial Mage): Không có lớp giáp vàng, màu Tím Tinh Tú huyền ảo
-        var mage = (energySystem != null) 
-            ? (energySystem.GetComponent<CelestialMageSkill>() ?? energySystem.GetComponentInChildren<CelestialMageSkill>() ?? energySystem.GetComponentInParent<CelestialMageSkill>() ?? FindAnyObjectByType<CelestialMageSkill>()) 
-            : null;
+        // Kiểm tra riêng cho Player 6 (Celestial Mage): Không có lớp giáp vàng, màu Tím Tinh Tú huyền ảo (cache 1 lần)
+        if (!mageSkillChecked && energySystem != null)
+        {
+            cachedMageSkill = energySystem.GetComponent<CelestialMageSkill>() 
+                ?? energySystem.GetComponentInChildren<CelestialMageSkill>() 
+                ?? energySystem.GetComponentInParent<CelestialMageSkill>();
+            mageSkillChecked = true;
+        }
+        var mage = cachedMageSkill;
         if (mage != null && mage.enabled)
         {
             float inner = energySystem.GetInnerEnergy();

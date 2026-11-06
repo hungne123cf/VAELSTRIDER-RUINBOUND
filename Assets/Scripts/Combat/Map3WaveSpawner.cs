@@ -257,6 +257,8 @@ public class Map3WaveSpawner : MonoBehaviour
 
     private void HandleEggHatched(Vector3 pos)
     {
+        if (!enabled) return;
+
         // Quet don lan nua dam bao chi co minh en Boss Nhen tren san dau
         ClearAllNonBossEnemies();
 

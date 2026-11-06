@@ -1,37 +1,35 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.SceneManagement;
-using UnityEngine.Rendering.Universal;
-using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// VAELSTRIDER: RUINBOUND - Multi-Path Map Expansion Builder (Map 2 & Map 3)
+/// VAELSTRIDER: RUINBOUND - Compact Multi-Path Map Expansion Builder (Map 2 & Map 3)
 /// 
-/// Nâng cấp Map 2 (Thung Lũng Tàn Tích) và Map 3 (Ký Ức Lãng Quên) thành Bản Đồ Đa Nhánh (3 Lối Đi Dài):
-/// - Mỗi nhánh gồm 3 Hành Lang / Cầu Đá + 2 Phòng Quái Chiến Đấu + 1 Đấu Trường Đại Trùm riêng biệt.
-/// - Mỗi lối đi có mật độ quái khác nhau rõ rệt:
-///   1. Nhánh Đông Quái (Swarm Route): Rất nhiều quái, rơi nhiều Linh Hồn & EXP -> Dẫn tới Đại Trùm 1.
-///   2. Nhánh Quái Vừa Phải (Balanced Route): Số lượng quái cân bằng -> Dẫn tới Đại Trùm 2.
-///   3. Nhánh Ít Quái Tinh Anh (Low-Monster Fast Route): Ít quái nhưng tinh nhuệ, tiến nhanh -> Dẫn tới Đại Trùm 3.
-/// - Tích hợp đầy đủ với DungeonRoomManager, FullscreenMapUI, MinimapHUD và SurroundingWaterOceanSystem.
+/// ĐẶC TÍNH THIẾT KẾ GỌN GÀNG & MƯỢT MÀ:
+/// 1. Bỏ hoàn toàn Nhánh Tây và chữ nổi chỉ đường rườm rà.
+/// 2. Thu gọn bản đồ chỉ gồm Khu Khởi Đầu + 2 Nhánh Ngắn Gọn (1 Phòng Quái + 1 Phòng Đại Trùm mỗi nhánh),
+///    hành lang rộng 8m thông thoáng, đi vài bước là vào trận ngay.
+/// 3. Dọn sạch các chướng ngại vật (đá, gốc cây, cây giữa đường) và tắt toàn bộ Collider vô hình quá bự
+///    của cây cổ thụ / cây ven đường để người chơi di chuyển mượt mà 100% không bị kẹt vô hình.
+/// 4. Bỏ hoàn toàn Boss Cây (ValleyGolemBossAI) & Quái Đá tĩnh (ValleySpitterAI), khôi phục đầy đủ
+///    Đại Trùm gốc Map 2 (Gor'Mok - Huyết Thú Cổ Thụ) và Đại Trùm gốc Map 3 (Phong Ấn Trứng Kén & Chúa Tể Nhện Cổ Đại),
+///    cùng Đại Trùm Bóng Ma Bản Ngã (ShadowDoppelgangerBoss) ở nhánh còn lại.
 /// </summary>
 public class MultiPathMapExpansionBuilder : MonoBehaviour
 {
     public enum RouteDensity
     {
-        SwarmManyMonsters,     // Đông quái (2 đợt lớn mỗi phòng)
-        BalancedMonsters,      // Quái vừa phải (2 đợt vừa mỗi phòng)
-        EliteFewMonsters       // Ít quái tinh anh (1 đợt ít quái mỗi phòng)
+        SwarmManyMonsters,     // Nhánh Đông Quái (2 đợt quái đông)
+        EliteFewMonsters       // Nhánh Ít Quái Tinh Anh (1 đợt quái tinh nhuệ, đi nhanh)
     }
 
     public enum RouteBossType
     {
-        GorMokBloodLord,       // Đại Trùm Gor'Mok - Huyết Thú Cổ Thụ (BloodMonsterAI Boss)
-        AncientValleyGolem,    // Golem Cổ Đại - Cự Thạch Hộ Vệ (ValleyGolemBossAI)
-        ShadowDoppelganger,    // Bóng Ma Bản Ngã (ShadowDoppelgangerBoss)
-        AncientSpiderKing      // Chúa Tể Nhện Cổ Đại (SkeletonKingBossAI)
+        GorMokBloodLord,       // Boss gốc Map 2: Đại Trùm Gor'Mok (BloodMonsterAI Boss 3 Phase)
+        AncientSpiderKing,     // Boss gốc Map 3: Phong Ấn Trứng Kén -> Chúa Tể Nhện Cổ Đại (SkeletonKingBossAI)
+        ShadowDoppelganger     // Đại Trùm Bóng Ma Bản Ngã (ShadowDoppelgangerBoss)
     }
 
     private static MultiPathMapExpansionBuilder instance;
@@ -71,8 +69,6 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
     {
         BloodMonsterAI.OnEnemyDied += OnBloodMonsterDied;
         ValleyBeastAI.OnEnemyDied += OnValleyBeastDied;
-        ValleySpitterAI.OnEnemyDied += OnValleySpitterDied;
-        ValleyGolemBossAI.OnEnemyDied += OnValleyGolemDied;
         BotWheelAI.OnEnemyDied += OnBotWheelDied;
         GoblinAI.OnEnemyDied += OnGenericEnemyDied;
         SkeletonAI.OnEnemyDied += OnGenericEnemyDied;
@@ -84,8 +80,6 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
     {
         BloodMonsterAI.OnEnemyDied -= OnBloodMonsterDied;
         ValleyBeastAI.OnEnemyDied -= OnValleyBeastDied;
-        ValleySpitterAI.OnEnemyDied -= OnValleySpitterDied;
-        ValleyGolemBossAI.OnEnemyDied -= OnValleyGolemDied;
         BotWheelAI.OnEnemyDied -= OnBotWheelDied;
         GoblinAI.OnEnemyDied -= OnGenericEnemyDied;
         SkeletonAI.OnEnemyDied -= OnGenericEnemyDied;
@@ -95,8 +89,6 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
 
     private void OnBloodMonsterDied(BloodMonsterAI e) => NotifyMonsterSlain(e != null ? e.gameObject : null);
     private void OnValleyBeastDied(ValleyBeastAI e) => NotifyMonsterSlain(e != null ? e.gameObject : null);
-    private void OnValleySpitterDied(ValleySpitterAI e) => NotifyMonsterSlain(e != null ? e.gameObject : null);
-    private void OnValleyGolemDied(ValleyGolemBossAI e) => NotifyMonsterSlain(e != null ? e.gameObject : null);
     private void OnBotWheelDied(BotWheelAI e) => NotifyMonsterSlain(e != null ? e.gameObject : null);
     private void OnSkeletonKingDied(SkeletonKingBossAI e) => NotifyMonsterSlain(e != null ? e.gameObject : null);
     private void OnGenericEnemyDied(object e)
@@ -120,20 +112,19 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
 
         if (isMap2)
         {
-            BuildMap2MultiPathValley();
+            BuildMap2CompactValley();
         }
         else
         {
-            BuildMap3MultiPathIslands();
+            BuildMap3CompactIslands();
         }
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // 1. MAP 2: THUNG LŨNG TÀN TÍCH ĐA NHÁNH (EAST, SOUTH, WEST ROUTES)
+    // 1. MAP 2: THUNG LŨNG TÀN TÍCH GỌN GÀNG (NHÁNH NAM & NHÁNH ĐÔNG)
     // ═══════════════════════════════════════════════════════════════════════════
-    private void BuildMap2MultiPathValley()
+    private void BuildMap2CompactValley()
     {
-        // Tìm Tilemap Ground & Walls của Map 2
         Tilemap groundTm = null;
         Tilemap wallsTm = null;
         var tilemaps = FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
@@ -145,49 +136,30 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             else if (n.Contains("wall")) wallsTm = tm;
         }
 
-        if (groundTm == null || wallsTm == null)
-        {
-            Debug.LogWarning("[MULTI-PATH MAP 2] Không tìm thấy Tilemap Ground hoặc Walls!");
-            return;
-        }
+        if (groundTm == null || wallsTm == null) return;
 
-        // Lấy mẫu gạch Cỏ, Đất và Tường Đá trực tiếp từ Tilemap hiện có (Zero-Bug Android)
         TileBase grassTile = groundTm.GetTile(new Vector3Int(-12, 0, 0)) ?? groundTm.GetTile(new Vector3Int(0, 0, 0));
         TileBase dirtTile  = groundTm.GetTile(new Vector3Int(0, -3, 0)) ?? grassTile;
         TileBase wallTile  = wallsTm.GetTile(new Vector3Int(-20, 0, 0)) ?? wallsTm.GetTile(new Vector3Int(20, 0, 0)) ?? wallsTm.GetTile(new Vector3Int(0, -14, 0));
 
-        // Giải phóng lối đi tại 3 cửa Đông, Nam, Tây của Thánh Địa Trung Tâm
-        ClearBlockingHubPropsMap2();
+        // Dọn dẹp triệt để các chướng ngại vật chắn đường và tắt toàn bộ Collider vô hình quá bự ở Map 2
+        CleanUpObstaclesAndOversizedCollidersMap2();
 
-        // Định nghĩa toàn bộ các hình chữ nhật mặt đất (Walkable Floor Rectangles)
-        // Central Sanctuary Hub: x [-19..19], y [-13..13]
-        AddWalkableRect(-19, -13, 39, 27);
+        // Khu Trung Tâm (Hub): x [-19..19], y [-13..13] (38m x 26m)
+        AddWalkableRect(-19, -13, 38, 26);
 
-        // --- NHÁNH ĐÔNG (+X): ĐÔNG QUÁI -> BOSS GOR'MOK ---
-        AddWalkableRect(20, -3, 14, 6);    // Hành lang Đông 1 (x: 20..33, y: -3..2)
-        AddWalkableRect(34, -10, 21, 21);  // Phòng Đông 1 (x: 34..54, y: -10..10)
-        AddWalkableRect(55, -3, 13, 6);    // Hành lang Đông 2 (x: 55..67, y: -3..2)
-        AddWalkableRect(68, -10, 21, 21);  // Phòng Đông 2 (x: 68..88, y: -10..10)
-        AddWalkableRect(89, -3, 13, 6);    // Hành lang Đông 3 (x: 89..101, y: -3..2)
-        AddWalkableRect(102, -13, 27, 27); // Đấu Trường Boss Đông (x: 102..128, y: -13..13)
+        // --- LỐI ĐI 1: NHÁNH NAM (-Y) — ĐÔNG QUÁI -> ĐẠI TRÙM GỐC MAP 2: GOR'MOK ---
+        AddWalkableRect(-4, -20, 8, 7);    // Hành lang Nam 1 rộng 8m, dài 7m (x: -4..4, y: -20..-13)
+        AddWalkableRect(-12, -36, 24, 16); // Phòng Quái Nam (x: -12..12, y: -36..-20)
+        AddWalkableRect(-4, -42, 8, 6);    // Hành lang Nam 2 rộng 8m, dài 6m (x: -4..4, y: -42..-36)
+        AddWalkableRect(-14, -64, 28, 22); // Phòng Đại Trùm Gor'Mok (x: -14..14, y: -64..-42)
 
-        // --- NHÁNH NAM (-Y): QUÁI VỪA PHẢI -> BOSS GOLEM CỔ ĐẠI ---
-        AddWalkableRect(-3, -27, 6, 14);   // Hành lang Nam 1 (x: -3..2, y: -27..-14)
-        AddWalkableRect(-12, -48, 25, 21); // Phòng Nam 1 (x: -12..12, y: -48..-28)
-        AddWalkableRect(-3, -61, 6, 13);   // Hành lang Nam 2 (x: -3..2, y: -61..-49)
-        AddWalkableRect(-12, -82, 25, 21); // Phòng Nam 2 (x: -12..12, y: -82..-62)
-        AddWalkableRect(-3, -95, 6, 13);   // Hành lang Nam 3 (x: -3..2, y: -95..-83)
-        AddWalkableRect(-15, -122, 31, 27);// Đấu Trường Boss Nam (x: -15..15, y: -122..-96)
+        // --- LỐI ĐI 2: NHÁNH ĐÔNG (+X) — ÍT QUÁI TINH ANH -> ĐẠI TRÙM BÓNG MA & GOR'MOK ---
+        AddWalkableRect(19, -4, 7, 8);     // Hành lang Đông 1 rộng 8m, dài 7m (x: 19..26, y: -4..4)
+        AddWalkableRect(26, -10, 18, 20);  // Phòng Quái Đông (x: 26..44, y: -10..10)
+        AddWalkableRect(44, -4, 6, 8);     // Hành lang Đông 2 rộng 8m, dài 6m (x: 44..50, y: -4..4)
+        AddWalkableRect(50, -12, 24, 24);  // Phòng Đại Trùm Đông (x: 50..74, y: -12..12)
 
-        // --- NHÁNH TÂY (-X): ÍT QUÁI TINH ANH -> BOSS BÓNG MA BẢN NGÃ ---
-        AddWalkableRect(-33, -3, 14, 6);   // Hành lang Tây 1 (x: -33..-20, y: -3..2)
-        AddWalkableRect(-54, -10, 21, 21); // Phòng Tây 1 (x: -54..-34, y: -10..10)
-        AddWalkableRect(-67, -3, 13, 6);   // Hành lang Tây 2 (x: -67..-55, y: -3..2)
-        AddWalkableRect(-88, -10, 21, 21); // Phòng Tây 2 (x: -88..-68, y: -10..10)
-        AddWalkableRect(-101, -3, 13, 6);  // Hành lang Tây 3 (x: -101..-89, y: -3..2)
-        AddWalkableRect(-128, -13, 27, 27);// Đấu Trường Boss Tây (x: -128..-102, y: -13..13)
-
-        // Tập hợp toàn bộ ô đất đi được
         HashSet<Vector2Int> floorCells = new HashSet<Vector2Int>();
         foreach (var r in walkableRects)
         {
@@ -214,12 +186,11 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             }
         }
 
-        // Vẽ tâm đấu trường đất nện (Dirt Clearing) cho các phòng chiến đấu và phòng Boss mới
+        // Vẽ tâm đất nện cho 4 phòng mới
         Vector2[] clearingCenters = new Vector2[]
         {
-            new Vector2(44f, 0f), new Vector2(78f, 0f), new Vector2(115f, 0f),
-            new Vector2(0f, -38f), new Vector2(0f, -72f), new Vector2(0f, -109f),
-            new Vector2(-44f, 0f), new Vector2(-78f, 0f), new Vector2(-115f, 0f)
+            new Vector2(0f, -28f), new Vector2(0f, -53f),
+            new Vector2(35f, 0f),  new Vector2(62f, 0f)
         };
         if (dirtTile != null)
         {
@@ -227,11 +198,11 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             {
                 int cx = Mathf.RoundToInt(c.x);
                 int cy = Mathf.RoundToInt(c.y);
-                for (int dx = -6; dx <= 6; dx++)
+                for (int dx = -5; dx <= 5; dx++)
                 {
-                    for (int dy = -5; dy <= 5; dy++)
+                    for (int dy = -4; dy <= 4; dy++)
                     {
-                        if ((dx * dx) / 36f + (dy * dy) / 25f <= 1.0f)
+                        if ((dx * dx) / 25f + (dy * dy) / 16f <= 1.0f)
                         {
                             groundTm.SetTile(new Vector3Int(cx + dx, cy + dy, 0), dirtTile);
                         }
@@ -240,7 +211,7 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             }
         }
 
-        // Xây viền tường đá kín xung quanh toàn bộ chu vi bản đồ mới (trừ phần phía Bắc cây cổ thụ y >= 14 của Hub)
+        // Xây viền tường đá kín xung quanh toàn bộ chu vi bản đồ
         if (wallTile != null)
         {
             HashSet<Vector2Int> wallCells = new HashSet<Vector2Int>();
@@ -276,39 +247,54 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             wallCol.enabled = true;
         }
 
-        // Khởi tạo hệ thống Phòng, Cửa Phong Ấn, Bảng Chỉ Đường và Trang Trí cho Map 2
         SetupMap2RoomsAndBarriers();
-        DecorateMap2ExpansionChambers();
     }
 
-    private void ClearBlockingHubPropsMap2()
+    private void CleanUpObstaclesAndOversizedCollidersMap2()
     {
         var envRoot = GameObject.Find("Map2_Environment");
-        if (envRoot == null) return;
-
-        for (int i = envRoot.transform.childCount - 1; i >= 0; i--)
+        if (envRoot != null)
         {
-            Transform child = envRoot.transform.GetChild(i);
-            if (child == null) continue;
-            Vector3 p = child.position;
-
-            // Di dời Trụ Đá Nam để mở Cổng Nam (x: -3..2, y: -14..-9)
-            if (child.name.Contains("Glowing_Rune_Pillar_South"))
+            for (int i = envRoot.transform.childCount - 1; i >= 0; i--)
             {
-                child.position = new Vector3(-6.2f, -11.5f, 0f);
-                continue;
-            }
+                Transform child = envRoot.transform.GetChild(i);
+                if (child == null) continue;
+                string n = child.name;
+                Vector3 p = child.position;
 
-            // Di dời các cây/đá nằm chắn ngay trước Cổng Đông (x > 11, y: -4.5..3.5) hoặc Cổng Tây (x < -11, y: -4.5..3.5)
-            if (p.y >= -4.8f && p.y <= 3.8f)
-            {
-                if (p.x >= 11.5f)
+                // 1. Tắt EdgeCollider2D khổng lồ trên Giant_Ancient_Tree để không bao giờ cản đường vô hình
+                if (n.Contains("Giant_Ancient_Tree"))
                 {
-                    child.position = new Vector3(p.x, 6.2f, p.z);
+                    var cols = child.GetComponentsInChildren<Collider2D>(true);
+                    foreach (var c in cols) c.enabled = false;
+                    continue;
                 }
-                else if (p.x <= -11.5f)
+
+                // 2. Xóa toàn bộ cây cối, tảng đá, trụ đá nằm chắn giữa sân hoặc chắn lối đi Đông / Nam
+                if (n.Contains("Tree_Mid") || n.Contains("Tree_Bottom") ||
+                    n.Contains("Boulder_") || n.Contains("Rock_") ||
+                    n.Contains("Glowing_Rune_Pillar") || n.Contains("AncientShrine"))
                 {
-                    child.position = new Vector3(p.x, 6.2f, p.z);
+                    Destroy(child.gameObject);
+                    continue;
+                }
+
+                // 3. Xóa các cây viền (Forest_Border_Tree) nằm gần cửa Nam (x: -6..6, y < -6) hoặc cửa Đông (x > 10, y: -6..6)
+                if (n.Contains("Forest_Border_Tree"))
+                {
+                    if ((p.x >= -6.5f && p.x <= 6.5f && p.y <= -6.0f) ||
+                        (p.x >= 10.0f && p.y >= -6.5f && p.y <= 6.5f))
+                    {
+                        Destroy(child.gameObject);
+                        continue;
+                    }
+                }
+
+                // 4. Tắt toàn bộ Collider2D trên các cây trang trí ở rìa còn lại để không bao giờ bị vướng tán cây vô hình
+                var childCols = child.GetComponentsInChildren<Collider2D>(true);
+                foreach (var c in childCols)
+                {
+                    c.enabled = false;
                 }
             }
         }
@@ -325,13 +311,13 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         var mgr = roomsRoot.gameObject.AddComponent<DungeonRoomManager>();
         mgr.rooms.Clear();
 
-        // Phòng 0: Thánh Địa Trung Tâm (Sanctuary)
+        // Phòng 1: Thánh Địa Trung Tâm
         var hubRoom = CreateCustomRoom(
             roomsRoot, 1, DungeonRoom.RoomType.Sanctuary,
             new Rect(-19f, -13f, 38f, 26f),
-            "THÁNH ĐỊA THUNG LŨNG (TRUNG TÂM)", "VALLEY SANCTUARY (CENTRAL HUB)",
-            "Hãy chọn 1 trong 3 Lối Đi (Đông / Nam / Tây) dẫn tới 3 Đại Trùm khác nhau!",
-            "Choose 1 of 3 Branching Paths (East / South / West) leading to 3 different Bosses!",
+            "THUNG LŨNG TÀN TÍCH", "VALLEY RUIN SANCTUARY",
+            "Đi xuống Nhánh Nam (Đông Quái -> Trùm Gor'Mok) hoặc sang Nhánh Đông (Ít Quái -> Bóng Ma)!",
+            "Head South (Swarm -> Boss Gor'Mok) or East (Fast Path -> Shadow Boss)!",
             null, null, null, null
         );
         hubRoom.isEntered = true;
@@ -339,199 +325,61 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         mgr.rooms.Add(hubRoom);
         mgr.currentRoom = hubRoom;
 
-        // --- NHÁNH ĐÔNG: ĐÔNG QUÁI -> BOSS GOR'MOK ---
-        var bE1_in  = CreateBarrier(barriersRoot, new Vector3(34f, -0.5f, 0f), true, 6.2f, "Barrier_E1_In");
-        var bE1_out = CreateBarrier(barriersRoot, new Vector3(54f, -0.5f, 0f), true, 6.2f, "Barrier_E1_Out");
-        var bE2_in  = CreateBarrier(barriersRoot, new Vector3(68f, -0.5f, 0f), true, 6.2f, "Barrier_E2_In");
-        var bE2_out = CreateBarrier(barriersRoot, new Vector3(88f, -0.5f, 0f), true, 6.2f, "Barrier_E2_Out");
-        var bE3_in  = CreateBarrier(barriersRoot, new Vector3(102f, -0.5f, 0f), true, 6.2f, "Barrier_E3_Boss");
+        // --- LỐI ĐI 1: NHÁNH NAM (-Y) — ĐÔNG QUÁI -> ĐẠI TRÙM GỐC MAP 2: GOR'MOK ---
+        var bS1_in  = CreateBarrier(barriersRoot, new Vector3(0f, -20f, 0f), false, 8.2f, "Barrier_S1_In");
+        var bS1_out = CreateBarrier(barriersRoot, new Vector3(0f, -36f, 0f), false, 8.2f, "Barrier_S1_Out");
+        var bS2_in  = CreateBarrier(barriersRoot, new Vector3(0f, -42f, 0f), false, 8.2f, "Barrier_S2_Boss");
 
         mgr.rooms.Add(CreateCustomRoom(
             roomsRoot, 2, DungeonRoom.RoomType.SunkenHall,
-            new Rect(34f, -10f, 20f, 20f),
-            "NHÁNH ĐÔNG 1: ĐẠI LỘ HUYẾT THÚ", "EAST PATH 1: BLOOD MONSTER AVENUE",
-            "Lối đi Đông Quái! Quét sạch 2 đợt bầy Huyết Thú đông đảo!",
-            "High-density Swarm Path! Purge 2 massive Blood Monster waves!",
-            bE1_in, bE1_out, bE2_in,
-            r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.SwarmManyMonsters, 1))
+            new Rect(-12f, -36f, 24f, 16f),
+            "SẢNH THUNG LŨNG NAM (ĐÔNG QUÁI)", "SOUTH VALLEY HALL (SWARM)",
+            "Tiêu diệt 2 đợt bầy Huyết Thú & Hoàng Thú để mở cửa Huyết Điện!",
+            "Purge 2 waves of Blood Monsters & Valley Beasts!",
+            bS1_in, bS1_out, bS2_in,
+            r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.SwarmManyMonsters))
         ));
 
         mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 3, DungeonRoom.RoomType.CursedCrypt,
-            new Rect(68f, -10f, 20f, 20f),
-            "NHÁNH ĐÔNG 2: HUYẾT TRÌ SÔI SỤC", "EAST PATH 2: BOILING BLOOD BASIN",
-            "Bầy quái thung lũng hung tợn bảo vệ cửa vào Huyết Điện!",
-            "Frenzied valley monsters guarding the Blood Sanctum!",
-            bE2_in, bE2_out, bE3_in,
-            r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.SwarmManyMonsters, 2))
-        ));
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 4, DungeonRoom.RoomType.TitanSanctum,
-            new Rect(102f, -13f, 26f, 26f),
-            "ĐẤU TRƯỜNG ĐÔNG: ĐẠI TRÙM GOR'MOK", "EAST SANCTUM: OVERLORD GOR'MOK",
-            "ĐẠI CHIẾN TRÙM NHÁNH ĐÔNG: GOR'MOK - HUYẾT THÚ CỔ THỤ!",
-            "EAST ROUTE FINAL BOSS: GOR'MOK THE ANCIENT BLOOD BEAST!",
-            bE3_in, null, null,
+            roomsRoot, 3, DungeonRoom.RoomType.TitanSanctum,
+            new Rect(-14f, -64f, 28f, 22f),
+            "HUYẾT ĐIỆN ĐẠI TRÙM GOR'MOK", "SANCTUM OF OVERLORD GOR'MOK",
+            "ĐẠI CHIẾN BOSS MAP 2: GOR'MOK - HUYẾT THÚ CỔ THỤ!",
+            "MAP 2 BOSS BATTLE: GOR'MOK THE ANCIENT BLOOD BEAST!",
+            bS2_in, null, null,
             r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.GorMokBloodLord, isMap3: false))
         ));
 
-        // --- NHÁNH NAM: QUÁI VỪA PHẢI -> BOSS GOLEM CỔ ĐẠI ---
-        var bS1_in  = CreateBarrier(barriersRoot, new Vector3(-0.5f, -28f, 0f), false, 6.2f, "Barrier_S1_In");
-        var bS1_out = CreateBarrier(barriersRoot, new Vector3(-0.5f, -48f, 0f), false, 6.2f, "Barrier_S1_Out");
-        var bS2_in  = CreateBarrier(barriersRoot, new Vector3(-0.5f, -62f, 0f), false, 6.2f, "Barrier_S2_In");
-        var bS2_out = CreateBarrier(barriersRoot, new Vector3(-0.5f, -82f, 0f), false, 6.2f, "Barrier_S2_Out");
-        var bS3_in  = CreateBarrier(barriersRoot, new Vector3(-0.5f, -96f, 0f), false, 6.2f, "Barrier_S3_Boss");
+        // --- LỐI ĐI 2: NHÁNH ĐÔNG (+X) — ÍT QUÁI TINH ANH -> ĐẠI TRÙM BÓNG MA BẢN NGÃ ---
+        var bE1_in  = CreateBarrier(barriersRoot, new Vector3(26f, 0f, 0f), true, 8.2f, "Barrier_E1_In");
+        var bE1_out = CreateBarrier(barriersRoot, new Vector3(44f, 0f, 0f), true, 8.2f, "Barrier_E1_Out");
+        var bE2_in  = CreateBarrier(barriersRoot, new Vector3(50f, 0f, 0f), true, 8.2f, "Barrier_E2_Boss");
 
         mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 5, DungeonRoom.RoomType.SunkenHall,
-            new Rect(-12f, -48f, 24f, 20f),
-            "NHÁNH NAM 1: SẢNH ĐÁ RÊU PHONG", "SOUTH PATH 1: MOSSY STONE HALL",
-            "Lối đi Cân Bằng! Tiêu diệt đội tuần tra thung lũng!",
-            "Balanced Path! Defeat the valley patrol squad!",
-            bS1_in, bS1_out, bS2_in,
-            r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.BalancedMonsters, 1))
+            roomsRoot, 4, DungeonRoom.RoomType.CursedCrypt,
+            new Rect(26f, -10f, 18f, 20f),
+            "HÀNH LANG ĐÔNG (ÍT QUÁI - ĐƯỜNG NHANH)", "EAST HALL (LOW MONSTERS - FAST PATH)",
+            "Hạ gục toán hộ vệ tinh nhuệ để tiến thẳng vào Điện Thờ!",
+            "Defeat the elite guard squad to reach the Boss Sanctum!",
+            bE1_in, bE1_out, bE2_in,
+            r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.EliteFewMonsters))
         ));
 
         mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 6, DungeonRoom.RoomType.CursedCrypt,
-            new Rect(-12f, -82f, 24f, 20f),
-            "NHÁNH NAM 2: HẺM NÚI ĐÁ VỠ", "SOUTH PATH 2: SHATTERED CANYON",
-            "Vượt qua chốt chặn cuối trước Thánh Điện Cự Thạch!",
-            "Break through the final garrison before the Golem Sanctum!",
-            bS2_in, bS2_out, bS3_in,
-            r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.BalancedMonsters, 2))
-        ));
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 7, DungeonRoom.RoomType.TitanSanctum,
-            new Rect(-15f, -122f, 30f, 26f),
-            "ĐẤU TRƯỜNG NAM: CỰ THẠCH GOLEM", "SOUTH SANCTUM: ANCIENT VALLEY GOLEM",
-            "ĐẠI CHIẾN TRÙM NHÁNH NAM: CỰ THẠCH HỘ VỆ THUNG LŨNG!",
-            "SOUTH ROUTE FINAL BOSS: ANCIENT STONE GOLEM!",
-            bS3_in, null, null,
-            r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.AncientValleyGolem, isMap3: false))
-        ));
-
-        // --- NHÁNH TÂY: ÍT QUÁI TINH ANH -> BOSS BÓNG MA BẢN NGÃ ---
-        var bW1_in  = CreateBarrier(barriersRoot, new Vector3(-34f, -0.5f, 0f), true, 6.2f, "Barrier_W1_In");
-        var bW1_out = CreateBarrier(barriersRoot, new Vector3(-54f, -0.5f, 0f), true, 6.2f, "Barrier_W1_Out");
-        var bW2_in  = CreateBarrier(barriersRoot, new Vector3(-68f, -0.5f, 0f), true, 6.2f, "Barrier_W2_In");
-        var bW2_out = CreateBarrier(barriersRoot, new Vector3(-88f, -0.5f, 0f), true, 6.2f, "Barrier_W2_Out");
-        var bW3_in  = CreateBarrier(barriersRoot, new Vector3(-102f, -0.5f, 0f), true, 6.2f, "Barrier_W3_Boss");
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 8, DungeonRoom.RoomType.SunkenHall,
-            new Rect(-54f, -10f, 20f, 20f),
-            "NHÁNH TÂY 1: VƯỜN CỔ TỊNH KHÔNG", "WEST PATH 1: SILENT ANCIENT GROVE",
-            "Lối đi Ít Quái Tinh Anh! Hạ gục nhanh hộ vệ tinh nhuệ!",
-            "Low-Monster Elite Path! Swiftly defeat the elite guardians!",
-            bW1_in, bW1_out, bW2_in,
-            r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.EliteFewMonsters, 1))
-        ));
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 9, DungeonRoom.RoomType.CursedCrypt,
-            new Rect(-88f, -10f, 20f, 20f),
-            "NHÁNH TÂY 2: HÀNH LANG PHẢN CHIẾU", "WEST PATH 2: MIRRORED CORRIDOR",
-            "Bóng tối ngưng tụ trước Điện Thờ Bản Ngã!",
-            "Shadows condense before the Mirror Sanctum!",
-            bW2_in, bW2_out, bW3_in,
-            r => StartCoroutine(RunMap2CombatRoomRoutine(r, RouteDensity.EliteFewMonsters, 2))
-        ));
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 10, DungeonRoom.RoomType.TitanSanctum,
-            new Rect(-128f, -13f, 26f, 26f),
-            "ĐẤU TRƯỜNG TÂY: BÓNG MA BẢN NGÃ", "WEST SANCTUM: SHADOW DOPPELGANGER",
-            "ĐẠI CHIẾN TRÙM NHÁNH TÂY: BÓNG MA BẢN NGÃ HƯ KHÔNG!",
-            "WEST ROUTE FINAL BOSS: VOID SHADOW DOPPELGANGER!",
-            bW3_in, null, null,
+            roomsRoot, 5, DungeonRoom.RoomType.TitanSanctum,
+            new Rect(50f, -12f, 24f, 24f),
+            "ĐIỆN THỜ BÓNG MA & HUYẾT THÚ", "SHADOW & BLOOD SANCTUM",
+            "ĐẠI CHIẾN TRÙM NHÁNH ĐÔNG: BÓNG MA BẢN NGÃ!",
+            "EAST ROUTE BOSS: SHADOW DOPPELGANGER!",
+            bE2_in, null, null,
             r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.ShadowDoppelganger, isMap3: false))
         ));
-
-        // Đặt 3 Bảng Chỉ Đường Phát Sáng ngay tại 3 cửa ngõ của Thánh Địa Map 2
-        CreateRouteSignpost(
-            new Vector3(17.2f, 2.8f, 0f),
-            LocalizationManager.T(
-                "<b><color=#FF6B6B>➔ NHÁNH ĐÔNG: ĐẠI LỘ HUYẾT THÚ</color></b>\n<size=78%><color=#FFD166>[ĐÔNG QUÁI - NHIỀU LINH HỒN]</color>\nBOSS: ĐẠI TRÙM GOR'MOK</size>",
-                "<b><color=#FF6B6B>➔ EAST PATH: BLOOD AVENUE</color></b>\n<size=78%><color=#FFD166>[MANY MONSTERS - HIGH LOOT]</color>\nBOSS: OVERLORD GOR'MOK</size>"
-            ),
-            new Color(1f, 0.35f, 0.2f)
-        );
-
-        CreateRouteSignpost(
-            new Vector3(0f, -10.8f, 0f),
-            LocalizationManager.T(
-                "<b><color=#4ECDC4>⬇ NHÁNH NAM: HẺM NÚI CỰ THẠCH</color></b>\n<size=78%><color=#A8E6CF>[QUÁI VỪA PHẢI - CÂN BẰNG]</color>\nBOSS: CỰ THẠCH GOLEM CỔ ĐẠI</size>",
-                "<b><color=#4ECDC4>⬇ SOUTH PATH: STONE CANYON</color></b>\n<size=78%><color=#A8E6CF>[BALANCED MONSTERS]</color>\nBOSS: ANCIENT VALLEY GOLEM</size>"
-            ),
-            new Color(0.25f, 0.9f, 0.85f)
-        );
-
-        CreateRouteSignpost(
-            new Vector3(-17.2f, 2.8f, 0f),
-            LocalizationManager.T(
-                "<b><color=#C77DFF>⬅ NHÁNH TÂY: ĐƯỜNG TẮT TỊNH KHÔNG</color></b>\n<size=78%><color=#E0AAFF>[ÍT QUÁI TINH ANH - ĐƯỜNG NHANH]</color>\nBOSS: BÓNG MA BẢN NGÃ</size>",
-                "<b><color=#C77DFF>⬅ WEST PATH: SILENT SHORTCUT</color></b>\n<size=78%><color=#E0AAFF>[FEW ELITE MONSTERS - FAST]</color>\nBOSS: SHADOW DOPPELGANGER</size>"
-            ),
-            new Color(0.78f, 0.45f, 1f)
-        );
-    }
-
-    private void DecorateMap2ExpansionChambers()
-    {
-        var envRoot = GameObject.Find("Map2_Environment");
-        if (envRoot == null) return;
-
-        Transform treeTemplate = envRoot.transform.Find("Forest_Border_Tree") ?? envRoot.transform.Find("Tree_MidLeft");
-        Transform boulderTemplate = envRoot.transform.Find("Boulder_MidLeft");
-        Transform pillarTemplate = envRoot.transform.Find("Glowing_Rune_Pillar_West");
-
-        Transform decoRoot = new GameObject("Map2_ExpansionDecorations").transform;
-        decoRoot.SetParent(transform, false);
-
-        Vector2[] roomCenters = new Vector2[]
-        {
-            new Vector2(44f, 0f), new Vector2(78f, 0f), new Vector2(115f, 0f),
-            new Vector2(0f, -38f), new Vector2(0f, -72f), new Vector2(0f, -109f),
-            new Vector2(-44f, 0f), new Vector2(-78f, 0f), new Vector2(-115f, 0f)
-        };
-
-        for (int i = 0; i < roomCenters.Length; i++)
-        {
-            Vector3 c = new Vector3(roomCenters[i].x, roomCenters[i].y, 0f);
-            bool isBossRoom = (i % 3 == 2);
-            float rx = isBossRoom ? 9.5f : 7.0f;
-            float ry = isBossRoom ? 9.0f : 6.8f;
-
-            // Đặt 4 cây cổ thụ ở 4 góc phòng để tạo cảnh quan rừng thung lũng sống động (không chắn đường đi ở giữa)
-            if (treeTemplate != null)
-            {
-                CloneDecor(treeTemplate, decoRoot, c + new Vector3(-rx, ry, 0f));
-                CloneDecor(treeTemplate, decoRoot, c + new Vector3(rx, ry, 0f));
-                CloneDecor(treeTemplate, decoRoot, c + new Vector3(-rx, -ry, 0f));
-                CloneDecor(treeTemplate, decoRoot, c + new Vector3(rx, -ry, 0f));
-            }
-
-            if (boulderTemplate != null)
-            {
-                CloneDecor(boulderTemplate, decoRoot, c + new Vector3(-rx + 1.5f, -ry + 1.2f, 0f));
-                CloneDecor(boulderTemplate, decoRoot, c + new Vector3(rx - 1.5f, ry - 1.2f, 0f));
-            }
-
-            if (pillarTemplate != null && isBossRoom)
-            {
-                CloneDecor(pillarTemplate, decoRoot, c + new Vector3(-6.5f, 6.5f, 0f));
-                CloneDecor(pillarTemplate, decoRoot, c + new Vector3(6.5f, 6.5f, 0f));
-            }
-        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // 2. MAP 3: KÝ ỨC LÃNG QUÊN ĐA NHÁNH (NORTH, EAST, WEST ISLAND ROUTES)
+    // 2. MAP 3: KÝ ỨC LÃNG QUÊN GỌN GÀNG (NHÁNH BẮC & NHÁNH ĐÔNG)
     // ═══════════════════════════════════════════════════════════════════════════
-    private void BuildMap3MultiPathIslands()
+    private void BuildMap3CompactIslands()
     {
         var baseFloorObj = GameObject.Find("ArenaFloor_Mossy");
         Sprite mossFloorSprite = null;
@@ -548,12 +396,12 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             }
         }
 
-        // Gỡ bỏ tường kín 4 phía cũ của đảo trung tâm để xây hệ thống tường viền mở 3 cầu đá
+        // Gỡ bỏ tường kín 4 phía cũ của đảo trung tâm
         var oldWalls = GameObject.Find("ArenaWalls");
         if (oldWalls != null) Destroy(oldWalls);
 
-        // Dịch chuyển nhẹ 2 cây ở mép Đông/Tây đảo trung tâm để không chắn lối lên Cầu Đông & Cầu Tây
-        ClearBlockingHubPropsMap3();
+        // Dọn dẹp toàn bộ đá, gốc cây chắn đường và tắt Collider vô hình trên đảo Map 3
+        CleanUpObstaclesAndOversizedCollidersMap3();
 
         Transform map3ExpRoot = new GameObject("Map3_MultiPathIslands").transform;
         map3ExpRoot.SetParent(transform, false);
@@ -561,36 +409,20 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         // Đảo Trung Tâm (Hub): x [-16..16), y [-11..11)
         AddWalkableRect(-16, -11, 32, 22);
 
-        // --- NHÁNH BẮC (+Y): ĐÔNG QUÁI -> BOSS CHÚA TỂ NHỆN SKELETON KING ---
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_N1", -3, 11, 6, 12);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Island_N1", -14, 23, 28, 18);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_N2", -3, 41, 6, 12);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Island_N2", -14, 53, 28, 18);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_N3", -3, 71, 6, 12);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "BossIsland_North", -17, 83, 34, 24);
+        // --- LỐI ĐI 1: NHÁNH BẮC (+Y) — ĐÔNG QUÁI -> BOSS GỐC MAP 3: CHÚA TỂ NHỆN CỔ ĐẠI ---
+        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_N1", -4, 11, 8, 7);
+        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Island_N1", -13, 18, 26, 16);
+        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_N2", -4, 34, 8, 6);
+        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "BossIsland_North", -15, 40, 30, 22);
 
-        // --- NHÁNH ĐÔNG (+X): QUÁI VỪA PHẢI -> BOSS BÓNG MA BẢN NGÃ ---
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_E1", 16, -3, 12, 6);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Island_E1", 28, -11, 20, 22);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_E2", 48, -3, 12, 6);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Island_E2", 60, -11, 20, 22);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_E3", 80, -3, 12, 6);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "BossIsland_East", 92, -14, 26, 28);
+        // --- LỐI ĐI 2: NHÁNH ĐÔNG (+X) — ÍT QUÁI TINH ANH -> ĐẠI TRÙM BÓNG MA BẢN NGÃ ---
+        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_E1", 16, -4, 7, 8);
+        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Island_E1", 23, -10, 18, 20);
+        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_E2", 41, -4, 6, 8);
+        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "BossIsland_East", 47, -12, 24, 24);
 
-        // --- NHÁNH TÂY (-X): ÍT QUÁI TINH ANH -> BOSS CỰ THẦN HƯ KHÔNG ---
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_W1", -28, -3, 12, 6);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Island_W1", -48, -11, 20, 22);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_W2", -60, -3, 12, 6);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Island_W2", -80, -11, 20, 22);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "Bridge_W3", -92, -3, 12, 6);
-        CreateIslandFloor(map3ExpRoot, mossFloorSprite, floorMat, "BossIsland_West", -118, -14, 26, 28);
-
-        // Tự động sinh toàn bộ tường bao quanh các đảo và cầu đá (mở thông hoàn toàn các đầu cầu)
         BuildPerimeterWallsFromWalkableRects(map3ExpRoot);
-
-        // Thiết lập hệ thống Phòng, Cửa Phong Ấn, Bảng Chỉ Đường và Cây Cổ Thụ cho Map 3
         SetupMap3RoomsAndBarriers();
-        DecorateMap3ExpansionIslands();
     }
 
     private void CreateIslandFloor(Transform parent, Sprite sprite, Material mat, string name, int xMin, int yMin, int width, int height)
@@ -610,22 +442,40 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         sr.color = Color.white;
     }
 
-    private void ClearBlockingHubPropsMap3()
+    private void CleanUpObstaclesAndOversizedCollidersMap3()
     {
-        var deco = GameObject.Find("NatureDecorations");
-        if (deco == null) return;
+        var envRoot = GameObject.Find("Map3_ForgottenMemories_Environment");
+        var decoRoot = GameObject.Find("NatureDecorations");
 
-        for (int i = 0; i < deco.transform.childCount; i++)
+        Transform[] roots = new Transform[]
         {
-            Transform ch = deco.transform.GetChild(i);
-            if (ch == null) continue;
-            if (ch.name.Contains("RedTree_West"))
+            envRoot != null ? envRoot.transform : null,
+            decoRoot != null ? decoRoot.transform : null
+        };
+
+        foreach (var r in roots)
+        {
+            if (r == null) continue;
+            var allChildren = r.GetComponentsInChildren<Transform>(true);
+            foreach (var ch in allChildren)
             {
-                ch.position = new Vector3(-13.5f, 4.8f, 0f);
-            }
-            else if (ch.name.Contains("TealTree_East"))
-            {
-                ch.position = new Vector3(13.5f, 4.8f, 0f);
+                if (ch == null || ch == r) continue;
+                string n = ch.name;
+
+                // Xóa toàn bộ gốc cây, tảng đá và cây chắn cửa Bắc / Đông
+                if (n.Contains("Stump_") || n.Contains("RockLarge_") || n.Contains("RockSmall_") ||
+                    n.Contains("PineTree_North") || n.Contains("TealTree_East"))
+                {
+                    Destroy(ch.gameObject);
+                    continue;
+                }
+
+                // Tắt toàn bộ Collider2D trên các cây trang trí ở góc đảo để không bao giờ gây kẹt đường
+                var cols = ch.GetComponents<Collider2D>();
+                foreach (var c in cols)
+                {
+                    c.enabled = false;
+                }
             }
         }
     }
@@ -745,13 +595,13 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         var mgr = roomsRoot.gameObject.AddComponent<DungeonRoomManager>();
         mgr.rooms.Clear();
 
-        // Phòng 0: Đảo Cổ Trung Tâm (Sanctuary Hub)
+        // Phòng 1: Đảo Cổ Trung Tâm
         var hubRoom = CreateCustomRoom(
             roomsRoot, 1, DungeonRoom.RoomType.Sanctuary,
             new Rect(-16f, -11f, 32f, 22f),
-            "ĐẢO CỔ KÝ ỨC (TRUNG TÂM)", "FORGOTTEN ISLAND (CENTRAL HUB)",
-            "Hãy chọn 1 trong 3 Cầu Đá (Bắc / Đông / Tây) dẫn tới 3 Đại Trùm khác nhau!",
-            "Choose 1 of 3 Stone Bridges (North / East / West) leading to 3 different Bosses!",
+            "ĐẢO CỔ KÝ ỨC", "FORGOTTEN ISLAND SANCTUARY",
+            "Đi lên Cầu Bắc (Đông Quái -> Chúa Tể Nhện) hoặc sang Cầu Đông (Ít Quái -> Bóng Ma)!",
+            "Head North (Swarm -> Spider Lord) or East (Fast Path -> Shadow Boss)!",
             null, null, null, null
         );
         hubRoom.isEntered = true;
@@ -759,200 +609,63 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         mgr.rooms.Add(hubRoom);
         mgr.currentRoom = hubRoom;
 
-        // --- NHÁNH BẮC (+Y): ĐÔNG QUÁI -> BOSS CHÚA TỂ NHỆN SKELETON KING ---
-        var bN1_in  = CreateBarrier(barriersRoot, new Vector3(0f, 23f, 0f), false, 6.2f, "Barrier_N1_In");
-        var bN1_out = CreateBarrier(barriersRoot, new Vector3(0f, 41f, 0f), false, 6.2f, "Barrier_N1_Out");
-        var bN2_in  = CreateBarrier(barriersRoot, new Vector3(0f, 53f, 0f), false, 6.2f, "Barrier_N2_In");
-        var bN2_out = CreateBarrier(barriersRoot, new Vector3(0f, 71f, 0f), false, 6.2f, "Barrier_N2_Out");
-        var bN3_in  = CreateBarrier(barriersRoot, new Vector3(0f, 83f, 0f), false, 6.2f, "Barrier_N3_Boss");
+        // --- LỐI ĐI 1: NHÁNH BẮC (+Y) — ĐÔNG QUÁI -> ĐẠI TRÙM GỐC MAP 3: CHÚA TỂ NHỆN CỔ ĐẠI ---
+        var bN1_in  = CreateBarrier(barriersRoot, new Vector3(0f, 18f, 0f), false, 8.2f, "Barrier_N1_In");
+        var bN1_out = CreateBarrier(barriersRoot, new Vector3(0f, 34f, 0f), false, 8.2f, "Barrier_N1_Out");
+        var bN2_in  = CreateBarrier(barriersRoot, new Vector3(0f, 40f, 0f), false, 8.2f, "Barrier_N2_Boss");
 
         mgr.rooms.Add(CreateCustomRoom(
             roomsRoot, 2, DungeonRoom.RoomType.SunkenHall,
-            new Rect(-14f, 23f, 28f, 18f),
-            "NHÁNH BẮC 1: ĐẢO YÊU TINH & QUÁI NHỚT", "NORTH PATH 1: GOBLIN & SLIME ISLE",
-            "Lối đi Đông Quái! Càn quét 2 đợt bầy Yêu Tinh và Quái Nhớt áp đảo!",
-            "High-Density Swarm Path! Purge 2 massive Goblin & Slime waves!",
+            new Rect(-13f, 18f, 26f, 16f),
+            "ĐẢO TIỀN ĐỒN BẮC (ĐÔNG QUÁI)", "NORTH OUTPOST ISLE (SWARM)",
+            "Càn quét 2 đợt bầy Yêu Tinh, Quái Nhớt và Bộ Xương Cổ Đại!",
+            "Purge 2 waves of Goblins, Slimes, and Ancient Skeletons!",
             bN1_in, bN1_out, bN2_in,
-            r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.SwarmManyMonsters, 1))
+            r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.SwarmManyMonsters))
         ));
 
         mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 3, DungeonRoom.RoomType.CursedCrypt,
-            new Rect(-14f, 53f, 28f, 18f),
-            "NHÁNH BẮC 2: QUẦN ĐẢO XƯƠNG CỔ ĐẠI", "NORTH PATH 2: ANCIENT BONE ARCHIPELAGO",
-            "Binh đoàn Bộ Xương & Yêu Tinh bảo vệ Phong Ấn Trứng Nhện!",
-            "Skeleton legion & Goblins guarding the Spider Cocoon Seal!",
-            bN2_in, bN2_out, bN3_in,
-            r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.SwarmManyMonsters, 2))
-        ));
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 4, DungeonRoom.RoomType.TitanSanctum,
-            new Rect(-17f, 83f, 34f, 24f),
-            "ĐẤU TRƯỜNG BẮC: CHÚA TỂ NHỆN CỔ ĐẠI", "NORTH SANCTUM: ANCIENT SPIDER LORD",
-            "ĐẠI CHIẾN TRÙM NHÁNH BẮC: CHÚA TỂ NHỆN CỔ ĐẠI SKELETON KING!",
-            "NORTH ROUTE FINAL BOSS: ANCIENT SPIDER LORD SKELETON KING!",
-            bN3_in, null, null,
+            roomsRoot, 3, DungeonRoom.RoomType.TitanSanctum,
+            new Rect(-15f, 40f, 30f, 22f),
+            "THÁNH ĐẢO CHÚA TỂ NHỆN CỔ ĐẠI", "SANCTUM OF THE ANCIENT SPIDER LORD",
+            "PHÁ VỠ PHONG ẤN TRỨNG KÉN ĐỂ TRIỆU HỒI CHÚA TỂ NHỆN CỔ ĐẠI!",
+            "SHATTER THE COCOON SEAL TO AWAKEN THE ANCIENT SPIDER LORD!",
+            bN2_in, null, null,
             r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.AncientSpiderKing, isMap3: true))
         ));
 
-        // --- NHÁNH ĐÔNG (+X): QUÁI VỪA PHẢI -> BOSS BÓNG MA BẢN NGÃ ---
-        var bE1_in  = CreateBarrier(barriersRoot, new Vector3(28f, 0f, 0f), true, 6.2f, "Barrier_M3_E1_In");
-        var bE1_out = CreateBarrier(barriersRoot, new Vector3(48f, 0f, 0f), true, 6.2f, "Barrier_M3_E1_Out");
-        var bE2_in  = CreateBarrier(barriersRoot, new Vector3(60f, 0f, 0f), true, 6.2f, "Barrier_M3_E2_In");
-        var bE2_out = CreateBarrier(barriersRoot, new Vector3(80f, 0f, 0f), true, 6.2f, "Barrier_M3_E2_Out");
-        var bE3_in  = CreateBarrier(barriersRoot, new Vector3(92f, 0f, 0f), true, 6.2f, "Barrier_M3_E3_Boss");
+        // --- LỐI ĐI 2: NHÁNH ĐÔNG (+X) — ÍT QUÁI TINH ANH -> ĐẠI TRÙM BÓNG MA BẢN NGÃ ---
+        var bE1_in  = CreateBarrier(barriersRoot, new Vector3(23f, 0f, 0f), true, 8.2f, "Barrier_M3_E1_In");
+        var bE1_out = CreateBarrier(barriersRoot, new Vector3(41f, 0f, 0f), true, 8.2f, "Barrier_M3_E1_Out");
+        var bE2_in  = CreateBarrier(barriersRoot, new Vector3(47f, 0f, 0f), true, 8.2f, "Barrier_M3_E2_Boss");
 
         mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 5, DungeonRoom.RoomType.SunkenHall,
-            new Rect(28f, -11f, 20f, 22f),
-            "NHÁNH ĐÔNG 1: ĐẢO SƯƠNG MÙ ĐÔNG", "EAST PATH 1: MISTY EAST ISLE",
-            "Lối đi Cân Bằng! Vượt qua đội tuần tra Bộ Xương và Yêu Tinh!",
-            "Balanced Path! Defeat the Skeleton & Goblin patrol!",
+            roomsRoot, 4, DungeonRoom.RoomType.CursedCrypt,
+            new Rect(23f, -10f, 18f, 20f),
+            "ĐẢO ĐÔNG (ÍT QUÁI - ĐƯỜNG NHANH)", "EAST ISLE (LOW MONSTERS - FAST PATH)",
+            "Hạ gục nhanh kỵ sĩ xương tinh nhuệ để tiến vào Đảo Trùm!",
+            "Swiftly slay the elite bone knights to enter the Boss Isle!",
             bE1_in, bE1_out, bE2_in,
-            r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.BalancedMonsters, 1))
+            r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.EliteFewMonsters))
         ));
 
         mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 6, DungeonRoom.RoomType.CursedCrypt,
-            new Rect(60f, -11f, 20f, 22f),
-            "NHÁNH ĐÔNG 2: ĐẢO HỒI ỨC TAN VỠ", "EAST PATH 2: SHATTERED MEMORY ISLE",
-            "Dọn sạch chốt chặn cuối trước Điện Thờ Bản Ngã!",
-            "Clear the final guard post before the Mirror Sanctum!",
-            bE2_in, bE2_out, bE3_in,
-            r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.BalancedMonsters, 2))
-        ));
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 7, DungeonRoom.RoomType.TitanSanctum,
-            new Rect(92f, -14f, 26f, 28f),
-            "ĐẤU TRƯỜNG ĐÔNG: BÓNG MA BẢN NGÃ", "EAST SANCTUM: SHADOW DOPPELGANGER",
+            roomsRoot, 5, DungeonRoom.RoomType.TitanSanctum,
+            new Rect(47f, -12f, 24f, 24f),
+            "ĐẢO BÓNG MA BẢN NGÃ", "SHADOW DOPPELGANGER ISLE",
             "ĐẠI CHIẾN TRÙM NHÁNH ĐÔNG: BÓNG MA BẢN NGÃ TỐI THƯỢNG!",
-            "EAST ROUTE FINAL BOSS: SUPREME SHADOW DOPPELGANGER!",
-            bE3_in, null, null,
+            "EAST ROUTE BOSS: SUPREME SHADOW DOPPELGANGER!",
+            bE2_in, null, null,
             r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.ShadowDoppelganger, isMap3: true))
         ));
-
-        // --- NHÁNH TÂY (-X): ÍT QUÁI TINH ANH -> BOSS CỰ THẦN HƯ KHÔNG ---
-        var bW1_in  = CreateBarrier(barriersRoot, new Vector3(-28f, 0f, 0f), true, 6.2f, "Barrier_M3_W1_In");
-        var bW1_out = CreateBarrier(barriersRoot, new Vector3(-48f, 0f, 0f), true, 6.2f, "Barrier_M3_W1_Out");
-        var bW2_in  = CreateBarrier(barriersRoot, new Vector3(-60f, 0f, 0f), true, 6.2f, "Barrier_M3_W2_In");
-        var bW2_out = CreateBarrier(barriersRoot, new Vector3(-80f, 0f, 0f), true, 6.2f, "Barrier_M3_W2_Out");
-        var bW3_in  = CreateBarrier(barriersRoot, new Vector3(-92f, 0f, 0f), true, 6.2f, "Barrier_M3_W3_Boss");
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 8, DungeonRoom.RoomType.SunkenHall,
-            new Rect(-48f, -11f, 20f, 22f),
-            "NHÁNH TÂY 1: ĐẢO TỊNH MẶC TÂY", "WEST PATH 1: SILENT WEST ISLE",
-            "Lối đi Ít Quái Tinh Anh! Hạ gục nhanh kỵ sĩ xương tinh nhuệ!",
-            "Low-Monster Elite Path! Swiftly slay the elite bone knights!",
-            bW1_in, bW1_out, bW2_in,
-            r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.EliteFewMonsters, 1))
-        ));
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 9, DungeonRoom.RoomType.CursedCrypt,
-            new Rect(-80f, -11f, 20f, 22f),
-            "NHÁNH TÂY 2: ĐẢO HỘ VỆ CỔ ĐẠI", "WEST PATH 2: ANCIENT GUARDIAN ISLE",
-            "Vượt qua hộ vệ cuối cùng trước Vực Thẳm Cự Thần!",
-            "Overcome the final elites before the Abyssal Golem Sanctum!",
-            bW2_in, bW2_out, bW3_in,
-            r => StartCoroutine(RunMap3CombatRoomRoutine(r, RouteDensity.EliteFewMonsters, 2))
-        ));
-
-        mgr.rooms.Add(CreateCustomRoom(
-            roomsRoot, 10, DungeonRoom.RoomType.TitanSanctum,
-            new Rect(-118f, -14f, 26f, 28f),
-            "ĐẤU TRƯỜNG TÂY: CỰ THẦN HƯ KHÔNG", "WEST SANCTUM: ABYSSAL STONE TITAN",
-            "ĐẠI CHIẾN TRÙM NHÁNH TÂY: CỰ THẦN ĐÁ CỔ ĐẠI THỨC TỈNH!",
-            "WEST ROUTE FINAL BOSS: AWAKENED ABYSSAL STONE TITAN!",
-            bW3_in, null, null,
-            r => StartCoroutine(RunBossRoomRoutine(r, RouteBossType.AncientValleyGolem, isMap3: true))
-        ));
-
-        // Đặt 3 Bảng Chỉ Đường Phát Sáng ngay trước 3 Cầu Đá ở Đảo Trung Tâm Map 3
-        CreateRouteSignpost(
-            new Vector3(0f, 9.2f, 0f),
-            LocalizationManager.T(
-                "<b><color=#FF6B6B>⬆ NHÁNH BẮC: QUẦN ĐẢO NHỆN CỔ</color></b>\n<size=78%><color=#FFD166>[ĐÔNG QUÁI - NHIỀU LINH HỒN]</color>\nBOSS: CHÚA TỂ NHỆN CỔ ĐẠI</size>",
-                "<b><color=#FF6B6B>⬆ NORTH PATH: SPIDER ARCHIPELAGO</color></b>\n<size=78%><color=#FFD166>[MANY MONSTERS - HIGH LOOT]</color>\nBOSS: ANCIENT SPIDER LORD</size>"
-            ),
-            new Color(1f, 0.35f, 0.2f)
-        );
-
-        CreateRouteSignpost(
-            new Vector3(13.2f, 2.2f, 0f),
-            LocalizationManager.T(
-                "<b><color=#4ECDC4>➔ NHÁNH ĐÔNG: HÀNH LANG BẢN NGÃ</color></b>\n<size=78%><color=#A8E6CF>[QUÁI VỪA PHẢI - CÂN BẰNG]</color>\nBOSS: BÓNG MA BẢN NGÃ</size>",
-                "<b><color=#4ECDC4>➔ EAST PATH: MIRROR ARCHIPELAGO</color></b>\n<size=78%><color=#A8E6CF>[BALANCED MONSTERS]</color>\nBOSS: SHADOW DOPPELGANGER</size>"
-            ),
-            new Color(0.25f, 0.9f, 0.85f)
-        );
-
-        CreateRouteSignpost(
-            new Vector3(-13.2f, 2.2f, 0f),
-            LocalizationManager.T(
-                "<b><color=#C77DFF>⬅ NHÁNH TÂY: VỰC THẲM CỰ THẦN</color></b>\n<size=78%><color=#E0AAFF>[ÍT QUÁI TINH ANH - ĐƯỜNG NHANH]</color>\nBOSS: CỰ THẦN HƯ KHÔNG</size>",
-                "<b><color=#C77DFF>⬅ WEST PATH: ABYSSAL TITAN ISLES</color></b>\n<size=78%><color=#E0AAFF>[FEW ELITE MONSTERS - FAST]</color>\nBOSS: ABYSSAL STONE TITAN</size>"
-            ),
-            new Color(0.78f, 0.45f, 1f)
-        );
-    }
-
-    private void DecorateMap3ExpansionIslands()
-    {
-        var deco = GameObject.Find("NatureDecorations");
-        if (deco == null) return;
-
-        Transform willowTpl = deco.transform.Find("Willow_NW");
-        Transform redTreeTpl = deco.transform.Find("RedTree_West");
-        Transform tealTreeTpl = deco.transform.Find("TealTree_East");
-        Transform rockTpl = deco.transform.Find("RockLarge_W");
-
-        Transform expDeco = new GameObject("Map3_ExpansionDecorations").transform;
-        expDeco.SetParent(transform, false);
-
-        Vector2[] islandCenters = new Vector2[]
-        {
-            new Vector2(0f, 32f), new Vector2(0f, 62f), new Vector2(0f, 95f),
-            new Vector2(38f, 0f), new Vector2(70f, 0f), new Vector2(105f, 0f),
-            new Vector2(-38f, 0f), new Vector2(-70f, 0f), new Vector2(-105f, 0f)
-        };
-
-        for (int i = 0; i < islandCenters.Length; i++)
-        {
-            Vector3 c = new Vector3(islandCenters[i].x, islandCenters[i].y, 0f);
-            bool isBoss = (i % 3 == 2);
-            float rx = isBoss ? 10.5f : 7.2f;
-            float ry = isBoss ? 8.5f : 6.5f;
-
-            if (willowTpl != null && isBoss)
-            {
-                CloneDecor(willowTpl, expDeco, c + new Vector3(-rx, ry, 0f));
-                CloneDecor(willowTpl, expDeco, c + new Vector3(rx, ry, 0f));
-            }
-            if (redTreeTpl != null)
-            {
-                CloneDecor(redTreeTpl, expDeco, c + new Vector3(-rx, -ry, 0f));
-            }
-            if (tealTreeTpl != null)
-            {
-                CloneDecor(tealTreeTpl, expDeco, c + new Vector3(rx, -ry, 0f));
-            }
-            if (rockTpl != null && !isBoss)
-            {
-                CloneDecor(rockTpl, expDeco, c + new Vector3(-rx + 1.5f, ry - 1.0f, 0f));
-                CloneDecor(rockTpl, expDeco, c + new Vector3(rx - 1.5f, ry - 1.0f, 0f));
-            }
-        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // 3. ĐIỀU PHỐI ĐỢT QUÁI & ĐẠI TRÙM THEO TỪNG PHÒNG (MAP 2 & MAP 3)
+    // 3. ĐIỀU PHỐI ĐỢT QUÁI & ĐẠI TRÙM GỐC (KHÔNG DÙNG BOSS CÂY / QUÁI ĐÁ)
     // ═══════════════════════════════════════════════════════════════════════════
-    private IEnumerator RunMap2CombatRoomRoutine(DungeonRoom room, RouteDensity density, int stageIndex)
+    private IEnumerator RunMap2CombatRoomRoutine(DungeonRoom room, RouteDensity density)
     {
-        yield return new WaitForSeconds(0.35f);
+        yield return new WaitForSeconds(0.3f);
         if (room.entranceBarrier != null) room.entranceBarrier.Lock();
         if (room.exitBarrier != null) room.exitBarrier.Lock();
 
@@ -964,36 +677,16 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             activeRoomMonsters.Clear();
             isSpawningRoomWave = true;
 
-            int bloodCount = 0, spitterCount = 0, beastCount = 0;
-            float eliteHpMult = 1.0f;
+            int bloodCount = (density == RouteDensity.SwarmManyMonsters) ? (3 + w) : 2;
+            int beastCount = (density == RouteDensity.SwarmManyMonsters) ? (1 + w) : 1;
+            int totalCount = bloodCount + beastCount;
 
-            if (density == RouteDensity.SwarmManyMonsters)
-            {
-                bloodCount   = (stageIndex == 1) ? (3 + w) : (4 + w);
-                spitterCount = 2;
-                beastCount   = (w == 2) ? 2 : 1;
-            }
-            else if (density == RouteDensity.BalancedMonsters)
-            {
-                bloodCount   = 2 + (w - 1);
-                spitterCount = 1 + (stageIndex - 1);
-                beastCount   = 1 + (w - 1);
-            }
-            else // EliteFewMonsters
-            {
-                bloodCount   = 1;
-                spitterCount = (stageIndex == 2) ? 1 : 0;
-                beastCount   = 2;
-                eliteHpMult  = 1.35f;
-            }
-
-            int totalCount = bloodCount + spitterCount + beastCount;
             if (waveUI != null)
             {
                 waveUI.ShowBanner(
                     room.GetLocalizedTitle(),
                     LocalizationManager.T($"Đợt {w} / {totalWaves} — Tiêu diệt {totalCount} quái vật!", $"Wave {w} / {totalWaves} — Slay {totalCount} monsters!"),
-                    2.2f
+                    2.0f
                 );
             }
 
@@ -1002,34 +695,15 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             {
                 Vector3 pos = GetSafeRoomSpawnPos(room, spawnIdx++, totalCount);
                 var bm = BloodMonsterAI.Spawn(pos, isBoss: false, index: i + 1);
-                if (bm != null)
-                {
-                    if (eliteHpMult > 1.05f) bm.MultiplyHealth(eliteHpMult);
-                    activeRoomMonsters.Add(bm.gameObject);
-                }
-                yield return new WaitForSeconds(0.18f);
-            }
-            for (int i = 0; i < spitterCount; i++)
-            {
-                Vector3 pos = GetSafeRoomSpawnPos(room, spawnIdx++, totalCount);
-                var sp = ValleySpitterAI.Spawn(pos, i + 1);
-                if (sp != null)
-                {
-                    if (eliteHpMult > 1.05f) sp.MultiplyHealth(eliteHpMult);
-                    activeRoomMonsters.Add(sp.gameObject);
-                }
-                yield return new WaitForSeconds(0.18f);
+                if (bm != null) activeRoomMonsters.Add(bm.gameObject);
+                yield return new WaitForSeconds(0.15f);
             }
             for (int i = 0; i < beastCount; i++)
             {
                 Vector3 pos = GetSafeRoomSpawnPos(room, spawnIdx++, totalCount);
                 var vb = ValleyBeastAI.Spawn(pos, i + 1);
-                if (vb != null)
-                {
-                    if (eliteHpMult > 1.05f) vb.MultiplyHealth(eliteHpMult);
-                    activeRoomMonsters.Add(vb.gameObject);
-                }
-                yield return new WaitForSeconds(0.18f);
+                if (vb != null) activeRoomMonsters.Add(vb.gameObject);
+                yield return new WaitForSeconds(0.15f);
             }
 
             isSpawningRoomWave = false;
@@ -1037,17 +711,17 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
 
             if (w < totalWaves)
             {
-                AethelShard.SpawnShards(room.roomCenter, density == RouteDensity.SwarmManyMonsters ? 12 : 8);
-                yield return new WaitForSeconds(1.8f);
+                AethelShard.SpawnShards(room.roomCenter, 12);
+                yield return new WaitForSeconds(1.4f);
             }
         }
 
         CompleteCombatRoom(room, density);
     }
 
-    private IEnumerator RunMap3CombatRoomRoutine(DungeonRoom room, RouteDensity density, int stageIndex)
+    private IEnumerator RunMap3CombatRoomRoutine(DungeonRoom room, RouteDensity density)
     {
-        yield return new WaitForSeconds(0.35f);
+        yield return new WaitForSeconds(0.3f);
         if (room.entranceBarrier != null) room.entranceBarrier.Lock();
         if (room.exitBarrier != null) room.exitBarrier.Lock();
 
@@ -1059,34 +733,17 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             activeRoomMonsters.Clear();
             isSpawningRoomWave = true;
 
-            int goblinCount = 0, skelCount = 0, slimeCount = 0, bloodCount = 0;
+            int goblinCount = (density == RouteDensity.SwarmManyMonsters) ? (3 + w) : 1;
+            int skelCount   = (density == RouteDensity.SwarmManyMonsters) ? (2 + w) : 2;
+            int slimeCount  = (density == RouteDensity.SwarmManyMonsters) ? 2 : 0;
+            int totalCount  = goblinCount + skelCount + slimeCount;
 
-            if (density == RouteDensity.SwarmManyMonsters)
-            {
-                goblinCount = 4 + w;
-                skelCount   = (stageIndex == 1) ? (2 + w) : (4 + w);
-                slimeCount  = 3;
-            }
-            else if (density == RouteDensity.BalancedMonsters)
-            {
-                goblinCount = 2 + (w - 1);
-                skelCount   = 2 + stageIndex;
-                slimeCount  = 1;
-            }
-            else // EliteFewMonsters
-            {
-                goblinCount = 0;
-                skelCount   = 2;
-                bloodCount  = 1 + (stageIndex - 1);
-            }
-
-            int totalCount = goblinCount + skelCount + slimeCount + bloodCount;
             if (waveUI != null)
             {
                 waveUI.ShowBanner(
                     room.GetLocalizedTitle(),
                     LocalizationManager.T($"Đợt {w} / {totalWaves} — Tiêu diệt {totalCount} quái vật!", $"Wave {w} / {totalWaves} — Slay {totalCount} monsters!"),
-                    2.2f
+                    2.0f
                 );
             }
 
@@ -1096,28 +753,21 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
                 Vector3 pos = GetSafeRoomSpawnPos(room, spawnIdx++, totalCount);
                 GameObject s = Map3WaveSpawner.SpawnSkeletonStatic(pos);
                 if (s != null) activeRoomMonsters.Add(s);
-                yield return new WaitForSeconds(0.16f);
+                yield return new WaitForSeconds(0.15f);
             }
             for (int i = 0; i < goblinCount; i++)
             {
                 Vector3 pos = GetSafeRoomSpawnPos(room, spawnIdx++, totalCount);
                 GameObject g = Map3WaveSpawner.SpawnGoblinStatic(pos);
                 if (g != null) activeRoomMonsters.Add(g);
-                yield return new WaitForSeconds(0.16f);
+                yield return new WaitForSeconds(0.15f);
             }
             for (int i = 0; i < slimeCount; i++)
             {
                 Vector3 pos = GetSafeRoomSpawnPos(room, spawnIdx++, totalCount);
                 GameObject sl = Map3WaveSpawner.SpawnSlimeStatic(pos);
                 if (sl != null) activeRoomMonsters.Add(sl);
-                yield return new WaitForSeconds(0.16f);
-            }
-            for (int i = 0; i < bloodCount; i++)
-            {
-                Vector3 pos = GetSafeRoomSpawnPos(room, spawnIdx++, totalCount);
-                var bm = BloodMonsterAI.Spawn(pos, isBoss: false, index: i + 1);
-                if (bm != null) activeRoomMonsters.Add(bm.gameObject);
-                yield return new WaitForSeconds(0.16f);
+                yield return new WaitForSeconds(0.15f);
             }
 
             isSpawningRoomWave = false;
@@ -1125,8 +775,8 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
 
             if (w < totalWaves)
             {
-                AethelShard.SpawnShards(room.roomCenter, density == RouteDensity.SwarmManyMonsters ? 14 : 9);
-                yield return new WaitForSeconds(1.8f);
+                AethelShard.SpawnShards(room.roomCenter, 12);
+                yield return new WaitForSeconds(1.4f);
             }
         }
 
@@ -1135,14 +785,14 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
 
     private IEnumerator RunBossRoomRoutine(DungeonRoom room, RouteBossType bossType, bool isMap3)
     {
-        yield return new WaitForSeconds(0.35f);
+        yield return new WaitForSeconds(0.3f);
         if (room.entranceBarrier != null) room.entranceBarrier.Lock();
         if (room.exitBarrier != null) room.exitBarrier.Lock();
 
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.45f, 0.55f);
 
-        yield return new WaitForSeconds(0.85f);
+        yield return new WaitForSeconds(0.75f);
 
         activeRoomMonsters.Clear();
         isSpawningRoomWave = true;
@@ -1162,13 +812,30 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             yield return StartCoroutine(WaitUntilActiveMonstersCleared());
             bossDefeated = true;
         }
-        else if (bossType == RouteBossType.AncientValleyGolem)
+        else if (bossType == RouteBossType.AncientSpiderKing)
         {
-            GameObject golemObj = new GameObject("Boss_AncientValleyGolem");
-            golemObj.transform.position = bossSpawnPos;
-            var golem = golemObj.AddComponent<ValleyGolemBossAI>();
-            EnemyHealthHelper.OnEnemySpawned(golemObj);
-            activeRoomMonsters.Add(golemObj);
+            // Giữ nguyên cơ chế gốc của Map 3: Sinh Phong Ấn Trứng Kén (BoneEggCocoon) trước, đập vỡ kén sẽ triệu hồi Chúa Tể Nhện!
+            bool eggHatched = false;
+            Vector3 hatchPos = bossSpawnPos;
+            System.Action<Vector3> onHatched = (pos) =>
+            {
+                eggHatched = true;
+                hatchPos = pos;
+            };
+
+            BoneEggCocoon.OnEggHatched += onHatched;
+            GameObject cocoon = Map3WaveSpawner.SpawnBoneEggCocoonStatic(bossSpawnPos);
+
+            while (!eggHatched && cocoon != null)
+            {
+                yield return new WaitForSeconds(0.2f);
+            }
+            BoneEggCocoon.OnEggHatched -= onHatched;
+
+            DamagePopup.CreateText(hatchPos + Vector3.up * 2.2f, LocalizationManager.T("CHÚA TỂ NHỆN THỨC TỈNH!", "SPIDER LORD AWAKENS!"), Color.red);
+            var skBoss = Map3WaveSpawner.SpawnSkeletonKingStatic(hatchPos);
+            if (skBoss != null) activeRoomMonsters.Add(skBoss.gameObject);
+
             isSpawningRoomWave = false;
             yield return StartCoroutine(WaitUntilActiveMonstersCleared());
             bossDefeated = true;
@@ -1185,15 +852,6 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             {
                 yield return new WaitForSeconds(0.25f);
             }
-            bossDefeated = true;
-        }
-        else if (bossType == RouteBossType.AncientSpiderKing)
-        {
-            // Triệu hồi Chúa Tể Nhện Cổ Đại trực tiếp tại tâm đấu trường Bắc
-            var skBoss = Map3WaveSpawner.SpawnSkeletonKingStatic(bossSpawnPos);
-            if (skBoss != null) activeRoomMonsters.Add(skBoss.gameObject);
-            isSpawningRoomWave = false;
-            yield return StartCoroutine(WaitUntilActiveMonstersCleared());
             bossDefeated = true;
         }
 
@@ -1215,17 +873,16 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
                 );
             }
 
-            // Nếu không phải SkeletonKingBossAI (vì SkeletonKingBossAI tự sinh cổng khi chết), sinh Cổng Chiến Thắng & Thương Nhân tại phòng Boss này
             if (bossType != RouteBossType.AncientSpiderKing)
             {
                 yield return new WaitForSeconds(1.2f);
-                Vector3 portalPos = room.roomCenter + new Vector3(0f, 2.2f, 0f);
+                Vector3 portalPos = room.roomCenter + new Vector3(0f, 2.0f, 0f);
                 RuinPortal.SpawnPortal(portalPos);
                 if (isMap3)
                 {
-                    CorruptedVoidPortal.Spawn(room.roomCenter + new Vector3(3.0f, 2.2f, 0f));
+                    CorruptedVoidPortal.Spawn(room.roomCenter + new Vector3(3.0f, 2.0f, 0f));
                 }
-                WanderingMerchant.SpawnMerchant(room.roomCenter + new Vector3(-3.2f, 1.8f, 0f));
+                WanderingMerchant.SpawnMerchant(room.roomCenter + new Vector3(-3.0f, 1.6f, 0f));
             }
         }
     }
@@ -1244,8 +901,7 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         if (room == null || room.isCleared) return;
         room.OnRoomCleared();
 
-        int rewardShards = density == RouteDensity.SwarmManyMonsters ? 18 :
-                           density == RouteDensity.BalancedMonsters ? 12 : 10;
+        int rewardShards = density == RouteDensity.SwarmManyMonsters ? 18 : 12;
         AethelShard.SpawnShards(room.roomCenter, rewardShards);
         HealthPotion.Spawn(room.roomCenter + new Vector3(0f, -0.5f, 0f), 1);
         WorldItemPickup.RollDrop(room.roomCenter + new Vector3(0.6f, 0f, 0f), false, 0.35f);
@@ -1256,14 +912,11 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             waveUI.ShowBanner(
                 LocalizationManager.T("KHU VỰC ĐÃ DỌN SẠCH!", "CHAMBER CLEARED!"),
                 LocalizationManager.T($"Cổng phong ấn đã mở! (+{rewardShards} Mảnh Linh Hồn)", $"Barrier unlocked! (+{rewardShards} Shards)"),
-                2.5f
+                2.2f
             );
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // 4. TIỆN ÍCH KHỞI TẠO PHÒNG, CỔNG PHONG ẤN & BẢNG CHỈ ĐƯỜNG
-    // ═══════════════════════════════════════════════════════════════════════════
     private void AddWalkableRect(int xMin, int yMin, int width, int height)
     {
         walkableRects.Add(new RectInt(xMin, yMin, width, height));
@@ -1272,11 +925,11 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
     private Vector3 GetSafeRoomSpawnPos(DungeonRoom room, int index, int total)
     {
         Vector3 c = room.roomCenter;
-        float rx = Mathf.Max(2.5f, room.roomBounds.width * 0.5f - 3.2f);
-        float ry = Mathf.Max(2.5f, room.roomBounds.height * 0.5f - 3.2f);
+        float rx = Mathf.Max(2.2f, room.roomBounds.width * 0.5f - 3.0f);
+        float ry = Mathf.Max(2.2f, room.roomBounds.height * 0.5f - 3.0f);
 
         float angle = (index / (float)Mathf.Max(1, total)) * Mathf.PI * 2f + Random.Range(-0.2f, 0.2f);
-        float distRatio = Random.Range(0.45f, 0.85f);
+        float distRatio = Random.Range(0.42f, 0.78f);
         return c + new Vector3(Mathf.Cos(angle) * rx * distRatio, Mathf.Sin(angle) * ry * distRatio, 0f);
     }
 
@@ -1313,52 +966,5 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         r.nextEntranceBarrier = nextEntrance;
         r.customEnterHandler = onEnter;
         return r;
-    }
-
-    private void CreateRouteSignpost(Vector3 position, string text, Color glowColor)
-    {
-        GameObject signObj = new GameObject("RouteSignpost_Beacon");
-        signObj.transform.SetParent(transform, false);
-        signObj.transform.position = position;
-
-        var sr = signObj.AddComponent<SpriteRenderer>();
-        sr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
-        sr.color = new Color(glowColor.r, glowColor.g, glowColor.b, 0.42f);
-        sr.sortingOrder = 5;
-        signObj.transform.localScale = new Vector3(1.8f, 0.9f, 1f);
-
-        var lt = signObj.AddComponent<Light2D>();
-        if (lt != null)
-        {
-            lt.lightType = Light2D.LightType.Point;
-            lt.color = glowColor;
-            lt.intensity = 1.4f;
-            lt.pointLightInnerRadius = 0.5f;
-            lt.pointLightOuterRadius = 3.5f;
-        }
-
-        GameObject txtObj = new GameObject("SignpostText");
-        txtObj.transform.SetParent(signObj.transform, false);
-        txtObj.transform.localPosition = new Vector3(0f, 0.85f, 0f);
-        txtObj.transform.localScale = new Vector3(1f / 1.8f, 1f / 0.9f, 1f);
-
-        var tmp = txtObj.AddComponent<TextMeshPro>();
-        tmp.text = text;
-        tmp.fontSize = 2.6f;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
-        tmp.outlineWidth = 0.22f;
-        tmp.outlineColor = new Color32(0, 0, 0, 235);
-        tmp.sortingOrder = 4900;
-
-        var rt = txtObj.GetComponent<RectTransform>();
-        if (rt != null) rt.sizeDelta = new Vector2(8.5f, 2.5f);
-    }
-
-    private void CloneDecor(Transform template, Transform parent, Vector3 pos)
-    {
-        if (template == null) return;
-        GameObject clone = Instantiate(template.gameObject, pos, Quaternion.identity, parent);
-        clone.name = template.name + "_Clone";
     }
 }

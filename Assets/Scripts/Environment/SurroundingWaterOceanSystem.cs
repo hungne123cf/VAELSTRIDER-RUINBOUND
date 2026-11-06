@@ -73,6 +73,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
         go.AddComponent<SurroundingWaterOceanSystem>();
     }
 
+    private Camera cachedMainCam;
+
     void Awake()
     {
         if (instance != null && instance != this)
@@ -87,76 +89,43 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
     {
         EnsureSpritesLoaded();
         BuildWaterAndShorelinesForCurrentScene();
+        cachedMainCam = Camera.main ?? FindAnyObjectByType<Camera>();
     }
 
     void Update()
     {
         float t = Time.time;
 
-        // 1. Chuyển khung hình mặt nước & sóng vỗ bờ (6 frames)
-        frameTimer += Time.deltaTime;
-        if (frameTimer >= FRAME_INTERVAL)
-        {
-            frameTimer -= FRAME_INTERVAL;
-            currentFrame = (currentFrame + 1) % 6;
-
-            if (oceanBaseSr != null && s_OceanFrames != null && s_OceanFrames[currentFrame] != null)
-            {
-                oceanBaseSr.sprite = s_OceanFrames[currentFrame];
-            }
-
-            for (int i = 0; i < shoreVisuals.Count; i++)
-            {
-                var sv = shoreVisuals[i];
-                if (sv.bankSr == null) continue;
-                int fIdx = (currentFrame + i) % 6;
-                switch (sv.dir)
-                {
-                    case ShoreDir.North:
-                        if (s_ShoreNorthFrames[fIdx] != null) sv.bankSr.sprite = s_ShoreNorthFrames[fIdx];
-                        break;
-                    case ShoreDir.South:
-                        if (s_ShoreSouthFrames[fIdx] != null) sv.bankSr.sprite = s_ShoreSouthFrames[fIdx];
-                        break;
-                    case ShoreDir.East:
-                        if (s_ShoreEastFrames[fIdx] != null) sv.bankSr.sprite = s_ShoreEastFrames[fIdx];
-                        break;
-                    case ShoreDir.West:
-                        if (s_ShoreWestFrames[fIdx] != null) sv.bankSr.sprite = s_ShoreWestFrames[fIdx];
-                        break;
-                }
-            }
-        }
-
-        // 2. Chuyển động trôi mượt của lớp sóng lăn tăn trên mặt nước (Seamless modulo 6m x 3m)
+        // 1. Chuyển động trôi mượt của lớp sóng lăn tăn trên mặt nước (Zero-Rebuild Transform Translation)
+        // Không gán lại .sprite hoặc .color trên SpriteDrawMode.Tiled trong Update để tránh CPU phải rebuild Tiled Mesh mỗi frame!
         if (waveCrestOverlayTransform != null)
         {
             float driftX = Mathf.Repeat(t * 0.48f, 6.0f) - 3.0f;
             float driftY = Mathf.Repeat(t * 0.24f, 3.0f) - 1.5f;
             waveCrestOverlayTransform.position = oceanCenterPos + new Vector3(driftX, driftY, 0f);
-
-            if (waveCrestOverlaySr != null)
-            {
-                float alpha = Mathf.Lerp(0.55f, 0.88f, (Mathf.Sin(t * 1.8f) + 1f) * 0.5f);
-                waveCrestOverlaySr.color = new Color(1f, 1f, 1f, alpha);
-            }
         }
 
-        // 3. Hiệu ứng sóng trắng dạt vào bờ và rút ra nhịp nhàng
-        for (int i = 0; i < shoreVisuals.Count; i++)
+        if (cachedMainCam == null) cachedMainCam = Camera.main;
+        Vector3 camPos = cachedMainCam != null ? cachedMainCam.transform.position : Vector3.zero;
+        bool hasCam = cachedMainCam != null;
+
+        // 2. Hiệu ứng sóng trắng dạt vào bờ và rút ra nhịp nhàng (Chỉ cập nhật các đoạn bờ gần Camera trong bán kính 34m)
+        int count = shoreVisuals.Count;
+        for (int i = 0; i < count; i++)
         {
             var sv = shoreVisuals[i];
-            if (sv.foamTransform == null || sv.foamSr == null) continue;
+            if (sv.foamTransform == null) continue;
 
-            // Chu kỳ sóng vỗ vào bờ (0 -> 1)
+            if (hasCam)
+            {
+                float dx = sv.foamBasePos.x - camPos.x;
+                float dy = sv.foamBasePos.y - camPos.y;
+                if (dx * dx + dy * dy > 1156f) continue; // Ngoài tầm nhìn Camera (>34m) -> bỏ qua
+            }
+
             float waveCycle = (Mathf.Sin(t * 2.3f + sv.phaseOffset) + 1f) * 0.5f;
-            // Sóng đẩy sát vào bờ đá khoảng 0.24m rồi rút nhẹ ra
             float surgeDist = Mathf.Lerp(-0.10f, 0.16f, waveCycle);
             sv.foamTransform.position = sv.foamBasePos + sv.surgeDir * surgeDist;
-
-            // Khi sóng vỗ sát bờ (waveCycle cao), bọt sóng trắng sáng rực lên rồi tan dần khi rút ra
-            float foamAlpha = Mathf.Lerp(0.38f, 0.92f, Mathf.Sin(waveCycle * Mathf.PI));
-            sv.foamSr.color = new Color(1f, 1f, 1f, foamAlpha);
         }
     }
 
@@ -239,25 +208,25 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
         var pad3 = GameObject.Find("ArenaFloor_OuterPadding");
         if (pad3 != null) pad3.SetActive(false);
 
-        // 3. Khởi tạo mặt nước đại dương bao phủ toàn bộ bản đồ
+        // 3. Khởi tạo mặt nước đại dương bao phủ toàn bộ bản đồ (kích thước vừa vặn chuẩn 60 FPS)
         if (sceneName.Contains("Map3") || sceneName.Contains("Forgotten"))
         {
-            oceanCenterPos = new Vector3(0f, 42f, 0f);
-            CreateOceanLayers(oceanCenterPos, new Vector2(340f, 260f), baseSortingOrder: -800);
+            oceanCenterPos = new Vector3(24f, 26f, 0f);
+            CreateOceanLayers(oceanCenterPos, new Vector2(150f, 130f), baseSortingOrder: -800);
             SetupMap3Shorelines();
         }
         else if (sceneName.Contains("Map2") || sceneName.Contains("Valley"))
         {
-            oceanCenterPos = new Vector3(0f, -45f, 0f);
-            CreateOceanLayers(oceanCenterPos, new Vector2(340f, 260f), baseSortingOrder: -500);
+            oceanCenterPos = new Vector3(26f, -26f, 0f);
+            CreateOceanLayers(oceanCenterPos, new Vector2(160f, 130f), baseSortingOrder: -500);
             SetupTilemapShorelines(shoreBankSortingOrder: 3, foamSortingOrder: -20);
-            ExpandCameraBounds(new Vector2(-135f, -130f), new Vector2(135f, 22f));
+            ExpandCameraBounds(new Vector2(-24f, -70f), new Vector2(80f, 18f));
         }
         else
         {
             // Map 1 (Map1_Thestart / SampleScene): Trải dài từ x=-17..72, y=-9..50
             oceanCenterPos = new Vector3(26f, 20f, 0f);
-            CreateOceanLayers(oceanCenterPos, new Vector2(220f, 160f), baseSortingOrder: -100);
+            CreateOceanLayers(oceanCenterPos, new Vector2(150f, 120f), baseSortingOrder: -100);
             SetupTilemapShorelines(shoreBankSortingOrder: 3, foamSortingOrder: -20);
             ExpandCameraBounds(new Vector2(-22f, -14f), new Vector2(76f, 54f));
         }
@@ -323,7 +292,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
 
             List<ShoreSegment> multiSegments = BuildShoreSegmentsFromLandCells(landCells);
             SpawnShoreVisuals(multiSegments, bankSortingOrder: -480, foamSortingOrder: -600, coordsAreTileIndices: true);
-            ExpandCameraBounds(new Vector2(-126f, -22f), new Vector2(126f, 115f));
+            ExpandCameraBounds(new Vector2(-22f, -16f), new Vector2(76f, 68f));
             return;
         }
 
