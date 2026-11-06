@@ -16,6 +16,11 @@ public class DungeonRoom : MonoBehaviour
     public RoomType roomType;
     public string roomTitle = "ROOM";
     public string roomSubtitle = "OBJECTIVE";
+    public string customTitleVN = "";
+    public string customTitleEN = "";
+    public string customSubtitleVN = "";
+    public string customSubtitleEN = "";
+    public System.Action<DungeonRoom> customEnterHandler;
     public Rect roomBounds;
     public Vector3 roomCenter;
 
@@ -97,6 +102,10 @@ public class DungeonRoom : MonoBehaviour
 
     public string GetLocalizedTitle()
     {
+        if (!string.IsNullOrEmpty(customTitleVN))
+        {
+            return LocalizationManager.T(customTitleVN, string.IsNullOrEmpty(customTitleEN) ? customTitleVN : customTitleEN);
+        }
         switch (roomType)
         {
             case RoomType.Sanctuary: return LocalizationManager.T("PHÒNG 1: THÁNH ĐỊA KHỞI ĐẦU", "ROOM 1: THE ANCIENT SANCTUARY");
@@ -109,6 +118,10 @@ public class DungeonRoom : MonoBehaviour
 
     public string GetLocalizedSubtitle()
     {
+        if (!string.IsNullOrEmpty(customSubtitleVN))
+        {
+            return LocalizationManager.T(customSubtitleVN, string.IsNullOrEmpty(customSubtitleEN) ? customSubtitleVN : customSubtitleEN);
+        }
         switch (roomType)
         {
             case RoomType.Sanctuary: return LocalizationManager.T("Khu vực an toàn. Hãy mở rương và chuẩn bị sức mạnh.", "Safe zone. Open chest and prepare for battle.");

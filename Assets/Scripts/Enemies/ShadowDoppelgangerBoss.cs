@@ -118,7 +118,9 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         rb = gameObject.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
+        rb.linearDamping = 4.0f;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        EnemyCCCleanseSystem.EnsureAttached(gameObject);
 
         var cap = gameObject.AddComponent<CapsuleCollider2D>();
         cap.size = new Vector2(1.1f, 1.4f);
@@ -504,7 +506,19 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
             animator.SetFloat(MoveYHash, dirToPlayer.y);
         }
 
-        if (isAttacking || isParrying) return;
+        if (isAttacking || isParrying)
+        {
+            busyWatchdogTimer += Time.deltaTime;
+            if (busyWatchdogTimer > 3.2f)
+            {
+                busyWatchdogTimer = 0f;
+                isAttacking = false;
+                isParrying = false;
+                isPlayingCustomAction = false;
+            }
+            return;
+        }
+        busyWatchdogTimer = 0f;
 
         attackTimer -= Time.deltaTime;
         dashTimer -= Time.deltaTime;
@@ -551,9 +565,12 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         }
     }
 
+    private float busyWatchdogTimer = 0f;
+
     void LateUpdate()
     {
         if (isDead) return;
+        ClampInsideRoomBounds();
         if (isPlayingCustomAction) return;
 
         // Quản lý hoạt ảnh di chuyển/đứng yên cho Dune Assassin & Celestial Mage (không dùng Animator)
@@ -589,6 +606,39 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
                     customAnimIndex = (customAnimIndex + 1) % frames.Length;
                 }
                 if (sr != null) sr.sprite = frames[customAnimIndex % frames.Length];
+            }
+        }
+    }
+
+    private void ClampInsideRoomBounds()
+    {
+        if (isDead) return;
+        float padding = 1.0f;
+        Vector3 pos = transform.position;
+        var roomMgr = DungeonRoomManager.Instance;
+        if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
+        {
+            Rect b = roomMgr.currentRoom.roomBounds;
+            float clampedX = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
+            float clampedY = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
+
+            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            {
+                transform.position = new Vector3(clampedX, clampedY, pos.z);
+                if (rb != null) rb.linearVelocity = Vector2.zero;
+            }
+        }
+        else if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
+        {
+            Vector2 min = MapBounds.Instance.MinBounds;
+            Vector2 max = MapBounds.Instance.MaxBounds;
+            float clampedX = Mathf.Clamp(pos.x, min.x + padding, max.x - padding);
+            float clampedY = Mathf.Clamp(pos.y, min.y + padding, max.y - padding);
+
+            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            {
+                transform.position = new Vector3(clampedX, clampedY, pos.z);
+                if (rb != null) rb.linearVelocity = Vector2.zero;
             }
         }
     }

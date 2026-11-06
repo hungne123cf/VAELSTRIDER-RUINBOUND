@@ -97,7 +97,9 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
+        rb.linearDamping = 4.0f;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        EnemyCCCleanseSystem.EnsureAttached(gameObject);
 
         CreateBloodOrbSprite();
         CreateWarningCone();
@@ -254,7 +256,22 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (blinkTimer > 0f) blinkTimer -= Time.deltaTime;
 
         if (player == null) { FindPlayerTarget(); SetMoving(false); return; }
-        if (isKnockedBack || isTransitioningPhase || isAttacking || isStunned) return;
+        if (isKnockedBack || isTransitioningPhase || isAttacking || isStunned)
+        {
+            busyWatchdogTimer += Time.deltaTime;
+            if (busyWatchdogTimer > 3.2f)
+            {
+                busyWatchdogTimer = 0f;
+                isKnockedBack = false;
+                isTransitioningPhase = false;
+                isAttacking = false;
+                isStunned = false;
+                HideWarningCone();
+                if (spriteRenderer != null) spriteRenderer.color = originalColor;
+            }
+            return;
+        }
+        busyWatchdogTimer = 0f;
 
         float dist = Vector2.Distance(transform.position, player.position);
         if (dist > detectionRange) { rb.linearVelocity = Vector2.zero; SetMoving(false); return; }
@@ -317,6 +334,8 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         SetMoving(true);
     }
 
+    private float busyWatchdogTimer = 0f;
+
     void LateUpdate()
     {
         if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
@@ -326,14 +345,27 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
     private void ClampInsideRoomBounds()
     {
         if (isDead) return;
+        float padding = isBoss ? 1.2f : 0.6f;
+        Vector3 pos = transform.position;
         var roomMgr = DungeonRoomManager.Instance;
         if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
         {
             Rect b = roomMgr.currentRoom.roomBounds;
-            float padding = isBoss ? 1.0f : 0.6f;
-            Vector3 pos = transform.position;
             float clampedX = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
             float clampedY = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
+
+            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            {
+                transform.position = new Vector3(clampedX, clampedY, pos.z);
+                if (rb != null) rb.linearVelocity = Vector2.zero;
+            }
+        }
+        else if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
+        {
+            Vector2 min = MapBounds.Instance.MinBounds;
+            Vector2 max = MapBounds.Instance.MaxBounds;
+            float clampedX = Mathf.Clamp(pos.x, min.x + padding, max.x - padding);
+            float clampedY = Mathf.Clamp(pos.y, min.y + padding, max.y - padding);
 
             if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
             {

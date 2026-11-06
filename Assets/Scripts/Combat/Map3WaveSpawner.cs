@@ -39,6 +39,12 @@ public class Map3WaveSpawner : MonoBehaviour
 
     void Start()
     {
+        if (FindAnyObjectByType<DungeonRoomManager>() != null)
+        {
+            isWaveActive = false;
+            enabled = false;
+            return;
+        }
         totalWaves = 10;
         StartCoroutine(StartWaveRoutine(1));
     }
@@ -318,7 +324,7 @@ public class Map3WaveSpawner : MonoBehaviour
         WaveSpawner.TriggerAllWavesCleared();
     }
 
-    private void SpawnBoneEggCocoon(Vector3 pos)
+    public static GameObject SpawnBoneEggCocoonStatic(Vector3 pos)
     {
         GameObject egg = new GameObject("BoneEgg_Cocoon");
         egg.transform.position = pos;
@@ -341,9 +347,12 @@ public class Map3WaveSpawner : MonoBehaviour
 
         egg.AddComponent<AutoDepthSort>();
         egg.AddComponent<BoneEggCocoon>();
+        return egg;
     }
 
-    private void SpawnGoblin(Vector3 pos)
+    private void SpawnBoneEggCocoon(Vector3 pos) => SpawnBoneEggCocoonStatic(pos);
+
+    public static GameObject SpawnGoblinStatic(Vector3 pos)
     {
         GameObject g = new GameObject("Goblin");
         g.transform.position = pos;
@@ -373,9 +382,12 @@ public class Map3WaveSpawner : MonoBehaviour
         g.AddComponent<AutoDepthSort>();
         g.AddComponent<GoblinAI>();
         EnemyHealthHelper.OnEnemySpawned(g);
+        return g;
     }
 
-    private void SpawnSkeleton(Vector3 pos)
+    private void SpawnGoblin(Vector3 pos) => SpawnGoblinStatic(pos);
+
+    public static GameObject SpawnSkeletonStatic(Vector3 pos)
     {
         GameObject s = new GameObject("Skeleton");
         s.transform.position = pos;
@@ -405,9 +417,12 @@ public class Map3WaveSpawner : MonoBehaviour
         s.AddComponent<AutoDepthSort>();
         s.AddComponent<SkeletonAI>();
         EnemyHealthHelper.OnEnemySpawned(s);
+        return s;
     }
 
-    private void SpawnSlime(Vector3 pos)
+    private void SpawnSkeleton(Vector3 pos) => SpawnSkeletonStatic(pos);
+
+    public static GameObject SpawnSlimeStatic(Vector3 pos)
     {
         GameObject sl = new GameObject("Slime");
         sl.transform.position = pos;
@@ -436,9 +451,13 @@ public class Map3WaveSpawner : MonoBehaviour
 
         sl.AddComponent<AutoDepthSort>();
         sl.AddComponent<SlimeAI>();
+        EnemyHealthHelper.OnEnemySpawned(sl);
+        return sl;
     }
 
-    private void SpawnSkeletonKing(Vector3 pos)
+    private void SpawnSlime(Vector3 pos) => SpawnSlimeStatic(pos);
+
+    public static SkeletonKingBossAI SpawnSkeletonKingStatic(Vector3 pos)
     {
         GameObject bk = new GameObject("SkeletonKing_Boss");
         bk.transform.position = pos;
@@ -468,6 +487,10 @@ public class Map3WaveSpawner : MonoBehaviour
         col.isTrigger = false;
 
         bk.AddComponent<AutoDepthSort>();
-        bk.AddComponent<SkeletonKingBossAI>();
+        var boss = bk.AddComponent<SkeletonKingBossAI>();
+        EnemyHealthHelper.OnEnemySpawned(bk);
+        return boss;
     }
+
+    private void SpawnSkeletonKing(Vector3 pos) => SpawnSkeletonKingStatic(pos);
 }

@@ -44,9 +44,12 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (rb == null)
         {
             rb = gameObject.AddComponent<Rigidbody2D>();
-            rb.gravityScale = 0;
-            rb.freezeRotation = true;
         }
+        rb.gravityScale = 0;
+        rb.freezeRotation = true;
+        rb.linearDamping = 4.0f;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        EnemyCCCleanseSystem.EnsureAttached(gameObject);
 
         sr = GetComponent<SpriteRenderer>();
         if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
@@ -104,6 +107,13 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         FindPlayer();
         IgnorePlayerCollision();
         BossIntroCutsceneUI.PlayValleyGolem(transform);
+
+        var bossUI = BossHealthBarUI.EnsureInstance();
+        if (bossUI != null)
+        {
+            bossUI.ShowBoss(LocalizationManager.T("GOLEM CỔ ĐẠI - CỰ THẠCH HỘ VỆ", "ANCIENT VALLEY GOLEM"), 1);
+            bossUI.UpdateHealth(currentHealth, maxHealth, 1);
+        }
 
         // Thong bao Boss tren UI
         var waveUI = FindAnyObjectByType<WaveUI>();
@@ -198,14 +208,27 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     private void ClampInsideRoomBounds()
     {
         if (isDead) return;
+        float padding = 1.2f;
+        Vector3 pos = transform.position;
         var roomMgr = DungeonRoomManager.Instance;
         if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
         {
             Rect b = roomMgr.currentRoom.roomBounds;
-            float padding = 1.2f;
-            Vector3 pos = transform.position;
             float clampedX = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
             float clampedY = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
+
+            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            {
+                transform.position = new Vector3(clampedX, clampedY, pos.z);
+                if (rb != null) rb.linearVelocity = Vector2.zero;
+            }
+        }
+        else if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
+        {
+            Vector2 min = MapBounds.Instance.MinBounds;
+            Vector2 max = MapBounds.Instance.MaxBounds;
+            float clampedX = Mathf.Clamp(pos.x, min.x + padding, max.x - padding);
+            float clampedY = Mathf.Clamp(pos.y, min.y + padding, max.y - padding);
 
             if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
             {
@@ -515,6 +538,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (isDead) return;
 
         currentHealth -= damage;
+        (BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance())?.UpdateHealth(currentHealth, maxHealth, 1);
         StartCoroutine(HitFlashRoutine());
 
         if (currentHealth <= 0)
@@ -536,6 +560,7 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (isDead) return;
         isDead = true;
 
+        (BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance())?.HideBoss();
         if (redCircleIndicator != null) Destroy(redCircleIndicator);
         if (myCol != null) myCol.enabled = false;
         rb.linearVelocity = Vector2.zero;

@@ -242,16 +242,16 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
         // 3. Khởi tạo mặt nước đại dương bao phủ toàn bộ bản đồ
         if (sceneName.Contains("Map3") || sceneName.Contains("Forgotten"))
         {
-            oceanCenterPos = Vector3.zero;
-            CreateOceanLayers(oceanCenterPos, new Vector2(140f, 100f), baseSortingOrder: -800);
+            oceanCenterPos = new Vector3(0f, 42f, 0f);
+            CreateOceanLayers(oceanCenterPos, new Vector2(340f, 260f), baseSortingOrder: -800);
             SetupMap3Shorelines();
         }
         else if (sceneName.Contains("Map2") || sceneName.Contains("Valley"))
         {
-            oceanCenterPos = Vector3.zero;
-            CreateOceanLayers(oceanCenterPos, new Vector2(160f, 120f), baseSortingOrder: -500);
+            oceanCenterPos = new Vector3(0f, -45f, 0f);
+            CreateOceanLayers(oceanCenterPos, new Vector2(340f, 260f), baseSortingOrder: -500);
             SetupTilemapShorelines(shoreBankSortingOrder: 3, foamSortingOrder: -20);
-            ExpandCameraBounds(new Vector2(-24.5f, -18.5f), new Vector2(24.5f, 18.5f));
+            ExpandCameraBounds(new Vector2(-135f, -130f), new Vector2(135f, 22f));
         }
         else
         {
@@ -295,7 +295,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
 
     private void SetupMap3Shorelines()
     {
-        // Đồng bộ kích thước sàn đấu Map 3 với vòng tường giới hạn 32m x 22m (-16..16, -11..11)
+        // Đồng bộ kích thước sàn đấu trung tâm Map 3 (32m x 22m: -16..16, -11..11)
         var floorObj = GameObject.Find("ArenaFloor_Mossy");
         if (floorObj != null)
         {
@@ -304,6 +304,27 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
             {
                 sr.size = new Vector2(32f, 22f);
             }
+        }
+
+        // Nếu Map 3 đã được mở rộng thành Quần Đảo Đa Nhánh (MultiPathMapExpansionBuilder), tạo sóng vỗ bao quanh toàn bộ đảo và cầu đá!
+        if (MultiPathMapExpansionBuilder.Instance != null && MultiPathMapExpansionBuilder.Instance.WalkableRects.Count > 0)
+        {
+            HashSet<Vector2Int> landCells = new HashSet<Vector2Int>();
+            foreach (var r in MultiPathMapExpansionBuilder.Instance.WalkableRects)
+            {
+                for (int x = r.xMin; x < r.xMax; x++)
+                {
+                    for (int y = r.yMin; y < r.yMax; y++)
+                    {
+                        landCells.Add(new Vector2Int(x, y));
+                    }
+                }
+            }
+
+            List<ShoreSegment> multiSegments = BuildShoreSegmentsFromLandCells(landCells);
+            SpawnShoreVisuals(multiSegments, bankSortingOrder: -480, foamSortingOrder: -600, coordsAreTileIndices: true);
+            ExpandCameraBounds(new Vector2(-126f, -22f), new Vector2(126f, 115f));
+            return;
         }
 
         // Tạo 4 bờ đá + sóng vỗ bao quanh đảo cổ Map 3 (-16..16, -11..11)
@@ -346,6 +367,12 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
 
         if (landCells.Count == 0) return;
 
+        List<ShoreSegment> segments = BuildShoreSegmentsFromLandCells(landCells);
+        SpawnShoreVisuals(segments, shoreBankSortingOrder, foamSortingOrder, coordsAreTileIndices: true);
+    }
+
+    private static List<ShoreSegment> BuildShoreSegmentsFromLandCells(HashSet<Vector2Int> landCells)
+    {
         // Tìm tất cả cạnh biên nơi ô đất/tường giáp với ô nước trống
         Dictionary<int, List<int>> northEdgesByY = new Dictionary<int, List<int>>();
         Dictionary<int, List<int>> southEdgesByY = new Dictionary<int, List<int>>();
@@ -385,8 +412,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
         BuildMergedSegments(southEdgesByY, ShoreDir.South, segments);
         BuildMergedSegments(eastEdgesByX,  ShoreDir.East,  segments);
         BuildMergedSegments(westEdgesByX,  ShoreDir.West,  segments);
-
-        SpawnShoreVisuals(segments, shoreBankSortingOrder, foamSortingOrder, coordsAreTileIndices: true);
+        return segments;
     }
 
     private static void BuildMergedSegments(Dictionary<int, List<int>> dict, ShoreDir dir, List<ShoreSegment> outSegments)

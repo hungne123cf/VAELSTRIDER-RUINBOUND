@@ -108,26 +108,21 @@ public class EnemyStunEffect : MonoBehaviour
         }
         EnemyCCCleanseSystem.EnsureAttached(enemyRoot);
 
-        // 5. QUY TẮC KHÔNG CỘNG DỒN CHOÁNG (NO STUN STACKING):
-        // Nếu Quái hoặc Boss đang trong trạng thái Choáng, tuyệt đối không cộng dồn thời gian!
+        // 5. QUY TẮC KHÔNG CỘNG DỒN CHOÁNG / BĂNG (NO STUN OR FREEZE STACKING):
+        // Nếu Quái hoặc Boss đang trong trạng thái Choáng hoặc Đóng Băng, tuyệt đối không cộng dồn thời gian!
         var existing = enemyRoot.GetComponent<EnemyStunEffect>();
         if (existing != null && existing.IsStunned)
         {
-            // Bỏ qua hoàn toàn đòn gây choáng tiếp theo của Player
+            return false;
+        }
+        var existingFreeze = enemyRoot.GetComponent<EnemyFreezeEffect>();
+        if (existingFreeze != null && existingFreeze.IsFrozen)
+        {
             return false;
         }
 
         // 6. KIỂM TRA THỜI GIAN HỒI MIỄN NHIỄM CHOÁNG (STUN IMMUNITY GRACE PERIOD)
-        int targetId = enemyRoot.GetInstanceID();
-        float lastEndTime = -999f;
-        if (existing != null) lastEndTime = existing.lastStunEndTime;
-        if (s_LastStunEndTimes.TryGetValue(targetId, out float recordedTime))
-        {
-            lastEndTime = Mathf.Max(lastEndTime, recordedTime);
-        }
-
-        float immunityCooldown = isBoss ? BOSS_IMMUNITY_COOLDOWN : MONSTER_IMMUNITY_COOLDOWN;
-        if (Time.time < lastEndTime + immunityCooldown)
+        if (IsInCCImmunityWindow(enemyRoot, isBoss))
         {
             // Đang trong thời gian miễn nhiễm phục hồi -> Kháng choáng 100%!
             Vector3 headPos = GetHeadTopWorldPosition(enemyRoot);
@@ -380,9 +375,34 @@ public class EnemyStunEffect : MonoBehaviour
         return Mathf.Max(width, 0.9f * scaleX);
     }
 
+    public static bool IsInCCImmunityWindow(GameObject enemyRoot, bool isBoss)
+    {
+        if (enemyRoot == null) return false;
+        int targetId = enemyRoot.GetInstanceID();
+        float lastEndTime = -999f;
+        var existing = enemyRoot.GetComponent<EnemyStunEffect>();
+        if (existing != null) lastEndTime = existing.lastStunEndTime;
+        if (s_LastStunEndTimes.TryGetValue(targetId, out float recordedTime))
+        {
+            lastEndTime = Mathf.Max(lastEndTime, recordedTime);
+        }
+
+        float immunityCooldown = isBoss ? BOSS_IMMUNITY_COOLDOWN : MONSTER_IMMUNITY_COOLDOWN;
+        return Time.time < lastEndTime + immunityCooldown;
+    }
+
+    public static void RecordCCEnd(GameObject enemyRoot)
+    {
+        if (enemyRoot == null) return;
+        int targetId = enemyRoot.GetInstanceID();
+        s_LastStunEndTimes[targetId] = Time.time;
+        var existing = enemyRoot.GetComponent<EnemyStunEffect>();
+        if (existing != null) existing.lastStunEndTime = Time.time;
+    }
+
     private void DisableAIScripts()
     {
-        disabledScripts.Clear();
+        // KHÔNG gọi disabledScripts.Clear() để tránh làm mất tham chiếu script AI khi hiệu ứng chồng chéo
         var allBehaviours = GetComponents<MonoBehaviour>();
         foreach (var mb in allBehaviours)
         {
@@ -393,6 +413,9 @@ public class EnemyStunEffect : MonoBehaviour
                 if (mb.enabled)
                 {
                     mb.enabled = false;
+                }
+                if (!disabledScripts.Contains(mb))
+                {
                     disabledScripts.Add(mb);
                 }
             }
@@ -404,7 +427,7 @@ public class EnemyStunEffect : MonoBehaviour
         if (animator == null) animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
         if (animator != null && !hasSavedAnimSpeed)
         {
-            originalAnimSpeed = animator.speed;
+            originalAnimSpeed = animator.speed > 0.2f ? animator.speed : 1.0f;
             animator.speed = 0.05f; // Đứng hình trong lúc bị choáng
             hasSavedAnimSpeed = true;
         }
@@ -412,11 +435,17 @@ public class EnemyStunEffect : MonoBehaviour
 
     private void ResumeAnimator()
     {
-        if (hasSavedAnimSpeed && animator != null)
+        if (animator == null) animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
+        if (animator != null)
         {
-            animator.speed = originalAnimSpeed;
-            hasSavedAnimSpeed = false;
+            var freeze = GetComponent<EnemyFreezeEffect>();
+            if (freeze == null || !freeze.IsFrozen)
+            {
+                float targetSpeed = EnemyChronoSlowEffect.IsChronoSlowActive ? EnemyChronoSlowEffect.SLOW_FACTOR : 1.0f;
+                animator.speed = (hasSavedAnimSpeed && originalAnimSpeed > 0.2f) ? originalAnimSpeed : targetSpeed;
+            }
         }
+        hasSavedAnimSpeed = false;
     }
 
     private void EnsureDizzyVFX()
@@ -520,6 +549,7 @@ public class EnemyStunEffect : MonoBehaviour
 
     public void RemoveStun()
     {
+        stunTimer = 0f;
         ResumeAnimator();
 
         foreach (var mb in disabledScripts)
@@ -528,16 +558,39 @@ public class EnemyStunEffect : MonoBehaviour
         }
         disabledScripts.Clear();
 
+        // Bảo hiểm kép: Bật lại toàn bộ script AI / Boss nếu mục tiêu không còn bị đóng băng
+        var freeze = GetComponent<EnemyFreezeEffect>();
+        if (freeze == null || !freeze.IsFrozen)
+        {
+            ForceEnableAllAIScripts(gameObject);
+        }
+
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+
         if (dizzyVfx != null)
         {
             dizzyVfx.SetActive(false);
         }
 
-        stunTimer = 0f;
         lastStunEndTime = Time.time;
         s_LastStunEndTimes[gameObject.GetInstanceID()] = Time.time;
 
         enabled = false;
+    }
+
+    public static void ForceEnableAllAIScripts(GameObject target)
+    {
+        if (target == null) return;
+        var allBehaviours = target.GetComponents<MonoBehaviour>();
+        foreach (var mb in allBehaviours)
+        {
+            if (mb == null) continue;
+            string typeName = mb.GetType().Name;
+            if (typeName.EndsWith("AI") || typeName.EndsWith("Enemy") || typeName.Contains("Boss") || typeName.Contains("Spawner"))
+            {
+                if (!mb.enabled) mb.enabled = true;
+            }
+        }
     }
 
     private static void CleanExpiredImmunities()

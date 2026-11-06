@@ -68,9 +68,36 @@ public class EnemyFreezeEffect : MonoBehaviour
             return;
         }
 
+        var existingStun = enemyRoot.GetComponent<EnemyStunEffect>();
+        if (existingStun != null && existingStun.IsStunned)
+        {
+            // Không chồng đóng băng lên mục tiêu đang bị choáng
+            return;
+        }
+
+        // Kiểm tra thời gian miễn nhiễm khống chế chung (Boss 4.0s, Quái thường 2.5s)
+        if (EnemyStunEffect.IsInCCImmunityWindow(enemyRoot, isBoss))
+        {
+            Vector3 headPos = EnemyStunEffect.GetHeadTopWorldPosition(enemyRoot);
+            DamagePopup.CreateText(headPos, LocalizationManager.T("KHÁNG BĂNG!", "FREEZE RESIST!"), new Color(0.35f, 0.85f, 1f));
+            return;
+        }
+
+        // Tỉ lệ 50% miễn đóng băng (tương tự kháng choáng 50%)
+        if (Random.value < EnemyStunEffect.STUN_IMMUNITY_CHANCE)
+        {
+            Vector3 headPos = EnemyStunEffect.GetHeadTopWorldPosition(enemyRoot);
+            DamagePopup.CreateText(headPos, LocalizationManager.T("MIỄN BĂNG (50%)!", "FREEZE IMMUNE (50%)!"), new Color(0.45f, 0.9f, 1f));
+            return;
+        }
+
         if (isBoss)
         {
-            duration = Mathf.Min(duration * 0.5f, 0.6f);
+            duration = Mathf.Min(duration * 0.45f, 0.45f);
+        }
+        else
+        {
+            duration = Mathf.Min(duration * 0.65f, 0.85f);
         }
 
         if (existing == null)
@@ -138,7 +165,7 @@ public class EnemyFreezeEffect : MonoBehaviour
 
             if (freezeTimer <= 0f)
             {
-                StartCoroutine(UnfreezeRoutine());
+                RemoveFreeze();
             }
         }
     }
@@ -185,7 +212,7 @@ public class EnemyFreezeEffect : MonoBehaviour
 
     private void DisableAIScripts()
     {
-        disabledScripts.Clear();
+        // KHÔNG gọi disabledScripts.Clear() để tránh làm mất tham chiếu script AI khi chồng hiệu ứng
         var allBehaviours = GetComponents<MonoBehaviour>();
         foreach (var mb in allBehaviours)
         {
@@ -196,6 +223,9 @@ public class EnemyFreezeEffect : MonoBehaviour
                 if (mb.enabled)
                 {
                     mb.enabled = false;
+                }
+                if (!disabledScripts.Contains(mb))
+                {
                     disabledScripts.Add(mb);
                 }
             }
@@ -207,7 +237,7 @@ public class EnemyFreezeEffect : MonoBehaviour
         if (animator == null) animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
         if (animator != null && !hasSavedAnimSpeed)
         {
-            originalAnimSpeed = animator.speed;
+            originalAnimSpeed = animator.speed > 0.2f ? animator.speed : 1.0f;
             animator.speed = 0f; // Bị đông cứng hoàn toàn
             hasSavedAnimSpeed = true;
         }
@@ -215,39 +245,22 @@ public class EnemyFreezeEffect : MonoBehaviour
 
     private void ResumeAnimator()
     {
-        if (hasSavedAnimSpeed && animator != null)
+        if (animator == null) animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
+        if (animator != null)
         {
-            animator.speed = originalAnimSpeed;
-            hasSavedAnimSpeed = false;
-        }
-    }
-
-    private IEnumerator UnfreezeRoutine()
-    {
-        float fadeDuration = 0.25f;
-        float elapsed = 0f;
-
-        while (elapsed < fadeDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / fadeDuration;
-
-            foreach (var kvp in originalColors)
+            var stun = GetComponent<EnemyStunEffect>();
+            if (stun == null || !stun.IsStunned)
             {
-                if (kvp.Key != null)
-                {
-                    kvp.Key.color = Color.Lerp(freezeTint, kvp.Value, t);
-                }
+                float targetSpeed = EnemyChronoSlowEffect.IsChronoSlowActive ? EnemyChronoSlowEffect.SLOW_FACTOR : 1.0f;
+                animator.speed = (hasSavedAnimSpeed && originalAnimSpeed > 0.2f) ? originalAnimSpeed : targetSpeed;
             }
-
-            yield return null;
         }
-
-        RemoveFreeze();
+        hasSavedAnimSpeed = false;
     }
 
     public void RemoveFreeze()
     {
+        freezeTimer = 0f;
         ResumeAnimator();
 
         foreach (var kvp in originalColors)
@@ -264,6 +277,17 @@ public class EnemyFreezeEffect : MonoBehaviour
         }
         disabledScripts.Clear();
 
+        // Bảo hiểm kép: Bật lại toàn bộ script AI / Boss nếu mục tiêu không còn bị choáng
+        var stun = GetComponent<EnemyStunEffect>();
+        if (stun == null || !stun.IsStunned)
+        {
+            EnemyStunEffect.ForceEnableAllAIScripts(gameObject);
+        }
+
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+
+        EnemyStunEffect.RecordCCEnd(gameObject);
+
         if (frostAura != null)
         {
             Destroy(frostAura);
@@ -275,9 +299,18 @@ public class EnemyFreezeEffect : MonoBehaviour
     void OnDestroy()
     {
         ResumeAnimator();
+        foreach (var kvp in originalColors)
+        {
+            if (kvp.Key != null) kvp.Key.color = kvp.Value;
+        }
         foreach (var mb in disabledScripts)
         {
             if (mb != null) mb.enabled = true;
+        }
+        var stun = GetComponent<EnemyStunEffect>();
+        if (stun == null || !stun.IsStunned)
+        {
+            EnemyStunEffect.ForceEnableAllAIScripts(gameObject);
         }
         if (frostAura != null) Destroy(frostAura);
     }

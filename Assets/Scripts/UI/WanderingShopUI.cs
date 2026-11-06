@@ -1159,18 +1159,18 @@ public class WanderingShopUI : MonoBehaviour
         shopCatalog.Add(new ShopRelicItem
         {
             id = "relic_magma_eruption",
-            categoryVN = "DUNG NHAM PHUN TRÀO", categoryEN = "MAGMA ERUPTION",
+            categoryVN = "HỎA DIỆM THIÊU ĐỐT", categoryEN = "BLAZING INFERNO",
             badgeColor = new Color(1f, 0.35f, 0.10f),
             rarity = AugmentDatabase.AugmentData.Rarity.Epic,
             realmRequirement = CalamityRealm.MagmaCalamity,
             augmentType = AugmentDatabase.AugmentType.MagmaEruption,
             maxPurchases = 1,
             cost = 320,
-            titleVN = "Dung Nham Bộc Phá", titleEN = "Magma Eruption",
-            descVN = "Đòn đánh thứ 3 tạo vùng Dung Nham sôi sục nổ gây 40 Sát Thương mỗi 0.5s và làm chậm kẻ địch.",
-            descEN = "3rd hit creates a boiling Magma Pool dealing 40 DMG per 0.5s and slowing foes.",
-            flavorVN = "«Đất nứt toác dưới chân kẻ thù, magma trào dâng nuốt chửng.»",
-            flavorEN = "«The earth fractures beneath foes, swallowing them in molten rock.»",
+            titleVN = "Hỏa Diệm Thiêu Đốt", titleEN = "Blazing Inferno",
+            descVN = "Đòn đánh và Lướt phóng Ngọn Lửa Thiêu Đốt bám chặt lên cơ thể quái và Boss, gây cháy 35 Sát Thương mỗi 0.5s suốt 4.5s.",
+            descEN = "Attacks and Dash ignite enemies and Bosses with clinging flames, dealing 35 DMG per 0.5s over 4.5s.",
+            flavorVN = "«Ngọn lửa bất diệt bám chặt lấy con mồi, thiêu rụi đến tàn tro cuối cùng.»",
+            flavorEN = "«Undying flames cling to their prey, burning until nothing but ash remains.»",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.MagmaEruption);

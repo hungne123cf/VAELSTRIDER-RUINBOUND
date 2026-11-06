@@ -31,24 +31,50 @@ public class EnemyCCCleanseSystem : MonoBehaviour
     private static readonly Dictionary<int, float> s_CCImmunityEndTimes = new Dictionary<int, float>();
 
     private float accumulatedCCTime = 0f;
+    private float periodicCheckTimer = 0f;
     private Rigidbody2D rb;
     private Animator animator;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            // Tăng ma sát giảm chấn để quái/Boss không bao giờ bị trôi dạt vô tận trên mặt đất
+            rb.linearDamping = Mathf.Max(rb.linearDamping, 4.0f);
+        }
         animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
     }
 
     void Update()
     {
-        // Kiểm tra xem quái có đang ở trong trạng thái bị khống chế hay không
-        bool isCCActive = CheckIsUnderCC();
+        bool isHardCC = CheckIsUnderHardCC();
+        bool isAnyCC = isHardCC || CheckIsUnderAnyCCOrDisabled();
 
-        if (isCCActive)
+        if (isHardCC)
+        {
+            // Khi đang bị Choáng hoặc Đóng Băng: khóa cứng vận tốc = 0 để không bao giờ bị trôi dạt
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+            }
+        }
+        else
+        {
+            // WATCHDOG MỖI FRAME: Khi KHÔNG bị Choáng / Đóng Băng, bắt buộc mọi script AI/Boss phải được bật lại ngay lập tức!
+            RestoreAllAIScripts();
+            if (animator == null) animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
+            if (animator != null && animator.speed < 0.4f)
+            {
+                animator.speed = EnemyChronoSlowEffect.IsChronoSlowActive ? EnemyChronoSlowEffect.SLOW_FACTOR : 1.0f;
+            }
+        }
+
+        // Cơ chế tự giải mọi khống chế mỗi 3.0s
+        if (isAnyCC)
         {
             accumulatedCCTime += Time.deltaTime;
-
             if (accumulatedCCTime >= CLEANSE_CYCLE_DURATION)
             {
                 TriggerAutoCleanse();
@@ -56,12 +82,33 @@ public class EnemyCCCleanseSystem : MonoBehaviour
         }
         else
         {
-            // Nếu không bị khống chế, giảm dần bộ đếm tích tụ để sẵn sàng cho lần sau
             if (accumulatedCCTime > 0f)
             {
-                accumulatedCCTime = Mathf.Max(0f, accumulatedCCTime - (Time.deltaTime * 0.75f));
+                accumulatedCCTime = Mathf.Max(0f, accumulatedCCTime - (Time.deltaTime * 0.5f));
             }
         }
+
+        // Chu kỳ tự kiểm tra bảo hiểm mỗi 3.0s
+        periodicCheckTimer += Time.deltaTime;
+        if (periodicCheckTimer >= CLEANSE_CYCLE_DURATION)
+        {
+            periodicCheckTimer = 0f;
+            if (CheckIsUnderHardCC())
+            {
+                TriggerAutoCleanse();
+            }
+        }
+    }
+
+    public bool CheckIsUnderHardCC()
+    {
+        var stun = GetComponent<EnemyStunEffect>();
+        if (stun != null && stun.IsStunned) return true;
+
+        var freeze = GetComponent<EnemyFreezeEffect>();
+        if (freeze != null && freeze.IsFrozen) return true;
+
+        return false;
     }
 
     /// <summary>
@@ -69,17 +116,28 @@ public class EnemyCCCleanseSystem : MonoBehaviour
     /// </summary>
     public bool CheckIsUnderCC()
     {
-        // 1. Kiểm tra EnemyStunEffect
-        var stun = GetComponent<EnemyStunEffect>();
-        if (stun != null && stun.IsStunned) return true;
+        return CheckIsUnderAnyCCOrDisabled();
+    }
 
-        // 2. Kiểm tra EnemyFreezeEffect
-        var freeze = GetComponent<EnemyFreezeEffect>();
-        if (freeze != null && freeze.IsFrozen) return true;
+    private bool CheckIsUnderAnyCCOrDisabled()
+    {
+        if (CheckIsUnderHardCC()) return true;
 
-        // 3. Kiểm tra EnemyChronoSlowEffect
         var slow = GetComponent<EnemyChronoSlowEffect>();
         if (slow != null) return true;
+
+        var allBehaviours = GetComponents<MonoBehaviour>();
+        foreach (var mb in allBehaviours)
+        {
+            if (mb == null || mb == this) continue;
+            string typeName = mb.GetType().Name;
+            if (typeName.EndsWith("AI") || typeName.EndsWith("Enemy") || typeName.Contains("Boss"))
+            {
+                if (!mb.enabled) return true;
+            }
+        }
+
+        if (animator != null && animator.speed < 0.4f) return true;
 
         return false;
     }

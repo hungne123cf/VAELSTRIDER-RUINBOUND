@@ -593,12 +593,12 @@ public static class AugmentDatabase
         },
         new AugmentData {
             type = AugmentType.MagmaEruption,
-            nameVN = "Hỏa Nham Bộc Phát",     nameEN = "Magma Eruption",
-            descVN = "Lướt và đòn đánh tạo vệt <color=#EF4444><b>Dung Nham Thiêu Đốt (Hellfire Trail)</b></color> thiêu rụi mặt đất, gây 40 sát thương/s và làm chậm <color=#F59E0B><b>35% Tốc Chạy</b></color>!",
-            descEN = "Dash and attacks scorch earth with <color=#EF4444><b>Hellfire Trail</b></color>, dealing 40 dmg/s and slowing by <color=#F59E0B><b>35%</b></color>!",
-            flavorVN = "«Bước chân rực lửa nung chảy cả mặt đất hoang tàn.»",
-            flavorEN = "«Blazing footsteps liquifying scorched earth beneath.»",
-            emoji = "🌋", value = 40f, duration = -1f,
+            nameVN = "Hỏa Diệm Thiêu Đốt",    nameEN = "Blazing Inferno",
+            descVN = "Đòn đánh và Lướt phóng <color=#EF4444><b>Ngọn Lửa Thiêu Đốt</b></color> bám chặt lên cơ thể quái & Boss, gây cháy liên tục <color=#F59E0B><b>{v} sát thương/0.5s</b></color> suốt 4.5s!",
+            descEN = "Attacks and Dash ignite enemies & Bosses with <color=#EF4444><b>Blazing Flames</b></color> on their bodies, burning for <color=#F59E0B><b>{v} dmg/0.5s</b></color> over 4.5s!",
+            flavorVN = "«Ngọn lửa bất diệt bám chặt lấy con mồi, thiêu rụi đến tàn tro cuối cùng.»",
+            flavorEN = "«Undying flames cling to their prey, burning until nothing but ash remains.»",
+            emoji = "🔥", value = 35f, duration = -1f,
             realmFilter = null,
             cardColor = new Color(0.95f, 0.45f, 0.15f), rarity = AugmentData.Rarity.Rare
         },

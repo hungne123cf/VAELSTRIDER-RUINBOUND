@@ -179,88 +179,17 @@ public class CombatBlessingFX : MonoBehaviour
         Destroy(lineObj, 0.12f);
     }
 
-    // ─── 2. HELLFIRE TRAIL (VỆT LỬA HƯ KHÔNG / DUNG NHAM) ─────────────────────
-    public static void SpawnHellfirePatch(Vector3 position, float duration = 2.8f, int damagePerTick = 40)
+    // ─── 2. BLAZING INFERNO (HỎA DIỆM THIÊU ĐỐT BÁM TRÊN CƠ THỂ QUÁI & BOSS) ──
+    public static void SpawnHellfirePatch(Vector3 position, float duration = 4.5f, int damagePerTick = 35)
     {
-        EnsureResources();
-
-        GameObject fire = new GameObject("FX_HellfirePatch");
-        fire.transform.position = position;
-
-        var sr = fire.AddComponent<SpriteRenderer>();
-        sr.sprite = s_fireFlameSprite;
-        sr.color = new Color(1f, 0.5f, 0.15f, 0.95f);
-        sr.sortingOrder = 45; // Tren mat dat, duoi chan quai
-        fire.transform.localScale = Vector3.one * 1.5f;
-
-        var light = fire.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
-        if (light != null)
+        // Thay thế hoàn toàn vũng dung nham mặt đất bằng ngọn lửa Pixel-Art bám trực tiếp lên cơ thể quái và Boss
+        Collider2D[] hits = Physics2D.OverlapCircleAll(position, 2.8f);
+        foreach (var col in hits)
         {
-            light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;
-            light.color = new Color(1f, 0.4f, 0.1f);
-            light.intensity = 1.6f;
-            light.pointLightOuterRadius = 1.6f;
-        }
-
-        var comp = fire.AddComponent<HellfirePatchController>();
-        comp.Init(duration, damagePerTick);
-    }
-
-    private class HellfirePatchController : MonoBehaviour
-    {
-        private float duration;
-        private int damagePerTick;
-        private float tickTimer = 0f;
-        private float elapsed = 0f;
-        private SpriteRenderer sr;
-        private UnityEngine.Rendering.Universal.Light2D lt;
-
-        public void Init(float dur, int dmg)
-        {
-            duration = dur;
-            damagePerTick = dmg;
-            sr = GetComponent<SpriteRenderer>();
-            lt = GetComponent<UnityEngine.Rendering.Universal.Light2D>();
-        }
-
-        void Update()
-        {
-            float dt = Time.deltaTime;
-            elapsed += dt;
-            tickTimer += dt;
-
-            // Hieu ung dap don lung linh cua lua
-            float flicker = 1.0f + Mathf.Sin(elapsed * 18f) * 0.18f;
-            transform.localScale = Vector3.one * (1.5f * flicker);
-
-            if (tickTimer >= 0.40f)
+            if (col == null) continue;
+            if (col.CompareTag("Enemy") || col.CompareTag("Boss") || col.GetComponentInParent<IDamageable>() != null)
             {
-                tickTimer = 0f;
-                // Dot tat ca quai vat trong ban kinh 1.2m
-                Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.2f);
-                foreach (var col in hits)
-                {
-                    if (col == null) continue;
-                    if (col.CompareTag("Enemy") || col.CompareTag("Boss"))
-                    {
-                        var dmg = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
-                        if (dmg != null)
-                        {
-                            dmg.TakeDamage(damagePerTick);
-                            DamagePopup.Create(col.transform.position + Vector3.up * 0.35f, damagePerTick, DamageType.TrueDamage, isCritical: false);
-                            EnemyChronoSlowEffect.Apply(col.gameObject);
-                        }
-                    }
-                }
-            }
-
-            if (elapsed >= duration)
-            {
-                // Fade out
-                float fadeRatio = Mathf.Clamp01((elapsed - duration) / 0.4f);
-                if (sr != null) sr.color = new Color(1f, 0.5f, 0.15f, 1f - fadeRatio);
-                if (lt != null) lt.intensity = Mathf.Lerp(1.6f, 0f, fadeRatio);
-                if (fadeRatio >= 1f) Destroy(gameObject);
+                EnemyBurnEffect.ApplyBurn(col.gameObject, duration: Mathf.Max(3.5f, duration), damagePerTick: damagePerTick, tickInterval: 0.5f);
             }
         }
     }

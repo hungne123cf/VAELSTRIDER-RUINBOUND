@@ -492,15 +492,15 @@ public class AugmentManager : MonoBehaviour
             }
         }
     
-        // 5. Vệt Lửa Hư Không / Dung Nham Thiêu Đốt khi Lướt (Hellfire Dash Trail)
+        // 5. Hỏa Diệm Thiêu Đốt khi Lướt (Blazing Inferno Dash Ignition)
         if (HasAugment(AugmentDatabase.AugmentType.MagmaEruption))
         {
-            CombatBlessingFX.SpawnHellfirePatch(playerPos, duration: 2.8f, damagePerTick: 40);
+            CombatBlessingFX.SpawnHellfirePatch(playerPos, duration: 4.5f, damagePerTick: 35);
             var pc = Object.FindAnyObjectByType<PlayerController>();
             if (pc != null)
             {
                 Vector3 midPoint = (playerPos + pc.transform.position) * 0.5f;
-                CombatBlessingFX.SpawnHellfirePatch(midPoint, duration: 2.8f, damagePerTick: 40);
+                CombatBlessingFX.SpawnHellfirePatch(midPoint, duration: 4.5f, damagePerTick: 35);
             }
         }
     }
@@ -743,13 +743,12 @@ public class AugmentManager : MonoBehaviour
             CorrosiveVenomDebuff.Apply(targetEnemy, duration: 4.0f, bonusDamage: 0.20f);
         }
 
-        // 2. Vết Thương Tử Thần (DeathsTouch): Thiêu đốt máu & Vết thương sâu
+        // 2. Vết Thương Tử Thần (DeathsTouch): Thiêu đốt cơ thể quái/Boss & Vết thương sâu
         if (augMgr.HasDeathsTouch())
         {
             GrievousWoundsDebuff.Apply(targetEnemy, duration: 3.5f, healReduction: 0.40f);
-            int burnDmg = Mathf.Max(10, Mathf.RoundToInt(actualDamage * 0.25f));
-            damageable?.TakeDamage(burnDmg);
-            DamagePopup.Create(targetEnemy.transform.position + Vector3.up * 0.35f, burnDmg, DamageType.TrueDamage, isCritical: false);
+            int burnDmg = Mathf.Max(12, Mathf.RoundToInt(actualDamage * 0.22f));
+            EnemyBurnEffect.ApplyBurn(targetEnemy, duration: 3.5f, damagePerTick: burnDmg, tickInterval: 0.5f);
         }
 
         // 3. Lôi Đình Song Trảm & Quá Tải Lôi Quang (EchoStrike / StaticOverload): Phóng tia sét lan qua 3 kẻ địch xung quanh
@@ -779,10 +778,10 @@ public class AugmentManager : MonoBehaviour
             }
         }
 
-        // 6. Hỏa Nham Bộc Phát (MagmaEruption): Tạo vệt dung nham thiêu đốt dưới chân mục tiêu
+        // 6. Hỏa Diệm Thiêu Đốt (MagmaEruption): Đốt ngọn lửa Pixel-Art bám chặt trên cơ thể quái và Boss cho đến hết deadline
         if (augMgr.HasAugment(AugmentDatabase.AugmentType.MagmaEruption))
         {
-            CombatBlessingFX.SpawnHellfirePatch(targetEnemy.transform.position, duration: 2.8f, damagePerTick: 35);
+            EnemyBurnEffect.ApplyBurn(targetEnemy, duration: 4.5f, damagePerTick: 35, tickInterval: 0.5f);
         }
 
         // 7. Hàn Băng Cực Độ (AbsoluteZeroNova): 35% cơ hội nổ Hàn Băng Vực Tuyệt Đối gây 120 dmg và đóng băng diện rộng trong 1.8s

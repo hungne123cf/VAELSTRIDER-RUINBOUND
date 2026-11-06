@@ -47,17 +47,17 @@ public class MapBounds : MonoBehaviour
     {
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
-        // 1. Quy ước kích thước chuẩn cho các Map chính
+        // 1. Quy ước kích thước chuẩn cho các Map chính (Bao phủ toàn bộ 3 Nhánh Mở Rộng)
         if (sceneName.Contains("Map3") || sceneName.Contains("ForgottenMemories"))
         {
-            minBounds = new Vector2(-16f, -11f);
-            maxBounds = new Vector2(16f, 11f);
+            minBounds = new Vector2(-126f, -22f);
+            maxBounds = new Vector2(126f, 115f);
             return;
         }
         else if (sceneName.Contains("Map2") || sceneName.Contains("ValleyRuin"))
         {
-            minBounds = new Vector2(-20f, -14f);
-            maxBounds = new Vector2(20f, 14f);
+            minBounds = new Vector2(-135f, -130f);
+            maxBounds = new Vector2(135f, 22f);
             return;
         }
         else if (sceneName.Contains("Map1") || sceneName.Contains("Thestart") || sceneName.Contains("SampleScene"))

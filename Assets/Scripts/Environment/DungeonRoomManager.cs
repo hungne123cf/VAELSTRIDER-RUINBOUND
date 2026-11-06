@@ -38,9 +38,15 @@ public class DungeonRoomManager : MonoBehaviour
     public void OnPlayerEnterRoom(DungeonRoom room)
     {
         currentRoom = room;
-        Debug.Log($"<color=cyan>[ROOM]</color> Người chơi bước vào {room.roomTitle}!");
+        Debug.Log($"<color=cyan>[ROOM]</color> Người chơi bước vào {room.GetLocalizedTitle()}!");
 
         AnnounceRoom(room);
+
+        if (room.customEnterHandler != null)
+        {
+            room.customEnterHandler.Invoke(room);
+            return;
+        }
 
         switch (room.roomType)
         {
