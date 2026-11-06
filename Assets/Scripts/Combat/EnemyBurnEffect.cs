@@ -109,6 +109,7 @@ public class EnemyBurnEffect : MonoBehaviour
     }
 
     private Collider2D targetMainCol;
+    private DynamicSpriteColliderSync targetColSync;
     private float cachedFootWorldOffsetY = 0f;
 
     private void CreateOnBodyPixelFlames()
@@ -118,48 +119,37 @@ public class EnemyBurnEffect : MonoBehaviour
         EnsurePixelFireSprites();
 
         targetMainCol = GetComponent<Collider2D>() ?? GetComponentInChildren<Collider2D>();
+        targetColSync = GetComponent<DynamicSpriteColliderSync>() ?? GetComponentInChildren<DynamicSpriteColliderSync>();
+        if (targetMainSr == null) targetMainSr = GetComponent<SpriteRenderer>() ?? GetComponentInChildren<SpriteRenderer>();
 
         flameRootObj = new GameObject("BurnFlame_PixelVFX");
-        flameRootObj.transform.SetParent(transform, false);
+        // Không gán làm con của transform quái/Boss nữa để triệt tiêu 100% việc lửa bị lộn ngược, méo mó hoặc lệch khi quái quay mặt lật flipX hay localScale.x!
+        // Ngọn lửa sẽ theo sát chân quái/Boss ở LateUpdate mỗi frame!
+        flameRootObj.transform.SetParent(null, false);
 
         // Đo kích thước thực tế (World Space) của Quái/Boss để chỉnh lửa nhỏ gọn đúng phần chân
         float worldWidth = 1.0f;
         float worldHeight = 1.2f;
-        float bottomWorldY = transform.position.y - 0.35f;
 
         if (targetMainCol != null && targetMainCol.bounds.size.y > 0.1f)
         {
             Bounds cb = targetMainCol.bounds;
             worldWidth = Mathf.Clamp(cb.size.x, 0.55f, 3.6f);
             worldHeight = Mathf.Clamp(cb.size.y, 0.65f, 4.0f);
-            bottomWorldY = cb.min.y;
         }
         else if (targetMainSr != null && targetMainSr.bounds.size.y > 0.1f)
         {
             Bounds sb = targetMainSr.bounds;
             worldWidth = Mathf.Clamp(sb.size.x * 0.65f, 0.55f, 3.6f);
             worldHeight = Mathf.Clamp(sb.size.y * 0.75f, 0.65f, 4.0f);
-            bottomWorldY = sb.min.y;
         }
-
-        // Đặt gốc ngọn lửa ngay tại phần chân (dưới đáy) của quái/Boss
-        cachedFootWorldOffsetY = (bottomWorldY - transform.position.y) + (worldHeight * 0.04f);
 
         // Chiều cao ngọn lửa ngoài thế giới chỉ bằng ~24% chiều cao cơ thể (chỉ cháy dưới chân, không che mặt/thân)
         float desiredFlameWorldHeight = Mathf.Clamp(worldHeight * 0.25f, 0.24f, 0.72f);
         float desiredFlameWorldWidth  = Mathf.Clamp(worldWidth * 0.32f, 0.22f, 0.68f);
 
-        // Khử hoàn toàn hệ số phóng đại (lossyScale) của đối tượng cha (ví dụ Boss scale 1.8x - 2.5x)
-        Vector3 lossy = transform.lossyScale;
-        float parentScaleX = Mathf.Max(0.25f, Mathf.Abs(lossy.x));
-        float parentScaleY = Mathf.Max(0.25f, Mathf.Abs(lossy.y));
-
-        flameRootObj.transform.localPosition = new Vector3(0f, cachedFootWorldOffsetY / parentScaleY, -0.04f);
-        flameRootObj.transform.localScale = new Vector3(
-            desiredFlameWorldWidth / parentScaleX,
-            desiredFlameWorldHeight / parentScaleY,
-            1f
-        );
+        flameRootObj.transform.localScale = new Vector3(desiredFlameWorldWidth, desiredFlameWorldHeight, 1f);
+        UpdateFlameWorldPosition();
 
         float footSpreadX = 0.42f;
         int baseSortOrder = targetMainSr != null ? targetMainSr.sortingOrder + 2 : 5100;
@@ -290,6 +280,41 @@ public class EnemyBurnEffect : MonoBehaviour
         {
             ExtinguishAndDestroy();
         }
+    }
+
+    void LateUpdate()
+    {
+        // Luôn bám chặt 100% vào vị trí chân thực tế của quái/Boss sau khi hoạt ảnh/lướt/teleport hoàn tất
+        UpdateFlameWorldPosition();
+    }
+
+    private void UpdateFlameWorldPosition()
+    {
+        if (flameRootObj == null) return;
+
+        // Tính toán vị trí chân (bottomWorldPos) của quái vật hoặc Boss ở frame hiện tại
+        Vector3 footWorldPos = transform.position;
+
+        if (targetMainCol == null) targetMainCol = GetComponent<Collider2D>() ?? GetComponentInChildren<Collider2D>();
+        if (targetMainSr == null) targetMainSr = GetComponent<SpriteRenderer>() ?? GetComponentInChildren<SpriteRenderer>();
+
+        if (targetMainCol != null && targetMainCol.enabled && targetMainCol.bounds.size.sqrMagnitude > 0.001f)
+        {
+            Bounds b = targetMainCol.bounds;
+            footWorldPos = new Vector3(b.center.x, b.min.y + b.size.y * 0.04f, transform.position.z - 0.04f);
+        }
+        else if (targetMainSr != null && targetMainSr.bounds.size.sqrMagnitude > 0.001f)
+        {
+            Bounds b = targetMainSr.bounds;
+            footWorldPos = new Vector3(b.center.x, b.min.y + b.size.y * 0.04f, transform.position.z - 0.04f);
+        }
+        else
+        {
+            footWorldPos = transform.position + Vector3.down * (isBossTarget ? 0.65f : 0.35f);
+            footWorldPos.z = transform.position.z - 0.04f;
+        }
+
+        flameRootObj.transform.position = footWorldPos;
     }
 
     private void DealBurnTickDamage()

@@ -244,8 +244,8 @@ public class DynamicSpriteColliderSync : MonoBehaviour
                 for (int j = 0; j < ptCount; j++)
                 {
                     Vector2 pt = s_TempShapeList[j];
-                    if (flipX) pt.x = mirrorCenterX - pt.x;
-                    if (flipY) pt.y = mirrorCenterY - pt.y;
+                    if (flipX) pt.x = -pt.x;
+                    if (flipY) pt.y = -pt.y;
                     arr[j] = pt;
                 }
 
@@ -280,8 +280,11 @@ public class DynamicSpriteColliderSync : MonoBehaviour
             }
         }
 
-        // Fallback: Nếu là Sprite tạo bằng code (Procedural) không có sẵn PhysicsShape, tạo bát giác ôm sát Bounds
+        // Fallback: Nếu Sprite không có sẵn PhysicsShape, tạo bát giác ôm sát Bounds của Sprite và xử lý lật flipX/flipY
         Vector2 c = b.center;
+        if (flipX) c.x = -c.x;
+        if (flipY) c.y = -c.y;
+
         Vector2 e = b.extents * 0.85f;
         if (e.x < 0.15f) e.x = 0.25f;
         if (e.y < 0.15f) e.y = 0.25f;
