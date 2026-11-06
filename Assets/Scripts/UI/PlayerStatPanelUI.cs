@@ -135,21 +135,10 @@ public class PlayerStatPanelUI : MonoBehaviour
         iRt.anchoredPosition = new Vector2(x, y);
         iRt.sizeDelta = new Vector2(26f, 26f);
         var img = icon.GetComponent<Image>();
-        img.sprite = GetCircleSprite();
-        img.color = iconColor;
+        img.sprite = GetPixelIcon(glyph, iconColor);
+        img.color = Color.white;
+        img.preserveAspect = true;
         img.raycastTarget = false;
-
-        // Ký hiệu nhỏ trong icon (nếu font không có glyph sẽ chỉ thấy chấm màu - không lỗi ô vuông nhờ fallback ẩn)
-        GameObject g = new GameObject("Glyph", typeof(RectTransform));
-        g.transform.SetParent(icon.transform, false);
-        var gRt = g.GetComponent<RectTransform>();
-        gRt.anchorMin = Vector2.zero; gRt.anchorMax = Vector2.one; gRt.offsetMin = gRt.offsetMax = Vector2.zero;
-        var gTmp = g.AddComponent<TextMeshProUGUI>();
-        if (font != null) gTmp.font = font;
-        gTmp.fontSize = 16; gTmp.alignment = TextAlignmentOptions.Center;
-        gTmp.color = new Color(0.05f, 0.05f, 0.08f, 0.9f);
-        gTmp.raycastTarget = false;
-        if (font != null && font.HasCharacter(glyph[0], true)) gTmp.text = glyph;
 
         GameObject t = new GameObject("Value", typeof(RectTransform));
         t.transform.SetParent(contentObj.transform, false);
@@ -167,6 +156,89 @@ public class PlayerStatPanelUI : MonoBehaviour
         tmp.overflowMode = TextOverflowModes.Ellipsis;
         tmp.raycastTarget = false;
         return tmp;
+    }
+
+    // ======================= PIXEL ICONS =======================
+    // '#' = màu chính, 'w' = điểm sáng; viền tối được tự động sinh quanh hình.
+    private static readonly System.Collections.Generic.Dictionary<string, string[]> IconMaps =
+        new System.Collections.Generic.Dictionary<string, string[]>
+    {
+        { "♥", new[] { // Máu - trái tim
+            "..##....##..", ".####..####.", "############", "#ww#########", "#w##########",
+            "############", ".##########.", "..########..", "...######...", "....####....", ".....##....." } },
+        { "⚔", new[] { // Tấn công - thanh kiếm
+            "..........ww", ".........w##", "........w##.", ".......w##..", "......w##...",
+            ".....w##....", ".#..w##.....", ".#####......", "..###.......", ".####.......", "##..#.......", "#..........." } },
+        { "»", new[] { // Tốc đánh - tia sét
+            "......####..", ".....###w...", "....####....", "...####.....", "..########..",
+            ".....####...", "....####....", "...###......", "..###.......", ".##.........", ".#.........." } },
+        { "◎", new[] { // Chí mạng - tâm ngắm
+            "....####....", "..##.##.##..", ".#...##...#.", ".#........#.", "#..........#",
+            "####.ww.####", "####.ww.####", "#..........#", ".#........#.", ".#...##...#.", "..##.##.##..", "....####...." } },
+        { "➤", new[] { // Di chuyển - chiếc giày
+            "...####.....", "...#w##.....", "...#w##.....", "...####.....", "...####.....",
+            "...#####....", "..#######...", "..########..", ".##########.", ".###########", ".www########" } },
+        { "■", new[] { // Giáp - khiên
+            ".##########.", "############", "#ww#########", "#w##########", "############",
+            "############", ".##########.", ".##########.", "..########..", "...######...", "....####....", ".....##....." } },
+        { "✦", new[] { // Phép - ngôi sao
+            ".....##.....", ".....##.....", "....#ww#....", "....####....", "############",
+            ".##########.", "..########..", "...######...", "..###..###..", "..##....##..", ".##......##.", ".#........#." } },
+        { "⌛", new[] { // Hồi chiêu - đồng hồ cát
+            "############", ".#........#.", "..#......#..", "...#wwww#...", "....####....", ".....##.....",
+            ".....##.....", "....#..#....", "...#....#...", "..#.wwww.#..", ".##########.", "############" } },
+        { "♦", new[] { // Hút máu - giọt máu
+            ".....##.....", ".....##.....", "....####....", "....####....", "...######...", "..########..",
+            "..#w######..", ".##w#######.", ".##########.", ".##########.", "..########..", "...######..." } },
+    };
+
+    private static readonly System.Collections.Generic.Dictionary<string, Sprite> iconCache =
+        new System.Collections.Generic.Dictionary<string, Sprite>();
+
+    private static Sprite GetPixelIcon(string key, Color main)
+    {
+        if (iconCache.TryGetValue(key, out var cached) && cached != null) return cached;
+        if (!IconMaps.TryGetValue(key, out var rows)) return GetCircleSprite();
+
+        int h = rows.Length, w = 0;
+        foreach (var r in rows) w = Mathf.Max(w, r.Length);
+        int size = Mathf.Max(w, h) + 2; // +2 cho viền
+        int ox = (size - w) / 2, oy = (size - h) / 2;
+
+        var grid = new char[size, size];
+        for (int y = 0; y < size; y++) for (int x = 0; x < size; x++) grid[x, y] = '.';
+        for (int r = 0; r < h; r++)
+            for (int c = 0; c < rows[r].Length; c++)
+                grid[ox + c, size - 1 - (oy + r)] = rows[r][c]; // lật trục Y cho texture
+
+        Color outline = new Color(0.04f, 0.03f, 0.05f, 1f);
+        Color hi = Color.Lerp(main, Color.white, 0.65f);
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
+        { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                char ch = grid[x, y];
+                Color col = new Color(0, 0, 0, 0);
+                if (ch == '#') col = main;
+                else if (ch == 'w') col = hi;
+                else
+                {
+                    for (int dy = -1; dy <= 1 && col.a == 0; dy++)
+                        for (int dx = -1; dx <= 1; dx++)
+                        {
+                            int nx = x + dx, ny = y + dy;
+                            if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+                            if (grid[nx, ny] == '#' || grid[nx, ny] == 'w') { col = outline; break; }
+                        }
+                }
+                tex.SetPixel(x, y, col);
+            }
+        tex.Apply();
+        var sp = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+        iconCache[key] = sp;
+        return sp;
     }
 
     private static Sprite GetCircleSprite()
