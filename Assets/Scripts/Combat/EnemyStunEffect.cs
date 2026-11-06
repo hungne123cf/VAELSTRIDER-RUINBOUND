@@ -53,8 +53,10 @@ public class EnemyStunEffect : MonoBehaviour
         // 1. Tuyệt đối không choáng Player
         if (target.CompareTag("Player") || target.GetComponent<PlayerHealth>() != null || target.GetComponentInParent<PlayerHealth>() != null) return false;
 
-        // 2. Không choáng các vật thể môi trường (Props, Chests, Barrels, Eggs, Rocks, Obstacles)
+        // 2. Không choáng các vật thể môi trường (Props, Chests, Barrels, Crystals, Eggs, Rocks, Obstacles)
         if (target.GetComponent<BreakableProp>() != null || target.GetComponentInParent<BreakableProp>() != null) return false;
+        if (target.GetComponent<ExplosiveBarrel>() != null || target.GetComponentInParent<ExplosiveBarrel>() != null) return false;
+        if (target.GetComponent<IceStalagmiteCrystal>() != null || target.GetComponentInParent<IceStalagmiteCrystal>() != null) return false;
         if (target.GetComponent<TreasureChest>() != null || target.GetComponentInParent<TreasureChest>() != null) return false;
         if (target.GetComponent<BoneEggObstacle>() != null || target.GetComponentInParent<BoneEggObstacle>() != null) return false;
 

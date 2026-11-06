@@ -31,7 +31,6 @@ public class IceStalagmiteCrystal : MonoBehaviour, IDamageable
     void Awake()
     {
         currentHealth = maxHealth;
-        gameObject.tag = "Breakable";
         gameObject.layer = 0;
 
         sr = gameObject.GetComponent<SpriteRenderer>();
@@ -212,3 +211,4 @@ public class IceStalagmiteCrystal : MonoBehaviour, IDamageable
         return go.AddComponent<IceStalagmiteCrystal>();
     }
 }
+

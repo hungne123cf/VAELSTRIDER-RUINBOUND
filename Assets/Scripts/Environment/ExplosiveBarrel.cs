@@ -34,7 +34,6 @@ public class ExplosiveBarrel : MonoBehaviour, IDamageable
     void Awake()
     {
         currentHealth = maxHealth;
-        gameObject.tag = "Breakable";
         gameObject.layer = 0; // Default
 
         sr = gameObject.GetComponent<SpriteRenderer>();
@@ -289,3 +288,4 @@ public class ExplosiveBarrel : MonoBehaviour, IDamageable
         return go.AddComponent<ExplosiveBarrel>();
     }
 }
+
