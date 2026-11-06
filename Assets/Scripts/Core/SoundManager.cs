@@ -11,23 +11,36 @@ public class SoundManager : MonoBehaviour
     public const string PREF_BGM_VOL = "Game_BGM_Volume";
     public const string PREF_SFX_VOL = "Game_SFX_Volume";
 
+    private float cachedMusicVolume = -1f;
+    private float cachedSfxVolume = -1f;
+
     public float MusicVolume
     {
-        get => PlayerPrefs.GetFloat(PREF_BGM_VOL, 0.75f);
+        get
+        {
+            if (cachedMusicVolume < 0f) cachedMusicVolume = PlayerPrefs.GetFloat(PREF_BGM_VOL, 0.75f);
+            return cachedMusicVolume;
+        }
         set
         {
-            PlayerPrefs.SetFloat(PREF_BGM_VOL, value);
+            cachedMusicVolume = Mathf.Clamp01(value);
+            PlayerPrefs.SetFloat(PREF_BGM_VOL, cachedMusicVolume);
             PlayerPrefs.Save();
-            if (musicSource != null) musicSource.volume = value * 0.45f;
+            if (musicSource != null) musicSource.volume = cachedMusicVolume * 0.45f;
         }
     }
 
     public float SFXVolume
     {
-        get => PlayerPrefs.GetFloat(PREF_SFX_VOL, 0.85f);
+        get
+        {
+            if (cachedSfxVolume < 0f) cachedSfxVolume = PlayerPrefs.GetFloat(PREF_SFX_VOL, 0.85f);
+            return cachedSfxVolume;
+        }
         set
         {
-            PlayerPrefs.SetFloat(PREF_SFX_VOL, value);
+            cachedSfxVolume = Mathf.Clamp01(value);
+            PlayerPrefs.SetFloat(PREF_SFX_VOL, cachedSfxVolume);
             PlayerPrefs.Save();
             ApplyVolumes();
         }
@@ -249,9 +262,14 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    private bool clipsLoaded = false;
+
     private void AutoLoadClips()
     {
-        // 1. Tải từ Resources (chuẩn mọi platform cả Editor và Build)
+        if (clipsLoaded && swordSlashClip != null) return;
+        clipsLoaded = true;
+
+        // 1. Tải từ Resources (chuẩn mọi platform cả Editor và Android Build)
         if (swordSlashClip == null) swordSlashClip = Resources.Load<AudioClip>("Audio/SFX/sword_slash");
         if (swordSlashHeavyClip == null) swordSlashHeavyClip = Resources.Load<AudioClip>("Audio/SFX/sword_slash_heavy");
         if (katanaSheatheClip == null) katanaSheatheClip = Resources.Load<AudioClip>("Audio/SFX/katana_sheathe");
@@ -262,6 +280,20 @@ public class SoundManager : MonoBehaviour
         if (thunderStrikeClip == null) thunderStrikeClip = Resources.Load<AudioClip>("Audio/SFX/thunder_strike");
         if (uiStoneClickClip == null) uiStoneClickClip = Resources.Load<AudioClip>("Audio/SFX/ui_stone_click");
         if (heavenlyAscensionClip == null) heavenlyAscensionClip = Resources.Load<AudioClip>("Audio/SFX/heavenly_ascension");
+
+        if (enemyShootClip == null) enemyShootClip = Resources.Load<AudioClip>("Audio/SFX/enemy_shoot");
+        if (shardPickupClip == null) shardPickupClip = Resources.Load<AudioClip>("Audio/SFX/shard_pickup");
+        if (potionDrinkClip == null) potionDrinkClip = Resources.Load<AudioClip>("Audio/SFX/potion_drink");
+        if (chestOpenClip == null) chestOpenClip = Resources.Load<AudioClip>("Audio/SFX/chest_open");
+        if (portalSpawnClip == null) portalSpawnClip = Resources.Load<AudioClip>("Audio/SFX/portal_spawn");
+        if (eyeGlintClip == null) eyeGlintClip = Resources.Load<AudioClip>("Audio/SFX/eye_glint");
+        if (playerHurtClip == null) playerHurtClip = Resources.Load<AudioClip>("Audio/SFX/player_hurt");
+        if (bossDeathClip == null) bossDeathClip = Resources.Load<AudioClip>("Audio/SFX/boss_death");
+        if (bossWarningClip == null) bossWarningClip = Resources.Load<AudioClip>("Audio/SFX/boss_warning");
+        if (runePillarHumClip == null) runePillarHumClip = Resources.Load<AudioClip>("Audio/SFX/rune_pillar_hum");
+
+        if (dungeonAmbienceClip == null) dungeonAmbienceClip = Resources.Load<AudioClip>("Audio/Music/dungeon_ambience");
+        if (coastalAmbienceClip == null) coastalAmbienceClip = Resources.Load<AudioClip>("Audio/Music/coastal_forest_ambience");
 
         if (ultiVoiceClip == null) ultiVoiceClip = Resources.Load<AudioClip>("Voice/ulti_voice");
 

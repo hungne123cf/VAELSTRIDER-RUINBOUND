@@ -301,3 +301,4 @@ public class DynamicSpriteColliderSync : MonoBehaviour
         return new Vector2[][] { fallbackOctagon };
     }
 }
+

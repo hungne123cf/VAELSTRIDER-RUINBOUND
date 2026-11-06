@@ -36,6 +36,13 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
         public float phaseOffset;
     }
 
+    private struct ShorelineAudioEdge
+    {
+        public Vector2 a;
+        public Vector2 b;
+        public float phaseOffset;
+    }
+
     private static SurroundingWaterOceanSystem instance;
     public static SurroundingWaterOceanSystem Instance => instance;
 
@@ -50,6 +57,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
     private static Sprite s_FoamEastSprite;
     private static Sprite s_FoamWestSprite;
     private static Material s_UnlitWaterMaterial;
+    private static AudioClip s_ShorelineWavesClip;
 
     private SpriteRenderer oceanBaseSr;
     private SpriteRenderer waveCrestOverlaySr;
@@ -57,6 +65,13 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
     private Vector3 oceanCenterPos;
 
     private readonly List<AnimatedShoreVisual> shoreVisuals = new List<AnimatedShoreVisual>();
+    private readonly List<ShorelineAudioEdge> shoreAudioEdges = new List<ShorelineAudioEdge>();
+    private AudioSource shoreWaveAudioSource;
+    private Transform cachedPlayerTransform;
+    private float nextPlayerSearchTime = 0f;
+    private const float SHORE_AUDIO_MAX_DIST = 9.5f;
+    private const float SHORE_AUDIO_FULL_DIST = 1.6f;
+
     private int currentFrame = 0;
     private float frameTimer = 0f;
     private const float FRAME_INTERVAL = 0.15f; // ~6.6 FPS chuẩn pixel art
@@ -89,7 +104,12 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
     {
         EnsureSpritesLoaded();
         BuildWaterAndShorelinesForCurrentScene();
+        SetupShorelineProximityAudio();
         cachedMainCam = Camera.main ?? FindAnyObjectByType<Camera>();
+        if (PlayerController.Instance != null)
+        {
+            cachedPlayerTransform = PlayerController.Instance.transform;
+        }
     }
 
     void Update()
@@ -127,6 +147,9 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
             float surgeDist = Mathf.Lerp(-0.10f, 0.16f, waveCycle);
             sv.foamTransform.position = sv.foamBasePos + sv.surgeDir * surgeDist;
         }
+
+        // 3. Công nghệ Âm thanh Sóng vỗ Dạt bờ theo Khoảng cách Cạnh Map & Định hướng Tai nghe Trái/Phải (Stereo Proximity Shoreline Audio)
+        UpdateShorelineProximityAudio(t, camPos);
     }
 
     private static void EnsureSpritesLoaded()
@@ -454,6 +477,9 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
 
             Vector3 foamBasePos = Vector3.zero;
             Vector3 surgeDir = Vector3.zero;
+            float phase = (i * 0.85f) % (Mathf.PI * 2f);
+            Vector2 edgeStart = Vector2.zero;
+            Vector2 edgeEnd = Vector2.zero;
 
             if (seg.dir == ShoreDir.North)
             {
@@ -466,6 +492,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 foamSr.size = new Vector2(length, 1.0f);
                 foamBasePos = new Vector3(mid, boundaryY + 0.56f, 0f);
                 surgeDir = Vector3.down; // Sóng vỗ từ trên xuống bờ
+                edgeStart = new Vector2(seg.startCoord, boundaryY);
+                edgeEnd = new Vector2(seg.endCoord, boundaryY);
             }
             else if (seg.dir == ShoreDir.South)
             {
@@ -478,6 +506,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 foamSr.size = new Vector2(length, 1.0f);
                 foamBasePos = new Vector3(mid, boundaryY - 0.68f, 0f);
                 surgeDir = Vector3.up; // Sóng vỗ từ dưới lên bờ
+                edgeStart = new Vector2(seg.startCoord, boundaryY);
+                edgeEnd = new Vector2(seg.endCoord, boundaryY);
             }
             else if (seg.dir == ShoreDir.East)
             {
@@ -490,6 +520,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 foamSr.size = new Vector2(1.0f, length);
                 foamBasePos = new Vector3(boundaryX + 0.48f, mid, 0f);
                 surgeDir = Vector3.left; // Sóng vỗ từ phải sang bờ trái
+                edgeStart = new Vector2(boundaryX, seg.startCoord);
+                edgeEnd = new Vector2(boundaryX, seg.endCoord);
             }
             else if (seg.dir == ShoreDir.West)
             {
@@ -502,6 +534,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 foamSr.size = new Vector2(1.0f, length);
                 foamBasePos = new Vector3(boundaryX - 0.48f, mid, 0f);
                 surgeDir = Vector3.right; // Sóng vỗ từ trái sang bờ phải
+                edgeStart = new Vector2(boundaryX, seg.startCoord);
+                edgeEnd = new Vector2(boundaryX, seg.endCoord);
             }
 
             foamObj.transform.position = foamBasePos;
@@ -514,9 +548,218 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 foamSr = foamSr,
                 foamBasePos = foamBasePos,
                 surgeDir = surgeDir,
-                phaseOffset = (i * 0.85f) % (Mathf.PI * 2f)
+                phaseOffset = phase
+            });
+
+            shoreAudioEdges.Add(new ShorelineAudioEdge
+            {
+                a = edgeStart,
+                b = edgeEnd,
+                phaseOffset = phase
             });
         }
+    }
+
+    // =========================================================================
+    // CÔNG NGHỆ ÂM THANH SÓNG VỖ DẠT BỜ THEO KHOẢNG CÁCH & ĐỊNH HƯỚNG TAI NGHE
+    // =========================================================================
+    private void SetupShorelineProximityAudio()
+    {
+        if (s_ShorelineWavesClip == null)
+        {
+            s_ShorelineWavesClip = Resources.Load<AudioClip>("Audio/SFX/shoreline_waves_loop");
+#if UNITY_EDITOR
+            if (s_ShorelineWavesClip == null)
+            {
+                s_ShorelineWavesClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/SFX/shoreline_waves_loop.wav");
+            }
+#endif
+            if (s_ShorelineWavesClip == null)
+            {
+                s_ShorelineWavesClip = BuildProceduralShorelineWaveClip();
+            }
+        }
+
+        GameObject audioObj = new GameObject("ShorelineProximityWaveAudio");
+        audioObj.transform.SetParent(transform, false);
+
+        shoreWaveAudioSource = audioObj.AddComponent<AudioSource>();
+        shoreWaveAudioSource.clip = s_ShorelineWavesClip;
+        shoreWaveAudioSource.loop = true;
+        shoreWaveAudioSource.playOnAwake = false;
+        shoreWaveAudioSource.spatialBlend = 0f; // Điều khiển suy hao khoảng cách 2D + Stereo Pan trực tiếp siêu mượt
+        shoreWaveAudioSource.volume = 0f;
+        shoreWaveAudioSource.pitch = 1.0f;
+        shoreWaveAudioSource.Play();
+    }
+
+    private void UpdateShorelineProximityAudio(float t, Vector3 fallbackCamPos)
+    {
+        if (shoreWaveAudioSource == null || shoreAudioEdges.Count == 0) return;
+
+        // 1. Lấy vị trí của Player (ưu tiên PlayerController.Instance, dự phòng Camera nếu chưa tìm thấy)
+        if (cachedPlayerTransform == null)
+        {
+            if (PlayerController.Instance != null)
+            {
+                cachedPlayerTransform = PlayerController.Instance.transform;
+            }
+            else if (t >= nextPlayerSearchTime)
+            {
+                nextPlayerSearchTime = t + 0.5f;
+                var pc = FindAnyObjectByType<PlayerController>();
+                if (pc != null) cachedPlayerTransform = pc.transform;
+            }
+        }
+
+        Vector2 listenerPos = cachedPlayerTransform != null
+            ? (Vector2)cachedPlayerTransform.position
+            : (Vector2)fallbackCamPos;
+
+        // 2. Tìm điểm mép bờ nước gần vị trí người chơi nhất trên toàn bộ bản đồ (Zero-Alloc)
+        float minDistSq = float.MaxValue;
+        Vector2 nearestShorePt = listenerPos;
+        float nearestPhase = 0f;
+
+        int edgeCount = shoreAudioEdges.Count;
+        for (int i = 0; i < edgeCount; i++)
+        {
+            ShorelineAudioEdge edge = shoreAudioEdges[i];
+            Vector2 ab = edge.b - edge.a;
+            float lenSq = ab.sqrMagnitude;
+            float proj = lenSq > 0.0001f ? Mathf.Clamp01(Vector2.Dot(listenerPos - edge.a, ab) / lenSq) : 0f;
+            Vector2 pt = edge.a + ab * proj;
+            float dSq = (listenerPos - pt).sqrMagnitude;
+
+            if (dSq < minDistSq)
+            {
+                minDistSq = dSq;
+                nearestShorePt = pt;
+                nearestPhase = edge.phaseOffset;
+            }
+        }
+
+        float maxDistSq = SHORE_AUDIO_MAX_DIST * SHORE_AUDIO_MAX_DIST;
+        if (minDistSq >= maxDistSq)
+        {
+            // Người chơi đứng ở khu vực giữa bản đồ -> tắt dần tiếng sóng về 0
+            if (shoreWaveAudioSource.volume > 0.001f)
+            {
+                shoreWaveAudioSource.volume = Mathf.MoveTowards(shoreWaveAudioSource.volume, 0f, Time.deltaTime * 1.5f);
+            }
+            else
+            {
+                shoreWaveAudioSource.volume = 0f;
+            }
+            return;
+        }
+
+        // 3. Tính độ lớn âm thanh theo khoảng cách thực tế tới mép nước (càng sát mép bờ tiếng sóng càng rõ)
+        float dist = Mathf.Sqrt(minDistSq);
+        float proximity = Mathf.Clamp01(1f - (dist - SHORE_AUDIO_FULL_DIST) / (SHORE_AUDIO_MAX_DIST - SHORE_AUDIO_FULL_DIST));
+        float distAttenuation = proximity * (0.35f + 0.65f * proximity);
+
+        // 4. Đồng bộ nhịp sóng vỗ âm thanh khớp với nhịp sóng bọt trắng dạt vào bờ (Visual-Audio Sync)
+        float waveCycle = (Mathf.Sin(t * 2.3f + nearestPhase) + 1f) * 0.5f;
+        float waveSurgeEnvelope = Mathf.Lerp(0.65f, 1.15f, waveCycle);
+
+        float sfxVol = SoundManager.Instance != null ? SoundManager.Instance.SFXVolume : 0.85f;
+        float targetVolume = distAttenuation * waveSurgeEnvelope * sfxVol * 0.62f;
+
+        shoreWaveAudioSource.volume = Mathf.MoveTowards(shoreWaveAudioSource.volume, targetVolume, Time.deltaTime * 2.0f);
+        shoreWaveAudioSource.pitch = Mathf.Lerp(0.95f, 1.04f, waveCycle);
+
+        // 5. Định hướng tai nghe Trái / Phải (Stereo Panning) dựa theo vị trí bờ nước so với nhân vật
+        float dx = nearestShorePt.x - listenerPos.x;
+        float targetPan = Mathf.Clamp(dx / 5.5f, -0.65f, 0.65f);
+        shoreWaveAudioSource.panStereo = Mathf.MoveTowards(shoreWaveAudioSource.panStereo, targetPan, Time.deltaTime * 2.5f);
+
+        if (!shoreWaveAudioSource.isPlaying)
+        {
+            shoreWaveAudioSource.Play();
+        }
+    }
+
+    /// <summary>
+    /// Tổng hợp âm thanh Sóng Vỗ Dạt Bờ Đá đa tầng (Deep Surf Wash + Foam Crest + Lapping Water Trickle)
+    /// tạo vòng lặp 8.0 giây liền mạch (Seamless Loop) không có điểm ngắt.
+    /// </summary>
+    private static AudioClip BuildProceduralShorelineWaveClip()
+    {
+        const int sampleRate = 22050;
+        const float duration = 8.0f; // 3 chu kỳ sóng vỗ + tiếng nước róc rách liền mạch
+        int sampleCount = Mathf.RoundToInt(sampleRate * duration);
+        float[] samples = new float[sampleCount];
+
+        uint rngState = 0x7A9E3B15u;
+        float lowPass1 = 0f;
+        float lowPass2 = 0f;
+        float deepSurfLP = 0f;
+
+        for (int i = 0; i < sampleCount; i++)
+        {
+            float t = (float)i / sampleRate;
+            float normT = t / duration; // 0..1
+
+            // Chu kỳ sóng chính (3 đợt sóng dạt bờ trong 8 giây để khớp hoàn hảo ở điểm đầu-cuối vòng lặp)
+            float wave1 = (Mathf.Sin(normT * Mathf.PI * 2f * 3f - 0.6f) + 1f) * 0.5f;
+            float wave2 = (Mathf.Sin(normT * Mathf.PI * 2f * 2f + 1.1f) + 1f) * 0.5f;
+            float crestEnv = Mathf.Pow(wave1, 1.8f) * 0.72f + Mathf.Pow(wave2, 2.2f) * 0.28f;
+
+            // Nhịp nước rút róc rách (trễ pha 90 độ sau khi sóng đập vào bờ)
+            float recedeWave = (Mathf.Sin(normT * Mathf.PI * 2f * 3f - 2.1f) + 1f) * 0.5f;
+            float recedeEnv = Mathf.Pow(recedeWave, 2.4f);
+
+            // Tạo White Noise chuẩn xác bằng Xorshift32
+            rngState ^= rngState << 13;
+            rngState ^= rngState >> 17;
+            rngState ^= rngState << 5;
+            float white = ((rngState & 0xFFFFu) / 32767.5f) - 1f;
+
+            // Tầng 1: Sóng ngầm trầm ấm (Deep Rolling Surf 90Hz - 320Hz)
+            deepSurfLP += 0.045f * (white - deepSurfLP);
+            float deepLayer = deepSurfLP * (0.28f + 0.55f * crestEnv);
+
+            // Tầng 2: Bọt sóng trắng vỗ vào bờ đá (Dynamic Cutoff Low-Pass Filter mở rộng khi sóng vỗ lên đỉnh)
+            float cutoffAlpha = Mathf.Lerp(0.06f, 0.28f, crestEnv);
+            lowPass1 += cutoffAlpha * (white - lowPass1);
+            lowPass2 += cutoffAlpha * (lowPass1 - lowPass2);
+            float bandFoam = (lowPass1 - lowPass2 * 0.65f) * (0.14f + 0.86f * crestEnv);
+
+            // Tầng 3: Tiếng nước vỗ róc rách / bọt nước tan vào kẽ đá khi sóng rút (Water Lapping Resonant Trickle)
+            float dropletSlot = (t * 19.0f);
+            int slotIdx = Mathf.FloorToInt(dropletSlot);
+            float slotFrac = dropletSlot - slotIdx;
+            uint slotHash = (uint)(slotIdx * 747796405u + 2891336453u);
+            slotHash ^= slotHash >> 16;
+            float dropletAmp = ((slotHash & 0xFFu) / 255f);
+            float trickleSample = 0f;
+            if (dropletAmp > 0.52f)
+            {
+                float baseFreq = 520f + ((slotHash >> 8) & 0x3FFu) * 0.85f;
+                float instFreq = baseFreq * (1f + slotFrac * 0.65f);
+                float env = Mathf.Sin(slotFrac * Mathf.PI) * Mathf.Exp(-slotFrac * 4.2f);
+                trickleSample = Mathf.Sin(2f * Mathf.PI * instFreq * (slotFrac / 19.0f)) * env * 0.075f * (0.35f + 0.65f * recedeEnv);
+            }
+
+            float combined = (deepLayer * 0.55f + bandFoam * 0.65f + trickleSample) * 0.82f;
+            samples[i] = Mathf.Clamp(combined, -0.95f, 0.95f);
+        }
+
+        // Làm mượt biên nối đầu-cuối (Crossfade 0.15s) để lặp 100% không có tiếng click
+        int fadeSamples = Mathf.RoundToInt(sampleRate * 0.15f);
+        for (int i = 0; i < fadeSamples; i++)
+        {
+            float a = (float)i / fadeSamples;
+            int tailIdx = sampleCount - fadeSamples + i;
+            float blended = Mathf.Lerp(samples[tailIdx], samples[i], a);
+            samples[i] = blended;
+            samples[tailIdx] = Mathf.Lerp(samples[tailIdx], samples[0], a * 0.5f);
+        }
+
+        AudioClip clip = AudioClip.Create("ShorelineLappingWavesLoop", sampleCount, 1, sampleRate, false);
+        clip.SetData(samples, 0);
+        return clip;
     }
 
     private static void ExpandCameraBounds(Vector2 min, Vector2 max)
