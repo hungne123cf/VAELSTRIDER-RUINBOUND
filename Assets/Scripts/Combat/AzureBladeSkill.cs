@@ -381,7 +381,7 @@ public class AzureBladeSkill : MonoBehaviour
         return true;
     }
 
-    private IEnumerator ExecuteHeavySlashWithWave(Vector2 facingDirection, int baseAtk)
+    private IEnumerator ExecuteHeavySlashWithWave(Vector2 facingDirection, int bonusAtk)
     {
         if (facingDirection.sqrMagnitude < 0.001f) facingDirection = Vector2.down;
         facingDirection = facingDirection.normalized;
@@ -389,7 +389,7 @@ public class AzureBladeSkill : MonoBehaviour
         yield return new WaitForSeconds(attackWindupDelay);
 
         Vector3 spawnPos = transform.position + (Vector3)(facingDirection * 0.7f) + Vector3.up * 0.2f;
-        int totalDamage = baseWaveDamage + baseAtk;
+        int totalDamage = baseWaveDamage + bonusAtk;
 
         SoundManager.EnsureInstance()?.PlaySwordSlash();
         SwordWaveProjectile.Spawn(spawnPos, facingDirection, totalDamage, waveSpeed, scaleMultiplier: 1.0f, isUlti: false, isCharged: false, pierceLimit: 4, ownerSkill: this);

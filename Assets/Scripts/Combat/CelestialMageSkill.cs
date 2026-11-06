@@ -417,7 +417,7 @@ public class CelestialMageSkill : MonoBehaviour
     // =========================================================================
     // 1. ĐÒN ĐÁNH CƠ BẢN: 1 CẦU TINH TÚ THẦN QUANG (SINGLE CELESTIAL STAR ORB)
     // =========================================================================
-    public void PerformAttack(Vector2 direction, int effectiveDamage)
+    public void PerformAttack(Vector2 direction, int bonusAttackDamage)
     {
         if (attackCooldownTimer > 0f || isExecutingSkill || isChargingBarrier) return;
         float atkSpdMult = (playerCombat != null) ? playerCombat.AttackSpeedMultiplier : 1.0f;
@@ -454,7 +454,7 @@ public class CelestialMageSkill : MonoBehaviour
             SpawnAnimatedVFX("CastMuzzleFlashVFX", spawnPos, vfxCastMuzzleFlashFrames, 0.035f, scale: 1.15f, tint: new Color(0.9f, 0.5f, 1f, 0.95f));
         }
 
-        int finalDamage = (effectiveDamage > 0) ? (baseOrbDamage + (effectiveDamage - 10)) : baseOrbDamage;
+        int finalDamage = baseOrbDamage + bonusAttackDamage;
         SpawnArcaneOrb(spawnPos, direction, finalDamage);
 
         SoundManager.EnsureInstance()?.PlayEnemyShoot();

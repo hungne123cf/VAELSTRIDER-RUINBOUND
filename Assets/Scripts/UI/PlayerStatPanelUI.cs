@@ -353,7 +353,7 @@ public class PlayerStatPanelUI : MonoBehaviour
 
         if (cCombat != null)
         {
-            atkTxt.text  = (cCombat.TotalAttackDamage + cCombat.BonusPhysicalDamage).ToString("N0");
+            atkTxt.text  = cCombat.TotalAttackDamage.ToString("N0");
             aspdTxt.text = cCombat.AttackSpeedMultiplier.ToString("0.00") + "x";
             critTxt.text = Mathf.RoundToInt(cCombat.TotalCritChance * 100f) + "%";
             magTxt.text  = cCombat.BonusMagicDamage.ToString("N0");

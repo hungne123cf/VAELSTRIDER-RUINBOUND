@@ -780,8 +780,7 @@ public class PlayerCombat : MonoBehaviour
             }
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
-            int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
-            ronin.PerformAttack(facing, curAtk);
+            ronin.PerformAttack(facing, bonusAttackDamage);
             return;
         }
 
@@ -795,8 +794,7 @@ public class PlayerCombat : MonoBehaviour
 
             lastAttackTime = Time.time;
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
-            int curAtk = attack1Damage + bonusAttackDamage;
-            titan.OnPerformAttack(facing, curAtk);
+            titan.OnPerformAttack(facing, bonusAttackDamage);
             return;
         }
 
@@ -822,8 +820,7 @@ public class PlayerCombat : MonoBehaviour
             }
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
-            int curAtk = ((comboStep == 1) ? attack1Damage : attack2Damage) + bonusAttackDamage;
-            azureBlade.OnPerformAttack(facing, curAtk);
+            azureBlade.OnPerformAttack(facing, bonusAttackDamage);
             return;
         }
 
@@ -836,8 +833,7 @@ public class PlayerCombat : MonoBehaviour
             if (!dune.IsAttackReady) return;
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
-            int curAtk = attack1Damage + bonusAttackDamage;
-            dune.PerformAttack(facing, curAtk);
+            dune.PerformAttack(facing, bonusAttackDamage);
             return;
         }
 
@@ -850,8 +846,7 @@ public class PlayerCombat : MonoBehaviour
             if (!mage.IsAttackReady) return;
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
-            int curAtk = attack1Damage + bonusAttackDamage;
-            mage.PerformAttack(facing, curAtk);
+            mage.PerformAttack(facing, bonusAttackDamage);
             return;
         }
 
