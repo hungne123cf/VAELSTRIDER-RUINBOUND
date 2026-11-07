@@ -111,6 +111,17 @@ public class PlayerController : MonoBehaviour
         return false;
     }
 
+    public Vector3 GetBodyCenterWorld()
+    {
+        var combat = GetComponent<PlayerCombat>();
+        if (combat != null) return combat.GetBodyCenterWorld();
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null && sr.sprite != null) return sr.bounds.center;
+        var col = GetComponent<Collider2D>();
+        if (col != null) return col.bounds.center;
+        return transform.position + Vector3.up * 1.0f;
+    }
+
     private void UpdateGoldenAuraVisual()
     {
         if (!hasGoldenSanctuary)
@@ -125,12 +136,13 @@ public class PlayerController : MonoBehaviour
             {
                 goldenAuraObject = new GameObject("GoldenSanctuaryAura");
                 goldenAuraObject.transform.SetParent(transform, false);
-                goldenAuraObject.transform.localPosition = new Vector3(0f, 0.2f, 0f);
                 var sr = goldenAuraObject.AddComponent<SpriteRenderer>();
                 sr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
                 sr.color = new Color(1f, 0.85f, 0.18f, 0.40f);
                 sr.sortingOrder = 5400;
             }
+            Vector3 localCenter = GetBodyCenterWorld() - transform.position;
+            goldenAuraObject.transform.localPosition = localCenter;
             goldenAuraObject.SetActive(true);
         }
         else
@@ -409,8 +421,10 @@ public class PlayerController : MonoBehaviour
         }
         if (goldenAuraObject != null && goldenAuraObject.activeSelf)
         {
-            float pulse = 1f + Mathf.PingPong(Time.time * 1.5f, 0.15f);
-            goldenAuraObject.transform.localScale = new Vector3(pulse * 1.3f, pulse * 1.3f, 1f);
+            Vector3 localCenter = GetBodyCenterWorld() - transform.position;
+            goldenAuraObject.transform.localPosition = localCenter;
+            float pulse = 1f + Mathf.PingPong(Time.time * 2f, 0.15f);
+            goldenAuraObject.transform.localScale = new Vector3(pulse * 1.8f, pulse * 1.8f, 1f);
         }
 
         if (dashCooldownTimer > 0)
