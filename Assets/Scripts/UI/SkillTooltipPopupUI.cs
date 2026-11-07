@@ -97,9 +97,8 @@ public class SkillTooltipPopupUI : MonoBehaviour
         outline.effectColor = new Color(0.85f, 0.70f, 0.35f, 0.95f); // Viền vàng hoàng kim TFT
         outline.effectDistance = new Vector2(2f, -2f);
 
-        TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") 
-            ?? Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF")
-            ?? TMP_Settings.defaultFontAsset;
+        TMP_FontAsset font = GameFontManager.BodyFont;
+        TMP_FontAsset headerFont = GameFontManager.HeaderFont;
 
         TMP_SpriteAsset spriteAsset = VaelstriderSpriteAssetFactory.GetOrCreateSpriteAsset();
 
@@ -140,7 +139,7 @@ public class SkillTooltipPopupUI : MonoBehaviour
         tRt.anchoredPosition = new Vector2(58f, -2f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
-        if (font != null) titleText.font = font;
+        if (headerFont != null) titleText.font = headerFont;
         titleText.fontSize = 17.5f;
         titleText.fontStyle = FontStyles.Bold;
         titleText.color = new Color(1f, 0.88f, 0.35f);

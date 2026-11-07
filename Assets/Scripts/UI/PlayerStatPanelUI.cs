@@ -63,7 +63,7 @@ public class PlayerStatPanelUI : MonoBehaviour
     // ======================= BUILD UI =======================
     private void Build()
     {
-        TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") ?? TMP_Settings.defaultFontAsset;
+        TMP_FontAsset font = GameFontManager.BodyFont;
 
         panelRt = GetComponent<RectTransform>();
         panelRt.anchorMin = panelRt.anchorMax = new Vector2(0f, 1f);

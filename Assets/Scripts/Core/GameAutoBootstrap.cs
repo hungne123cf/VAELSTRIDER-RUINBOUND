@@ -204,6 +204,14 @@ public class GameAutoBootstrap : MonoBehaviour
         FrostfallBlizzardHazardManager.EnsureManager();
         SurroundingWaterOceanSystem.EnsureWaterSystem();
 
+        // 11. Áp dụng chuẩn Typography Dark Fantasy (Cinzel cho Header/Boss, Be Vietnam Pro cho UI/Stats)
+        GameFontManager.EnsureInitialized();
+        Canvas mainCanvas = GetMainGameplayCanvas();
+        if (mainCanvas != null)
+        {
+            GameFontManager.ApplyFontsGlobally(mainCanvas.gameObject);
+        }
+
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
     }
 

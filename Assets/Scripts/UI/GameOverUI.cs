@@ -106,6 +106,7 @@ public class GameOverUI : MonoBehaviour
 
         if (titleText != null) 
         {
+            titleText.font = GameFontManager.HeaderFont;
             titleText.text = isVi ? "CHUYẾN PHIÊU LƯU KẾT THÚC" : "EXPEDITION FAILED";
             titleText.enableWordWrapping = false;
             titleText.enableAutoSizing = true;
@@ -135,6 +136,7 @@ public class GameOverUI : MonoBehaviour
         }
         if (subtitleText != null) 
         {
+            subtitleText.font = GameFontManager.BodyFont;
             subtitleText.text = isVi ? "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này." : "Your journey ends here. Battle levels and augments only exist within this run.";
             subtitleText.fontSize = 14f;
             subtitleText.enableAutoSizing = true;
@@ -149,6 +151,10 @@ public class GameOverUI : MonoBehaviour
                 sRt.anchoredPosition = new Vector2(0f, 115f);
             }
         }
+
+        if (restartBtnText != null) restartBtnText.font = GameFontManager.BodyFont;
+        if (mainMenuBtnText != null) mainMenuBtnText.font = GameFontManager.BodyFont;
+        if (respawnStatusText != null) respawnStatusText.font = GameFontManager.HeaderFont;
 
         // Game 1 mạng: Ẩn nút Respawn hồi sinh tại chỗ
         if (respawnButton != null)
@@ -504,6 +510,7 @@ public class GameOverUI : MonoBehaviour
         titleRect.anchoredPosition = new Vector2(0, 245);
         titleRect.sizeDelta = new Vector2(800, 58);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
+        titleTmp.font = GameFontManager.HeaderFont;
         titleTmp.text = LocalizationManager.T("NGƯƠI ĐÃ TỬ TRẬN", "YOU DIED");
         titleTmp.fontSize = 42;
         titleTmp.enableAutoSizing = true;
@@ -527,6 +534,7 @@ public class GameOverUI : MonoBehaviour
         subRect.anchoredPosition = new Vector2(0, 115);
         subRect.sizeDelta = new Vector2(860, 28);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
+        subTmp.font = GameFontManager.BodyFont;
         subTmp.text = "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này.";
         subTmp.fontSize = 14f;
         subTmp.enableAutoSizing = true;
@@ -546,6 +554,7 @@ public class GameOverUI : MonoBehaviour
         statusRect.anchoredPosition = new Vector2(0, 68);
         statusRect.sizeDelta = new Vector2(780, 36);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
+        statusTmp.font = GameFontManager.HeaderFont;
         statusTmp.fontSize = 24f;
         statusTmp.fontStyle = FontStyles.Bold;
         statusTmp.alignment = TextAlignmentOptions.Center;
@@ -603,6 +612,7 @@ public class GameOverUI : MonoBehaviour
         tRt.offsetMax = Vector2.zero;
 
         btnTxt = txtObj.AddComponent<TextMeshProUGUI>();
+        btnTxt.font = GameFontManager.BodyFont;
         btnTxt.text = text;
         btnTxt.fontSize = fontSize;
         btnTxt.fontStyle = FontStyles.Bold;

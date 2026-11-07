@@ -331,6 +331,13 @@ public class MainMenuManager : MonoBehaviour
             UpdateCurrencyDisplay();
 
             LocalizationManager.OnLanguageChanged += UpdateAllTexts;
+
+            GameFontManager.EnsureInitialized();
+            Canvas mmCanvas = GetComponentInParent<Canvas>() ?? FindAnyObjectByType<Canvas>();
+            if (mmCanvas != null)
+            {
+                GameFontManager.ApplyFontsGlobally(mmCanvas.gameObject);
+            }
         }
         catch (System.Exception ex)
         {

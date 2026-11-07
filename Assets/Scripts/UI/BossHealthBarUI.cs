@@ -143,6 +143,7 @@ public class BossHealthBarUI : MonoBehaviour
         nameRt.sizeDelta = new Vector2(760f, 32f);
 
         var nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
+        nameTmp.font = GameFontManager.HeaderFont;
         nameTmp.text = LocalizationManager.T("PHÁO ĐÀI BÁNH XE CỔ ĐẠI", "THE ANCIENT TITAN WHEEL");
         nameTmp.fontSize = 20;
         nameTmp.fontStyle = FontStyles.Bold;
@@ -220,6 +221,7 @@ public class BossHealthBarUI : MonoBehaviour
         hpTxtRt.anchorMax = Vector2.one;
         hpTxtRt.sizeDelta = Vector2.zero;
         var hpTmp = hpTxtObj.AddComponent<TextMeshProUGUI>();
+        hpTmp.font = GameFontManager.BodyFont;
         hpTmp.text = "100%";
         hpTmp.fontSize = 14;
         hpTmp.fontStyle = FontStyles.Bold;

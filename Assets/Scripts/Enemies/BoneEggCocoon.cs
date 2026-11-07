@@ -88,9 +88,7 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
         guidanceObj.transform.localPosition = new Vector3(0f, 2.2f, 0f);
 
         guidanceTMP = guidanceObj.AddComponent<TextMeshPro>();
-        TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") 
-            ?? Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF")
-            ?? TMP_Settings.defaultFontAsset;
+        TMP_FontAsset font = GameFontManager.BodyFont;
         if (font != null) guidanceTMP.font = font;
         guidanceTMP.text = "<color=#FCD34D><b>!</b></color>";
         guidanceTMP.fontSize = 5.2f;

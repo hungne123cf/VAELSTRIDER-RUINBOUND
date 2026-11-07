@@ -643,9 +643,9 @@ public static class SoulslikeHUDStyler
         if (tmp == null) return;
         try
         {
-            if (tmp.font == null && TMP_Settings.defaultFontAsset != null)
+            if (tmp.font == null)
             {
-                tmp.font = TMP_Settings.defaultFontAsset;
+                tmp.font = GameFontManager.BodyFont;
             }
 
             if (tmp.font != null && tmp.fontSharedMaterial == null)
@@ -674,6 +674,7 @@ public static class SoulslikeHUDStyler
     {
         if (title != null)
         {
+            title.font = GameFontManager.HeaderFont;
             title.fontStyle = FontStyles.Bold;
             title.color = new Color(0.98f, 0.88f, 0.55f, 1f); // Hoàng kim Soulslike
             SetSafeOutline(title, 0.40f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
@@ -681,6 +682,7 @@ public static class SoulslikeHUDStyler
 
         if (subtitle != null)
         {
+            subtitle.font = GameFontManager.BodyFont;
             subtitle.color = new Color(0.80f, 0.82f, 0.88f, 0.85f); // Bạc cổ
             SetSafeOutline(subtitle, 0.25f, new Color(0.02f, 0.02f, 0.04f, 0.90f));
         }

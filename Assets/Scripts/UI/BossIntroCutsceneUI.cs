@@ -168,9 +168,8 @@ public class BossIntroCutsceneUI : MonoBehaviour
             rootRt.offsetMax = Vector2.zero;
         }
 
-        TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") 
-            ?? Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF")
-            ?? TMP_Settings.defaultFontAsset;
+        TMP_FontAsset font = GameFontManager.BodyFont;
+        TMP_FontAsset headerFont = GameFontManager.HeaderFont;
 
         // 1. TOP LETTERBOX BAR
         GameObject topBarObj = CreateUIGameObject("TopLetterbox", root.transform);
@@ -213,7 +212,7 @@ public class BossIntroCutsceneUI : MonoBehaviour
         bnRt.anchoredPosition = new Vector2(0f, -5f);
 
         bottomNameText = bNameObj.AddComponent<TextMeshProUGUI>();
-        if (font != null) bottomNameText.font = font;
+        if (headerFont != null) bottomNameText.font = headerFont;
         bottomNameText.fontSize = 32;
         bottomNameText.fontStyle = FontStyles.Bold;
         bottomNameText.alignment = TextAlignmentOptions.Left;
@@ -319,7 +318,7 @@ public class BossIntroCutsceneUI : MonoBehaviour
         stRt.anchoredPosition = new Vector2(7f, -7f); // Độ dời bóng 3D
 
         bigNameShadowText = shadowTextObj.AddComponent<TextMeshProUGUI>();
-        if (font != null) bigNameShadowText.font = font;
+        if (headerFont != null) bigNameShadowText.font = headerFont;
         bigNameShadowText.fontSize = 80;
         bigNameShadowText.fontStyle = FontStyles.Bold;
         bigNameShadowText.alignment = TextAlignmentOptions.Left;
@@ -337,7 +336,7 @@ public class BossIntroCutsceneUI : MonoBehaviour
         mtRt.anchoredPosition = Vector2.zero;
 
         bigNameText = mainTextObj.AddComponent<TextMeshProUGUI>();
-        if (font != null) bigNameText.font = font;
+        if (headerFont != null) bigNameText.font = headerFont;
         bigNameText.fontSize = 80;
         bigNameText.fontStyle = FontStyles.Bold;
         bigNameText.alignment = TextAlignmentOptions.Left;
@@ -367,7 +366,7 @@ public class BossIntroCutsceneUI : MonoBehaviour
         fgRt.anchoredPosition = Vector2.zero;
 
         fightText = fightObj.AddComponent<TextMeshProUGUI>();
-        if (font != null) fightText.font = font;
+        if (headerFont != null) fightText.font = headerFont;
         fightText.fontSize = 68;
         fightText.fontStyle = FontStyles.Bold;
         fightText.alignment = TextAlignmentOptions.Center;

@@ -221,7 +221,8 @@ public class AugmentHUDBar : MonoBehaviour
         _rootRt.anchoredPosition = new Vector2(24f, -162f);
         _rootRt.sizeDelta = new Vector2(456f, 122f);
 
-        TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") ?? TMP_Settings.defaultFontAsset;
+        TMP_FontAsset font = GameFontManager.BodyFont;
+        TMP_FontAsset headerFont = GameFontManager.HeaderFont;
         bool isVi = LocalizationManager.IsVietnamese;
 
         // ── 1. Panel Content (Hộp kính mờ Dark Fantasy đồng bộ với PlayerStatPanelUI) ──
@@ -251,7 +252,7 @@ public class AugmentHUDBar : MonoBehaviour
         hRt.sizeDelta = new Vector2(260f, 28f);
 
         var hTmp = headerObj.GetComponent<TextMeshProUGUI>();
-        if (font != null) hTmp.font = font;
+        if (headerFont != null) hTmp.font = headerFont;
         hTmp.text = isVi ? "LÕI NÂNG CẤP ĐÃ CHỌN" : "ACTIVE AUGMENTS";
         hTmp.fontSize = 16.5f;
         hTmp.fontStyle = FontStyles.Bold;
