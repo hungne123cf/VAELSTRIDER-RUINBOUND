@@ -12,8 +12,8 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private float attackOffsetDistance = 1.3f;
     [SerializeField] private Vector2 bodyCenterOffset = new Vector2(0f, 0.1f);
     [SerializeField] private LayerMask enemyLayers;
-    [SerializeField] private int attack1Damage = 5;
-    [SerializeField] private int attack2Damage = 5;
+    [SerializeField] private int attack1Damage = 25;
+    [SerializeField] private int attack2Damage = 35;
     [SerializeField] private float comboResetTime = 0.9f;
 
     [Header("Special Skill - Ruin Whirlwind")]
@@ -303,8 +303,8 @@ public class PlayerCombat : MonoBehaviour
         }
         else
         {
-            attack1Damage = 18;
-            attack2Damage = 28;
+            attack1Damage = 25;
+            attack2Damage = 35;
         }
         skillCooldown = 18.0f;
 
@@ -430,6 +430,14 @@ public class PlayerCombat : MonoBehaviour
         }
 
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out lifestealPercent, out float cdReduc, out _, out _);
+        var heroData = CharacterManager.EnsureInstance()?.GetCharacter(curHero);
+        bool hasOtherHeroSkill = (GetComponent<GaleRoninSkill>() != null || GetComponent<AzureBladeSkill>() != null ||
+                                  GetComponent<TitanBerserkerSkill>() != null || GetComponent<DuneAssassinSkill>() != null ||
+                                  GetComponent<CelestialMageSkill>() != null);
+        bool isVael = (curHero == CharacterManager.CHAR_VAELSTRIDER || string.IsNullOrEmpty(curHero)) && !hasOtherHeroSkill;
+        float baseLs = heroData != null && heroData.baseLifesteal > 0f ? heroData.baseLifesteal : (isVael ? 0.05f : 0f);
+        lifestealPercent += baseLs;
+
         socketCdReduc = cdReduc;
         float upUltiCd = 0f;
         var upgradeMgr = PlayerUpgradeManager.EnsureInstance();

@@ -18,6 +18,7 @@ public class CharacterData
     public int baseAttack;
     public int baseDefense;
     public float baseSpeed;
+    public float baseLifesteal;
     public int unlockPrice;
     public string controllerPath;
     public string spriteSheetPath;
@@ -109,6 +110,7 @@ public class CharacterManager : MonoBehaviour
             baseAttack = 25,
             baseDefense = 12,
             baseSpeed = 5.0f,
+            baseLifesteal = 0.05f, // 5% Hút máu cơ bản của Hiệp Sĩ Vaelstrider
             unlockPrice = 0, // Miễn phí ban đầu
             controllerPath = "Controllers/Player1",
             spriteSheetPath = "Assets/ART/Player/IDLE/idle_down.png"

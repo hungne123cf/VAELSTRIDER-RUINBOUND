@@ -3410,7 +3410,7 @@ public class MainMenuManager : MonoBehaviour
                 "- <b>Ultimate (Holy Sword Tempest):</b> 360 deg sword vortex storm pulling enemies and summons a gigantic Holy Sword of the Heavens slamming down with massive AoE damage.");
             if (heroStatsSummaryText != null)
             {
-                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 100   CÔNG: 20   TỐC: 5.0", "HP: 100   ATK: 20   SPD: 5.0");
+                heroStatsSummaryText.text = LocalizationManager.T("MÁU: 100   CÔNG: 25   TỐC: 5.0   HÚT MÁU: 5%", "HP: 100   ATK: 25   SPD: 5.0   LIFESTEAL: 5%");
             }
         }
     }
