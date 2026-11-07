@@ -417,26 +417,23 @@ public class SoundManager : MonoBehaviour
     private float lastHitImpactTime = 0f;
 
     /// <summary>
-    /// Âm thanh chém trúng đích đa tầng: Thịt, Giáp nặng, hoặc Bạo Kích nổ giòn giã
+    /// Âm thanh chém trúng đích: Chém trúng thịt bình thường hoặc đòn chém nặng.
+    /// ĐÃ BỎ HOÀN TOÀN âm thanh chí mạng theo yêu cầu.
     /// </summary>
     public void PlayHitImpact(bool isCrit = false, bool isHeavy = false)
     {
         // Chống nghẽn Audio Thread khi chém quét trúng 10-20 quái cùng 1 frame
-        if (!isCrit && !isHeavy && Time.unscaledTime - lastHitImpactTime < 0.04f) return;
+        if (!isHeavy && Time.unscaledTime - lastHitImpactTime < 0.04f) return;
         lastHitImpactTime = Time.unscaledTime;
 
         AutoLoadClips();
-        if (isCrit && hitCritClip != null)
-        {
-            PlaySFX(hitCritClip, 1.35f, 0.03f); // Bạo kích uy lực chấn động
-        }
-        else if (isHeavy && titanSlamClip != null)
+        if (isHeavy && titanSlamClip != null)
         {
             PlaySFX(titanSlamClip, 1.15f, 0.05f); // Đòn chém nặng / nện búa
         }
         else if (hitImpactClip != null)
         {
-            PlaySFX(hitImpactClip, 1.05f, 0.10f); // Chém trúng thịt bình thường
+            PlaySFX(hitImpactClip, 1.05f, 0.10f); // Chém trúng bình thường
         }
         else
         {
@@ -445,7 +442,7 @@ public class SoundManager : MonoBehaviour
     }
 
     public void PlayHitImpact() => PlayHitImpact(false, false);
-    public void PlayCritImpact() => PlayHitImpact(true, false);
+    public void PlayCritImpact() => PlayHitImpact(false, false); // Đã bỏ âm thanh chí mạng hoàn toàn
 
     /// <summary>
     /// Tiếng tra kiếm Katana "Ching!" của Ronin
@@ -568,9 +565,7 @@ public class SoundManager : MonoBehaviour
 
     public void PlayBossWarning()
     {
-        AutoLoadClips();
-        if (bossWarningClip != null) PlaySFX(bossWarningClip, 1.35f, 0.01f);
-        else PlayEyeFlareGlint();
+        // ĐÃ BỎ HOÀN TOÀN âm thanh vùng cảnh báo của boss khỏi dự án theo yêu cầu
     }
 
     public void PlayMenuHover()
@@ -614,10 +609,10 @@ public class SoundManager : MonoBehaviour
     public void PlayGameOver() => PlayBossDeath();
     public void PlayAttack() => PlaySwordSlash();
     public void PlayUltiSFX() => PlayHeavenlyAscension();
-    public void PlayBossRoar() => PlayBossWarning();
+    public void PlayBossRoar() { }
     public void PlayBossSlam() => PlayHitImpact(false, true);
-    public void PlayBossSkill() => PlayBossWarning();
-    public void PlayParrySuccess() => PlayHitImpact(true, true);
+    public void PlayBossSkill() { }
+    public void PlayParrySuccess() => PlayHitImpact(false, true);
 
     private void PlaySynthFallback(float frequency, float duration)
     {
