@@ -828,8 +828,10 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
             BoneEggCocoon.OnEggHatched += onHatched;
             GameObject cocoon = Map3WaveSpawner.SpawnBoneEggCocoonStatic(bossSpawnPos);
 
-            while (!eggHatched && cocoon != null)
+            float waitEggTimer = 0f;
+            while (!eggHatched && cocoon != null && waitEggTimer < 25f)
             {
+                waitEggTimer += 0.2f;
                 yield return new WaitForSeconds(0.2f);
             }
             BoneEggCocoon.OnEggHatched -= onHatched;

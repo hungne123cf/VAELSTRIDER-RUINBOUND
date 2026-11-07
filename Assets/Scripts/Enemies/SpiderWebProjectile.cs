@@ -73,16 +73,26 @@ public class SpiderWebProjectile : MonoBehaviour
         sr.sortingOrder = 2500;
         transform.localScale = new Vector3(1.1f, 1.1f, 1f);
 
-        // Ánh sáng dạ quang theo hệ nguyên tố
-        GameObject lightObj = new GameObject("Web_Light");
-        lightObj.transform.SetParent(transform, false);
-        lightObj.transform.localPosition = Vector3.zero;
-        var light = lightObj.AddComponent<Light2D>();
-        light.lightType = Light2D.LightType.Point;
-        light.color = lightCol;
-        light.intensity = 1.6f;
-        light.pointLightInnerRadius = 0.2f;
-        light.pointLightOuterRadius = 1.6f;
+        // Ánh sáng dạ quang theo hệ nguyên tố (try/catch an toàn trên Android)
+        try
+        {
+            GameObject lightObj = new GameObject("Web_Light");
+            lightObj.transform.SetParent(transform, false);
+            lightObj.transform.localPosition = Vector3.zero;
+            var light = lightObj.AddComponent<Light2D>();
+            if (light != null)
+            {
+                light.lightType = Light2D.LightType.Point;
+                light.color = lightCol;
+                light.intensity = 1.6f;
+                light.pointLightInnerRadius = 0.2f;
+                light.pointLightOuterRadius = 1.6f;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[SpiderWebProjectile] Light2D setup skipped: {ex.Message}");
+        }
 
         var col = GetComponent<CircleCollider2D>();
         col.radius = 0.45f;

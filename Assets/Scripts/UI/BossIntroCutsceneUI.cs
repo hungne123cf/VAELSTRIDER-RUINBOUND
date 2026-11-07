@@ -117,6 +117,10 @@ public class BossIntroCutsceneUI : MonoBehaviour
         var existing = Object.FindAnyObjectByType<BossIntroCutsceneUI>(FindObjectsInactive.Include);
         if (existing != null)
         {
+            if (existing.topLetterbox == null || existing.fightText == null)
+            {
+                existing.BuildUIStructure(existing.gameObject, existing.GetComponentInParent<Canvas>());
+            }
             Instance = existing;
             return existing;
         }
@@ -493,216 +497,264 @@ public class BossIntroCutsceneUI : MonoBehaviour
         ui.activeRoutine = ui.StartCoroutine(ui.PlayIntroRoutine(data, bossTransform, onFinished));
     }
 
+    private IEnumerator SafetyWatchdogRoutine(float timeout)
+    {
+        yield return new WaitForSecondsRealtime(timeout);
+        if (IsCutsceneActive)
+        {
+            Debug.LogWarning("[BossIntroCutsceneUI] Safety watchdog timeout fired! Force restoring player control and HUD.");
+            ForceEndCutscene();
+        }
+    }
+
+    public static void ForceEndCutscene()
+    {
+        IsCutsceneActive = false;
+        var pCtrl = Object.FindAnyObjectByType<PlayerController>();
+        if (pCtrl != null) pCtrl.SetCanMove(true);
+
+        var cam = CameraFollow.Instance ?? Object.FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.RestoreFocus();
+
+        var ui = Instance;
+        if (ui != null)
+        {
+            ui.SetGameplayHUDVisible(true);
+            if (ui.canvasGroup != null) ui.canvasGroup.alpha = 0f;
+            if (ui.bannerCanvasGroup != null) ui.bannerCanvasGroup.alpha = 0f;
+            if (ui.fightText != null) ui.fightText.gameObject.SetActive(false);
+            if (ui.skipPromptText != null) ui.skipPromptText.gameObject.SetActive(false);
+            if (ui.activeRoutine != null)
+            {
+                ui.StopCoroutine(ui.activeRoutine);
+                ui.activeRoutine = null;
+            }
+        }
+    }
+
     private IEnumerator PlayIntroRoutine(BossIntroData data, Transform bossTransform, System.Action onFinished)
     {
         IsCutsceneActive = true;
         skipRequested = false;
 
-        // 1. Khóa nhẹ nút di chuyển của người chơi và ngưng nhận sát thương
         var playerCtrl = Object.FindAnyObjectByType<PlayerController>();
-        if (playerCtrl != null) playerCtrl.SetCanMove(false);
+        Coroutine watchdog = StartCoroutine(SafetyWatchdogRoutine(3.5f));
 
-        // Tạm thời ẩn các UI vướng víu (Minimap, Joystick, QuickSlots)
-        SetGameplayHUDVisible(false);
-
-        // Nạp Splash Art khổ lớn cho Boss
-        Sprite splashSprite = data.bossSplashSprite;
-        if (splashSprite == null)
+        try
         {
-            string nameUpper = (data.bossName ?? "").ToUpper();
-            if (nameUpper.Contains("GIKK") || nameUpper.Contains("WHEEL") || nameUpper.Contains("BOT"))
+            if (playerCtrl != null) playerCtrl.SetCanMove(false);
+            SetGameplayHUDVisible(false);
+
+            if (topLetterbox == null || bottomLetterbox == null || slantedBanner == null || fightText == null)
             {
-                splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GoliathGikk") 
-                            ?? Resources.Load<Sprite>("Enemies/BossAvatars/Avatar_GoliathGikk");
+                BuildUIStructure(gameObject, canvas ?? GetComponentInParent<Canvas>());
             }
-            else if (nameUpper.Contains("GOR'MOK") || nameUpper.Contains("GORMOK") || nameUpper.Contains("BLOOD"))
+
+            // Nạp Splash Art khổ lớn cho Boss
+            Sprite splashSprite = data.bossSplashSprite;
+            if (splashSprite == null)
             {
-                splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GorMok") 
-                            ?? Resources.Load<Sprite>("Enemies/BossAvatars/Avatar_GorMok");
+                string nameUpper = (data.bossName ?? "").ToUpper();
+                if (nameUpper.Contains("GIKK") || nameUpper.Contains("WHEEL") || nameUpper.Contains("BOT"))
+                {
+                    splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GoliathGikk") 
+                                ?? Resources.Load<Sprite>("Enemies/BossAvatars/Avatar_GoliathGikk");
+                }
+                else if (nameUpper.Contains("GOR'MOK") || nameUpper.Contains("GORMOK") || nameUpper.Contains("BLOOD"))
+                {
+                    splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GorMok") 
+                                ?? Resources.Load<Sprite>("Enemies/BossAvatars/Avatar_GorMok");
+                }
+                else if (nameUpper.Contains("VALENTHUS") || nameUpper.Contains("GOLEM"))
+                {
+                    splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_Valenthus") 
+                                ?? Resources.Load<Sprite>("Enemies/BossAvatars/Avatar_Valenthus");
+                }
+                else if (nameUpper.Contains("VALTHOR") || nameUpper.Contains("SKELETON") || nameUpper.Contains("DEATHLORD") || nameUpper.Contains("NHỆN"))
+                {
+                    splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_SkeletonKing") 
+                                ?? Resources.Load<Sprite>("Enemies/BossAvatars/Avatar_SkeletonKing");
+                }
+                else if (nameUpper.Contains("SHADOW") || nameUpper.Contains("DOPPELGANGER"))
+                {
+                    splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_ShadowDoppelganger");
+                }
             }
-            else if (nameUpper.Contains("VALENTHUS") || nameUpper.Contains("GOLEM"))
+
+            // Cập nhật Banner Background Color
+            if (bannerBg != null)
             {
-                splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_Valenthus") 
-                            ?? Resources.Load<Sprite>("Enemies/BossAvatars/Avatar_Valenthus");
+                bannerBg.color = data.bannerColor;
             }
-            else if (nameUpper.Contains("VALTHOR") || nameUpper.Contains("SKELETON") || nameUpper.Contains("DEATHLORD"))
+
+            // Gán hình Boss Splash Art
+            if (bossSplashImg != null)
             {
-                splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_SkeletonKing") 
-                            ?? Resources.Load<Sprite>("Enemies/BossAvatars/Avatar_SkeletonKing");
+                if (splashSprite != null)
+                {
+                    bossSplashImg.sprite = splashSprite;
+                    bossSplashImg.color = Color.white;
+                    bossSplashImg.gameObject.SetActive(true);
+                }
+                else
+                {
+                    bossSplashImg.gameObject.SetActive(false);
+                }
             }
-            else if (nameUpper.Contains("SHADOW") || nameUpper.Contains("DOPPELGANGER"))
+
+            // Chuẩn bị Text tên lớn 3D trên banner
+            string bigName = data.bossName;
+            if (bigNameText != null) bigNameText.text = bigName;
+            if (bigNameShadowText != null) bigNameShadowText.text = bigName;
+
+            // Chuẩn bị Text dải dưới (Bottom Letterbox)
+            string displayName = !string.IsNullOrEmpty(data.displayName) ? data.displayName : data.bossName.Replace("\n", " ");
+            if (bottomNameText != null) bottomNameText.text = displayName;
+            if (bottomTitleText != null) bottomTitleText.text = data.bossTitle;
+            if (bottomThreatText != null)
             {
-                splashSprite = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_ShadowDoppelganger");
+                bottomThreatText.text = string.IsNullOrEmpty(data.threatLevel) 
+                    ? (LocalizationManager.IsVietnamese ? "[!] CẤP ĐỘ NGUY HIỂM: THẢM HỌA TITAN [!]" : "[!] THREAT LEVEL: CALAMITY TITAN [!]")
+                    : data.threatLevel;
+                bottomThreatText.color = data.bannerColor;
             }
-        }
 
-        // Cập nhật Banner Background Color
-        if (bannerBg != null)
-        {
-            bannerBg.color = data.bannerColor;
-        }
+            if (canvasGroup != null) canvasGroup.alpha = 1f;
+            if (fightText != null) fightText.gameObject.SetActive(false);
+            if (skipPromptText != null) skipPromptText.gameObject.SetActive(true);
 
-        // Gán hình Boss Splash Art
-        if (bossSplashImg != null)
-        {
-            if (splashSprite != null)
+            // 2. Slide In Letterbox Bars (0.35s)
+            float elapsed = 0f;
+            float letterboxDuration = 0.35f;
+            while (elapsed < letterboxDuration && !skipRequested)
             {
-                bossSplashImg.sprite = splashSprite;
-                bossSplashImg.color = Color.white;
-                bossSplashImg.gameObject.SetActive(true);
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / letterboxDuration);
+                float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+                if (topLetterbox != null) topLetterbox.anchoredPosition = new Vector2(0f, Mathf.Lerp(135f, 0f, smoothT));
+                if (bottomLetterbox != null) bottomLetterbox.anchoredPosition = new Vector2(0f, Mathf.Lerp(-145f, 0f, smoothT));
+                yield return null;
             }
-            else
+            if (topLetterbox != null) topLetterbox.anchoredPosition = Vector2.zero;
+            if (bottomLetterbox != null) bottomLetterbox.anchoredPosition = Vector2.zero;
+
+            // 3. Camera lia sang Boss và Zoom cận cảnh
+            var cam = CameraFollow.Instance ?? Object.FindAnyObjectByType<CameraFollow>();
+            if (cam != null && bossTransform != null)
             {
-                bossSplashImg.gameObject.SetActive(false);
+                cam.FocusOn(bossTransform, 3.8f);
             }
-        }
 
-        // Chuẩn bị Text tên lớn 3D trên banner
-        string bigName = data.bossName;
-        if (bigNameText != null) bigNameText.text = bigName;
-        if (bigNameShadowText != null) bigNameShadowText.text = bigName;
-
-        // Chuẩn bị Text dải dưới (Bottom Letterbox)
-        string displayName = !string.IsNullOrEmpty(data.displayName) ? data.displayName : data.bossName.Replace("\n", " ");
-        if (bottomNameText != null) bottomNameText.text = displayName;
-        if (bottomTitleText != null) bottomTitleText.text = data.bossTitle;
-        if (bottomThreatText != null)
-        {
-            bottomThreatText.text = string.IsNullOrEmpty(data.threatLevel) 
-                ? (LocalizationManager.IsVietnamese ? "[!] CẤP ĐỘ NGUY HIỂM: THẢM HỌA TITAN [!]" : "[!] THREAT LEVEL: CALAMITY TITAN [!]")
-                : data.threatLevel;
-            bottomThreatText.color = data.bannerColor;
-        }
-
-        canvasGroup.alpha = 1f;
-        fightText.gameObject.SetActive(false);
-        skipPromptText.gameObject.SetActive(true);
-
-        // 2. Slide In Letterbox Bars (0.35s)
-        float elapsed = 0f;
-        float letterboxDuration = 0.35f;
-        while (elapsed < letterboxDuration && !skipRequested)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / letterboxDuration);
-            float smoothT = Mathf.SmoothStep(0f, 1f, t);
-
-            topLetterbox.anchoredPosition = new Vector2(0f, Mathf.Lerp(135f, 0f, smoothT));
-            bottomLetterbox.anchoredPosition = new Vector2(0f, Mathf.Lerp(-145f, 0f, smoothT));
-            yield return null;
-        }
-        topLetterbox.anchoredPosition = Vector2.zero;
-        bottomLetterbox.anchoredPosition = Vector2.zero;
-
-        // 3. Camera lia sang Boss và Zoom cận cảnh
-        var cam = CameraFollow.Instance ?? Object.FindAnyObjectByType<CameraFollow>();
-        if (cam != null && bossTransform != null)
-        {
-            cam.FocusOn(bossTransform, 3.8f);
-        }
-
-        // 4. Âm thanh cảnh báo Boss & Sóng xung kích chấn động đất
-        SoundManager.EnsureInstance()?.PlayBossWarning();
-        if (bossTransform != null)
-        {
-            SpawnGroundShockwave(bossTransform.position, data.bannerColor);
-        }
-
-        // Chờ 0.20s để camera bắt trọn khoảnh khắc Boss
-        elapsed = 0f;
-        while (elapsed < 0.20f && !skipRequested)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
-        // 5. THẺ TÊN SOUL KNIGHT DẬP SẦM VÀO GIỮA MÀN HÌNH (SLAM IMPACT)
-        SoundManager.EnsureInstance()?.PlayTitanSlam();
-        if (cam != null) cam.Shake(0.38f, 0.45f);
-
-        bannerCanvasGroup.alpha = 1f;
-        slantedBanner.localScale = Vector3.one * 1.35f;
-        if (bossSplashRt != null) bossSplashRt.localScale = Vector3.one * 0.75f;
-
-        // Hiệu ứng dập nảy (Elastic slam down từ 1.35x xuống 1.0x)
-        elapsed = 0f;
-        float slamDuration = 0.22f;
-        while (elapsed < slamDuration && !skipRequested)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / slamDuration);
-            float scale = Mathf.Lerp(1.35f, 1.0f, t);
-            slantedBanner.localScale = Vector3.one * scale;
-
-            if (bossSplashRt != null)
+            // 4. Âm thanh cảnh báo Boss & Sóng xung kích chấn động đất
+            try { SoundManager.EnsureInstance()?.PlayBossWarning(); } catch { }
+            if (bossTransform != null)
             {
-                float splashScale = Mathf.Lerp(0.75f, 1.0f, Mathf.Sqrt(t));
-                bossSplashRt.localScale = Vector3.one * splashScale;
+                try { SpawnGroundShockwave(bossTransform.position, data.bannerColor); } catch { }
             }
-            yield return null;
-        }
-        slantedBanner.localScale = Vector3.one;
-        if (bossSplashRt != null) bossSplashRt.localScale = Vector3.one;
 
-        // 6. Giữ lại banner để người chơi ngắm trọn vẹn Boss Splash Art (~1.5s)
-        elapsed = 0f;
-        while (elapsed < 1.5f && !skipRequested)
+            // Chờ 0.20s để camera bắt trọn khoảnh khắc Boss
+            elapsed = 0f;
+            while (elapsed < 0.20f && !skipRequested)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            // 5. THẺ TÊN SOUL KNIGHT DẬP SẦM VÀO GIỮA MÀN HÌNH (SLAM IMPACT)
+            try { SoundManager.EnsureInstance()?.PlayTitanSlam(); } catch { }
+            if (cam != null) cam.Shake(0.38f, 0.45f);
+
+            if (bannerCanvasGroup != null) bannerCanvasGroup.alpha = 1f;
+            if (slantedBanner != null) slantedBanner.localScale = Vector3.one * 1.35f;
+            if (bossSplashRt != null) bossSplashRt.localScale = Vector3.one * 0.75f;
+
+            // Hiệu ứng dập nảy (Elastic slam down từ 1.35x xuống 1.0x)
+            elapsed = 0f;
+            float slamDuration = 0.22f;
+            while (elapsed < slamDuration && !skipRequested)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / slamDuration);
+                float scale = Mathf.Lerp(1.35f, 1.0f, t);
+                if (slantedBanner != null) slantedBanner.localScale = Vector3.one * scale;
+
+                if (bossSplashRt != null)
+                {
+                    float splashScale = Mathf.Lerp(0.75f, 1.0f, Mathf.Sqrt(t));
+                    bossSplashRt.localScale = Vector3.one * splashScale;
+                }
+                yield return null;
+            }
+            if (slantedBanner != null) slantedBanner.localScale = Vector3.one;
+            if (bossSplashRt != null) bossSplashRt.localScale = Vector3.one;
+
+            // 6. Giữ lại banner để người chơi ngắm trọn vẹn Boss Splash Art (~1.5s)
+            elapsed = 0f;
+            while (elapsed < 1.5f && !skipRequested)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            // 7. Thu hồi thẻ Boss và trả lại góc nhìn
+            elapsed = 0f;
+            float fadeOutDuration = 0.25f;
+            while (elapsed < fadeOutDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / fadeOutDuration);
+                if (bannerCanvasGroup != null) bannerCanvasGroup.alpha = 1f - t;
+                if (topLetterbox != null) topLetterbox.anchoredPosition = new Vector2(0f, Mathf.Lerp(0f, 135f, t));
+                if (bottomLetterbox != null) bottomLetterbox.anchoredPosition = new Vector2(0f, Mathf.Lerp(0f, -145f, t));
+                yield return null;
+            }
+            if (bannerCanvasGroup != null) bannerCanvasGroup.alpha = 0f;
+            if (skipPromptText != null) skipPromptText.gameObject.SetActive(false);
+
+            // Trả lại Camera về Player
+            if (cam != null)
+            {
+                cam.RestoreFocus();
+            }
+
+            // 8. Tự động nạp đầy Thanh Máu Boss (0% -> 100%)
+            var bossUI = BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance();
+            if (bossUI != null)
+            {
+                bossUI.AnimateFillFromZero(0.7f);
+            }
+
+            // 9. Lóe sáng chữ "CHIẾN ĐẤU! (FIGHT!)"
+            if (fightText != null)
+            {
+                fightText.gameObject.SetActive(true);
+                fightText.transform.localScale = Vector3.one * 1.25f;
+                elapsed = 0f;
+                float fightDuration = 0.45f;
+                while (elapsed < fightDuration)
+                {
+                    elapsed += Time.unscaledDeltaTime;
+                    float t = Mathf.Clamp01(elapsed / fightDuration);
+                    fightText.transform.localScale = Vector3.Lerp(Vector3.one * 1.25f, Vector3.one, t);
+                    yield return null;
+                }
+                fightText.gameObject.SetActive(false);
+            }
+        }
+        finally
         {
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
+            if (watchdog != null) StopCoroutine(watchdog);
+            // 10. Luôn luôn khôi phục HUD & Trả quyền điều khiển cho người chơi an toàn 100%
+            SetGameplayHUDVisible(true);
+            if (playerCtrl != null) playerCtrl.SetCanMove(true);
+
+            if (canvasGroup != null) canvasGroup.alpha = 0f;
+            IsCutsceneActive = false;
+            activeRoutine = null;
+
+            onFinished?.Invoke();
         }
-
-        // 7. Thu hồi thẻ Boss và trả lại góc nhìn
-        elapsed = 0f;
-        float fadeOutDuration = 0.25f;
-        while (elapsed < fadeOutDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / fadeOutDuration);
-            bannerCanvasGroup.alpha = 1f - t;
-            topLetterbox.anchoredPosition = new Vector2(0f, Mathf.Lerp(0f, 135f, t));
-            bottomLetterbox.anchoredPosition = new Vector2(0f, Mathf.Lerp(0f, -145f, t));
-            yield return null;
-        }
-        bannerCanvasGroup.alpha = 0f;
-        skipPromptText.gameObject.SetActive(false);
-
-        // Trả lại Camera về Player
-        if (cam != null)
-        {
-            cam.RestoreFocus();
-        }
-
-        // 8. Tự động nạp đầy Thanh Máu Boss (0% -> 100%)
-        var bossUI = BossHealthBarUI.Instance ?? BossHealthBarUI.EnsureInstance();
-        if (bossUI != null)
-        {
-            bossUI.AnimateFillFromZero(0.7f);
-        }
-
-        // 9. Lóe sáng chữ "CHIẾN ĐẤU! (FIGHT!)"
-        fightText.gameObject.SetActive(true);
-        fightText.transform.localScale = Vector3.one * 1.25f;
-        elapsed = 0f;
-        float fightDuration = 0.45f;
-        while (elapsed < fightDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / fightDuration);
-            fightText.transform.localScale = Vector3.Lerp(Vector3.one * 1.25f, Vector3.one, t);
-            yield return null;
-        }
-        fightText.gameObject.SetActive(false);
-
-        // 10. Hoàn tất cutscene: Khôi phục HUD & Trả quyền điều khiển cho người chơi
-        SetGameplayHUDVisible(true);
-        if (playerCtrl != null) playerCtrl.SetCanMove(true);
-
-        canvasGroup.alpha = 0f;
-        IsCutsceneActive = false;
-        activeRoutine = null;
-
-        onFinished?.Invoke();
     }
 
     private void SetGameplayHUDVisible(bool visible)

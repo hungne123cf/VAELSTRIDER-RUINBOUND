@@ -108,17 +108,27 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
         hpFillSr.sortingOrder = 3995;
         fillObj.transform.localScale = new Vector3(1.7f, 0.16f, 1f);
 
-        // 3. Cot sang huyen ao roi tu troi xuong qua trung
-        GameObject lightObj = new GameObject("Egg_HolyLight");
-        lightObj.transform.SetParent(transform, false);
-        lightObj.transform.localPosition = Vector3.zero;
+        // 3. Cot sang huyen ao roi tu troi xuong qua trung (try/catch an toan tuyet doi cho Mobile)
+        try
+        {
+            GameObject lightObj = new GameObject("Egg_HolyLight");
+            lightObj.transform.SetParent(transform, false);
+            lightObj.transform.localPosition = Vector3.zero;
 
-        holyPillarLight = lightObj.AddComponent<Light2D>();
-        holyPillarLight.lightType = Light2D.LightType.Point;
-        holyPillarLight.color = new Color(0.35f, 0.85f, 1f, 1f);
-        holyPillarLight.intensity = 2.8f;
-        holyPillarLight.pointLightInnerRadius = 0.8f;
-        holyPillarLight.pointLightOuterRadius = 4.5f;
+            holyPillarLight = lightObj.AddComponent<Light2D>();
+            if (holyPillarLight != null)
+            {
+                holyPillarLight.lightType = Light2D.LightType.Point;
+                holyPillarLight.color = new Color(0.35f, 0.85f, 1f, 1f);
+                holyPillarLight.intensity = 2.8f;
+                holyPillarLight.pointLightInnerRadius = 0.8f;
+                holyPillarLight.pointLightOuterRadius = 4.5f;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[BoneEggCocoon] Light2D setup skipped on platform: {ex.Message}");
+        }
     }
 
     private Sprite CreateBoxSprite(Vector2 pivot)
@@ -134,6 +144,17 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
     void Start()
     {
         breatheRoutine = StartCoroutine(EggBreatheRoutine());
+        StartCoroutine(AutoBreakWatchdogRoutine());
+    }
+
+    private IEnumerator AutoBreakWatchdogRoutine()
+    {
+        // Safety Fallback: Sau 35s nếu kén chưa vỡ (do người chơi chưa kịp đánh hoặc bị lỗi tương tác), tự động nứt vỡ triệu hồi Boss
+        yield return new WaitForSeconds(35f);
+        if (!isDestroyed)
+        {
+            StartCoroutine(BreakEggRoutine());
+        }
     }
 
     void Update()

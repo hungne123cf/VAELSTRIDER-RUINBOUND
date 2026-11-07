@@ -4,11 +4,12 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
+public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IPointerExitHandler
 {
     public enum ButtonType { Attack, Dash, Skill }
     [Header("Loai nut")]
     [SerializeField] private ButtonType buttonType = ButtonType.Attack;
+    public ButtonType GetButtonType() => buttonType;
 
     [Header("Gan truc tiep Player vao day (hoac de tu tim)")]
     [SerializeField] private PlayerCombat playerCombat;
@@ -35,6 +36,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     private float pointerDownTime = 0f;
     private Vector2 pointerDownPos = Vector2.zero;
     private Vector2 currentDragAimDir = Vector2.zero;
+    private bool wasTooltipShown = false;
 
     void Awake()
     {
@@ -160,6 +162,16 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             {
                 float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.08f;
                 lockIconImg.transform.localScale = new Vector3(pulse, pulse, 1f);
+            }
+        }
+
+        // Bắt sự kiện Ấn Giữ Lâu (Long-Press >= 0.38s) để hiện Popup Thẻ Kỹ Năng phong cách TFT / LMHT
+        if (isPointerDown && !wasTooltipShown && currentDragAimDir.sqrMagnitude < 0.01f)
+        {
+            if (Time.time - pointerDownTime >= 0.38f)
+            {
+                SkillTooltipPopupUI.EnsureInstance()?.ShowTooltip(buttonType, transform.position);
+                wasTooltipShown = true;
             }
         }
 
@@ -1879,12 +1891,40 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
     }
 
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (wasTooltipShown)
+        {
+            wasTooltipShown = false;
+            SkillTooltipPopupUI.Instance?.HideTooltip();
+        }
+    }
+
     public void OnPointerUp(PointerEventData eventData)
     {
         transform.localScale = originalScale;
 
         if (!isPointerDown) return;
         isPointerDown = false;
+
+        if (wasTooltipShown)
+        {
+            wasTooltipShown = false;
+            SkillTooltipPopupUI.Instance?.HideTooltip();
+            if (SkillAimIndicator.Instance != null) SkillAimIndicator.Instance.Hide();
+            if (SkillCancelZoneUI.Instance != null) SkillCancelZoneUI.Instance.Hide();
+
+            if (buttonType == ButtonType.Attack && playerCombat != null)
+            {
+                var titanSkill = playerCombat.GetComponent<TitanBerserkerSkill>();
+                if (titanSkill != null && titanSkill.IsChargingEarthshaker) titanSkill.CancelEarthshakerCharge();
+                var azureBlade = playerCombat.GetComponent<AzureBladeSkill>();
+                if (azureBlade != null) azureBlade.CancelAim();
+                var mageSkill = playerCombat.GetComponent<CelestialMageSkill>();
+                if (mageSkill != null && mageSkill.IsChargingBarrier) mageSkill.ReleaseBarrierCharge(Vector2.zero, 0);
+            }
+            return;
+        }
 
         EnsureTargets();
         if (playerHealth != null && playerHealth.IsDead) return;

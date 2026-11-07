@@ -384,18 +384,24 @@ public class PlayerCombat : MonoBehaviour
         // Phân loại tướng hệ Sức Mạnh Phép (AP) hay Vật Lý (AD)
         bool isApHero = IsAPHero;
 
-        // QUY TẮC PHÂN LOẠI LÕI ATK VS AP:
-        // - Tướng AP: Lõi ATK (vật lý) không cộng dồn sát thương cho tướng AP. Lõi AP cộng dồn trực tiếp vào công phép!
-        // - Tướng AD: Lõi AP (phép) không cộng dồn sát thương vật lý cho tướng AD. Lõi ATK cộng dồn trực tiếp vào công vật lý!
-        int effectiveAugAtk = isApHero ? 0 : augBonusAtk;
-        int effectiveAugAP  = isApHero ? augBonusAP : 0;
-
-        bonusPhysAtk = upgradeBonusAtk + weaponPhysAtk + socketPhysAtk + costumeAtk + effectiveAugAtk;
-        bonusMagicAtk = weaponMagicAtk + socketMagicAtk + azureSpeedConvertedAP + effectiveAugAP;
+        // TẤT CẢ CÁC LÕI ĐỀU CỘNG DỒN THẬT VÀO BẢNG CHỈ SỐ:
+        // - Lõi +ATK cộng dồn 100% vào Công Vật Lý (ATK).
+        // - Lõi +AP cộng dồn 100% vào Sức Mạnh Phép (AP).
+        bonusPhysAtk = upgradeBonusAtk + weaponPhysAtk + socketPhysAtk + costumeAtk + augBonusAtk;
+        bonusMagicAtk = weaponMagicAtk + socketMagicAtk + azureSpeedConvertedAP + augBonusAP;
         bonusTrueAtk = weaponTrueAtk + socketTrueAtk;
 
-        // Sát thương cộng thêm cơ bản khi tung đòn:
-        bonusAttackDamage = isApHero ? (bonusMagicAtk + bonusTrueAtk) : (bonusPhysAtk + bonusTrueAtk);
+        // Sát thương cộng thêm cơ bản khi tung đòn (áp dụng Dual-Scaling %ATK + %AP kiểu LMHT / TFT):
+        // - Tướng Vật Lý: nhận 100% Bonus ATK + 35% Bonus AP
+        // - Tướng Phép: nhận 100% Bonus AP + 30% Bonus ATK
+        if (isApHero)
+        {
+            bonusAttackDamage = bonusMagicAtk + Mathf.RoundToInt(bonusPhysAtk * 0.30f) + bonusTrueAtk;
+        }
+        else
+        {
+            bonusAttackDamage = bonusPhysAtk + Mathf.RoundToInt(bonusMagicAtk * 0.35f) + bonusTrueAtk;
+        }
 
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out lifestealPercent, out float cdReduc, out _, out _);
         socketCdReduc = cdReduc;

@@ -221,63 +221,74 @@ public class DynamicSpriteColliderSync : MonoBehaviour
 
     private static Vector2[][] BuildPathsForSprite(Sprite sprite, bool flipX, bool flipY)
     {
-        int shapeCount = sprite.GetPhysicsShapeCount();
+        if (sprite == null) return null;
+
         Bounds b = sprite.bounds;
         float mirrorCenterX = b.center.x * 2f;
         float mirrorCenterY = b.center.y * 2f;
 
-        if (shapeCount > 0)
+        try
         {
-            List<Vector2[]> validPaths = new List<Vector2[]>(shapeCount);
-            Vector2[] largestPath = null;
-            float largestPerimeter = -1f;
+            int shapeCount = sprite.GetPhysicsShapeCount();
 
-            for (int i = 0; i < shapeCount; i++)
+            if (shapeCount > 0)
             {
-                s_TempShapeList.Clear();
-                int ptCount = sprite.GetPhysicsShape(i, s_TempShapeList);
-                if (ptCount < 3) continue;
+                List<Vector2[]> validPaths = new List<Vector2[]>(shapeCount);
+                Vector2[] largestPath = null;
+                float largestPerimeter = -1f;
 
-                Vector2[] arr = new Vector2[ptCount];
-                float perimeter = 0f;
-
-                for (int j = 0; j < ptCount; j++)
+                for (int i = 0; i < shapeCount; i++)
                 {
-                    Vector2 pt = s_TempShapeList[j];
-                    if (flipX) pt.x = -pt.x;
-                    if (flipY) pt.y = -pt.y;
-                    arr[j] = pt;
+                    s_TempShapeList.Clear();
+                    int ptCount = sprite.GetPhysicsShape(i, s_TempShapeList);
+                    if (ptCount < 3) continue;
+
+                    Vector2[] arr = new Vector2[ptCount];
+                    float perimeter = 0f;
+
+                    for (int j = 0; j < ptCount; j++)
+                    {
+                        Vector2 pt = s_TempShapeList[j];
+                        if (flipX) pt.x = -pt.x;
+                        if (flipY) pt.y = -pt.y;
+                        arr[j] = pt;
+                    }
+
+                    for (int j = 0; j < ptCount; j++)
+                    {
+                        Vector2 p0 = arr[j];
+                        Vector2 p1 = arr[(j + 1) % ptCount];
+                        perimeter += Vector2.Distance(p0, p1);
+                    }
+
+                    if (perimeter > largestPerimeter)
+                    {
+                        largestPerimeter = perimeter;
+                        largestPath = arr;
+                    }
+
+                    // Lọc bỏ các hạt bụi pixel li ti rời rạc (chu vi < 0.45m) để đa giác mượt và chuẩn xác
+                    if (perimeter >= 0.45f)
+                    {
+                        validPaths.Add(arr);
+                    }
                 }
 
-                for (int j = 0; j < ptCount; j++)
+                if (validPaths.Count == 0 && largestPath != null)
                 {
-                    Vector2 p0 = arr[j];
-                    Vector2 p1 = arr[(j + 1) % ptCount];
-                    perimeter += Vector2.Distance(p0, p1);
+                    validPaths.Add(largestPath);
                 }
 
-                if (perimeter > largestPerimeter)
+                if (validPaths.Count > 0)
                 {
-                    largestPerimeter = perimeter;
-                    largestPath = arr;
-                }
-
-                // Lọc bỏ các hạt bụi pixel li ti rời rạc (chu vi < 0.45m) để đa giác mượt và chuẩn xác
-                if (perimeter >= 0.45f)
-                {
-                    validPaths.Add(arr);
+                    return validPaths.ToArray();
                 }
             }
-
-            if (validPaths.Count == 0 && largestPath != null)
-            {
-                validPaths.Add(largestPath);
-            }
-
-            if (validPaths.Count > 0)
-            {
-                return validPaths.ToArray();
-            }
+        }
+        catch (System.Exception ex)
+        {
+            // Android APK Runtime Protection: Physics shape data not accessible on mobile compressed sprites
+            Debug.LogWarning($"[DynamicSpriteColliderSync] Physics shape fallback for sprite {sprite.name}: {ex.Message}");
         }
 
         // Fallback: Nếu Sprite không có sẵn PhysicsShape, tạo bát giác ôm sát Bounds của Sprite và xử lý lật flipX/flipY
