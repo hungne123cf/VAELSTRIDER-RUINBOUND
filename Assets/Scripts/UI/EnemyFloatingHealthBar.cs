@@ -264,6 +264,14 @@ public class EnemyFloatingHealthBar : MonoBehaviour
             float topY = (cachedCol != null && cachedCol.enabled) ? cachedCol.bounds.max.y : (targetTransform.position.y + 2.0f);
             targetPos = new Vector3(centerX, topY + 0.20f, 0f);
         }
+        else if (targetTransform.GetComponent<BotWheelAI>() != null)
+        {
+            // Quái BotWheel Map 1: Khung sprite 117x26 lệch tâm nên luôn lấy chuẩn theo GetBossVisualCenter()
+            var bot = targetTransform.GetComponent<BotWheelAI>();
+            Vector3 center = bot.GetBossVisualCenter();
+            float absScaleY = Mathf.Abs(targetTransform.lossyScale.y);
+            targetPos = new Vector3(center.x, center.y + 0.48f * absScaleY + headPadding, 0f);
+        }
         else
         {
             float colTop = (cachedCol != null && cachedCol.enabled) ? cachedCol.bounds.max.y : float.MinValue;

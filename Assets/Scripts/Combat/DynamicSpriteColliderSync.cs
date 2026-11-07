@@ -79,6 +79,14 @@ public class DynamicSpriteColliderSync : MonoBehaviour
 
     public static Vector2 GetBodyCenter(Transform targetTransform, Collider2D col = null)
     {
+        if (targetTransform != null)
+        {
+            var bot = targetTransform.GetComponent<BotWheelAI>();
+            if (bot != null)
+            {
+                return bot.GetBossVisualCenter();
+            }
+        }
         if (col != null && col.enabled && col.bounds.size.sqrMagnitude > 0.001f)
         {
             return col.bounds.center;
@@ -218,6 +226,26 @@ public class DynamicSpriteColliderSync : MonoBehaviour
         lastSprite = currentSprite;
         lastFlipX = flipX;
         lastFlipY = flipY;
+
+        if (GetComponent<BotWheelAI>() != null)
+        {
+            Vector2 c = new Vector2(flipX ? 1.136f : -1.136f, flipY ? -0.36f : 0.36f);
+            Vector2 e = new Vector2(0.26f, 0.36f);
+            Vector2[] botBodyOctagon = new Vector2[8]
+            {
+                new Vector2(c.x - e.x * 0.5f, c.y - e.y),
+                new Vector2(c.x + e.x * 0.5f, c.y - e.y),
+                new Vector2(c.x + e.x,        c.y - e.y * 0.5f),
+                new Vector2(c.x + e.x,        c.y + e.y * 0.5f),
+                new Vector2(c.x + e.x * 0.5f, c.y + e.y),
+                new Vector2(c.x - e.x * 0.5f, c.y + e.y),
+                new Vector2(c.x - e.x,        c.y + e.y * 0.5f),
+                new Vector2(c.x - e.x,        c.y - e.y * 0.5f)
+            };
+            polyCol.pathCount = 1;
+            polyCol.SetPath(0, botBodyOctagon);
+            return;
+        }
 
         ShapeCacheKey key = new ShapeCacheKey
         {

@@ -277,7 +277,12 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
             else if (dir.x < -0.05f) spriteRenderer.flipX = true;
         }
 
-        // Đã gỡ bỏ hoàn toàn cơ chế dịch chuyển / lướt ra sau lưng người chơi của Boss Map 1 để thân thiện với tân thủ
+        // 1. BOSS DICH CHUYEN SAU LUNG KHI PLAYER CHAY RA QUA XA (dist > 5.5m)
+        if (isBoss && dist > 5.5f && blinkTimer <= 0f && attackTimer <= 0f)
+        {
+            StartCoroutine(PerformShadowBlinkBehindPlayerRoutine());
+            return;
+        }
 
         // 2. BOSS PHASE CUOI (FINAL PHASE): Hut mau lien tuc cooldown 0.1s
         if (isBoss && currentBossPhase == 1 && siphonTimer <= 0f && dist <= 7.0f && attackTimer <= 0f)
@@ -369,7 +374,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
         if (attackTimer > 0f) return false;
         bool used = false;
 
-        // Phase 1 (Final): Uu tien Hut Mau va Nguyet Tram (Đã bỏ lướt Huyết Đột Kích ra sau lưng)
+        // Phase 1 (Final): Uu tien Hut Mau va Nhay Vo
         if (currentBossPhase == 1)
         {
             if (siphonTimer <= 0f && distance <= 7.0f)
@@ -382,13 +387,23 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
                 StartCoroutine(PerformCrescentWavesRoutine());
                 used = true;
             }
+            else if (pounceTimer <= 0f && distance >= 2.0f)
+            {
+                StartCoroutine(PerformCrimsonPounceRoutine(dir));
+                used = true;
+            }
         }
-        // Phase 2 (Enraged): Nguyet Tram Hinh Non & Hut Mau
+        // Phase 2 (Enraged): Nguyet Tram Hinh Non & Huyết Đột Kích
         else if (currentBossPhase == 2)
         {
             if (crescentTimer <= 0f && distance <= 8.0f)
             {
                 StartCoroutine(PerformCrescentWavesRoutine());
+                used = true;
+            }
+            else if (pounceTimer <= 0f && distance >= 2.2f)
+            {
+                StartCoroutine(PerformCrimsonPounceRoutine(dir));
                 used = true;
             }
             else if (siphonTimer <= 0f && distance <= 5.5f)
@@ -397,7 +412,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
                 used = true;
             }
         }
-        // Phase 3 (Normal): Nguyet Tram & Hut Mau
+        // Phase 3 (Normal): Nguyet Tram, Hut Mau & Pounce
         else
         {
             if (siphonTimer <= 0f && distance <= 6.5f)
@@ -408,6 +423,11 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
             else if (crescentTimer <= 0f && distance <= 7.5f)
             {
                 StartCoroutine(PerformCrescentWavesRoutine());
+                used = true;
+            }
+            else if (pounceTimer <= 0f && distance >= 2.5f)
+            {
+                StartCoroutine(PerformCrimsonPounceRoutine(dir));
                 used = true;
             }
         }

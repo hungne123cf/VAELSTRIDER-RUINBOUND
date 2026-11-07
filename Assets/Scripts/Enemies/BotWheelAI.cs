@@ -208,7 +208,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (isKnockedBack || isTransitioningPhase || isPurpleRingActive) return;
 
-        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+        Vector3 bodyPos = GetBodyFootPosition();
+        float distanceToPlayer = Vector2.Distance(bodyPos, player.position);
 
         // 1. Ngoai tam phat hien -> Dung yen
         if (distanceToPlayer > detectionRange)
@@ -224,9 +225,12 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
             rb.linearVelocity = Vector2.zero;
             SetMoving(false);
 
-            // Luon quay nong sung ve phia Player
-            bool faceLeft = player.position.x < transform.position.x;
-            SetFacing(faceLeft);
+            // Luon quay nong sung ve phia Player (dung deadzone 0.15m de khong giat mat)
+            float dx = player.position.x - bodyPos.x;
+            if (Mathf.Abs(dx) > 0.15f)
+            {
+                SetFacing(dx < 0f);
+            }
 
             if (attackCooldownTimer <= 0)
             {
@@ -236,15 +240,18 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         }
 
         // 3. Trong tam phat hien nhung chua toi tam ban -> Tiep can nguoi choi (luon lach qua vat can)
-        Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
-        Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(transform.position, dir, enemyCol, 0.35f, 1.0f);
+        Vector2 dir = ((Vector2)player.position - (Vector2)bodyPos).normalized;
+        Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(bodyPos, dir, enemyCol, 0.35f, 1.0f);
         rb.linearVelocity = moveDir * moveSpeed;
         SetMoving(true);
 
         if (spriteRenderer != null)
         {
-            bool moveFaceLeft = player.position.x < transform.position.x;
-            SetFacing(moveFaceLeft);
+            float moveDx = player.position.x - bodyPos.x;
+            if (Mathf.Abs(moveDx) > 0.15f)
+            {
+                SetFacing(moveDx < 0f);
+            }
         }
     }
 
@@ -258,17 +265,18 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     {
         if (isDead) return;
         float padding = isBoss ? 1.2f : 0.6f;
-        Vector3 pos = transform.position;
+        Vector3 bodyPos = GetBodyFootPosition();
         var roomMgr = DungeonRoomManager.Instance;
         if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
         {
             Rect b = roomMgr.currentRoom.roomBounds;
-            float clampedX = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
-            float clampedY = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
+            float clampedX = Mathf.Clamp(bodyPos.x, b.xMin + padding, b.xMax - padding);
+            float clampedY = Mathf.Clamp(bodyPos.y, b.yMin + padding, b.yMax - padding);
 
-            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            if (Mathf.Abs(bodyPos.x - clampedX) > 0.01f || Mathf.Abs(bodyPos.y - clampedY) > 0.01f)
             {
-                transform.position = new Vector3(clampedX, clampedY, pos.z);
+                Vector3 delta = new Vector3(clampedX - bodyPos.x, clampedY - bodyPos.y, 0f);
+                transform.position += delta;
                 if (rb != null) rb.linearVelocity = Vector2.zero;
             }
         }
@@ -276,12 +284,13 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         {
             Vector2 min = MapBounds.Instance.MinBounds;
             Vector2 max = MapBounds.Instance.MaxBounds;
-            float clampedX = Mathf.Clamp(pos.x, min.x + padding, max.x - padding);
-            float clampedY = Mathf.Clamp(pos.y, min.y + padding, max.y - padding);
+            float clampedX = Mathf.Clamp(bodyPos.x, min.x + padding, max.x - padding);
+            float clampedY = Mathf.Clamp(bodyPos.y, min.y + padding, max.y - padding);
 
-            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            if (Mathf.Abs(bodyPos.x - clampedX) > 0.01f || Mathf.Abs(bodyPos.y - clampedY) > 0.01f)
             {
-                transform.position = new Vector3(clampedX, clampedY, pos.z);
+                Vector3 delta = new Vector3(clampedX - bodyPos.x, clampedY - bodyPos.y, 0f);
+                transform.position += delta;
                 if (rb != null) rb.linearVelocity = Vector2.zero;
             }
         }
@@ -319,14 +328,18 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         // Vị trí trọng tâm người chơi (ngực / BoxCollider2D của Player)
         Vector3 playerCenter = player.position + Vector3.up * 1.0f;
 
+        Vector3 bodyPos = GetBodyFootPosition();
         // Luôn quay nòng súng đối diện người chơi
-        bool facingLeft = playerCenter.x < transform.position.x;
+        bool facingLeft = playerCenter.x < bodyPos.x;
         SetFacing(facingLeft);
+        bodyPos = GetBodyFootPosition();
 
-        // Vị trí nòng súng phía trước mặt quái
-        float muzzleX = (facingLeft ? -0.45f : 0.45f) * transform.localScale.x;
-        float muzzleY = 0.55f * transform.localScale.y;
-        Vector3 muzzlePos = transform.position + new Vector3(muzzleX, muzzleY, 0f);
+        // Vị trí nòng súng phía trước mặt thân thật của quái
+        float absScaleX = Mathf.Abs(transform.localScale.x);
+        float absScaleY = Mathf.Abs(transform.localScale.y);
+        float muzzleX = (facingLeft ? -0.35f : 0.35f) * absScaleX;
+        float muzzleY = 0.42f * absScaleY;
+        Vector3 muzzlePos = bodyPos + new Vector3(muzzleX, muzzleY, 0f);
 
         // Hướng bắn trực diện từ nòng súng vào thẳng ngực người chơi (dù đứng sát cạnh hay góc nào đều bắn trúng 100%)
         Vector2 flyDir = ((Vector2)playerCenter - (Vector2)muzzlePos).normalized;
@@ -410,7 +423,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (player != null && !isBoss)
         {
-            Vector2 knockbackDir = ((Vector2)transform.position - (Vector2)player.position).normalized;
+            Vector2 knockbackDir = ((Vector2)GetBodyFootPosition() - (Vector2)player.position).normalized;
             StartCoroutine(KnockbackRoutine(knockbackDir));
         }
 
@@ -470,7 +483,8 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
             ? new Color(0.85f, 0.45f, 1f) 
             : new Color(1f, 0.2f, 0.2f);
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 1.8f, phaseTitle, titleColor);
+        Vector3 bossCenter = GetBossVisualCenter();
+        DamagePopup.CreateText(bossCenter + Vector3.up * 1.5f, phaseTitle, titleColor);
 
         // Đổi màu hào quang Boss (Phase 2: Tím hư không, Phase 1: Đỏ huyết nguyệt)
         if (spriteRenderer != null)
@@ -489,7 +503,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         // Đẩy lùi người chơi ra xa nhẹ
         if (player != null)
         {
-            Vector2 pushDir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+            Vector2 pushDir = ((Vector2)player.position - (Vector2)bossCenter).normalized;
             var playerRb = player.GetComponent<Rigidbody2D>();
             if (playerRb != null) playerRb.AddForce(pushDir * 8f, ForceMode2D.Impulse);
         }
@@ -501,7 +515,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (currentBossPhase == 2)
         {
-            // Mất thanh máu đầu tiên: Ngay lập tức tạo vòng tròn đạn tím 3 giây và dịch chuyển về tâm
+            // Mất thanh máu đầu tiên: Ngay lập tức tạo vòng tròn đạn tím 3 giây
             yield return StartCoroutine(PurpleBulletRingTeleportRoutine());
         }
         else if (currentBossPhase == 1)
@@ -584,15 +598,16 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
             }
         }
 
+        Vector3 dropPos = GetBodyFootPosition();
         if (isBoss && !isClone)
         {
-            AethelShard.SpawnShards(transform.position, Random.Range(18, 26));
-            WorldItemPickup.RollDrop(transform.position, true);
+            AethelShard.SpawnShards(dropPos, Random.Range(18, 26));
+            WorldItemPickup.RollDrop(dropPos, true);
         }
         else if (!isClone)
         {
-            AethelShard.SpawnShards(transform.position, Random.Range(3, 6));
-            WorldItemPickup.RollDrop(transform.position, false);
+            AethelShard.SpawnShards(dropPos, Random.Range(3, 6));
+            WorldItemPickup.RollDrop(dropPos, false);
         }
 
         Collider2D col = GetComponent<Collider2D>();
@@ -604,8 +619,11 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     public void SetupBoss(float scaleMultiplier = 1.75f, int hpMultiplier = 3, int damageMultiplier = 2)
     {
         isBoss = true;
-        initialSpawnPosition = transform.position;
+        Vector3 bodyBefore = GetBodyFootPosition();
+        initialSpawnPosition = bodyBefore;
         transform.localScale = transform.localScale * scaleMultiplier;
+        Vector3 bodyAfter = GetBodyFootPosition();
+        transform.position += (bodyBefore - bodyAfter);
 
         // Hệ thống 3 thanh máu: Mỗi thanh 420 HP (scale theo Map)
         totalBossPhases = 3;
@@ -635,6 +653,19 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         BossHealthBarUI.EnsureInstance()?.ShowBoss(this, GetBossDisplayName());
     }
 
+    /// <summary>
+    /// Vị trí chân thực tế của thân робоt BotWheel trên màn hình.
+    /// Do bộ sprite gốc (117x26 px) có phần thân nằm lệch bên trái (x ≈ 21.5 px, cách tâm 58.5 px một đoạn 1.136 unit),
+    /// hàm này luôn trả về tọa độ thế giới chính xác của thân quái vật.
+    /// </summary>
+    public Vector3 GetBodyFootPosition()
+    {
+        bool facingLeft = spriteRenderer != null && spriteRenderer.flipX;
+        float absScaleX = Mathf.Abs(transform.localScale.x);
+        float offsetX = (facingLeft ? 1.136f : -1.136f) * absScaleX;
+        return transform.position + new Vector3(offsetX, 0f, 0f);
+    }
+
     // =========================================================================
     // CHIÊU THỨC MA TRẬN ĐẠN TÍM (PHASE 2 & 1)
     // 1. Boss đứng im 1 giây
@@ -643,19 +674,9 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     // =========================================================================
     public Vector3 GetBossVisualCenter()
     {
-        if (enemyCol == null) enemyCol = GetComponent<Collider2D>();
-        if (enemyCol != null)
-        {
-            return enemyCol.bounds.center;
-        }
-
-        bool facingLeft = spriteRenderer != null && spriteRenderer.flipX;
-        float absScaleX = Mathf.Abs(transform.localScale.x);
+        Vector3 foot = GetBodyFootPosition();
         float absScaleY = Mathf.Abs(transform.localScale.y);
-        float offsetX = (facingLeft ? 1.136f : -1.136f) * absScaleX;
-        float offsetY = 0.35f * absScaleY;
-
-        return transform.position + new Vector3(offsetX, offsetY, 0f);
+        return foot + new Vector3(0f, 0.35f * absScaleY, 0f);
     }
 
     private IEnumerator PurpleBulletRingTeleportRoutine()
@@ -805,7 +826,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         }
         activeClones.Clear();
 
-        DamagePopup.CreateText(transform.position + Vector3.up * 2.2f, LocalizationManager.T("TAM THỂ PHÂN THÂN", "TRIPLE CLONES"), new Color(1f, 0.3f, 0.3f));
+        DamagePopup.CreateText(GetBossVisualCenter() + Vector3.up * 1.6f, LocalizationManager.T("TAM THỂ PHÂN THÂN", "TRIPLE CLONES"), new Color(1f, 0.3f, 0.3f));
         SoundManager.EnsureInstance()?.PlayPortalSpawn();
 
         // 1. Trùm chính: Màu Đỏ Huyết Nguyệt (Blood Crimson)
@@ -848,25 +869,40 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
             cloneAI.activeClones = new List<BotWheelAI>();
 
             activeClones.Add(cloneAI);
+            DamagePopup.CreateText(cloneAI.GetBossVisualCenter() + Vector3.up * 1.4f, cloneTitle, cloneColor);
         }
-
-        DamagePopup.CreateText(transform.position + offset + Vector3.up * 1.8f, cloneTitle, cloneColor);
     }
 
     private void OnDrawGizmosSelected()
     {
+        Vector3 center = Application.isPlaying ? GetBodyFootPosition() : transform.position;
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        Gizmos.DrawWireSphere(center, detectionRange);
 
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(center, attackRange);
     }
 
     private void SetFacing(bool faceLeft)
     {
-        if (spriteRenderer != null)
+        if (spriteRenderer != null && spriteRenderer.flipX != faceLeft)
         {
+            // Giữ nguyên tuyệt đối vị trí hiển thị của thân робоt trên màn hình khi lật mặt (bù trừ độ lệch tâm 1.136 unit của khung hình 117x26)
+            Vector3 bodyFootBefore = GetBodyFootPosition();
             spriteRenderer.flipX = faceLeft;
+            Vector3 bodyFootAfter = GetBodyFootPosition();
+            Vector3 delta = bodyFootBefore - bodyFootAfter;
+            transform.position += delta;
+            if (rb != null)
+            {
+                rb.position += (Vector2)delta;
+            }
+
+            var colSync = GetComponent<DynamicSpriteColliderSync>();
+            if (colSync != null)
+            {
+                colSync.SyncColliderWithSprite(force: true);
+            }
         }
 
         if (enemyCol == null) enemyCol = GetComponent<Collider2D>();
