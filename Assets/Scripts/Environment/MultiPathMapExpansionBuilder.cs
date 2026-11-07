@@ -381,6 +381,9 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
     // ═══════════════════════════════════════════════════════════════════════════
     private void BuildMap3CompactIslands()
     {
+        var pad3 = GameObject.Find("ArenaFloor_OuterPadding");
+        if (pad3 != null) pad3.SetActive(false);
+
         var baseFloorObj = GameObject.Find("ArenaFloor_Mossy");
         Sprite mossFloorSprite = null;
         Material floorMat = null;
@@ -393,6 +396,7 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
                 floorMat = sr.sharedMaterial;
                 sr.drawMode = SpriteDrawMode.Tiled;
                 sr.size = new Vector2(32f, 22f);
+                sr.sortingOrder = -500;
             }
         }
 

@@ -74,13 +74,18 @@ public class DungeonRoom : MonoBehaviour
             if (player != null)
             {
                 Vector3 p = player.transform.position;
-                float clampedX = Mathf.Clamp(p.x, roomBounds.xMin + 0.6f, roomBounds.xMax - 0.6f);
-                float clampedY = Mathf.Clamp(p.y, roomBounds.yMin + 0.6f, roomBounds.yMax - 0.6f);
+                float clampedX = Mathf.Clamp(p.x, roomBounds.xMin + 0.65f, roomBounds.xMax - 0.65f);
+                float clampedY = Mathf.Clamp(p.y, roomBounds.yMin + 0.65f, roomBounds.yMax - 0.65f);
                 if (Mathf.Abs(clampedX - p.x) > 0.01f || Mathf.Abs(clampedY - p.y) > 0.01f)
                 {
-                    player.transform.position = new Vector3(clampedX, clampedY, p.z);
+                    Vector3 newPos = new Vector3(clampedX, clampedY, 0f);
+                    player.transform.position = newPos;
                     if (s_cachedPlayerRb == null) s_cachedPlayerRb = player.GetComponent<Rigidbody2D>();
-                    if (s_cachedPlayerRb != null) s_cachedPlayerRb.linearVelocity = Vector2.zero;
+                    if (s_cachedPlayerRb != null)
+                    {
+                        s_cachedPlayerRb.position = new Vector2(clampedX, clampedY);
+                        s_cachedPlayerRb.linearVelocity = Vector2.zero;
+                    }
                 }
             }
         }

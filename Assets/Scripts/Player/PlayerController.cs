@@ -349,6 +349,7 @@ public class PlayerController : MonoBehaviour
         dashCooldown = 5.0f;
         baseDashCooldown = 5.0f;
         if (GetComponent<DashGhostTrail>() == null) gameObject.AddComponent<DashGhostTrail>();
+        if (GetComponent<AutoDepthSort>() == null) gameObject.AddComponent<AutoDepthSort>();
         PlayerEquipmentVisual.EnsureExists(gameObject);
         AutoAlignCollider();
 
@@ -538,6 +539,28 @@ public class PlayerController : MonoBehaviour
                 }
             }
             rb.linearVelocity = moveInput * curSpeed;
+        }
+    }
+
+    private SpriteRenderer cachedPlayerSr;
+
+    void LateUpdate()
+    {
+        Vector3 pos = transform.position;
+        Vector3 clamped = SurroundingWaterOceanSystem.ClampToWalkableLand(pos, 0.55f);
+        if (Mathf.Abs(pos.x - clamped.x) > 0.005f || Mathf.Abs(pos.y - clamped.y) > 0.005f || Mathf.Abs(pos.z) > 0.001f)
+        {
+            transform.position = new Vector3(clamped.x, clamped.y, 0f);
+            if (rb != null)
+            {
+                rb.position = new Vector2(clamped.x, clamped.y);
+            }
+        }
+
+        if (cachedPlayerSr == null) cachedPlayerSr = GetComponent<SpriteRenderer>();
+        if (cachedPlayerSr != null && cachedPlayerSr.sortingOrder < 1500)
+        {
+            cachedPlayerSr.sortingOrder = AutoDepthSort.GetSortingOrderForY(transform.position.y);
         }
     }
 

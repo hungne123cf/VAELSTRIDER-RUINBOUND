@@ -323,4 +323,75 @@ public class DungeonRoomManager : MonoBehaviour
             Debug.Log($"<color=yellow>[MERCHANT SPAWNED]</color> Thương nhân cổ đại đã xuất hiện tại {merchantPos}!");
         }
     }
+
+    /// <summary>
+    /// Khóa cứng vị trí Boss / Quái vật bên trong căn phòng nơi chúng được triệu hồi (homeRoomBounds),
+    /// tuyệt đối không cho phép thoát ra hành lang, sang phòng khác hoặc lọt ra vùng nước.
+    /// </summary>
+    public static Vector3 ClampEnemyToHomeRoom(Vector3 pos, ref Rect homeRoomBounds, float padding = 1.2f)
+    {
+        if (homeRoomBounds.width <= 0.1f && Instance != null)
+        {
+            Vector2 pt = new Vector2(pos.x, pos.y);
+            foreach (var r in Instance.rooms)
+            {
+                if (r != null && r.roomBounds.width > 0.1f && r.roomBounds.Contains(pt))
+                {
+                    homeRoomBounds = r.roomBounds;
+                    break;
+                }
+            }
+
+            if (homeRoomBounds.width <= 0.1f && Instance.currentRoom != null && Instance.currentRoom.roomBounds.width > 0.1f)
+            {
+                homeRoomBounds = Instance.currentRoom.roomBounds;
+            }
+
+            if (homeRoomBounds.width <= 0.1f && Instance.rooms.Count > 0)
+            {
+                float bestDistSq = float.MaxValue;
+                foreach (var r in Instance.rooms)
+                {
+                    if (r == null || r.roomBounds.width <= 0.1f) continue;
+                    Rect b = r.roomBounds;
+                    float cx = Mathf.Clamp(pos.x, b.xMin, b.xMax);
+                    float cy = Mathf.Clamp(pos.y, b.yMin, b.yMax);
+                    float dSq = (pos.x - cx) * (pos.x - cx) + (pos.y - cy) * (pos.y - cy);
+                    if (dSq < bestDistSq)
+                    {
+                        bestDistSq = dSq;
+                        homeRoomBounds = b;
+                    }
+                }
+            }
+        }
+
+        Vector3 clamped = pos;
+        if (homeRoomBounds.width > 0.1f)
+        {
+            float padX = Mathf.Min(padding, homeRoomBounds.width * 0.42f);
+            float padY = Mathf.Min(padding, homeRoomBounds.height * 0.42f);
+            clamped.x = Mathf.Clamp(clamped.x, homeRoomBounds.xMin + padX, homeRoomBounds.xMax - padX);
+            clamped.y = Mathf.Clamp(clamped.y, homeRoomBounds.yMin + padY, homeRoomBounds.yMax - padY);
+        }
+        else if (Instance != null && Instance.currentRoom != null && Instance.currentRoom.roomBounds.width > 0.1f)
+        {
+            Rect b = Instance.currentRoom.roomBounds;
+            float padX = Mathf.Min(padding, b.width * 0.42f);
+            float padY = Mathf.Min(padding, b.height * 0.42f);
+            clamped.x = Mathf.Clamp(clamped.x, b.xMin + padX, b.xMax - padX);
+            clamped.y = Mathf.Clamp(clamped.y, b.yMin + padY, b.yMax - padY);
+        }
+        else if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
+        {
+            Vector2 min = MapBounds.Instance.MinBounds;
+            Vector2 max = MapBounds.Instance.MaxBounds;
+            clamped.x = Mathf.Clamp(clamped.x, min.x + padding, max.x - padding);
+            clamped.y = Mathf.Clamp(clamped.y, min.y + padding, max.y - padding);
+        }
+
+        clamped = SurroundingWaterOceanSystem.ClampToWalkableLand(clamped, Mathf.Min(padding, 0.85f));
+        clamped.z = 0f;
+        return clamped;
+    }
 }

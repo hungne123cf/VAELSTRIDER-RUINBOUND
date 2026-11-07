@@ -608,35 +608,21 @@ public class ShadowDoppelgangerBoss : MonoBehaviour, IDamageable, IEnemyHealth
         }
     }
 
+    private Rect homeRoomBounds;
+
     private void ClampInsideRoomBounds()
     {
         if (isDead) return;
-        float padding = 1.0f;
+        float padding = 1.25f;
         Vector3 pos = transform.position;
-        var roomMgr = DungeonRoomManager.Instance;
-        if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
+        Vector3 clamped = DungeonRoomManager.ClampEnemyToHomeRoom(pos, ref homeRoomBounds, padding);
+        if (Mathf.Abs(pos.x - clamped.x) > 0.005f || Mathf.Abs(pos.y - clamped.y) > 0.005f)
         {
-            Rect b = roomMgr.currentRoom.roomBounds;
-            float clampedX = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
-            float clampedY = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
-
-            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
+            transform.position = new Vector3(clamped.x, clamped.y, 0f);
+            if (rb != null)
             {
-                transform.position = new Vector3(clampedX, clampedY, pos.z);
-                if (rb != null) rb.linearVelocity = Vector2.zero;
-            }
-        }
-        else if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
-        {
-            Vector2 min = MapBounds.Instance.MinBounds;
-            Vector2 max = MapBounds.Instance.MaxBounds;
-            float clampedX = Mathf.Clamp(pos.x, min.x + padding, max.x - padding);
-            float clampedY = Mathf.Clamp(pos.y, min.y + padding, max.y - padding);
-
-            if (Mathf.Abs(pos.x - clampedX) > 0.01f || Mathf.Abs(pos.y - clampedY) > 0.01f)
-            {
-                transform.position = new Vector3(clampedX, clampedY, pos.z);
-                if (rb != null) rb.linearVelocity = Vector2.zero;
+                rb.position = new Vector2(clamped.x, clamped.y);
+                rb.linearVelocity = Vector2.zero;
             }
         }
     }

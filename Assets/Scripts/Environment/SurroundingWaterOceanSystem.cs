@@ -66,6 +66,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
 
     private readonly List<AnimatedShoreVisual> shoreVisuals = new List<AnimatedShoreVisual>();
     private readonly List<ShorelineAudioEdge> shoreAudioEdges = new List<ShorelineAudioEdge>();
+    private readonly HashSet<Vector2Int> validLandCells = new HashSet<Vector2Int>();
     private AudioSource shoreWaveAudioSource;
     private Transform cachedPlayerTransform;
     private float nextPlayerSearchTime = 0f;
@@ -288,14 +289,23 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
 
     private void SetupMap3Shorelines()
     {
+        validLandCells.Clear();
+
         // Đồng bộ kích thước sàn đấu trung tâm Map 3 (32m x 22m: -16..16, -11..11)
         var floorObj = GameObject.Find("ArenaFloor_Mossy");
         if (floorObj != null)
         {
             var sr = floorObj.GetComponent<SpriteRenderer>();
-            if (sr != null && sr.drawMode == SpriteDrawMode.Tiled)
+            if (sr != null)
             {
-                sr.size = new Vector2(32f, 22f);
+                if (sr.drawMode == SpriteDrawMode.Tiled)
+                {
+                    sr.size = new Vector2(32f, 22f);
+                }
+                if (sr.sortingOrder > -500)
+                {
+                    sr.sortingOrder = -1500;
+                }
             }
         }
 
@@ -309,7 +319,9 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 {
                     for (int y = r.yMin; y < r.yMax; y++)
                     {
-                        landCells.Add(new Vector2Int(x, y));
+                        Vector2Int cell = new Vector2Int(x, y);
+                        landCells.Add(cell);
+                        validLandCells.Add(cell);
                     }
                 }
             }
@@ -318,6 +330,14 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
             SpawnShoreVisuals(multiSegments, bankSortingOrder: -480, foamSortingOrder: -600, coordsAreTileIndices: true);
             ExpandCameraBounds(new Vector2(-22f, -16f), new Vector2(76f, 68f));
             return;
+        }
+
+        for (int x = -16; x < 16; x++)
+        {
+            for (int y = -11; y < 11; y++)
+            {
+                validLandCells.Add(new Vector2Int(x, y));
+            }
         }
 
         // Tạo 4 bờ đá + sóng vỗ bao quanh đảo cổ Map 3 (-16..16, -11..11)
@@ -335,14 +355,18 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
 
     private void SetupTilemapShorelines(int shoreBankSortingOrder, int foamSortingOrder)
     {
+        validLandCells.Clear();
         HashSet<Vector2Int> landCells = new HashSet<Vector2Int>();
+        HashSet<Vector2Int> wallCells = new HashSet<Vector2Int>();
         var tilemaps = FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
 
         foreach (var tm in tilemaps)
         {
             if (tm == null) continue;
             string n = tm.gameObject.name.ToLower();
-            if (!n.Contains("ground") && !n.Contains("floor") && !n.Contains("wall")) continue;
+            bool isGround = n.Contains("ground") || n.Contains("floor");
+            bool isWall = n.Contains("wall");
+            if (!isGround && !isWall) continue;
 
             BoundsInt bounds = tm.cellBounds;
             for (int x = bounds.xMin; x < bounds.xMax; x++)
@@ -352,8 +376,34 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                     Vector3Int cellPos = new Vector3Int(x, y, 0);
                     if (tm.HasTile(cellPos))
                     {
-                        landCells.Add(new Vector2Int(x, y));
+                        Vector2Int cell = new Vector2Int(x, y);
+                        landCells.Add(cell);
+                        if (isWall) wallCells.Add(cell);
                     }
+                }
+            }
+        }
+
+        if (MultiPathMapExpansionBuilder.Instance != null && MultiPathMapExpansionBuilder.Instance.WalkableRects.Count > 0)
+        {
+            foreach (var r in MultiPathMapExpansionBuilder.Instance.WalkableRects)
+            {
+                for (int x = r.xMin; x < r.xMax; x++)
+                {
+                    for (int y = r.yMin; y < r.yMax; y++)
+                    {
+                        validLandCells.Add(new Vector2Int(x, y));
+                    }
+                }
+            }
+        }
+        else
+        {
+            foreach (var c in landCells)
+            {
+                if (!wallCells.Contains(c))
+                {
+                    validLandCells.Add(c);
                 }
             }
         }
@@ -495,6 +545,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.down; // Sóng vỗ từ trên xuống bờ
                 edgeStart = new Vector2(seg.startCoord, boundaryY);
                 edgeEnd = new Vector2(seg.endCoord, boundaryY);
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY + 0.8f), new Vector2(length + 0.4f, 1.6f));
             }
             else if (seg.dir == ShoreDir.South)
             {
@@ -509,6 +560,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.up; // Sóng vỗ từ dưới lên bờ
                 edgeStart = new Vector2(seg.startCoord, boundaryY);
                 edgeEnd = new Vector2(seg.endCoord, boundaryY);
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY - 0.8f), new Vector2(length + 0.4f, 1.6f));
             }
             else if (seg.dir == ShoreDir.East)
             {
@@ -523,6 +575,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.left; // Sóng vỗ từ phải sang bờ trái
                 edgeStart = new Vector2(boundaryX, seg.startCoord);
                 edgeEnd = new Vector2(boundaryX, seg.endCoord);
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(boundaryX + 0.8f, mid), new Vector2(1.6f, length + 0.4f));
             }
             else if (seg.dir == ShoreDir.West)
             {
@@ -537,6 +590,7 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.right; // Sóng vỗ từ trái sang bờ phải
                 edgeStart = new Vector2(boundaryX, seg.startCoord);
                 edgeEnd = new Vector2(boundaryX, seg.endCoord);
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(boundaryX - 0.8f, mid), new Vector2(1.6f, length + 0.4f));
             }
 
             foamObj.transform.position = foamBasePos;
@@ -559,6 +613,119 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 phaseOffset = phase
             });
         }
+    }
+
+    private static void SpawnShorelineWallCollider(Transform parent, Vector2 center, Vector2 size)
+    {
+        GameObject wallObj = new GameObject("ShorelineWallCollider");
+        wallObj.transform.SetParent(parent, false);
+        wallObj.transform.position = new Vector3(center.x, center.y, 0f);
+        var rb = wallObj.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Static;
+        var box = wallObj.AddComponent<BoxCollider2D>();
+        box.size = size;
+    }
+
+    /// <summary>
+    /// Kẹp chặt vị trí thực thể trên đất liền / đảo hợp lệ, ngăn tuyệt đối việc lọt ra vùng nước
+    /// trong khi vẫn cho phép đi qua các cầu nối giữa các đảo liền kề mượt mà.
+    /// </summary>
+    public static Vector3 ClampToWalkableLand(Vector3 pos, float padding = 0.55f)
+    {
+        var builder = MultiPathMapExpansionBuilder.Instance;
+        bool hasWalkableRects = builder != null && builder.WalkableRects != null && builder.WalkableRects.Count > 0;
+
+        if (instance != null && instance.validLandCells.Count > 0)
+        {
+            var cells = instance.validLandCells;
+            float x = pos.x;
+            float y = pos.y;
+            int cx = Mathf.FloorToInt(x);
+            int cy = Mathf.FloorToInt(y);
+
+            // Nếu đã lọt ra ngoài ô đất hợp lệ (vào vùng nước): kéo ngay về điểm gần nhất trên WalkableRect hoặc ô đất gần nhất
+            if (!cells.Contains(new Vector2Int(cx, cy)))
+            {
+                if (hasWalkableRects)
+                {
+                    float bestDistSq = float.MaxValue;
+                    Vector2 bestPt = new Vector2(x, y);
+                    foreach (var r in builder.WalkableRects)
+                    {
+                        float rx = Mathf.Clamp(x, r.xMin + padding, r.xMax - padding);
+                        float ry = Mathf.Clamp(y, r.yMin + padding, r.yMax - padding);
+                        float dSq = (x - rx) * (x - rx) + (y - ry) * (y - ry);
+                        if (dSq < bestDistSq)
+                        {
+                            bestDistSq = dSq;
+                            bestPt = new Vector2(rx, ry);
+                        }
+                    }
+                    return new Vector3(bestPt.x, bestPt.y, pos.z);
+                }
+                else
+                {
+                    float bestDistSq = float.MaxValue;
+                    Vector2Int bestCell = new Vector2Int(cx, cy);
+                    foreach (var c in cells)
+                    {
+                        float cellCenterX = c.x + 0.5f;
+                        float cellCenterY = c.y + 0.5f;
+                        float dSq = (x - cellCenterX) * (x - cellCenterX) + (y - cellCenterY) * (y - cellCenterY);
+                        if (dSq < bestDistSq)
+                        {
+                            bestDistSq = dSq;
+                            bestCell = c;
+                        }
+                    }
+                    cx = bestCell.x;
+                    cy = bestCell.y;
+                    x = Mathf.Clamp(x, cx + 0.05f, cx + 0.95f);
+                    y = Mathf.Clamp(y, cy + 0.05f, cy + 0.95f);
+                }
+            }
+
+            // Đang đứng trên ô đất (cx, cy): kiểm tra 4 hướng xem có giáp mặt nước không để giữ khoảng cách padding
+            float pad = Mathf.Clamp(padding, 0.25f, 0.92f);
+            if (!cells.Contains(new Vector2Int(cx + 1, cy)))
+            {
+                x = Mathf.Min(x, (cx + 1) - pad);
+            }
+            if (!cells.Contains(new Vector2Int(cx - 1, cy)))
+            {
+                x = Mathf.Max(x, cx + pad);
+            }
+            if (!cells.Contains(new Vector2Int(cx, cy + 1)))
+            {
+                y = Mathf.Min(y, (cy + 1) - pad);
+            }
+            if (!cells.Contains(new Vector2Int(cx, cy - 1)))
+            {
+                y = Mathf.Max(y, cy + pad);
+            }
+
+            return new Vector3(x, y, pos.z);
+        }
+
+        if (hasWalkableRects)
+        {
+            float bestDistSq = float.MaxValue;
+            Vector2 bestPt = new Vector2(pos.x, pos.y);
+            foreach (var r in builder.WalkableRects)
+            {
+                float rx = Mathf.Clamp(pos.x, r.xMin + padding, r.xMax - padding);
+                float ry = Mathf.Clamp(pos.y, r.yMin + padding, r.yMax - padding);
+                float dSq = (pos.x - rx) * (pos.x - rx) + (pos.y - ry) * (pos.y - ry);
+                if (dSq < bestDistSq)
+                {
+                    bestDistSq = dSq;
+                    bestPt = new Vector2(rx, ry);
+                }
+            }
+            return new Vector3(bestPt.x, bestPt.y, pos.z);
+        }
+
+        return pos;
     }
 
     // =========================================================================

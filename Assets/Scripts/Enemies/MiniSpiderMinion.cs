@@ -233,15 +233,21 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         }
     }
 
+    private Rect homeRoomBounds;
+
     void LateUpdate()
     {
         if (isDead) return;
         Vector3 pos = transform.position;
-        Vector3 clamped = SkeletonKingBossAI.ClampToValidArena(pos, 0.6f);
-        if (Mathf.Abs(pos.x - clamped.x) > 0.01f || Mathf.Abs(pos.y - clamped.y) > 0.01f)
+        Vector3 clamped = DungeonRoomManager.ClampEnemyToHomeRoom(pos, ref homeRoomBounds, 0.7f);
+        if (Mathf.Abs(pos.x - clamped.x) > 0.005f || Mathf.Abs(pos.y - clamped.y) > 0.005f)
         {
-            transform.position = new Vector3(clamped.x, clamped.y, pos.z);
-            if (rb != null) rb.linearVelocity = Vector2.zero;
+            transform.position = new Vector3(clamped.x, clamped.y, 0f);
+            if (rb != null)
+            {
+                rb.position = new Vector2(clamped.x, clamped.y);
+                rb.linearVelocity = Vector2.zero;
+            }
         }
     }
 

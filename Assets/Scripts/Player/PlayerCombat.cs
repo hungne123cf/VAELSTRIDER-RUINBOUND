@@ -2016,7 +2016,7 @@ public class PlayerCombat : MonoBehaviour
 
         var sr = pillar.AddComponent<SpriteRenderer>();
         sr.sortingLayerName = "Default";
-        sr.sortingOrder = 5000 + Mathf.RoundToInt(-pos.y * 100) + 20;
+        sr.sortingOrder = AutoDepthSort.GetSortingOrderForY(pos.y, 20);
 
         var pLight = pillar.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
         pLight.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;

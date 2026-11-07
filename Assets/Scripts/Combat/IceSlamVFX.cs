@@ -164,7 +164,7 @@ public class IceSlamVFX : MonoBehaviour
         var sr = spike.AddComponent<SpriteRenderer>();
         sr.sortingLayerName = "Default";
         // Sorting theo chuẩn depth sort hệ thống (base 5000) để luôn nổi trên sàn gạch và depth-sort tự nhiên với quái
-        sr.sortingOrder = 5000 + Mathf.RoundToInt(-pos.y * 100) + 15;
+        sr.sortingOrder = AutoDepthSort.GetSortingOrderForY(pos.y, 15);
 
         var spikeLight = spike.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
         spikeLight.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;

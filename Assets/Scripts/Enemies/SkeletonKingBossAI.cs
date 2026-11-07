@@ -40,6 +40,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     public bool IsPhaseTransitioning => isPhaseTransitioning;
     public bool IsDead => isDead;
     private bool isDead = false;
+    private Rect homeRoomBounds;
 
     // Animator Hashes
     private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
@@ -87,7 +88,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
         rb.linearDamping = 4.0f;
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Discrete;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         EnemyCCCleanseSystem.EnsureAttached(gameObject);
 
         if (GetComponent<AutoDepthSort>() == null) gameObject.AddComponent<AutoDepthSort>();
@@ -228,6 +229,12 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         }
     }
 
+    void FixedUpdate()
+    {
+        if (isDead || BossIntroCutsceneUI.IsCutsceneActive) return;
+        ClampInsideRoomBounds();
+    }
+
     void LateUpdate()
     {
         if (isDead || BossIntroCutsceneUI.IsCutsceneActive) return;
@@ -236,24 +243,45 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     public static Vector3 ClampToValidArena(Vector3 pos, float padding = 1.0f)
     {
+        var roomMgr = DungeonRoomManager.Instance;
+        if (roomMgr != null)
+        {
+            if (roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0.1f)
+            {
+                Rect b = roomMgr.currentRoom.roomBounds;
+                float padX = Mathf.Min(padding, b.width * 0.42f);
+                float padY = Mathf.Min(padding, b.height * 0.42f);
+                float cx = Mathf.Clamp(pos.x, b.xMin + padX, b.xMax - padX);
+                float cy = Mathf.Clamp(pos.y, b.yMin + padY, b.yMax - padY);
+                return new Vector3(cx, cy, 0f);
+            }
+
+            foreach (var r in roomMgr.rooms)
+            {
+                if (r != null && r.roomBounds.width > 0.1f && r.roomBounds.Contains(new Vector2(pos.x, pos.y)))
+                {
+                    Rect b = r.roomBounds;
+                    float padX = Mathf.Min(padding, b.width * 0.42f);
+                    float padY = Mathf.Min(padding, b.height * 0.42f);
+                    float cx = Mathf.Clamp(pos.x, b.xMin + padX, b.xMax - padX);
+                    float cy = Mathf.Clamp(pos.y, b.yMin + padY, b.yMax - padY);
+                    return new Vector3(cx, cy, 0f);
+                }
+            }
+        }
+
         var builder = MultiPathMapExpansionBuilder.Instance;
         if (builder != null && builder.WalkableRects != null && builder.WalkableRects.Count > 0)
         {
-            foreach (var r in builder.WalkableRects)
-            {
-                if (pos.x >= r.xMin + padding && pos.x <= r.xMax - padding &&
-                    pos.y >= r.yMin + padding && pos.y <= r.yMax - padding)
-                {
-                    return pos;
-                }
-            }
-
             RectInt closestRect = builder.WalkableRects[0];
             float minDistSqr = float.MaxValue;
             foreach (var r in builder.WalkableRects)
             {
-                Vector2 center = new Vector2(r.xMin + r.width * 0.5f, r.yMin + r.height * 0.5f);
-                float distSqr = ((Vector2)pos - center).sqrMagnitude;
+                float padX = Mathf.Min(padding, r.width * 0.42f);
+                float padY = Mathf.Min(padding, r.height * 0.42f);
+                float rx = Mathf.Clamp(pos.x, r.xMin + padX, r.xMax - padX);
+                float ry = Mathf.Clamp(pos.y, r.yMin + padY, r.yMax - padY);
+                float distSqr = (pos.x - rx) * (pos.x - rx) + (pos.y - ry) * (pos.y - ry);
                 if (distSqr < minDistSqr)
                 {
                     minDistSqr = distSqr;
@@ -261,18 +289,11 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
                 }
             }
 
-            float cx = Mathf.Clamp(pos.x, closestRect.xMin + padding, closestRect.xMax - padding);
-            float cy = Mathf.Clamp(pos.y, closestRect.yMin + padding, closestRect.yMax - padding);
-            return new Vector3(cx, cy, pos.z);
-        }
-
-        var roomMgr = DungeonRoomManager.Instance;
-        if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
-        {
-            Rect b = roomMgr.currentRoom.roomBounds;
-            float cx = Mathf.Clamp(pos.x, b.xMin + padding, b.xMax - padding);
-            float cy = Mathf.Clamp(pos.y, b.yMin + padding, b.yMax - padding);
-            return new Vector3(cx, cy, pos.z);
+            float cPadX = Mathf.Min(padding, closestRect.width * 0.42f);
+            float cPadY = Mathf.Min(padding, closestRect.height * 0.42f);
+            float cx = Mathf.Clamp(pos.x, closestRect.xMin + cPadX, closestRect.xMax - cPadX);
+            float cy = Mathf.Clamp(pos.y, closestRect.yMin + cPadY, closestRect.yMax - cPadY);
+            return new Vector3(cx, cy, 0f);
         }
 
         if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
@@ -281,21 +302,25 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
             Vector2 max = MapBounds.Instance.MaxBounds;
             float cx = Mathf.Clamp(pos.x, min.x + padding, max.x - padding);
             float cy = Mathf.Clamp(pos.y, min.y + padding, max.y - padding);
-            return new Vector3(cx, cy, pos.z);
+            return new Vector3(cx, cy, 0f);
         }
 
-        return pos;
+        return SurroundingWaterOceanSystem.ClampToWalkableLand(pos, padding);
     }
 
     private void ClampInsideRoomBounds()
     {
         if (isDead) return;
         Vector3 pos = transform.position;
-        Vector3 clamped = ClampToValidArena(pos, 1.2f);
-        if (Mathf.Abs(pos.x - clamped.x) > 0.01f || Mathf.Abs(pos.y - clamped.y) > 0.01f)
+        Vector3 clamped = DungeonRoomManager.ClampEnemyToHomeRoom(pos, ref homeRoomBounds, 1.4f);
+        if (Mathf.Abs(pos.x - clamped.x) > 0.005f || Mathf.Abs(pos.y - clamped.y) > 0.005f)
         {
-            transform.position = new Vector3(clamped.x, clamped.y, pos.z);
-            if (rb != null) rb.linearVelocity = Vector2.zero;
+            transform.position = new Vector3(clamped.x, clamped.y, 0f);
+            if (rb != null)
+            {
+                rb.position = new Vector2(clamped.x, clamped.y);
+                rb.linearVelocity = Vector2.zero;
+            }
         }
     }
 
@@ -462,6 +487,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         while (elapsed < dashTime && !isDead)
         {
             rb.linearVelocity = dashDir * (moveSpeed * 3.6f);
+            ClampInsideRoomBounds();
             elapsed += Time.deltaTime;
 
             Vector2 curBodyPos = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
@@ -796,14 +822,15 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.6f, 1.0f);
 
-        AethelShard.SpawnShards(transform.position, 35);
-        HealthPotion.Spawn(transform.position + Vector3.left * 0.8f, 1);
-        HealthPotion.Spawn(transform.position + Vector3.right * 0.8f, 1);
-        WorldItemPickup.Spawn(transform.position, "core_abyssal_soul", 1);
-        WorldItemPickup.RollDrop(transform.position + Vector3.up * 0.5f, true);
-        TreasureChest.SpawnChest(transform.position + Vector3.down * 1.5f);
+        Vector3 safeCenter = ClampToValidArena(transform.position, 4.2f);
+        AethelShard.SpawnShards(safeCenter, 35);
+        HealthPotion.Spawn(safeCenter + Vector3.left * 0.8f, 1);
+        HealthPotion.Spawn(safeCenter + Vector3.right * 0.8f, 1);
+        WorldItemPickup.Spawn(safeCenter, "core_abyssal_soul", 1);
+        WorldItemPickup.RollDrop(safeCenter + Vector3.up * 0.5f, true);
+        TreasureChest.SpawnChest(safeCenter + Vector3.down * 1.5f);
 
-        Vector3 bossDeathPos = transform.position;
+        Vector3 bossDeathPos = safeCenter;
         // 3. Trieu hoi Bong Ma Ban Nga (CHỈ DUY NHẤT ở Màn Ác Mộng VoidNightmare) hoac Cong Thien Gioi
         if (CorruptedCycleManager.IsCorruptedActive && CorruptedCycleManager.CurrentRealm == CalamityRealm.VoidNightmare)
         {
@@ -831,18 +858,20 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     private static IEnumerator SpawnHeavenlyPortalRoutineStatic(Vector3 center)
     {
         yield return new WaitForSeconds(1.5f);
-        SpawnSovereignAltarStatic(center);
-        RuinPortal.SpawnPortal(center + new Vector3(-2.8f, 0, 0));
-        CorruptedVoidPortal.Spawn(center + new Vector3(2.8f, 0, 0));
-        WanderingMerchant.SpawnMerchant(center + new Vector3(0f, -2.5f, 0f));
+        Vector3 safeCenter = ClampToValidArena(center, 4.2f);
+        SpawnSovereignAltarStatic(safeCenter);
+        RuinPortal.SpawnPortal(safeCenter + new Vector3(-2.8f, 0, 0));
+        CorruptedVoidPortal.Spawn(safeCenter + new Vector3(2.8f, 0, 0));
+        WanderingMerchant.SpawnMerchant(safeCenter + new Vector3(0f, -2.5f, 0f));
     }
 
     private static void SpawnPortalsDirect(Vector3 center)
     {
-        SpawnSovereignAltarStatic(center);
-        RuinPortal.SpawnPortal(center + new Vector3(-2.8f, 0, 0));
-        CorruptedVoidPortal.Spawn(center + new Vector3(2.8f, 0, 0));
-        WanderingMerchant.SpawnMerchant(center + new Vector3(0f, -2.5f, 0f));
+        Vector3 safeCenter = ClampToValidArena(center, 4.2f);
+        SpawnSovereignAltarStatic(safeCenter);
+        RuinPortal.SpawnPortal(safeCenter + new Vector3(-2.8f, 0, 0));
+        CorruptedVoidPortal.Spawn(safeCenter + new Vector3(2.8f, 0, 0));
+        WanderingMerchant.SpawnMerchant(safeCenter + new Vector3(0f, -2.5f, 0f));
     }
 
     private void ClearAllRemainingEnemies()
@@ -881,10 +910,11 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     private IEnumerator SpawnHeavenlyPortalRoutine()
     {
         yield return new WaitForSeconds(1.8f);
-        SpawnSovereignAltarStatic(transform.position);
-        RuinPortal.SpawnPortal(transform.position + new Vector3(-2.8f, 0, 0));
-        CorruptedVoidPortal.Spawn(transform.position + new Vector3(2.8f, 0, 0));
-        WanderingMerchant.SpawnMerchant(transform.position + new Vector3(0f, -2.5f, 0f));
+        Vector3 safeCenter = ClampToValidArena(transform.position, 4.2f);
+        SpawnSovereignAltarStatic(safeCenter);
+        RuinPortal.SpawnPortal(safeCenter + new Vector3(-2.8f, 0, 0));
+        CorruptedVoidPortal.Spawn(safeCenter + new Vector3(2.8f, 0, 0));
+        WanderingMerchant.SpawnMerchant(safeCenter + new Vector3(0f, -2.5f, 0f));
     }
 
     private static void SpawnSovereignAltarStatic(Vector3 centerPos)

@@ -255,6 +255,14 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         }
     }
 
+    private Rect homeRoomBounds;
+
+    void FixedUpdate()
+    {
+        if (isDead || LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
+        if (isBoss) ClampInsideRoomBounds();
+    }
+
     void LateUpdate()
     {
         if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
@@ -264,34 +272,17 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     private void ClampInsideRoomBounds()
     {
         if (isDead) return;
-        float padding = isBoss ? 1.2f : 0.6f;
+        float padding = isBoss ? 1.35f : 0.7f;
         Vector3 bodyPos = GetBodyFootPosition();
-        var roomMgr = DungeonRoomManager.Instance;
-        if (roomMgr != null && roomMgr.currentRoom != null && roomMgr.currentRoom.roomBounds.width > 0)
+        Vector3 clamped = DungeonRoomManager.ClampEnemyToHomeRoom(bodyPos, ref homeRoomBounds, padding);
+        if (Mathf.Abs(bodyPos.x - clamped.x) > 0.005f || Mathf.Abs(bodyPos.y - clamped.y) > 0.005f)
         {
-            Rect b = roomMgr.currentRoom.roomBounds;
-            float clampedX = Mathf.Clamp(bodyPos.x, b.xMin + padding, b.xMax - padding);
-            float clampedY = Mathf.Clamp(bodyPos.y, b.yMin + padding, b.yMax - padding);
-
-            if (Mathf.Abs(bodyPos.x - clampedX) > 0.01f || Mathf.Abs(bodyPos.y - clampedY) > 0.01f)
+            Vector3 delta = new Vector3(clamped.x - bodyPos.x, clamped.y - bodyPos.y, 0f);
+            transform.position += delta;
+            if (rb != null)
             {
-                Vector3 delta = new Vector3(clampedX - bodyPos.x, clampedY - bodyPos.y, 0f);
-                transform.position += delta;
-                if (rb != null) rb.linearVelocity = Vector2.zero;
-            }
-        }
-        else if (MapBounds.Instance != null && MapBounds.Instance.HasValidBounds)
-        {
-            Vector2 min = MapBounds.Instance.MinBounds;
-            Vector2 max = MapBounds.Instance.MaxBounds;
-            float clampedX = Mathf.Clamp(bodyPos.x, min.x + padding, max.x - padding);
-            float clampedY = Mathf.Clamp(bodyPos.y, min.y + padding, max.y - padding);
-
-            if (Mathf.Abs(bodyPos.x - clampedX) > 0.01f || Mathf.Abs(bodyPos.y - clampedY) > 0.01f)
-            {
-                Vector3 delta = new Vector3(clampedX - bodyPos.x, clampedY - bodyPos.y, 0f);
-                transform.position += delta;
-                if (rb != null) rb.linearVelocity = Vector2.zero;
+                rb.position = (Vector2)transform.position;
+                rb.linearVelocity = Vector2.zero;
             }
         }
     }
