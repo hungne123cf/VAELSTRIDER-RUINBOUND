@@ -378,7 +378,8 @@ public class PlayerStatPanelUI : MonoBehaviour
         HeroCostumeManager.GetEquippedCostumeBonus(curCharId, out _, out _, out float costumeDef, out _);
         int augDef = AugmentManager.Instance != null ? AugmentManager.Instance.GetAugDef() : 0;
         int totalDisplayDef = Mathf.RoundToInt(baseDef + armorDef + sockDef + costumeDef + augDef);
-        defTxt.text = $"{totalDisplayDef}%";
+        float redPct = (totalDisplayDef / (totalDisplayDef + 80f)) * 100f;
+        defTxt.text = $"{totalDisplayDef} ({Mathf.RoundToInt(redPct)}%)";
     }
 
     // Hút máu có thể lưu dạng 0.1 hoặc 10 -> chuẩn hóa về %

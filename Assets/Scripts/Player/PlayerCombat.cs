@@ -31,6 +31,7 @@ public class PlayerCombat : MonoBehaviour
     private float lastAttackTime = 0f;
     public float LastAttackTime => lastAttackTime;
     private float skillCooldownTimer = 0f;
+    private int vaelstriderAttackHitCount = 0; // Đếm số đòn đánh của Player 1 (đòn thứ 3 tích giáp ảo 30%)
     private int lastAttackFrame = -1;
     private int lastSpecialSkillFrame = -1;
     private bool isUltiActive = false;
@@ -935,6 +936,7 @@ public class PlayerCombat : MonoBehaviour
         Collider2D[] allHits = Physics2D.OverlapCircleAll(origin, attackRadius);
         var damagedSet = new System.Collections.Generic.HashSet<IDamageable>();
         int enemyCount = 0;
+        int totalDamageThisSwing = 0;
 
         foreach (var col in allHits)
         {
@@ -983,6 +985,7 @@ public class PlayerCombat : MonoBehaviour
                 int actualTrue = (finalTrue > 0) ? AugmentManager.ProcessOutgoingDamage(gameObject, col.gameObject, finalTrue, DamageType.TrueDamage) : 0;
                 int actualHitDmg = actualPhys + actualMagic + actualTrue;
                 damageable.TakeDamage(actualHitDmg);
+                totalDamageThisSwing += actualHitDmg;
                 OnPlayerHitEnemy?.Invoke(col.gameObject, actualHitDmg);
 
                 Vector3 hitPopupPos = DynamicSpriteColliderSync.GetBodyCenter(col.transform, col);
@@ -1016,6 +1019,27 @@ public class PlayerCombat : MonoBehaviour
                 if (actualMagic > 0) ApplyLifesteal(actualMagic, DamageType.Magic);
                 if (actualTrue > 0) ApplyLifesteal(actualTrue, DamageType.TrueDamage);
 
+            }
+        }
+
+        // ─── NỘI TẠI PLAYER 1 (VAELSTRIDER): MỖI 3 ĐÒN ĐÁNH TÍCH GIÁP ẢO VĨNH VIỄN 30% SÁT THƯƠNG ───
+        if (enemyCount > 0 && totalDamageThisSwing > 0)
+        {
+            string selectedChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? CharacterManager.CHAR_VAELSTRIDER;
+            bool isVaelstrider = (selectedChar == CharacterManager.CHAR_VAELSTRIDER);
+            if (isVaelstrider)
+            {
+                vaelstriderAttackHitCount++;
+                if (vaelstriderAttackHitCount >= 3)
+                {
+                    vaelstriderAttackHitCount = 0;
+                    int shieldGain = Mathf.Max(1, Mathf.RoundToInt(totalDamageThisSwing * 0.30f));
+                    var pHealth = playerHealth != null ? playerHealth : (GetComponent<PlayerHealth>() ?? PlayerHealth.Instance);
+                    if (pHealth != null)
+                    {
+                        pHealth.AddShield(shieldGain, isPermanent: true);
+                    }
+                }
             }
         }
 

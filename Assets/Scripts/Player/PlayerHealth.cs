@@ -342,6 +342,36 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private float virtualHealthTimer = 0f;
     private bool isVirtualHealthActive = false;
 
+    /// <summary>
+    /// Giáp Ảo (Shield) chuẩn phong cách LoL / Wild Rift / Soul Knight:
+    /// Màu trắng hiển thị trực tiếp trên thanh HP, hấp thụ 100% sát thương nhận vào trước khi trừ vào máu thật.
+    /// Có thể là Vĩnh Viễn (isPermanent = true) hoặc có thời hạn (duration > 0).
+    /// </summary>
+    public void AddShield(int amount, bool isPermanent = true, float duration = 0f)
+    {
+        if (amount <= 0 || isDead) return;
+
+        int maxCap = Mathf.RoundToInt(maxHealth * 2.0f); // Giáp ảo cộng dồn tối đa 200% Max HP
+        currentVirtualHealth = Mathf.Min(maxCap, currentVirtualHealth + amount);
+        maxVirtualHealth = Mathf.Max(maxVirtualHealth, currentVirtualHealth);
+        isVirtualHealthActive = true;
+
+        if (isPermanent || duration <= 0f)
+        {
+            virtualHealthTimer = float.PositiveInfinity;
+        }
+        else
+        {
+            virtualHealthTimer = Mathf.Max(virtualHealthTimer, duration);
+        }
+
+        DamagePopup.CreateText(transform.position + Vector3.up * 0.95f, $"+{amount} GIÁP ẢO", Color.white);
+    }
+
+    public int CurrentShield => (isVirtualHealthActive && currentVirtualHealth > 0) ? currentVirtualHealth : 0;
+    public int GetShield() => CurrentShield;
+    public bool IsShieldActive() => isVirtualHealthActive && currentVirtualHealth > 0;
+
     public void AddVirtualHealth(int amount, float duration = 15f, bool fillMissingBaseHpFirst = true)
     {
         if (amount <= 0 || isDead) return;
@@ -356,7 +386,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             if (amount <= 0) return; // Toàn bộ lượng máu đã được dùng để lấp đầy máu gốc
         }
 
-        int maxCap = Mathf.RoundToInt(maxHealth * 0.85f);
+        int maxCap = Mathf.RoundToInt(maxHealth * 1.5f);
         if (isVirtualHealthActive && currentVirtualHealth > 0)
         {
             currentVirtualHealth = Mathf.Min(maxCap, currentVirtualHealth + amount);
@@ -439,12 +469,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public float GetVirtualHealthTimer() => virtualHealthTimer;
     public float GetVirtualHealthDuration() => virtualHealthDuration;
     public bool IsVirtualHealthActive() => isVirtualHealthActive && currentVirtualHealth > 0;
-    public bool IsVirtualHealthExpiringSoon() => isVirtualHealthActive && virtualHealthTimer <= 3.5f;
+    public bool IsVirtualHealthExpiringSoon() => isVirtualHealthActive && !float.IsPositiveInfinity(virtualHealthTimer) && virtualHealthTimer <= 3.5f;
 
     void Update()
     {
-        // 1. Đếm thời gian duy trì Lớp Máu Ảo
-        if (isVirtualHealthActive)
+        // 1. Đếm thời gian duy trì Lớp Máu Ảo / Giáp Ảo (Giáp Ảo Vĩnh Viễn có Timer = Infinity sẽ không bị trừ)
+        if (isVirtualHealthActive && !float.IsPositiveInfinity(virtualHealthTimer))
         {
             virtualHealthTimer -= Time.deltaTime;
             if (virtualHealthTimer <= 0f)
@@ -515,8 +545,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         float totalDef = Mathf.Max(0f, baseDef + armorDef + sockDef + costumeDef + augDef);
         if (totalDef > 0)
         {
-            float reductionPercent = totalDef / (totalDef + 100f);
-            damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - reductionPercent)));
+            float reductionPercent = totalDef / (totalDef + 80f);
+            // Đảm bảo giáp luôn có tác dụng giảm sát thương thực tế (không bị làm tròn về 0 ở cấp thấp)
+            int mitigated = Mathf.Max(1, Mathf.RoundToInt(damage * reductionPercent));
+            damage = Mathf.Max(1, damage - mitigated);
         }
 
         // Lõi Bản Thể Thủy Tinh (GlassCannonTitan): Nhận thêm +30% Sát thương từ kẻ địch
@@ -536,7 +568,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             }
         }
 
-        // 1. Kiểm tra và trừ vào Lớp Máu Ảo trước (Virtual Health Barrier)
+        // 1. Kiểm tra và trừ vào Lớp Giáp Ảo trước (White Shield Barrier)
         if (isVirtualHealthActive && currentVirtualHealth > 0)
         {
             int virtualAbsorbed = 0;
@@ -560,8 +592,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
             if (virtualAbsorbed > 0)
             {
-                // Hiển thị số trừ máu ảo màu vàng kim hổ phách nổi bật
-                DamagePopup.CreateText(transform.position + Vector3.up * 0.75f, $"-{virtualAbsorbed}", new Color(1f, 0.82f, 0.2f));
+                // Hiển thị số trừ giáp ảo màu trắng bạc nổi bật chuẩn phong cách MOBA
+                DamagePopup.CreateText(transform.position + Vector3.up * 0.75f, $"-{virtualAbsorbed}", Color.white);
                 SoundManager.EnsureInstance()?.PlayHitImpact();
                 FindAnyObjectByType<CameraFollow>()?.Shake(0.08f, 0.1f);
             }

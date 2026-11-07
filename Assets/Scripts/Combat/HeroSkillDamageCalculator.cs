@@ -147,10 +147,12 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = Mathf.Max(1, info.fromAtk + info.fromAP);
                 info.description = LocalizationManager.T(
-                    $"• <b>Nhấp đánh:</b> Vung kiếm cổ đại theo hình vòng cung dứt điểm kẻ địch. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý.\n" +
+                    $"• <b>Nhấp đánh:</b> Vung kiếm cổ đại dứt điểm kẻ địch. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý.\n" +
+                    $"• <b>Nội tại Kiếm Khí:</b> Mỗi <b>3 đòn đánh</b> trúng địch tạo một lớp <color=#FFFFFF><b>Giáp Ảo vĩnh viễn</b></color> bằng <b>30% sát thương gây ra</b>.\n" +
                     $"• <b>Đè giữ (Gồng):</b> Vào Thế Thủ Kiếm Thuẫn giảm 65% sát thương nhận vào (tiêu hao 15 Năng lượng/giây), nhả nút phóng <b>Đại Sóng Kiếm Hoàng Kim</b> càn quét diện rộng.\n\n" +
                     $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (35% <sprite name=\"ap\">)",
                     $"• <b>Tap:</b> Sweeping ancient sword slash. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n" +
+                    $"• <b>Sword Passive:</b> Every <b>3 attack hits</b> generates a <color=#FFFFFF><b>Permanent Shield</b></color> equal to <b>30% of damage dealt</b>.\n" +
                     $"• <b>Hold (Charge):</b> Enters Parry Stance taking 65% less damage (costs 15 Energy/sec), release to unleash <b>Radiant Swordwave</b> sweeping enemies.\n\n" +
                     $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (35% <sprite name=\"ap\">)");
                 break;

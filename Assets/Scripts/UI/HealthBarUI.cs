@@ -13,19 +13,21 @@ public class HealthBarUI : MonoBehaviour
     [Header("Easing Speed")]
     [SerializeField] private float easeSpeed = 0.05f;
 
-    [Header("Virtual Health Bar (Nằm Sát Mép Phải Thanh Máu Thật - Màu Cam Đỏ Cục Gọn)")]
-    [SerializeField] private Color barrierColor = new Color(1f, 0.28f, 0.05f, 1f); // Màu cam đỏ rực rỡ
-    [SerializeField] private Color barrierFlashColor = new Color(1f, 0.85f, 0.15f, 0.25f);
+    [Header("White Shield Bar (Giáp Ảo Màu Trắng Phủ Trực Tiếp Trên Thanh Máu)")]
+    [SerializeField] private Color whiteShieldColor = new Color(1f, 1f, 1f, 0.95f); // Trắng sáng tinh khiết chuẩn MOBA
+    [SerializeField] private Color whiteShieldOverflowColor = new Color(1f, 1f, 1f, 0.72f); // Trắng mờ phát sáng khi giáp tràn qua 100%
 
     private PlayerHealth playerHealth;
-    private GameObject virtualHpBarObj;
-    private Slider virtualHpSlider;
-    private Image virtualHpFillImage;
-    private TextMeshProUGUI virtualHpText;
-    private Outline virtualHpOutline;
+    private GameObject whiteShieldUnderflowObj;
+    private RectTransform whiteShieldUnderflowRt;
+    private Image whiteShieldUnderflowImg;
+    private GameObject whiteShieldOverflowObj;
+    private RectTransform whiteShieldOverflowRt;
+    private Image whiteShieldOverflowImg;
+
     private int lastDisplayedCurrentHP = -1;
     private int lastDisplayedMaxHP = -1;
-    private int lastDisplayedVirtualHP = -1;
+    private int lastDisplayedShield = -1;
     private bool hpTypographyApplied = false;
 
     void Awake()
@@ -44,6 +46,7 @@ public class HealthBarUI : MonoBehaviour
         {
             int max = playerHealth.GetMaxHealth();
             int current = playerHealth.GetCurrentHealth();
+            int shield = playerHealth.GetVirtualHealth();
             if (hpSlider != null)
             {
                 hpSlider.maxValue = max;
@@ -54,7 +57,7 @@ public class HealthBarUI : MonoBehaviour
                 easeHpSlider.maxValue = max;
                 easeHpSlider.value = current;
             }
-            UpdateText(current, max);
+            UpdateText(current, max, shield);
         }
     }
 
@@ -68,6 +71,7 @@ public class HealthBarUI : MonoBehaviour
 
         int currentHP = playerHealth.GetCurrentHealth();
         int maxHP = playerHealth.GetMaxHealth();
+        int currentShield = playerHealth.GetVirtualHealth();
 
         if (hpSlider != null)
         {
@@ -90,159 +94,117 @@ public class HealthBarUI : MonoBehaviour
             }
         }
 
-        UpdateText(currentHP, maxHP);
-        UpdateVirtualHealthBar();
+        UpdateText(currentHP, maxHP, currentShield);
+        UpdateWhiteShieldBar(currentHP, maxHP, currentShield);
     }
 
-    private void UpdateVirtualHealthBar()
+    private void UpdateWhiteShieldBar(int currentHP, int maxHP, int shield)
     {
-        bool isVirtualActive = playerHealth != null && playerHealth.IsVirtualHealthActive();
+        EnsureWhiteShieldOverlay();
 
-        if (isVirtualActive)
+        if (shield <= 0)
         {
-            EnsureVirtualHealthBar();
-            if (virtualHpBarObj == null) return;
-
-            if (!virtualHpBarObj.activeSelf) virtualHpBarObj.SetActive(true);
-
-            int currentVHp = playerHealth.GetVirtualHealth();
-            int maxVHp = playerHealth.GetMaxVirtualHealth();
-
-            if (virtualHpSlider != null)
-            {
-                virtualHpSlider.maxValue = Mathf.Max(1, maxVHp);
-                virtualHpSlider.value = currentVHp;
-            }
-
-            if (virtualHpText != null && currentVHp != lastDisplayedVirtualHP)
-            {
-                lastDisplayedVirtualHP = currentVHp;
-                virtualHpText.text = $"+{currentVHp}";
-            }
-
-            bool isExpiringSoon = playerHealth.IsVirtualHealthExpiringSoon();
-            if (isExpiringSoon)
-            {
-                // Nhấp nháy nhanh khi còn <= 3.5 giây
-                float t = Mathf.PingPong(Time.time * 9f, 1f);
-                if (virtualHpFillImage != null)
-                {
-                    virtualHpFillImage.color = Color.Lerp(barrierColor, barrierFlashColor, t);
-                }
-                if (virtualHpOutline != null)
-                {
-                    virtualHpOutline.effectColor = Color.Lerp(new Color(1f, 0.4f, 0.1f, 1f), new Color(1f, 0.9f, 0.2f, 0.2f), t);
-                }
-                if (virtualHpText != null)
-                {
-                    virtualHpText.color = t > 0.5f ? Color.white : new Color(1f, 0.85f, 0.2f, 1f);
-                }
-            }
-            else
-            {
-                if (virtualHpFillImage != null)
-                {
-                    virtualHpFillImage.color = barrierColor;
-                }
-                if (virtualHpOutline != null)
-                {
-                    virtualHpOutline.effectColor = new Color(0.9f, 0.2f, 0.05f, 0.85f);
-                }
-                if (virtualHpText != null)
-                {
-                    virtualHpText.color = Color.white;
-                }
-            }
-        }
-        else
-        {
-            if (virtualHpBarObj != null && virtualHpBarObj.activeSelf)
-            {
-                virtualHpBarObj.SetActive(false);
-            }
-        }
-    }
-
-    private void EnsureVirtualHealthBar()
-    {
-        if (virtualHpBarObj != null) return;
-
-        // Dọn dẹp object cũ nếu có
-        Transform oldInParent = transform.parent != null ? transform.parent.Find("VirtualHealthBar_RightSide") : null;
-        if (oldInParent != null && oldInParent.gameObject != gameObject)
-        {
-            Destroy(oldInParent.gameObject);
-        }
-
-        Transform existingChild = transform.Find("VirtualHealthBar_RightSide");
-        if (existingChild != null)
-        {
-            virtualHpBarObj = existingChild.gameObject;
-            virtualHpSlider = virtualHpBarObj.GetComponent<Slider>();
-            virtualHpFillImage = virtualHpBarObj.transform.Find("FillArea/Fill")?.GetComponent<Image>();
-            virtualHpText = virtualHpBarObj.transform.Find("Text")?.GetComponent<TextMeshProUGUI>();
-            virtualHpOutline = virtualHpBarObj.GetComponent<Outline>();
+            if (whiteShieldUnderflowObj != null && whiteShieldUnderflowObj.activeSelf)
+                whiteShieldUnderflowObj.SetActive(false);
+            if (whiteShieldOverflowObj != null && whiteShieldOverflowObj.activeSelf)
+                whiteShieldOverflowObj.SetActive(false);
             return;
         }
 
-        virtualHpBarObj = new GameObject("VirtualHealthBar_RightSide");
-        virtualHpBarObj.transform.SetParent(transform, false);
+        float hpRatio = maxHP > 0 ? Mathf.Clamp01((float)currentHP / maxHP) : 0f;
+        float shieldRatio = maxHP > 0 ? (float)shield / maxHP : 0f;
 
-        // Neo trực tiếp vào mép phải thanh máu thật: y kéo dài 100% khớp tuyệt đối, x cách đúng 2px sát rạt
-        RectTransform vRt = virtualHpBarObj.AddComponent<RectTransform>();
-        vRt.anchorMin = new Vector2(1f, 0f);
-        vRt.anchorMax = new Vector2(1f, 1f);
-        vRt.pivot = new Vector2(0f, 0.5f);
-        vRt.anchoredPosition = new Vector2(2f, 0f); // Sát mép phải 2 pixel
-        vRt.sizeDelta = new Vector2(75f, 0f);       // Rộng 75px (dạng khối cục gọn), cao khớp 100%
+        // 1. Dải Giáp Ảo nối tiếp ngay sau thanh HP hiện tại (lấp đầy thanh máu về phía 100%)
+        float underflowMin = hpRatio;
+        float underflowMax = Mathf.Clamp01(hpRatio + shieldRatio);
 
-        // Background
-        Image bgImg = virtualHpBarObj.AddComponent<Image>();
-        bgImg.color = new Color(0.08f, 0.04f, 0.04f, 0.95f);
+        if (underflowMax > underflowMin && whiteShieldUnderflowObj != null)
+        {
+            if (!whiteShieldUnderflowObj.activeSelf) whiteShieldUnderflowObj.SetActive(true);
+            whiteShieldUnderflowRt.anchorMin = new Vector2(underflowMin, 0f);
+            whiteShieldUnderflowRt.anchorMax = new Vector2(underflowMax, 1f);
+            whiteShieldUnderflowRt.offsetMin = Vector2.zero;
+            whiteShieldUnderflowRt.offsetMax = Vector2.zero;
+        }
+        else if (whiteShieldUnderflowObj != null && whiteShieldUnderflowObj.activeSelf)
+        {
+            whiteShieldUnderflowObj.SetActive(false);
+        }
 
-        virtualHpOutline = virtualHpBarObj.AddComponent<Outline>();
-        virtualHpOutline.effectColor = new Color(0.9f, 0.2f, 0.05f, 0.85f);
-        virtualHpOutline.effectDistance = new Vector2(1f, -1f);
+        // 2. Dải Giáp Ảo tràn (Over-shield khi Máu + Giáp Ảo > 100% Max HP): Phủ lớp màng trắng phát sáng từ 0% lên
+        float overflowRatio = (hpRatio + shieldRatio) - 1.0f;
+        if (overflowRatio > 0.002f && whiteShieldOverflowObj != null)
+        {
+            if (!whiteShieldOverflowObj.activeSelf) whiteShieldOverflowObj.SetActive(true);
+            whiteShieldOverflowRt.anchorMin = new Vector2(0f, 0f);
+            whiteShieldOverflowRt.anchorMax = new Vector2(Mathf.Clamp01(overflowRatio), 1f);
+            whiteShieldOverflowRt.offsetMin = Vector2.zero;
+            whiteShieldOverflowRt.offsetMax = Vector2.zero;
+        }
+        else if (whiteShieldOverflowObj != null && whiteShieldOverflowObj.activeSelf)
+        {
+            whiteShieldOverflowObj.SetActive(false);
+        }
+    }
 
-        virtualHpSlider = virtualHpBarObj.AddComponent<Slider>();
-        virtualHpSlider.interactable = false;
-        virtualHpSlider.transition = Selectable.Transition.None;
+    private void EnsureWhiteShieldOverlay()
+    {
+        // Dọn dẹp khối cục cũ nếu có (VirtualHealthBar_RightSide)
+        Transform oldSide = transform.Find("VirtualHealthBar_RightSide");
+        if (oldSide != null) Destroy(oldSide.gameObject);
+        if (transform.parent != null)
+        {
+            Transform oldInParent = transform.parent.Find("VirtualHealthBar_RightSide");
+            if (oldInParent != null && oldInParent.gameObject != gameObject)
+            {
+                Destroy(oldInParent.gameObject);
+            }
+        }
 
-        // Fill Area
-        GameObject fillArea = new GameObject("FillArea");
-        fillArea.transform.SetParent(virtualHpBarObj.transform, false);
-        RectTransform fillAreaRt = fillArea.AddComponent<RectTransform>();
-        fillAreaRt.anchorMin = Vector2.zero;
-        fillAreaRt.anchorMax = Vector2.one;
-        fillAreaRt.sizeDelta = Vector2.zero;
+        if (whiteShieldUnderflowObj != null && whiteShieldOverflowObj != null) return;
 
-        // Fill Image
-        GameObject fill = new GameObject("Fill");
-        fill.transform.SetParent(fillArea.transform, false);
-        RectTransform fillRt = fill.AddComponent<RectTransform>();
-        fillRt.anchorMin = Vector2.zero;
-        fillRt.anchorMax = Vector2.one;
-        fillRt.sizeDelta = Vector2.zero;
+        Transform container = (hpSlider != null && hpSlider.fillRect != null) ? hpSlider.fillRect.parent : transform.Find("Fill Area");
+        if (container == null) container = transform;
 
-        virtualHpFillImage = fill.AddComponent<Image>();
-        virtualHpFillImage.color = barrierColor;
-        virtualHpSlider.fillRect = fillRt;
+        // 1. Tạo WhiteShield_Underflow
+        Transform existUnder = container.Find("WhiteShield_Underflow");
+        if (existUnder != null)
+        {
+            whiteShieldUnderflowObj = existUnder.gameObject;
+            whiteShieldUnderflowRt = whiteShieldUnderflowObj.GetComponent<RectTransform>();
+            whiteShieldUnderflowImg = whiteShieldUnderflowObj.GetComponent<Image>();
+        }
+        else
+        {
+            whiteShieldUnderflowObj = new GameObject("WhiteShield_Underflow");
+            whiteShieldUnderflowObj.transform.SetParent(container, false);
+            whiteShieldUnderflowRt = whiteShieldUnderflowObj.AddComponent<RectTransform>();
+            whiteShieldUnderflowImg = whiteShieldUnderflowObj.AddComponent<Image>();
+            whiteShieldUnderflowImg.color = whiteShieldColor;
+            whiteShieldUnderflowImg.raycastTarget = false;
+        }
 
-        // Number Text Label - Chữ trắng sáng viền đen dày nổi bật trên mọi nền
-        GameObject textObj = new GameObject("Text");
-        textObj.transform.SetParent(virtualHpBarObj.transform, false);
-        RectTransform textRt = textObj.AddComponent<RectTransform>();
-        textRt.anchorMin = Vector2.zero;
-        textRt.anchorMax = Vector2.one;
-        textRt.sizeDelta = Vector2.zero;
+        // 2. Tạo WhiteShield_Overflow
+        Transform existOver = container.Find("WhiteShield_Overflow");
+        if (existOver != null)
+        {
+            whiteShieldOverflowObj = existOver.gameObject;
+            whiteShieldOverflowRt = whiteShieldOverflowObj.GetComponent<RectTransform>();
+            whiteShieldOverflowImg = whiteShieldOverflowObj.GetComponent<Image>();
+        }
+        else
+        {
+            whiteShieldOverflowObj = new GameObject("WhiteShield_Overflow");
+            whiteShieldOverflowObj.transform.SetParent(container, false);
+            whiteShieldOverflowRt = whiteShieldOverflowObj.AddComponent<RectTransform>();
+            whiteShieldOverflowImg = whiteShieldOverflowObj.AddComponent<Image>();
+            whiteShieldOverflowImg.color = whiteShieldOverflowColor;
+            whiteShieldOverflowImg.raycastTarget = false;
+        }
 
-        virtualHpText = textObj.AddComponent<TextMeshProUGUI>();
-        virtualHpText.fontSize = 12;
-        virtualHpText.fontStyle = FontStyles.Bold;
-        virtualHpText.color = Color.white;
-        virtualHpText.alignment = TextAlignmentOptions.Center;
-        virtualHpText.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(virtualHpText, 0.35f, Color.black);
+        // Đảm bảo chữ số hiển thị máu luôn ở trên cùng không bị che khuất
+        if (tmpHpText != null) tmpHpText.transform.SetAsLastSibling();
+        else if (hpText != null) hpText.transform.SetAsLastSibling();
     }
 
     private void EnsureTextComponent()
@@ -301,16 +263,25 @@ public class HealthBarUI : MonoBehaviour
         SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
     }
 
-    private void UpdateText(int current, int max)
+    private void UpdateText(int current, int max, int shield = 0)
     {
         EnsureTextComponent();
-        if (current == lastDisplayedCurrentHP && max == lastDisplayedMaxHP) return;
+        if (current == lastDisplayedCurrentHP && max == lastDisplayedMaxHP && shield == lastDisplayedShield) return;
         lastDisplayedCurrentHP = current;
         lastDisplayedMaxHP = max;
+        lastDisplayedShield = shield;
 
         if (tmpHpText != null)
         {
-            tmpHpText.text = $"<color=#f0d890>{current}</color> <size=9><color=#8c806a>/</color></size> <color=#c4b89f>{max}</color>";
+            if (shield > 0)
+            {
+                tmpHpText.text = $"<color=#f0d890>{current}</color> <color=#ffffff><b>(+{shield})</b></color> <size=9><color=#8c806a>/</color></size> <color=#c4b89f>{max}</color>";
+            }
+            else
+            {
+                tmpHpText.text = $"<color=#f0d890>{current}</color> <size=9><color=#8c806a>/</color></size> <color=#c4b89f>{max}</color>";
+            }
+
             if (!hpTypographyApplied)
             {
                 ApplySoulslikeTypography(tmpHpText);
@@ -319,7 +290,7 @@ public class HealthBarUI : MonoBehaviour
         }
         else if (hpText != null)
         {
-            hpText.text = $"{current} / {max}";
+            hpText.text = (shield > 0) ? $"{current} (+{shield}) / {max}" : $"{current} / {max}";
         }
     }
 }
