@@ -135,11 +135,9 @@ public class SlimeAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (isDead || PlayerHealth.IsPlayerDead) { isAttacking = false; yield break; }
 
-        Vector2 slamDir = (player != null) ? (player.position - transform.position).normalized : Vector2.right;
-        rb.linearVelocity = slamDir * (moveSpeed * 2.8f);
-
-        yield return new WaitForSeconds(0.2f);
+        // Đứng tại chỗ đập xuống (bỏ cơ chế lướt xuyên qua sau lưng Player)
         rb.linearVelocity = Vector2.zero;
+        yield return new WaitForSeconds(0.2f);
 
         if (player != null && Vector2.Distance(transform.position, player.position) <= meleeRange + 0.6f)
         {

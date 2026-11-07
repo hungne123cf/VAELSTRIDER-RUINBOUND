@@ -6,25 +6,39 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// Thanh hiển thị các Lõi Nâng Cấp (Augments) đang kích hoạt trực tiếp trên màn hình trận đấu (Gameplay HUD).
-/// - Mỗi Lõi Nâng Cấp sở hữu biểu tượng (Icon) riêng biệt theo từng cơ chế
-/// - Hiển thị viền màu theo phẩm chất (Bạc, Vàng, Kim Cương / Prismatic)
-/// - Các Lõi có thời hạn sẽ hiển thị vòng tròn hồi chiêu (Radial Cooldown) & đếm ngược số giây (12s, 4.5s...)
-/// - Khi hết thời hạn sẽ tự động thu nhỏ và biến mất khỏi màn hình trận đấu
-/// - Bấm hoặc rê chuột vào Icon sẽ hiện Tooltip giải thích chi tiết hiệu ứng của Lõi
+/// Hộp Popup thu gọn / mở rộng hiển thị các Lõi Nâng Cấp (Augments) trên màn hình trận đấu (Gameplay HUD).
+/// - Thiết kế đồng bộ 100% với Bảng Thống Kê Chỉ Số (PlayerStatPanelUI):
+///   + Khi thu gọn: Chỉ hiển thị 1 nút Icon tròn Lõi Cổ Ngữ (52x52, nền đá đen, viền vàng đồng, biểu tượng Tinh Thể Lõi) kèm số lượng Lõi đang sở hữu.
+///   + Khi bấm mở rộng: Hiện bảng kính mờ Dark Fantasy chứa toàn bộ các Icon Lõi Nâng Cấp đang kích hoạt, bấm lại vào nút Icon góc phải để đóng lại bất cứ lúc nào.
+/// - Mỗi Lõi hiển thị viền phẩm chất (Bạc, Vàng, Kim Cương), cấp độ (Lv.2, Lv.3) và vòng xoay hồi chiêu (Radial Cooldown).
+/// - Chạm hoặc rê chuột vào từng Icon Lõi sẽ hiện Tooltip giải thích chi tiết, hoặc bấm nút "CHI TIẾT" để mở bảng danh sách đầy đủ.
 /// </summary>
 public class AugmentHUDBar : MonoBehaviour
 {
     private static AugmentHUDBar instance;
     public static AugmentHUDBar Instance => instance;
 
+    private const string PREF_COLLAPSED = "AugmentPanel_Collapsed";
+
     // Cache sprites
     private static Sprite _obsidianCore;
     private static Sprite _runicRing;
-    private static Sprite _cooldownMask;
     private static Sprite _panelBg;
+    private static Sprite _augmentToggleIconSprite;
 
-    // Badges active on HUD
+    // Collapsible Popup UI Elements
+    private RectTransform _rootRt;
+    private GameObject _panelContentObj;
+    private RectTransform _panelContentRt;
+    private Transform _badgesGridContainer;
+    private GameObject _emptyStateTextObj;
+    private RectTransform _toggleBtnRt;
+    private Image _toggleBtnImg;
+    private GameObject _countBadgeObj;
+    private TextMeshProUGUI _countBadgeText;
+    private bool _collapsed = true;
+
+    // Badges active inside Popup Grid
     private class BadgeItem
     {
         public AugmentDatabase.AugmentData data;
@@ -54,9 +68,7 @@ public class AugmentHUDBar : MonoBehaviour
     private CanvasGroup _tooltipCg;
     private Coroutine _tooltipFadeCor;
 
-    // More Button (+) & Overview Modal
-    private GameObject _moreButtonObj;
-    private TextMeshProUGUI _moreBtnText;
+    // Full Overview Modal
     private GameObject _fullOverviewPopupObj;
     private Transform _popupContentContainer;
     private float _prevOverviewTimeScale = 1f;
@@ -69,16 +81,375 @@ public class AugmentHUDBar : MonoBehaviour
 
     void Start()
     {
+        EnsureCollapsiblePanelBuilt();
         RefreshBadges(true);
     }
 
     void OnEnable()
     {
+        EnsureCollapsiblePanelBuilt();
         RefreshBadges(true);
+    }
+
+    // ─── Procedural Augment Core Toggle Icon (Đồng bộ phong cách với Stat Icon) ─
+    private static Sprite GetAugmentToggleIconSprite()
+    {
+        if (_augmentToggleIconSprite != null) return _augmentToggleIconSprite;
+
+        const int s = 64;
+        var tex = new Texture2D(s, s, TextureFormat.RGBA32, false)
+        {
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp
+        };
+
+        Color dark      = new Color(0.07f, 0.09f, 0.13f, 0.95f);
+        Color gold      = new Color(0.95f, 0.78f, 0.38f, 1.00f);
+        Color goldDim   = new Color(0.62f, 0.50f, 0.26f, 1.00f);
+        Color coreCyan  = new Color(0.32f, 0.90f, 1.00f, 1.00f);
+        Color coreWhite = new Color(0.96f, 0.98f, 1.00f, 1.00f);
+
+        Vector2 c = new Vector2(s * 0.5f, s * 0.5f);
+        float rOut = s * 0.5f - 1f;
+        float rRing = rOut - 4f;
+
+        for (int y = 0; y < s; y++)
+        {
+            for (int x = 0; x < s; x++)
+            {
+                Vector2 p = new Vector2(x + 0.5f, y + 0.5f);
+                float d = Vector2.Distance(p, c);
+                Color col = Color.clear;
+
+                if (d <= rOut)
+                {
+                    // Nền tròn đá đen & viền đồng vàng giống hệt icon thống kê chỉ số
+                    col = d > rRing ? gold : (d > rRing - 1.5f ? goldDim : dark);
+
+                    float dx = Mathf.Abs(p.x - c.x);
+                    float dy = Mathf.Abs(p.y - c.y);
+                    float diamondDist = dx + dy;
+                    float octDist = Mathf.Max(dx, dy) + 0.42f * Mathf.Min(dx, dy);
+
+                    // 1. Vành cổ ngữ bát giác / kim cương bên ngoài (bán kính 14..17)
+                    if (octDist >= 13.2f && octDist <= 16.2f)
+                    {
+                        col = octDist < 14.8f ? gold : goldDim;
+                    }
+
+                    // 2. Bốn hạt vệ tinh năng lượng ở 4 đỉnh Đông - Tây - Nam - Bắc
+                    if ((dx <= 2.2f && Mathf.Abs(dy - 17.5f) <= 2.2f) ||
+                        (dy <= 2.2f && Mathf.Abs(dx - 17.5f) <= 2.2f))
+                    {
+                        col = gold;
+                    }
+
+                    // 3. Tinh thể Lõi Nâng Cấp hình thoi đa diện ở chính giữa
+                    if (diamondDist <= 10.5f)
+                    {
+                        if (diamondDist >= 8.2f)
+                        {
+                            col = gold; // Viền vàng bọc quanh lõi
+                        }
+                        else if (diamondDist <= 3.5f)
+                        {
+                            col = coreWhite; // Tâm sáng trắng kim cương
+                        }
+                        else
+                        {
+                            // Mặt cắt tinh thể ánh lam ngọc / hoàng kim
+                            bool topFacet = (p.y > c.y && p.x < c.x);
+                            col = topFacet ? Color.Lerp(coreCyan, coreWhite, 0.55f) : coreCyan;
+                        }
+                    }
+
+                    col.a *= Mathf.Clamp01(rOut - d + 0.5f);
+                }
+
+                tex.SetPixel(x, y, col);
+            }
+        }
+
+        tex.Apply();
+        _augmentToggleIconSprite = Sprite.Create(tex, new Rect(0, 0, s, s), new Vector2(0.5f, 0.5f), 100f);
+        return _augmentToggleIconSprite;
+    }
+
+    public static AugmentHUDBar EnsureExists()
+    {
+        if (instance != null) return instance;
+
+        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
+        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        if (canvas == null) return null;
+
+        Transform existing = canvas.transform.Find("AugmentHUDBar");
+        if (existing != null)
+        {
+            instance = existing.GetComponent<AugmentHUDBar>();
+            if (instance != null)
+            {
+                instance.EnsureCollapsiblePanelBuilt();
+                return instance;
+            }
+        }
+
+        GameObject barObj = new GameObject("AugmentHUDBar", typeof(RectTransform));
+        barObj.transform.SetParent(canvas.transform, false);
+
+        instance = barObj.AddComponent<AugmentHUDBar>();
+        instance.EnsureCollapsiblePanelBuilt();
+        instance.SetupTooltip(canvas.transform);
+
+        return instance;
+    }
+
+    private void EnsureCollapsiblePanelBuilt()
+    {
+        if (_panelContentObj != null && _toggleBtnRt != null) return;
+
+        // Xóa layout cũ trên root nếu có từ phiên trước
+        var oldHlg = GetComponent<HorizontalLayoutGroup>();
+        if (oldHlg != null) Destroy(oldHlg);
+
+        _rootRt = GetComponent<RectTransform>();
+        if (_rootRt == null) _rootRt = gameObject.AddComponent<RectTransform>();
+        _rootRt.anchorMin = new Vector2(0f, 1f);
+        _rootRt.anchorMax = new Vector2(0f, 1f);
+        _rootRt.pivot = new Vector2(0f, 1f);
+        // Nằm ngay phía trên Bảng Thống Kê Chỉ Số (x = 24, y = -134)
+        _rootRt.anchoredPosition = new Vector2(24f, -134f);
+        _rootRt.sizeDelta = new Vector2(380f, 104f);
+
+        TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") ?? TMP_Settings.defaultFontAsset;
+        bool isVi = LocalizationManager.IsVietnamese;
+
+        // ── 1. Panel Content (Hộp kính mờ Dark Fantasy đồng bộ với PlayerStatPanelUI) ──
+        _panelContentObj = new GameObject("Content", typeof(RectTransform), typeof(Image), typeof(Outline));
+        _panelContentObj.transform.SetParent(transform, false);
+        _panelContentRt = _panelContentObj.GetComponent<RectTransform>();
+        _panelContentRt.anchorMin = Vector2.zero;
+        _panelContentRt.anchorMax = Vector2.one;
+        _panelContentRt.offsetMin = _panelContentRt.offsetMax = Vector2.zero;
+
+        var bg = _panelContentObj.GetComponent<Image>();
+        bg.color = new Color(0.04f, 0.06f, 0.09f, 0.84f);
+        bg.raycastTarget = true;
+
+        var outline = _panelContentObj.GetComponent<Outline>();
+        outline.effectColor = new Color(0.62f, 0.55f, 0.40f, 0.85f);
+        outline.effectDistance = new Vector2(2f, -2f);
+
+        // Tiêu đề hộp Lõi Nâng Cấp
+        var headerObj = new GameObject("HeaderTitle", typeof(RectTransform), typeof(TextMeshProUGUI));
+        headerObj.transform.SetParent(_panelContentObj.transform, false);
+        var hRt = headerObj.GetComponent<RectTransform>();
+        hRt.anchorMin = new Vector2(0f, 1f);
+        hRt.anchorMax = new Vector2(0f, 1f);
+        hRt.pivot = new Vector2(0f, 1f);
+        hRt.anchoredPosition = new Vector2(14f, -8f);
+        hRt.sizeDelta = new Vector2(210f, 24f);
+
+        var hTmp = headerObj.GetComponent<TextMeshProUGUI>();
+        if (font != null) hTmp.font = font;
+        hTmp.text = isVi ? "LÕI NÂNG CẤP ĐÃ CHỌN" : "ACTIVE AUGMENTS";
+        hTmp.fontSize = 14f;
+        hTmp.fontStyle = FontStyles.Bold;
+        hTmp.color = new Color(0.95f, 0.82f, 0.42f, 1f);
+        hTmp.alignment = TextAlignmentOptions.MidlineLeft;
+        hTmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(hTmp, 0.30f, Color.black);
+
+        // Nút "CHI TIẾT" nhỏ trên thanh tiêu đề để mở bảng mô tả đầy đủ nếu muốn đọc chữ
+        var detailBtnObj = new GameObject("DetailBtn", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
+        detailBtnObj.transform.SetParent(_panelContentObj.transform, false);
+        var dbRt = detailBtnObj.GetComponent<RectTransform>();
+        dbRt.anchorMin = new Vector2(1f, 1f);
+        dbRt.anchorMax = new Vector2(1f, 1f);
+        dbRt.pivot = new Vector2(1f, 1f);
+        dbRt.anchoredPosition = new Vector2(-42f, -7f);
+        dbRt.sizeDelta = new Vector2(78f, 22f);
+
+        var dbImg = detailBtnObj.GetComponent<Image>();
+        dbImg.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
+
+        var dbOut = detailBtnObj.GetComponent<Outline>();
+        dbOut.effectColor = new Color(0.85f, 0.72f, 0.35f, 0.80f);
+        dbOut.effectDistance = new Vector2(1f, -1f);
+
+        var dbBtn = detailBtnObj.GetComponent<Button>();
+        dbBtn.targetGraphic = dbImg;
+        dbBtn.onClick.AddListener(OpenFullOverviewPopup);
+
+        var dbTxtObj = new GameObject("Txt", typeof(RectTransform), typeof(TextMeshProUGUI));
+        dbTxtObj.transform.SetParent(detailBtnObj.transform, false);
+        var dbtRt = dbTxtObj.GetComponent<RectTransform>();
+        dbtRt.anchorMin = Vector2.zero;
+        dbtRt.anchorMax = Vector2.one;
+        dbtRt.offsetMin = dbtRt.offsetMax = Vector2.zero;
+
+        var dbTmp = dbTxtObj.GetComponent<TextMeshProUGUI>();
+        if (font != null) dbTmp.font = font;
+        dbTmp.text = isVi ? "CHI TIẾT" : "DETAILS";
+        dbTmp.fontSize = 11f;
+        dbTmp.fontStyle = FontStyles.Bold;
+        dbTmp.alignment = TextAlignmentOptions.Center;
+        dbTmp.color = new Color(1f, 0.90f, 0.50f, 1f);
+        dbTmp.raycastTarget = false;
+
+        // Grid chứa các Icon Lõi Nâng Cấp
+        var gridObj = new GameObject("BadgesGrid", typeof(RectTransform), typeof(GridLayoutGroup));
+        gridObj.transform.SetParent(_panelContentObj.transform, false);
+        var gRt = gridObj.GetComponent<RectTransform>();
+        gRt.anchorMin = new Vector2(0f, 0f);
+        gRt.anchorMax = new Vector2(1f, 1f);
+        gRt.offsetMin = new Vector2(14f, 10f);
+        gRt.offsetMax = new Vector2(-14f, -36f);
+
+        var glg = gridObj.GetComponent<GridLayoutGroup>();
+        glg.cellSize = new Vector2(42f, 42f);
+        glg.spacing = new Vector2(8f, 8f);
+        glg.startCorner = GridLayoutGroup.Corner.UpperLeft;
+        glg.startAxis = GridLayoutGroup.Axis.Horizontal;
+        glg.childAlignment = TextAnchor.UpperLeft;
+        glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        glg.constraintCount = 7;
+        _badgesGridContainer = gridObj.transform;
+
+        // Dòng chữ khi chưa có Lõi nào
+        _emptyStateTextObj = new GameObject("EmptyText", typeof(RectTransform), typeof(TextMeshProUGUI));
+        _emptyStateTextObj.transform.SetParent(_panelContentObj.transform, false);
+        var empRt = _emptyStateTextObj.GetComponent<RectTransform>();
+        empRt.anchorMin = new Vector2(0f, 0f);
+        empRt.anchorMax = new Vector2(1f, 1f);
+        empRt.offsetMin = new Vector2(14f, 8f);
+        empRt.offsetMax = new Vector2(-14f, -32f);
+
+        var empTmp = _emptyStateTextObj.GetComponent<TextMeshProUGUI>();
+        if (font != null) empTmp.font = font;
+        empTmp.text = isVi ? "Chưa sở hữu Lõi Nâng Cấp nào" : "No Augments acquired yet";
+        empTmp.fontSize = 14f;
+        empTmp.alignment = TextAlignmentOptions.Center;
+        empTmp.color = new Color(0.65f, 0.70f, 0.78f, 0.90f);
+        empTmp.raycastTarget = false;
+
+        // ── 2. Nút Toggle Icon Tròn (52x52 - Giống hệt nút Thống Kê Chỉ Số) ────
+        var btnObj = new GameObject("ToggleBtn", typeof(RectTransform), typeof(Image), typeof(Button));
+        btnObj.transform.SetParent(transform, false);
+        _toggleBtnRt = btnObj.GetComponent<RectTransform>();
+        _toggleBtnRt.sizeDelta = new Vector2(52f, 52f);
+
+        _toggleBtnImg = btnObj.GetComponent<Image>();
+        _toggleBtnImg.sprite = GetAugmentToggleIconSprite();
+        _toggleBtnImg.color = Color.white;
+
+        var toggleBtn = btnObj.GetComponent<Button>();
+        toggleBtn.targetGraphic = _toggleBtnImg;
+        toggleBtn.onClick.AddListener(Toggle);
+
+        // Huy hiệu đếm số lượng Lõi ở góc dưới phải của nút Icon
+        _countBadgeObj = new GameObject("CountBadge", typeof(RectTransform), typeof(Image), typeof(Outline));
+        _countBadgeObj.transform.SetParent(btnObj.transform, false);
+        var cbRt = _countBadgeObj.GetComponent<RectTransform>();
+        cbRt.anchorMin = new Vector2(1f, 0f);
+        cbRt.anchorMax = new Vector2(1f, 0f);
+        cbRt.pivot = new Vector2(1f, 0f);
+        cbRt.anchoredPosition = new Vector2(2f, -2f);
+        cbRt.sizeDelta = new Vector2(22f, 18f);
+
+        var cbImg = _countBadgeObj.GetComponent<Image>();
+        cbImg.sprite = GetPanelBg();
+        cbImg.type = Image.Type.Sliced;
+        cbImg.color = new Color(0.06f, 0.09f, 0.15f, 0.96f);
+        cbImg.raycastTarget = false;
+
+        var cbOut = _countBadgeObj.GetComponent<Outline>();
+        cbOut.effectColor = new Color(0.95f, 0.80f, 0.35f, 0.95f);
+        cbOut.effectDistance = new Vector2(1f, -1f);
+
+        var cbTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        cbTxtObj.transform.SetParent(_countBadgeObj.transform, false);
+        var cbtRt = cbTxtObj.GetComponent<RectTransform>();
+        cbtRt.anchorMin = Vector2.zero;
+        cbtRt.anchorMax = Vector2.one;
+        cbtRt.offsetMin = cbtRt.offsetMax = Vector2.zero;
+
+        _countBadgeText = cbTxtObj.GetComponent<TextMeshProUGUI>();
+        if (font != null) _countBadgeText.font = font;
+        _countBadgeText.fontSize = 11.5f;
+        _countBadgeText.fontStyle = FontStyles.Bold;
+        _countBadgeText.alignment = TextAlignmentOptions.Center;
+        _countBadgeText.color = new Color(0.35f, 0.92f, 1.00f, 1f);
+        _countBadgeText.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(_countBadgeText, 0.30f, Color.black);
+        _countBadgeObj.SetActive(false);
+
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas != null) SetupTooltip(canvas.transform);
+
+        _collapsed = PlayerPrefs.GetInt(PREF_COLLAPSED, 1) == 1;
+        ApplyCollapsedState();
+    }
+
+    public void Toggle()
+    {
+        _collapsed = !_collapsed;
+        PlayerPrefs.SetInt(PREF_COLLAPSED, _collapsed ? 1 : 0);
+        PlayerPrefs.Save();
+        HideTooltip();
+        ApplyCollapsedState();
+        if (!_collapsed) RefreshBadges(true);
+    }
+
+    private void ApplyCollapsedState()
+    {
+        if (_panelContentObj != null) _panelContentObj.SetActive(!_collapsed);
+
+        if (_toggleBtnRt != null)
+        {
+            if (_collapsed)
+            {
+                // Thu gọn: Nút icon tròn nằm gọn ở góc trên-trái (ngay trên nút Thống Kê Chỉ Số)
+                _toggleBtnRt.anchorMin = _toggleBtnRt.anchorMax = new Vector2(0f, 1f);
+                _toggleBtnRt.pivot = new Vector2(0f, 1f);
+                _toggleBtnRt.anchoredPosition = Vector2.zero;
+            }
+            else
+            {
+                // Mở rộng: Nút icon tròn nằm ở góc trên-phải của hộp Popup (giống hệt bảng Thống Kê Chỉ Số)
+                _toggleBtnRt.anchorMin = _toggleBtnRt.anchorMax = new Vector2(1f, 1f);
+                _toggleBtnRt.pivot = new Vector2(0.5f, 0.5f);
+                _toggleBtnRt.anchoredPosition = new Vector2(-4f, -4f);
+            }
+        }
+
+        if (_toggleBtnImg != null)
+        {
+            _toggleBtnImg.color = _collapsed ? Color.white : new Color(1f, 1f, 1f, 0.88f);
+        }
+
+        SyncStatPanelPosition();
+    }
+
+    private void SyncStatPanelPosition()
+    {
+        if (PlayerStatPanelUI.Instance == null) return;
+
+        if (_collapsed)
+        {
+            // Khi hộp Lõi thu gọn (cao 52px tại y = -134), bảng Chỉ Số nằm ngay dưới tại y = -192
+            PlayerStatPanelUI.Instance.SetTopYOffset(-192f);
+        }
+        else
+        {
+            float h = _rootRt != null ? _rootRt.sizeDelta.y : 104f;
+            PlayerStatPanelUI.Instance.SetTopYOffset(-134f - h - 10f);
+        }
     }
 
     public void RefreshBadges(bool force = false)
     {
+        EnsureCollapsiblePanelBuilt();
         if (AugmentManager.Instance == null) return;
         var selected = AugmentManager.Instance.GetSelectedAugments();
         if (selected == null) return;
@@ -89,7 +460,7 @@ public class AugmentHUDBar : MonoBehaviour
         }
         _lastSelectedCount = selected.Count;
 
-        // Đếm số lượng từng loại Lõi theo thứ tự xuất hiện cũ nhất (chronological)
+        // Đếm số lượng từng loại Lõi theo thứ tự xuất hiện
         List<AugmentDatabase.AugmentType> orderedTypes = new List<AugmentDatabase.AugmentType>();
         Dictionary<AugmentDatabase.AugmentType, int> counts = new Dictionary<AugmentDatabase.AugmentType, int>();
         Dictionary<AugmentDatabase.AugmentType, AugmentDatabase.AugmentData> firstFound = new Dictionary<AugmentDatabase.AugmentType, AugmentDatabase.AugmentData>();
@@ -111,7 +482,7 @@ public class AugmentHUDBar : MonoBehaviour
             }
         }
 
-        // Xóa các badge không còn sở hữu khỏi _activeBadges
+        // Xóa các badge không còn sở hữu
         List<AugmentDatabase.AugmentType> toClean = null;
         foreach (var kvp in _activeBadges)
         {
@@ -134,7 +505,7 @@ public class AugmentHUDBar : MonoBehaviour
             }
         }
 
-        // Cập nhật hoặc tạo mới badge
+        // Cập nhật hoặc tạo mới toàn bộ badge trong hộp Popup
         for (int i = 0; i < orderedTypes.Count; i++)
         {
             var type = orderedTypes[i];
@@ -161,20 +532,34 @@ public class AugmentHUDBar : MonoBehaviour
 
             if (badge != null && badge.rootObj != null)
             {
-                // Người dùng yêu cầu: chỉ hiện lên 3 lỗi cũ nhất
-                bool showOnBar = (i < 3);
-                badge.rootObj.SetActive(showOnBar);
-                if (showOnBar)
-                {
-                    badge.rootObj.transform.SetSiblingIndex(i);
-                }
+                badge.rootObj.SetActive(true);
+                badge.rootObj.transform.SetSiblingIndex(i);
             }
         }
 
-        // Quản lý nút Dấu Cộng (+)
-        UpdateMoreButton(orderedTypes.Count);
+        // Cập nhật huy hiệu số lượng trên nút Toggle Icon
+        int distinctCount = orderedTypes.Count;
+        if (_countBadgeObj != null)
+        {
+            _countBadgeObj.SetActive(distinctCount > 0);
+            if (_countBadgeText != null) _countBadgeText.text = distinctCount.ToString();
+        }
 
-        // Nếu popup đang mở thì cập nhật lại nội dung danh sách
+        if (_emptyStateTextObj != null)
+        {
+            _emptyStateTextObj.SetActive(distinctCount == 0);
+        }
+
+        // Tự động co giãn chiều cao hộp Popup theo số hàng Lõi (7 icon / hàng)
+        int rows = Mathf.Max(1, Mathf.CeilToInt(distinctCount / 7f));
+        float panelHeight = 46f + rows * 46f + (rows - 1) * 6f;
+        if (_rootRt != null)
+        {
+            _rootRt.sizeDelta = new Vector2(380f, panelHeight);
+        }
+        SyncStatPanelPosition();
+
+        // Nếu popup tổng quan đang mở thì cập nhật lại nội dung danh sách
         if (_fullOverviewPopupObj != null && _fullOverviewPopupObj.activeSelf)
         {
             PopulateOverviewContent(orderedTypes, counts, firstFound);
@@ -185,51 +570,6 @@ public class AugmentHUDBar : MonoBehaviour
     {
         if (aug == null) return;
         RefreshBadges(true);
-    }
-
-    public static AugmentHUDBar EnsureExists()
-    {
-        if (instance != null) return instance;
-
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
-        if (canvas == null) return null;
-
-        Transform existing = canvas.transform.Find("AugmentHUDBar");
-        if (existing != null)
-        {
-            instance = existing.GetComponent<AugmentHUDBar>();
-            if (instance != null)
-            {
-                RectTransform extRt = existing.GetComponent<RectTransform>();
-                if (extRt != null) extRt.anchoredPosition = new Vector2(68f, -148f);
-                return instance;
-            }
-        }
-
-        GameObject barObj = new GameObject("AugmentHUDBar", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-        barObj.transform.SetParent(canvas.transform, false);
-
-        RectTransform rt = barObj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0f, 1f);
-        rt.anchorMax = new Vector2(0f, 1f);
-        rt.pivot = new Vector2(0f, 1f);
-        // Vị trí nằm ngay dưới hộp ShardsCounter (-118f, height 28) tránh hoàn toàn không chồng đè
-        rt.anchoredPosition = new Vector2(68f, -148f);
-        rt.sizeDelta = new Vector2(560f, 44f);
-
-        HorizontalLayoutGroup hlg = barObj.GetComponent<HorizontalLayoutGroup>();
-        hlg.spacing = 7f;
-        hlg.childAlignment = TextAnchor.MiddleLeft;
-        hlg.childControlWidth = false;
-        hlg.childControlHeight = false;
-        hlg.childForceExpandWidth = false;
-        hlg.childForceExpandHeight = false;
-
-        instance = barObj.AddComponent<AugmentHUDBar>();
-        instance.SetupTooltip(canvas.transform);
-
-        return instance;
     }
 
     private void SetupTooltip(Transform canvasRoot)
@@ -243,8 +583,8 @@ public class AugmentHUDBar : MonoBehaviour
         _tooltipRt.anchorMin = new Vector2(0f, 1f);
         _tooltipRt.anchorMax = new Vector2(0f, 1f);
         _tooltipRt.pivot = new Vector2(0f, 1f);
-        _tooltipRt.sizeDelta = new Vector2(300f, 110f);
-        _tooltipRt.anchoredPosition = new Vector2(68f, -196f);
+        _tooltipRt.sizeDelta = new Vector2(340f, 118f);
+        _tooltipRt.anchoredPosition = new Vector2(24f, -245f);
 
         Image bg = _tooltipObj.GetComponent<Image>();
         bg.sprite = GetPanelBg();
@@ -315,10 +655,8 @@ public class AugmentHUDBar : MonoBehaviour
         var selected = AugmentManager.Instance.GetSelectedAugments();
         if (selected == null) return;
 
-        // 1. Kiểm tra thêm Lõi Nâng Cấp mới được chọn vào HUD hoặc thăng cấp sao
         RefreshBadges();
 
-        // 2. Cập nhật thời gian hồi chiêu / đếm ngược và kiểm tra hết hạn
         List<AugmentDatabase.AugmentType> toRemove = null;
 
         foreach (var kvp in _activeBadges)
@@ -330,7 +668,6 @@ public class AugmentHUDBar : MonoBehaviour
             var aug = badge.data;
             if (aug == null) continue;
 
-            // Kiểm tra xem còn sở hữu loại Lõi này không
             bool stillOwned = false;
             for (int s = 0; s < selected.Count; s++)
             {
@@ -348,7 +685,6 @@ public class AugmentHUDBar : MonoBehaviour
                 continue;
             }
 
-            // Nếu là Lõi tạm thời có thời hạn (duration > 0)
             if (aug.duration > 0f)
             {
                 float remaining = AugmentManager.Instance.GetRemainingDurationByType(type);
@@ -360,7 +696,6 @@ public class AugmentHUDBar : MonoBehaviour
                     continue;
                 }
 
-                // Cập nhật Radial Cooldown Overlay (vòng quét tròn)
                 if (badge.cdOverlayImg != null)
                 {
                     if (!badge.cdOverlayImg.gameObject.activeSelf) badge.cdOverlayImg.gameObject.SetActive(true);
@@ -368,7 +703,6 @@ public class AugmentHUDBar : MonoBehaviour
                     badge.cdOverlayImg.fillAmount = Mathf.Clamp01(remaining / totalDur);
                 }
 
-                // Cập nhật văn bản đếm ngược số giây
                 if (badge.cdText != null)
                 {
                     if (!badge.cdText.gameObject.activeSelf) badge.cdText.gameObject.SetActive(true);
@@ -378,7 +712,6 @@ public class AugmentHUDBar : MonoBehaviour
                     badge.cdText.text = secStr;
                 }
             }
-            // Nếu là Lõi vĩnh viễn có hồi chiêu nội tại (Thánh Khiên Hộ Mệnh 45s, Bất Diệt Cuồng Vương 90s)
             else if (AugmentManager.Instance.GetAugmentCooldownInfo(type, out float cdRem, out float maxCd))
             {
                 if (cdRem > 0f)
@@ -397,12 +730,11 @@ public class AugmentHUDBar : MonoBehaviour
                     }
                     if (badge.iconImg != null)
                     {
-                        badge.iconImg.color = new Color(0.40f, 0.40f, 0.45f, 0.50f); // Làm tối mờ khi đang hồi
+                        badge.iconImg.color = new Color(0.45f, 0.45f, 0.50f, 0.55f);
                     }
                 }
                 else
                 {
-                    // Sẵn sàng kích hoạt (READY)
                     if (badge.cdOverlayImg != null && badge.cdOverlayImg.gameObject.activeSelf)
                     {
                         badge.cdOverlayImg.gameObject.SetActive(false);
@@ -419,7 +751,6 @@ public class AugmentHUDBar : MonoBehaviour
                 }
             }
 
-            // Cập nhật số stack cộng dồn (Berserker / SoulHarvest)
             if (aug.type == AugmentDatabase.AugmentType.BerserkerMode && badge.stackText != null)
             {
                 int stacks = AugmentManager.Instance.GetBerserkerStacks();
@@ -427,7 +758,6 @@ public class AugmentHUDBar : MonoBehaviour
             }
         }
 
-        // 3. Xoá các Lõi đã hết thời hạn với hiệu ứng mờ dần
         if (toRemove != null)
         {
             for (int i = 0; i < toRemove.Count; i++)
@@ -436,7 +766,7 @@ public class AugmentHUDBar : MonoBehaviour
                 if (_activeBadges.TryGetValue(type, out BadgeItem badge))
                 {
                     _activeBadges.Remove(type);
-                    if (gameObject.activeInHierarchy)
+                    if (gameObject.activeInHierarchy && !_collapsed)
                     {
                         StartCoroutine(AnimateFadeOutAndDestroy(badge));
                     }
@@ -453,28 +783,17 @@ public class AugmentHUDBar : MonoBehaviour
 
     private void CreateAugmentBadge(AugmentDatabase.AugmentData aug, int rank = 1)
     {
-        Color tierColor;
-        switch (aug.rarity)
-        {
-            case AugmentDatabase.AugmentData.Rarity.Epic:
-                tierColor = new Color(0.92f, 0.50f, 0.98f, 1f); // Tím Lăng Kính (Prismatic)
-                break;
-            case AugmentDatabase.AugmentData.Rarity.Rare:
-                tierColor = new Color(1.00f, 0.82f, 0.28f, 1f); // Hoàng Kim (Gold)
-                break;
-            default:
-                tierColor = new Color(0.80f, 0.86f, 0.95f, 0.95f); // Thép Bạc (Silver)
-                break;
-        }
-
+        EnsureCollapsiblePanelBuilt();
+        Color tierColor = GetTierColor(aug.rarity);
         Color typeColor = LevelUpChoiceUI.GetDamageTypeColor(aug.type);
 
-        // Khung huy hiệu gốc (Size 38x38)
+        Transform parentTransform = _badgesGridContainer != null ? _badgesGridContainer : transform;
+
         GameObject badgeObj = new GameObject($"Badge_{aug.type}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Outline), typeof(CanvasGroup));
-        badgeObj.transform.SetParent(transform, false);
+        badgeObj.transform.SetParent(parentTransform, false);
 
         RectTransform rt = badgeObj.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(38f, 38f);
+        rt.sizeDelta = new Vector2(42f, 42f);
 
         Image bg = badgeObj.GetComponent<Image>();
         bg.sprite = GetObsidianCore();
@@ -486,7 +805,6 @@ public class AugmentHUDBar : MonoBehaviour
 
         CanvasGroup cg = badgeObj.GetComponent<CanvasGroup>();
 
-        // Vành kim loại Runic Ring
         GameObject ringObj = new GameObject("Ring", typeof(RectTransform), typeof(Image));
         ringObj.transform.SetParent(badgeObj.transform, false);
         var ringRt = ringObj.GetComponent<RectTransform>();
@@ -496,10 +814,9 @@ public class AugmentHUDBar : MonoBehaviour
 
         Image ringImg = ringObj.GetComponent<Image>();
         ringImg.sprite = GetRunicRing();
-        ringImg.color = Color.Lerp(tierColor, typeColor, 0.35f);
+        ringImg.color = Color.Lerp(tierColor, Color.white, 0.25f);
         ringImg.raycastTarget = false;
 
-        // Icon đồ họa độc nhất riêng biệt cho từng Lõi Nâng Cấp (Giữ nguyên màu gốc sắc nét Color.white)
         GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
         iconObj.transform.SetParent(badgeObj.transform, false);
         var iconRt = iconObj.GetComponent<RectTransform>();
@@ -534,9 +851,8 @@ public class AugmentHUDBar : MonoBehaviour
             fbTmp.raycastTarget = false;
         }
 
-        // Lớp phủ Cooldown Radial & Chữ đếm giây (Hỗ trợ cả Lõi có thời hạn VÀ Lõi có hồi chiêu nội tại như Thánh Khiên Hộ Mệnh)
-        bool hasCooldownSupport = (aug.duration > 0f) || 
-                                  (aug.type == AugmentDatabase.AugmentType.DivineAegis) || 
+        bool hasCooldownSupport = (aug.duration > 0f) ||
+                                  (aug.type == AugmentDatabase.AugmentType.DivineAegis) ||
                                   (aug.type == AugmentDatabase.AugmentType.UndyingSovereign);
 
         Image cdOverlay = null;
@@ -552,7 +868,7 @@ public class AugmentHUDBar : MonoBehaviour
             cdRt.offsetMin = cdRt.offsetMax = Vector2.zero;
 
             cdOverlay = cdObj.GetComponent<Image>();
-            cdOverlay.sprite = GetObsidianCore(); // Mask hình tròn
+            cdOverlay.sprite = GetObsidianCore();
             cdOverlay.type = Image.Type.Filled;
             cdOverlay.fillMethod = Image.FillMethod.Radial360;
             cdOverlay.fillOrigin = (int)Image.Origin360.Top;
@@ -561,7 +877,6 @@ public class AugmentHUDBar : MonoBehaviour
             cdOverlay.raycastTarget = false;
             if (aug.duration <= 0f) cdObj.SetActive(false);
 
-            // Chữ đếm giây còn lại ở giữa Icon (ví dụ 45s, 12s, 4.2s)
             GameObject cdTxtObj = new GameObject("CDText", typeof(RectTransform), typeof(TextMeshProUGUI));
             cdTxtObj.transform.SetParent(badgeObj.transform, false);
             var cdTxtRt = cdTxtObj.GetComponent<RectTransform>();
@@ -578,7 +893,6 @@ public class AugmentHUDBar : MonoBehaviour
             if (aug.duration <= 0f) cdTxtObj.SetActive(false);
         }
 
-        // Chữ đếm số tầng stack (Berserker / SoulHarvest)
         TextMeshProUGUI stackTmp = null;
         if (aug.type == AugmentDatabase.AugmentType.BerserkerMode || aug.type == AugmentDatabase.AugmentType.SoulHarvest)
         {
@@ -597,7 +911,6 @@ public class AugmentHUDBar : MonoBehaviour
             SoulslikeHUDStyler.SetSafeOutline(stackTmp, 0.40f, Color.black);
         }
 
-        // Huy hiệu cấp độ (Lv.2, Lv.3) ở góc trên bên trái huy hiệu, trên 1 dòng duy nhất không xuống dòng
         GameObject starObj = new GameObject("StarRankBadge", typeof(RectTransform), typeof(Image), typeof(Outline));
         starObj.transform.SetParent(badgeObj.transform, false);
         var starRt = starObj.GetComponent<RectTransform>();
@@ -605,7 +918,7 @@ public class AugmentHUDBar : MonoBehaviour
         starRt.anchorMax = new Vector2(0f, 1f);
         starRt.pivot = new Vector2(0f, 1f);
         starRt.anchoredPosition = new Vector2(-2f, 2f);
-        starRt.sizeDelta = new Vector2(25f, 13f);
+        starRt.sizeDelta = new Vector2(26f, 14f);
 
         var starImg = starObj.GetComponent<Image>();
         starImg.sprite = GetPanelBg();
@@ -628,14 +941,13 @@ public class AugmentHUDBar : MonoBehaviour
         starTmp.fontSize = 9.5f;
         starTmp.fontStyle = FontStyles.Bold;
         starTmp.alignment = TextAlignmentOptions.Center;
-        starTmp.color = new Color(1f, 0.90f, 0.35f, 1f); // Vàng Hoàng Kim
+        starTmp.color = new Color(1f, 0.90f, 0.35f, 1f);
         starTmp.enableWordWrapping = false;
         starTmp.overflowMode = TextOverflowModes.Overflow;
         SoulslikeHUDStyler.SetSafeOutline(starTmp, 0.30f, Color.black);
         starTmp.text = $"Lv.{rank}";
         starObj.SetActive(rank > 1);
 
-        // Tương tác chạm / rê chuột để xem Tooltip giải thích Lõi
         var trigger = badgeObj.AddComponent<EventTrigger>();
         var captured = aug;
 
@@ -670,8 +982,7 @@ public class AugmentHUDBar : MonoBehaviour
 
         _activeBadges[aug.type] = item;
 
-        // Hiệu ứng Pop-in khi nhận Lõi mới (chỉ chạy coroutine nếu GameObject đang active)
-        if (gameObject.activeInHierarchy)
+        if (gameObject.activeInHierarchy && !_collapsed)
         {
             StartCoroutine(AnimatePopIn(item));
         }
@@ -741,26 +1052,10 @@ public class AugmentHUDBar : MonoBehaviour
         if (_tooltipObj == null || aug == null) return;
 
         bool isVi = LocalizationManager.IsVietnamese;
-
-        Color tierColor;
-        string tierName;
-        switch (aug.rarity)
-        {
-            case AugmentDatabase.AugmentData.Rarity.Epic:
-                tierColor = new Color(0.92f, 0.50f, 0.98f, 1f);
-                tierName = isVi ? "BẬC KIM CƯƠNG" : "PRISMATIC TIER";
-                break;
-            case AugmentDatabase.AugmentData.Rarity.Rare:
-                tierColor = new Color(1.00f, 0.82f, 0.28f, 1f);
-                tierName = isVi ? "BẬC VÀNG" : "GOLD TIER";
-                break;
-            default:
-                tierColor = new Color(0.80f, 0.86f, 0.95f, 0.95f);
-                tierName = isVi ? "BẬC BẠC" : "SILVER TIER";
-                break;
-        }
-
+        Color tierColor = GetTierColor(aug.rarity);
+        string tierName = GetTierName(aug.rarity, isVi);
         string typeName = LevelUpChoiceUI.GetDamageTypeName(aug.type, isVi);
+
         if (_tooltipTierText != null)
         {
             _tooltipTierText.text = $"{tierName} - {typeName}";
@@ -783,21 +1078,7 @@ public class AugmentHUDBar : MonoBehaviour
         if (string.IsNullOrEmpty(title)) title = aug.type.ToString();
         if (_tooltipTitleText != null) _tooltipTitleText.text = title + rankHeader;
 
-        string desc = isVi ? aug.descVN : aug.descEN;
-        if (string.IsNullOrEmpty(desc))
-        {
-            var dbAug = AugmentDatabase.GetByType(aug.type);
-            if (dbAug != null) desc = isVi ? dbAug.descVN : dbAug.descEN;
-        }
-        if (string.IsNullOrEmpty(desc))
-        {
-            desc = aug.descVN ?? aug.descEN;
-        }
-
-        float totalVal = aug.value * rank;
-        string valStr = totalVal % 1 == 0 ? ((int)totalVal).ToString() : totalVal.ToString("F1");
-
-        desc = FormatAugmentDescription(aug, rank, isVi, typeName);
+        string desc = FormatAugmentDescription(aug, rank, isVi, typeName);
 
         if (aug.duration > 0f)
         {
@@ -820,6 +1101,13 @@ public class AugmentHUDBar : MonoBehaviour
 
         if (_tooltipDescText != null) _tooltipDescText.text = desc;
 
+        if (_tooltipRt != null)
+        {
+            float panelH = (_rootRt != null && !_collapsed) ? _rootRt.sizeDelta.y : 52f;
+            _tooltipRt.anchoredPosition = new Vector2(24f, -134f - panelH - 6f);
+        }
+
+        _tooltipObj.transform.SetAsLastSibling();
         _tooltipObj.SetActive(true);
 
         if (gameObject.activeInHierarchy)
@@ -877,101 +1165,7 @@ public class AugmentHUDBar : MonoBehaviour
         onComplete?.Invoke();
     }
 
-    // ─── More Button (+) & Full Overview Modal ────────────────────────────────
-    private void UpdateMoreButton(int totalDistinctCount)
-    {
-        if (totalDistinctCount > 3)
-        {
-            EnsureMoreButtonCreated();
-            if (_moreButtonObj != null)
-            {
-                _moreButtonObj.SetActive(true);
-                _moreButtonObj.transform.SetAsLastSibling();
-                if (_moreBtnText != null)
-                {
-                    int extra = totalDistinctCount - 3;
-                    _moreBtnText.text = $"+{extra}";
-                }
-            }
-        }
-        else
-        {
-            if (_moreButtonObj != null)
-            {
-                _moreButtonObj.SetActive(false);
-            }
-        }
-    }
-
-    private void EnsureMoreButtonCreated()
-    {
-        if (_moreButtonObj != null) return;
-
-        _moreButtonObj = new GameObject("MoreAugmentsButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(LayoutElement));
-        _moreButtonObj.transform.SetParent(transform, false);
-
-        var le = _moreButtonObj.GetComponent<LayoutElement>();
-        le.preferredWidth = 38f;
-        le.preferredHeight = 38f;
-        le.minWidth = 38f;
-        le.minHeight = 38f;
-
-        var rt = _moreButtonObj.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(38f, 38f);
-
-        var bg = _moreButtonObj.GetComponent<Image>();
-        bg.sprite = GetObsidianCore();
-        bg.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
-
-        // Vòng viền hào quang Hoàng Kim
-        var ringObj = new GameObject("Ring", typeof(RectTransform), typeof(Image));
-        ringObj.transform.SetParent(_moreButtonObj.transform, false);
-        var ringRt = ringObj.GetComponent<RectTransform>();
-        ringRt.anchorMin = Vector2.zero;
-        ringRt.anchorMax = Vector2.one;
-        ringRt.offsetMin = ringRt.offsetMax = Vector2.zero;
-
-        var ringImg = ringObj.GetComponent<Image>();
-        ringImg.sprite = GetRunicRing();
-        ringImg.color = new Color(0.95f, 0.82f, 0.40f, 0.95f);
-        ringImg.raycastTarget = false;
-
-        // Dấu cộng Text
-        var txtObj = new GameObject("PlusText", typeof(RectTransform), typeof(TextMeshProUGUI));
-        txtObj.transform.SetParent(_moreButtonObj.transform, false);
-        var txtRt = txtObj.GetComponent<RectTransform>();
-        txtRt.anchorMin = Vector2.zero;
-        txtRt.anchorMax = Vector2.one;
-        txtRt.offsetMin = txtRt.offsetMax = Vector2.zero;
-
-        _moreBtnText = txtObj.GetComponent<TextMeshProUGUI>();
-        _moreBtnText.fontSize = 17f;
-        _moreBtnText.fontStyle = FontStyles.Bold;
-        _moreBtnText.alignment = TextAlignmentOptions.Center;
-        _moreBtnText.color = new Color(1f, 0.90f, 0.45f, 1f);
-        SoulslikeHUDStyler.SetSafeOutline(_moreBtnText, 0.40f, Color.black);
-        _moreBtnText.text = "+";
-
-        var btn = _moreButtonObj.GetComponent<Button>();
-        btn.targetGraphic = bg;
-        btn.onClick.AddListener(OpenFullOverviewPopup);
-
-        // Tooltip hover
-        var trigger = _moreButtonObj.AddComponent<EventTrigger>();
-        var enter = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
-        enter.callback.AddListener(_ => {
-            bool isVi = LocalizationManager.IsVietnamese;
-            string t = isVi ? "Xem Tất Cả Lõi" : "View All Augments";
-            string d = isVi ? "Bấm vào để mở danh sách chi tiết tất cả các Lõi Nâng Cấp đã chọn." : "Click to view full list and stats of all acquired augments.";
-            ShowCustomTooltip(t, d, _moreButtonObj.transform.position);
-        });
-        trigger.triggers.Add(enter);
-
-        var exit = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
-        exit.callback.AddListener(_ => HideTooltip());
-        trigger.triggers.Add(exit);
-    }
-
+    // ─── Full Overview Modal ───────────────────────────────────────────────────
     public void OpenFullOverviewPopup()
     {
         HideTooltip();
@@ -988,7 +1182,6 @@ public class AugmentHUDBar : MonoBehaviour
 
         if (_fullOverviewPopupObj == null) return;
 
-        // Query augments
         if (AugmentManager.Instance != null)
         {
             var selected = AugmentManager.Instance.GetSelectedAugments();
@@ -1048,7 +1241,6 @@ public class AugmentHUDBar : MonoBehaviour
         rootRt.anchorMax = Vector2.one;
         rootRt.offsetMin = rootRt.offsetMax = Vector2.zero;
 
-        // Dark background overlay (click to close)
         var backdropObj = new GameObject("Backdrop", typeof(RectTransform), typeof(Image), typeof(Button));
         backdropObj.transform.SetParent(_fullOverviewPopupObj.transform, false);
         var bRt = backdropObj.GetComponent<RectTransform>();
@@ -1063,7 +1255,6 @@ public class AugmentHUDBar : MonoBehaviour
         var bBtn = backdropObj.GetComponent<Button>();
         bBtn.onClick.AddListener(CloseFullOverviewPopup);
 
-        // Center window panel
         var panelObj = new GameObject("WindowPanel", typeof(RectTransform), typeof(Image));
         panelObj.transform.SetParent(backdropObj.transform, false);
         var pRt = panelObj.GetComponent<RectTransform>();
@@ -1078,7 +1269,6 @@ public class AugmentHUDBar : MonoBehaviour
         pImg.color = new Color(0.05f, 0.065f, 0.095f, 0.98f);
         pImg.raycastTarget = true;
 
-        // Panel Border
         var borderObj = new GameObject("Border", typeof(RectTransform), typeof(Image));
         borderObj.transform.SetParent(panelObj.transform, false);
         var borderRt = borderObj.GetComponent<RectTransform>();
@@ -1096,7 +1286,6 @@ public class AugmentHUDBar : MonoBehaviour
         borderImg.color = new Color(0.95f, 0.82f, 0.40f, 0.90f);
         borderImg.raycastTarget = false;
 
-        // Title text
         var titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
         titleObj.transform.SetParent(panelObj.transform, false);
         var tRt = titleObj.GetComponent<RectTransform>();
@@ -1112,7 +1301,6 @@ public class AugmentHUDBar : MonoBehaviour
         titleTmp.color = new Color(1f, 0.90f, 0.50f, 1f);
         SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.40f, Color.black);
 
-        // Close X button
         var closeXObj = new GameObject("CloseXBtn", typeof(RectTransform), typeof(Image), typeof(Button));
         closeXObj.transform.SetParent(panelObj.transform, false);
         var cxRt = closeXObj.GetComponent<RectTransform>();
@@ -1142,7 +1330,6 @@ public class AugmentHUDBar : MonoBehaviour
         cxTmp.color = new Color(0.95f, 0.35f, 0.35f, 1f);
         SoulslikeHUDStyler.SetSafeOutline(cxTmp, 0.35f, Color.black);
 
-        // Gothic Divider
         var divObj = new GameObject("Divider", typeof(RectTransform), typeof(Image));
         divObj.transform.SetParent(panelObj.transform, false);
         var divRt = divObj.GetComponent<RectTransform>();
@@ -1155,7 +1342,6 @@ public class AugmentHUDBar : MonoBehaviour
         divImg.color = new Color(0.95f, 0.82f, 0.40f, 0.85f);
         divImg.raycastTarget = false;
 
-        // Scrollable container (ScrollRect + RectMask2D)
         var scrollObj = new GameObject("ScrollView", typeof(RectTransform), typeof(ScrollRect), typeof(RectMask2D));
         scrollObj.transform.SetParent(panelObj.transform, false);
         var scRt = scrollObj.GetComponent<RectTransform>();
@@ -1190,7 +1376,6 @@ public class AugmentHUDBar : MonoBehaviour
         scrollRect.content = cRt;
         _popupContentContainer = contentObj.transform;
 
-        // Bottom Close Button
         var bottomBtnObj = new GameObject("BottomCloseBtn", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
         bottomBtnObj.transform.SetParent(panelObj.transform, false);
         var bbRt = bottomBtnObj.GetComponent<RectTransform>();
@@ -1274,17 +1459,8 @@ public class AugmentHUDBar : MonoBehaviour
             }
             if (string.IsNullOrEmpty(title)) title = aug.type.ToString();
 
-            string desc = isVi ? aug.descVN : aug.descEN;
-            if (string.IsNullOrEmpty(desc))
-            {
-                var dbAug = AugmentDatabase.GetByType(aug.type);
-                if (dbAug != null) desc = isVi ? dbAug.descVN : dbAug.descEN;
-            }
-            if (string.IsNullOrEmpty(desc)) desc = aug.descVN ?? aug.descEN;
+            string desc = FormatAugmentDescription(aug, rank, isVi, typeName);
 
-            desc = FormatAugmentDescription(aug, rank, isVi, typeName);
-
-            // Card item
             var cardObj = new GameObject($"Card_{type}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(LayoutElement), typeof(Outline));
             cardObj.transform.SetParent(_popupContentContainer, false);
 
@@ -1301,7 +1477,6 @@ public class AugmentHUDBar : MonoBehaviour
             outl.effectColor = tierColor * 0.70f;
             outl.effectDistance = new Vector2(1f, -1f);
 
-            // Left medallion (44x44)
             var medalObj = new GameObject("Medallion", typeof(RectTransform), typeof(Image));
             medalObj.transform.SetParent(cardObj.transform, false);
             var medalRt = medalObj.GetComponent<RectTransform>();
@@ -1329,8 +1504,8 @@ public class AugmentHUDBar : MonoBehaviour
             var iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
             iconObj.transform.SetParent(medalObj.transform, false);
             var iconRt = iconObj.GetComponent<RectTransform>();
-            iconRt.anchorMin = new Vector2(0.15f, 0.15f);
-            iconRt.anchorMax = new Vector2(0.85f, 0.85f);
+            iconRt.anchorMin = new Vector2(0.10f, 0.10f);
+            iconRt.anchorMax = new Vector2(0.90f, 0.90f);
             iconRt.offsetMin = iconRt.offsetMax = Vector2.zero;
 
             var iconImg = iconObj.GetComponent<Image>();
@@ -1374,7 +1549,6 @@ public class AugmentHUDBar : MonoBehaviour
                 SoulslikeHUDStyler.SetSafeOutline(rkTmp, 0.35f, Color.black);
             }
 
-            // Text column (offsetMax -155f để không bao giờ chạm/đè lên cột trạng thái bên phải)
             var textObj = new GameObject("TextCol", typeof(RectTransform), typeof(TextMeshProUGUI));
             textObj.transform.SetParent(cardObj.transform, false);
             var textRt = textObj.GetComponent<RectTransform>();
@@ -1389,7 +1563,6 @@ public class AugmentHUDBar : MonoBehaviour
             textTmp.enableWordWrapping = true;
             SoulslikeHUDStyler.SetSafeOutline(textTmp, 0.25f, Color.black);
 
-            // Right status column
             var statusObj = new GameObject("StatusCol", typeof(RectTransform), typeof(TextMeshProUGUI));
             statusObj.transform.SetParent(cardObj.transform, false);
             var statusRt = statusObj.GetComponent<RectTransform>();
@@ -1415,21 +1588,6 @@ public class AugmentHUDBar : MonoBehaviour
             }
             SoulslikeHUDStyler.SetSafeOutline(statusTmp, 0.25f, Color.black);
         }
-    }
-
-    private void ShowCustomTooltip(string title, string desc, Vector3 badgePos)
-    {
-        if (_tooltipObj == null) return;
-        if (_tooltipTierText != null) _tooltipTierText.text = "";
-        if (_tooltipTitleText != null) _tooltipTitleText.text = title;
-        if (_tooltipDescText != null) _tooltipDescText.text = desc;
-
-        if (_tooltipRt != null)
-        {
-            _tooltipRt.anchoredPosition = new Vector2(68f, -196f);
-        }
-        _tooltipObj.SetActive(true);
-        if (_tooltipCg != null) _tooltipCg.alpha = 1f;
     }
 
     private static Color GetTierColor(AugmentDatabase.AugmentData.Rarity rarity)

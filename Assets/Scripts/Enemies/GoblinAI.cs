@@ -136,12 +136,9 @@ public class GoblinAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (isDead || PlayerHealth.IsPlayerDead) { isAttacking = false; yield break; }
 
-        // Lao nhanh mot doan ngan dam kiem
-        Vector2 lungeDir = (player != null) ? (player.position - transform.position).normalized : Vector2.right;
-        rb.linearVelocity = lungeDir * (moveSpeed * 1.5f);
-
-        yield return new WaitForSeconds(0.15f);
+        // Đứng tại chỗ vung kiếm (bỏ cơ chế lướt xuyên qua sau lưng Player)
         rb.linearVelocity = Vector2.zero;
+        yield return new WaitForSeconds(0.15f);
 
         if (player != null && Vector2.Distance(transform.position, player.position) <= meleeRange + 0.6f)
         {

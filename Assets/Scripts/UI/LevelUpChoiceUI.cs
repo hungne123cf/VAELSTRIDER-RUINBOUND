@@ -1057,7 +1057,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         var rbTxt = rbTxtObj.GetComponent<TextMeshProUGUI>();
         rbTxt.text = isUpgrade
             ? (isVN ? $"THĂNG CẤP:  CẤP {currentRank}  ->  CẤP {currentRank + 1}" : $"UPGRADE:  LV.{currentRank}  ->  LV.{currentRank + 1}")
-            : (isVN ? "LÕI MỚI  -  CẤP 1" : "NEW AUGMENT  -  LV.1");
+            : (isVN ? "LÕI MỚI" : "NEW AUGMENT");
         rbTxt.color = isUpgrade ? new Color(1f, 0.94f, 0.55f) : new Color(0.55f, 1f, 0.80f);
         rbTxt.fontSize = 12.5f;
         rbTxt.fontStyle = FontStyles.Bold;
@@ -1255,7 +1255,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         var btnTMP = btnTxtObj.GetComponent<TextMeshProUGUI>();
         btnTMP.text = isUpgrade
             ? (isVN ? $"NÂNG LÊN CẤP {currentRank + 1}" : $"UPGRADE TO LV.{currentRank + 1}")
-            : (isVN ? "NÂNG CẤP" : "ACQUIRE");
+            : (isVN ? "NÂNG CẤP" : "UPGRADE");
         btnTMP.fontSize = 18.5f;
         btnTMP.fontStyle = FontStyles.Bold;
         btnTMP.alignment = TextAlignmentOptions.Center;

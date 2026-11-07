@@ -259,6 +259,14 @@ public class PlayerStatPanelUI : MonoBehaviour
     }
 
     // ======================= LOGIC =======================
+    public void SetTopYOffset(float yPos)
+    {
+        if (panelRt != null)
+        {
+            panelRt.anchoredPosition = new Vector2(24f, yPos);
+        }
+    }
+
     public void Toggle()
     {
         collapsed = !collapsed;
