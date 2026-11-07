@@ -511,6 +511,14 @@ public class PlayerCombat : MonoBehaviour
 
     public void SetBaseAttackDamage(int hit1, int hit2)
     {
+        string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        bool hasOtherHeroSkill = (GetComponent<GaleRoninSkill>() != null || GetComponent<AzureBladeSkill>() != null ||
+                                  GetComponent<TitanBerserkerSkill>() != null || GetComponent<DuneAssassinSkill>() != null ||
+                                  GetComponent<CelestialMageSkill>() != null);
+        bool isVael = (curHero == CharacterManager.CHAR_VAELSTRIDER || string.IsNullOrEmpty(curHero)) && !hasOtherHeroSkill;
+        if (isVael && hit1 < 25) hit1 = 25;
+        if (isVael && hit2 < 35) hit2 = 35;
+
         attack1Damage = hit1;
         attack2Damage = hit2;
     }

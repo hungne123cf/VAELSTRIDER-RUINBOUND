@@ -142,8 +142,20 @@ public class PlayerEnergySystem : MonoBehaviour
     /// - Với Player 6: Đầy 100% kích hoạt trạng thái Bùng Nổ Thiên Quang (Hồi chiêu cuối 1s liên tục, không có giáp vàng).
     /// - Với các nhân vật khác: Đầy 100% tự động bung Giáp Hộ Thân màu vàng.
     /// </summary>
+    public bool IsPlayer1()
+    {
+        string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        bool hasOtherHeroSkill = (GetComponent<GaleRoninSkill>() != null || GetComponent<AzureBladeSkill>() != null ||
+                                  GetComponent<TitanBerserkerSkill>() != null || GetComponent<DuneAssassinSkill>() != null ||
+                                  GetComponent<CelestialMageSkill>() != null);
+        return (curHero == CharacterManager.CHAR_VAELSTRIDER || string.IsNullOrEmpty(curHero)) && !hasOtherHeroSkill;
+    }
+
     public void AddInnerEnergy(float amount)
     {
+        // Riêng Player 1 (Vaelstrider): Đã có Giáp Ảo 3-hit màu trắng và Máu Ảo từ Lõi, BỎ HOÀN TOÀN giáp nội năng vàng
+        if (IsPlayer1()) return;
+
         // Riêng Player 6 (Celestial Mage): Không bật khiên vàng, dùng để kích hoạt trạng thái Hồi Siêu Tốc Chiêu Cuối (Overdrive)
         var mage = GetComponent<CelestialMageSkill>() 
             ?? GetComponentInChildren<CelestialMageSkill>() 
@@ -211,7 +223,8 @@ public class PlayerEnergySystem : MonoBehaviour
     /// </summary>
     public int AbsorbDamage(int incomingDamage)
     {
-        // Riêng Player 6 không dùng cơ chế giáp vàng
+        // Riêng Player 1 và Player 6 không dùng cơ chế giáp vàng
+        if (IsPlayer1()) return incomingDamage;
         var mage = GetComponent<CelestialMageSkill>();
         if (mage != null && mage.enabled) return incomingDamage;
 
@@ -305,7 +318,7 @@ public class PlayerEnergySystem : MonoBehaviour
     public float GetMaxInnerEnergy() => maxInnerEnergy;
     public float GetInnerEnergyNormalized() => maxInnerEnergy > 0 ? Mathf.Clamp01(currentInnerEnergy / maxInnerEnergy) : 0f;
 
-    public bool IsShieldActive() => isShieldActive || currentInnerEnergy > 0f;
+    public bool IsShieldActive() => !IsPlayer1() && (isShieldActive || currentInnerEnergy > 0f);
     public int GetShieldHealth() => currentShieldHealth;
     public int GetMaxShieldHealth() => maxShieldHealth;
     public float GetShieldHealthNormalized() => maxShieldHealth > 0 ? Mathf.Clamp01((float)currentShieldHealth / maxShieldHealth) : 0f;

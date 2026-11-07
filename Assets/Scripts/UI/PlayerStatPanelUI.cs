@@ -371,7 +371,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         // Giáp hiển thị tổng hợp: Giáp cơ bản của tướng đã chọn + Đồ trang bị + Lõi nâng cấp
         string curCharId = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         var cData = CharacterManager.EnsureInstance()?.GetCharacter(curCharId);
-        int baseDef = cData != null ? cData.baseDefense : 10;
+        int baseDef = cData != null ? cData.baseDefense : 20;
         ArmorShopUI.GetEquippedArmorBonus(out _, out float armorDef, out _);
         if (armorDef > 0f && armorDef <= 1f) armorDef *= 100f;
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out int sockDef, out _, out _, out _, out _);

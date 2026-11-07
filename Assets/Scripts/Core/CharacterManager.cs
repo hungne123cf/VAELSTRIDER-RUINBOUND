@@ -108,7 +108,7 @@ public class CharacterManager : MonoBehaviour
             skillDescEN = "Golden sword arts. Hold attack for Divine Parry Stance: blocks incoming damage and retaliates with a x3.0 Crit Divine Riposte! Special skill spins 360° pulling enemies and erupting with a blast.",
             baseHealth = 100,
             baseAttack = 25,
-            baseDefense = 12,
+            baseDefense = 20,
             baseSpeed = 5.0f,
             baseLifesteal = 0.05f, // 5% Hút máu cơ bản của Hiệp Sĩ Vaelstrider
             unlockPrice = 0, // Miễn phí ban đầu

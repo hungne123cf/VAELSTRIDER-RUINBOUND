@@ -258,6 +258,26 @@ public class PlayerEnergyUI : MonoBehaviour
     {
         if (innerEnergySlider == null) return;
 
+        // Riêng Player 1 (Vaelstrider): Ẩn hoàn toàn thanh giáp nội năng màu vàng theo yêu cầu
+        string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        bool hasOtherHeroSkill = energySystem != null && (energySystem.GetComponent<GaleRoninSkill>() != null || energySystem.GetComponent<AzureBladeSkill>() != null ||
+                                  energySystem.GetComponent<TitanBerserkerSkill>() != null || energySystem.GetComponent<DuneAssassinSkill>() != null ||
+                                  energySystem.GetComponent<CelestialMageSkill>() != null);
+        bool isVaelstrider = (curHero == CharacterManager.CHAR_VAELSTRIDER || string.IsNullOrEmpty(curHero)) && !hasOtherHeroSkill;
+
+        if (isVaelstrider)
+        {
+            if (innerEnergySlider.gameObject.activeSelf)
+            {
+                innerEnergySlider.gameObject.SetActive(false);
+            }
+            if (innerEnergyText != null && innerEnergyText.gameObject.activeSelf)
+            {
+                innerEnergyText.gameObject.SetActive(false);
+            }
+            return;
+        }
+
         if (!innerEnergySlider.gameObject.activeSelf)
         {
             innerEnergySlider.gameObject.SetActive(true);

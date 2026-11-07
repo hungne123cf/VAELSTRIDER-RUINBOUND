@@ -626,7 +626,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         // Giảm sát thương theo Giáp căn bản của Tướng + Trang bị đang mặc + Khảm ngọc + Trang phục + Lõi Nâng Cấp (No limit, tính theo công thức giảm sát thương thực: Reduction = Def / (Def + 100))
         string curCharId = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         var cData = CharacterManager.EnsureInstance()?.GetCharacter(curCharId);
-        int baseDef = cData != null ? cData.baseDefense : 10;
+        int baseDef = cData != null ? cData.baseDefense : 20;
         ArmorShopUI.GetEquippedArmorBonus(out int _, out float armorDef, out float _);
         if (armorDef > 0f && armorDef <= 1f) armorDef *= 100f; // Chuẩn hóa nếu trả về dạng số thập phân (vd: 0.08 -> 8%)
         EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out int sockDef, out _, out _, out _, out _);
