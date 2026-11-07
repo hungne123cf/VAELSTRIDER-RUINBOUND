@@ -601,7 +601,31 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             }
         }
 
-        // 1. Kiểm tra và trừ vào Lớp Giáp Ảo trước (White Shield Barrier)
+        // 1. Kiểm tra và hấp thụ sát thương bằng Lớp Giáp Hộ Thân Nội Năng (Energy System Shield) TRƯỚC TIÊN theo yêu cầu
+        var energySys = GetComponent<PlayerEnergySystem>() 
+            ?? GetComponentInParent<PlayerEnergySystem>() 
+            ?? GetComponentInChildren<PlayerEnergySystem>() 
+            ?? PlayerEnergySystem.Instance;
+        if (energySys != null && energySys.IsShieldActive())
+        {
+            int prevDmg = damage;
+            damage = energySys.AbsorbDamage(damage);
+            int shieldAbsorbed = prevDmg - Mathf.Max(0, damage);
+            if (shieldAbsorbed > 0)
+            {
+                // Hiển thị số trừ khiên nội năng màu vàng hổ phách rực rỡ
+                DamagePopup.CreateText(transform.position + Vector3.up * 0.9f, $"-{shieldAbsorbed}", new Color(1f, 0.85f, 0.2f));
+                FindAnyObjectByType<CameraFollow>()?.Shake(0.08f, 0.1f);
+            }
+
+            if (damage <= 0)
+            {
+                // Giáp nội năng đã chặn toàn bộ đòn đánh!
+                return;
+            }
+        }
+
+        // 2. Kiểm tra và trừ vào Lớp Giáp Ảo (White Shield Barrier) kế tiếp nếu còn sát thương
         if (isVirtualHealthActive && currentVirtualHealth > 0)
         {
             int virtualAbsorbed = 0;
@@ -637,27 +661,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             if (damage <= 0)
             {
                 return; // Đã hấp thụ toàn bộ đòn đánh bằng máu ảo!
-            }
-        }
-
-        // 2. Kiểm tra và hấp thụ sát thương bằng Lớp Giáp Hộ Thân (Energy System Shield) nếu có
-        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
-        if (energySys != null && energySys.IsShieldActive())
-        {
-            int prevDmg = damage;
-            damage = energySys.AbsorbDamage(damage);
-            int shieldAbsorbed = prevDmg - Mathf.Max(0, damage);
-            if (shieldAbsorbed > 0)
-            {
-                // Hiển thị số trừ khiên nội năng màu xanh lam/cyan hộ thuẫn
-                DamagePopup.CreateText(transform.position + Vector3.up * 0.9f, $"-{shieldAbsorbed}", new Color(0.35f, 0.88f, 1f));
-                FindAnyObjectByType<CameraFollow>()?.Shake(0.08f, 0.1f);
-            }
-
-            if (damage <= 0)
-            {
-                // Giáp hộ thân đã chặn toàn bộ đòn đánh!
-                return;
             }
         }
 

@@ -651,11 +651,16 @@ public static class SoulslikeHUDStyler
                 tmp.fontSharedMaterial = tmp.font.material;
             }
 
-            if (tmp.fontSharedMaterial != null)
+            var mat = tmp.fontMaterial;
+            if (mat != null)
             {
-                tmp.outlineWidth = width;
-                tmp.outlineColor = color;
+                mat.EnableKeyword(TMP_ShaderUtilities.Keyword_Outline);
+                mat.SetColor(TMP_ShaderUtilities.ID_OutlineColor, color);
+                mat.SetFloat(TMP_ShaderUtilities.ID_OutlineWidth, width);
             }
+
+            tmp.outlineWidth = width;
+            tmp.outlineColor = color;
         }
         catch (System.Exception)
         {
