@@ -57,6 +57,10 @@ public class AzureBladeSkill : MonoBehaviour
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         aimIndicator = RangedAimIndicator.EnsureExists(gameObject);
+        if (playerCombat != null && playerCombat.Attack1Damage > 0)
+        {
+            baseWaveDamage = playerCombat.Attack1Damage;
+        }
         RefreshCooldownStats();
     }
 

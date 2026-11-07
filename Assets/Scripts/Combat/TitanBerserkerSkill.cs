@@ -85,6 +85,10 @@ public class TitanBerserkerSkill : MonoBehaviour
         {
             enemyLayers = LayerMask.GetMask("Enemy", "Default", "Obstacle");
         }
+        if (playerCombat != null && playerCombat.Attack1Damage > 0)
+        {
+            baseHammerDamage = playerCombat.Attack1Damage;
+        }
 
         IceSlamVFX.EnsureFramesLoaded();
     }

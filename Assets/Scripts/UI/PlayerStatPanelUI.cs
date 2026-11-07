@@ -195,7 +195,7 @@ public class PlayerStatPanelUI : MonoBehaviour
     private static readonly System.Collections.Generic.Dictionary<string, Sprite> iconCache =
         new System.Collections.Generic.Dictionary<string, Sprite>();
 
-    private static Sprite GetPixelIcon(string key, Color main)
+    public static Sprite GetPixelIcon(string key, Color main)
     {
         if (iconCache.TryGetValue(key, out var cached) && cached != null) return cached;
         if (!IconMaps.TryGetValue(key, out var rows)) return GetCircleSprite();

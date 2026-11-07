@@ -149,6 +149,10 @@ public class DuneAssassinSkill : MonoBehaviour
         {
             enemyLayers = LayerMask.GetMask("Enemy", "Default", "Obstacle");
         }
+        if (playerCombat != null && playerCombat.Attack1Damage > 0)
+        {
+            baseDaggerDamage = playerCombat.Attack1Damage;
+        }
 
         RefreshCooldownStats();
         LoadAllPlayer5Sprites();

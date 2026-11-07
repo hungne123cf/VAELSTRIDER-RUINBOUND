@@ -96,6 +96,10 @@ public class GaleRoninSkill : MonoBehaviour
         {
             targetLayers = ~0; // Target everything damageable
         }
+        if (playerCombat != null && playerCombat.Attack1Damage > 0)
+        {
+            baseSlashDamage = playerCombat.Attack1Damage;
+        }
         RefreshCooldownStats();
     }
 

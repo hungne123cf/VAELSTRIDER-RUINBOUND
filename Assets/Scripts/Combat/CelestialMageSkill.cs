@@ -118,6 +118,11 @@ public class CelestialMageSkill : MonoBehaviour
             if (enemyLayers.value == 0) enemyLayers = ~0;
         }
 
+        if (playerCombat != null && playerCombat.Attack1Damage > 0)
+        {
+            baseOrbDamage = playerCombat.Attack1Damage;
+        }
+
         RefreshCooldownStats();
         LoadAllPlayer6Sprites();
         EnsureProceduralSprites();
