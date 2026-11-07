@@ -42,6 +42,12 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
 
         sr.sortingOrder = 1500;
         LoadEggSprites();
+
+        // Zero-Bug Android: Dùng CircleCollider2D tĩnh, triệt tiêu PolygonCollider2D để không nghẽn Box2D
+        var oldSync = GetComponent<DynamicSpriteColliderSync>();
+        if (oldSync != null) DestroyImmediate(oldSync);
+        var oldPoly = GetComponent<PolygonCollider2D>();
+        if (oldPoly != null) DestroyImmediate(oldPoly);
         var circleCol = GetComponent<CircleCollider2D>();
         if (circleCol == null) circleCol = gameObject.AddComponent<CircleCollider2D>();
         circleCol.radius = 0.85f;

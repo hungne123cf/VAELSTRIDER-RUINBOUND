@@ -169,141 +169,150 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRt = titleObj.GetComponent<RectTransform>();
         titleRt.anchoredPosition = new Vector2(0f, 225f);
-        titleRt.sizeDelta = new Vector2(700f, 42f);
+        titleRt.sizeDelta = new Vector2(740f, 48f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = LocalizationManager.T("DỊCH CHUYỂN CÕI GIỚI", "REALM WARP GATE");
-        titleText.fontSize = 32f;
+        titleText.fontSize = 36f;
         titleText.fontStyle = FontStyles.Bold;
+        titleText.characterSpacing = 2.0f;
         titleText.color = new Color(1f, 0.92f, 0.65f, 1f); // Antique Gold
         titleText.alignment = TextAlignmentOptions.Center;
-        SoulslikeHUDStyler.SetSafeOutline(titleText, 0.35f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(titleText, 0.45f, Color.black);
 
         // Subtitle
         GameObject subObj = new GameObject("SubText", typeof(RectTransform), typeof(CanvasRenderer));
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchoredPosition = new Vector2(0f, 182f);
-        subRt.sizeDelta = new Vector2(700f, 30f);
+        subRt.anchoredPosition = new Vector2(0f, 178f);
+        subRt.sizeDelta = new Vector2(740f, 32f);
 
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = LocalizationManager.T("Vết nứt không gian kết nối tới cõi tiếp theo", "Traverse the spatial rift into the next realm");
-        subtitleText.fontSize = 17f;
+        subtitleText.fontSize = 18f;
         subtitleText.fontStyle = FontStyles.Normal;
-        subtitleText.color = new Color(0.75f, 0.80f, 0.90f, 0.85f);
+        subtitleText.color = new Color(0.85f, 0.88f, 0.95f, 0.90f);
         subtitleText.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.25f, Color.black);
 
         // Filigree Divider
-        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 160f), new Vector2(660f, 10f));
+        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 152f), new Vector2(720f, 12f));
 
         // 3. Destination Plaque Card
         GameObject plaqueObj = new GameObject("DestinationCard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         plaqueObj.layer = 5;
         plaqueObj.transform.SetParent(boxObj.transform, false);
         RectTransform plaqueRt = plaqueObj.GetComponent<RectTransform>();
-        plaqueRt.anchoredPosition = new Vector2(0f, 52f);
-        plaqueRt.sizeDelta = new Vector2(700f, 165f);
+        plaqueRt.anchoredPosition = new Vector2(0f, 40f);
+        plaqueRt.sizeDelta = new Vector2(720f, 175f);
 
         Image pImg = plaqueObj.GetComponent<Image>();
         pImg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
         pImg.type = Image.Type.Sliced;
-        pImg.color = new Color(0.12f, 0.14f, 0.22f, 0.95f);
+        pImg.color = new Color(0.08f, 0.10f, 0.16f, 0.96f);
 
         var pOutline = plaqueObj.AddComponent<Outline>();
-        pOutline.effectColor = new Color(0.35f, 0.40f, 0.55f, 0.55f);
-        pOutline.effectDistance = new Vector2(1f, -1f);
+        pOutline.effectColor = new Color(0.95f, 0.80f, 0.35f, 0.45f);
+        pOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
         // Destination Tag
         GameObject tagObj = new GameObject("DestTag", typeof(RectTransform), typeof(CanvasRenderer));
         tagObj.layer = 5;
         tagObj.transform.SetParent(plaqueObj.transform, false);
         RectTransform tagRt = tagObj.GetComponent<RectTransform>();
-        tagRt.anchoredPosition = new Vector2(0f, 44f);
-        tagRt.sizeDelta = new Vector2(460f, 18f);
+        tagRt.anchoredPosition = new Vector2(0f, 52f);
+        tagRt.sizeDelta = new Vector2(680f, 24f);
         destTagText = tagObj.AddComponent<TextMeshProUGUI>();
         destTagText.text = LocalizationManager.T("ĐÍCH ĐẾN TIẾP THEO", "DESTINATION REALM");
-        destTagText.fontSize = 11f;
+        destTagText.fontSize = 14f;
         destTagText.fontStyle = FontStyles.Bold;
-        destTagText.color = new Color(0.65f, 0.75f, 0.90f, 0.9f);
+        destTagText.characterSpacing = 2.5f;
+        destTagText.color = new Color(0.95f, 0.80f, 0.45f, 0.95f);
         destTagText.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(destTagText, 0.30f, Color.black);
 
         // Destination Name (Không ký tự lạ, chữ to rõ ràng)
         GameObject destNameObj = new GameObject("DestName", typeof(RectTransform), typeof(CanvasRenderer));
         destNameObj.layer = 5;
         destNameObj.transform.SetParent(plaqueObj.transform, false);
         RectTransform dnRt = destNameObj.GetComponent<RectTransform>();
-        dnRt.anchoredPosition = new Vector2(0f, 22f);
-        dnRt.sizeDelta = new Vector2(460f, 24f);
+        dnRt.anchoredPosition = new Vector2(0f, 18f);
+        dnRt.sizeDelta = new Vector2(680f, 36f);
         destinationNameText = destNameObj.AddComponent<TextMeshProUGUI>();
-        destinationNameText.fontSize = 16f;
+        destinationNameText.fontSize = 26f;
         destinationNameText.fontStyle = FontStyles.Bold;
-        destinationNameText.color = new Color(0.35f, 0.85f, 1f);
+        destinationNameText.characterSpacing = 1.5f;
+        destinationNameText.color = new Color(0.40f, 0.90f, 1f);
         destinationNameText.alignment = TextAlignmentOptions.Center;
-        SoulslikeHUDStyler.SetSafeOutline(destinationNameText, 0.35f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(destinationNameText, 0.45f, Color.black);
 
         // Destination Description (Có chiều cao rộng rãi cho 3 dòng bullet points)
         GameObject destDescObj = new GameObject("DestDesc", typeof(RectTransform), typeof(CanvasRenderer));
         destDescObj.layer = 5;
         destDescObj.transform.SetParent(plaqueObj.transform, false);
         RectTransform ddRt = destDescObj.GetComponent<RectTransform>();
-        ddRt.anchoredPosition = new Vector2(0f, -20f);
-        ddRt.sizeDelta = new Vector2(450f, 54f);
+        ddRt.anchoredPosition = new Vector2(0f, -32f);
+        ddRt.sizeDelta = new Vector2(680f, 54f);
         destinationDescText = destDescObj.AddComponent<TextMeshProUGUI>();
-        destinationDescText.fontSize = 11f;
-        destinationDescText.lineSpacing = 1.15f;
+        destinationDescText.fontSize = 16f;
+        destinationDescText.lineSpacing = 1.25f;
         destinationDescText.fontStyle = FontStyles.Normal;
-        destinationDescText.color = new Color(0.80f, 0.85f, 0.92f, 0.90f);
+        destinationDescText.color = new Color(0.92f, 0.94f, 0.98f, 0.95f);
         destinationDescText.alignment = TextAlignmentOptions.Center;
         destinationDescText.enableWordWrapping = true;
+        SoulslikeHUDStyler.SetSafeOutline(destinationDescText, 0.25f, Color.black);
 
         // 4. Warning Notice Box
         GameObject warnObj = new GameObject("WarningText", typeof(RectTransform), typeof(CanvasRenderer));
         warnObj.layer = 5;
         warnObj.transform.SetParent(boxObj.transform, false);
         RectTransform warnRt = warnObj.GetComponent<RectTransform>();
-        warnRt.anchoredPosition = new Vector2(0f, -54f);
-        warnRt.sizeDelta = new Vector2(470f, 38f);
+        warnRt.anchoredPosition = new Vector2(0f, -80f);
+        warnRt.sizeDelta = new Vector2(720f, 48f);
 
         warningNoticeText = warnObj.AddComponent<TextMeshProUGUI>();
-        warningNoticeText.fontSize = 16f;
-        warningNoticeText.lineSpacing = 2f;
+        warningNoticeText.fontSize = 17f;
+        warningNoticeText.lineSpacing = 1.3f;
         warningNoticeText.alignment = TextAlignmentOptions.Center;
         warningNoticeText.text = LocalizationManager.T(
             "Bạn có muốn bước qua cánh cổng không gian?\n<color=#F87171>Lưu ý: Mọi chiến lợi phẩm chưa nhặt trên bản đồ sẽ biến mất!</color>",
             "Do you wish to enter the realm rift?\n<color=#F87171>Notice: Any uncollected loot on this map will be lost!</color>"
         );
+        SoulslikeHUDStyler.SetSafeOutline(warningNoticeText, 0.30f, Color.black);
 
         // 5. Action Buttons Bar
         GameObject btnBarObj = new GameObject("ActionBar", typeof(RectTransform), typeof(CanvasRenderer));
         btnBarObj.layer = 5;
         btnBarObj.transform.SetParent(boxObj.transform, false);
         RectTransform barRt = btnBarObj.GetComponent<RectTransform>();
-        barRt.anchoredPosition = new Vector2(0f, -212f);
-        barRt.sizeDelta = new Vector2(720f, 92f);
+        barRt.anchoredPosition = new Vector2(0f, -195f);
+        barRt.sizeDelta = new Vector2(720f, 85f);
 
         // Button 1: CANCEL [ Ở LẠI ]
         cancelBtn = CreateActionButton(btnBarObj.transform, "Btn_Cancel",
             LocalizationManager.T("Ở LẠI", "STAY"),
-            new Vector2(-180f, 0f), new Vector2(335f, 86f),
-            new Color(0.25f, 0.28f, 0.38f, 1f),
-            new Color(0.85f, 0.88f, 0.95f),
-            new Color(0.40f, 0.45f, 0.58f, 0.7f));
+            new Vector2(-180f, 0f), new Vector2(335f, 75f),
+            new Color(0.22f, 0.25f, 0.35f, 1f),
+            new Color(0.92f, 0.94f, 0.98f),
+            new Color(0.45f, 0.50f, 0.65f, 0.85f),
+            20f);
         cancelBtnText = cancelBtn.GetComponentInChildren<TextMeshProUGUI>();
         cancelBtn.onClick.AddListener(Cancel);
 
         // Button 2: PROCEED [ TIẾN VÀO ]
         proceedBtn = CreateActionButton(btnBarObj.transform, "Btn_Proceed",
             LocalizationManager.T("TIẾN VÀO", "ENTER"),
-            new Vector2(180f, 0f), new Vector2(335f, 86f),
-            new Color(0.50f, 0.18f, 0.78f, 1f),
+            new Vector2(180f, 0f), new Vector2(335f, 75f),
+            new Color(0.48f, 0.16f, 0.72f, 1f),
             new Color(1f, 0.96f, 0.65f),
-            new Color(1f, 0.85f, 0.35f, 0.9f));
+            new Color(0.98f, 0.85f, 0.35f, 0.95f),
+            22f);
         proceedBtnText = proceedBtn.GetComponentInChildren<TextMeshProUGUI>();
         proceedBtn.onClick.AddListener(ConfirmProceed);
     }
 
-    private Button CreateActionButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, Color textColor, Color outlineColor)
+    private Button CreateActionButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, Color textColor, Color outlineColor, float fontSize = 20f)
     {
         GameObject btnObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         btnObj.layer = 5;
@@ -341,11 +350,11 @@ public class PortalConfirmationPopupUI : MonoBehaviour
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         tmp.text = text;
-        tmp.fontSize = 15f;
+        tmp.fontSize = fontSize;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = textColor;
         tmp.alignment = TextAlignmentOptions.Center;
-        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.40f, Color.black);
 
         return btn;
     }
@@ -522,12 +531,12 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             if (destinationNameText != null)
             {
                 destinationNameText.text = LocalizationManager.T("KÝ ỨC LÃNG QUÊN (MAP 3)", "FORGOTTEN MEMORIES (MAP 3)");
-                destinationNameText.color = new Color(0.80f, 0.45f, 1f); // Amethyst Purple
+                destinationNameText.color = new Color(0.92f, 0.60f, 1f); // Rực rỡ Thạch Anh Tím Soulslike
             }
             if (destinationDescText != null)
             {
                 destinationDescText.text = LocalizationManager.T(
-                    "Cõi tâm thức cổ xưa - Nơi ngự trị của Skeleton King",
+                    "Cõi tâm thức cổ xưa - Nơi ngự trị của Chúa Tể Nhện Skeleton King",
                     "Ancient sanctum - Realm of the dread Skeleton King"
                 );
             }

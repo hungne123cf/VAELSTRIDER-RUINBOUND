@@ -797,19 +797,7 @@ public class AugmentHUDBar : MonoBehaviour
         float totalVal = aug.value * rank;
         string valStr = totalVal % 1 == 0 ? ((int)totalVal).ToString() : totalVal.ToString("F1");
 
-        if (!string.IsNullOrEmpty(desc))
-        {
-            desc = desc.Replace("{v}", $"<b><color=#FFEAA7>{valStr}</color></b>");
-        }
-        else
-        {
-            desc = isVi ? $"Tăng cường chỉ số {typeName} (+{valStr})." : $"Enhanced {typeName} (+{valStr}).";
-        }
-
-        if (rank > 1)
-        {
-            desc += $"\n<color=#FBBF24><b>{(isVi ? $"+ Cấp {rank}: Chỉ số được cộng dồn x{rank}!" : $"+ Rank {rank}: Stats multiplied by x{rank}!")}</b></color>";
-        }
+        desc = FormatAugmentDescription(aug, rank, isVi, typeName);
 
         if (aug.duration > 0f)
         {
@@ -1294,21 +1282,7 @@ public class AugmentHUDBar : MonoBehaviour
             }
             if (string.IsNullOrEmpty(desc)) desc = aug.descVN ?? aug.descEN;
 
-            float totalVal = aug.value * rank;
-            string valStr = totalVal % 1 == 0 ? ((int)totalVal).ToString() : totalVal.ToString("F1");
-            if (!string.IsNullOrEmpty(desc))
-            {
-                desc = desc.Replace("{v}", $"<b><color=#FFEAA7>{valStr}</color></b>");
-            }
-            else
-            {
-                desc = isVi ? $"Tăng cường chỉ số {typeName} (+{valStr})." : $"Enhanced {typeName} (+{valStr}).";
-            }
-
-            if (rank > 1)
-            {
-                desc += $"  <color=#FBBF24><b>{(isVi ? $"+ Cấp {rank}: Chỉ số x{rank}!" : $"+ Rank {rank}: Stats x{rank}!")}</b></color>";
-            }
+            desc = FormatAugmentDescription(aug, rank, isVi, typeName);
 
             // Card item
             var cardObj = new GameObject($"Card_{type}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(LayoutElement), typeof(Outline));
@@ -1497,6 +1471,49 @@ public class AugmentHUDBar : MonoBehaviour
         if (_runicRing == null)
             _runicRing = SoulslikeHUDStyler.GetActionButtonRingSprite();
         return _runicRing;
+    }
+
+    public static string FormatAugmentDescription(AugmentDatabase.AugmentData aug, int rank, bool isVi, string typeName)
+    {
+        string desc = isVi ? aug.descVN : aug.descEN;
+        if (string.IsNullOrEmpty(desc))
+        {
+            var dbAug = AugmentDatabase.GetByType(aug.type);
+            if (dbAug != null) desc = isVi ? dbAug.descVN : dbAug.descEN;
+        }
+        if (string.IsNullOrEmpty(desc)) desc = aug.descVN ?? aug.descEN;
+
+        float totalVal = aug.value * rank;
+        string valStr = totalVal % 1 == 0 ? ((int)totalVal).ToString() : totalVal.ToString("F1");
+
+        if (!string.IsNullOrEmpty(desc))
+        {
+            desc = desc.Replace("{v}", $"<b><color=#FFEAA7>{valStr}</color></b>");
+        }
+        else
+        {
+            return isVi ? $"Tăng cường chỉ số {typeName} (+{valStr})." : $"Enhanced {typeName} (+{valStr}).";
+        }
+
+        if (rank > 1)
+        {
+            if (aug.type == AugmentDatabase.AugmentType.PercentCurrentHpExecute)
+            {
+                int mobPercent = 30 * rank;
+                int bossPercent = 5 * rank;
+                int bossCap = 600 * rank;
+                if (isVi)
+                {
+                    desc = $"<color=#55EFC4><b>[LỢI ÍCH]</b></color> Gây thêm sát thương bằng <color=#FFEAA7><b>{mobPercent}% Máu Hiện Tại</b></color> của quái vật.\n<color=#FDCB6E><b>[HẠN CHẾ]</b></color> Sát thương lên Boss là <color=#FDCB6E><b>{bossPercent}% Máu</b></color> (trần {bossCap} dmg).";
+                }
+                else
+                {
+                    desc = $"<color=#55EFC4><b>[BENEFIT]</b></color> Deals bonus damage equal to <color=#FFEAA7><b>{mobPercent}% Target Current HP</b></color> on monsters.\n<color=#FDCB6E><b>[LIMIT]</b></color> Deals <color=#FDCB6E><b>{bossPercent}% HP</b></color> on Bosses (max {bossCap} dmg).";
+                }
+            }
+        }
+
+        return desc;
     }
 
     public static Sprite GetPanelBg()

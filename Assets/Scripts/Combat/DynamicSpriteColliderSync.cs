@@ -57,6 +57,17 @@ public class DynamicSpriteColliderSync : MonoBehaviour
     public static PolygonCollider2D EnsureAttached(GameObject target)
     {
         if (target == null) return null;
+
+        // Zero-Bug Android: Không gắn DynamicSpriteColliderSync hoặc PolygonCollider2D lên Boss và Minion 
+        // vốn đã có CapsuleCollider2D / CircleCollider2D tĩnh để triệt tiêu 100% nguy cơ Box2D solver freeze
+        if (target.GetComponent<SkeletonKingBossAI>() != null || 
+            target.GetComponent<MiniSpiderMinion>() != null ||
+            target.GetComponent<BoneEggObstacle>() != null ||
+            target.GetComponent<BoneEggCocoon>() != null)
+        {
+            return target.GetComponent<PolygonCollider2D>();
+        }
+
         var sync = target.GetComponent<DynamicSpriteColliderSync>();
         if (sync == null)
         {
@@ -118,6 +129,18 @@ public class DynamicSpriteColliderSync : MonoBehaviour
 
     public void EnsureInitialized()
     {
+        // Zero-Bug Android: Không bao giờ gắn hoặc tái tạo PolygonCollider2D trên Boss Nhện hoặc Minion
+        if (GetComponent<SkeletonKingBossAI>() != null || 
+            GetComponent<MiniSpiderMinion>() != null ||
+            GetComponent<BoneEggObstacle>() != null ||
+            GetComponent<BoneEggCocoon>() != null)
+        {
+            var pCol = GetComponent<PolygonCollider2D>();
+            if (pCol != null) Destroy(pCol);
+            Destroy(this);
+            return;
+        }
+
         if (sr == null)
         {
             sr = GetComponent<SpriteRenderer>();

@@ -718,20 +718,21 @@ public class AugmentManager : MonoBehaviour
                        targetEnemy.GetComponent<TreasureChest>() != null || targetEnemy.GetComponentInParent<TreasureChest>() != null);
         if (isProp) return;
 
-        // Trảm Sát Trảm Kích (PercentCurrentHpExecute): Đòn đánh gây thêm 50% HP hiện tại của mục tiêu
+        // Trảm Sát Trảm Kích (PercentCurrentHpExecute): Đòn đánh gây thêm % HP hiện tại của mục tiêu (Ăn theo cấp Rank)
         if (augMgr.HasAugment(AugmentDatabase.AugmentType.PercentCurrentHpExecute))
         {
+            int rank = augMgr.GetAugmentRank(AugmentDatabase.AugmentType.PercentCurrentHpExecute);
             int curHp = EnemyHealthHelper.GetCurrentHealth(targetEnemy);
             int maxHp = EnemyHealthHelper.GetMaxHealth(targetEnemy);
             bool isBoss = EnemyHealthHelper.IsBossOrElite(targetEnemy);
 
             if (curHp > 0)
             {
-                int execDmg = Mathf.RoundToInt(curHp * 0.30f);
+                int execDmg = Mathf.RoundToInt(curHp * 0.30f * rank);
                 if (isBoss)
                 {
-                    // Giới hạn sát thương lên Boss là 5% Max HP (trần 600 dmg)
-                    int bossCap = Mathf.Min(600, Mathf.RoundToInt(maxHp * 0.05f));
+                    // Giới hạn sát thương lên Boss là (5% * rank) Max HP (trần 600 * rank dmg)
+                    int bossCap = Mathf.Min(600 * rank, Mathf.RoundToInt(maxHp * 0.05f * rank));
                     execDmg = Mathf.Min(execDmg, bossCap);
                 }
                 execDmg = Mathf.Max(1, execDmg);
@@ -1377,6 +1378,17 @@ public class AugmentManager : MonoBehaviour
                 return true;
         }
         return false;
+    }
+
+    public int GetAugmentRank(AugmentDatabase.AugmentType type)
+    {
+        int count = 0;
+        for (int i = 0; i < _selectedAugments.Count; i++)
+        {
+            if (_selectedAugments[i] != null && _selectedAugments[i].type == type)
+                count++;
+        }
+        return Mathf.Max(1, count);
     }
 
     public bool IsTimedAugment(AugmentDatabase.AugmentData a)

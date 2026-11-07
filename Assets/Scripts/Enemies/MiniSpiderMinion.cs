@@ -4,6 +4,10 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
 {
+    public static readonly System.Collections.Generic.HashSet<MiniSpiderMinion> ActiveMinions = new System.Collections.Generic.HashSet<MiniSpiderMinion>();
+    private static Sprite[] s_CachedWalkSprites;
+    private static Sprite s_CachedDeathSprite;
+
     private Transform player;
     private Rigidbody2D rb;
     private SpriteRenderer sr;
@@ -31,6 +35,21 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         return go.AddComponent<MiniSpiderMinion>();
     }
 
+    void OnEnable()
+    {
+        ActiveMinions.Add(this);
+    }
+
+    void OnDisable()
+    {
+        ActiveMinions.Remove(this);
+    }
+
+    void OnDestroy()
+    {
+        ActiveMinions.Remove(this);
+    }
+
     void Awake()
     {
         maxHealth = MapScalingManager.ScaleHealth(maxHealth);
@@ -38,6 +57,12 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
         sr = gameObject.AddComponent<SpriteRenderer>();
+
+        // Gỡ bỏ triệt để PolygonCollider2D và DynamicSpriteColliderSync để Box2D không bị nghẽn
+        var oldSync = GetComponent<DynamicSpriteColliderSync>();
+        if (oldSync != null) DestroyImmediate(oldSync);
+        var oldPoly = GetComponent<PolygonCollider2D>();
+        if (oldPoly != null) DestroyImmediate(oldPoly);
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
@@ -50,33 +75,38 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         sr.sortingOrder = 1200;
         transform.localScale = new Vector3(0.35f, 0.35f, 1f);
 
-        // Load Sprites (100% Android Runtime Safe via Resources + Procedural Fallback)
-        walkSprites = new Sprite[4];
-        for (int i = 0; i < 4; i++)
+        // Load Sprites tĩnh 1 lần duy nhất (Zero-Lag Memory Caching)
+        if (s_CachedWalkSprites == null)
         {
-            walkSprites[i] = Resources.Load<Sprite>($"Enemies/Map3/SkeletonKing_Walk_{i}");
-#if UNITY_EDITOR
-            if (walkSprites[i] == null)
-                walkSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Walk_{i}.png");
-#endif
-        }
-
-        deathSprite = Resources.Load<Sprite>("Enemies/Map3/SkeletonKing_Death_1");
-#if UNITY_EDITOR
-        if (deathSprite == null)
-            deathSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Death_1.png");
-#endif
-
-        // Zero-Bug Android Guarantee: Never allow invisible spider minions!
-        if (walkSprites[0] == null)
-        {
-            Sprite fallback = GetProceduralSpiderSprite();
+            s_CachedWalkSprites = new Sprite[4];
             for (int i = 0; i < 4; i++)
             {
-                walkSprites[i] = fallback;
+                s_CachedWalkSprites[i] = Resources.Load<Sprite>($"Enemies/Map3/SkeletonKing_Walk_{i}");
+#if UNITY_EDITOR
+                if (s_CachedWalkSprites[i] == null)
+                    s_CachedWalkSprites[i] = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/ART/Bosses/Skeleton King/SkeletonKing_Walk_{i}.png");
+#endif
             }
+
+            s_CachedDeathSprite = Resources.Load<Sprite>("Enemies/Map3/SkeletonKing_Death_1");
+#if UNITY_EDITOR
+            if (s_CachedDeathSprite == null)
+                s_CachedDeathSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Bosses/Skeleton King/SkeletonKing_Death_1.png");
+#endif
+
+            if (s_CachedWalkSprites[0] == null)
+            {
+                Sprite fallback = GetProceduralSpiderSprite();
+                for (int i = 0; i < 4; i++)
+                {
+                    s_CachedWalkSprites[i] = fallback;
+                }
+            }
+            if (s_CachedDeathSprite == null) s_CachedDeathSprite = s_CachedWalkSprites[0];
         }
-        if (deathSprite == null) deathSprite = walkSprites[0];
+
+        walkSprites = s_CachedWalkSprites;
+        deathSprite = s_CachedDeathSprite;
 
         sr.sprite = walkSprites[0];
         sr.color = Color.white;
@@ -171,10 +201,11 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         Vector2 moveDir = EnemyNavigationHelper.GetSteeredDirection(bodyPos, dir, col, 0.25f, 0.8f);
         rb.linearVelocity = moveDir * moveSpeed;
 
-        // Lật mặt theo hướng đi
+        // Lật mặt theo hướng đi (Zero-Bug: Dùng flipX để Box2D không bị nghẽn)
         if (Mathf.Abs(dir.x) > 0.05f)
         {
-            transform.localScale = new Vector3(dir.x > 0 ? 0.35f : -0.35f, 0.35f, 1f);
+            if (sr != null) sr.flipX = (dir.x < 0);
+            transform.localScale = new Vector3(0.35f, 0.35f, 1f);
         }
 
         // Hoat anh bò lom ngom

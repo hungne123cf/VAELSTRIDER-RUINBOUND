@@ -63,8 +63,14 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
         gameObject.tag = "Enemy";
 
-        // Zero-Bug Android: Dùng CapsuleCollider2D tĩnh ôm sát thân nhện để tránh lỗi đảo chiều đa giác Box2D khi lật mặt âm scale.x
-        col = GetComponent<Collider2D>();
+        // Zero-Bug Android: Triệt tiêu 100% nguy cơ Box2D solver freeze bằng cách gỡ bỏ PolygonCollider2D và DynamicSpriteColliderSync
+        var oldSync = GetComponent<DynamicSpriteColliderSync>();
+        if (oldSync != null) DestroyImmediate(oldSync);
+        var oldPoly = GetComponent<PolygonCollider2D>();
+        if (oldPoly != null) DestroyImmediate(oldPoly);
+
+        // Dùng CapsuleCollider2D tĩnh ôm trọn thân nhện mượt mà
+        col = GetComponent<CapsuleCollider2D>();
         if (col == null)
         {
             var cap = gameObject.AddComponent<CapsuleCollider2D>();
@@ -73,6 +79,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
             col = cap;
         }
         col.isTrigger = false;
+        transform.localScale = new Vector3(1.2f, 1.2f, 1f);
         EnemyNavigationHelper.EnsureFrictionless(col);
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
@@ -153,11 +160,12 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         Vector2 bodyPos = DynamicSpriteColliderSync.GetBodyCenter(transform, col);
         float dist = Vector2.Distance(bodyPos, player.position);
 
-        // Lat mat theo huong nguoi choi
+        // Lat mat theo huong nguoi choi (Zero-Bug: Dùng flipX, giữ nguyên localScale dương để Box2D không bao giờ bị nghẽn)
         Vector3 diff = (Vector3)player.position - (Vector3)bodyPos;
         if (Mathf.Abs(diff.x) > 0.05f)
         {
-            transform.localScale = new Vector3(diff.x > 0 ? 1.2f : -1.2f, 1.2f, 1f);
+            if (spriteRenderer != null) spriteRenderer.flipX = (diff.x < 0);
+            transform.localScale = new Vector3(1.2f, 1.2f, 1f);
         }
 
         // Tuyệt Kỹ Ác Mộng 1 (Chu Kỳ Tha Hóa): Shadow Blink Decapitate (Dịch Chuyển Bóng Đêm Sau Lưng Trảm Kích)
@@ -724,14 +732,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
     }
 
     public const int MAX_ACTIVE_MINIONS = 6;
-    public static int ActiveMinionCount
-    {
-        get
-        {
-            var minions = Object.FindObjectsByType<MiniSpiderMinion>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            return minions != null ? minions.Length : 0;
-        }
-    }
+    public static int ActiveMinionCount => MiniSpiderMinion.ActiveMinions.Count;
 
     private void SpawnPhaseMinions()
     {

@@ -21,7 +21,6 @@ public class HealthBarUI : MonoBehaviour
     private RectTransform whiteShieldBarRt;
     private Image whiteShieldBarImg;
     private Outline whiteShieldOutline;
-    private GameObject textBackdropObj;
 
     private int lastDisplayedCurrentHP = -1;
     private int lastDisplayedMaxHP = -1;
@@ -120,8 +119,7 @@ public class HealthBarUI : MonoBehaviour
             whiteShieldBarRt.offsetMin = Vector2.zero;
             whiteShieldBarRt.offsetMax = Vector2.zero;
 
-            // Đảm bảo chữ số hiển thị máu và tấm nền chữ luôn ở trên cùng không bị che khuất
-            if (textBackdropObj != null) textBackdropObj.transform.SetAsLastSibling();
+            // Đảm bảo chữ số hiển thị máu luôn ở trên cùng không bị che khuất
             if (tmpHpText != null) tmpHpText.transform.SetAsLastSibling();
             else if (hpText != null) hpText.transform.SetAsLastSibling();
         }
@@ -174,39 +172,17 @@ public class HealthBarUI : MonoBehaviour
         whiteShieldOutline.effectColor = new Color(0.40f, 0.85f, 1f, 0.80f);
         whiteShieldOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
-        // Đảm bảo chữ số hiển thị máu và tấm nền chữ luôn ở trên cùng không bị che khuất
-        if (textBackdropObj != null) textBackdropObj.transform.SetAsLastSibling();
+        // Đảm bảo chữ số hiển thị máu luôn ở trên cùng không bị che khuất
         if (tmpHpText != null) tmpHpText.transform.SetAsLastSibling();
         else if (hpText != null) hpText.transform.SetAsLastSibling();
     }
 
-    private void EnsureTextBackdrop()
-    {
-        if (textBackdropObj != null) return;
-        Transform exist = transform.Find("HP_Text_Backdrop");
-        if (exist != null)
-        {
-            textBackdropObj = exist.gameObject;
-            return;
-        }
-
-        textBackdropObj = new GameObject("HP_Text_Backdrop");
-        textBackdropObj.transform.SetParent(transform, false);
-        RectTransform rt = textBackdropObj.AddComponent<RectTransform>();
-        // Neo ở góc phải nơi hiển thị chữ số HP để bảo vệ tương phản chữ
-        rt.anchorMin = new Vector2(0.42f, 0.10f);
-        rt.anchorMax = new Vector2(0.99f, 0.90f);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-
-        Image img = textBackdropObj.AddComponent<Image>();
-        img.color = new Color(0.02f, 0.03f, 0.06f, 0.62f); // Nền tối Obsidian chống lóa chìm màu chữ 100%
-        img.raycastTarget = false;
-    }
-
     private void EnsureTextComponent()
     {
-        EnsureTextBackdrop();
+        // Xóa sạch tấm nền xám cũ nếu có để thanh máu liền mạch một màu đỏ thẫm
+        Transform existBackdrop = transform.Find("HP_Text_Backdrop");
+        if (existBackdrop != null) Destroy(existBackdrop.gameObject);
+
         if (tmpHpText != null || hpText != null) return;
 
         tmpHpText = GetComponentInChildren<TextMeshProUGUI>();
@@ -246,7 +222,6 @@ public class HealthBarUI : MonoBehaviour
     private void ApplySoulslikeTypography(TextMeshProUGUI tmp)
     {
         if (tmp == null) return;
-        EnsureTextBackdrop();
         RectTransform txtRt = tmp.GetComponent<RectTransform>();
         if (txtRt != null)
         {
@@ -256,7 +231,7 @@ public class HealthBarUI : MonoBehaviour
             txtRt.offsetMax = new Vector2(-6f, 0f);
         }
         tmp.alignment = TextAlignmentOptions.MidlineRight;
-        tmp.fontSize = 12.5f;
+        tmp.fontSize = 13f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
         // Viền đen đậm nét 0.50f chống chìm màu chữ 100% khi full giáp ảo
@@ -270,8 +245,6 @@ public class HealthBarUI : MonoBehaviour
         lastDisplayedCurrentHP = current;
         lastDisplayedMaxHP = max;
         lastDisplayedShield = shield;
-
-        if (textBackdropObj != null) textBackdropObj.transform.SetAsLastSibling();
 
         if (tmpHpText != null)
         {

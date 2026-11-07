@@ -30,6 +30,12 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
 
         sr.sortingOrder = 1400;
 
+        // Zero-Bug Android: Dùng CircleCollider2D tĩnh, triệt tiêu PolygonCollider2D để không nghẽn Box2D
+        var oldSync = GetComponent<DynamicSpriteColliderSync>();
+        if (oldSync != null) DestroyImmediate(oldSync);
+        var oldPoly = GetComponent<PolygonCollider2D>();
+        if (oldPoly != null) DestroyImmediate(oldPoly);
+
         idleSprites = new Sprite[4];
         breakSprites = new Sprite[4];
         for (int i = 0; i < 4; i++)
@@ -123,10 +129,13 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
         // Roi 1-2 linh hon nho
         AethelShard.SpawnShards(transform.position, Random.Range(1, 3));
 
-        // No ra 1 - 2 Nhen Con Mini!
+        // No ra 1 - 2 Nhen Con Mini (Giới hạn tối đa không vượt quá MAX_ACTIVE_MINIONS để chống tràn bộ nhớ và drop FPS)
         Vector3 hatchPos = transform.position;
-        MiniSpiderMinion.Spawn(hatchPos + Vector3.left * 0.4f);
-        if (Random.value > 0.4f)
+        if (SkeletonKingBossAI.ActiveMinionCount < SkeletonKingBossAI.MAX_ACTIVE_MINIONS)
+        {
+            MiniSpiderMinion.Spawn(hatchPos + Vector3.left * 0.4f);
+        }
+        if (Random.value > 0.4f && SkeletonKingBossAI.ActiveMinionCount < SkeletonKingBossAI.MAX_ACTIVE_MINIONS)
         {
             MiniSpiderMinion.Spawn(hatchPos + Vector3.right * 0.4f);
         }

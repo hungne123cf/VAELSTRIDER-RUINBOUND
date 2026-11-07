@@ -141,7 +141,7 @@ public static class SoulslikeHUDStyler
             hbRt.sizeDelta = new Vector2(360f, 26f);
         }
 
-        // Background
+        // Background: Đỏ đen Obsidian sâu thẳm
         Transform bg = hb.Find("Background");
         if (bg != null)
         {
@@ -150,11 +150,11 @@ public static class SoulslikeHUDStyler
             {
                 bgImg.sprite = GetObsidianTroughSprite();
                 bgImg.type = Image.Type.Sliced;
-                bgImg.color = Color.white;
+                bgImg.color = new Color(0.18f, 0.04f, 0.06f, 0.95f);
             }
         }
 
-        // Fill Sliders
+        // Fill Sliders: Đỏ thẫm hoàng gia (Crimson Ruby) đồng nhất toàn thanh máu
         Transform fillArea = hb.Find("Fill Area");
         if (fillArea != null)
         {
@@ -166,12 +166,16 @@ public static class SoulslikeHUDStyler
                 {
                     fillImg.sprite = GetRubyFillSprite();
                     fillImg.type = Image.Type.Sliced;
-                    fillImg.color = Color.white;
+                    fillImg.color = new Color(0.68f, 0.08f, 0.12f, 1f);
                 }
             }
         }
 
-        // Number Text: Rõ nét, dày dặn, dễ nhìn trên mobile
+        // Xóa sạch tấm nền xám cũ nếu có để thanh máu liền mạch một màu đỏ thẫm
+        Transform oldBackdrop = hb.Find("HP_Text_Backdrop");
+        if (oldBackdrop != null) Object.Destroy(oldBackdrop.gameObject);
+
+        // Number Text: Rõ nét, dày dặn, dễ nhìn trên mobile với viền đen sắc nét
         var tmp = hb.GetComponentInChildren<TextMeshProUGUI>();
         if (tmp != null)
         {
@@ -184,8 +188,8 @@ public static class SoulslikeHUDStyler
             tmp.alignment = TextAlignmentOptions.MidlineRight;
             tmp.fontSize = 15f;
             tmp.fontStyle = FontStyles.Bold;
-            tmp.color = new Color(0.98f, 0.94f, 0.85f, 1f); // Trắng ngà hoàng gia
-            SetSafeOutline(tmp, 0.35f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+            tmp.color = Color.white;
+            SetSafeOutline(tmp, 0.45f, Color.black);
         }
     }
 
