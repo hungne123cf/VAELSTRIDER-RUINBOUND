@@ -1367,7 +1367,7 @@ public class AugmentManager : MonoBehaviour
             if (_selectedAugments[i] != null && _selectedAugments[i].type == type)
                 count++;
         }
-        return count;
+        return Mathf.Max(1, count);
     }
 
     public bool HasAugment(AugmentDatabase.AugmentType type)
@@ -1378,17 +1378,6 @@ public class AugmentManager : MonoBehaviour
                 return true;
         }
         return false;
-    }
-
-    public int GetAugmentRank(AugmentDatabase.AugmentType type)
-    {
-        int count = 0;
-        for (int i = 0; i < _selectedAugments.Count; i++)
-        {
-            if (_selectedAugments[i] != null && _selectedAugments[i].type == type)
-                count++;
-        }
-        return Mathf.Max(1, count);
     }
 
     public bool IsTimedAugment(AugmentDatabase.AugmentData a)
