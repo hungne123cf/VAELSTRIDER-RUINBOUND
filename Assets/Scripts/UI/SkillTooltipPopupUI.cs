@@ -6,10 +6,12 @@ using TMPro;
 /// VAELSTRIDER: RUINBOUND - Long-Press Skill Tooltip Popup (Phong cách Đấu Trường Chân Lý TFT / LMHT)
 /// 
 /// Khi người chơi ấn giữ nút chiêu trên màn hình cảm ứng:
-/// - Xuất hiện Popup Thẻ Kỹ Năng chi tiết: Tên chiêu, Icon kỹ năng thật, Loại chiêu, Hồi chiêu.
-/// - Sát thương được ghi chung liền mạch với phần mô tả kỹ năng, không còn khung tách biệt thô kệch.
-/// - Dòng phân tích tỷ lệ sở hữu ICON THẬT (Sprite Pixel Art thanh kiếm ⚔ cam và ngôi sao ✦ xanh lấy trực tiếp từ Bảng Chỉ Số HUD),
-///   triệt tiêu hoàn toàn lỗi font chữ ô vuông [□]!
+/// - Xuất hiện Popup Thẻ Kỹ Năng chi tiết: Tên chiêu, Icon kỹ năng thật, Loại chiêu, Tiêu hao năng lượng/máu, Hồi chiêu.
+/// - Sát thương và công thức phân rã được gộp chung lên TRÊN cùng hàng với mô tả, không tách riêng 2 hàng ở dưới đáy.
+/// - Không còn phần chia cấp độ [ 30 / 45 / 70 ] vì game không có level chiêu.
+/// - Tự động hiển thị chính xác tiêu hao cố định (50 Năng lượng), trên giây (15/s), hoặc dùng HP (20% Máu tối đa).
+/// - Sử dụng TMP_SpriteAsset pixel art sắc nét: <sprite name="atk">, <sprite name="ap">, <sprite name="mana">, <sprite name="hp">,
+///   triệt tiêu 100% lỗi font chữ ô vuông [□]!
 /// - Đặt ở vị trí cao thoáng (nửa trên màn hình) tránh bị ngón tay và nút Hủy Chiêu che khuất.
 /// </summary>
 public class SkillTooltipPopupUI : MonoBehaviour
@@ -24,14 +26,6 @@ public class SkillTooltipPopupUI : MonoBehaviour
     private TextMeshProUGUI titleText;
     private TextMeshProUGUI categoryText;
     private TextMeshProUGUI descText;
-
-    // Scaling Row Elements (Dùng Icon Sprite Thực Tế)
-    private GameObject scalingRowObj;
-    private Image atkIconImg;
-    private TextMeshProUGUI atkValText;
-    private TextMeshProUGUI plusText;
-    private Image apIconImg;
-    private TextMeshProUGUI apValText;
 
     private Coroutine fadeRoutine;
     private bool isVisible = false;
@@ -87,8 +81,8 @@ public class SkillTooltipPopupUI : MonoBehaviour
         panelRt.anchorMin = new Vector2(1f, 1f);
         panelRt.anchorMax = new Vector2(1f, 1f);
         panelRt.pivot = new Vector2(1f, 1f);
-        panelRt.sizeDelta = new Vector2(430f, 215f);
-        panelRt.anchoredPosition = new Vector2(-50f, -190f);
+        panelRt.sizeDelta = new Vector2(440f, 185f);
+        panelRt.anchoredPosition = new Vector2(-50f, -180f);
 
         canvasGroup = root.AddComponent<CanvasGroup>();
         canvasGroup.alpha = 0f;
@@ -97,7 +91,7 @@ public class SkillTooltipPopupUI : MonoBehaviour
 
         // 1. Nền thẻ bài Dark Fantasy sang trọng (Màu đá than chì #101217 viền vàng đồng)
         var bgImg = root.AddComponent<Image>();
-        bgImg.color = new Color(0.06f, 0.08f, 0.11f, 0.95f);
+        bgImg.color = new Color(0.06f, 0.08f, 0.11f, 0.96f);
 
         var outline = root.AddComponent<Outline>();
         outline.effectColor = new Color(0.85f, 0.70f, 0.35f, 0.95f); // Viền vàng hoàng kim TFT
@@ -107,6 +101,8 @@ public class SkillTooltipPopupUI : MonoBehaviour
             ?? Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF")
             ?? TMP_Settings.defaultFontAsset;
 
+        TMP_SpriteAsset spriteAsset = VaelstriderSpriteAssetFactory.GetOrCreateSpriteAsset();
+
         // 2. Header Container (Icon Chiêu + Tên Chiêu + Hồi Chiêu)
         GameObject headerObj = new GameObject("Header", typeof(RectTransform));
         headerObj.transform.SetParent(root.transform, false);
@@ -114,8 +110,8 @@ public class SkillTooltipPopupUI : MonoBehaviour
         hRt.anchorMin = new Vector2(0f, 1f);
         hRt.anchorMax = new Vector2(1f, 1f);
         hRt.pivot = new Vector2(0.5f, 1f);
-        hRt.sizeDelta = new Vector2(-24f, 56f);
-        hRt.anchoredPosition = new Vector2(0f, -10f);
+        hRt.sizeDelta = new Vector2(-24f, 54f);
+        hRt.anchoredPosition = new Vector2(0f, -8f);
 
         // Icon Kỹ Năng
         GameObject iconObj = new GameObject("SkillIcon", typeof(RectTransform), typeof(Image));
@@ -124,7 +120,7 @@ public class SkillTooltipPopupUI : MonoBehaviour
         iRt.anchorMin = new Vector2(0f, 0.5f);
         iRt.anchorMax = new Vector2(0f, 0.5f);
         iRt.pivot = new Vector2(0f, 0.5f);
-        iRt.sizeDelta = new Vector2(48f, 48f);
+        iRt.sizeDelta = new Vector2(46f, 46f);
         iRt.anchoredPosition = new Vector2(4f, 0f);
 
         iconImg = iconObj.GetComponent<Image>();
@@ -140,8 +136,8 @@ public class SkillTooltipPopupUI : MonoBehaviour
         tRt.anchorMin = new Vector2(0f, 1f);
         tRt.anchorMax = new Vector2(1f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.sizeDelta = new Vector2(-60f, 26f);
-        tRt.anchoredPosition = new Vector2(62f, -2f);
+        tRt.sizeDelta = new Vector2(-60f, 25f);
+        tRt.anchoredPosition = new Vector2(58f, -2f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         if (font != null) titleText.font = font;
@@ -151,7 +147,7 @@ public class SkillTooltipPopupUI : MonoBehaviour
         titleText.alignment = TextAlignmentOptions.Left;
         titleText.text = "TÊN CHIÊU THỨC";
 
-        // Category & Cooldown Row
+        // Category & Cooldown Row (Loại Chiêu • Tiêu Hao • Hồi Chiêu)
         GameObject subRowObj = new GameObject("SubRow", typeof(RectTransform));
         subRowObj.transform.SetParent(headerObj.transform, false);
         var sRt = subRowObj.GetComponent<RectTransform>();
@@ -159,15 +155,16 @@ public class SkillTooltipPopupUI : MonoBehaviour
         sRt.anchorMax = new Vector2(1f, 0f);
         sRt.pivot = new Vector2(0f, 0f);
         sRt.sizeDelta = new Vector2(-60f, 22f);
-        sRt.anchoredPosition = new Vector2(62f, 4f);
+        sRt.anchoredPosition = new Vector2(58f, 3f);
 
         categoryText = subRowObj.AddComponent<TextMeshProUGUI>();
         if (font != null) categoryText.font = font;
-        categoryText.fontSize = 13f;
+        if (spriteAsset != null) categoryText.spriteAsset = spriteAsset;
+        categoryText.fontSize = 12.5f;
         categoryText.fontStyle = FontStyles.Bold;
         categoryText.color = new Color(0.4f, 0.85f, 1f);
         categoryText.alignment = TextAlignmentOptions.Left;
-        categoryText.text = "[KÍCH HOẠT]  •  Hồi chiêu: 0s";
+        categoryText.text = "[KÍCH HOẠT]  •  Tiêu hao: 0  •  Hồi chiêu: 0s";
 
         // 3. Đường kẻ ngang phân cách tinh tế
         GameObject sepObj = new GameObject("Separator", typeof(RectTransform), typeof(Image));
@@ -177,113 +174,29 @@ public class SkillTooltipPopupUI : MonoBehaviour
         sepRt.anchorMax = new Vector2(1f, 1f);
         sepRt.pivot = new Vector2(0.5f, 1f);
         sepRt.sizeDelta = new Vector2(-24f, 1.5f);
-        sepRt.anchoredPosition = new Vector2(0f, -72f);
-        sepObj.GetComponent<Image>().color = new Color(0.85f, 0.70f, 0.35f, 0.40f);
+        sepRt.anchoredPosition = new Vector2(0f, -68f);
+        sepObj.GetComponent<Image>().color = new Color(0.85f, 0.70f, 0.35f, 0.45f);
 
-        // 4. Mô tả kỹ năng gộp chung với sát thương (Liền mạch và thẩm mỹ)
+        // 4. Mô tả kỹ năng gộp chung với sát thương (Liền mạch chuẩn TFT)
         GameObject descObj = new GameObject("DescText", typeof(RectTransform));
         descObj.transform.SetParent(root.transform, false);
         var dRt = descObj.GetComponent<RectTransform>();
         dRt.anchorMin = new Vector2(0f, 1f);
         dRt.anchorMax = new Vector2(1f, 1f);
         dRt.pivot = new Vector2(0f, 1f);
-        dRt.sizeDelta = new Vector2(-24f, 85f);
-        dRt.anchoredPosition = new Vector2(12f, -80f);
+        dRt.sizeDelta = new Vector2(-28f, 100f);
+        dRt.anchoredPosition = new Vector2(14f, -76f);
 
         descText = descObj.AddComponent<TextMeshProUGUI>();
         if (font != null) descText.font = font;
-        descText.fontSize = 14f;
+        if (spriteAsset != null) descText.spriteAsset = spriteAsset;
+        descText.fontSize = 13.5f;
         descText.color = new Color(0.88f, 0.90f, 0.94f);
-        descText.lineSpacing = 4f;
+        descText.lineSpacing = 5f;
         descText.alignment = TextAlignmentOptions.TopLeft;
+        descText.enableWordWrapping = true;
+        descText.overflowMode = TextOverflowModes.Overflow;
         descText.text = "Mô tả chi tiết kỹ năng và lượng sát thương gây ra.";
-
-        // 5. Dòng Tỷ Lệ Sát Thương Thời Gian Thực (Chứa ICON THẬT từ Bảng Chỉ Số)
-        scalingRowObj = new GameObject("ScalingRow", typeof(RectTransform));
-        scalingRowObj.transform.SetParent(root.transform, false);
-        var scRt = scalingRowObj.GetComponent<RectTransform>();
-        scRt.anchorMin = new Vector2(0f, 0f);
-        scRt.anchorMax = new Vector2(1f, 0f);
-        scRt.pivot = new Vector2(0f, 0f);
-        scRt.sizeDelta = new Vector2(-24f, 32f);
-        scRt.anchoredPosition = new Vector2(12f, 10f);
-
-        // Icon Kiếm (ATK) Thực Tế từ PlayerStatPanelUI
-        GameObject atkIconObj = new GameObject("AtkIcon", typeof(RectTransform), typeof(Image));
-        atkIconObj.transform.SetParent(scalingRowObj.transform, false);
-        var aiRt = atkIconObj.GetComponent<RectTransform>();
-        aiRt.anchorMin = new Vector2(0f, 0.5f);
-        aiRt.anchorMax = new Vector2(0f, 0.5f);
-        aiRt.pivot = new Vector2(0f, 0.5f);
-        aiRt.sizeDelta = new Vector2(22f, 22f);
-        aiRt.anchoredPosition = new Vector2(0f, 0f);
-        atkIconImg = atkIconObj.GetComponent<Image>();
-        atkIconImg.sprite = PlayerStatPanelUI.GetPixelIcon("⚔", new Color(1f, 0.55f, 0.20f));
-        atkIconImg.preserveAspect = true;
-
-        // Giá trị ATK
-        GameObject atkValObj = new GameObject("AtkValText", typeof(RectTransform));
-        atkValObj.transform.SetParent(scalingRowObj.transform, false);
-        var avRt = atkValObj.GetComponent<RectTransform>();
-        avRt.anchorMin = new Vector2(0f, 0.5f);
-        avRt.anchorMax = new Vector2(0f, 0.5f);
-        avRt.pivot = new Vector2(0f, 0.5f);
-        avRt.sizeDelta = new Vector2(110f, 26f);
-        avRt.anchoredPosition = new Vector2(26f, -1f);
-        atkValText = atkValObj.AddComponent<TextMeshProUGUI>();
-        if (font != null) atkValText.font = font;
-        atkValText.fontSize = 14f;
-        atkValText.fontStyle = FontStyles.Bold;
-        atkValText.color = new Color(1f, 0.65f, 0.25f);
-        atkValText.alignment = TextAlignmentOptions.Left;
-        atkValText.text = "18 (100%)";
-
-        // Dấu "+"
-        GameObject plusObj = new GameObject("PlusText", typeof(RectTransform));
-        plusObj.transform.SetParent(scalingRowObj.transform, false);
-        var pRt = plusObj.GetComponent<RectTransform>();
-        pRt.anchorMin = new Vector2(0f, 0.5f);
-        pRt.anchorMax = new Vector2(0f, 0.5f);
-        pRt.pivot = new Vector2(0f, 0.5f);
-        pRt.sizeDelta = new Vector2(20f, 26f);
-        pRt.anchoredPosition = new Vector2(145f, -1f);
-        plusText = plusObj.AddComponent<TextMeshProUGUI>();
-        if (font != null) plusText.font = font;
-        plusText.fontSize = 14f;
-        plusText.fontStyle = FontStyles.Bold;
-        plusText.color = new Color(0.7f, 0.75f, 0.85f);
-        plusText.alignment = TextAlignmentOptions.Center;
-        plusText.text = "+";
-
-        // Icon Ngôi Sao (AP) Thực Tế từ PlayerStatPanelUI
-        GameObject apIconObj = new GameObject("ApIcon", typeof(RectTransform), typeof(Image));
-        apIconObj.transform.SetParent(scalingRowObj.transform, false);
-        var apiRt = apIconObj.GetComponent<RectTransform>();
-        apiRt.anchorMin = new Vector2(0f, 0.5f);
-        apiRt.anchorMax = new Vector2(0f, 0.5f);
-        apiRt.pivot = new Vector2(0f, 0.5f);
-        apiRt.sizeDelta = new Vector2(22f, 22f);
-        apiRt.anchoredPosition = new Vector2(170f, 0f);
-        apIconImg = apIconObj.GetComponent<Image>();
-        apIconImg.sprite = PlayerStatPanelUI.GetPixelIcon("✦", new Color(0.35f, 0.75f, 1f));
-        apIconImg.preserveAspect = true;
-
-        // Giá trị AP
-        GameObject apValObj = new GameObject("ApValText", typeof(RectTransform));
-        apValObj.transform.SetParent(scalingRowObj.transform, false);
-        var apvRt = apValObj.GetComponent<RectTransform>();
-        apvRt.anchorMin = new Vector2(0f, 0.5f);
-        apvRt.anchorMax = new Vector2(0f, 0.5f);
-        apvRt.pivot = new Vector2(0f, 0.5f);
-        apvRt.sizeDelta = new Vector2(120f, 26f);
-        apvRt.anchoredPosition = new Vector2(196f, -1f);
-        apValText = apValObj.AddComponent<TextMeshProUGUI>();
-        if (font != null) apValText.font = font;
-        apValText.fontSize = 14f;
-        apValText.fontStyle = FontStyles.Bold;
-        apValText.color = new Color(0.40f, 0.85f, 1f);
-        apValText.alignment = TextAlignmentOptions.Left;
-        apValText.text = "0 (35%)";
     }
 
     /// <summary>
@@ -311,6 +224,11 @@ public class SkillTooltipPopupUI : MonoBehaviour
 
         if (info == null) return;
 
+        // Gán Sprite Asset
+        var spriteAsset = VaelstriderSpriteAssetFactory.GetOrCreateSpriteAsset();
+        if (categoryText != null && categoryText.spriteAsset == null) categoryText.spriteAsset = spriteAsset;
+        if (descText != null && descText.spriteAsset == null) descText.spriteAsset = spriteAsset;
+
         // Gán Icon Chiêu Thức Thực Tế
         if (iconImg != null)
         {
@@ -335,27 +253,23 @@ public class SkillTooltipPopupUI : MonoBehaviour
 
         // Cập nhật nội dung Text
         if (titleText != null) titleText.text = info.skillName;
-        if (categoryText != null) categoryText.text = $"{info.skillCategory}  •  {info.cooldownText}";
-        if (descText != null) descText.text = info.description;
-
-        // Cập nhật dòng phân tích tỷ lệ sở hữu ICON THẬT (Image Sprite từ Bảng Chỉ Số)
-        if (atkIconImg != null) atkIconImg.sprite = PlayerStatPanelUI.GetPixelIcon("⚔", new Color(1f, 0.55f, 0.20f));
-        if (apIconImg != null) apIconImg.sprite = PlayerStatPanelUI.GetPixelIcon("✦", new Color(0.35f, 0.75f, 1f));
-
-        if (atkValText != null)
+        if (categoryText != null)
         {
-            atkValText.text = $"{info.fromAtk} ({Mathf.RoundToInt(info.atkRatio * 100)}%)";
+            categoryText.text = $"<color=#38BDF8>[{info.skillCategory}]</color>  •  {info.energyCostText}  •  {info.cooldownText}";
         }
 
-        if (apValText != null)
+        if (descText != null)
         {
-            apValText.text = $"{info.fromAP} ({Mathf.RoundToInt(info.apRatio * 100)}%)";
-        }
-
-        if (panelRt != null)
-        {
-            // Neo ở góc trên bên phải màn hình (tránh xa ngón tay cái và nút HỦY CHIÊU ở góc dưới)
-            panelRt.anchoredPosition = new Vector2(-50f, -190f);
+            descText.text = info.description;
+            // Tự động co giãn chiều cao thẻ bài theo độ dài mô tả để layout luôn vừa vặn không thừa thãi
+            Canvas.ForceUpdateCanvases();
+            float textH = descText.preferredHeight;
+            float targetH = Mathf.Max(180f, textH + 92f);
+            if (panelRt != null)
+            {
+                panelRt.sizeDelta = new Vector2(440f, targetH);
+                panelRt.anchoredPosition = new Vector2(-50f, -180f);
+            }
         }
 
         if (fadeRoutine != null) StopCoroutine(fadeRoutine);
