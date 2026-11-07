@@ -43,7 +43,8 @@ public class HealthBarUI : MonoBehaviour
         {
             int max = playerHealth.GetMaxHealth();
             int current = playerHealth.GetCurrentHealth();
-            int shield = playerHealth.GetVirtualHealth();
+            int shield = playerHealth.Player1WhiteShield;
+            int virtualHp = playerHealth.GetVirtualHealth();
             if (hpSlider != null)
             {
                 hpSlider.maxValue = max;
@@ -54,7 +55,7 @@ public class HealthBarUI : MonoBehaviour
                 easeHpSlider.maxValue = max;
                 easeHpSlider.value = current;
             }
-            UpdateText(current, max, shield);
+            UpdateText(current, max, shield, virtualHp);
         }
     }
 
@@ -68,7 +69,8 @@ public class HealthBarUI : MonoBehaviour
 
         int currentHP = playerHealth.GetCurrentHealth();
         int maxHP = playerHealth.GetMaxHealth();
-        int currentShield = playerHealth.GetVirtualHealth();
+        int currentShield = playerHealth.Player1WhiteShield; // Giáp Ảo riêng của Player 1 (White Shield)
+        int virtualHp = playerHealth.GetVirtualHealth();     // Máu Ảo từ Lõi Nâng Cấp (Augments)
 
         if (hpSlider != null)
         {
@@ -91,7 +93,7 @@ public class HealthBarUI : MonoBehaviour
             }
         }
 
-        UpdateText(currentHP, maxHP, currentShield);
+        UpdateText(currentHP, maxHP, currentShield, virtualHp);
         UpdateWhiteShieldBar(currentHP, maxHP, currentShield);
     }
 
@@ -238,25 +240,35 @@ public class HealthBarUI : MonoBehaviour
         SoulslikeHUDStyler.SetSafeOutline(tmp, 0.50f, Color.black);
     }
 
-    private void UpdateText(int current, int max, int shield = 0)
+    private int lastDisplayedVirtualHp = -1;
+
+    private void UpdateText(int current, int max, int shield = 0, int virtualHp = 0)
     {
         EnsureTextComponent();
-        if (current == lastDisplayedCurrentHP && max == lastDisplayedMaxHP && shield == lastDisplayedShield) return;
+        if (current == lastDisplayedCurrentHP && max == lastDisplayedMaxHP && shield == lastDisplayedShield && virtualHp == lastDisplayedVirtualHp) return;
         lastDisplayedCurrentHP = current;
         lastDisplayedMaxHP = max;
         lastDisplayedShield = shield;
+        lastDisplayedVirtualHp = virtualHp;
 
         if (tmpHpText != null)
         {
             tmpHpText.transform.SetAsLastSibling();
             if (shield > 0)
             {
-                // Máu trắng sáng, Giáp Ảo màu vàng kim hổ phách rực rỡ nổi bật tuyệt đối trên nền tối và viền đen
-                tmpHpText.text = $"<color=#FFFFFF><b>{current}</b></color> <color=#FBBF24><b>(+{shield})</b></color> <color=#94A3B8>/</color> <color=#FFFFFF><b>{max}</b></color>";
+                // Khi có Giáp Ảo: Đổi màu chữ sang màu đen để tương phản sắc nét trên thanh giáp ảo màu trắng/lam sáng
+                string vHpStr = (virtualHp > 0) ? $" <color=#B45309>[+{virtualHp}]</color>" : "";
+                tmpHpText.text = $"<color=#000000><b>{current}</b></color> <color=#B45309><b>(+{shield})</b></color>{vHpStr} <color=#1E293B>/</color> <color=#000000><b>{max}</b></color>";
+                // Viền mỏng sáng nhẹ giúp nét chữ đen hiển thị sắc nét tuyệt đối
+                SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.25f, new Color(1f, 1f, 1f, 0.35f));
             }
             else
             {
-                tmpHpText.text = $"<color=#FFFFFF><b>{current}</b></color> <color=#94A3B8>/</color> <color=#FFFFFF><b>{max}</b></color>";
+                // Khi không có Giáp Ảo: Màu trắng bình thường trên thanh máu đỏ thẫm
+                string vHpStr = (virtualHp > 0) ? $" <color=#F59E0B><b>[+{virtualHp}]</b></color>" : "";
+                tmpHpText.text = $"<color=#FFFFFF><b>{current}</b></color>{vHpStr} <color=#94A3B8>/</color> <color=#FFFFFF><b>{max}</b></color>";
+                // Viền đen đậm Souls-like
+                SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.50f, Color.black);
             }
 
             if (!hpTypographyApplied)
@@ -268,7 +280,8 @@ public class HealthBarUI : MonoBehaviour
         else if (hpText != null)
         {
             hpText.transform.SetAsLastSibling();
-            hpText.text = (shield > 0) ? $"{current} (+{shield}) / {max}" : $"{current} / {max}";
+            string vHpStr = (virtualHp > 0) ? $" [+{virtualHp}]" : "";
+            hpText.text = (shield > 0) ? $"{current} (+{shield}){vHpStr} / {max}" : $"{current}{vHpStr} / {max}";
         }
     }
 }

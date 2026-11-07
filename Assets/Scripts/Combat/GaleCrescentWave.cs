@@ -25,8 +25,12 @@ public class GaleCrescentWave : MonoBehaviour
     private static Sprite cachedForwardCrescentSprite;
     private static Sprite cachedSparkSprite;
 
+    private static int activeWaveCount = 0;
+    private const int MAX_CONCURRENT_WAVES = 16;
+
     public static GaleCrescentWave Spawn(Vector3 origin, Vector2 direction, int damage, float speed = 14.5f, float scale = 0.85f, GaleRoninSkill owner = null)
     {
+        if (activeWaveCount >= MAX_CONCURRENT_WAVES) return null; // An toàn tối đa, không spam quá số lượng cho phép
         GameObject go = new GameObject("GaleCrescentWave");
         go.transform.position = origin;
         var wave = go.AddComponent<GaleCrescentWave>();
@@ -92,6 +96,16 @@ public class GaleCrescentWave : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        activeWaveCount++;
+    }
+
+    void OnDisable()
+    {
+        activeWaveCount = Mathf.Max(0, activeWaveCount - 1);
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other == null || other.gameObject.CompareTag("Player")) return;
@@ -110,7 +124,7 @@ public class GaleCrescentWave : MonoBehaviour
             // Hiệu ứng tia sét nổ bạo kích trên thân quái
             SpawnHitLightningSparks(other.transform.position);
 
-            AugmentManager.TriggerOnHitAugments(attacker, other.gameObject, actualDamage, damageable);
+            // TUYỆT ĐỐI KHÔNG gọi TriggerOnHitAugments từ đạn kiếm khí phụ để tránh đệ quy vô tận làm đứng máy!
 
             if (ownerSkill != null)
             {

@@ -70,6 +70,13 @@ public class PlayerCombat : MonoBehaviour
             effectiveRate = Mathf.Max(PhysLifestealPercent, Mathf.Max(SpellVampPercent, LifestealPercent));
         }
 
+        var augMgr = AugmentManager.Instance;
+        bool hasBloodGod = (augMgr != null && augMgr.HasBloodGodTribute());
+        if (hasBloodGod && effectiveRate < 0.25f)
+        {
+            effectiveRate = 0.25f; // Đảm bảo tối thiểu 25% Hút Máu từ Huyết Thần Tế Lễ
+        }
+
         if (effectiveRate <= 0.0001f) return;
 
         int healAmount = Mathf.RoundToInt(damageDealt * effectiveRate);
@@ -83,11 +90,29 @@ public class PlayerCombat : MonoBehaviour
 
         if (healAmount <= 0) return;
 
-        var augMgr = AugmentManager.Instance;
-        // Huyết Thần Tế Lễ: Khi đầy máu, lượng máu hút dư thừa chuyển thành Lá Chắn Máu Ảo vĩnh cửu (tối đa 50% Max HP)
-        if (playerHealth.CurrentHealth >= playerHealth.MaxHealth && augMgr != null && augMgr.HasBloodGodTribute())
+        // Huyết Thần Tế Lễ: Hút máu chuyển hóa thành Lớp Máu Ảo (Virtual Health)
+        if (hasBloodGod)
         {
-            playerHealth.AddVirtualHealth(healAmount, 35f);
+            if (playerHealth.CurrentHealth >= playerHealth.MaxHealth)
+            {
+                // Khi đầy máu gốc: 100% chuyển hóa thành Máu Ảo
+                playerHealth.AddVirtualHealth(healAmount, 45f);
+            }
+            else
+            {
+                // Khi chưa đầy: Hồi đầy máu gốc trước, lượng dư thừa chuyển thành Máu Ảo
+                int missingHp = playerHealth.MaxHealth - playerHealth.CurrentHealth;
+                if (healAmount > missingHp)
+                {
+                    playerHealth.Heal(missingHp);
+                    int overflow = healAmount - missingHp;
+                    playerHealth.AddVirtualHealth(overflow, 45f);
+                }
+                else
+                {
+                    playerHealth.Heal(healAmount);
+                }
+            }
         }
         else
         {
@@ -1025,8 +1050,12 @@ public class PlayerCombat : MonoBehaviour
         // ─── NỘI TẠI PLAYER 1 (VAELSTRIDER): MỖI 3 ĐÒN ĐÁNH TÍCH GIÁP ẢO VĨNH VIỄN 30% SÁT THƯƠNG ───
         if (enemyCount > 0 && totalDamageThisSwing > 0)
         {
-            string selectedChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? CharacterManager.CHAR_VAELSTRIDER;
-            bool isVaelstrider = (selectedChar == CharacterManager.CHAR_VAELSTRIDER);
+            string selectedChar = CharacterManager.EnsureInstance() != null ? CharacterManager.EnsureInstance().GetSelectedCharacterId() : "";
+            bool hasOtherHeroSkill = (GetComponent<GaleRoninSkill>() != null || GetComponent<AzureBladeSkill>() != null ||
+                                      GetComponent<TitanBerserkerSkill>() != null || GetComponent<DuneAssassinSkill>() != null ||
+                                      GetComponent<CelestialMageSkill>() != null);
+            bool isVaelstrider = (selectedChar == CharacterManager.CHAR_VAELSTRIDER || string.IsNullOrEmpty(selectedChar)) && !hasOtherHeroSkill;
+
             if (isVaelstrider)
             {
                 vaelstriderAttackHitCount++;
@@ -1037,7 +1066,7 @@ public class PlayerCombat : MonoBehaviour
                     var pHealth = playerHealth != null ? playerHealth : (GetComponent<PlayerHealth>() ?? PlayerHealth.Instance);
                     if (pHealth != null)
                     {
-                        pHealth.AddShield(shieldGain, isPermanent: true);
+                        pHealth.AddPlayer1WhiteShield(shieldGain);
                     }
                 }
             }
@@ -2164,7 +2193,6 @@ public class PlayerCombat : MonoBehaviour
         wasRiposteTriggeredThisDash = false;
 
         var ph = GetComponent<PlayerHealth>();
-        bool prevInvul = ph != null && ph.isInvulnerable;
         if (ph != null) ph.isInvulnerable = true;
 
         CreateRadiantRiposteAura();
@@ -2172,34 +2200,39 @@ public class PlayerCombat : MonoBehaviour
         float elapsed = 0f;
         float dashDuration = (playerController != null) ? playerController.DashDuration : 0.35f;
 
-        // Vòng lặp quét né đòn / phản kích trong suốt thời gian lướt
-        while (elapsed < dashDuration)
+        try
         {
-            elapsed += Time.deltaTime;
-
-            if (!wasRiposteTriggeredThisDash)
+            // Vòng lặp quét né đòn / phản kích trong suốt thời gian lướt
+            while (elapsed < dashDuration)
             {
-                // Quét quái trong phạm vi lướt qua
-                int enemyLayer = LayerMask.NameToLayer("Enemy");
-                int mask = (enemyLayer != -1) ? (1 << enemyLayer) : ~0;
-                Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.45f, mask);
+                elapsed += Time.deltaTime;
 
-                for (int i = 0; i < hits.Length; i++)
+                if (!wasRiposteTriggeredThisDash)
                 {
-                    if (hits[i].CompareTag("Enemy") || hits[i].GetComponent<IDamageable>() != null)
+                    // Quét quái trong phạm vi lướt qua
+                    int enemyLayer = LayerMask.NameToLayer("Enemy");
+                    int mask = (enemyLayer != -1) ? (1 << enemyLayer) : ~0;
+                    Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.45f, mask);
+
+                    for (int i = 0; i < hits.Length; i++)
                     {
-                        ExecuteRadiantRiposteCounter(dashDir);
-                        break;
+                        if (hits[i].CompareTag("Enemy") || hits[i].GetComponent<IDamageable>() != null)
+                        {
+                            ExecuteRadiantRiposteCounter(dashDir);
+                            break;
+                        }
                     }
                 }
+
+                yield return null;
             }
-
-            yield return null;
         }
-
-        DestroyRadiantRiposteAura();
-        if (ph != null) ph.isInvulnerable = prevInvul;
-        isRadiantRiposteDashing = false;
+        finally
+        {
+            DestroyRadiantRiposteAura();
+            if (ph != null) ph.isInvulnerable = false;
+            isRadiantRiposteDashing = false;
+        }
     }
 
     private void ExecuteRadiantRiposteCounter(Vector2 dir)

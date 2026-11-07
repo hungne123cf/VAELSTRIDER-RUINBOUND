@@ -705,18 +705,25 @@ public class AugmentManager : MonoBehaviour
         return augmentedDamage;
     }
 
+    private static bool isTriggeringOnHit = false;
+    private static float lastTripleRuinGaleTime = 0f;
+
     /// <summary>
     /// Kích hoạt toàn bộ hiệu ứng Đòn Đánh của Lõi Nâng Cấp (Áp dụng đồng đều cho TẤT CẢ TƯỚNG)
     /// </summary>
     public static void TriggerOnHitAugments(GameObject attacker, GameObject targetEnemy, int actualDamage, IDamageable damageable)
     {
-        if (targetEnemy == null) return;
-        var augMgr = Instance;
-        if (augMgr == null) return;
+        if (targetEnemy == null || isTriggeringOnHit) return;
+        isTriggeringOnHit = true;
 
-        bool isProp = (targetEnemy.GetComponent<BreakableProp>() != null || targetEnemy.GetComponentInParent<BreakableProp>() != null ||
-                       targetEnemy.GetComponent<TreasureChest>() != null || targetEnemy.GetComponentInParent<TreasureChest>() != null);
-        if (isProp) return;
+        try
+        {
+            var augMgr = Instance;
+            if (augMgr == null) return;
+
+            bool isProp = (targetEnemy.GetComponent<BreakableProp>() != null || targetEnemy.GetComponentInParent<BreakableProp>() != null ||
+                           targetEnemy.GetComponent<TreasureChest>() != null || targetEnemy.GetComponentInParent<TreasureChest>() != null);
+            if (isProp) return;
 
         // Trảm Sát Trảm Kích (PercentCurrentHpExecute): Đòn đánh gây thêm % HP hiện tại của mục tiêu (Ăn theo cấp Rank)
         if (augMgr.HasAugment(AugmentDatabase.AugmentType.PercentCurrentHpExecute))
@@ -801,9 +808,10 @@ public class AugmentManager : MonoBehaviour
             CorrosiveVenomDebuff.Apply(targetEnemy, duration: 4.5f, bonusDamage: 0.30f);
         }
 
-        // 9. Tam Trảm Tàn Phong (TripleRuinGale - Vaelstrider): Đòn chém có 35% cơ hội phóng 3 luồng kiếm khí
-        if (augMgr.HasAugment(AugmentDatabase.AugmentType.TripleRuinGale) && UnityEngine.Random.value <= 0.35f && attacker != null)
+        // 9. Tam Trảm Tàn Phong (TripleRuinGale - Vaelstrider): Đòn chém có 35% cơ hội phóng 3 luồng kiếm khí (Có Cooldown 0.35s chống spam đứng máy)
+        if (augMgr.HasAugment(AugmentDatabase.AugmentType.TripleRuinGale) && UnityEngine.Random.value <= 0.35f && attacker != null && (Time.time - lastTripleRuinGaleTime >= 0.35f))
         {
+            lastTripleRuinGaleTime = Time.time;
             Vector3 origin = attacker.transform.position;
             Vector2 aimDir = (targetEnemy.transform.position - origin).normalized;
             if (aimDir.sqrMagnitude < 0.01f) aimDir = Vector2.right;
@@ -846,6 +854,11 @@ public class AugmentManager : MonoBehaviour
             var cam = Object.FindAnyObjectByType<CameraFollow>();
             if (cam != null) cam.Shake(0.18f, 0.25f);
             SoundManager.EnsureInstance()?.PlayHitImpact(true, true);
+        }
+        }
+        finally
+        {
+            isTriggeringOnHit = false;
         }
     }
 

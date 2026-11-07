@@ -106,7 +106,7 @@ public class CharacterManager : MonoBehaviour
             skillDescVN = "Combo kiếm thuật hoàng kim. Nhấn Giữ vào Thế Thủ Kiếm Thuẫn: Đỡ đòn hoàn hảo chặn đứng sát thương và tung đòn Phản Kích Hoàng Kim x3.0 sát thương bạo kích! Tuyệt kỹ xoay kiếm 360 độ hút quái và tung đòn kết liễu hất văng.",
             skillDescEN = "Golden sword arts. Hold attack for Divine Parry Stance: blocks incoming damage and retaliates with a x3.0 Crit Divine Riposte! Special skill spins 360° pulling enemies and erupting with a blast.",
             baseHealth = 100,
-            baseAttack = 20,
+            baseAttack = 25,
             baseDefense = 12,
             baseSpeed = 5.0f,
             unlockPrice = 0, // Miễn phí ban đầu

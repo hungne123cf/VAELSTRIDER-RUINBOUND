@@ -102,15 +102,7 @@ public class PlayerEnergySystem : MonoBehaviour
             currentEnergy = Mathf.Min(maxEnergy, currentEnergy + rate * Time.deltaTime);
         }
 
-        // 2. Dem thoi gian duy tri Giap Ho Than
-        if (isShieldActive)
-        {
-            shieldTimer -= Time.deltaTime;
-            if (shieldTimer <= 0f)
-            {
-                BreakShield(expired: true);
-            }
-        }
+        // 2. Giáp Hộ Thân Nội Năng màu vàng duy trì liên tục cho đến khi bị quái đánh vỡ (chuẩn phong cách ARPG / MOBA)
     }
 
     /// <summary>
@@ -213,8 +205,9 @@ public class PlayerEnergySystem : MonoBehaviour
     }
 
     /// <summary>
-    /// Hap thu sat thuong khi nguoi choi bi quai danh trung.
-    /// Tra ve luong sat thuong du thua (neu co) xuyen qua vao mau goc.
+    /// Hấp thụ sát thương khi người chơi bị quái đánh trúng.
+    /// Ưu tiên trừ vào Thanh Giáp Nội Năng màu vàng trước tiên theo yêu cầu.
+    /// Trả về lượng sát thương dư thừa (nếu có) xuyên qua vào giáp ảo/máu.
     /// </summary>
     public int AbsorbDamage(int incomingDamage)
     {
@@ -222,31 +215,54 @@ public class PlayerEnergySystem : MonoBehaviour
         var mage = GetComponent<CelestialMageSkill>();
         if (mage != null && mage.enabled) return incomingDamage;
 
-        if (!isShieldActive || incomingDamage <= 0) return incomingDamage;
+        if (incomingDamage <= 0) return incomingDamage;
 
-        // Am thanh & hieu ung giap chan don
+        // Âm thanh & hiệu ứng giáp chắn đòn
         if (shieldVisual != null)
         {
             shieldVisual.OnHit();
         }
 
-        if (currentShieldHealth >= incomingDamage)
+        // 1. Nếu đang có Khiên Hộ Thân Siêu Cấp (đầy nội năng 100%)
+        if (isShieldActive && currentShieldHealth > 0)
         {
-            currentShieldHealth -= incomingDamage;
-
-            if (currentShieldHealth <= 0)
+            if (currentShieldHealth >= incomingDamage)
             {
-                BreakShield(expired: false);
+                currentShieldHealth -= incomingDamage;
+                currentInnerEnergy = Mathf.Clamp(currentShieldHealth, 0f, maxInnerEnergy);
+                if (currentShieldHealth <= 0)
+                {
+                    BreakShield(expired: false);
+                }
+                return 0; // Hấp thụ hoàn toàn sát thương!
             }
-            return 0; // Hap thu hoan toan sat thuong!
+            else
+            {
+                int remainingDamage = incomingDamage - currentShieldHealth;
+                currentShieldHealth = 0;
+                BreakShield(expired: false);
+                return remainingDamage; // Phần sát thương còn lại trừ tiếp vào các lớp sau
+            }
         }
-        else
+
+        // 2. Nếu thanh nội năng màu vàng đang có năng lượng (> 0): Hoạt động như lớp giáp năng lượng bảo hộ
+        if (currentInnerEnergy > 0f)
         {
-            int remainingDamage = incomingDamage - currentShieldHealth;
-            currentShieldHealth = 0;
-            BreakShield(expired: false);
-            return remainingDamage; // Phan sat thuong con lai tru vao mau
+            int energyAvailable = Mathf.RoundToInt(currentInnerEnergy);
+            if (energyAvailable >= incomingDamage)
+            {
+                currentInnerEnergy = Mathf.Max(0f, currentInnerEnergy - incomingDamage);
+                return 0; // Hấp thụ trọn vẹn vào nội năng!
+            }
+            else
+            {
+                int remDmg = incomingDamage - energyAvailable;
+                currentInnerEnergy = 0f;
+                return remDmg;
+            }
         }
+
+        return incomingDamage;
     }
 
     /// <summary>
@@ -289,7 +305,7 @@ public class PlayerEnergySystem : MonoBehaviour
     public float GetMaxInnerEnergy() => maxInnerEnergy;
     public float GetInnerEnergyNormalized() => maxInnerEnergy > 0 ? Mathf.Clamp01(currentInnerEnergy / maxInnerEnergy) : 0f;
 
-    public bool IsShieldActive() => isShieldActive;
+    public bool IsShieldActive() => isShieldActive || currentInnerEnergy > 0f;
     public int GetShieldHealth() => currentShieldHealth;
     public int GetMaxShieldHealth() => maxShieldHealth;
     public float GetShieldHealthNormalized() => maxShieldHealth > 0 ? Mathf.Clamp01((float)currentShieldHealth / maxShieldHealth) : 0f;

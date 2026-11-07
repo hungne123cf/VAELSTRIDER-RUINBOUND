@@ -177,16 +177,28 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public static void ResetRunPreservedHealth()
     {
         PlayerPrefs.DeleteKey(PREF_RUN_PRESERVED_HEALTH);
+        PlayerPrefs.DeleteKey("Saved_P1_WhiteShield");
+        PlayerPrefs.DeleteKey("Saved_VirtualHealth");
+        PlayerPrefs.DeleteKey("Saved_VirtualHealthTimer");
         PlayerPrefs.DeleteKey("Saved_CurrentShield");
         PlayerPrefs.DeleteKey("Saved_ShieldTimer");
         PlayerPrefs.Save();
     }
 
     private bool isSceneInitializing = true;
+    private float invulSafetyTimer = 0f;
+
+    void OnEnable()
+    {
+        isInvulnerable = false;
+        invulSafetyTimer = 0f;
+    }
 
     void Awake()
     {
         Instance = this;
+        isInvulnerable = false;
+        invulSafetyTimer = 0f;
 
         // Tự động nạp máu khởi điểm chuẩn theo đúng Anh Hùng đã chọn (Titan: 200, Azure/Dune: 110, Ronin: 95, Vael: 100)
         var charMgr = CharacterManager.EnsureInstance();
@@ -211,12 +223,19 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (preserved > 0)
         {
             currentHealth = Mathf.Clamp(preserved, 1, maxHealth);
-            Debug.Log($"<color=cyan>[HP PRESERVED]</color> Sang map mới tại {activeScene}: Bảo lưu chính xác {currentHealth}/{maxHealth} HP từ vòng trước!");
+            // Khôi phục Giáp Ảo Vĩnh Viễn của Player 1 từ map trước
+            player1WhiteShield = PlayerPrefs.GetInt("Saved_P1_WhiteShield", 0);
+            Debug.Log($"<color=cyan>[HP PRESERVED]</color> Sang map mới tại {activeScene}: Bảo lưu chính xác {currentHealth}/{maxHealth} HP, Giáp Ảo P1: +{player1WhiteShield}!");
         }
         else
         {
             // Bắt đầu một Run mới từ đầu (chưa qua màn nào): Hồi đầy 100% sinh lực chuẩn theo tướng đã chọn
             currentHealth = maxHealth;
+            player1WhiteShield = 0;
+            currentVirtualHealth = 0;
+            isVirtualHealthActive = false;
+            PlayerPrefs.DeleteKey("Saved_P1_WhiteShield");
+            PlayerPrefs.DeleteKey("Saved_VirtualHealth");
             Debug.Log($"<color=green>[HP INIT]</color> Bắt đầu run mới tại {activeScene}: Sinh lực khởi đầu 100% ({maxHealth}/{maxHealth} HP cho {charData?.nameVN ?? "Hero"})!");
         }
         PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
@@ -238,22 +257,30 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         yield return null;
         yield return new WaitForEndOfFrame();
 
+        isInvulnerable = false;
+
         int preserved = RunPreservedCurrentHealth;
         if (preserved > 0)
         {
             currentHealth = Mathf.Clamp(preserved, 1, maxHealth);
             PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
 
-            // Khôi phục Giáp Ảo vĩnh viễn / có thời hạn được bảo lưu từ map trước
-            int savedShield = PlayerPrefs.GetInt("Saved_CurrentShield", 0);
-            if (savedShield > 0)
+            // Khôi phục Giáp Ảo Vĩnh Viễn của Player 1 được bảo lưu từ map trước
+            int savedP1Shield = PlayerPrefs.GetInt("Saved_P1_WhiteShield", 0);
+            if (savedP1Shield > 0)
             {
-                currentVirtualHealth = savedShield;
-                maxVirtualHealth = Mathf.Max(maxVirtualHealth, currentVirtualHealth);
+                player1WhiteShield = savedP1Shield;
+                Debug.Log($"<color=cyan>[SHIELD RESTORED]</color> Giữ nguyên thành công +{player1WhiteShield} Giáp Ảo Player 1 qua map mới!");
+            }
+
+            // Khôi phục Máu Ảo từ Lõi nếu còn thời hạn
+            int savedVHealth = PlayerPrefs.GetInt("Saved_VirtualHealth", 0);
+            float savedVTimer = PlayerPrefs.GetFloat("Saved_VirtualHealthTimer", 0f);
+            if (savedVHealth > 0 && savedVTimer > 0f)
+            {
+                currentVirtualHealth = savedVHealth;
+                virtualHealthTimer = savedVTimer;
                 isVirtualHealthActive = true;
-                float savedTimer = PlayerPrefs.GetFloat("Saved_ShieldTimer", -1f);
-                virtualHealthTimer = (savedTimer < 0f) ? float.PositiveInfinity : savedTimer;
-                Debug.Log($"<color=cyan>[SHIELD RESTORED]</color> Giữ nguyên thành công +{currentVirtualHealth} Giáp Ảo qua map mới!");
             }
             Debug.Log($"<color=cyan>[HP LOCKED]</color> Hoàn tất khởi tạo map: Máu giữ nguyên chuẩn xác {currentHealth}/{maxHealth} HP!");
         }
@@ -261,11 +288,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         {
             // Bắt đầu một Run mới: Luôn đảm bảo nhân vật đầy 100% sinh lực theo đúng tướng đã chọn sau khi nạp đủ nâng cấp
             currentHealth = maxHealth;
+            player1WhiteShield = 0;
             currentVirtualHealth = 0;
             isVirtualHealthActive = false;
             PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
-            PlayerPrefs.DeleteKey("Saved_CurrentShield");
-            PlayerPrefs.DeleteKey("Saved_ShieldTimer");
+            PlayerPrefs.DeleteKey("Saved_P1_WhiteShield");
+            PlayerPrefs.DeleteKey("Saved_VirtualHealth");
+            PlayerPrefs.DeleteKey("Saved_VirtualHealthTimer");
             Debug.Log($"<color=green>[HP FULL]</color> Khởi đầu trận mới: Sinh lực đầy bình 100% ({currentHealth}/{maxHealth} HP)!");
         }
 
@@ -278,15 +307,24 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (!isDead && currentHealth > 0)
         {
             RunPreservedCurrentHealth = currentHealth;
-            if (isVirtualHealthActive && currentVirtualHealth > 0)
+            if (player1WhiteShield > 0)
             {
-                PlayerPrefs.SetInt("Saved_CurrentShield", currentVirtualHealth);
-                PlayerPrefs.SetFloat("Saved_ShieldTimer", float.IsPositiveInfinity(virtualHealthTimer) ? -1f : virtualHealthTimer);
+                PlayerPrefs.SetInt("Saved_P1_WhiteShield", player1WhiteShield);
             }
             else
             {
-                PlayerPrefs.DeleteKey("Saved_CurrentShield");
-                PlayerPrefs.DeleteKey("Saved_ShieldTimer");
+                PlayerPrefs.DeleteKey("Saved_P1_WhiteShield");
+            }
+
+            if (isVirtualHealthActive && currentVirtualHealth > 0 && virtualHealthTimer > 0f)
+            {
+                PlayerPrefs.SetInt("Saved_VirtualHealth", currentVirtualHealth);
+                PlayerPrefs.SetFloat("Saved_VirtualHealthTimer", virtualHealthTimer);
+            }
+            else
+            {
+                PlayerPrefs.DeleteKey("Saved_VirtualHealth");
+                PlayerPrefs.DeleteKey("Saved_VirtualHealthTimer");
             }
             PlayerPrefs.Save();
         }
@@ -364,52 +402,54 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private float socketHpRegen = 0f;
     private float regenTimer = 0f;
 
-    [Header("Virtual Health / Máu Ảo (+50% HP Tuyệt Kỹ)")]
+    [Header("Player 1 Exclusive White Shield (Giáp Ảo Vĩnh Viễn Không Giới Hạn)")]
+    private int player1WhiteShield = 0;
+    public int Player1WhiteShield => player1WhiteShield;
+    public int CurrentShield => player1WhiteShield;
+    public int GetShield() => player1WhiteShield;
+    public bool IsShieldActive() => player1WhiteShield > 0;
+
+    /// <summary>
+    /// Giáp Ảo màu trắng (White Shield) ĐỘC QUYỀN RIÊNG CHO PLAYER 1 (Vaelstrider):
+    /// Cứ mỗi 3 đòn đánh trúng kẻ địch tích lũy vĩnh viễn 30% sát thương gây ra thành Giáp Ảo.
+    /// Không giới hạn trần (No Limit), tồn tại vĩnh viễn, bảo lưu qua các map mới.
+    /// </summary>
+    public void AddPlayer1WhiteShield(int amount)
+    {
+        if (amount <= 0 || isDead) return;
+
+        player1WhiteShield += amount;
+        PlayerPrefs.SetInt("Saved_P1_WhiteShield", player1WhiteShield);
+        PlayerPrefs.Save();
+    }
+
+    /// <summary>
+    /// Giữ tương thích ngược cho các lời gọi AddShield cũ (chỉ cộng vào Player 1 White Shield)
+    /// </summary>
+    public void AddShield(int amount, bool isPermanent = true, float duration = 0f)
+    {
+        AddPlayer1WhiteShield(amount);
+    }
+
+    [Header("Virtual Health / Máu Ảo Từ Lõi Nâng Cấp (Augments / Overheal)")]
     private int currentVirtualHealth = 0;
     private int maxVirtualHealth = 0;
     private float virtualHealthDuration = 15f;
     private float virtualHealthTimer = 0f;
     private bool isVirtualHealthActive = false;
 
+    public int CurrentVirtualHealth => (isVirtualHealthActive && currentVirtualHealth > 0) ? currentVirtualHealth : 0;
+    public int GetVirtualHealth() => (isVirtualHealthActive && currentVirtualHealth > 0) ? currentVirtualHealth : 0;
+    public bool IsVirtualHealthActive() => isVirtualHealthActive && currentVirtualHealth > 0;
+
     /// <summary>
-    /// Giáp Ảo (Shield) chuẩn phong cách LoL / Wild Rift / Soul Knight:
-    /// Màu trắng hiển thị trực tiếp trên thanh HP, hấp thụ 100% sát thương nhận vào trước khi trừ vào máu thật.
-    /// Có thể là Vĩnh Viễn (isPermanent = true) hoặc có thời hạn (duration > 0).
+    /// Máu Ảo (Virtual Health): Cơ chế độc lập từ các Lõi Nâng Cấp (như Huyết Thần Tế Lễ BloodGodTribute).
     /// </summary>
-    public void AddShield(int amount, bool isPermanent = true, float duration = 0f)
+    public void AddVirtualHealth(int amount, float duration = 25f, bool fillMissingBaseHpFirst = false)
     {
         if (amount <= 0 || isDead) return;
 
-        // NO LIMIT cho Giáp Ảo: Không giới hạn trần, cộng dồn vô hạn
-        currentVirtualHealth += amount;
-        maxVirtualHealth = Mathf.Max(maxVirtualHealth, currentVirtualHealth);
-        isVirtualHealthActive = true;
-
-        if (isPermanent || duration <= 0f)
-        {
-            virtualHealthTimer = float.PositiveInfinity;
-        }
-        else
-        {
-            virtualHealthTimer = Mathf.Max(virtualHealthTimer, duration);
-        }
-
-        PlayerPrefs.SetInt("Saved_CurrentShield", currentVirtualHealth);
-        PlayerPrefs.SetFloat("Saved_ShieldTimer", float.IsPositiveInfinity(virtualHealthTimer) ? -1f : virtualHealthTimer);
-        PlayerPrefs.Save();
-
-        // Không popup chữ "GIÁP ẢO" theo yêu cầu người chơi
-    }
-
-    public int CurrentShield => (isVirtualHealthActive && currentVirtualHealth > 0) ? currentVirtualHealth : 0;
-    public int GetShield() => CurrentShield;
-    public bool IsShieldActive() => isVirtualHealthActive && currentVirtualHealth > 0;
-
-    public void AddVirtualHealth(int amount, float duration = 15f, bool fillMissingBaseHpFirst = true)
-    {
-        if (amount <= 0 || isDead) return;
-
-        // Chuẩn nguyên tắc Overheal: Máu gốc chưa đầy thì ưu tiên hồi phục lấp đầy bình máu gốc trước
+        // Chuẩn nguyên tắc Overheal: Máu gốc chưa đầy thì ưu tiên hồi phục lấp đầy bình máu gốc trước nếu fillMissingBaseHpFirst = true
         if (fillMissingBaseHpFirst && currentHealth < maxHealth)
         {
             int missing = maxHealth - currentHealth;
@@ -433,6 +473,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         virtualHealthDuration = duration;
         virtualHealthTimer = duration;
         isVirtualHealthActive = true;
+
+        PlayerPrefs.SetInt("Saved_VirtualHealth", currentVirtualHealth);
+        PlayerPrefs.SetFloat("Saved_VirtualHealthTimer", virtualHealthTimer);
+        PlayerPrefs.Save();
 
         SoundManager.EnsureInstance()?.PlayHitImpact();
     }
@@ -506,7 +550,22 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     void Update()
     {
-        // 1. Đếm thời gian duy trì Lớp Máu Ảo / Giáp Ảo (Giáp Ảo Vĩnh Viễn có Timer = Infinity sẽ không bị trừ)
+        // 0. Invulnerable Safety Watchdog: Tránh kẹt trạng thái bất tử nếu coroutine bị ngắt hoặc load scene
+        if (isInvulnerable && !BossIntroCutsceneUI.IsCutsceneActive && !LevelUpChoiceUI.IsShowing && Time.timeScale > 0f)
+        {
+            invulSafetyTimer += Time.deltaTime;
+            if (invulSafetyTimer >= 2.0f)
+            {
+                isInvulnerable = false;
+                invulSafetyTimer = 0f;
+            }
+        }
+        else
+        {
+            invulSafetyTimer = 0f;
+        }
+
+        // 1. Đếm thời gian duy trì Lớp Máu Ảo từ Lõi Nâng Cấp
         if (isVirtualHealthActive && !float.IsPositiveInfinity(virtualHealthTimer))
         {
             virtualHealthTimer -= Time.deltaTime;
@@ -625,42 +684,53 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             }
         }
 
-        // 2. Kiểm tra và trừ vào Lớp Giáp Ảo (White Shield Barrier) kế tiếp nếu còn sát thương
-        if (isVirtualHealthActive && currentVirtualHealth > 0)
+        // 2. Kiểm tra và trừ vào Giáp Ảo Màu Trắng (Player 1 White Shield) kế tiếp nếu còn sát thương
+        if (player1WhiteShield > 0)
         {
-            int virtualAbsorbed = 0;
-            if (currentVirtualHealth >= damage)
-            {
-                virtualAbsorbed = damage;
-                currentVirtualHealth -= damage;
-                if (currentVirtualHealth <= 0)
-                {
-                    isVirtualHealthActive = false;
-                }
-                damage = 0;
-            }
-            else
-            {
-                virtualAbsorbed = currentVirtualHealth;
-                damage -= virtualAbsorbed;
-                currentVirtualHealth = 0;
-                isVirtualHealthActive = false;
-            }
+            int whiteAbsorbed = Mathf.Min(damage, player1WhiteShield);
+            player1WhiteShield -= whiteAbsorbed;
+            damage -= whiteAbsorbed;
 
-            PlayerPrefs.SetInt("Saved_CurrentShield", currentVirtualHealth);
+            PlayerPrefs.SetInt("Saved_P1_WhiteShield", player1WhiteShield);
             PlayerPrefs.Save();
 
-            if (virtualAbsorbed > 0)
+            if (whiteAbsorbed > 0)
             {
                 // Hiển thị số trừ giáp ảo màu trắng bạc nổi bật chuẩn phong cách MOBA
-                DamagePopup.CreateText(transform.position + Vector3.up * 0.75f, $"-{virtualAbsorbed}", Color.white);
+                DamagePopup.CreateText(transform.position + Vector3.up * 0.75f, $"-{whiteAbsorbed}", Color.white);
                 SoundManager.EnsureInstance()?.PlayHitImpact();
                 FindAnyObjectByType<CameraFollow>()?.Shake(0.08f, 0.1f);
             }
 
             if (damage <= 0)
             {
-                return; // Đã hấp thụ toàn bộ đòn đánh bằng máu ảo!
+                return; // Đã hấp thụ toàn bộ đòn đánh bằng Giáp Ảo!
+            }
+        }
+
+        // 3. Kiểm tra và trừ vào Lớp Máu Ảo Từ Lõi Nâng Cấp (Virtual Health) nếu còn sát thương
+        if (isVirtualHealthActive && currentVirtualHealth > 0)
+        {
+            int vAbsorbed = Mathf.Min(damage, currentVirtualHealth);
+            currentVirtualHealth -= vAbsorbed;
+            damage -= vAbsorbed;
+            if (currentVirtualHealth <= 0)
+            {
+                isVirtualHealthActive = false;
+            }
+
+            PlayerPrefs.SetInt("Saved_VirtualHealth", currentVirtualHealth);
+            PlayerPrefs.Save();
+
+            if (vAbsorbed > 0)
+            {
+                DamagePopup.CreateText(transform.position + Vector3.up * 0.65f, $"-{vAbsorbed}", new Color(1f, 0.85f, 0.25f));
+                SoundManager.EnsureInstance()?.PlayHitImpact();
+            }
+
+            if (damage <= 0)
+            {
+                return; // Đã hấp thụ toàn bộ đòn đánh bằng Máu Ảo!
             }
         }
 
@@ -857,9 +927,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     private void Die()
     {
-        if (isDead || isInvulnerable) return;
+        if (isDead) return;
         isDead = true;
+        isInvulnerable = false;
         currentHealth = 0;
+        player1WhiteShield = 0;
+        currentVirtualHealth = 0;
+        isVirtualHealthActive = false;
         LastDeathPosition = transform.position;
         LastDeathScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         PlayerPrefs.SetInt("Saved_CurrentHealth", maxHealth);
