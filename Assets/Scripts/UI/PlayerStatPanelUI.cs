@@ -68,8 +68,8 @@ public class PlayerStatPanelUI : MonoBehaviour
         panelRt = GetComponent<RectTransform>();
         panelRt.anchorMin = panelRt.anchorMax = new Vector2(0f, 1f);
         panelRt.pivot = new Vector2(0f, 1f);
-        panelRt.anchoredPosition = new Vector2(24f, -190f); // Dưới cụm Avatar/Thanh máu
-        panelRt.sizeDelta = new Vector2(380f, 190f);
+        panelRt.anchoredPosition = new Vector2(24f, -234f); // Dưới cụm Avatar/Thanh máu/Lõi Nâng Cấp
+        panelRt.sizeDelta = new Vector2(456f, 226f);
 
         // Nội dung (nền + 2 cột)
         contentObj = new GameObject("Content", typeof(RectTransform), typeof(Image));
@@ -78,13 +78,13 @@ public class PlayerStatPanelUI : MonoBehaviour
         cRt.anchorMin = Vector2.zero; cRt.anchorMax = Vector2.one;
         cRt.offsetMin = cRt.offsetMax = Vector2.zero;
         var bg = contentObj.GetComponent<Image>();
-        bg.color = new Color(0.04f, 0.06f, 0.09f, 0.78f);
+        bg.color = new Color(0.04f, 0.06f, 0.09f, 0.82f);
         bg.raycastTarget = false;
         var outline = contentObj.AddComponent<Outline>();
         outline.effectColor = new Color(0.62f, 0.55f, 0.40f, 0.85f);
         outline.effectDistance = new Vector2(2f, -2f);
 
-        float rowH = 34f, top = -14f;
+        float rowH = 40f, top = -16f;
         // Cột trái
         hpTxt   = CreateRow(font, 0, top - rowH * 0, new Color(0.45f, 0.95f, 0.35f), "♥");
         atkTxt  = CreateRow(font, 0, top - rowH * 1, new Color(1f, 0.55f, 0.20f), "⚔");
@@ -97,11 +97,11 @@ public class PlayerStatPanelUI : MonoBehaviour
         cdrTxt  = CreateRow(font, 1, top - rowH * 2, new Color(0.70f, 0.75f, 0.95f), "⌛");
         lsTxt   = CreateRow(font, 1, top - rowH * 3, new Color(1f, 0.45f, 0.15f), "♦");
 
-        // Nút thu gọn / mở rộng (luôn hiện)
+        // Nút thu gọn / mở rộng (luôn hiện, kích cỡ 64x64 rõ nét trên mobile)
         GameObject btnObj = new GameObject("ToggleBtn", typeof(RectTransform), typeof(Image), typeof(Button));
         btnObj.transform.SetParent(transform, false);
         toggleRt = btnObj.GetComponent<RectTransform>();
-        toggleRt.sizeDelta = new Vector2(52f, 52f);
+        toggleRt.sizeDelta = new Vector2(64f, 64f);
         toggleImg = btnObj.GetComponent<Image>();
         toggleImg.sprite = GetStatIconSprite();
         toggleImg.color = Color.white;
@@ -113,7 +113,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         lRt.anchorMin = Vector2.zero; lRt.anchorMax = Vector2.one; lRt.offsetMin = lRt.offsetMax = Vector2.zero;
         toggleLabel = lblObj.AddComponent<TextMeshProUGUI>();
         if (font != null) toggleLabel.font = font;
-        toggleLabel.fontSize = 24; toggleLabel.fontStyle = FontStyles.Bold;
+        toggleLabel.fontSize = 26; toggleLabel.fontStyle = FontStyles.Bold;
         toggleLabel.alignment = TextAlignmentOptions.Center;
         toggleLabel.color = Color.white;
         toggleLabel.raycastTarget = false;
@@ -121,11 +121,15 @@ public class PlayerStatPanelUI : MonoBehaviour
         collapsed = PlayerPrefs.GetInt(PREF_COLLAPSED, 0) == 1;
         ApplyCollapsed();
         Refresh();
+        if (AugmentHUDBar.Instance != null)
+        {
+            AugmentHUDBar.Instance.SyncStatPanelPosition();
+        }
     }
 
     private TextMeshProUGUI CreateRow(TMP_FontAsset font, int col, float y, Color iconColor, string glyph)
     {
-        float x = col == 0 ? 16f : 212f;
+        float x = col == 0 ? 18f : 250f;
 
         GameObject icon = new GameObject("Icon", typeof(RectTransform), typeof(Image));
         icon.transform.SetParent(contentObj.transform, false);
@@ -133,7 +137,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         iRt.anchorMin = iRt.anchorMax = new Vector2(0f, 1f);
         iRt.pivot = new Vector2(0f, 1f);
         iRt.anchoredPosition = new Vector2(x, y);
-        iRt.sizeDelta = new Vector2(26f, 26f);
+        iRt.sizeDelta = new Vector2(32f, 32f);
         var img = icon.GetComponent<Image>();
         img.sprite = GetPixelIcon(glyph, iconColor);
         img.color = Color.white;
@@ -145,16 +149,18 @@ public class PlayerStatPanelUI : MonoBehaviour
         var tRt = t.GetComponent<RectTransform>();
         tRt.anchorMin = tRt.anchorMax = new Vector2(0f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.anchoredPosition = new Vector2(x + 34f, y + 2f);
-        tRt.sizeDelta = new Vector2(160f, 30f);
+        tRt.anchoredPosition = new Vector2(x + 42f, y + 2f);
+        tRt.sizeDelta = new Vector2(185f, 36f);
         var tmp = t.AddComponent<TextMeshProUGUI>();
         if (font != null) tmp.font = font;
-        tmp.fontSize = 21;
-        tmp.color = new Color(0.93f, 0.90f, 0.82f);
+        tmp.fontSize = 24.5f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = new Color(0.95f, 0.92f, 0.85f);
         tmp.alignment = TextAlignmentOptions.Left;
         tmp.enableWordWrapping = false;
         tmp.overflowMode = TextOverflowModes.Ellipsis;
         tmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.30f, Color.black);
         return tmp;
     }
 

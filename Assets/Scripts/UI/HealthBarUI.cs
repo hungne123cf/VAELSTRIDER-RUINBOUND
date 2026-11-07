@@ -14,7 +14,7 @@ public class HealthBarUI : MonoBehaviour
     [SerializeField] private float easeSpeed = 0.05f;
 
     [Header("White Shield Bar (Giáp Ảo Chuẩn Shape of Dreams - Đi từ Phải sang Trái)")]
-    [SerializeField] private Color whiteShieldColor = new Color(0.68f, 0.84f, 0.98f, 0.55f); // Băng tinh lam mờ dịu mắt, không bị chói lóa làm mờ chữ số
+    [SerializeField] private Color whiteShieldColor = new Color(1f, 1f, 1f, 0.96f); // Màu trắng tinh khiết rõ nét
 
     private PlayerHealth playerHealth;
     private GameObject whiteShieldBarObj;
@@ -29,6 +29,7 @@ public class HealthBarUI : MonoBehaviour
 
     void Awake()
     {
+        whiteShieldColor = new Color(1f, 1f, 1f, 0.96f);
         EnsureTextComponent();
     }
 
@@ -111,6 +112,11 @@ public class HealthBarUI : MonoBehaviour
         if (whiteShieldBarObj != null)
         {
             if (!whiteShieldBarObj.activeSelf) whiteShieldBarObj.SetActive(true);
+            if (whiteShieldBarImg != null)
+            {
+                whiteShieldBarImg.sprite = null;
+                whiteShieldBarImg.color = new Color(1f, 1f, 1f, 0.98f);
+            }
 
             // Chuẩn Shape of Dreams: Giáp ảo neo cố định ở mép phải (1.0f) và mở rộng dần về bên trái (1.0f -> 0.0f)
             float shieldRatio = maxHP > 0 ? (float)shield / maxHP : 0f;
@@ -159,6 +165,15 @@ public class HealthBarUI : MonoBehaviour
             whiteShieldBarRt = whiteShieldBarObj.GetComponent<RectTransform>();
             whiteShieldBarImg = whiteShieldBarObj.GetComponent<Image>();
             whiteShieldOutline = whiteShieldBarObj.GetComponent<Outline>();
+            if (whiteShieldBarImg != null)
+            {
+                whiteShieldBarImg.sprite = null;
+                whiteShieldBarImg.color = new Color(1f, 1f, 1f, 0.98f);
+            }
+            if (whiteShieldOutline != null)
+            {
+                whiteShieldOutline.effectColor = new Color(1f, 1f, 1f, 1f);
+            }
             return;
         }
 
@@ -166,12 +181,13 @@ public class HealthBarUI : MonoBehaviour
         whiteShieldBarObj.transform.SetParent(container, false);
         whiteShieldBarRt = whiteShieldBarObj.AddComponent<RectTransform>();
         whiteShieldBarImg = whiteShieldBarObj.AddComponent<Image>();
-        whiteShieldBarImg.color = whiteShieldColor;
+        whiteShieldBarImg.sprite = null;
+        whiteShieldBarImg.color = new Color(1f, 1f, 1f, 0.98f);
         whiteShieldBarImg.raycastTarget = false;
 
-        // Viền tinh thể phát sáng sang trọng cho Giáp Ảo chuẩn Shape of Dreams
+        // Viền trắng tinh khiết nổi bật cho Giáp Ảo
         whiteShieldOutline = whiteShieldBarObj.AddComponent<Outline>();
-        whiteShieldOutline.effectColor = new Color(0.40f, 0.85f, 1f, 0.80f);
+        whiteShieldOutline.effectColor = new Color(1f, 1f, 1f, 1f);
         whiteShieldOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
         // Đảm bảo chữ số hiển thị máu luôn ở trên cùng không bị che khuất
@@ -208,12 +224,12 @@ public class HealthBarUI : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
 
         tmpHpText = textObj.AddComponent<TextMeshProUGUI>();
-        tmpHpText.fontSize = 12.5f;
+        tmpHpText.fontSize = 18f;
         tmpHpText.fontStyle = FontStyles.Bold;
         tmpHpText.color = Color.white;
-        tmpHpText.alignment = TextAlignmentOptions.Center;
+        tmpHpText.alignment = TextAlignmentOptions.MidlineRight;
         tmpHpText.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.55f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.45f, Color.black);
     }
 
     private void ApplyBoldOutline(TextMeshProUGUI tmp)
@@ -229,15 +245,29 @@ public class HealthBarUI : MonoBehaviour
         {
             txtRt.anchorMin = Vector2.zero;
             txtRt.anchorMax = Vector2.one;
-            txtRt.offsetMin = new Vector2(10f, 0f);
-            txtRt.offsetMax = new Vector2(-6f, 0f);
+            txtRt.offsetMin = new Vector2(12f, 0f);
+            txtRt.offsetMax = new Vector2(-10f, 0f);
         }
         tmp.alignment = TextAlignmentOptions.MidlineRight;
-        tmp.fontSize = 13f;
+        tmp.fontSize = 18f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
-        // Viền đen đậm nét 0.50f chống chìm màu chữ 100% khi full giáp ảo
-        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.50f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.45f, Color.black);
+        ApplyExtraBoldDilate(tmp, 0.18f);
+    }
+
+    private static void ApplyExtraBoldDilate(TextMeshProUGUI tmp, float dilate)
+    {
+        if (tmp == null) return;
+        try
+        {
+            Material mat = tmp.fontMaterial;
+            if (mat != null && mat.HasProperty(ShaderUtilities.ID_FaceDilate))
+            {
+                mat.SetFloat(ShaderUtilities.ID_FaceDilate, dilate);
+            }
+        }
+        catch (System.Exception) { }
     }
 
     private int lastDisplayedVirtualHp = -1;
@@ -253,28 +283,31 @@ public class HealthBarUI : MonoBehaviour
 
         if (tmpHpText != null)
         {
-            tmpHpText.transform.SetAsLastSibling();
-            if (shield > 0)
-            {
-                // Khi có Giáp Ảo: Đổi màu chữ sang màu đen để tương phản sắc nét trên thanh giáp ảo màu trắng/lam sáng
-                string vHpStr = (virtualHp > 0) ? $" <color=#B45309>[+{virtualHp}]</color>" : "";
-                tmpHpText.text = $"<color=#000000><b>{current}</b></color> <color=#B45309><b>(+{shield})</b></color>{vHpStr} <color=#1E293B>/</color> <color=#000000><b>{max}</b></color>";
-                // Viền mỏng sáng nhẹ giúp nét chữ đen hiển thị sắc nét tuyệt đối
-                SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.25f, new Color(1f, 1f, 1f, 0.35f));
-            }
-            else
-            {
-                // Khi không có Giáp Ảo: Màu trắng bình thường trên thanh máu đỏ thẫm
-                string vHpStr = (virtualHp > 0) ? $" <color=#F59E0B><b>[+{virtualHp}]</b></color>" : "";
-                tmpHpText.text = $"<color=#FFFFFF><b>{current}</b></color>{vHpStr} <color=#94A3B8>/</color> <color=#FFFFFF><b>{max}</b></color>";
-                // Viền đen đậm Souls-like
-                SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.50f, Color.black);
-            }
-
             if (!hpTypographyApplied)
             {
                 ApplySoulslikeTypography(tmpHpText);
                 hpTypographyApplied = true;
+            }
+
+            tmpHpText.transform.SetAsLastSibling();
+            tmpHpText.fontSize = 18f;
+            tmpHpText.fontStyle = FontStyles.Bold;
+
+            if (shield > 0)
+            {
+                // Khi có Giáp Ảo trắng tinh khiết: Chữ đen đậm nét + viền trắng sắc nét giúp nổi bật trên cả nền trắng lẫn nền máu đỏ
+                string vHpStr = (virtualHp > 0) ? $" <color=#9A3412><b>[+{virtualHp}]</b></color>" : "";
+                tmpHpText.text = $"<color=#000000><b>{current}</b></color> <color=#B45309><b>(+{shield})</b></color>{vHpStr} <color=#0F172A><b>/</b></color> <color=#000000><b>{max}</b></color>";
+                SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.24f, new Color(1f, 1f, 1f, 0.96f));
+                ApplyExtraBoldDilate(tmpHpText, 0.20f);
+            }
+            else
+            {
+                // Khi không có Giáp Ảo: Chữ trắng in đậm + viền đen dày sắc nét trên nền máu đỏ thẫm
+                string vHpStr = (virtualHp > 0) ? $" <color=#FBBF24><b>[+{virtualHp}]</b></color>" : "";
+                tmpHpText.text = $"<color=#FFFFFF><b>{current}</b></color>{vHpStr} <color=#CBD5E1><b>/</b></color> <color=#FFFFFF><b>{max}</b></color>";
+                SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.45f, Color.black);
+                ApplyExtraBoldDilate(tmpHpText, 0.18f);
             }
         }
         else if (hpText != null)

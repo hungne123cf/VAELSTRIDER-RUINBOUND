@@ -217,9 +217,9 @@ public class AugmentHUDBar : MonoBehaviour
         _rootRt.anchorMin = new Vector2(0f, 1f);
         _rootRt.anchorMax = new Vector2(0f, 1f);
         _rootRt.pivot = new Vector2(0f, 1f);
-        // Nằm ngay phía trên Bảng Thống Kê Chỉ Số (x = 24, y = -134)
-        _rootRt.anchoredPosition = new Vector2(24f, -134f);
-        _rootRt.sizeDelta = new Vector2(380f, 104f);
+        // Nằm ngay phía dưới cụm Avatar/Shards và phía trên Bảng Thống Kê Chỉ Số (x = 24, y = -162)
+        _rootRt.anchoredPosition = new Vector2(24f, -162f);
+        _rootRt.sizeDelta = new Vector2(456f, 122f);
 
         TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") ?? TMP_Settings.defaultFontAsset;
         bool isVi = LocalizationManager.IsVietnamese;
@@ -247,28 +247,28 @@ public class AugmentHUDBar : MonoBehaviour
         hRt.anchorMin = new Vector2(0f, 1f);
         hRt.anchorMax = new Vector2(0f, 1f);
         hRt.pivot = new Vector2(0f, 1f);
-        hRt.anchoredPosition = new Vector2(14f, -8f);
-        hRt.sizeDelta = new Vector2(210f, 24f);
+        hRt.anchoredPosition = new Vector2(16f, -9f);
+        hRt.sizeDelta = new Vector2(260f, 28f);
 
         var hTmp = headerObj.GetComponent<TextMeshProUGUI>();
         if (font != null) hTmp.font = font;
         hTmp.text = isVi ? "LÕI NÂNG CẤP ĐÃ CHỌN" : "ACTIVE AUGMENTS";
-        hTmp.fontSize = 14f;
+        hTmp.fontSize = 16.5f;
         hTmp.fontStyle = FontStyles.Bold;
         hTmp.color = new Color(0.95f, 0.82f, 0.42f, 1f);
         hTmp.alignment = TextAlignmentOptions.MidlineLeft;
         hTmp.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(hTmp, 0.30f, Color.black);
 
-        // Nút "CHI TIẾT" nhỏ trên thanh tiêu đề để mở bảng mô tả đầy đủ nếu muốn đọc chữ
+        // Nút "CHI TIẾT" trên thanh tiêu đề để mở bảng mô tả đầy đủ nếu muốn đọc chữ
         var detailBtnObj = new GameObject("DetailBtn", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
         detailBtnObj.transform.SetParent(_panelContentObj.transform, false);
         var dbRt = detailBtnObj.GetComponent<RectTransform>();
         dbRt.anchorMin = new Vector2(1f, 1f);
         dbRt.anchorMax = new Vector2(1f, 1f);
         dbRt.pivot = new Vector2(1f, 1f);
-        dbRt.anchoredPosition = new Vector2(-42f, -7f);
-        dbRt.sizeDelta = new Vector2(78f, 22f);
+        dbRt.anchoredPosition = new Vector2(-48f, -8f);
+        dbRt.sizeDelta = new Vector2(96f, 28f);
 
         var dbImg = detailBtnObj.GetComponent<Image>();
         dbImg.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
@@ -291,29 +291,29 @@ public class AugmentHUDBar : MonoBehaviour
         var dbTmp = dbTxtObj.GetComponent<TextMeshProUGUI>();
         if (font != null) dbTmp.font = font;
         dbTmp.text = isVi ? "CHI TIẾT" : "DETAILS";
-        dbTmp.fontSize = 11f;
+        dbTmp.fontSize = 13.5f;
         dbTmp.fontStyle = FontStyles.Bold;
         dbTmp.alignment = TextAlignmentOptions.Center;
         dbTmp.color = new Color(1f, 0.90f, 0.50f, 1f);
         dbTmp.raycastTarget = false;
 
-        // Grid chứa các Icon Lõi Nâng Cấp
+        // Grid chứa các Icon Lõi Nâng Cấp (Phóng to 54x54 rõ nét trên điện thoại)
         var gridObj = new GameObject("BadgesGrid", typeof(RectTransform), typeof(GridLayoutGroup));
         gridObj.transform.SetParent(_panelContentObj.transform, false);
         var gRt = gridObj.GetComponent<RectTransform>();
         gRt.anchorMin = new Vector2(0f, 0f);
         gRt.anchorMax = new Vector2(1f, 1f);
-        gRt.offsetMin = new Vector2(14f, 10f);
-        gRt.offsetMax = new Vector2(-14f, -36f);
+        gRt.offsetMin = new Vector2(16f, 12f);
+        gRt.offsetMax = new Vector2(-16f, -42f);
 
         var glg = gridObj.GetComponent<GridLayoutGroup>();
-        glg.cellSize = new Vector2(42f, 42f);
-        glg.spacing = new Vector2(8f, 8f);
+        glg.cellSize = new Vector2(54f, 54f);
+        glg.spacing = new Vector2(10f, 10f);
         glg.startCorner = GridLayoutGroup.Corner.UpperLeft;
         glg.startAxis = GridLayoutGroup.Axis.Horizontal;
         glg.childAlignment = TextAnchor.UpperLeft;
         glg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        glg.constraintCount = 7;
+        glg.constraintCount = 6;
         _badgesGridContainer = gridObj.transform;
 
         // Dòng chữ khi chưa có Lõi nào
@@ -322,22 +322,22 @@ public class AugmentHUDBar : MonoBehaviour
         var empRt = _emptyStateTextObj.GetComponent<RectTransform>();
         empRt.anchorMin = new Vector2(0f, 0f);
         empRt.anchorMax = new Vector2(1f, 1f);
-        empRt.offsetMin = new Vector2(14f, 8f);
-        empRt.offsetMax = new Vector2(-14f, -32f);
+        empRt.offsetMin = new Vector2(16f, 10f);
+        empRt.offsetMax = new Vector2(-16f, -38f);
 
         var empTmp = _emptyStateTextObj.GetComponent<TextMeshProUGUI>();
         if (font != null) empTmp.font = font;
         empTmp.text = isVi ? "Chưa sở hữu Lõi Nâng Cấp nào" : "No Augments acquired yet";
-        empTmp.fontSize = 14f;
+        empTmp.fontSize = 16f;
         empTmp.alignment = TextAlignmentOptions.Center;
         empTmp.color = new Color(0.65f, 0.70f, 0.78f, 0.90f);
         empTmp.raycastTarget = false;
 
-        // ── 2. Nút Toggle Icon Tròn (52x52 - Giống hệt nút Thống Kê Chỉ Số) ────
+        // ── 2. Nút Toggle Icon Tròn (64x64 - Phóng to đồng bộ với nút Thống Kê Chỉ Số) ────
         var btnObj = new GameObject("ToggleBtn", typeof(RectTransform), typeof(Image), typeof(Button));
         btnObj.transform.SetParent(transform, false);
         _toggleBtnRt = btnObj.GetComponent<RectTransform>();
-        _toggleBtnRt.sizeDelta = new Vector2(52f, 52f);
+        _toggleBtnRt.sizeDelta = new Vector2(64f, 64f);
 
         _toggleBtnImg = btnObj.GetComponent<Image>();
         _toggleBtnImg.sprite = GetAugmentToggleIconSprite();
@@ -355,7 +355,7 @@ public class AugmentHUDBar : MonoBehaviour
         cbRt.anchorMax = new Vector2(1f, 0f);
         cbRt.pivot = new Vector2(1f, 0f);
         cbRt.anchoredPosition = new Vector2(2f, -2f);
-        cbRt.sizeDelta = new Vector2(22f, 18f);
+        cbRt.sizeDelta = new Vector2(28f, 22f);
 
         var cbImg = _countBadgeObj.GetComponent<Image>();
         cbImg.sprite = GetPanelBg();
@@ -376,7 +376,7 @@ public class AugmentHUDBar : MonoBehaviour
 
         _countBadgeText = cbTxtObj.GetComponent<TextMeshProUGUI>();
         if (font != null) _countBadgeText.font = font;
-        _countBadgeText.fontSize = 11.5f;
+        _countBadgeText.fontSize = 14.5f;
         _countBadgeText.fontStyle = FontStyles.Bold;
         _countBadgeText.alignment = TextAlignmentOptions.Center;
         _countBadgeText.color = new Color(0.35f, 0.92f, 1.00f, 1f);
@@ -431,19 +431,19 @@ public class AugmentHUDBar : MonoBehaviour
         SyncStatPanelPosition();
     }
 
-    private void SyncStatPanelPosition()
+    public void SyncStatPanelPosition()
     {
         if (PlayerStatPanelUI.Instance == null) return;
 
         if (_collapsed)
         {
-            // Khi hộp Lõi thu gọn (cao 52px tại y = -134), bảng Chỉ Số nằm ngay dưới tại y = -192
-            PlayerStatPanelUI.Instance.SetTopYOffset(-192f);
+            // Khi hộp Lõi thu gọn (cao 64px tại y = -162), bảng Chỉ Số nằm ngay dưới tại y = -234
+            PlayerStatPanelUI.Instance.SetTopYOffset(-234f);
         }
         else
         {
-            float h = _rootRt != null ? _rootRt.sizeDelta.y : 104f;
-            PlayerStatPanelUI.Instance.SetTopYOffset(-134f - h - 10f);
+            float h = _rootRt != null ? _rootRt.sizeDelta.y : 122f;
+            PlayerStatPanelUI.Instance.SetTopYOffset(-162f - h - 12f);
         }
     }
 
@@ -550,12 +550,12 @@ public class AugmentHUDBar : MonoBehaviour
             _emptyStateTextObj.SetActive(distinctCount == 0);
         }
 
-        // Tự động co giãn chiều cao hộp Popup theo số hàng Lõi (7 icon / hàng)
-        int rows = Mathf.Max(1, Mathf.CeilToInt(distinctCount / 7f));
-        float panelHeight = 46f + rows * 46f + (rows - 1) * 6f;
+        // Tự động co giãn chiều cao hộp Popup theo số hàng Lõi (6 icon / hàng)
+        int rows = Mathf.Max(1, Mathf.CeilToInt(distinctCount / 6f));
+        float panelHeight = 56f + rows * 54f + (rows - 1) * 10f;
         if (_rootRt != null)
         {
-            _rootRt.sizeDelta = new Vector2(380f, panelHeight);
+            _rootRt.sizeDelta = new Vector2(456f, panelHeight);
         }
         SyncStatPanelPosition();
 
@@ -793,7 +793,7 @@ public class AugmentHUDBar : MonoBehaviour
         badgeObj.transform.SetParent(parentTransform, false);
 
         RectTransform rt = badgeObj.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(42f, 42f);
+        rt.sizeDelta = new Vector2(54f, 54f);
 
         Image bg = badgeObj.GetComponent<Image>();
         bg.sprite = GetObsidianCore();
@@ -885,7 +885,7 @@ public class AugmentHUDBar : MonoBehaviour
             cdTxtRt.offsetMin = cdTxtRt.offsetMax = Vector2.zero;
 
             cdTmp = cdTxtObj.GetComponent<TextMeshProUGUI>();
-            cdTmp.fontSize = 11.5f;
+            cdTmp.fontSize = 14f;
             cdTmp.fontStyle = FontStyles.Bold;
             cdTmp.alignment = TextAlignmentOptions.Center;
             cdTmp.color = new Color(1f, 0.90f, 0.35f);
@@ -904,7 +904,7 @@ public class AugmentHUDBar : MonoBehaviour
             sRt.offsetMin = sRt.offsetMax = Vector2.zero;
 
             stackTmp = stackObj.GetComponent<TextMeshProUGUI>();
-            stackTmp.fontSize = 10.5f;
+            stackTmp.fontSize = 13f;
             stackTmp.fontStyle = FontStyles.Bold;
             stackTmp.alignment = TextAlignmentOptions.TopRight;
             stackTmp.color = Color.white;
@@ -918,7 +918,7 @@ public class AugmentHUDBar : MonoBehaviour
         starRt.anchorMax = new Vector2(0f, 1f);
         starRt.pivot = new Vector2(0f, 1f);
         starRt.anchoredPosition = new Vector2(-2f, 2f);
-        starRt.sizeDelta = new Vector2(26f, 14f);
+        starRt.sizeDelta = new Vector2(32f, 18f);
 
         var starImg = starObj.GetComponent<Image>();
         starImg.sprite = GetPanelBg();
@@ -938,7 +938,7 @@ public class AugmentHUDBar : MonoBehaviour
         starTxtRt.offsetMin = starTxtRt.offsetMax = Vector2.zero;
 
         var starTmp = starTxtObj.GetComponent<TextMeshProUGUI>();
-        starTmp.fontSize = 9.5f;
+        starTmp.fontSize = 12f;
         starTmp.fontStyle = FontStyles.Bold;
         starTmp.alignment = TextAlignmentOptions.Center;
         starTmp.color = new Color(1f, 0.90f, 0.35f, 1f);

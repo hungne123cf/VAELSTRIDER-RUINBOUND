@@ -137,8 +137,8 @@ public static class SoulslikeHUDStyler
             hbRt.anchorMin = new Vector2(0f, 1f);
             hbRt.anchorMax = new Vector2(0f, 1f);
             hbRt.pivot = new Vector2(0.5f, 0.5f);
-            hbRt.anchoredPosition = new Vector2(244f, -30f);
-            hbRt.sizeDelta = new Vector2(360f, 26f);
+            hbRt.anchoredPosition = new Vector2(288f, -31f);
+            hbRt.sizeDelta = new Vector2(430f, 34f);
         }
 
         // Background: Đỏ đen Obsidian sâu thẳm
@@ -182,14 +182,12 @@ public static class SoulslikeHUDStyler
             RectTransform txtRt = tmp.GetComponent<RectTransform>();
             txtRt.anchorMin = Vector2.zero;
             txtRt.anchorMax = Vector2.one;
-            txtRt.offsetMin = new Vector2(10f, 0f);
+            txtRt.offsetMin = new Vector2(12f, 0f);
             txtRt.offsetMax = new Vector2(-10f, 0f);
 
             tmp.alignment = TextAlignmentOptions.MidlineRight;
-            tmp.fontSize = 15f;
+            tmp.fontSize = 18f;
             tmp.fontStyle = FontStyles.Bold;
-            tmp.color = Color.white;
-            SetSafeOutline(tmp, 0.45f, Color.black);
         }
     }
 
@@ -206,7 +204,7 @@ public static class SoulslikeHUDStyler
             if (ebRt != null)
             {
                 ebRt.anchoredPosition = new Vector2(0f, 0f);
-                ebRt.sizeDelta = new Vector2(350f, 18f);
+                ebRt.sizeDelta = new Vector2(420f, 24f);
             }
 
             Image bg = eb.GetComponent<Image>();
@@ -235,10 +233,10 @@ public static class SoulslikeHUDStyler
                 tRt.offsetMax = new Vector2(-10f, 0f);
 
                 txt.alignment = TextAlignmentOptions.MidlineRight;
-                txt.fontSize = 13f;
+                txt.fontSize = 16f;
                 txt.fontStyle = FontStyles.Bold;
-                txt.color = new Color(0.80f, 0.93f, 1f, 1f); // Lam ngọc ánh sáng
-                SetSafeOutline(txt, 0.35f, Color.black);
+                txt.color = new Color(0.85f, 0.96f, 1f, 1f); // Lam ngọc ánh sáng
+                SetSafeOutline(txt, 0.40f, Color.black);
             }
         }
 
@@ -249,8 +247,8 @@ public static class SoulslikeHUDStyler
             RectTransform iebRt = ieb.GetComponent<RectTransform>();
             if (iebRt != null)
             {
-                iebRt.anchoredPosition = new Vector2(0f, -21f);
-                iebRt.sizeDelta = new Vector2(340f, 14f);
+                iebRt.anchoredPosition = new Vector2(0f, -27f);
+                iebRt.sizeDelta = new Vector2(410f, 17f);
             }
 
             Image bg = ieb.GetComponent<Image>();
@@ -282,7 +280,7 @@ public static class SoulslikeHUDStyler
         RectTransform expRt = expHud.GetComponent<RectTransform>();
         if (expRt != null)
         {
-            expRt.sizeDelta = new Vector2(330f, 14f);
+            expRt.sizeDelta = new Vector2(400f, 20f);
         }
 
         Image bg = expHud.GetComponent<Image>();
@@ -316,7 +314,7 @@ public static class SoulslikeHUDStyler
             tRt.offsetMax = new Vector2(-10f, 0f);
 
             txt.alignment = TextAlignmentOptions.MidlineRight;
-            txt.fontSize = 13f;
+            txt.fontSize = 15.5f;
             txt.fontStyle = FontStyles.Bold;
             txt.color = new Color(0.98f, 0.94f, 1f, 1f);
             SetSafeOutline(txt, 0.40f, Color.black);
@@ -334,9 +332,9 @@ public static class SoulslikeHUDStyler
             scRt.anchorMin = new Vector2(0f, 1f);
             scRt.anchorMax = new Vector2(0f, 1f);
             scRt.pivot = new Vector2(0.5f, 0.5f);
-            // Căn lùi sang phải (X = 175f) ngay dưới thanh EXP, tránh hoàn toàn avatar và không bám rìa trái
-            scRt.anchoredPosition = new Vector2(175f, -118f);
-            scRt.sizeDelta = new Vector2(120f, 28f);
+            // Căn lùi sang phải (X = 206f) ngay dưới thanh EXP, tránh hoàn toàn avatar 110px
+            scRt.anchoredPosition = new Vector2(206f, -138f);
+            scRt.sizeDelta = new Vector2(156f, 36f);
             scRt.localScale = Vector3.one;
         }
 
@@ -368,8 +366,8 @@ public static class SoulslikeHUDStyler
                 iRt.anchorMin = new Vector2(0f, 0.5f);
                 iRt.anchorMax = new Vector2(0f, 0.5f);
                 iRt.pivot = new Vector2(0.5f, 0.5f);
-                iRt.anchoredPosition = new Vector2(18f, 0f);
-                iRt.sizeDelta = new Vector2(22f, 22f);
+                iRt.anchoredPosition = new Vector2(22f, 0f);
+                iRt.sizeDelta = new Vector2(28f, 28f);
             }
         }
 
@@ -380,11 +378,11 @@ public static class SoulslikeHUDStyler
             RectTransform tRt = tmp.GetComponent<RectTransform>();
             tRt.anchorMin = new Vector2(0f, 0f);
             tRt.anchorMax = new Vector2(1f, 1f);
-            tRt.offsetMin = new Vector2(34f, 0f);
+            tRt.offsetMin = new Vector2(42f, 0f);
             tRt.offsetMax = new Vector2(-8f, 0f);
 
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            tmp.fontSize = 15f;
+            tmp.fontSize = 19.5f;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = new Color(0.98f, 0.88f, 0.55f, 1f); // Vàng kim cổ điển Soulslike
             SetSafeOutline(tmp, 0.40f, Color.black);
@@ -393,7 +391,7 @@ public static class SoulslikeHUDStyler
         var leg = sc.GetComponentInChildren<Text>();
         if (leg != null)
         {
-            leg.fontSize = 15;
+            leg.fontSize = 19;
             leg.fontStyle = FontStyle.Bold;
             leg.color = new Color(0.98f, 0.88f, 0.55f, 1f);
         }

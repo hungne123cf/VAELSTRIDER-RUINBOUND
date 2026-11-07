@@ -139,20 +139,20 @@ public class PlayerAvatarUI : MonoBehaviour
             RectTransform hbRt = hb.GetComponent<RectTransform>();
             if (hbRt != null)
             {
-                // Mobile-optimized Soulslike HUD: Thanh máu dài 360px, dày 26px.
-                // Mép trái xuất phát chính xác từ x = 64f (trục tâm của hình tròn Avatar đường kính 92px).
-                // Mép phải kết thúc tại x = 424f -> Chiều dài = 360f.
-                // Với pivot = (0.5, 0.5) -> center X = 64 + 180 = 244f. Center Y = -30f.
-                if (Mathf.Abs(hbRt.anchoredPosition.x - 244f) > 0.5f || 
-                    Mathf.Abs(hbRt.anchoredPosition.y - (-30f)) > 0.5f ||
-                    Mathf.Abs(hbRt.sizeDelta.x - 360f) > 0.5f ||
-                    Mathf.Abs(hbRt.sizeDelta.y - 26f) > 0.5f)
+                // Mobile-optimized Soulslike HUD: Thanh máu phóng to dài 430px, dày 34px để dễ quan sát trên điện thoại.
+                // Mép trái xuất phát chính xác từ x = 73f (trục tâm của hình tròn Avatar đường kính 110px).
+                // Mép phải kết thúc tại x = 503f -> Chiều dài = 430f.
+                // Với pivot = (0.5, 0.5) -> center X = 73 + 215 = 288f. Center Y = -31f.
+                if (Mathf.Abs(hbRt.anchoredPosition.x - 288f) > 0.5f || 
+                    Mathf.Abs(hbRt.anchoredPosition.y - (-31f)) > 0.5f ||
+                    Mathf.Abs(hbRt.sizeDelta.x - 430f) > 0.5f ||
+                    Mathf.Abs(hbRt.sizeDelta.y - 34f) > 0.5f)
                 {
                     hbRt.anchorMin = new Vector2(0f, 1f);
                     hbRt.anchorMax = new Vector2(0f, 1f);
                     hbRt.pivot = new Vector2(0.5f, 0.5f);
-                    hbRt.anchoredPosition = new Vector2(244f, -30f);
-                    hbRt.sizeDelta = new Vector2(360f, 26f);
+                    hbRt.anchoredPosition = new Vector2(288f, -31f);
+                    hbRt.sizeDelta = new Vector2(430f, 34f);
                 }
             }
         }
@@ -234,7 +234,17 @@ public class PlayerAvatarUI : MonoBehaviour
         Sprite circleSprite = GetCircleFillSprite();
         Sprite ringSprite = GetCircleRingSprite();
 
-        // 2. Nền gốc hình tròn
+        // 2. Nền gốc hình tròn (Tăng kích cỡ lên 110x110 giúp dễ quan sát trên điện thoại)
+        RectTransform selfRt = GetComponent<RectTransform>();
+        if (selfRt != null)
+        {
+            selfRt.anchorMin = new Vector2(0f, 1f);
+            selfRt.anchorMax = new Vector2(0f, 1f);
+            selfRt.pivot = new Vector2(0f, 1f);
+            selfRt.anchoredPosition = new Vector2(18f, -14f);
+            selfRt.sizeDelta = new Vector2(110f, 110f);
+        }
+
         if (rootBgImage == null) rootBgImage = GetComponent<Image>();
         if (rootBgImage != null)
         {
@@ -314,7 +324,7 @@ public class PlayerAvatarUI : MonoBehaviour
             bRt.anchorMax = new Vector2(0.5f, 0f);
             bRt.pivot = new Vector2(0.5f, 0.5f);
             bRt.anchoredPosition = new Vector2(0f, 2f);
-            bRt.sizeDelta = new Vector2(46f, 20f);
+            bRt.sizeDelta = new Vector2(60f, 24f);
 
             Image bImg = badgeTrans.GetComponent<Image>();
             if (bImg != null)
@@ -333,7 +343,7 @@ public class PlayerAvatarUI : MonoBehaviour
             levelText = badgeTrans.GetComponentInChildren<TextMeshProUGUI>();
             if (levelText != null)
             {
-                levelText.fontSize = 12f;
+                levelText.fontSize = 15f;
                 levelText.fontStyle = FontStyles.Bold;
                 levelText.color = new Color(0.96f, 0.86f, 0.55f, 1f); // Vàng kim cổ điển Soulslike
                 levelText.alignment = TextAlignmentOptions.Center;
@@ -612,8 +622,8 @@ public class PlayerAvatarUI : MonoBehaviour
         rootRt.anchorMin = new Vector2(0f, 1f);
         rootRt.anchorMax = new Vector2(0f, 1f);
         rootRt.pivot = new Vector2(0f, 1f);
-        rootRt.anchoredPosition = new Vector2(18f, -16f);
-        rootRt.sizeDelta = new Vector2(92f, 92f);
+        rootRt.anchoredPosition = new Vector2(18f, -14f);
+        rootRt.sizeDelta = new Vector2(110f, 110f);
 
         Image rootBg = rootObj.GetComponent<Image>();
         rootBg.sprite = circleSprite;
@@ -668,7 +678,7 @@ public class PlayerAvatarUI : MonoBehaviour
         badgeRt.anchorMax = new Vector2(0.5f, 0f);
         badgeRt.pivot = new Vector2(0.5f, 0.5f);
         badgeRt.anchoredPosition = new Vector2(0f, 2f);
-        badgeRt.sizeDelta = new Vector2(46f, 20f);
+        badgeRt.sizeDelta = new Vector2(60f, 24f);
 
         Image badgeBg = badgeObj.GetComponent<Image>();
         badgeBg.sprite = circleSprite;
@@ -688,7 +698,7 @@ public class PlayerAvatarUI : MonoBehaviour
 
         var tmp = textObj.GetComponent<TextMeshProUGUI>();
         tmp.text = "LV.1";
-        tmp.fontSize = 12f;
+        tmp.fontSize = 15f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = new Color(1f, 0.88f, 0.35f, 1f);
         tmp.alignment = TextAlignmentOptions.Center;

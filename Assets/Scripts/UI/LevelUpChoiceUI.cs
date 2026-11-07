@@ -173,7 +173,7 @@ public class LevelUpChoiceUI : MonoBehaviour
     }
 
     // ─── Procedural High-Contrast UI Sprites ───────────────────────────────────
-    private static Sprite GetCardBodySprite()
+    public static Sprite GetCardBodySprite()
     {
         if (_cardBodySprite != null) return _cardBodySprite;
 
@@ -224,7 +224,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         return _cardBodySprite;
     }
 
-    private static Sprite GetOrnateCardFrameSprite()
+    public static Sprite GetOrnateCardFrameSprite()
     {
         if (_cardFrameSprite != null) return _cardFrameSprite;
 
@@ -299,7 +299,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         return _cardFrameSprite;
     }
 
-    private static Sprite GetRadialGlowSprite()
+    public static Sprite GetRadialGlowSprite()
     {
         if (_radialGlowSprite != null) return _radialGlowSprite;
 
@@ -326,7 +326,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         return _radialGlowSprite;
     }
 
-    private static Sprite GetPillBadgeSprite()
+    public static Sprite GetPillBadgeSprite()
     {
         if (_pillBadgeSprite != null) return _pillBadgeSprite;
 
@@ -367,7 +367,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         return _pillBadgeSprite;
     }
 
-    private static Sprite GetDiamondGemSprite()
+    public static Sprite GetDiamondGemSprite()
     {
         if (_diamondGemSprite != null) return _diamondGemSprite;
 

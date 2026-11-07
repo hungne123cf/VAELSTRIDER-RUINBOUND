@@ -90,15 +90,15 @@ public class PlayerExpBarUI : MonoBehaviour
         {
             float startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
             float startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 3f;
-            float expOffsetY = startY - 38f;
-            float barWidth = Mathf.Max(260f, hbRt.sizeDelta.x - 30f);
+            float expOffsetY = startY - 46f;
+            float barWidth = Mathf.Max(300f, hbRt.sizeDelta.x - 30f);
             if (Mathf.Abs(rootRt.anchoredPosition.x - startX) > 0.5f || 
                 Mathf.Abs(rootRt.anchoredPosition.y - expOffsetY) > 0.5f ||
                 Mathf.Abs(rootRt.sizeDelta.x - barWidth) > 0.5f ||
-                Mathf.Abs(rootRt.sizeDelta.y - 14f) > 0.5f)
+                Mathf.Abs(rootRt.sizeDelta.y - 20f) > 0.5f)
             {
                 rootRt.anchoredPosition = new Vector2(startX, expOffsetY);
-                rootRt.sizeDelta = new Vector2(barWidth, 14f);
+                rootRt.sizeDelta = new Vector2(barWidth, 20f);
             }
         }
     }
@@ -148,8 +148,8 @@ public class PlayerExpBarUI : MonoBehaviour
             RectTransform scRt = shardsUI.GetComponent<RectTransform>();
             if (scRt != null)
             {
-                scRt.anchoredPosition = new Vector2(175f, -118f);
-                scRt.sizeDelta = new Vector2(120f, 28f);
+                scRt.anchoredPosition = new Vector2(206f, -138f);
+                scRt.sizeDelta = new Vector2(156f, 36f);
             }
         }
     }
@@ -167,8 +167,8 @@ public class PlayerExpBarUI : MonoBehaviour
         if (healthBar == null) healthBar = mainCanvas.transform.Find("HealthBar");
 
         float startX = 20f;
-        float startY = -43f;
-        float barWidth = 220f;
+        float startY = -51f;
+        float barWidth = 400f;
 
         if (healthBar != null)
         {
@@ -177,13 +177,13 @@ public class PlayerExpBarUI : MonoBehaviour
             {
                 startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
                 startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 3f;
-                barWidth = Mathf.Max(260f, hbRt.sizeDelta.x - 30f);
+                barWidth = Mathf.Max(300f, hbRt.sizeDelta.x - 30f);
             }
         }
 
-        // Đặt ngay dưới 2 thanh năng lượng Soulslike (EnergyBar 18px + InnerEnergyBar 14px + đệm = 38px)
-        float expOffsetY = startY - 38f;
-        float expBarHeight = 14f;
+        // Đặt ngay dưới 2 thanh năng lượng Soulslike (EnergyBar 24px + InnerEnergyBar 17px + đệm = 46px)
+        float expOffsetY = startY - 46f;
+        float expBarHeight = 20f;
 
         _root = new GameObject("PlayerExpBarHUD");
         _root.transform.SetParent(mainCanvas.transform, false);
@@ -243,7 +243,7 @@ public class PlayerExpBarUI : MonoBehaviour
         textRt.offsetMax = new Vector2(-10f, 0f);
 
         _expLabelText = textObj.AddComponent<TextMeshProUGUI>();
-        _expLabelText.fontSize = 13f;
+        _expLabelText.fontSize = 15.5f;
         _expLabelText.fontStyle = FontStyles.Bold;
         _expLabelText.color = new Color(0.98f, 0.94f, 1f, 1f);
         _expLabelText.alignment = TextAlignmentOptions.MidlineRight;

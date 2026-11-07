@@ -77,14 +77,14 @@ public class PlayerEnergyUI : MonoBehaviour
         {
             float startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
             float startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 3f;
-            float barWidth = Mathf.Max(280f, hbRt.sizeDelta.x - 10f);
+            float barWidth = Mathf.Max(320f, hbRt.sizeDelta.x - 10f);
             if (Mathf.Abs(rootRt.anchoredPosition.x - startX) > 0.5f || 
                 Mathf.Abs(rootRt.anchoredPosition.y - startY) > 0.5f ||
                 Mathf.Abs(rootRt.sizeDelta.x - barWidth) > 0.5f ||
-                Mathf.Abs(rootRt.sizeDelta.y - 38f) > 0.5f)
+                Mathf.Abs(rootRt.sizeDelta.y - 46f) > 0.5f)
             {
                 rootRt.anchoredPosition = new Vector2(startX, startY);
-                rootRt.sizeDelta = new Vector2(barWidth, 38f);
+                rootRt.sizeDelta = new Vector2(barWidth, 46f);
 
                 if (energySlider != null)
                 {
@@ -92,7 +92,7 @@ public class PlayerEnergyUI : MonoBehaviour
                     if (cachedEnergySliderRt != null)
                     {
                         cachedEnergySliderRt.anchoredPosition = new Vector2(0f, 0f);
-                        cachedEnergySliderRt.sizeDelta = new Vector2(barWidth, 18f);
+                        cachedEnergySliderRt.sizeDelta = new Vector2(barWidth, 24f);
                     }
                 }
                 if (innerEnergySlider != null)
@@ -100,8 +100,8 @@ public class PlayerEnergyUI : MonoBehaviour
                     if (cachedInnerEnergySliderRt == null) cachedInnerEnergySliderRt = innerEnergySlider.GetComponent<RectTransform>();
                     if (cachedInnerEnergySliderRt != null)
                     {
-                        cachedInnerEnergySliderRt.anchoredPosition = new Vector2(0f, -21f);
-                        cachedInnerEnergySliderRt.sizeDelta = new Vector2(barWidth - 10f, 14f);
+                        cachedInnerEnergySliderRt.anchoredPosition = new Vector2(0f, -27f);
+                        cachedInnerEnergySliderRt.sizeDelta = new Vector2(barWidth - 10f, 17f);
                     }
                 }
             }
@@ -120,7 +120,7 @@ public class PlayerEnergyUI : MonoBehaviour
             }
         }
 
-        float barWidth = (rootRt != null && rootRt.sizeDelta.x > 50f) ? rootRt.sizeDelta.x : 350f;
+        float barWidth = (rootRt != null && rootRt.sizeDelta.x > 50f) ? rootRt.sizeDelta.x : 420f;
 
         if (energySlider == null)
         {
@@ -133,7 +133,7 @@ public class PlayerEnergyUI : MonoBehaviour
             }
             else
             {
-                energySlider = CreateSubBar(transform, "EnergyBar", 0f, barWidth, 18f, Color.white, out energyFillImage, out energyText, out _);
+                energySlider = CreateSubBar(transform, "EnergyBar", 0f, barWidth, 24f, Color.white, out energyFillImage, out energyText, out _);
             }
         }
 
@@ -149,7 +149,7 @@ public class PlayerEnergyUI : MonoBehaviour
             }
             else
             {
-                innerEnergySlider = CreateSubBar(transform, "InnerEnergyBar", -21f, barWidth - 10f, 14f, Color.white, out innerEnergyFillImage, out innerEnergyText, out innerEnergyOutline);
+                innerEnergySlider = CreateSubBar(transform, "InnerEnergyBar", -27f, barWidth - 10f, 17f, Color.white, out innerEnergyFillImage, out innerEnergyText, out innerEnergyOutline);
             }
         }
 
@@ -169,10 +169,10 @@ public class PlayerEnergyUI : MonoBehaviour
             tRt.offsetMax = new Vector2(-10f, 0f);
         }
         tmp.alignment = TextAlignmentOptions.MidlineRight;
-        tmp.fontSize = 13f;
+        tmp.fontSize = 16f;
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = new Color(0.80f, 0.93f, 1f, 1f); // Lam ngọc ánh sáng
-        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, Color.black);
+        tmp.color = new Color(0.85f, 0.96f, 1f, 1f); // Lam ngọc ánh sáng
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.40f, Color.black);
     }
 
     private void RepositionShardsCounter()
@@ -184,8 +184,8 @@ public class PlayerEnergyUI : MonoBehaviour
         }
         if (cachedShardsRt != null)
         {
-            cachedShardsRt.anchoredPosition = new Vector2(175f, -118f);
-            cachedShardsRt.sizeDelta = new Vector2(120f, 28f);
+            cachedShardsRt.anchoredPosition = new Vector2(206f, -138f);
+            cachedShardsRt.sizeDelta = new Vector2(156f, 36f);
         }
     }
 
