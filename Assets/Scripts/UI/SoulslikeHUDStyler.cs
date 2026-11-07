@@ -654,9 +654,9 @@ public static class SoulslikeHUDStyler
             var mat = tmp.fontMaterial;
             if (mat != null)
             {
-                mat.EnableKeyword(TMP_ShaderUtilities.Keyword_Outline);
-                mat.SetColor(TMP_ShaderUtilities.ID_OutlineColor, color);
-                mat.SetFloat(TMP_ShaderUtilities.ID_OutlineWidth, width);
+                mat.EnableKeyword(ShaderUtilities.Keyword_Outline);
+                mat.SetColor(ShaderUtilities.ID_OutlineColor, color);
+                mat.SetFloat(ShaderUtilities.ID_OutlineWidth, width);
             }
 
             tmp.outlineWidth = width;
