@@ -253,6 +253,12 @@ public class Map3WaveSpawner : MonoBehaviour
 
         var slimes = Object.FindObjectsByType<SlimeAI>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var sl in slimes) if (sl != null) Destroy(sl.gameObject);
+
+        var minispiders = Object.FindObjectsByType<MiniSpiderMinion>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var ms in minispiders) if (ms != null) Destroy(ms.gameObject);
+
+        var eggs = Object.FindObjectsByType<BoneEggObstacle>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var e in eggs) if (e != null) Destroy(e.gameObject);
     }
 
     private void HandleEggHatched(Vector3 pos)
@@ -344,7 +350,6 @@ public class Map3WaveSpawner : MonoBehaviour
 
         egg.AddComponent<AutoDepthSort>();
         egg.AddComponent<BoneEggCocoon>();
-        DynamicSpriteColliderSync.EnsureAttached(egg);
         return egg;
     }
 

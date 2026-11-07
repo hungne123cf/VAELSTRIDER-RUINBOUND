@@ -211,10 +211,20 @@ public class DynamicSpriteColliderSync : MonoBehaviour
 
         if (cachedPaths != null && cachedPaths.Length > 0)
         {
-            polyCol.pathCount = cachedPaths.Length;
-            for (int i = 0; i < cachedPaths.Length; i++)
+            try
             {
-                polyCol.SetPath(i, cachedPaths[i]);
+                polyCol.pathCount = cachedPaths.Length;
+                for (int i = 0; i < cachedPaths.Length; i++)
+                {
+                    if (cachedPaths[i] != null && cachedPaths[i].Length >= 3)
+                    {
+                        polyCol.SetPath(i, cachedPaths[i]);
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[DynamicSpriteColliderSync] SetPath fallback on sprite {currentSprite.name}: {ex.Message}");
             }
         }
     }
@@ -252,6 +262,12 @@ public class DynamicSpriteColliderSync : MonoBehaviour
                         if (flipX) pt.x = -pt.x;
                         if (flipY) pt.y = -pt.y;
                         arr[j] = pt;
+                    }
+
+                    // Zero-Bug Android: Đảo ngược thứ tự đỉnh khi lật để duy trì chiều quay Counter-Clockwise (CCW) của Box2D
+                    if (flipX ^ flipY)
+                    {
+                        System.Array.Reverse(arr);
                     }
 
                     for (int j = 0; j < ptCount; j++)
@@ -311,6 +327,11 @@ public class DynamicSpriteColliderSync : MonoBehaviour
             new Vector2(c.x - e.x,        c.y + e.y * 0.5f),
             new Vector2(c.x - e.x,        c.y - e.y * 0.5f)
         };
+
+        if (flipX ^ flipY)
+        {
+            System.Array.Reverse(fallbackOctagon);
+        }
 
         return new Vector2[][] { fallbackOctagon };
     }

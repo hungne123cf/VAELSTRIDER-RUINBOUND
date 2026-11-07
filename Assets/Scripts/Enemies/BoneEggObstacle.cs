@@ -48,7 +48,12 @@ public class BoneEggObstacle : MonoBehaviour, IDamageable
 
         if (idleSprites[0] != null) sr.sprite = idleSprites[0];
         transform.localScale = Vector3.one * 1.1f;
-        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        var circleCol = GetComponent<CircleCollider2D>();
+        if (circleCol == null) circleCol = gameObject.AddComponent<CircleCollider2D>();
+        circleCol.radius = 0.55f;
+        circleCol.isTrigger = false;
+        col = circleCol;
+        EnemyNavigationHelper.EnsureFrictionless(col);
     }
 
     void Start()

@@ -41,7 +41,7 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Discrete;
 
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
@@ -81,7 +81,12 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
         sr.sprite = walkSprites[0];
         sr.color = Color.white;
 
-        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        // Zero-Bug Android: Dùng CircleCollider2D nhẹ tênh thay vì PolygonCollider2D để không bao giờ bị nghẽn vật lý Box2D
+        var circleCol = GetComponent<CircleCollider2D>();
+        if (circleCol == null) circleCol = gameObject.AddComponent<CircleCollider2D>();
+        circleCol.radius = 0.35f;
+        circleCol.isTrigger = false;
+        col = circleCol;
         EnemyNavigationHelper.EnsureFrictionless(col);
 
         gameObject.AddComponent<AutoDepthSort>();

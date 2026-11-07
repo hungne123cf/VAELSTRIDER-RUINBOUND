@@ -42,7 +42,12 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
 
         sr.sortingOrder = 1500;
         LoadEggSprites();
-        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
+        var circleCol = GetComponent<CircleCollider2D>();
+        if (circleCol == null) circleCol = gameObject.AddComponent<CircleCollider2D>();
+        circleCol.radius = 0.85f;
+        circleCol.isTrigger = false;
+        col = circleCol;
+        EnemyNavigationHelper.EnsureFrictionless(col);
         SetupGuidanceVisuals();
     }
 
@@ -77,6 +82,10 @@ public class BoneEggCocoon : MonoBehaviour, IDamageable, IEnemyHealth
         guidanceObj.transform.localPosition = new Vector3(0f, 2.2f, 0f);
 
         guidanceTMP = guidanceObj.AddComponent<TextMeshPro>();
+        TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/VaelstriderFont") 
+            ?? Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF")
+            ?? TMP_Settings.defaultFontAsset;
+        if (font != null) guidanceTMP.font = font;
         guidanceTMP.text = "<color=#FCD34D><b>!</b></color>";
         guidanceTMP.fontSize = 5.2f;
         guidanceTMP.fontStyle = FontStyles.Bold;

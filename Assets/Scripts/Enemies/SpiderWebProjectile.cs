@@ -143,12 +143,13 @@ public class SpiderWebProjectile : MonoBehaviour
         trail.transform.localScale = Vector3.one * 0.35f;
 
         StartCoroutine(FadeAndDestroyRoutine(trail, trailSr));
+        Destroy(trail, 0.25f); // Failsafe tự hủy chống tràn bộ nhớ trên Android
     }
 
     private IEnumerator FadeAndDestroyRoutine(GameObject obj, SpriteRenderer tsr)
     {
         float t = 0f;
-        while (t < 0.2f)
+        while (t < 0.2f && obj != null)
         {
             t += Time.deltaTime;
             if (tsr != null) tsr.color = new Color(1f, 1f, 1f, Mathf.Lerp(0.6f, 0f, t / 0.2f));

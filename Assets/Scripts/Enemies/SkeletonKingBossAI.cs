@@ -63,19 +63,24 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         gameObject.layer = (enemyLayer != -1) ? enemyLayer : 6;
         gameObject.tag = "Enemy";
 
-        col = DynamicSpriteColliderSync.EnsureAttached(gameObject);
-        if (col != null)
+        // Zero-Bug Android: Dùng CapsuleCollider2D tĩnh ôm sát thân nhện để tránh lỗi đảo chiều đa giác Box2D khi lật mặt âm scale.x
+        col = GetComponent<Collider2D>();
+        if (col == null)
         {
-            col.isTrigger = false;
-            EnemyNavigationHelper.EnsureFrictionless(col);
+            var cap = gameObject.AddComponent<CapsuleCollider2D>();
+            cap.size = new Vector2(2.4f, 1.8f);
+            cap.offset = new Vector2(0f, 0.4f);
+            col = cap;
         }
+        col.isTrigger = false;
+        EnemyNavigationHelper.EnsureFrictionless(col);
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
         rb.linearDamping = 4.0f;
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Discrete;
         EnemyCCCleanseSystem.EnsureAttached(gameObject);
 
         if (GetComponent<AutoDepthSort>() == null) gameObject.AddComponent<AutoDepthSort>();
@@ -217,6 +222,7 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     void LateUpdate()
     {
+        if (isDead || BossIntroCutsceneUI.IsCutsceneActive) return;
         ClampInsideRoomBounds();
     }
 
@@ -407,11 +413,17 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         var cam = Object.FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.45f, 0.5f);
 
-        // Sinh 2 Qua Trung Nhen xung quanh (se no va de ra Nhen Con Mini)
-        Vector3 leftEgg = slamCenter + new Vector3(-2.8f, Random.Range(-0.8f, 0.8f), 0f);
-        Vector3 rightEgg = slamCenter + new Vector3(2.8f, Random.Range(-0.8f, 0.8f), 0f);
-        BoneEggObstacle.Spawn(leftEgg);
-        BoneEggObstacle.Spawn(rightEgg);
+        // Sinh 2 Qua Trung Nhen xung quanh neu chua vuot nguong toi da tren Mobile
+        if (ActiveMinionCount < MAX_ACTIVE_MINIONS)
+        {
+            Vector3 leftEgg = slamCenter + new Vector3(-2.8f, Random.Range(-0.8f, 0.8f), 0f);
+            BoneEggObstacle.Spawn(leftEgg);
+            if (ActiveMinionCount + 1 < MAX_ACTIVE_MINIONS)
+            {
+                Vector3 rightEgg = slamCenter + new Vector3(2.8f, Random.Range(-0.8f, 0.8f), 0f);
+                BoneEggObstacle.Spawn(rightEgg);
+            }
+        }
 
         yield return new WaitForSeconds(0.4f);
         isBusy = false;
@@ -487,8 +499,11 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
                 if (target != null) target.TakeDamage(earthquakeDamage);
             }
 
-            // Sinh Trung Nhen no ra Nhen Con Mini
-            BoneEggObstacle.Spawn(targetPos);
+            // Sinh Trung Nhen no ra Nhen Con Mini (kiem soat so luong tren mobile)
+            if (ActiveMinionCount < MAX_ACTIVE_MINIONS)
+            {
+                BoneEggObstacle.Spawn(targetPos);
+            }
 
             var cam = Object.FindAnyObjectByType<CameraFollow>();
             if (cam != null) cam.Shake(0.25f, 0.3f);
@@ -536,10 +551,12 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
         SoundManager.EnsureInstance()?.PlayBossWarning();
 
-        // 1. Tan biến vào hư không
+        // 1. Tan biến vào hư không (kem watchdog an toan 1s)
         float fade = 1f;
-        while (fade > 0.05f)
+        float fadeWatchdog = 0f;
+        while (fade > 0.05f && fadeWatchdog < 1.0f)
         {
+            fadeWatchdog += Time.deltaTime;
             fade -= Time.deltaTime * 3.5f;
             if (spriteRenderer != null) spriteRenderer.color = new Color(originalColor.r, originalColor.g, originalColor.b, fade);
             yield return null;
@@ -706,18 +723,39 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         isBusy = false;
     }
 
+    public const int MAX_ACTIVE_MINIONS = 6;
+    public static int ActiveMinionCount
+    {
+        get
+        {
+            var minions = Object.FindObjectsByType<MiniSpiderMinion>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            return minions != null ? minions.Length : 0;
+        }
+    }
+
     private void SpawnPhaseMinions()
     {
+        if (ActiveMinionCount >= MAX_ACTIVE_MINIONS) return;
+
         if (currentBossPhase == 2)
         {
             MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.left * 2.0f, 0.8f));
-            MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.right * 2.0f, 0.8f));
+            if (ActiveMinionCount < MAX_ACTIVE_MINIONS)
+            {
+                MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.right * 2.0f, 0.8f));
+            }
         }
         else if (currentBossPhase == 3)
         {
             MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.left * 2.0f, 0.8f));
-            MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.right * 2.0f, 0.8f));
-            MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.up * 1.8f, 0.8f));
+            if (ActiveMinionCount < MAX_ACTIVE_MINIONS)
+            {
+                MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.right * 2.0f, 0.8f));
+            }
+            if (ActiveMinionCount < MAX_ACTIVE_MINIONS)
+            {
+                MiniSpiderMinion.Spawn(ClampToValidArena(transform.position + Vector3.up * 1.8f, 0.8f));
+            }
         }
     }
 
