@@ -67,6 +67,10 @@ public static class GameFontManager
                     if (_bodyFont != null)
                     {
                         _bodyFont.name = "BeVietnamPro SDF (Dynamic)";
+                        if (_bodyFont.material != null && _bodyFont.atlasTextures != null && _bodyFont.atlasTextures.Length > 0 && _bodyFont.atlasTextures[0] != null)
+                        {
+                            _bodyFont.material.SetTexture(ShaderUtilities.ID_MainTex, _bodyFont.atlasTextures[0]);
+                        }
                     }
                 }
             }
@@ -80,6 +84,10 @@ public static class GameFontManager
                     if (_headerFont != null)
                     {
                         _headerFont.name = "Cinzel SDF (Dynamic)";
+                        if (_headerFont.material != null && _headerFont.atlasTextures != null && _headerFont.atlasTextures.Length > 0 && _headerFont.atlasTextures[0] != null)
+                        {
+                            _headerFont.material.SetTexture(ShaderUtilities.ID_MainTex, _headerFont.atlasTextures[0]);
+                        }
                     }
                 }
             }
@@ -88,7 +96,7 @@ public static class GameFontManager
             if (_bodyFont == null) _bodyFont = TMP_Settings.defaultFontAsset;
             if (_headerFont == null) _headerFont = _bodyFont;
 
-            // 3. Cấu hình bảng Fallback: Header (Cinzel) -> Body (BeVietnamPro) -> LiberationSans
+            // 3. Cấu hình bảng Fallback: Header (Cinzel) -> Body (BeVietnamPro)
             if (_headerFont != null && _bodyFont != null && _headerFont != _bodyFont)
             {
                 if (_headerFont.fallbackFontAssetTable == null)
@@ -97,38 +105,6 @@ public static class GameFontManager
                 if (!_headerFont.fallbackFontAssetTable.Contains(_bodyFont))
                 {
                     _headerFont.fallbackFontAssetTable.Add(_bodyFont);
-                }
-            }
-
-            // 4. Inject BeVietnamPro và Cinzel vào TMP_Settings toàn cục và fallback của LiberationSans
-            if (TMP_Settings.defaultFontAsset != null && TMP_Settings.defaultFontAsset != _bodyFont)
-            {
-                var defTable = TMP_Settings.defaultFontAsset.fallbackFontAssetTable;
-                if (defTable == null)
-                {
-                    defTable = new List<TMP_FontAsset>();
-                    TMP_Settings.defaultFontAsset.fallbackFontAssetTable = defTable;
-                }
-
-                if (_bodyFont != null && !defTable.Contains(_bodyFont))
-                {
-                    defTable.Insert(0, _bodyFont);
-                }
-                if (_headerFont != null && !defTable.Contains(_headerFont))
-                {
-                    defTable.Insert(1, _headerFont);
-                }
-            }
-
-            if (TMP_Settings.fallbackFontAssets != null)
-            {
-                if (_bodyFont != null && !TMP_Settings.fallbackFontAssets.Contains(_bodyFont))
-                {
-                    TMP_Settings.fallbackFontAssets.Insert(0, _bodyFont);
-                }
-                if (_headerFont != null && !TMP_Settings.fallbackFontAssets.Contains(_headerFont))
-                {
-                    TMP_Settings.fallbackFontAssets.Insert(1, _headerFont);
                 }
             }
 
@@ -186,3 +162,4 @@ public static class GameFontManager
         }
     }
 }
+
