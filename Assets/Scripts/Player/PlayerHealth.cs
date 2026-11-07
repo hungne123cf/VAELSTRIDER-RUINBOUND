@@ -541,11 +541,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         return virtualDeducted + realHpDeducted;
     }
 
-    public int GetVirtualHealth() => currentVirtualHealth;
     public int GetMaxVirtualHealth() => maxVirtualHealth;
     public float GetVirtualHealthTimer() => virtualHealthTimer;
     public float GetVirtualHealthDuration() => virtualHealthDuration;
-    public bool IsVirtualHealthActive() => isVirtualHealthActive && currentVirtualHealth > 0;
     public bool IsVirtualHealthExpiringSoon() => isVirtualHealthActive && !float.IsPositiveInfinity(virtualHealthTimer) && virtualHealthTimer <= 3.5f;
 
     void Update()
