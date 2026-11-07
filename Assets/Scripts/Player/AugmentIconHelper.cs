@@ -12,6 +12,11 @@ public static class AugmentIconHelper
     private static readonly System.Collections.Generic.Dictionary<string, Sprite> _cache
         = new System.Collections.Generic.Dictionary<string, Sprite>();
 
+    public static void ClearCache()
+    {
+        _cache.Clear();
+    }
+
     public static string GetIconFileName(AugmentDatabase.AugmentType type)
     {
         switch (type)
@@ -211,8 +216,41 @@ public static class AugmentIconHelper
         string nameNoExt = Path.GetFileNameWithoutExtension(filename);
         Sprite spr = null;
 
+#if UNITY_EDITOR
+        // Trong Editor: Ưu tiên đọc trực tiếp file PNG mới nhất từ đĩa để hiển thị ngay lập tức không chờ Reimport
+        {
+            string[] editorDiskPaths = new string[]
+            {
+                Path.Combine(Application.dataPath, "Resources/UI/Augments", filename),
+                Path.Combine(Application.dataPath, "Sprites/UI/Augments", filename)
+            };
+            for (int i = 0; i < editorDiskPaths.Length; i++)
+            {
+                if (File.Exists(editorDiskPaths[i]))
+                {
+                    try
+                    {
+                        byte[] fileBytes = File.ReadAllBytes(editorDiskPaths[i]);
+                        Texture2D diskTex = new Texture2D(128, 128, TextureFormat.RGBA32, false);
+                        if (diskTex.LoadImage(fileBytes))
+                        {
+                            diskTex.filterMode = FilterMode.Bilinear;
+                            diskTex.wrapMode = TextureWrapMode.Clamp;
+                            spr = Sprite.Create(diskTex, new Rect(0, 0, diskTex.width, diskTex.height), new Vector2(0.5f, 0.5f), 100f);
+                            break;
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+#endif
+
         // 1. Resources.Load<Sprite> chuẩn Unity (Cho bản build APK Android và PC Standalone)
-        spr = Resources.Load<Sprite>("UI/Augments/" + nameNoExt);
+        if (spr == null)
+        {
+            spr = Resources.Load<Sprite>("UI/Augments/" + nameNoExt);
+        }
 
         // 2. Resources.Load<Texture2D> fallback nếu Sprite importer chưa được nạp
         if (spr == null)

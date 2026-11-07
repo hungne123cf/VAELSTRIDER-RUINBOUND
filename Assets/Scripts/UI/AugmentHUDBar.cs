@@ -414,7 +414,7 @@ public class AugmentHUDBar : MonoBehaviour
                     }
                     if (badge.iconImg != null)
                     {
-                        badge.iconImg.color = LevelUpChoiceUI.GetDamageTypeColor(aug.type);
+                        badge.iconImg.color = Color.white;
                     }
                 }
             }
@@ -499,17 +499,17 @@ public class AugmentHUDBar : MonoBehaviour
         ringImg.color = Color.Lerp(tierColor, typeColor, 0.35f);
         ringImg.raycastTarget = false;
 
-        // Icon đồ họa độc nhất riêng biệt cho từng Lõi Nâng Cấp
+        // Icon đồ họa độc nhất riêng biệt cho từng Lõi Nâng Cấp (Giữ nguyên màu gốc sắc nét Color.white)
         GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
         iconObj.transform.SetParent(badgeObj.transform, false);
         var iconRt = iconObj.GetComponent<RectTransform>();
-        iconRt.anchorMin = new Vector2(0.20f, 0.20f);
-        iconRt.anchorMax = new Vector2(0.80f, 0.80f);
+        iconRt.anchorMin = new Vector2(0.08f, 0.08f);
+        iconRt.anchorMax = new Vector2(0.92f, 0.92f);
         iconRt.offsetMin = iconRt.offsetMax = Vector2.zero;
 
         Image iconImg = iconObj.GetComponent<Image>();
         iconImg.sprite = AugmentIconHelper.GetAugmentSprite(aug.type);
-        iconImg.color = typeColor;
+        iconImg.color = Color.white;
         iconImg.preserveAspect = true;
         iconImg.raycastTarget = false;
         if (iconImg.sprite != null)
