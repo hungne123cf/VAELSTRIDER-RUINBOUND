@@ -1019,8 +1019,8 @@ public class GameAutoBootstrap : MonoBehaviour
             var pCombat = player.GetComponent<PlayerCombat>();
             if (pCombat != null)
             {
-                var charData = CharacterManager.EnsureInstance()?.GetCharacter(CharacterManager.CHAR_VAELSTRIDER);
-                int baseAtk = charData != null ? charData.baseAttack : 25;
+                var vaelData = CharacterManager.EnsureInstance()?.GetCharacter(CharacterManager.CHAR_VAELSTRIDER);
+                int baseAtk = vaelData != null ? vaelData.baseAttack : 25;
                 pCombat.SetBaseAttackDamage(baseAtk, Mathf.RoundToInt(baseAtk * 1.4f));
             }
 
