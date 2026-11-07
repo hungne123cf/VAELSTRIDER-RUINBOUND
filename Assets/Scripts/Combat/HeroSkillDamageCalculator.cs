@@ -5,10 +5,10 @@ using UnityEngine;
 /// 
 /// Hệ thống tính toán Sát thương & Thông số Kỹ năng Chuẩn xác 100% theo Mã Nguồn Thực Tế:
 /// - Mô tả đầy đủ cả cơ chế Đánh Thường lẫn cơ chế ĐÈ GIỮ (GỒNG CHIÊU / TỤ LỰC) của từng vị tướng.
+/// - Hiển thị tỉ lệ phần trăm tỉ lệ (% Scaling: 100% ATK, 35% AP...) ở dòng công thức chuẩn LMHT/TFT.
 /// - Phân định rõ ràng chiêu nào gây sát thương, chiêu nào thuần di chuyển né đòn (Dash Dune Assassin không gây dame).
 /// - Chi phí tiêu hao chính xác tuyệt đối: Cố định (Năng lượng), Theo giây (Gồng), hoặc Trừ Máu (Hiến Tế HP cho Dune Assassin).
 /// - Nếu chiêu không tốn gì thì ghi "Tiêu hao: 0".
-/// - Không còn phần chia cấp độ [ 30 / 45 / 70 ] vì game không có level chiêu.
 /// </summary>
 public static class HeroSkillDamageCalculator
 {
@@ -25,7 +25,7 @@ public static class HeroSkillDamageCalculator
         public float atkRatio;
         public float apRatio;
         public DamageType damageType;
-        public bool hasDamage = true; // Chiêu có gây sát thương hay không (ví dụ Dash Dune Assassin không gây dame)
+        public bool hasDamage = true; // Chiêu có gây sát thương hay không
         public Sprite skillIcon;
     }
 
@@ -59,10 +59,10 @@ public static class HeroSkillDamageCalculator
                 info.description = LocalizationManager.T(
                     $"• <b>Nhấp đánh:</b> Combo song đoản đao lướt chém chớp nhoáng với tỉ lệ chí mạng cao, tích nộ và nội năng. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý.\n" +
                     $"• <b>Đè giữ (Gồng):</b> Vào Thế Thủ Ảo Ảnh (giảm 70% sát thương), nhả nút để phóng <b>Tam Sa Lốc Xoáy</b> cuốn phăng và gây Chảy Máu quái vật liên tục (tiêu hao 8% Máu tối đa, 12% khi đầy nộ).\n\n" +
-                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
+                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (35% <sprite name=\"ap\">)",
                     $"• <b>Tap:</b> Lightning-fast dual dagger flurry with high critical strike rate. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n" +
                     $"• <b>Hold (Charge):</b> Enters Mirage Guard (70% damage reduction), release to fire <b>Sand Vortex</b> sweeping and bleeding enemies (costs 8% Max HP, 12% in Rage).\n\n" +
-                    $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (35% <sprite name=\"ap\">)");
                 break;
 
             case CharacterManager.CHAR_CELESTIAL_MAGE: // Pháp Sư Tinh Tú (Player 6)
@@ -77,10 +77,10 @@ public static class HeroSkillDamageCalculator
                 info.description = LocalizationManager.T(
                     $"• <b>Nhấp đánh:</b> Phóng 3 luồng cầu ma pháp tự động truy tìm kẻ địch và phóng sét lan sang quái vật lân cận. Nó gây <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) sát thương phép.\n" +
                     $"• <b>Đè giữ (Gồng):</b> Kích hoạt <b>Khiên Ma Trận</b> hấp thụ 80% sát thương nhận vào và đẩy lùi kẻ địch áp sát (tiêu hao 20 Năng lượng/giây), nhả nút bộc phát sóng đẩy quái vật.\n\n" +
-                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">)",
+                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (100% <sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (30% <sprite name=\"atk\">)",
                     $"• <b>Tap:</b> Fires 3 homing star orbs that detonate and chain lightning. Deals <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) magic damage.\n" +
                     $"• <b>Hold (Charge):</b> Activates <b>Barrier Matrix</b> absorbing 80% damage and pushing enemies back (costs 20 Energy/sec).\n\n" +
-                    $"<color=#D0D5DD>Attack Damage: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">)");
+                    $"<color=#D0D5DD>Attack Damage: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (100% <sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (30% <sprite name=\"atk\">)");
                 break;
 
             case CharacterManager.CHAR_AZURE_BLADE: // Lam Kiếm Sĩ (Player 3)
@@ -95,10 +95,10 @@ public static class HeroSkillDamageCalculator
                 info.description = LocalizationManager.T(
                     $"• <b>Nhấp đánh:</b> Vung kiếm phóng kiếm khí lam sắc xuyên thấu quái vật từ xa. Nó gây <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) sát thương phép.\n" +
                     $"• <b>Đè giữ (Gồng):</b> Tụ lực tạo hào quang Băng Hàn cực hạn, nhả nút phóng <b>Đại Kiếm Khí Khổng Lồ</b> tầm xa hơn với sát thương khuếch đại lên đến <b>x2.2 lần</b> và xuyên qua vô số quái vật.\n\n" +
-                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">)",
+                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (100% <sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (50% <sprite name=\"atk\">)",
                     $"• <b>Tap:</b> Slashes releasing piercing swordwaves. Deals <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) magic damage.\n" +
                     $"• <b>Hold (Charge):</b> Focuses cryo aura to unleash a <b>Giant Swordwave</b> dealing up to <b>2.2x</b> damage piercing all foes.\n\n" +
-                    $"<color=#D0D5DD>Attack Damage: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">)");
+                    $"<color=#D0D5DD>Attack Damage: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (100% <sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (50% <sprite name=\"atk\">)");
                 break;
 
             case CharacterManager.CHAR_TITAN_BERSERKER: // Cuồng Nộ Giáp Sắt (Player 4)
@@ -113,10 +113,10 @@ public static class HeroSkillDamageCalculator
                 info.description = LocalizationManager.T(
                     $"• <b>Nhấp đánh:</b> Vung đại chùy càn quét diện rộng đẩy lùi quái vật. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý.\n" +
                     $"• <b>Đè giữ (Gồng):</b> Giơ búa thủ thế giảm 50% sát thương (tiêu hao 15 Năng lượng/giây), nhả nút nện búa gây chấn động làm choáng quái vật trong 1.2s và gây thêm 150% sát thương.\n\n" +
-                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
+                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (25% <sprite name=\"ap\">)",
                     $"• <b>Tap:</b> Heavy warhammer sweeps repelling foes. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n" +
                     $"• <b>Hold (Charge):</b> Guards taking 50% less damage (costs 15 Energy/sec), release to slam stunning foes for 1.2s and dealing 150% extra damage.\n\n" +
-                    $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (25% <sprite name=\"ap\">)");
                 break;
 
             case CharacterManager.CHAR_GALE_RONIN: // Lôi Kiếm Lãng Tử (Player 2)
@@ -131,10 +131,10 @@ public static class HeroSkillDamageCalculator
                 info.description = LocalizationManager.T(
                     $"• <b>Nhấp đánh:</b> Chuỗi trảm kích lôi ảnh chém chớp nhoáng diện rộng. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý.\n" +
                     $"• <b>Đè giữ (Gồng):</b> Vào thế tụ lực Cư Hợp kiếm đạo (tiêu hao 15 Năng lượng), nhả nút lướt chém xuyên qua hàng loạt mục tiêu theo đường thẳng gây 180% sát thương cực lớn.\n\n" +
-                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
+                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (30% <sprite name=\"ap\">)",
                     $"• <b>Tap:</b> Rapid thunder slash combo sweeping wide arc. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n" +
                     $"• <b>Hold (Charge):</b> Focuses Iaido stance (costs 15 Energy), release to dash and pierce all straight-line targets dealing 180% damage.\n\n" +
-                    $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (30% <sprite name=\"ap\">)");
                 break;
 
             default: // Vaelstrider (Player 1)
@@ -149,10 +149,10 @@ public static class HeroSkillDamageCalculator
                 info.description = LocalizationManager.T(
                     $"• <b>Nhấp đánh:</b> Vung kiếm cổ đại theo hình vòng cung dứt điểm kẻ địch. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý.\n" +
                     $"• <b>Đè giữ (Gồng):</b> Vào Thế Thủ Kiếm Thuẫn giảm 65% sát thương nhận vào (tiêu hao 15 Năng lượng/giây), nhả nút phóng <b>Đại Sóng Kiếm Hoàng Kim</b> càn quét diện rộng.\n\n" +
-                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
+                    $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (35% <sprite name=\"ap\">)",
                     $"• <b>Tap:</b> Sweeping ancient sword slash. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n" +
                     $"• <b>Hold (Charge):</b> Enters Parry Stance taking 65% less damage (costs 15 Energy/sec), release to unleash <b>Radiant Swordwave</b> sweeping enemies.\n\n" +
-                    $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (35% <sprite name=\"ap\">)");
                 break;
         }
 
@@ -190,8 +190,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = 45 + info.fromAtk + info.fromAP;
                 info.description = LocalizationManager.T(
-                    $"Hiến tế 20% máu tối đa, triệu hồi lốc cát vây hãm quái vật và tung nhát chém chữ X xé rách chiến trường gây Chảy Máu liên tục. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý diện rộng.\n\n<color=#D0D5DD>Sát Thương: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
-                    $"Sacrifices 20% max HP to conjure sand vortices and execute an X-slash inflicting Bleed. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"Hiến tế 20% máu tối đa, triệu hồi lốc cát vây hãm quái vật và tung nhát chém chữ X xé rách chiến trường gây Chảy Máu liên tục. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý diện rộng.\n\n<color=#D0D5DD>Sát Thương Tuyệt Kỹ: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 45 + <color=#FFA500>{info.fromAtk}</color> (120% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (60% <sprite name=\"ap\">)",
+                    $"Sacrifices 20% max HP to conjure sand vortices and execute an X-slash inflicting Bleed. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Ultimate Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 45 + <color=#FFA500>{info.fromAtk}</color> (120% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (60% <sprite name=\"ap\">)");
                 break;
 
             case CharacterManager.CHAR_CELESTIAL_MAGE: // Player 6 (Pháp Sư Tinh Tú)
@@ -205,8 +205,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAtk = Mathf.RoundToInt(totalAtk * info.atkRatio);
                 info.totalDamage = 40 + info.fromAP + info.fromAtk;
                 info.description = LocalizationManager.T(
-                    $"Triệu hồi cơn mưa thiên thạch từ không gian rơi xuống hủy diệt toàn bộ kẻ địch trên bản đồ. Nó gây <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) sát thương phép mỗi viên.\n\n<color=#D0D5DD>Sát Thương: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">)",
-                    $"Summon a catastrophic meteor storm obliterating all battlefield enemies. Deals <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) magic damage per meteor.\n\n<color=#D0D5DD>Damage: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">)");
+                    $"Triệu hồi cơn mưa thiên thạch từ không gian rơi xuống hủy diệt toàn bộ kẻ địch trên bản đồ. Nó gây <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) sát thương phép mỗi viên.\n\n<color=#D0D5DD>Sát Thương Tuyệt Kỹ: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = 40 + <color=#4DEEEA>{info.fromAP}</color> (130% <sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (40% <sprite name=\"atk\">)",
+                    $"Summon a catastrophic meteor storm obliterating all battlefield enemies. Deals <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) magic damage per meteor.\n\n<color=#D0D5DD>Ultimate Damage: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = 40 + <color=#4DEEEA>{info.fromAP}</color> (130% <sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (40% <sprite name=\"atk\">)");
                 break;
 
             case CharacterManager.CHAR_AZURE_BLADE: // Player 3 (Lam Kiếm Sĩ)
@@ -220,8 +220,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAtk = Mathf.RoundToInt(totalAtk * info.atkRatio);
                 info.totalDamage = 32 + info.fromAP + info.fromAtk;
                 info.description = LocalizationManager.T(
-                    $"Tích tụ cực hạn và phóng ra 5 luồng kiếm khí khổng lồ quét sạch toàn bộ góc chiến trường. Nó gây <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) sát thương phép mỗi luồng.\n\n<color=#D0D5DD>Sát Thương: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">)",
-                    $"Releases 5 giant fan-shaped sword arcs sweeping clean the battlefield. Deals <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) magic damage per arc.\n\n<color=#D0D5DD>Damage: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">)");
+                    $"Tích tụ cực hạn và phóng ra 5 luồng kiếm khí khổng lồ quét sạch toàn bộ góc chiến trường. Nó gây <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) sát thương phép mỗi luồng.\n\n<color=#D0D5DD>Sát Thương Tuyệt Kỹ: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = 32 + <color=#4DEEEA>{info.fromAP}</color> (110% <sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (50% <sprite name=\"atk\">)",
+                    $"Releases 5 giant fan-shaped sword arcs sweeping clean the battlefield. Deals <color=#4DEEEA><b>{info.totalDamage}</b></color> (<sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color> + <sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color>) magic damage per arc.\n\n<color=#D0D5DD>Ultimate Damage: </color><color=#4DEEEA><b>{info.totalDamage}</b></color> = 32 + <color=#4DEEEA>{info.fromAP}</color> (110% <sprite name=\"ap\">) + <color=#FFA500>{info.fromAtk}</color> (50% <sprite name=\"atk\">)");
                 break;
 
             case CharacterManager.CHAR_TITAN_BERSERKER: // Player 4 (Cuồng Nộ Giáp Sắt)
@@ -235,8 +235,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = 50 + info.fromAtk + info.fromAP;
                 info.description = LocalizationManager.T(
-                    $"Nện đại chùy tạo sóng xung kích 360 độ làm choáng kẻ địch xung quanh trong 1.5s. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý lên các kẻ địch trúng chấn động.\n\n<color=#D0D5DD>Sát Thương: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
-                    $"Slams the warhammer down creating a 360-degree shockwave that stuns foes for 1.5s. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"Nện đại chùy tạo sóng xung kích 360 độ làm choáng kẻ địch xung quanh trong 1.5s. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý lên các kẻ địch trúng chấn động.\n\n<color=#D0D5DD>Sát Thương Tuyệt Kỹ: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 50 + <color=#FFA500>{info.fromAtk}</color> (140% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (50% <sprite name=\"ap\">)",
+                    $"Slams the warhammer down creating a 360-degree shockwave that stuns foes for 1.5s. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Ultimate Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 50 + <color=#FFA500>{info.fromAtk}</color> (140% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (50% <sprite name=\"ap\">)");
                 break;
 
             case CharacterManager.CHAR_GALE_RONIN: // Player 2 (Lôi Kiếm Lãng Tử)
@@ -250,8 +250,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = 40 + info.fromAtk + info.fromAP;
                 info.description = LocalizationManager.T(
-                    $"Biến mất vào hư không và xuất hiện chém xuyên qua hàng loạt quái vật trong chớp mắt. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý lên kẻ địch trúng đòn.\n\n<color=#D0D5DD>Sát Thương: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
-                    $"Vanishes into shadows and slashes through a line of enemies at blinding speed. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"Biến mất vào hư không và xuất hiện chém xuyên qua hàng loạt quái vật trong chớp mắt. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý lên kẻ địch trúng đòn.\n\n<color=#D0D5DD>Sát Thương Tuyệt Kỹ: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 40 + <color=#FFA500>{info.fromAtk}</color> (130% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (70% <sprite name=\"ap\">)",
+                    $"Vanishes into shadows and slashes through a line of enemies at blinding speed. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Ultimate Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 40 + <color=#FFA500>{info.fromAtk}</color> (130% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (70% <sprite name=\"ap\">)");
                 break;
 
             default: // Vaelstrider (Player 1)
@@ -265,8 +265,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = 35 + info.fromAtk + info.fromAP;
                 info.description = LocalizationManager.T(
-                    $"Xoay tròn đại kiếm cổ đại liên tục hất tung toàn bộ quái vật xung quanh. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý lên các kẻ địch trúng đòn.\n\n<color=#D0D5DD>Sát Thương: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
-                    $"Spins the ancient greatsword knocking surrounding enemies airborne. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"Xoay tròn đại kiếm cổ đại liên tục hất tung toàn bộ quái vật xung quanh. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý lên các kẻ địch trúng đòn.\n\n<color=#D0D5DD>Sát Thương Tuyệt Kỹ: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 35 + <color=#FFA500>{info.fromAtk}</color> (110% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (60% <sprite name=\"ap\">)",
+                    $"Spins the ancient greatsword knocking surrounding enemies airborne. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Ultimate Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 35 + <color=#FFA500>{info.fromAtk}</color> (110% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (60% <sprite name=\"ap\">)");
                 break;
         }
 
@@ -340,8 +340,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = 18 + info.fromAtk + info.fromAP;
                 info.description = LocalizationManager.T(
-                    $"Lao vọt tới trước đồng thời xoay tròn đại chùy 360 độ càn quét mọi quái vật cản đường. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý và hất văng quái vật.\n\n<color=#D0D5DD>Sát Thương: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
-                    $"Charges forward spinning the warhammer 360 degrees. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage knocking back enemies.\n\n<color=#D0D5DD>Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"Lao vọt tới trước đồng thời xoay tròn đại chùy 360 độ càn quét mọi quái vật cản đường. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý và hất văng quái vật.\n\n<color=#D0D5DD>Sát Thương Xung Kích: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 18 + <color=#FFA500>{info.fromAtk}</color> (60% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (30% <sprite name=\"ap\">)",
+                    $"Charges forward spinning the warhammer 360 degrees. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage knocking back enemies.\n\n<color=#D0D5DD>Charge Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 18 + <color=#FFA500>{info.fromAtk}</color> (60% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (30% <sprite name=\"ap\">)");
                 break;
 
             case CharacterManager.CHAR_GALE_RONIN: // Lôi Kiếm Lãng Tử (Player 2)
@@ -369,8 +369,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = 12 + info.fromAtk + info.fromAP;
                 info.description = LocalizationManager.T(
-                    $"Lướt nhanh né đòn bất tử trong 0.2s và hất văng quái cản đường. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý lên kẻ địch va phải.\n\n<color=#D0D5DD>Sát Thương: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)",
-                    $"Swift dash granting invulnerability and knocking back pathway enemies. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (<sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (<sprite name=\"ap\">)");
+                    $"Lướt nhanh né đòn bất tử trong 0.2s và hất văng quái cản đường. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý lên kẻ địch va phải.\n\n<color=#D0D5DD>Sát Thương Phản Đòn: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 12 + <color=#FFA500>{info.fromAtk}</color> (40% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (25% <sprite name=\"ap\">)",
+                    $"Swift dash granting invulnerability and knocking back pathway enemies. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage.\n\n<color=#D0D5DD>Riposte Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 12 + <color=#FFA500>{info.fromAtk}</color> (40% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (25% <sprite name=\"ap\">)");
                 break;
         }
 
