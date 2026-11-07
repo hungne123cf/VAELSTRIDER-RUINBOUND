@@ -1374,13 +1374,19 @@ public class AugmentManager : MonoBehaviour
 
     public int GetAugmentRank(AugmentDatabase.AugmentType type)
     {
+        int count = GetOwnedAugmentCount(type);
+        return Mathf.Max(1, count);
+    }
+
+    public int GetOwnedAugmentCount(AugmentDatabase.AugmentType type)
+    {
         int count = 0;
         for (int i = 0; i < _selectedAugments.Count; i++)
         {
             if (_selectedAugments[i] != null && _selectedAugments[i].type == type)
                 count++;
         }
-        return Mathf.Max(1, count);
+        return count;
     }
 
     public bool HasAugment(AugmentDatabase.AugmentType type)

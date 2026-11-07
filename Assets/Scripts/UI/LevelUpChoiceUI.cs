@@ -881,7 +881,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         string typeName = GetDamageTypeName(aug.type, isVN);
 
         int currentRank = AugmentManager.Instance != null
-            ? AugmentManager.Instance.GetAugmentRank(aug.type) : 0;
+            ? AugmentManager.Instance.GetOwnedAugmentCount(aug.type) : 0;
         bool isUpgrade = currentRank > 0;
 
         // ── 1. Tier Visual Spec (Silver / Gold / Prismatic) ───────────────────
@@ -1255,7 +1255,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         var btnTMP = btnTxtObj.GetComponent<TextMeshProUGUI>();
         btnTMP.text = isUpgrade
             ? (isVN ? $"NÂNG LÊN CẤP {currentRank + 1}" : $"UPGRADE TO LV.{currentRank + 1}")
-            : (isVN ? "KHẮC ẤN LÕI NÀY" : "ACQUIRE AUGMENT");
+            : (isVN ? "NÂNG CẤP" : "ACQUIRE");
         btnTMP.fontSize = 18.5f;
         btnTMP.fontStyle = FontStyles.Bold;
         btnTMP.alignment = TextAlignmentOptions.Center;
