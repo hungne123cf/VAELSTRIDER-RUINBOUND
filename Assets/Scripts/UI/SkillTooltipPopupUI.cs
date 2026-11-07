@@ -264,11 +264,15 @@ public class SkillTooltipPopupUI : MonoBehaviour
             // Tự động co giãn chiều cao thẻ bài theo độ dài mô tả để layout luôn vừa vặn không thừa thãi
             Canvas.ForceUpdateCanvases();
             float textH = descText.preferredHeight;
-            float targetH = Mathf.Max(180f, textH + 92f);
+            float targetH = Mathf.Max(185f, textH + 90f);
             if (panelRt != null)
             {
-                panelRt.sizeDelta = new Vector2(440f, targetH);
-                panelRt.anchoredPosition = new Vector2(-50f, -180f);
+                panelRt.sizeDelta = new Vector2(450f, targetH);
+                panelRt.anchoredPosition = new Vector2(-50f, -170f);
+            }
+            if (descText.rectTransform != null)
+            {
+                descText.rectTransform.sizeDelta = new Vector2(-28f, textH + 10f);
             }
         }
 
