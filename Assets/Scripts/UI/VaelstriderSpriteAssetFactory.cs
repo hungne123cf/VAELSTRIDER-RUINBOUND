@@ -63,7 +63,6 @@ public static class VaelstriderSpriteAssetFactory
         // Tạo ScriptableObject TMP_SpriteAsset
         TMP_SpriteAsset asset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
         asset.name = "VaelstriderRuntimeIcons";
-        asset.version = "1.1.0";
         asset.hashCode = TMP_TextUtilities.GetSimpleHashCode(asset.name);
 
         Shader shader = Shader.Find("TextMeshPro/Sprite") ?? Shader.Find("UI/Default");
@@ -75,8 +74,9 @@ public static class VaelstriderSpriteAssetFactory
         asset.spriteSheet = tex;
 
         string[] names = new[] { "atk", "ap", "mana", "hp" };
-        var glyphTable = new List<TMP_SpriteGlyph>();
-        var charTable = new List<TMP_SpriteCharacter>();
+
+        if (asset.spriteGlyphTable != null) asset.spriteGlyphTable.Clear();
+        if (asset.spriteCharacterTable != null) asset.spriteCharacterTable.Clear();
 
         for (int i = 0; i < iconCount; i++)
         {
@@ -85,18 +85,16 @@ public static class VaelstriderSpriteAssetFactory
             GlyphMetrics metrics = new GlyphMetrics(iconSize, iconSize, 0, iconSize * 0.85f, iconSize);
 
             TMP_SpriteGlyph glyph = new TMP_SpriteGlyph((uint)i, metrics, rect, 1.0f, 0);
-            glyphTable.Add(glyph);
+            if (asset.spriteGlyphTable != null) asset.spriteGlyphTable.Add(glyph);
 
             TMP_SpriteCharacter ch = new TMP_SpriteCharacter(0xFFFE, glyph)
             {
                 name = names[i],
                 scale = 1.0f
             };
-            charTable.Add(ch);
+            if (asset.spriteCharacterTable != null) asset.spriteCharacterTable.Add(ch);
         }
 
-        asset.spriteGlyphTable = glyphTable;
-        asset.spriteCharacterTable = charTable;
         asset.UpdateLookupTables();
 
         cachedAsset = asset;
@@ -127,3 +125,4 @@ public static class VaelstriderSpriteAssetFactory
         }
     }
 }
+
