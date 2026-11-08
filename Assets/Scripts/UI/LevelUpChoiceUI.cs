@@ -1018,12 +1018,12 @@ public class LevelUpChoiceUI : MonoBehaviour
                     chosenSprite = _spriteDeityBloodBeast; break;
 
                 // Nữ Chúa Băng Giá (Glacial Frost Empress): Hệ Băng Tuyết & Hàn Khí
-                case AugmentDatabase.AugmentType.GlacialSoul:
-                case AugmentDatabase.AugmentType.AbsoluteZeroNova:
-                    chosenSprite = _spriteDeityFrostEmpress; break;
+                // (GlacialSoul & AbsoluteZeroNova đã có ảnh độc bản ở trên)
+                // case AugmentDatabase.AugmentType.GlacialSoul:
+                // case AugmentDatabase.AugmentType.AbsoluteZeroNova:
 
                 // Chúa Tể Hỏa Ngục Dung Nham (Inferno Hellfire Fiend): Lửa, Hỏa Nham & Cuồng Nộ
-                case AugmentDatabase.AugmentType.FlameAdaptation:
+                // (FlameAdaptation đã có ảnh độc bản ở trên)
                 case AugmentDatabase.AugmentType.MagmaEruption:
                 case AugmentDatabase.AugmentType.RagingFire:
                     chosenSprite = _spriteDeityInfernoFiend; break;
