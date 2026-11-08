@@ -19,7 +19,14 @@ public static class CardDeityTextureSetup
             "Assets/Resources/UI/CardDeities/CardDeity_BloodBeast.png",
             "Assets/Resources/UI/CardDeities/CardDeity_CelestialAstral.png",
             "Assets/Resources/UI/CardDeities/CardDeity_IronTitan.png",
-            "Assets/Resources/UI/CardDeities/CardDeity_VoidPhantom.png"
+            "Assets/Resources/UI/CardDeities/CardDeity_VoidPhantom.png",
+            "Assets/Resources/UI/CardDeities/CardDeity_FrostEmpress.png",
+            "Assets/Resources/UI/CardDeities/CardDeity_InfernoFiend.png",
+            "Assets/Resources/UI/CardDeities/CardDeity_VenomQueen.png",
+            "Assets/Resources/UI/CardDeities/CardDeity_ThunderGod.png",
+            "Assets/Resources/UI/CardDeities/CardDeity_GrimReaper.png",
+            "Assets/Resources/UI/CardDeities/CardDeity_CursedDemon.png",
+            "Assets/Resources/UI/CardDeities/CardDeity_ShieldGoddess.png"
         };
 
         bool anyModified = false;
@@ -71,3 +78,4 @@ public static class CardDeityTextureSetup
     }
 }
 #endif
+
