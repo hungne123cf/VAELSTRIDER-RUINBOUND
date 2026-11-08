@@ -587,6 +587,8 @@ public class LevelUpChoiceUI : MonoBehaviour
             BuildCard(_cardsContainer, aug, i, isVietnamese,
                 new Vector2(xMin, 0.015f), new Vector2(xMax, 0.985f));
         }
+
+        Canvas.ForceUpdateCanvases();
     }
 
     private void BuildRerollButton(Transform parent, bool isVN)
@@ -1275,21 +1277,33 @@ public class LevelUpChoiceUI : MonoBehaviour
         rbTxt.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.30f, Color.black);
 
-        // ── 5. Khung Tranh Minh Họa Riêng Biệt (Picture Frame - Đứng yên 100%, Tràn Viền) ──
-        var picFrameObj = new GameObject("PictureFrame", typeof(RectTransform), typeof(Image), typeof(RectMask2D));
+        // ── 5. Khung Tranh Minh Họa Riêng Biệt (Picture Frame - FitInParent Ôm Vừa Khít Tỷ Lệ Ảnh) ──
+        Sprite illustrationSprite = GetAugmentCardIllustrationSprite(aug);
+        float artRatio = 0.747f; // Mặc định tỷ lệ chuẩn 3:4 của Card Deities
+        if (illustrationSprite != null && illustrationSprite.rect.height > 0)
+        {
+            artRatio = (float)illustrationSprite.rect.width / illustrationSprite.rect.height;
+        }
+
+        var picFrameObj = new GameObject("PictureFrame", typeof(RectTransform), typeof(Image), typeof(RectMask2D), typeof(AspectRatioFitter));
         picFrameObj.transform.SetParent(card.transform, false);
         var pfRT = picFrameObj.GetComponent<RectTransform>();
-        pfRT.anchorMin = new Vector2(0.055f, 0.410f);
-        pfRT.anchorMax = new Vector2(0.945f, 0.858f);
+        pfRT.anchorMin = new Vector2(0.045f, 0.365f);
+        pfRT.anchorMax = new Vector2(0.955f, 0.858f);
         pfRT.offsetMin = pfRT.offsetMax = Vector2.zero;
+        pfRT.pivot = new Vector2(0.5f, 0.5f);
+
+        var arf = picFrameObj.GetComponent<AspectRatioFitter>();
+        arf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+        arf.aspectRatio = artRatio;
+
         var pfImg = picFrameObj.GetComponent<Image>();
         pfImg.sprite = GetCardBodySprite();
         pfImg.type = Image.Type.Sliced;
         pfImg.color = new Color(0.03f, 0.04f, 0.06f, 1f);
         pfImg.raycastTarget = false;
 
-        // Bức tranh nghệ thuật minh họa Lõi / Player (Hiển thị sắc nét, ĐỨNG YÊN, KHÔNG VIỀN ĐEN THỪA)
-        Sprite illustrationSprite = GetAugmentCardIllustrationSprite(aug);
+        // Bức tranh nghệ thuật minh họa Lõi / Player (Hiển thị sắc nét, ĐỨNG YÊN, KHUNG ÔM VỪA KHÍT)
         RectTransform phantomRT = null;
         if (illustrationSprite != null)
         {
@@ -1305,11 +1319,11 @@ public class LevelUpChoiceUI : MonoBehaviour
             var artImg = artObj.GetComponent<Image>();
             artImg.sprite = illustrationSprite;
             artImg.color = Color.white;
-            artImg.preserveAspect = false; // Tràn đều khung tranh viền vàng chuẩn Yu-Gi-Oh, loại bỏ hoàn toàn dải đen 2 bên
+            artImg.preserveAspect = false; // Phủ khít khung tranh vì khung đã ôm chuẩn tỷ lệ tranh gốc bằng FitInParent
             artImg.raycastTarget = false;
         }
 
-        // Khung viền kim loại kép mạ vàng bao quanh bức tranh
+        // Khung viền kim loại kép mạ vàng bao quanh bức tranh (Ôm vừa khít mép tranh từng pixel)
         var picBorderObj = new GameObject("PictureBorder", typeof(RectTransform), typeof(Image));
         picBorderObj.transform.SetParent(picFrameObj.transform, false);
         var pbRT = picBorderObj.GetComponent<RectTransform>();
@@ -1326,8 +1340,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         var descBoxObj = new GameObject("DescriptionBox", typeof(RectTransform), typeof(Image), typeof(Outline));
         descBoxObj.transform.SetParent(card.transform, false);
         var dbRT = descBoxObj.GetComponent<RectTransform>();
-        dbRT.anchorMin = new Vector2(0.055f, 0.016f);
-        dbRT.anchorMax = new Vector2(0.945f, 0.398f);
+        dbRT.anchorMin = new Vector2(0.045f, 0.016f);
+        dbRT.anchorMax = new Vector2(0.955f, 0.355f);
         dbRT.offsetMin = dbRT.offsetMax = Vector2.zero;
 
         var dbImg = descBoxObj.GetComponent<Image>();
@@ -1609,22 +1623,34 @@ public class LevelUpChoiceUI : MonoBehaviour
             new Vector2(0.06f, 0.865f), new Vector2(0.94f, 0.875f),
             tierColor * 0.85f);
 
-        // Bên Trái: Khung Tranh Thu Nhỏ
-        var leftThumb = new GameObject("LeftThumbnail", typeof(RectTransform), typeof(Image), typeof(Outline));
+        // Bên Trái: Khung Tranh Thu Nhỏ (Ôm vừa khít chuẩn tỷ lệ 3:4)
+        Sprite thumbSprite = GetAugmentCardIllustrationSprite(aug);
+        float thumbRatio = 0.747f;
+        if (thumbSprite != null && thumbSprite.rect.height > 0)
+        {
+            thumbRatio = (float)thumbSprite.rect.width / thumbSprite.rect.height;
+        }
+
+        var leftThumb = new GameObject("LeftThumbnail", typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter), typeof(Outline));
         leftThumb.transform.SetParent(modal.transform, false);
         var ltRT = leftThumb.GetComponent<RectTransform>();
-        ltRT.anchorMin = new Vector2(0.06f, 0.22f);
-        ltRT.anchorMax = new Vector2(0.38f, 0.83f);
+        ltRT.anchorMin = new Vector2(0.06f, 0.20f);
+        ltRT.anchorMax = new Vector2(0.40f, 0.84f);
         ltRT.offsetMin = ltRT.offsetMax = Vector2.zero;
+        ltRT.pivot = new Vector2(0.5f, 0.5f);
+
+        var ltArf = leftThumb.GetComponent<AspectRatioFitter>();
+        ltArf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+        ltArf.aspectRatio = thumbRatio;
 
         var ltImg = leftThumb.GetComponent<Image>();
-        ltImg.sprite = GetAugmentCardIllustrationSprite(aug);
+        ltImg.sprite = thumbSprite;
         ltImg.preserveAspect = false;
         ltImg.color = Color.white;
 
         var ltOut = leftThumb.GetComponent<Outline>();
         ltOut.effectColor = tierColor;
-        ltOut.effectDistance = new Vector2(1.5f, -1.5f);
+        ltOut.effectDistance = new Vector2(1.8f, -1.8f);
 
         // Bên Phải: Chi Tiết Lõi
         var rightDetail = new GameObject("RightDetail", typeof(RectTransform));
