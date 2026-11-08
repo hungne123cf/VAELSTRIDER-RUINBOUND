@@ -653,10 +653,6 @@ public class GameOverUI : MonoBehaviour
 
         return Instance;
     }
-        if (frame != null) frame.SetAsLastSibling();
-
-        return Instance;
-    }
 
     private static Button CreateFramedButton(Transform parent, string name, string text, Vector2 pos, Vector2 size, Color bgColor, Color frameColor, float fontSize, out TextMeshProUGUI btnTxt)
     {
