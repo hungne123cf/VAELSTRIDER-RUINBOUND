@@ -927,6 +927,25 @@ public class LevelUpChoiceUI : MonoBehaviour
     private static Sprite _spritePoisonTouch;
     private static Sprite _spriteVirulentBloom;
 
+    // ─── ĐỢT 3: 17 TRANH ĐỘC BẢN HỆ KIẾN TẠO, KIẾM THÁNH, THÁNH KHIÊN & TỬ THẦN ───
+    private static Sprite _spriteRagingFire;
+    private static Sprite _spriteAcidMembrane;
+    private static Sprite _spriteSoulHarvest;
+    private static Sprite _spriteDeathsTouch;
+    private static Sprite _spriteDivineAegis;
+    private static Sprite _spriteIronBastion;
+    private static Sprite _spriteArcaneShield;
+    private static Sprite _spriteBonusAttack;
+    private static Sprite _spriteBonusSpeed;
+    private static Sprite _spriteSwiftShadow;
+    private static Sprite _spriteComboMastery;
+    private static Sprite _spriteGodforgedArsenal;
+    private static Sprite _spriteShadowAmbush;
+    private static Sprite _spriteLaceratingEdge;
+    private static Sprite _spriteFleetWind;
+    private static Sprite _spriteRelentlessAssault;
+    private static Sprite _spriteGiantSlayer;
+
     private static void EnsureDeitySpritesLoaded()
     {
         if (_spriteDeityBloodBeast == null) _spriteDeityBloodBeast = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodBeast");
@@ -973,6 +992,25 @@ public class LevelUpChoiceUI : MonoBehaviour
         if (_spriteMagmaEruption == null) _spriteMagmaEruption = Resources.Load<Sprite>("UI/CardDeities/CardDeity_MagmaEruption");
         if (_spritePoisonTouch == null) _spritePoisonTouch = Resources.Load<Sprite>("UI/CardDeities/CardDeity_PoisonTouch");
         if (_spriteVirulentBloom == null) _spriteVirulentBloom = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VirulentBloom");
+
+        // Nạp Đợt 3: 17 tranh độc bản
+        if (_spriteRagingFire == null) _spriteRagingFire = Resources.Load<Sprite>("UI/CardDeities/CardDeity_RagingFire");
+        if (_spriteAcidMembrane == null) _spriteAcidMembrane = Resources.Load<Sprite>("UI/CardDeities/CardDeity_AcidMembrane");
+        if (_spriteSoulHarvest == null) _spriteSoulHarvest = Resources.Load<Sprite>("UI/CardDeities/CardDeity_SoulHarvest");
+        if (_spriteDeathsTouch == null) _spriteDeathsTouch = Resources.Load<Sprite>("UI/CardDeities/CardDeity_DeathsTouch");
+        if (_spriteDivineAegis == null) _spriteDivineAegis = Resources.Load<Sprite>("UI/CardDeities/CardDeity_DivineAegis");
+        if (_spriteIronBastion == null) _spriteIronBastion = Resources.Load<Sprite>("UI/CardDeities/CardDeity_IronBastion");
+        if (_spriteArcaneShield == null) _spriteArcaneShield = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ArcaneShield");
+        if (_spriteBonusAttack == null) _spriteBonusAttack = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusAttack");
+        if (_spriteBonusSpeed == null) _spriteBonusSpeed = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusSpeed");
+        if (_spriteSwiftShadow == null) _spriteSwiftShadow = Resources.Load<Sprite>("UI/CardDeities/CardDeity_SwiftShadow");
+        if (_spriteComboMastery == null) _spriteComboMastery = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ComboMastery");
+        if (_spriteGodforgedArsenal == null) _spriteGodforgedArsenal = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GodforgedArsenal");
+        if (_spriteShadowAmbush == null) _spriteShadowAmbush = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ShadowAmbush");
+        if (_spriteLaceratingEdge == null) _spriteLaceratingEdge = Resources.Load<Sprite>("UI/CardDeities/CardDeity_LaceratingEdge");
+        if (_spriteFleetWind == null) _spriteFleetWind = Resources.Load<Sprite>("UI/CardDeities/CardDeity_FleetWind");
+        if (_spriteRelentlessAssault == null) _spriteRelentlessAssault = Resources.Load<Sprite>("UI/CardDeities/CardDeity_RelentlessAssault");
+        if (_spriteGiantSlayer == null) _spriteGiantSlayer = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GiantSlayer");
     }
 
     public static Sprite GetAugmentCardIllustrationSprite(AugmentDatabase.AugmentData aug, HashSet<Sprite> usedSprites = null)
@@ -1072,27 +1110,44 @@ public class LevelUpChoiceUI : MonoBehaviour
                 case AugmentDatabase.AugmentType.VirulentBloom:
                     chosenSprite = _spriteVirulentBloom; break;
 
-                // Chúa Tể Hỏa Ngục Dung Nham (Inferno Hellfire Fiend): Lửa, Hỏa Nham & Cuồng Nộ
+                // ─── ĐỢT 3: 17 LÕI HỎA NGỤC, ĐỘC TỐ, TỬ THẦN, THÁNH KHIÊN & KIẾM THÁNH (Độc bản 100%) ───
                 case AugmentDatabase.AugmentType.RagingFire:
-                    chosenSprite = _spriteDeityInfernoFiend; break;
-
-                // Nữ Chúa Độc Tố (Venom Hydra Queen): Độc Dược & Axit Ăn Mòn
+                    chosenSprite = _spriteRagingFire; break;
                 case AugmentDatabase.AugmentType.AcidMembrane:
-                    chosenSprite = _spriteDeityVenomQueen; break;
+                    chosenSprite = _spriteAcidMembrane; break;
 
-                // Tử Thần Thu Hoạch Linh Hồn (Grim Reaper): Hút Linh Hồn & Kết Liễu
                 case AugmentDatabase.AugmentType.SoulHarvest:
+                    chosenSprite = _spriteSoulHarvest; break;
                 case AugmentDatabase.AugmentType.DeathsTouch:
-                    chosenSprite = _spriteDeityGrimReaper; break;
+                    chosenSprite = _spriteDeathsTouch; break;
 
-                // Tà Thần Lời Nguyền Cổ Xưa (Ancient Cursed Demon)
-                // (Các lõi CursedMight, ChronoStasis,... đã có tranh độc bản ở trên)
-
-                // Nữ Thần Thánh Khiên Vàng Kim (Divine Aegis Goddess): Khiên Hộ Mệnh & Bất Hoại
                 case AugmentDatabase.AugmentType.DivineAegis:
+                    chosenSprite = _spriteDivineAegis; break;
                 case AugmentDatabase.AugmentType.IronBastion:
+                    chosenSprite = _spriteIronBastion; break;
                 case AugmentDatabase.AugmentType.ArcaneShield:
-                    chosenSprite = _spriteDeityShieldGoddess; break;
+                    chosenSprite = _spriteArcaneShield; break;
+
+                case AugmentDatabase.AugmentType.BonusAttack:
+                    chosenSprite = _spriteBonusAttack; break;
+                case AugmentDatabase.AugmentType.BonusSpeed:
+                    chosenSprite = _spriteBonusSpeed; break;
+                case AugmentDatabase.AugmentType.SwiftShadow:
+                    chosenSprite = _spriteSwiftShadow; break;
+                case AugmentDatabase.AugmentType.ComboMastery:
+                    chosenSprite = _spriteComboMastery; break;
+                case AugmentDatabase.AugmentType.GodforgedArsenal:
+                    chosenSprite = _spriteGodforgedArsenal; break;
+                case AugmentDatabase.AugmentType.ShadowAmbush:
+                    chosenSprite = _spriteShadowAmbush; break;
+                case AugmentDatabase.AugmentType.LaceratingEdge:
+                    chosenSprite = _spriteLaceratingEdge; break;
+                case AugmentDatabase.AugmentType.FleetWind:
+                    chosenSprite = _spriteFleetWind; break;
+                case AugmentDatabase.AugmentType.RelentlessAssault:
+                    chosenSprite = _spriteRelentlessAssault; break;
+                case AugmentDatabase.AugmentType.GiantSlayer:
+                    chosenSprite = _spriteGiantSlayer; break;
 
                 // Cổ Thần Tinh Tú: Sức Mạnh Phép (AP), Hồi Chiêu (CDR), Tinh Vân & Thần Chú
                 case AugmentDatabase.AugmentType.BonusAbilityPower:
@@ -1109,19 +1164,6 @@ public class LevelUpChoiceUI : MonoBehaviour
                 case AugmentDatabase.AugmentType.AscendedDivinity:
                 case AugmentDatabase.AugmentType.EchoingVoid:
                     chosenSprite = _spriteDeityCelestial; break;
-
-                // Chiến Thần Kiếm Khách: Tấn Công Vật Lý (ATK), Tốc Đánh, Tốc Độ Di Chuyển & Kiếm Khí
-                case AugmentDatabase.AugmentType.BonusAttack:
-                case AugmentDatabase.AugmentType.BonusSpeed:
-                case AugmentDatabase.AugmentType.SwiftShadow:
-                case AugmentDatabase.AugmentType.ComboMastery:
-                case AugmentDatabase.AugmentType.GodforgedArsenal:
-                case AugmentDatabase.AugmentType.ShadowAmbush:
-                case AugmentDatabase.AugmentType.LaceratingEdge:
-                case AugmentDatabase.AugmentType.FleetWind:
-                case AugmentDatabase.AugmentType.RelentlessAssault:
-                case AugmentDatabase.AugmentType.GiantSlayer:
-                    chosenSprite = _spriteDeityBladeSaint; break;
 
                 // Cự Thần Titan: Máu Tối Đa (HP), Giáp Thủ, Hồi Phục Sinh Lực & Thể Trọng
                 case AugmentDatabase.AugmentType.BonusHealth:
