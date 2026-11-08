@@ -910,6 +910,23 @@ public class LevelUpChoiceUI : MonoBehaviour
     private static Sprite _spriteGlacialSoul;
     private static Sprite _spriteAbsoluteZeroNova;
 
+    // ─── ĐỢT 2: 15 TRANH ĐỘC BẢN HỆ CHIẾN BINH, HUYẾT TẾ & NGUYÊN TỐ ───
+    private static Sprite _spriteBonusCritChance;
+    private static Sprite _spriteBonusCritDamage;
+    private static Sprite _spriteBonusLifesteal;
+    private static Sprite _spriteVampireBlood;
+    private static Sprite _spriteBloodGodTribute;
+    private static Sprite _spriteBattleFrenzy;
+    private static Sprite _spriteBerserkerMode;
+    private static Sprite _spriteHeavyImpact;
+    private static Sprite _spriteDemonicPact;
+    private static Sprite _spriteStaticOverload;
+    private static Sprite _spriteEchoStrike;
+    private static Sprite _spriteStormDancer;
+    private static Sprite _spriteMagmaEruption;
+    private static Sprite _spritePoisonTouch;
+    private static Sprite _spriteVirulentBloom;
+
     private static void EnsureDeitySpritesLoaded()
     {
         if (_spriteDeityBloodBeast == null) _spriteDeityBloodBeast = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodBeast");
@@ -939,6 +956,23 @@ public class LevelUpChoiceUI : MonoBehaviour
         if (_spriteFlameAdaptation == null) _spriteFlameAdaptation = Resources.Load<Sprite>("UI/CardDeities/CardDeity_FlameAdaptation");
         if (_spriteGlacialSoul == null) _spriteGlacialSoul = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GlacialSoul");
         if (_spriteAbsoluteZeroNova == null) _spriteAbsoluteZeroNova = Resources.Load<Sprite>("UI/CardDeities/CardDeity_AbsoluteZeroNova");
+
+        // Nạp Đợt 2: 15 tranh độc bản
+        if (_spriteBonusCritChance == null) _spriteBonusCritChance = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusCritChance");
+        if (_spriteBonusCritDamage == null) _spriteBonusCritDamage = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusCritDamage");
+        if (_spriteBonusLifesteal == null) _spriteBonusLifesteal = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusLifesteal");
+        if (_spriteVampireBlood == null) _spriteVampireBlood = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VampireBlood");
+        if (_spriteBloodGodTribute == null) _spriteBloodGodTribute = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodGodTribute");
+        if (_spriteBattleFrenzy == null) _spriteBattleFrenzy = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BattleFrenzy");
+        if (_spriteBerserkerMode == null) _spriteBerserkerMode = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BerserkerMode");
+        if (_spriteHeavyImpact == null) _spriteHeavyImpact = Resources.Load<Sprite>("UI/CardDeities/CardDeity_HeavyImpact");
+        if (_spriteDemonicPact == null) _spriteDemonicPact = Resources.Load<Sprite>("UI/CardDeities/CardDeity_DemonicPact");
+        if (_spriteStaticOverload == null) _spriteStaticOverload = Resources.Load<Sprite>("UI/CardDeities/CardDeity_StaticOverload");
+        if (_spriteEchoStrike == null) _spriteEchoStrike = Resources.Load<Sprite>("UI/CardDeities/CardDeity_EchoStrike");
+        if (_spriteStormDancer == null) _spriteStormDancer = Resources.Load<Sprite>("UI/CardDeities/CardDeity_StormDancer");
+        if (_spriteMagmaEruption == null) _spriteMagmaEruption = Resources.Load<Sprite>("UI/CardDeities/CardDeity_MagmaEruption");
+        if (_spritePoisonTouch == null) _spritePoisonTouch = Resources.Load<Sprite>("UI/CardDeities/CardDeity_PoisonTouch");
+        if (_spriteVirulentBloom == null) _spriteVirulentBloom = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VirulentBloom");
     }
 
     public static Sprite GetAugmentCardIllustrationSprite(AugmentDatabase.AugmentData aug, HashSet<Sprite> usedSprites = null)
@@ -1002,43 +1036,49 @@ public class LevelUpChoiceUI : MonoBehaviour
                 case AugmentDatabase.AugmentType.AbsoluteZeroNova:
                     chosenSprite = _spriteAbsoluteZeroNova; break;
 
-                // Đại Tướng Cuồng Bạo (Berserker Warlord): Cuồng Chiến, Tàn Sát, Va Chạm Nặng
-                case AugmentDatabase.AugmentType.BattleFrenzy:
-                case AugmentDatabase.AugmentType.BerserkerMode:
-                case AugmentDatabase.AugmentType.HeavyImpact:
-                case AugmentDatabase.AugmentType.DemonicPact:
-                    chosenSprite = _spriteDeityBerserkerWarlord; break;
-
-                // Thần Thú Huyết Long / Huyết Quỷ: Hút Máu, Huyết Tế, Khát Máu
+                // ─── ĐỢT 2: 15 LÕI HUYẾT TẾ, CUỒNG CHIẾN & NGUYÊN TỐ (Độc bản 100%) ───
                 case AugmentDatabase.AugmentType.BonusCritChance:
+                    chosenSprite = _spriteBonusCritChance; break;
                 case AugmentDatabase.AugmentType.BonusCritDamage:
+                    chosenSprite = _spriteBonusCritDamage; break;
                 case AugmentDatabase.AugmentType.BonusLifesteal:
+                    chosenSprite = _spriteBonusLifesteal; break;
                 case AugmentDatabase.AugmentType.VampireBlood:
+                    chosenSprite = _spriteVampireBlood; break;
                 case AugmentDatabase.AugmentType.BloodGodTribute:
-                    chosenSprite = _spriteDeityBloodBeast; break;
+                    chosenSprite = _spriteBloodGodTribute; break;
 
-                // Nữ Chúa Băng Giá (Glacial Frost Empress): Hệ Băng Tuyết & Hàn Khí
-                // (GlacialSoul & AbsoluteZeroNova đã có ảnh độc bản ở trên)
-                // case AugmentDatabase.AugmentType.GlacialSoul:
-                // case AugmentDatabase.AugmentType.AbsoluteZeroNova:
+                case AugmentDatabase.AugmentType.BattleFrenzy:
+                    chosenSprite = _spriteBattleFrenzy; break;
+                case AugmentDatabase.AugmentType.BerserkerMode:
+                    chosenSprite = _spriteBerserkerMode; break;
+                case AugmentDatabase.AugmentType.HeavyImpact:
+                    chosenSprite = _spriteHeavyImpact; break;
+                case AugmentDatabase.AugmentType.DemonicPact:
+                    chosenSprite = _spriteDemonicPact; break;
+
+                case AugmentDatabase.AugmentType.StaticOverload:
+                    chosenSprite = _spriteStaticOverload; break;
+                case AugmentDatabase.AugmentType.EchoStrike:
+                    chosenSprite = _spriteEchoStrike; break;
+                case AugmentDatabase.AugmentType.StormDancer:
+                    chosenSprite = _spriteStormDancer; break;
+
+                case AugmentDatabase.AugmentType.MagmaEruption:
+                    chosenSprite = _spriteMagmaEruption; break;
+
+                case AugmentDatabase.AugmentType.PoisonTouch:
+                    chosenSprite = _spritePoisonTouch; break;
+                case AugmentDatabase.AugmentType.VirulentBloom:
+                    chosenSprite = _spriteVirulentBloom; break;
 
                 // Chúa Tể Hỏa Ngục Dung Nham (Inferno Hellfire Fiend): Lửa, Hỏa Nham & Cuồng Nộ
-                // (FlameAdaptation đã có ảnh độc bản ở trên)
-                case AugmentDatabase.AugmentType.MagmaEruption:
                 case AugmentDatabase.AugmentType.RagingFire:
                     chosenSprite = _spriteDeityInfernoFiend; break;
 
                 // Nữ Chúa Độc Tố (Venom Hydra Queen): Độc Dược & Axit Ăn Mòn
-                case AugmentDatabase.AugmentType.PoisonTouch:
                 case AugmentDatabase.AugmentType.AcidMembrane:
-                case AugmentDatabase.AugmentType.VirulentBloom:
                     chosenSprite = _spriteDeityVenomQueen; break;
-
-                // Lôi Thần Tử Điện (Thunderstorm Deity): Sấm Sét, Lôi Đình & Bão Tố
-                case AugmentDatabase.AugmentType.StaticOverload:
-                case AugmentDatabase.AugmentType.EchoStrike:
-                case AugmentDatabase.AugmentType.StormDancer:
-                    chosenSprite = _spriteDeityThunderGod; break;
 
                 // Tử Thần Thu Hoạch Linh Hồn (Grim Reaper): Hút Linh Hồn & Kết Liễu
                 case AugmentDatabase.AugmentType.SoulHarvest:
