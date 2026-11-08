@@ -1277,11 +1277,11 @@ public class LevelUpChoiceUI : MonoBehaviour
         rbTxt.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.30f, Color.black);
 
-        // ── 5. Vùng Chứa Tranh (PictureArea Container) - Tuyệt đối không tràn đè lên các vùng khác ──
+        // ── 5. Vùng Chứa Tranh (PictureArea Container) - Mở rộng tối đa xuống dưới ──
         var picAreaObj = new GameObject("PictureArea", typeof(RectTransform));
         picAreaObj.transform.SetParent(card.transform, false);
         var paRT = picAreaObj.GetComponent<RectTransform>();
-        paRT.anchorMin = new Vector2(0.05f, 0.395f);
+        paRT.anchorMin = new Vector2(0.05f, 0.270f);
         paRT.anchorMax = new Vector2(0.95f, 0.850f);
         paRT.offsetMin = paRT.offsetMax = Vector2.zero;
 
@@ -1344,12 +1344,12 @@ public class LevelUpChoiceUI : MonoBehaviour
         pbImg.color = tierFrameColor;
         pbImg.raycastTarget = false;
 
-        // ── 6. Hộp Mô Tả Văn Bản Riêng Biệt (Card Description Text Box - Nằm Gọn Đáy Thẻ) ──
+        // ── 6. Hộp Mô Tả Văn Bản Riêng Biệt (Card Description Text Box - Tối ưu gọn khít sát đáy) ──
         var descBoxObj = new GameObject("DescriptionBox", typeof(RectTransform), typeof(Image), typeof(Outline));
         descBoxObj.transform.SetParent(card.transform, false);
         var dbRT = descBoxObj.GetComponent<RectTransform>();
         dbRT.anchorMin = new Vector2(0.045f, 0.016f);
-        dbRT.anchorMax = new Vector2(0.955f, 0.385f);
+        dbRT.anchorMax = new Vector2(0.955f, 0.260f);
         dbRT.offsetMin = dbRT.offsetMax = Vector2.zero;
 
         var dbImg = descBoxObj.GetComponent<Image>();
@@ -1378,13 +1378,13 @@ public class LevelUpChoiceUI : MonoBehaviour
         var tagTxtObj = new GameObject("CategoryTagText", typeof(RectTransform), typeof(TextMeshProUGUI));
         tagTxtObj.transform.SetParent(descBoxObj.transform, false);
         var ttTagRT = tagTxtObj.GetComponent<RectTransform>();
-        ttTagRT.anchorMin = new Vector2(0.04f, 0.83f);
-        ttTagRT.anchorMax = new Vector2(0.96f, 0.98f);
+        ttTagRT.anchorMin = new Vector2(0.04f, 0.78f);
+        ttTagRT.anchorMax = new Vector2(0.96f, 0.96f);
         ttTagRT.offsetMin = ttTagRT.offsetMax = Vector2.zero;
 
         var tagTMP = tagTxtObj.GetComponent<TextMeshProUGUI>();
         tagTMP.text = headerTagText;
-        tagTMP.fontSize = 12.5f;
+        tagTMP.fontSize = 12f;
         tagTMP.fontStyle = FontStyles.Bold;
         tagTMP.alignment = TextAlignmentOptions.MidlineLeft;
         tagTMP.color = isHeroSignature ? new Color(1f, 0.85f, 0.35f) : typeColor;
@@ -1393,7 +1393,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         // Đường kẻ trang trí trong hộp mô tả
         CreateOrnamentDivider(descBoxObj.transform, "DescInnerDivider",
-            new Vector2(0.04f, 0.80f), new Vector2(0.96f, 0.82f),
+            new Vector2(0.04f, 0.74f), new Vector2(0.96f, 0.76f),
             tierFrameColor * 0.65f);
 
         // Nội dung mô tả chỉ số + Scaling thăng cấp
@@ -1403,11 +1403,14 @@ public class LevelUpChoiceUI : MonoBehaviour
         descObj.transform.SetParent(descBoxObj.transform, false);
         var descRT = descObj.GetComponent<RectTransform>();
         descRT.anchorMin = new Vector2(0.04f, 0.04f);
-        descRT.anchorMax = new Vector2(0.96f, 0.79f);
+        descRT.anchorMax = new Vector2(0.96f, 0.72f);
         descRT.offsetMin = descRT.offsetMax = Vector2.zero;
 
         var descTMP = descObj.GetComponent<TextMeshProUGUI>();
         descTMP.text = fullDesc;
+        descTMP.enableAutoSizing = true;
+        descTMP.fontSizeMin = 11.5f;
+        descTMP.fontSizeMax = 15.0f;
         descTMP.enableAutoSizing = true;
         descTMP.fontSizeMin = 11.5f;
         descTMP.fontSizeMax = 15.5f;
