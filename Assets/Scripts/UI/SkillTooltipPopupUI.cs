@@ -67,6 +67,8 @@ public class SkillTooltipPopupUI : MonoBehaviour
             return;
         }
         Instance = this;
+        if (panelRt == null) panelRt = GetComponent<RectTransform>();
+        if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
     }
 
     void OnDestroy()
@@ -81,8 +83,8 @@ public class SkillTooltipPopupUI : MonoBehaviour
         panelRt.anchorMin = new Vector2(1f, 1f);
         panelRt.anchorMax = new Vector2(1f, 1f);
         panelRt.pivot = new Vector2(1f, 1f);
-        panelRt.sizeDelta = new Vector2(440f, 185f);
-        panelRt.anchoredPosition = new Vector2(-50f, -180f);
+        panelRt.sizeDelta = new Vector2(580f, 220f);
+        panelRt.anchoredPosition = new Vector2(-45f, -140f);
 
         canvasGroup = root.AddComponent<CanvasGroup>();
         canvasGroup.alpha = 0f;
@@ -91,11 +93,11 @@ public class SkillTooltipPopupUI : MonoBehaviour
 
         // 1. Nền thẻ bài Dark Fantasy sang trọng (Màu đá than chì #101217 viền vàng đồng)
         var bgImg = root.AddComponent<Image>();
-        bgImg.color = new Color(0.06f, 0.08f, 0.11f, 0.96f);
+        bgImg.color = new Color(0.06f, 0.08f, 0.11f, 0.97f);
 
         var outline = root.AddComponent<Outline>();
-        outline.effectColor = new Color(0.85f, 0.70f, 0.35f, 0.95f); // Viền vàng hoàng kim TFT
-        outline.effectDistance = new Vector2(2f, -2f);
+        outline.effectColor = new Color(0.88f, 0.75f, 0.38f, 0.98f); // Viền vàng hoàng kim TFT
+        outline.effectDistance = new Vector2(2.5f, -2.5f);
 
         TMP_FontAsset font = GameFontManager.BodyFont;
         TMP_FontAsset headerFont = GameFontManager.HeaderFont;
@@ -109,57 +111,57 @@ public class SkillTooltipPopupUI : MonoBehaviour
         hRt.anchorMin = new Vector2(0f, 1f);
         hRt.anchorMax = new Vector2(1f, 1f);
         hRt.pivot = new Vector2(0.5f, 1f);
-        hRt.sizeDelta = new Vector2(-24f, 54f);
-        hRt.anchoredPosition = new Vector2(0f, -8f);
+        hRt.sizeDelta = new Vector2(-32f, 72f);
+        hRt.anchoredPosition = new Vector2(0f, -10f);
 
-        // Icon Kỹ Năng
+        // Icon Kỹ Năng (Phóng to sắc nét 62x62 cho điện thoại)
         GameObject iconObj = new GameObject("SkillIcon", typeof(RectTransform), typeof(Image));
         iconObj.transform.SetParent(headerObj.transform, false);
         var iRt = iconObj.GetComponent<RectTransform>();
         iRt.anchorMin = new Vector2(0f, 0.5f);
         iRt.anchorMax = new Vector2(0f, 0.5f);
         iRt.pivot = new Vector2(0f, 0.5f);
-        iRt.sizeDelta = new Vector2(46f, 46f);
-        iRt.anchoredPosition = new Vector2(4f, 0f);
+        iRt.sizeDelta = new Vector2(62f, 62f);
+        iRt.anchoredPosition = new Vector2(6f, 0f);
 
         iconImg = iconObj.GetComponent<Image>();
         iconImg.preserveAspect = true;
         var iconOutline = iconObj.AddComponent<Outline>();
         iconOutline.effectColor = new Color(0.95f, 0.78f, 0.38f, 0.90f);
-        iconOutline.effectDistance = new Vector2(1.5f, -1.5f);
+        iconOutline.effectDistance = new Vector2(2f, -2f);
 
-        // Tên Kỹ Năng (Vàng kim đậm nét)
+        // Tên Kỹ Năng (Vàng kim đậm nét, tăng kích cỡ lên 23 rõ ràng trên mobile)
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform));
         titleObj.transform.SetParent(headerObj.transform, false);
         var tRt = titleObj.GetComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0f, 1f);
         tRt.anchorMax = new Vector2(1f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.sizeDelta = new Vector2(-60f, 25f);
-        tRt.anchoredPosition = new Vector2(58f, -2f);
+        tRt.sizeDelta = new Vector2(-88f, 32f);
+        tRt.anchoredPosition = new Vector2(80f, -4f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         if (headerFont != null) titleText.font = headerFont;
-        titleText.fontSize = 17.5f;
+        titleText.fontSize = 23f;
         titleText.fontStyle = FontStyles.Bold;
         titleText.color = new Color(1f, 0.88f, 0.35f);
         titleText.alignment = TextAlignmentOptions.Left;
         titleText.text = "TÊN CHIÊU THỨC";
 
-        // Category & Cooldown Row (Loại Chiêu • Tiêu Hao • Hồi Chiêu)
+        // Category & Cooldown Row (Loại Chiêu • Tiêu Hao • Hồi Chiêu, tăng lên 17 rõ nét)
         GameObject subRowObj = new GameObject("SubRow", typeof(RectTransform));
         subRowObj.transform.SetParent(headerObj.transform, false);
         var sRt = subRowObj.GetComponent<RectTransform>();
         sRt.anchorMin = new Vector2(0f, 0f);
         sRt.anchorMax = new Vector2(1f, 0f);
         sRt.pivot = new Vector2(0f, 0f);
-        sRt.sizeDelta = new Vector2(-60f, 22f);
-        sRt.anchoredPosition = new Vector2(58f, 3f);
+        sRt.sizeDelta = new Vector2(-88f, 28f);
+        sRt.anchoredPosition = new Vector2(80f, 4f);
 
         categoryText = subRowObj.AddComponent<TextMeshProUGUI>();
         if (font != null) categoryText.font = font;
         if (spriteAsset != null) categoryText.spriteAsset = spriteAsset;
-        categoryText.fontSize = 12.5f;
+        categoryText.fontSize = 17f;
         categoryText.fontStyle = FontStyles.Bold;
         categoryText.color = new Color(0.4f, 0.85f, 1f);
         categoryText.alignment = TextAlignmentOptions.Left;
@@ -172,26 +174,26 @@ public class SkillTooltipPopupUI : MonoBehaviour
         sepRt.anchorMin = new Vector2(0f, 1f);
         sepRt.anchorMax = new Vector2(1f, 1f);
         sepRt.pivot = new Vector2(0.5f, 1f);
-        sepRt.sizeDelta = new Vector2(-24f, 1.5f);
-        sepRt.anchoredPosition = new Vector2(0f, -68f);
-        sepObj.GetComponent<Image>().color = new Color(0.85f, 0.70f, 0.35f, 0.45f);
+        sepRt.sizeDelta = new Vector2(-32f, 2f);
+        sepRt.anchoredPosition = new Vector2(0f, -88f);
+        sepObj.GetComponent<Image>().color = new Color(0.88f, 0.75f, 0.40f, 0.55f);
 
-        // 4. Mô tả kỹ năng gộp chung với sát thương (Liền mạch chuẩn TFT)
+        // 4. Mô tả kỹ năng gộp chung với sát thương (Tăng font size lên 18.5f, khoảng cách dòng thoáng đãng)
         GameObject descObj = new GameObject("DescText", typeof(RectTransform));
         descObj.transform.SetParent(root.transform, false);
         var dRt = descObj.GetComponent<RectTransform>();
         dRt.anchorMin = new Vector2(0f, 1f);
         dRt.anchorMax = new Vector2(1f, 1f);
         dRt.pivot = new Vector2(0f, 1f);
-        dRt.sizeDelta = new Vector2(-28f, 100f);
-        dRt.anchoredPosition = new Vector2(14f, -76f);
+        dRt.sizeDelta = new Vector2(-36f, 120f);
+        dRt.anchoredPosition = new Vector2(18f, -98f);
 
         descText = descObj.AddComponent<TextMeshProUGUI>();
         if (font != null) descText.font = font;
         if (spriteAsset != null) descText.spriteAsset = spriteAsset;
-        descText.fontSize = 13.5f;
-        descText.color = new Color(0.88f, 0.90f, 0.94f);
-        descText.lineSpacing = 5f;
+        descText.fontSize = 18.5f;
+        descText.color = new Color(0.90f, 0.92f, 0.96f);
+        descText.lineSpacing = 6f;
         descText.alignment = TextAlignmentOptions.TopLeft;
         descText.enableWordWrapping = true;
         descText.overflowMode = TextOverflowModes.Overflow;
@@ -263,15 +265,15 @@ public class SkillTooltipPopupUI : MonoBehaviour
             // Tự động co giãn chiều cao thẻ bài theo độ dài mô tả để layout luôn vừa vặn không thừa thãi
             Canvas.ForceUpdateCanvases();
             float textH = descText.preferredHeight;
-            float targetH = Mathf.Max(185f, textH + 90f);
+            float targetH = Mathf.Max(220f, textH + 118f);
             if (panelRt != null)
             {
-                panelRt.sizeDelta = new Vector2(450f, targetH);
-                panelRt.anchoredPosition = new Vector2(-50f, -170f);
+                panelRt.sizeDelta = new Vector2(580f, targetH);
+                panelRt.anchoredPosition = new Vector2(-45f, -140f);
             }
             if (descText.rectTransform != null)
             {
-                descText.rectTransform.sizeDelta = new Vector2(-28f, textH + 10f);
+                descText.rectTransform.sizeDelta = new Vector2(-36f, textH + 15f);
             }
         }
 
