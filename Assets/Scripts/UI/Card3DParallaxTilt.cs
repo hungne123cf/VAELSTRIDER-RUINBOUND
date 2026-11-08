@@ -258,3 +258,4 @@ public class Card3DParallaxTilt : MonoBehaviour, IPointerEnterHandler, IPointerE
         return _cachedHoloFoilSprite;
     }
 }
+

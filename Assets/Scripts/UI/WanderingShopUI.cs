@@ -322,15 +322,15 @@ public class WanderingShopUI : MonoBehaviour
     // ─── Modal Construction (Dark Fantasy / TFT proportions) ───────────────────
     private void BuildUIHierarchy(Transform root)
     {
-        // 1. Cửa sổ chính (Main Modal Window) - Kích thước rộng rãi 1320 x 750 chuẩn 1080p
+        // 1. Cửa sổ chính (Main Modal Window) - Phủ toàn màn hình để kích thước thẻ bài tương xứng tuyệt đối với LevelUpChoiceUI
         GameObject modalObj = new GameObject("ShopModal", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         modalObj.transform.SetParent(root, false);
 
         RectTransform modalRt = modalObj.GetComponent<RectTransform>();
-        modalRt.anchorMin = new Vector2(0.5f, 0.5f);
-        modalRt.anchorMax = new Vector2(0.5f, 0.5f);
-        modalRt.sizeDelta = new Vector2(1320f, 750f);
-        modalRt.anchoredPosition = Vector2.zero;
+        modalRt.anchorMin = new Vector2(0.015f, 0.015f);
+        modalRt.anchorMax = new Vector2(0.985f, 0.985f);
+        modalRt.offsetMin = modalRt.offsetMax = Vector2.zero;
+        modalRt.pivot = new Vector2(0.5f, 0.5f);
 
         Image modalBg = modalObj.GetComponent<Image>();
         modalBg.sprite = GetPanelBgSprite();
@@ -356,14 +356,13 @@ public class WanderingShopUI : MonoBehaviour
         GameObject titleObj = new GameObject("HeaderTitle", typeof(RectTransform), typeof(TextMeshProUGUI));
         titleObj.transform.SetParent(modalObj.transform, false);
         RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchorMin = new Vector2(0.12f, 1f);
-        titleRt.anchorMax = new Vector2(0.88f, 1f);
-        titleRt.pivot = new Vector2(0.5f, 1f);
-        titleRt.sizeDelta = new Vector2(0f, 36f);
-        titleRt.anchoredPosition = new Vector2(0f, -18f);
+        titleRt.anchorMin = new Vector2(0.20f, 0.932f);
+        titleRt.anchorMax = new Vector2(0.80f, 0.985f);
+        titleRt.offsetMin = titleRt.offsetMax = Vector2.zero;
+        titleRt.pivot = new Vector2(0.5f, 0.5f);
 
         headerTitleText = titleObj.GetComponent<TextMeshProUGUI>();
-        headerTitleText.fontSize = 24f;
+        headerTitleText.fontSize = 26f;
         headerTitleText.fontStyle = FontStyles.Bold;
         headerTitleText.alignment = TextAlignmentOptions.Center;
         headerTitleText.color = new Color(1f, 0.88f, 0.45f);
@@ -371,58 +370,56 @@ public class WanderingShopUI : MonoBehaviour
 
         // Cánh hoa văn trang trí 2 bên Tiêu đề
         CreateDividerWing(modalObj.transform, "TitleLeftWing",
-            new Vector2(0.18f, 0.965f), new Vector2(0.32f, 0.985f),
+            new Vector2(0.20f, 0.945f), new Vector2(0.32f, 0.970f),
             new Color(1f, 0.85f, 0.40f, 0.85f), false);
 
         CreateDividerWing(modalObj.transform, "TitleRightWing",
-            new Vector2(0.68f, 0.965f), new Vector2(0.82f, 0.985f),
+            new Vector2(0.68f, 0.945f), new Vector2(0.80f, 0.970f),
             new Color(1f, 0.85f, 0.40f, 0.85f), true);
 
         // Phụ đề (Subtitle)
         GameObject subObj = new GameObject("SubtitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
         subObj.transform.SetParent(modalObj.transform, false);
         RectTransform subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchorMin = new Vector2(0.10f, 1f);
-        subRt.anchorMax = new Vector2(0.90f, 1f);
-        subRt.pivot = new Vector2(0.5f, 1f);
-        subRt.sizeDelta = new Vector2(0f, 22f);
-        subRt.anchoredPosition = new Vector2(0f, -54f);
+        subRt.anchorMin = new Vector2(0.15f, 0.885f);
+        subRt.anchorMax = new Vector2(0.85f, 0.930f);
+        subRt.offsetMin = subRt.offsetMax = Vector2.zero;
+        subRt.pivot = new Vector2(0.5f, 0.5f);
 
         headerSubtitleText = subObj.GetComponent<TextMeshProUGUI>();
-        headerSubtitleText.fontSize = 13.5f;
+        headerSubtitleText.fontSize = 14f;
         headerSubtitleText.alignment = TextAlignmentOptions.Center;
         headerSubtitleText.color = new Color(0.78f, 0.86f, 0.95f);
         SoulslikeHUDStyler.SetSafeOutline(headerSubtitleText, 0.30f, Color.black);
 
         // Đường hoa văn phân cách đối xứng
         CreateOrnamentDivider(modalObj.transform, "HeaderDivider",
-            new Vector2(0.18f, 0.882f), new Vector2(0.82f, 0.898f),
+            new Vector2(0.20f, 0.865f), new Vector2(0.80f, 0.880f),
             new Color(0.95f, 0.82f, 0.40f, 0.85f));
 
-        // Khay hiển thị số dư Mảnh Cổ Tự (Shards Counter)
+        // Khay hiển thị số dư Mảnh Cổ Tự (Shards Counter) - Đặt gọn ở góc trên bên trái
         GameObject shardsObj = new GameObject("ShardsCounter", typeof(RectTransform), typeof(TextMeshProUGUI));
         shardsObj.transform.SetParent(modalObj.transform, false);
         RectTransform shardsRt = shardsObj.GetComponent<RectTransform>();
-        shardsRt.anchorMin = new Vector2(0.5f, 1f);
-        shardsRt.anchorMax = new Vector2(0.5f, 1f);
-        shardsRt.pivot = new Vector2(0.5f, 1f);
-        shardsRt.sizeDelta = new Vector2(480f, 26f);
-        shardsRt.anchoredPosition = new Vector2(0f, -94f);
+        shardsRt.anchorMin = new Vector2(0.035f, 0.920f);
+        shardsRt.anchorMax = new Vector2(0.240f, 0.980f);
+        shardsRt.offsetMin = shardsRt.offsetMax = Vector2.zero;
+        shardsRt.pivot = new Vector2(0f, 0.5f);
 
         shardsCounterText = shardsObj.GetComponent<TextMeshProUGUI>();
-        shardsCounterText.fontSize = 15.5f;
+        shardsCounterText.fontSize = 16f;
         shardsCounterText.fontStyle = FontStyles.Bold;
-        shardsCounterText.alignment = TextAlignmentOptions.Center;
+        shardsCounterText.alignment = TextAlignmentOptions.MidlineLeft;
         SoulslikeHUDStyler.SetSafeOutline(shardsCounterText, 0.35f, Color.black);
 
         // Nút Đóng [X] góc phải trên
         GameObject closeBtnObj = new GameObject("CloseBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
         closeBtnObj.transform.SetParent(modalObj.transform, false);
         RectTransform closeRt = closeBtnObj.GetComponent<RectTransform>();
-        closeRt.anchorMin = new Vector2(1f, 1f);
-        closeRt.anchorMax = new Vector2(1f, 1f);
-        closeRt.sizeDelta = new Vector2(60f, 60f);
-        closeRt.anchoredPosition = new Vector2(-18f, -18f);
+        closeRt.anchorMin = new Vector2(0.945f, 0.920f);
+        closeRt.anchorMax = new Vector2(0.985f, 0.980f);
+        closeRt.offsetMin = closeRt.offsetMax = Vector2.zero;
+        closeRt.pivot = new Vector2(1f, 0.5f);
 
         Image closeImg = closeBtnObj.GetComponent<Image>();
         closeImg.sprite = GetStoneBtnSprite();
@@ -445,7 +442,7 @@ public class WanderingShopUI : MonoBehaviour
 
         var closeTmp = closeTxtObj.GetComponent<TextMeshProUGUI>();
         closeTmp.text = "X";
-        closeTmp.fontSize = 18f;
+        closeTmp.fontSize = 20f;
         closeTmp.fontStyle = FontStyles.Bold;
         closeTmp.alignment = TextAlignmentOptions.Center;
         closeTmp.color = new Color(1f, 0.85f, 0.4f);
@@ -455,8 +452,8 @@ public class WanderingShopUI : MonoBehaviour
         GameObject cardsObj = new GameObject("CardContainer", typeof(RectTransform));
         cardsObj.transform.SetParent(modalObj.transform, false);
         RectTransform cardsRt = cardsObj.GetComponent<RectTransform>();
-        cardsRt.anchorMin = new Vector2(0.03f, 0.10f);
-        cardsRt.anchorMax = new Vector2(0.97f, 0.84f);
+        cardsRt.anchorMin = new Vector2(0.05f, 0.115f);
+        cardsRt.anchorMax = new Vector2(0.95f, 0.855f);
         cardsRt.offsetMin = cardsRt.offsetMax = Vector2.zero;
         cardContainer = cardsObj.transform;
 
@@ -468,7 +465,7 @@ public class WanderingShopUI : MonoBehaviour
         toastRt.anchorMax = new Vector2(0.5f, 0f);
         toastRt.pivot = new Vector2(0.5f, 0f);
         toastRt.sizeDelta = new Vector2(680f, 38f);
-        toastRt.anchoredPosition = new Vector2(0f, 74f);
+        toastRt.anchoredPosition = new Vector2(0f, 80f);
 
         var toastBg = toastObj.GetComponent<Image>();
         toastBg.sprite = GetStoneBtnSprite();
@@ -504,10 +501,9 @@ public class WanderingShopUI : MonoBehaviour
         GameObject rerollBtnObj = new GameObject("RerollBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
         rerollBtnObj.transform.SetParent(modalObj.transform, false);
         RectTransform rerollRt = rerollBtnObj.GetComponent<RectTransform>();
-        rerollRt.anchorMin = new Vector2(0.5f, 0f);
-        rerollRt.anchorMax = new Vector2(0.5f, 0f);
-        rerollRt.sizeDelta = new Vector2(320f, 58f);
-        rerollRt.anchoredPosition = new Vector2(-160f, 22f);
+        rerollRt.anchorMin = new Vector2(0.20f, 0.018f);
+        rerollRt.anchorMax = new Vector2(0.48f, 0.095f);
+        rerollRt.offsetMin = rerollRt.offsetMax = Vector2.zero;
 
         Image rerollImg = rerollBtnObj.GetComponent<Image>();
         rerollImg.sprite = GetStoneBtnSprite();
@@ -530,7 +526,7 @@ public class WanderingShopUI : MonoBehaviour
 
         var rerollTmp = rerollTxtObj.GetComponent<TextMeshProUGUI>();
         rerollTmp.text = LocalizationManager.T("LÀM MỚI (50 MẢNH)", "REROLL (50 SHARDS)");
-        rerollTmp.fontSize = 15f;
+        rerollTmp.fontSize = 16f;
         rerollTmp.fontStyle = FontStyles.Bold;
         rerollTmp.alignment = TextAlignmentOptions.Center;
         rerollTmp.color = new Color(1f, 0.88f, 0.45f);
@@ -540,10 +536,9 @@ public class WanderingShopUI : MonoBehaviour
         GameObject continueBtnObj = new GameObject("ContinueBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
         continueBtnObj.transform.SetParent(modalObj.transform, false);
         RectTransform contRt = continueBtnObj.GetComponent<RectTransform>();
-        contRt.anchorMin = new Vector2(0.5f, 0f);
-        contRt.anchorMax = new Vector2(0.5f, 0f);
-        contRt.sizeDelta = new Vector2(320f, 58f);
-        contRt.anchoredPosition = new Vector2(160f, 22f);
+        contRt.anchorMin = new Vector2(0.52f, 0.018f);
+        contRt.anchorMax = new Vector2(0.80f, 0.095f);
+        contRt.offsetMin = contRt.offsetMax = Vector2.zero;
 
         Image contImg = continueBtnObj.GetComponent<Image>();
         contImg.sprite = GetStoneBtnSprite();
@@ -566,7 +561,7 @@ public class WanderingShopUI : MonoBehaviour
 
         var contTmp = contTxtObj.GetComponent<TextMeshProUGUI>();
         contTmp.text = LocalizationManager.T("TIẾP TỤC HÀNH TRÌNH", "CONTINUE JOURNEY");
-        contTmp.fontSize = 15f;
+        contTmp.fontSize = 16f;
         contTmp.fontStyle = FontStyles.Bold;
         contTmp.alignment = TextAlignmentOptions.Center;
         contTmp.color = Color.white;
@@ -1945,7 +1940,7 @@ public class WanderingShopUI : MonoBehaviour
             var picAreaObj = new GameObject("PictureArea", typeof(RectTransform));
             picAreaObj.transform.SetParent(card.transform, false);
             var paRT = picAreaObj.GetComponent<RectTransform>();
-            paRT.anchorMin = new Vector2(0.05f, 0.270f);
+            paRT.anchorMin = new Vector2(0.05f, 0.340f);
             paRT.anchorMax = new Vector2(0.95f, 0.850f);
             paRT.offsetMin = paRT.offsetMax = Vector2.zero;
 
@@ -2025,7 +2020,7 @@ public class WanderingShopUI : MonoBehaviour
             descBoxObj.transform.SetParent(card.transform, false);
             var dbRT = descBoxObj.GetComponent<RectTransform>();
             dbRT.anchorMin = new Vector2(0.045f, 0.016f);
-            dbRT.anchorMax = new Vector2(0.955f, 0.260f);
+            dbRT.anchorMax = new Vector2(0.955f, 0.328f);
             dbRT.offsetMin = dbRT.offsetMax = Vector2.zero;
 
             var dbImg = descBoxObj.GetComponent<Image>();
@@ -2042,8 +2037,8 @@ public class WanderingShopUI : MonoBehaviour
             var statTagObj = new GameObject("StatTag", typeof(RectTransform));
             statTagObj.transform.SetParent(descBoxObj.transform, false);
             var stRT = statTagObj.GetComponent<RectTransform>();
-            stRT.anchorMin = new Vector2(0.04f, 0.78f);
-            stRT.anchorMax = new Vector2(0.96f, 0.96f);
+            stRT.anchorMin = new Vector2(0.04f, 0.83f);
+            stRT.anchorMax = new Vector2(0.96f, 0.97f);
             stRT.offsetMin = stRT.offsetMax = Vector2.zero;
 
             var stTxtObj = new GameObject("StatTagText", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -2063,7 +2058,7 @@ public class WanderingShopUI : MonoBehaviour
             SoulslikeHUDStyler.SetSafeOutline(stTxt, 0.30f, Color.black);
 
             CreateOrnamentDivider(descBoxObj.transform, "DescInnerDivider",
-                new Vector2(0.04f, 0.74f), new Vector2(0.96f, 0.76f),
+                new Vector2(0.04f, 0.805f), new Vector2(0.96f, 0.825f),
                 tierFrameColor * 0.65f);
 
             // Nội dung mô tả
@@ -2078,26 +2073,27 @@ public class WanderingShopUI : MonoBehaviour
             var descObj = new GameObject("ItemDesc", typeof(RectTransform), typeof(TextMeshProUGUI));
             descObj.transform.SetParent(descBoxObj.transform, false);
             var descRT = descObj.GetComponent<RectTransform>();
-            descRT.anchorMin = new Vector2(0.04f, 0.33f);
-            descRT.anchorMax = new Vector2(0.96f, 0.72f);
+            descRT.anchorMin = new Vector2(0.04f, 0.26f);
+            descRT.anchorMax = new Vector2(0.96f, 0.79f);
             descRT.offsetMin = descRT.offsetMax = Vector2.zero;
 
             var descTMP = descObj.GetComponent<TextMeshProUGUI>();
             descTMP.text = fullDesc;
             descTMP.enableAutoSizing = true;
             descTMP.fontSizeMin = 10.5f;
-            descTMP.fontSizeMax = 13.5f;
+            descTMP.fontSizeMax = 14.5f;
             descTMP.alignment = TextAlignmentOptions.TopLeft;
             descTMP.color = new Color(0.92f, 0.95f, 1f);
             descTMP.enableWordWrapping = true;
             SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.25f, new Color(0f, 0f, 0f, 0.85f));
 
-            // Nút Mua (BUY BUTTON) đặt gọn gàng ở đáy Hộp Mô Tả
+            // Nút Mua (BUY BUTTON) đặt gọn gàng ở đáy Hộp Mô Tả, hoàn toàn tách biệt không bao giờ che chữ
             var btnObj = new GameObject("BuyBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
             btnObj.transform.SetParent(descBoxObj.transform, false);
             var btnRT = btnObj.GetComponent<RectTransform>();
-            btnRT.anchorMin = new Vector2(0.04f, 0.04f);
-            btnRT.anchorMax = new Vector2(0.96f, 0.30f);
+            btnRT.anchorMin = new Vector2(0.04f, 0.035f);
+            btnRT.anchorMax = new Vector2(0.96f, 0.225f);
+            btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
             btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
             var btnImg = btnObj.GetComponent<Image>();
