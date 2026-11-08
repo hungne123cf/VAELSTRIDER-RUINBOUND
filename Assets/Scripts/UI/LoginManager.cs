@@ -16,6 +16,7 @@ public class LoginManager : MonoBehaviour
     [Header("UI Panels")]
     [SerializeField] private GameObject loginCardPanel;
     [SerializeField] private GameObject tapToStartPanel;
+    [SerializeField] private GameIntroLoadingController introLoadingController;
 
     [Header("Tabs")]
     [SerializeField] private Button tabLoginBtn;
@@ -105,6 +106,19 @@ public class LoginManager : MonoBehaviour
                 welcomeUserBannerText.transform.parent.gameObject.SetActive(false);
             }
             welcomeUserBannerText.gameObject.SetActive(false);
+        }
+
+        // Tự động kích hoạt Intro Trailer & Thanh Tiến Trình Loading nếu có
+        if (introLoadingController == null)
+        {
+            introLoadingController = Object.FindAnyObjectByType<GameIntroLoadingController>();
+        }
+
+        if (introLoadingController != null)
+        {
+            if (tapToStartPanel != null) tapToStartPanel.SetActive(false);
+            introLoadingController.StartIntroSequence();
+            return;
         }
 
         // Tự động ẩn toàn bộ các thanh Divider trắng thừa trên Canvas

@@ -406,10 +406,232 @@ public static class LoginSceneBuilder
         tapPanel.SetActive(true);
         loginCardObj.SetActive(false);
 
+        // 9B. GameIntroLoadingController (Cinematic Trailer & Loading Progress Bar)
+        GameObject introObj = new GameObject("IntroLoadingSystem");
+        introObj.transform.SetParent(canvasObj.transform, false);
+        var introRt = introObj.AddComponent<RectTransform>();
+        introRt.anchorMin = Vector2.zero;
+        introRt.anchorMax = Vector2.one;
+        introRt.sizeDelta = Vector2.zero;
+        var introCtrl = introObj.AddComponent<GameIntroLoadingController>();
+
+        // 9B-1. Cinematic Panel
+        GameObject cinePanelObj = new GameObject("CinematicPanel");
+        cinePanelObj.transform.SetParent(introObj.transform, false);
+        var cpRt = cinePanelObj.AddComponent<RectTransform>();
+        cpRt.anchorMin = Vector2.zero;
+        cpRt.anchorMax = Vector2.one;
+        cpRt.sizeDelta = Vector2.zero;
+        var cpCg = cinePanelObj.AddComponent<CanvasGroup>();
+        var cpBg = cinePanelObj.AddComponent<Image>();
+        cpBg.color = new Color(0.02f, 0.02f, 0.04f, 1f);
+
+        // Slide illustration
+        GameObject slideObj = new GameObject("CinematicSlide");
+        slideObj.transform.SetParent(cinePanelObj.transform, false);
+        var slideRt = slideObj.AddComponent<RectTransform>();
+        slideRt.anchorMin = new Vector2(0.10f, 0.18f);
+        slideRt.anchorMax = new Vector2(0.90f, 0.88f);
+        slideRt.offsetMin = slideRt.offsetMax = Vector2.zero;
+        var slideImg = slideObj.AddComponent<Image>();
+        Sprite cineBg = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/Backgrounds/Night/WCP_Example.png");
+        if (cineBg == null) cineBg = sandBgSprite;
+        slideImg.sprite = cineBg;
+        slideImg.color = new Color(0.95f, 0.95f, 1f, 0.95f);
+        slideImg.preserveAspect = true;
+
+        // Subtitle text (Story Narration)
+        GameObject cineTxtObj = new GameObject("CinematicSubtitle");
+        cineTxtObj.transform.SetParent(cinePanelObj.transform, false);
+        var ctRt = cineTxtObj.AddComponent<RectTransform>();
+        ctRt.anchorMin = new Vector2(0.12f, 0.04f);
+        ctRt.anchorMax = new Vector2(0.88f, 0.16f);
+        ctRt.offsetMin = ctRt.offsetMax = Vector2.zero;
+        var cineTmp = cineTxtObj.AddComponent<TextMeshProUGUI>();
+        cineTmp.fontSize = 22;
+        cineTmp.fontStyle = FontStyles.Bold;
+        cineTmp.alignment = TextAlignmentOptions.Center;
+        cineTmp.color = new Color(1f, 0.92f, 0.65f);
+        cineTmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(cineTmp, 0.45f, Color.black);
+
+        // Skip Button
+        GameObject skipObj = new GameObject("Btn_SkipTrailer");
+        skipObj.transform.SetParent(cinePanelObj.transform, false);
+        var skipRt = skipObj.AddComponent<RectTransform>();
+        skipRt.anchorMin = new Vector2(1f, 1f);
+        skipRt.anchorMax = new Vector2(1f, 1f);
+        skipRt.pivot = new Vector2(1f, 1f);
+        skipRt.anchoredPosition = new Vector2(-28f, -28f);
+        skipRt.sizeDelta = new Vector2(130f, 44f);
+        var skipImg = skipObj.AddComponent<Image>();
+        skipImg.color = new Color(0.12f, 0.15f, 0.22f, 0.88f);
+        var skipBtn = skipObj.AddComponent<Button>();
+        skipBtn.targetGraphic = skipImg;
+        var skipOutline = skipObj.AddComponent<Outline>();
+        skipOutline.effectColor = new Color(0.85f, 0.75f, 0.35f, 0.75f);
+        skipOutline.effectDistance = new Vector2(1.2f, -1.2f);
+        var skipCg = skipObj.AddComponent<CanvasGroup>();
+
+        GameObject skipTxtObj = new GameObject("Text");
+        skipTxtObj.transform.SetParent(skipObj.transform, false);
+        var sktRt = skipTxtObj.AddComponent<RectTransform>();
+        sktRt.anchorMin = Vector2.zero;
+        sktRt.anchorMax = Vector2.one;
+        sktRt.offsetMin = sktRt.offsetMax = Vector2.zero;
+        var skTmp = skipTxtObj.AddComponent<TextMeshProUGUI>();
+        skTmp.text = "BỎ QUA »";
+        skTmp.fontSize = 15;
+        skTmp.fontStyle = FontStyles.Bold;
+        skTmp.color = new Color(1f, 0.88f, 0.45f);
+        skTmp.alignment = TextAlignmentOptions.Center;
+        skTmp.raycastTarget = false;
+
+        // 9B-2. Loading Progress Panel
+        GameObject loadPanelObj = new GameObject("LoadingProgressPanel");
+        loadPanelObj.transform.SetParent(introObj.transform, false);
+        var lpRt = loadPanelObj.AddComponent<RectTransform>();
+        lpRt.anchorMin = Vector2.zero;
+        lpRt.anchorMax = Vector2.one;
+        lpRt.sizeDelta = Vector2.zero;
+        var lpCg = loadPanelObj.AddComponent<CanvasGroup>();
+        var lpBg = loadPanelObj.AddComponent<Image>();
+        lpBg.sprite = sandBgSprite;
+        lpBg.color = new Color(0.55f, 0.50f, 0.45f, 1f);
+
+        // Loading Title
+        GameObject loadTitleObj = new GameObject("GameTitle");
+        loadTitleObj.transform.SetParent(loadPanelObj.transform, false);
+        var ltRt = loadTitleObj.AddComponent<RectTransform>();
+        ltRt.anchorMin = new Vector2(0.5f, 0.5f);
+        ltRt.anchorMax = new Vector2(0.5f, 0.5f);
+        ltRt.pivot = new Vector2(0.5f, 0.5f);
+        ltRt.anchoredPosition = new Vector2(0f, 220f);
+        ltRt.sizeDelta = new Vector2(1000f, 90f);
+        var ltTmp = loadTitleObj.AddComponent<TextMeshProUGUI>();
+        ltTmp.text = "VAELSTRIDER: RUINBOUND";
+        ltTmp.fontSize = 46;
+        ltTmp.fontStyle = FontStyles.Bold;
+        ltTmp.alignment = TextAlignmentOptions.Center;
+        ltTmp.color = new Color(1f, 0.85f, 0.35f);
+        ltTmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(ltTmp, 0.45f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
+
+        GameObject loadSubObj = new GameObject("Subtitle");
+        loadSubObj.transform.SetParent(loadPanelObj.transform, false);
+        var lsRt = loadSubObj.AddComponent<RectTransform>();
+        lsRt.anchorMin = new Vector2(0.5f, 0.5f);
+        lsRt.anchorMax = new Vector2(0.5f, 0.5f);
+        lsRt.pivot = new Vector2(0.5f, 0.5f);
+        lsRt.anchoredPosition = new Vector2(0f, 165f);
+        lsRt.sizeDelta = new Vector2(800f, 35f);
+        var lsTmp = loadSubObj.AddComponent<TextMeshProUGUI>();
+        lsTmp.text = "— HÀNH TRÌNH TÀN TÍCH THƯỢNG CỔ —";
+        lsTmp.fontSize = 17;
+        lsTmp.fontStyle = FontStyles.Bold;
+        lsTmp.alignment = TextAlignmentOptions.Center;
+        lsTmp.color = new Color(0.92f, 0.45f, 0.45f);
+        lsTmp.raycastTarget = false;
+
+        // Progress Slider
+        GameObject sliderObj = new GameObject("ProgressSlider");
+        sliderObj.transform.SetParent(loadPanelObj.transform, false);
+        var sldRt = sliderObj.AddComponent<RectTransform>();
+        sldRt.anchorMin = new Vector2(0.5f, 0.5f);
+        sldRt.anchorMax = new Vector2(0.5f, 0.5f);
+        sldRt.pivot = new Vector2(0.5f, 0.5f);
+        sldRt.anchoredPosition = new Vector2(0f, -160f);
+        sldRt.sizeDelta = new Vector2(840f, 24f);
+
+        var sldBg = sliderObj.AddComponent<Image>();
+        sldBg.color = new Color(0.06f, 0.08f, 0.12f, 0.95f);
+        var sldOutline = sliderObj.AddComponent<Outline>();
+        sldOutline.effectColor = new Color(0.95f, 0.80f, 0.35f, 0.85f);
+        sldOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        var slider = sliderObj.AddComponent<Slider>();
+        slider.minValue = 0f;
+        slider.maxValue = 1f;
+        slider.value = 0f;
+
+        // Fill Area
+        GameObject fillAreaObj = new GameObject("Fill Area");
+        fillAreaObj.transform.SetParent(sliderObj.transform, false);
+        var faRt = fillAreaObj.AddComponent<RectTransform>();
+        faRt.anchorMin = Vector2.zero;
+        faRt.anchorMax = Vector2.one;
+        faRt.offsetMin = new Vector2(3f, 3f);
+        faRt.offsetMax = new Vector2(-3f, -3f);
+
+        GameObject fillObj = new GameObject("Fill");
+        fillObj.transform.SetParent(fillAreaObj.transform, false);
+        var fRt = fillObj.AddComponent<RectTransform>();
+        fRt.anchorMin = Vector2.zero;
+        fRt.anchorMax = Vector2.one;
+        fRt.offsetMin = fRt.offsetMax = Vector2.zero;
+        var fillImg = fillObj.AddComponent<Image>();
+        fillImg.color = new Color(0.18f, 0.85f, 0.45f, 1f); // Xanh ngọc sinh lực
+        slider.fillRect = fRt;
+
+        // Status text (Tips / Action)
+        GameObject tipObj = new GameObject("StatusText");
+        tipObj.transform.SetParent(loadPanelObj.transform, false);
+        var tipRt = tipObj.AddComponent<RectTransform>();
+        tipRt.anchorMin = new Vector2(0.5f, 0.5f);
+        tipRt.anchorMax = new Vector2(0.5f, 0.5f);
+        tipRt.pivot = new Vector2(0.5f, 0.5f);
+        tipRt.anchoredPosition = new Vector2(0f, -120f);
+        tipRt.sizeDelta = new Vector2(800f, 32f);
+        var tipTmp = tipObj.AddComponent<TextMeshProUGUI>();
+        tipTmp.text = "Đang khởi hành vào vương quốc...";
+        tipTmp.fontSize = 17;
+        tipTmp.fontStyle = FontStyles.Bold;
+        tipTmp.alignment = TextAlignmentOptions.Center;
+        tipTmp.color = new Color(0.35f, 0.95f, 0.65f);
+        tipTmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(tipTmp, 0.35f, Color.black);
+
+        // Percent text
+        GameObject pctObj = new GameObject("PercentText");
+        pctObj.transform.SetParent(loadPanelObj.transform, false);
+        var pctRt = pctObj.AddComponent<RectTransform>();
+        pctRt.anchorMin = new Vector2(0.5f, 0.5f);
+        pctRt.anchorMax = new Vector2(0.5f, 0.5f);
+        pctRt.pivot = new Vector2(0.5f, 0.5f);
+        pctRt.anchoredPosition = new Vector2(0f, -200f);
+        pctRt.sizeDelta = new Vector2(300f, 30f);
+        var pctTmp = pctObj.AddComponent<TextMeshProUGUI>();
+        pctTmp.text = "0%";
+        pctTmp.fontSize = 16;
+        pctTmp.fontStyle = FontStyles.Bold;
+        pctTmp.alignment = TextAlignmentOptions.Center;
+        pctTmp.color = new Color(1f, 0.95f, 0.82f);
+        pctTmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(pctTmp, 0.35f, Color.black);
+
+        // Link intro controller
+        SerializedObject introSo = new SerializedObject(introCtrl);
+        introSo.FindProperty("cinematicPanel").objectReferenceValue = cinePanelObj;
+        introSo.FindProperty("loadingProgressPanel").objectReferenceValue = loadPanelObj;
+        introSo.FindProperty("cinematicCg").objectReferenceValue = cpCg;
+        introSo.FindProperty("cinematicSlideImage").objectReferenceValue = slideImg;
+        introSo.FindProperty("cinematicSubtitleText").objectReferenceValue = cineTmp;
+        introSo.FindProperty("skipButton").objectReferenceValue = skipBtn;
+        introSo.FindProperty("skipButtonCg").objectReferenceValue = skipCg;
+        introSo.FindProperty("loadingProgressCg").objectReferenceValue = lpCg;
+        introSo.FindProperty("progressSlider").objectReferenceValue = slider;
+        introSo.FindProperty("progressFillImage").objectReferenceValue = fillImg;
+        introSo.FindProperty("progressPercentText").objectReferenceValue = pctTmp;
+        introSo.FindProperty("progressStatusText").objectReferenceValue = tipTmp;
+        introSo.FindProperty("gameTitleText").objectReferenceValue = ltTmp;
+        introSo.FindProperty("gameSubtitleText").objectReferenceValue = lsTmp;
+        introSo.ApplyModifiedProperties();
+
         // 10. Link all references into LoginManager
         SerializedObject so = new SerializedObject(loginMgr);
         so.FindProperty("loginCardPanel").objectReferenceValue = loginCardObj;
         so.FindProperty("tapToStartPanel").objectReferenceValue = tapPanel;
+        so.FindProperty("introLoadingController").objectReferenceValue = introCtrl;
 
         so.FindProperty("tabLoginBtn").objectReferenceValue = tabLoginBtn;
         so.FindProperty("tabRegisterBtn").objectReferenceValue = tabRegBtn;

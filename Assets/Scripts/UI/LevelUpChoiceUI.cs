@@ -880,7 +880,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         return AugmentIconHelper.GetAugmentShortCode(type);
     }
 
-    // ─── 13 Tác Phẩm Nghệ Thuật Dark Fantasy Độc Bản & Player Avatars ─────────
+    // ─── Tác Phẩm Nghệ Thuật Dark Fantasy Độc Bản & Player Avatars ─────────
     private static Sprite _spriteDeityBloodBeast;
     private static Sprite _spriteDeityBerserkerWarlord;
     private static Sprite _spriteDeityCelestial;
@@ -894,6 +894,21 @@ public class LevelUpChoiceUI : MonoBehaviour
     private static Sprite _spriteDeityGrimReaper;
     private static Sprite _spriteDeityCursedDemon;
     private static Sprite _spriteDeityShieldGoddess;
+
+    // Tác phẩm độc bản mới tạo cho từng Lõi Cụ Thể (Dedicated Augment Artworks)
+    private static Sprite _spritePercentCurrentHpExecute;
+    private static Sprite _spriteGoldenSanctuary;
+    private static Sprite _spriteCursedMight;
+    private static Sprite _spriteIroncladPact;
+    private static Sprite _spriteChronoStasis;
+    private static Sprite _spriteBloodTitheBlade;
+    private static Sprite _spriteGlassCannonTitan;
+    private static Sprite _spritePhantomRush;
+    private static Sprite _spriteSoulHarvesterMultiplier;
+    private static Sprite _spriteSkillSoulSurge;
+    private static Sprite _spriteFlameAdaptation;
+    private static Sprite _spriteGlacialSoul;
+    private static Sprite _spriteAbsoluteZeroNova;
 
     private static void EnsureDeitySpritesLoaded()
     {
@@ -910,6 +925,20 @@ public class LevelUpChoiceUI : MonoBehaviour
         if (_spriteDeityGrimReaper == null) _spriteDeityGrimReaper = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GrimReaper");
         if (_spriteDeityCursedDemon == null) _spriteDeityCursedDemon = Resources.Load<Sprite>("UI/CardDeities/CardDeity_CursedDemon");
         if (_spriteDeityShieldGoddess == null) _spriteDeityShieldGoddess = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ShieldGoddess");
+
+        if (_spritePercentCurrentHpExecute == null) _spritePercentCurrentHpExecute = Resources.Load<Sprite>("UI/CardDeities/CardDeity_PercentCurrentHpExecute");
+        if (_spriteGoldenSanctuary == null) _spriteGoldenSanctuary = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GoldenSanctuary");
+        if (_spriteCursedMight == null) _spriteCursedMight = Resources.Load<Sprite>("UI/CardDeities/CardDeity_CursedMight");
+        if (_spriteIroncladPact == null) _spriteIroncladPact = Resources.Load<Sprite>("UI/CardDeities/CardDeity_IroncladPact");
+        if (_spriteChronoStasis == null) _spriteChronoStasis = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ChronoStasis");
+        if (_spriteBloodTitheBlade == null) _spriteBloodTitheBlade = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodTitheBlade");
+        if (_spriteGlassCannonTitan == null) _spriteGlassCannonTitan = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GlassCannonTitan");
+        if (_spritePhantomRush == null) _spritePhantomRush = Resources.Load<Sprite>("UI/CardDeities/CardDeity_PhantomRush");
+        if (_spriteSoulHarvesterMultiplier == null) _spriteSoulHarvesterMultiplier = Resources.Load<Sprite>("UI/CardDeities/CardDeity_SoulHarvesterMultiplier");
+        if (_spriteSkillSoulSurge == null) _spriteSkillSoulSurge = Resources.Load<Sprite>("UI/CardDeities/CardDeity_SkillSoulSurge");
+        if (_spriteFlameAdaptation == null) _spriteFlameAdaptation = Resources.Load<Sprite>("UI/CardDeities/CardDeity_FlameAdaptation");
+        if (_spriteGlacialSoul == null) _spriteGlacialSoul = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GlacialSoul");
+        if (_spriteAbsoluteZeroNova == null) _spriteAbsoluteZeroNova = Resources.Load<Sprite>("UI/CardDeities/CardDeity_AbsoluteZeroNova");
     }
 
     public static Sprite GetAugmentCardIllustrationSprite(AugmentDatabase.AugmentData aug, HashSet<Sprite> usedSprites = null)
@@ -942,6 +971,36 @@ public class LevelUpChoiceUI : MonoBehaviour
                     chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_TITAN_BERSERKER); break;
                 case AugmentDatabase.AugmentType.MeteorSupercluster:
                     chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_CELESTIAL_MAGE); break;
+
+                // ─── 10 LÕI KHẾ ƯỚC & LỜI NGUYÊN (Hình vẽ độc bản riêng biệt 100%) ───
+                case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
+                    chosenSprite = _spritePercentCurrentHpExecute; break;
+                case AugmentDatabase.AugmentType.GoldenSanctuary:
+                    chosenSprite = _spriteGoldenSanctuary; break;
+                case AugmentDatabase.AugmentType.CursedMight:
+                    chosenSprite = _spriteCursedMight; break;
+                case AugmentDatabase.AugmentType.IroncladPact:
+                    chosenSprite = _spriteIroncladPact; break;
+                case AugmentDatabase.AugmentType.ChronoStasis:
+                    chosenSprite = _spriteChronoStasis; break;
+                case AugmentDatabase.AugmentType.BloodTitheBlade:
+                    chosenSprite = _spriteBloodTitheBlade; break;
+                case AugmentDatabase.AugmentType.GlassCannonTitan:
+                    chosenSprite = _spriteGlassCannonTitan; break;
+                case AugmentDatabase.AugmentType.PhantomRush:
+                    chosenSprite = _spritePhantomRush; break;
+                case AugmentDatabase.AugmentType.SoulHarvesterMultiplier:
+                    chosenSprite = _spriteSoulHarvesterMultiplier; break;
+                case AugmentDatabase.AugmentType.SkillSoulSurge:
+                    chosenSprite = _spriteSkillSoulSurge; break;
+
+                // ─── CÁC LÕI NGUYÊN TỐ CÕI TAI ƯƠNG CÓ TRANH MỚI ───
+                case AugmentDatabase.AugmentType.FlameAdaptation:
+                    chosenSprite = _spriteFlameAdaptation; break;
+                case AugmentDatabase.AugmentType.GlacialSoul:
+                    chosenSprite = _spriteGlacialSoul; break;
+                case AugmentDatabase.AugmentType.AbsoluteZeroNova:
+                    chosenSprite = _spriteAbsoluteZeroNova; break;
 
                 // Đại Tướng Cuồng Bạo (Berserker Warlord): Cuồng Chiến, Tàn Sát, Va Chạm Nặng
                 case AugmentDatabase.AugmentType.BattleFrenzy:
@@ -983,24 +1042,14 @@ public class LevelUpChoiceUI : MonoBehaviour
 
                 // Tử Thần Thu Hoạch Linh Hồn (Grim Reaper): Hút Linh Hồn & Kết Liễu
                 case AugmentDatabase.AugmentType.SoulHarvest:
-                case AugmentDatabase.AugmentType.SoulHarvesterMultiplier:
-                case AugmentDatabase.AugmentType.SkillSoulSurge:
                 case AugmentDatabase.AugmentType.DeathsTouch:
-                case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
                     chosenSprite = _spriteDeityGrimReaper; break;
 
-                // Tà Thần Lời Nguyền Cổ Xưa (Ancient Cursed Demon): Lõi Hai Mặt Đánh Đổi Lời Nguyền
-                case AugmentDatabase.AugmentType.CursedMight:
-                case AugmentDatabase.AugmentType.IroncladPact:
-                case AugmentDatabase.AugmentType.ChronoStasis:
-                case AugmentDatabase.AugmentType.BloodTitheBlade:
-                case AugmentDatabase.AugmentType.GlassCannonTitan:
-                case AugmentDatabase.AugmentType.PhantomRush:
-                    chosenSprite = _spriteDeityCursedDemon; break;
+                // Tà Thần Lời Nguyền Cổ Xưa (Ancient Cursed Demon)
+                // (Các lõi CursedMight, ChronoStasis,... đã có tranh độc bản ở trên)
 
                 // Nữ Thần Thánh Khiên Vàng Kim (Divine Aegis Goddess): Khiên Hộ Mệnh & Bất Hoại
                 case AugmentDatabase.AugmentType.DivineAegis:
-                case AugmentDatabase.AugmentType.GoldenSanctuary:
                 case AugmentDatabase.AugmentType.IronBastion:
                 case AugmentDatabase.AugmentType.ArcaneShield:
                     chosenSprite = _spriteDeityShieldGoddess; break;
