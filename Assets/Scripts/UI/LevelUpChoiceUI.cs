@@ -1155,6 +1155,9 @@ public class LevelUpChoiceUI : MonoBehaviour
             ? AugmentManager.Instance.GetOwnedAugmentCount(aug.type) : 0;
         bool isUpgrade = currentRank > 0;
 
+        // Lưu giữ chính xác Sprite gốc đã gán cho thẻ bài này (tránh lệch hình khi mở popup)
+        Sprite illustrationSprite = GetAugmentCardIllustrationSprite(aug, usedSprites);
+
         // ── 1. Tier Visual Spec (Silver / Gold / Prismatic) ───────────────────
         string tierTitle;
         Color tierFrameColor;
@@ -1377,7 +1380,6 @@ public class LevelUpChoiceUI : MonoBehaviour
         paRT.anchorMax = new Vector2(0.95f, 0.850f);
         paRT.offsetMin = paRT.offsetMax = Vector2.zero;
 
-        Sprite illustrationSprite = GetAugmentCardIllustrationSprite(aug, usedSprites);
         float artRatio = 0.747f; // Mặc định tỷ lệ chuẩn 3:4 của Card Deities
         if (illustrationSprite != null && illustrationSprite.rect.height > 0)
         {
@@ -1533,10 +1535,11 @@ public class LevelUpChoiceUI : MonoBehaviour
         // ── 7. Toàn bộ thẻ bài là nút bấm tương tác mở Popup Xác Nhận ─────────
         var captured = aug;
         int capturedIndex = index;
+        Sprite capturedSprite = illustrationSprite;
 
         var cardBtn = card.GetComponent<Button>();
         cardBtn.targetGraphic = cardBodyImg;
-        cardBtn.onClick.AddListener(() => ShowAugmentConfirmPopup(captured, capturedIndex, isVN));
+        cardBtn.onClick.AddListener(() => ShowAugmentConfirmPopup(captured, capturedIndex, isVN, capturedSprite));
 
         // ── 8. Animations: Entrance Flip-in, Hover Scale, & Prismatic Shimmer
         SetupCardHover(card, cardRT, cardFrameImg, outerGlowImg, null, tierFrameColor, isPrismatic);
@@ -1676,7 +1679,7 @@ public class LevelUpChoiceUI : MonoBehaviour
     // ─── Popup Xác Nhận Lõi Nâng Cấp (Dark Fantasy Confirmation Modal) ─────────
     private GameObject _confirmPopupObj = null;
 
-    private void ShowAugmentConfirmPopup(AugmentDatabase.AugmentData aug, int cardIndex, bool isVN)
+    private void ShowAugmentConfirmPopup(AugmentDatabase.AugmentData aug, int cardIndex, bool isVN, Sprite originalSprite = null)
     {
         if (_isPicking || aug == null) return;
         SoundManager.EnsureInstance()?.PlayMenuHover();
@@ -1752,7 +1755,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         ltaRT.anchorMax = new Vector2(0.40f, 0.84f);
         ltaRT.offsetMin = ltaRT.offsetMax = Vector2.zero;
 
-        Sprite thumbSprite = GetAugmentCardIllustrationSprite(aug);
+        // Dùng đúng Sprite ban đầu của thẻ bài (hoặc lấy trực tiếp theo aug)
+        Sprite thumbSprite = originalSprite != null ? originalSprite : GetAugmentCardIllustrationSprite(aug);
         float thumbRatio = 0.747f;
         if (thumbSprite != null && thumbSprite.rect.height > 0)
         {
