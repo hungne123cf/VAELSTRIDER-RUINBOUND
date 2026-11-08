@@ -233,3 +233,4 @@ public class GameIntroLoadingController : MonoBehaviour
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
     }
 }
+

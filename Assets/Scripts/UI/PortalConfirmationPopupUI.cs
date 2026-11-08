@@ -23,6 +23,13 @@ public class PortalConfirmationPopupUI : MonoBehaviour
     private CorruptedVoidPortal currentCorruptedPortal;
     private Transform playerTransform;
 
+    [Header("Portal Visual Preview")]
+    private Image portalImage;
+    private Image portalFrameBg;
+    private Outline portalOutline;
+    private TextMeshProUGUI portalStatusBadge;
+    private Coroutine portalPulseCoroutine;
+
     private TextMeshProUGUI titleText;
     private TextMeshProUGUI subtitleText;
     private TextMeshProUGUI destTagText;
@@ -117,8 +124,19 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             instance = existing.GetComponent<PortalConfirmationPopupUI>();
             if (instance != null)
             {
-                if (instance.titleText == null) instance.BuildUI(existing);
-                return instance;
+                if (instance.titleText == null || instance.portalImage == null)
+                {
+                    Destroy(existing.gameObject);
+                    instance = null;
+                }
+                else
+                {
+                    return instance;
+                }
+            }
+            else
+            {
+                Destroy(existing.gameObject);
             }
         }
 
@@ -145,13 +163,13 @@ public class PortalConfirmationPopupUI : MonoBehaviour
 
     private void BuildUI(Transform root)
     {
-        // 1. Dialog Box Frame (Tỉ lệ chuẩn 530x390 rộng rãi, không chồng chữ)
+        // 1. Dialog Box Frame (Tỉ lệ chuẩn 860x610 rộng rãi, không chồng chữ)
         GameObject boxObj = new GameObject("DialogBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         boxObj.layer = 5;
         boxObj.transform.SetParent(root, false);
 
         RectTransform boxRt = boxObj.GetComponent<RectTransform>();
-        boxRt.sizeDelta = new Vector2(800f, 580f);
+        boxRt.sizeDelta = new Vector2(860f, 610f);
         boxRt.anchoredPosition = Vector2.zero;
 
         Image boxImg = boxObj.GetComponent<Image>();
@@ -168,12 +186,12 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchoredPosition = new Vector2(0f, 225f);
-        titleRt.sizeDelta = new Vector2(740f, 48f);
+        titleRt.anchoredPosition = new Vector2(0f, 240f);
+        titleRt.sizeDelta = new Vector2(800f, 48f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = LocalizationManager.T("DỊCH CHUYỂN CÕI GIỚI", "REALM WARP GATE");
-        titleText.fontSize = 36f;
+        titleText.fontSize = 35f;
         titleText.fontStyle = FontStyles.Bold;
         titleText.characterSpacing = 2.0f;
         titleText.color = new Color(1f, 0.92f, 0.65f, 1f); // Antique Gold
@@ -185,81 +203,133 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchoredPosition = new Vector2(0f, 178f);
-        subRt.sizeDelta = new Vector2(740f, 32f);
+        subRt.anchoredPosition = new Vector2(0f, 196f);
+        subRt.sizeDelta = new Vector2(800f, 32f);
 
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = LocalizationManager.T("Vết nứt không gian kết nối tới cõi tiếp theo", "Traverse the spatial rift into the next realm");
-        subtitleText.fontSize = 18f;
+        subtitleText.fontSize = 17f;
         subtitleText.fontStyle = FontStyles.Normal;
         subtitleText.color = new Color(0.85f, 0.88f, 0.95f, 0.90f);
         subtitleText.alignment = TextAlignmentOptions.Center;
         SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.25f, Color.black);
 
         // Filigree Divider
-        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 152f), new Vector2(720f, 12f));
+        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 172f), new Vector2(780f, 12f));
 
-        // 3. Destination Plaque Card
+        // 3. Destination Plaque Card (Có chứa hình Pixel Art biểu trưng + Thông tin cõi)
         GameObject plaqueObj = new GameObject("DestinationCard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         plaqueObj.layer = 5;
         plaqueObj.transform.SetParent(boxObj.transform, false);
         RectTransform plaqueRt = plaqueObj.GetComponent<RectTransform>();
-        plaqueRt.anchoredPosition = new Vector2(0f, 40f);
-        plaqueRt.sizeDelta = new Vector2(720f, 175f);
+        plaqueRt.anchoredPosition = new Vector2(0f, 42f);
+        plaqueRt.sizeDelta = new Vector2(790f, 210f);
 
         Image pImg = plaqueObj.GetComponent<Image>();
         pImg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
         pImg.type = Image.Type.Sliced;
-        pImg.color = new Color(0.08f, 0.10f, 0.16f, 0.96f);
+        pImg.color = new Color(0.06f, 0.08f, 0.13f, 0.97f);
 
         var pOutline = plaqueObj.AddComponent<Outline>();
         pOutline.effectColor = new Color(0.95f, 0.80f, 0.35f, 0.45f);
         pOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
+        // ─── 3A. Khung ảnh Biểu trưng Cổng Pixel Art (Bên trái) ────────────────
+        GameObject portalFrameObj = new GameObject("PortalFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        portalFrameObj.layer = 5;
+        portalFrameObj.transform.SetParent(plaqueObj.transform, false);
+        RectTransform pfRt = portalFrameObj.GetComponent<RectTransform>();
+        pfRt.anchoredPosition = new Vector2(-285f, 0f);
+        pfRt.sizeDelta = new Vector2(175f, 175f);
+
+        portalFrameBg = portalFrameObj.GetComponent<Image>();
+        portalFrameBg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
+        portalFrameBg.type = Image.Type.Sliced;
+        portalFrameBg.color = new Color(0.02f, 0.03f, 0.05f, 1f);
+
+        portalOutline = portalFrameObj.AddComponent<Outline>();
+        portalOutline.effectColor = new Color(0.40f, 0.90f, 1f, 0.75f); // Neon Cyan / Gold Glow
+        portalOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        // Ảnh Pixel Art Cổng Dịch Chuyển
+        GameObject portalImgObj = new GameObject("PortalPixelImage", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        portalImgObj.layer = 5;
+        portalImgObj.transform.SetParent(portalFrameObj.transform, false);
+        RectTransform piRt = portalImgObj.GetComponent<RectTransform>();
+        piRt.anchoredPosition = Vector2.zero;
+        piRt.sizeDelta = new Vector2(160f, 160f);
+
+        portalImage = portalImgObj.GetComponent<Image>();
+        portalImage.preserveAspect = true;
+        portalImage.sprite = GetPortalSprite("map2");
+        portalImage.raycastTarget = false;
+
+        // Badge trạng thái nhỏ dưới khung ảnh
+        GameObject badgeObj = new GameObject("PortalBadge", typeof(RectTransform), typeof(CanvasRenderer));
+        badgeObj.layer = 5;
+        badgeObj.transform.SetParent(portalFrameObj.transform, false);
+        RectTransform bRt = badgeObj.GetComponent<RectTransform>();
+        bRt.anchoredPosition = new Vector2(0f, -74f);
+        bRt.sizeDelta = new Vector2(160f, 20f);
+        portalStatusBadge = badgeObj.AddComponent<TextMeshProUGUI>();
+        portalStatusBadge.text = "<color=#34D399>● KẾT NỐI MỞ</color>";
+        portalStatusBadge.fontSize = 11f;
+        portalStatusBadge.fontStyle = FontStyles.Bold;
+        portalStatusBadge.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(portalStatusBadge, 0.35f, Color.black);
+
+        // ─── 3B. Khung Nội dung Thông tin Cõi Giới (Bên phải) ──────────────────
+        GameObject infoObj = new GameObject("InfoContainer", typeof(RectTransform));
+        infoObj.layer = 5;
+        infoObj.transform.SetParent(plaqueObj.transform, false);
+        RectTransform infoRt = infoObj.GetComponent<RectTransform>();
+        infoRt.anchoredPosition = new Vector2(105f, 0f);
+        infoRt.sizeDelta = new Vector2(530f, 185f);
+
         // Destination Tag
         GameObject tagObj = new GameObject("DestTag", typeof(RectTransform), typeof(CanvasRenderer));
         tagObj.layer = 5;
-        tagObj.transform.SetParent(plaqueObj.transform, false);
+        tagObj.transform.SetParent(infoObj.transform, false);
         RectTransform tagRt = tagObj.GetComponent<RectTransform>();
-        tagRt.anchoredPosition = new Vector2(0f, 52f);
-        tagRt.sizeDelta = new Vector2(680f, 24f);
+        tagRt.anchoredPosition = new Vector2(0f, 58f);
+        tagRt.sizeDelta = new Vector2(530f, 24f);
         destTagText = tagObj.AddComponent<TextMeshProUGUI>();
         destTagText.text = LocalizationManager.T("ĐÍCH ĐẾN TIẾP THEO", "DESTINATION REALM");
-        destTagText.fontSize = 14f;
+        destTagText.fontSize = 13f;
         destTagText.fontStyle = FontStyles.Bold;
         destTagText.characterSpacing = 2.5f;
         destTagText.color = new Color(0.95f, 0.80f, 0.45f, 0.95f);
-        destTagText.alignment = TextAlignmentOptions.Center;
+        destTagText.alignment = TextAlignmentOptions.Left;
         SoulslikeHUDStyler.SetSafeOutline(destTagText, 0.30f, Color.black);
 
-        // Destination Name (Không ký tự lạ, chữ to rõ ràng)
+        // Destination Name
         GameObject destNameObj = new GameObject("DestName", typeof(RectTransform), typeof(CanvasRenderer));
         destNameObj.layer = 5;
-        destNameObj.transform.SetParent(plaqueObj.transform, false);
+        destNameObj.transform.SetParent(infoObj.transform, false);
         RectTransform dnRt = destNameObj.GetComponent<RectTransform>();
-        dnRt.anchoredPosition = new Vector2(0f, 18f);
-        dnRt.sizeDelta = new Vector2(680f, 36f);
+        dnRt.anchoredPosition = new Vector2(0f, 20f);
+        dnRt.sizeDelta = new Vector2(530f, 38f);
         destinationNameText = destNameObj.AddComponent<TextMeshProUGUI>();
-        destinationNameText.fontSize = 26f;
+        destinationNameText.fontSize = 25f;
         destinationNameText.fontStyle = FontStyles.Bold;
-        destinationNameText.characterSpacing = 1.5f;
+        destinationNameText.characterSpacing = 1.2f;
         destinationNameText.color = new Color(0.40f, 0.90f, 1f);
-        destinationNameText.alignment = TextAlignmentOptions.Center;
+        destinationNameText.alignment = TextAlignmentOptions.Left;
         SoulslikeHUDStyler.SetSafeOutline(destinationNameText, 0.45f, Color.black);
 
-        // Destination Description (Có chiều cao rộng rãi cho 3 dòng bullet points)
+        // Destination Description
         GameObject destDescObj = new GameObject("DestDesc", typeof(RectTransform), typeof(CanvasRenderer));
         destDescObj.layer = 5;
-        destDescObj.transform.SetParent(plaqueObj.transform, false);
+        destDescObj.transform.SetParent(infoObj.transform, false);
         RectTransform ddRt = destDescObj.GetComponent<RectTransform>();
-        ddRt.anchoredPosition = new Vector2(0f, -32f);
-        ddRt.sizeDelta = new Vector2(680f, 54f);
+        ddRt.anchoredPosition = new Vector2(0f, -36f);
+        ddRt.sizeDelta = new Vector2(530f, 62f);
         destinationDescText = destDescObj.AddComponent<TextMeshProUGUI>();
-        destinationDescText.fontSize = 16f;
+        destinationDescText.fontSize = 15f;
         destinationDescText.lineSpacing = 1.25f;
         destinationDescText.fontStyle = FontStyles.Normal;
         destinationDescText.color = new Color(0.92f, 0.94f, 0.98f, 0.95f);
-        destinationDescText.alignment = TextAlignmentOptions.Center;
+        destinationDescText.alignment = TextAlignmentOptions.Left;
         destinationDescText.enableWordWrapping = true;
         SoulslikeHUDStyler.SetSafeOutline(destinationDescText, 0.25f, Color.black);
 
@@ -268,11 +338,11 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         warnObj.layer = 5;
         warnObj.transform.SetParent(boxObj.transform, false);
         RectTransform warnRt = warnObj.GetComponent<RectTransform>();
-        warnRt.anchoredPosition = new Vector2(0f, -80f);
-        warnRt.sizeDelta = new Vector2(720f, 48f);
+        warnRt.anchoredPosition = new Vector2(0f, -95f);
+        warnRt.sizeDelta = new Vector2(780f, 48f);
 
         warningNoticeText = warnObj.AddComponent<TextMeshProUGUI>();
-        warningNoticeText.fontSize = 17f;
+        warningNoticeText.fontSize = 16f;
         warningNoticeText.lineSpacing = 1.3f;
         warningNoticeText.alignment = TextAlignmentOptions.Center;
         warningNoticeText.text = LocalizationManager.T(
@@ -377,11 +447,18 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         Time.timeScale = 0f; // Tạm dừng trận chiến để chọn an toàn
         SoundManager.EnsureInstance()?.PlayButtonClick();
 
+        if (portalPulseCoroutine != null) StopCoroutine(portalPulseCoroutine);
+        portalPulseCoroutine = StartCoroutine(PortalPulseRoutine());
+
         string currentScene = SceneManager.GetActiveScene().name;
         bool isHeavenly = (portal != null && portal.IsFinalRealm) || currentScene.Contains("Map3") || currentScene.Contains("Forgotten");
 
         if (isHeavenly)
         {
+            if (portalImage != null) portalImage.sprite = GetPortalSprite("heavenly");
+            if (portalOutline != null) portalOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
+            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#FCD34D>✦ THĂNG HOA</color>";
+
             if (titleText != null)
             {
                 titleText.text = LocalizationManager.T("CỔNG THĂNG HOA: KẾT THÚC HÀNH TRÌNH", "HEAVENLY GATE: ASCENSION");
@@ -467,10 +544,17 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         Time.timeScale = 0f;
         SoundManager.EnsureInstance()?.PlayButtonClick();
 
+        if (portalPulseCoroutine != null) StopCoroutine(portalPulseCoroutine);
+        portalPulseCoroutine = StartCoroutine(PortalPulseRoutine());
+
         var nextRealm = CorruptedCycleManager.GetNextRealm();
         int nextCycle = (int)nextRealm;
         Color realmColor = CorruptedCycleManager.GetRealmColor(nextRealm);
         string realmName = CorruptedCycleManager.GetRealmName(nextRealm);
+
+        if (portalImage != null) portalImage.sprite = GetPortalSprite("void");
+        if (portalOutline != null) portalOutline.effectColor = realmColor;
+        if (portalStatusBadge != null) portalStatusBadge.text = $"<color=#{ColorUtility.ToHtmlStringRGB(realmColor)}>● VẾT NỨT ÁC MỘNG</color>";
 
         if (titleText != null)
         {
@@ -513,6 +597,10 @@ public class PortalConfirmationPopupUI : MonoBehaviour
 
         if (currentScene == "SampleScene" || currentScene.Contains("Map1"))
         {
+            if (portalImage != null) portalImage.sprite = GetPortalSprite("map2");
+            if (portalOutline != null) portalOutline.effectColor = new Color(0.35f, 0.85f, 1f, 0.85f);
+            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#38BDF8>● CÕI TÀN TÍCH</color>";
+
             if (destinationNameText != null)
             {
                 destinationNameText.text = LocalizationManager.T("THUNG LŨNG TÀN TÍCH (MAP 2)", "VALLEY OF RUIN (MAP 2)");
@@ -528,6 +616,10 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         }
         else if (currentScene.Contains("Map2") || currentScene.Contains("Valley"))
         {
+            if (portalImage != null) portalImage.sprite = GetPortalSprite("map3");
+            if (portalOutline != null) portalOutline.effectColor = new Color(0.85f, 0.45f, 1f, 0.85f);
+            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#C084FC>● CÕI KÝ ỨC</color>";
+
             if (destinationNameText != null)
             {
                 destinationNameText.text = LocalizationManager.T("KÝ ỨC LÃNG QUÊN (MAP 3)", "FORGOTTEN MEMORIES (MAP 3)");
@@ -543,6 +635,10 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         }
         else if (currentScene.Contains("Map3") || currentScene.Contains("Forgotten"))
         {
+            if (portalImage != null) portalImage.sprite = GetPortalSprite("heavenly");
+            if (portalOutline != null) portalOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
+            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#FCD34D>✦ CÕI THIÊN ĐƯỜNG</color>";
+
             if (destinationNameText != null)
             {
                 destinationNameText.text = LocalizationManager.T("CÕI THIÊN ĐƯỜNG (HOÀN THÀNH)", "HEAVENLY GATE (ASCENSION)");
@@ -558,11 +654,71 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         }
     }
 
+    private static Sprite GetPortalSprite(string realmKey)
+    {
+        string spriteName = "portal_map2_pixel";
+        if (realmKey == "map2") spriteName = "portal_map2_pixel";
+        else if (realmKey == "map3") spriteName = "portal_map3_pixel";
+        else if (realmKey == "heavenly") spriteName = "portal_heavenly_pixel";
+        else if (realmKey == "void") spriteName = "portal_void_pixel";
+
+        Sprite sp = Resources.Load<Sprite>("UI/Popups/" + spriteName);
+        if (sp != null) return sp;
+
+#if UNITY_EDITOR
+        sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/UI/Popups/" + spriteName + ".png");
+        if (sp != null) return sp;
+#endif
+
+        string fullPath = System.IO.Path.Combine(Application.dataPath, "Resources/UI/Popups/" + spriteName + ".png");
+        if (System.IO.File.Exists(fullPath))
+        {
+            byte[] bytes = System.IO.File.ReadAllBytes(fullPath);
+            Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            if (tex.LoadImage(bytes))
+            {
+                tex.filterMode = FilterMode.Point;
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+        }
+
+        // Fallback to ruin_portal
+        sp = Resources.Load<Sprite>("Environment/ruin_portal");
+        if (sp != null) return sp;
+
+#if UNITY_EDITOR
+        sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Environment/ruin_portal.png");
+#endif
+        return sp;
+    }
+
+    private System.Collections.IEnumerator PortalPulseRoutine()
+    {
+        if (portalImage == null) yield break;
+        Transform pTr = portalImage.transform;
+        float elapsed = 0f;
+        while (isOpen)
+        {
+            elapsed += Time.unscaledDeltaTime * 2.8f;
+            float s = 1.0f + Mathf.Sin(elapsed) * 0.045f;
+            pTr.localScale = new Vector3(s, s, 1f);
+            yield return null;
+        }
+        pTr.localScale = Vector3.one;
+    }
+
     public void Cancel()
     {
         if (!isOpen) return;
         isOpen = false;
         LastClosedTime = Time.unscaledTime;
+
+        if (portalPulseCoroutine != null)
+        {
+            StopCoroutine(portalPulseCoroutine);
+            portalPulseCoroutine = null;
+        }
+        if (portalImage != null) portalImage.transform.localScale = Vector3.one;
 
         Time.timeScale = 1f;
 
@@ -587,6 +743,13 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         if (!isOpen) return;
         isOpen = false;
         LastClosedTime = Time.unscaledTime;
+
+        if (portalPulseCoroutine != null)
+        {
+            StopCoroutine(portalPulseCoroutine);
+            portalPulseCoroutine = null;
+        }
+        if (portalImage != null) portalImage.transform.localScale = Vector3.one;
 
         Time.timeScale = 1f;
 

@@ -20,6 +20,10 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private Button restartButton;
     [SerializeField] private Button mainMenuButton;
 
+    [Header("Death Emblem Visual")]
+    [SerializeField] private Image deathEmblemImage;
+    [SerializeField] private Outline deathEmblemOutline;
+
     [Header("Texts")]
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI subtitleText;
@@ -107,16 +111,17 @@ public class GameOverUI : MonoBehaviour
         if (titleText != null) 
         {
             titleText.font = GameFontManager.HeaderFont;
-            titleText.text = isVi ? "CHUYẾN PHIÊU LƯU KẾT THÚC" : "EXPEDITION FAILED";
+            titleText.text = isVi ? "NGƯƠI ĐÃ TỬ TRẬN" : "YOU DIED";
             titleText.enableWordWrapping = false;
             titleText.enableAutoSizing = true;
-            titleText.fontSizeMin = 20f;
-            titleText.fontSizeMax = 28f;
+            titleText.fontSizeMin = 28f;
+            titleText.fontSizeMax = 44f;
+            titleText.color = new Color(0.85f, 0.15f, 0.15f); // Deep blood ruby Soulslike
             var rt = titleText.rectTransform;
             if (rt != null)
             {
-                rt.sizeDelta = new Vector2(620f, 40f);
-                rt.anchoredPosition = new Vector2(0f, 172f);
+                rt.sizeDelta = new Vector2(760f, 52f);
+                rt.anchoredPosition = new Vector2(0f, 255f);
             }
 
             Transform titleBox = titleText.transform.parent;
@@ -130,10 +135,17 @@ public class GameOverUI : MonoBehaviour
                 if (titleDiv != null)
                 {
                     var divRt = titleDiv.GetComponent<RectTransform>();
-                    if (divRt != null) divRt.anchoredPosition = new Vector2(0f, 142f);
+                    if (divRt != null) divRt.anchoredPosition = new Vector2(0f, 48f);
                 }
             }
         }
+
+        // Cập nhật biểu trưng tử trận Pixel Art
+        if (deathEmblemImage != null && deathEmblemImage.sprite == null)
+        {
+            deathEmblemImage.sprite = GetDeathEmblemSprite();
+        }
+
         if (subtitleText != null) 
         {
             subtitleText.font = GameFontManager.BodyFont;
@@ -147,8 +159,8 @@ public class GameOverUI : MonoBehaviour
             var sRt = subtitleText.rectTransform;
             if (sRt != null)
             {
-                sRt.sizeDelta = new Vector2(860f, 28f);
-                sRt.anchoredPosition = new Vector2(0f, 115f);
+                sRt.sizeDelta = new Vector2(860f, 26f);
+                sRt.anchoredPosition = new Vector2(0f, 22f);
             }
         }
 
@@ -168,15 +180,15 @@ public class GameOverUI : MonoBehaviour
             long shards = PlayerInventory.GetCurrentRunShards();
 
             respawnStatusText.text = isVi 
-                ? $"<color=#00FFFF><b>LINH HỒN: {shards:N0}</b></color>"
-                : $"<color=#00FFFF><b>AETHEL SHARDS: {shards:N0}</b></color>";
+                ? $"<color=#00FFFF><b>LINH HỒN THU ĐƯỢC: {shards:N0}</b></color>"
+                : $"<color=#00FFFF><b>AETHEL SHARDS COLLECTED: {shards:N0}</b></color>";
             respawnStatusText.color = Color.white;
             respawnStatusText.enableWordWrapping = false;
             var stRt = respawnStatusText.rectTransform;
             if (stRt != null)
             {
-                stRt.sizeDelta = new Vector2(780f, 36f);
-                stRt.anchoredPosition = new Vector2(0f, 68f);
+                stRt.sizeDelta = new Vector2(780f, 32f);
+                stRt.anchoredPosition = new Vector2(0f, -10f);
             }
         }
 
@@ -440,6 +452,38 @@ public class GameOverUI : MonoBehaviour
         return _dividerSprite;
     }
 
+    private static Sprite GetDeathEmblemSprite()
+    {
+        Sprite sp = Resources.Load<Sprite>("UI/Popups/gameover_death_emblem");
+        if (sp != null) return sp;
+
+#if UNITY_EDITOR
+        sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/UI/Popups/gameover_death_emblem.png");
+        if (sp != null) return sp;
+#endif
+
+        string fullPath = System.IO.Path.Combine(Application.dataPath, "Resources/UI/Popups/gameover_death_emblem.png");
+        if (System.IO.File.Exists(fullPath))
+        {
+            byte[] bytes = System.IO.File.ReadAllBytes(fullPath);
+            Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            if (tex.LoadImage(bytes))
+            {
+                tex.filterMode = FilterMode.Point;
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+        }
+
+        // Fallback sang skull_death
+        sp = Resources.Load<Sprite>("UI/Augments/skull_death");
+        if (sp != null) return sp;
+
+#if UNITY_EDITOR
+        sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI/Augments/skull_death.png");
+#endif
+        return sp;
+    }
+
     public static GameOverUI EnsureUIExists()
     {
         Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
@@ -450,13 +494,13 @@ public class GameOverUI : MonoBehaviour
         {
             GameOverUI ui = existing.GetComponent<GameOverUI>();
             Transform box = existing.Find("CenterBox");
-            if (ui != null && ui.mainMenuButton != null && box != null && box.Find("FrameBorder") != null)
+            if (ui != null && ui.mainMenuButton != null && box != null && box.Find("DeathEmblemBox") != null)
             {
                 Instance = ui;
                 return Instance;
             }
 
-            // Phiên bản cũ chưa có FrameBorder -> huỷ để tạo mới chuẩn Gothic
+            // Phiên bản cũ chưa có DeathEmblemBox -> huỷ để tạo mới chuẩn Gothic Pixel Art
             Destroy(existing.gameObject);
             Instance = null;
         }
@@ -489,12 +533,12 @@ public class GameOverUI : MonoBehaviour
         Instance = panelObj.AddComponent<GameOverUI>();
         Instance.canvasGroup = cg;
 
-        // ─── Center Box (Khung Gothic chạm khắc) ───────────────────────────────
+        // ─── Center Box (Khung Gothic chạm khắc 880x680) ───────────────────────
         GameObject boxObj = new GameObject("CenterBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         boxObj.layer = 5;
         boxObj.transform.SetParent(panelObj.transform, false);
         RectTransform boxRect = boxObj.GetComponent<RectTransform>();
-        boxRect.sizeDelta = new Vector2(880, 640);
+        boxRect.sizeDelta = new Vector2(880, 680);
         boxRect.anchoredPosition = Vector2.zero;
 
         Image boxBg = boxObj.GetComponent<Image>();
@@ -502,40 +546,72 @@ public class GameOverUI : MonoBehaviour
         boxBg.type = Image.Type.Sliced;
         boxBg.color = Color.white;
 
-        // ─── Title: YOU DIED / NGƯƠI ĐÃ TỬ TRẬN ──────────────────────────────────────────
+        // ─── 1. Title: NGƯƠI ĐÃ TỬ TRẬN / YOU DIED ─────────────────────────────
         GameObject titleObj = new GameObject("Title", typeof(RectTransform));
         titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRect = titleObj.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, 245);
-        titleRect.sizeDelta = new Vector2(800, 58);
+        titleRect.anchoredPosition = new Vector2(0, 255);
+        titleRect.sizeDelta = new Vector2(760, 52);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.font = GameFontManager.HeaderFont;
         titleTmp.text = LocalizationManager.T("NGƯƠI ĐÃ TỬ TRẬN", "YOU DIED");
-        titleTmp.fontSize = 42;
+        titleTmp.fontSize = 40;
         titleTmp.enableAutoSizing = true;
-        titleTmp.fontSizeMin = 24;
-        titleTmp.fontSizeMax = 46;
+        titleTmp.fontSizeMin = 26;
+        titleTmp.fontSizeMax = 44;
         titleTmp.enableWordWrapping = false;
         titleTmp.fontStyle = FontStyles.Bold;
-        titleTmp.color = new Color(0.78f, 0.12f, 0.12f); // Deep blood ruby Soulslike
+        titleTmp.color = new Color(0.85f, 0.15f, 0.15f); // Deep blood ruby Soulslike
         titleTmp.alignment = TextAlignmentOptions.Center;
-        SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.35f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.40f, Color.black);
         Instance.titleText = titleTmp;
 
-        // Title Bottom Symmetric Divider
-        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 150), new Vector2(740, 10), new Color(1f, 0.9f, 0.65f, 0.85f));
+        // ─── 2. Death Emblem (Biểu trưng Tử Trận Pixel Art: Đầu lâu Gothic & Kiếm gãy) ───
+        GameObject emblemBox = new GameObject("DeathEmblemBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        emblemBox.layer = 5;
+        emblemBox.transform.SetParent(boxObj.transform, false);
+        RectTransform ebRt = emblemBox.GetComponent<RectTransform>();
+        ebRt.anchoredPosition = new Vector2(0f, 138f);
+        ebRt.sizeDelta = new Vector2(144f, 144f);
 
-        // ─── Subtitle ──────────────────────────────────────────────────────────
+        Image ebBg = emblemBox.GetComponent<Image>();
+        ebBg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
+        ebBg.type = Image.Type.Sliced;
+        ebBg.color = new Color(0.18f, 0.04f, 0.06f, 0.90f);
+
+        Instance.deathEmblemOutline = emblemBox.AddComponent<Outline>();
+        Instance.deathEmblemOutline.effectColor = new Color(0.95f, 0.20f, 0.25f, 0.75f);
+        Instance.deathEmblemOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        GameObject emblemImgObj = new GameObject("EmblemPixelImage", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        emblemImgObj.layer = 5;
+        emblemImgObj.transform.SetParent(emblemBox.transform, false);
+        RectTransform eiRt = emblemImgObj.GetComponent<RectTransform>();
+        eiRt.anchoredPosition = Vector2.zero;
+        eiRt.sizeDelta = new Vector2(136f, 136f);
+
+        Instance.deathEmblemImage = emblemImgObj.GetComponent<Image>();
+        Instance.deathEmblemImage.preserveAspect = true;
+        Instance.deathEmblemImage.sprite = GetDeathEmblemSprite();
+        Instance.deathEmblemImage.raycastTarget = false;
+
+        // ─── 3. Divider dưới Emblem ────────────────────────────────────────────
+        CreateOrnamentDivider(boxObj.transform, "TitleDivider", new Vector2(0, 48), new Vector2(740, 10), new Color(1f, 0.9f, 0.65f, 0.85f));
+
+        // ─── 4. Subtitle ───────────────────────────────────────────────────────
         GameObject subObj = new GameObject("Subtitle", typeof(RectTransform));
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRect = subObj.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, 115);
-        subRect.sizeDelta = new Vector2(860, 28);
+        subRect.anchoredPosition = new Vector2(0, 22);
+        subRect.sizeDelta = new Vector2(860, 26);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         subTmp.font = GameFontManager.BodyFont;
-        subTmp.text = "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này.";
+        subTmp.text = LocalizationManager.T(
+            "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này.",
+            "Your journey ends here. Battle levels and augments only exist within this run."
+        );
         subTmp.fontSize = 14f;
         subTmp.enableAutoSizing = true;
         subTmp.fontSizeMin = 10f;
@@ -544,33 +620,39 @@ public class GameOverUI : MonoBehaviour
         subTmp.overflowMode = TextOverflowModes.Ellipsis;
         subTmp.color = new Color(0.75f, 0.78f, 0.86f);
         subTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(subTmp, 0.25f, Color.black);
         Instance.subtitleText = subTmp;
 
-        // ─── Run Summary Indicator (Linh Hồn / Aethel Shards) ────────────────────
+        // ─── 5. Run Summary Indicator (Linh Hồn / Aethel Shards) ────────────────
         GameObject statusObj = new GameObject("RespawnStatus", typeof(RectTransform));
         statusObj.layer = 5;
         statusObj.transform.SetParent(boxObj.transform, false);
         RectTransform statusRect = statusObj.GetComponent<RectTransform>();
-        statusRect.anchoredPosition = new Vector2(0, 68);
-        statusRect.sizeDelta = new Vector2(780, 36);
+        statusRect.anchoredPosition = new Vector2(0, -10);
+        statusRect.sizeDelta = new Vector2(780, 32);
         var statusTmp = statusObj.AddComponent<TextMeshProUGUI>();
         statusTmp.font = GameFontManager.HeaderFont;
-        statusTmp.fontSize = 24f;
+        statusTmp.fontSize = 22f;
         statusTmp.fontStyle = FontStyles.Bold;
         statusTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(statusTmp, 0.35f, Color.black);
         Instance.respawnStatusText = statusTmp;
 
         // Section Divider before buttons
-        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, 42), new Vector2(740, 10), ColorDividerLine);
+        CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, -38), new Vector2(740, 10), ColorDividerLine);
 
-        // ─── 1. Button: START NEW RUN (LEVEL 1) ────────────────────────────────
-        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI", new Vector2(0, -32), new Vector2(720, 84), ColorBtnRestartBg, ColorBtnFrame, 28, out Instance.restartBtnText);
+        // ─── 6. Button: START NEW RUN (LEVEL 1) ────────────────────────────────
+        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI", new Vector2(0, -102), new Vector2(720, 80), ColorBtnRestartBg, ColorBtnFrame, 26, out Instance.restartBtnText);
 
-        // ─── 2. Button: RETURN TO SANCTUARY ────────────────────────────────────
-        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH", new Vector2(0, -145), new Vector2(720, 84), ColorBtnMainMenuBg, ColorBtnFrame, 28, out Instance.mainMenuBtnText);
+        // ─── 7. Button: RETURN TO SANCTUARY ────────────────────────────────────
+        Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH", new Vector2(0, -200), new Vector2(720, 80), ColorBtnMainMenuBg, ColorBtnFrame, 26, out Instance.mainMenuBtnText);
 
         // Đảm bảo khung ngoài của CenterBox nếu có luôn hiển thị trên cùng
         Transform frame = boxObj.transform.Find("FrameBorder");
+        if (frame != null) frame.SetAsLastSibling();
+
+        return Instance;
+    }
         if (frame != null) frame.SetAsLastSibling();
 
         return Instance;
