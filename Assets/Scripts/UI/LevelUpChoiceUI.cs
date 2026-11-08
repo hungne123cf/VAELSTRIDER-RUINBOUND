@@ -873,6 +873,97 @@ public class LevelUpChoiceUI : MonoBehaviour
         return AugmentIconHelper.GetAugmentShortCode(type);
     }
 
+    // ─── Phantom Deity / Cổ Thần Watermark Sprites ────────────────────────────
+    private static Sprite _spriteGorMok;
+    private static Sprite _spriteValenthus;
+    private static Sprite _spriteSkeletonKing;
+    private static Sprite _spriteGoliathGikk;
+    private static Sprite _spriteShadowDoppel;
+
+    private static Sprite GetDeityWatermarkSprite(AugmentDatabase.AugmentType type)
+    {
+        switch (type)
+        {
+            // Valenthus: Tinh Tú Tối Cao / Ma Pháp Cổ Đại / Năng Lượng Vũ Trụ
+            case AugmentDatabase.AugmentType.BonusAbilityPower:
+            case AugmentDatabase.AugmentType.ArcaneWand:
+            case AugmentDatabase.AugmentType.RunicEmpowerment:
+            case AugmentDatabase.AugmentType.BonusSpellVamp:
+            case AugmentDatabase.AugmentType.BonusCooldownReduction:
+            case AugmentDatabase.AugmentType.BonusMaxEnergy:
+            case AugmentDatabase.AugmentType.UltimateCharge:
+            case AugmentDatabase.AugmentType.CelestialCascade:
+            case AugmentDatabase.AugmentType.ArcaneOverdrive:
+            case AugmentDatabase.AugmentType.SurgingPulse:
+            case AugmentDatabase.AugmentType.ArcaneShield:
+            case AugmentDatabase.AugmentType.ChainReaction:
+            case AugmentDatabase.AugmentType.AscendedDivinity:
+            case AugmentDatabase.AugmentType.EchoingVoid:
+                if (_spriteValenthus == null) _spriteValenthus = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_Valenthus");
+                return _spriteValenthus;
+
+            // Gor'Mok: Huyết Ma / Cuồng Nộ / Độc Dược / Hút Máu & Chí Mạng
+            case AugmentDatabase.AugmentType.BonusCritChance:
+            case AugmentDatabase.AugmentType.BonusCritDamage:
+            case AugmentDatabase.AugmentType.BonusLifesteal:
+            case AugmentDatabase.AugmentType.VampireBlood:
+            case AugmentDatabase.AugmentType.RagingFire:
+            case AugmentDatabase.AugmentType.BerserkerMode:
+            case AugmentDatabase.AugmentType.SoulHarvest:
+            case AugmentDatabase.AugmentType.DemonicPact:
+            case AugmentDatabase.AugmentType.BloodGodTribute:
+            case AugmentDatabase.AugmentType.DeathsTouch:
+            case AugmentDatabase.AugmentType.PoisonTouch:
+            case AugmentDatabase.AugmentType.BattleFrenzy:
+            case AugmentDatabase.AugmentType.FlameAdaptation:
+            case AugmentDatabase.AugmentType.MagmaEruption:
+                if (_spriteGorMok == null) _spriteGorMok = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GorMok");
+                return _spriteGorMok;
+
+            // Goliath Gikk: Cự Thần Titan / Thiết Bích / Sinh Lực Bất Diệt
+            case AugmentDatabase.AugmentType.BonusHealth:
+            case AugmentDatabase.AugmentType.BonusDefense:
+            case AugmentDatabase.AugmentType.AncientShield:
+            case AugmentDatabase.AugmentType.RegenerativeCore:
+            case AugmentDatabase.AugmentType.UndyingSovereign:
+            case AugmentDatabase.AugmentType.DivineAegis:
+            case AugmentDatabase.AugmentType.IronBastion:
+            case AugmentDatabase.AugmentType.AbundantVitality:
+            case AugmentDatabase.AugmentType.SecondWind:
+            case AugmentDatabase.AugmentType.LifeTransfusion:
+            case AugmentDatabase.AugmentType.UnwaveringWill:
+            case AugmentDatabase.AugmentType.PrismaticTitan:
+            case AugmentDatabase.AugmentType.AcidMembrane:
+            case AugmentDatabase.AugmentType.VirulentBloom:
+                if (_spriteGoliathGikk == null) _spriteGoliathGikk = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GoliathGikk");
+                return _spriteGoliathGikk;
+
+            // Skeleton King: Kiếm Thánh Hoàng Gia / Kiếm Khí & Tốc Độ Vũ Bão
+            case AugmentDatabase.AugmentType.BonusAttack:
+            case AugmentDatabase.AugmentType.BonusSpeed:
+            case AugmentDatabase.AugmentType.SwiftShadow:
+            case AugmentDatabase.AugmentType.ComboMastery:
+            case AugmentDatabase.AugmentType.EchoStrike:
+            case AugmentDatabase.AugmentType.GodforgedArsenal:
+            case AugmentDatabase.AugmentType.StormDancer:
+            case AugmentDatabase.AugmentType.ShadowAmbush:
+            case AugmentDatabase.AugmentType.LaceratingEdge:
+            case AugmentDatabase.AugmentType.FleetWind:
+            case AugmentDatabase.AugmentType.HeavyImpact:
+            case AugmentDatabase.AugmentType.RelentlessAssault:
+            case AugmentDatabase.AugmentType.GiantSlayer:
+            case AugmentDatabase.AugmentType.StaticOverload:
+                if (_spriteSkeletonKing == null) _spriteSkeletonKing = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_SkeletonKing");
+                return _spriteSkeletonKing;
+
+            // Shadow Doppelganger: Bóng Ma Định Mệnh / Hư Ảnh May Mắn
+            case AugmentDatabase.AugmentType.BountyHunter:
+            default:
+                if (_spriteShadowDoppel == null) _spriteShadowDoppel = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_ShadowDoppelganger");
+                return _spriteShadowDoppel ?? (_spriteValenthus ?? Resources.Load<Sprite>("Enemies/BossPortraits/Splash_Valenthus"));
+        }
+    }
+
     // ─── Build Individual Tarot / Hades Augment Card ───────────────────────────
     private void BuildCard(Transform parent, AugmentDatabase.AugmentData aug, int index,
         bool isVN, Vector2 anchorMin, Vector2 anchorMax)
@@ -966,6 +1057,30 @@ public class LevelUpChoiceUI : MonoBehaviour
         topArchImg.sprite = GetRadialGlowSprite();
         topArchImg.color = tierTopArchColor;
         topArchImg.raycastTarget = false;
+
+        // ── 2.5. Phantom Deity / Cổ Thần Watermark Artwork ────────────────────
+        Sprite deitySprite = GetDeityWatermarkSprite(aug.type);
+        RectTransform phantomRT = null;
+        if (deitySprite != null)
+        {
+            var phantomObj = new GameObject("PhantomDeityWatermark", typeof(RectTransform), typeof(Image));
+            phantomObj.transform.SetParent(card.transform, false);
+            phantomRT = phantomObj.GetComponent<RectTransform>();
+            phantomRT.anchorMin = new Vector2(0.04f, 0.20f);
+            phantomRT.anchorMax = new Vector2(0.96f, 0.88f);
+            phantomRT.offsetMin = phantomRT.offsetMax = Vector2.zero;
+            phantomRT.pivot = new Vector2(0.5f, 0.5f);
+
+            var phantomImg = phantomObj.GetComponent<Image>();
+            phantomImg.sprite = deitySprite;
+            phantomImg.preserveAspect = true;
+            phantomImg.raycastTarget = false;
+
+            // Độ mờ huyền ảo: 0.18 - 0.26 để tạo chiều sâu cổ đại ma mị mà vẫn đọc rõ 100% nội dung
+            float phantomAlpha = isPrismatic ? 0.26f : (aug.rarity == AugmentDatabase.AugmentData.Rarity.Rare ? 0.22f : 0.18f);
+            Color blendedDeityTint = Color.Lerp(tierFrameColor, typeColor, 0.35f);
+            phantomImg.color = new Color(blendedDeityTint.r, blendedDeityTint.g, blendedDeityTint.b, phantomAlpha);
+        }
 
         // Ornate Metallic Double Frame
         var frameObj = new GameObject("FrameBorder", typeof(RectTransform), typeof(Image));
@@ -1277,7 +1392,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         // ── 10. Animations: Entrance Flip-in, Hover Scale, & Ambient/Prismatic
         SetupCardHover(card, cardRT, cardFrameImg, outerGlowImg, btnImg, tierFrameColor, isPrismatic);
         StartCoroutine(AnimateCardEntranceRoutine(cardRT, cardCG, index));
-        StartCoroutine(AnimateCardAmbientRoutine(cardRT, haloRT, haloImg, cardFrameImg, tbOutline, outerGlowImg, tierTxt, isPrismatic, index));
+        StartCoroutine(AnimateCardAmbientRoutine(cardRT, haloRT, phantomRT, haloImg, cardFrameImg, tbOutline, outerGlowImg, tierTxt, isPrismatic, index));
     }
 
     private string FormatCardDescription(AugmentDatabase.AugmentData aug, int currentRank, bool isVN)
@@ -1364,6 +1479,7 @@ public class LevelUpChoiceUI : MonoBehaviour
     private IEnumerator AnimateCardAmbientRoutine(
         RectTransform cardRT,
         RectTransform haloRT,
+        RectTransform phantomRT,
         Image haloImg,
         Image frameImg,
         Outline bannerOutline,
@@ -1379,7 +1495,14 @@ public class LevelUpChoiceUI : MonoBehaviour
         {
             float uTime = Time.unscaledTime + timeOffset;
 
-            // 1. Breathing Elemental Medallion Halo
+            // 1. Subtle breathing pulse for Phantom Deity Watermark
+            if (phantomRT != null)
+            {
+                float pPulse = 1.0f + 0.035f * Mathf.Sin(uTime * 1.8f);
+                phantomRT.localScale = new Vector3(pPulse, pPulse, 1f);
+            }
+
+            // 2. Breathing Elemental Medallion Halo
             if (haloRT != null)
             {
                 float pulse = 1.0f + 0.08f * Mathf.Sin(uTime * 3.2f);
@@ -1391,7 +1514,7 @@ public class LevelUpChoiceUI : MonoBehaviour
                 }
             }
 
-            // 2. Live Prismatic Shimmer for Epic/Prismatic Tier Cards
+            // 3. Live Prismatic Shimmer for Epic/Prismatic Tier Cards
             if (isPrismatic)
             {
                 // Cycle smoothly between Magenta-Rose, Celestial Cyan, and Imperial Gold
