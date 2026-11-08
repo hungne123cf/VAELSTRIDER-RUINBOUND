@@ -1275,12 +1275,12 @@ public class LevelUpChoiceUI : MonoBehaviour
         rbTxt.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.30f, Color.black);
 
-        // ── 5. Khung Tranh Minh Họa Riêng Biệt (Picture Frame - Đứng yên 100%) ──
-        var picFrameObj = new GameObject("PictureFrame", typeof(RectTransform), typeof(Image));
+        // ── 5. Khung Tranh Minh Họa Riêng Biệt (Picture Frame - Đứng yên 100%, Tràn Viền) ──
+        var picFrameObj = new GameObject("PictureFrame", typeof(RectTransform), typeof(Image), typeof(RectMask2D));
         picFrameObj.transform.SetParent(card.transform, false);
         var pfRT = picFrameObj.GetComponent<RectTransform>();
-        pfRT.anchorMin = new Vector2(0.055f, 0.445f);
-        pfRT.anchorMax = new Vector2(0.945f, 0.855f);
+        pfRT.anchorMin = new Vector2(0.055f, 0.410f);
+        pfRT.anchorMax = new Vector2(0.945f, 0.858f);
         pfRT.offsetMin = pfRT.offsetMax = Vector2.zero;
         var pfImg = picFrameObj.GetComponent<Image>();
         pfImg.sprite = GetCardBodySprite();
@@ -1288,7 +1288,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         pfImg.color = new Color(0.03f, 0.04f, 0.06f, 1f);
         pfImg.raycastTarget = false;
 
-        // Bức tranh nghệ thuật minh họa Lõi / Player (Hiển thị sắc nét, ĐỨNG YÊN)
+        // Bức tranh nghệ thuật minh họa Lõi / Player (Hiển thị sắc nét, ĐỨNG YÊN, KHÔNG VIỀN ĐEN THỪA)
         Sprite illustrationSprite = GetAugmentCardIllustrationSprite(aug);
         RectTransform phantomRT = null;
         if (illustrationSprite != null)
@@ -1305,7 +1305,7 @@ public class LevelUpChoiceUI : MonoBehaviour
             var artImg = artObj.GetComponent<Image>();
             artImg.sprite = illustrationSprite;
             artImg.color = Color.white;
-            artImg.preserveAspect = true;
+            artImg.preserveAspect = false; // Tràn đều khung tranh viền vàng chuẩn Yu-Gi-Oh, loại bỏ hoàn toàn dải đen 2 bên
             artImg.raycastTarget = false;
         }
 
@@ -1322,12 +1322,12 @@ public class LevelUpChoiceUI : MonoBehaviour
         pbImg.color = tierFrameColor;
         pbImg.raycastTarget = false;
 
-        // ── 6. Hộp Mô Tả Văn Bản Riêng Biệt (Card Description Text Box) ─────────
+        // ── 6. Hộp Mô Tả Văn Bản Riêng Biệt (Card Description Text Box - Lùi Sát Đáy) ──
         var descBoxObj = new GameObject("DescriptionBox", typeof(RectTransform), typeof(Image), typeof(Outline));
         descBoxObj.transform.SetParent(card.transform, false);
         var dbRT = descBoxObj.GetComponent<RectTransform>();
-        dbRT.anchorMin = new Vector2(0.055f, 0.035f);
-        dbRT.anchorMax = new Vector2(0.945f, 0.435f);
+        dbRT.anchorMin = new Vector2(0.055f, 0.016f);
+        dbRT.anchorMax = new Vector2(0.945f, 0.398f);
         dbRT.offsetMin = dbRT.offsetMax = Vector2.zero;
 
         var dbImg = descBoxObj.GetComponent<Image>();
@@ -1356,7 +1356,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         var tagTxtObj = new GameObject("CategoryTagText", typeof(RectTransform), typeof(TextMeshProUGUI));
         tagTxtObj.transform.SetParent(descBoxObj.transform, false);
         var ttTagRT = tagTxtObj.GetComponent<RectTransform>();
-        ttTagRT.anchorMin = new Vector2(0.04f, 0.82f);
+        ttTagRT.anchorMin = new Vector2(0.04f, 0.83f);
         ttTagRT.anchorMax = new Vector2(0.96f, 0.98f);
         ttTagRT.offsetMin = ttTagRT.offsetMax = Vector2.zero;
 
@@ -1371,7 +1371,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         // Đường kẻ trang trí trong hộp mô tả
         CreateOrnamentDivider(descBoxObj.transform, "DescInnerDivider",
-            new Vector2(0.04f, 0.79f), new Vector2(0.96f, 0.81f),
+            new Vector2(0.04f, 0.80f), new Vector2(0.96f, 0.82f),
             tierFrameColor * 0.65f);
 
         // Nội dung mô tả chỉ số + Scaling thăng cấp
@@ -1381,7 +1381,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         descObj.transform.SetParent(descBoxObj.transform, false);
         var descRT = descObj.GetComponent<RectTransform>();
         descRT.anchorMin = new Vector2(0.04f, 0.04f);
-        descRT.anchorMax = new Vector2(0.96f, 0.78f);
+        descRT.anchorMax = new Vector2(0.96f, 0.79f);
         descRT.offsetMin = descRT.offsetMax = Vector2.zero;
 
         var descTMP = descObj.GetComponent<TextMeshProUGUI>();
@@ -1619,7 +1619,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         var ltImg = leftThumb.GetComponent<Image>();
         ltImg.sprite = GetAugmentCardIllustrationSprite(aug);
-        ltImg.preserveAspect = true;
+        ltImg.preserveAspect = false;
         ltImg.color = Color.white;
 
         var ltOut = leftThumb.GetComponent<Outline>();
