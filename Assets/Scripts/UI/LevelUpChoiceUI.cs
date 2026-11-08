@@ -874,17 +874,17 @@ public class LevelUpChoiceUI : MonoBehaviour
     }
 
     // ─── Phantom Deity / Cổ Thần Watermark Sprites ────────────────────────────
-    private static Sprite _spriteGorMok;
-    private static Sprite _spriteValenthus;
-    private static Sprite _spriteSkeletonKing;
-    private static Sprite _spriteGoliathGikk;
-    private static Sprite _spriteShadowDoppel;
+    private static Sprite _spriteDeityBloodBeast;
+    private static Sprite _spriteDeityCelestial;
+    private static Sprite _spriteDeityBladeSaint;
+    private static Sprite _spriteDeityIronTitan;
+    private static Sprite _spriteDeityVoidPhantom;
 
     private static Sprite GetDeityWatermarkSprite(AugmentDatabase.AugmentType type)
     {
         switch (type)
         {
-            // Valenthus: Tinh Tú Tối Cao / Ma Pháp Cổ Đại / Năng Lượng Vũ Trụ
+            // Cổ Thần Tinh Tú: Ma Pháp Cổ Đại / Sức Mạnh Phép / Giảm Hồi Chiêu / Tinh Vân
             case AugmentDatabase.AugmentType.BonusAbilityPower:
             case AugmentDatabase.AugmentType.ArcaneWand:
             case AugmentDatabase.AugmentType.RunicEmpowerment:
@@ -899,10 +899,12 @@ public class LevelUpChoiceUI : MonoBehaviour
             case AugmentDatabase.AugmentType.ChainReaction:
             case AugmentDatabase.AugmentType.AscendedDivinity:
             case AugmentDatabase.AugmentType.EchoingVoid:
-                if (_spriteValenthus == null) _spriteValenthus = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_Valenthus");
-                return _spriteValenthus;
+                if (_spriteDeityCelestial == null)
+                    _spriteDeityCelestial = Resources.Load<Sprite>("UI/CardDeities/CardDeity_CelestialAstral")
+                        ?? Resources.Load<Sprite>("Enemies/BossPortraits/Splash_Valenthus");
+                return _spriteDeityCelestial;
 
-            // Gor'Mok: Huyết Ma / Cuồng Nộ / Độc Dược / Hút Máu & Chí Mạng
+            // Thần Thú Huyết Long / Huyết Quỷ: Cuồng Nộ / Hút Máu / Chí Mạng / Độc Tố / Hỏa Ngục
             case AugmentDatabase.AugmentType.BonusCritChance:
             case AugmentDatabase.AugmentType.BonusCritDamage:
             case AugmentDatabase.AugmentType.BonusLifesteal:
@@ -917,10 +919,12 @@ public class LevelUpChoiceUI : MonoBehaviour
             case AugmentDatabase.AugmentType.BattleFrenzy:
             case AugmentDatabase.AugmentType.FlameAdaptation:
             case AugmentDatabase.AugmentType.MagmaEruption:
-                if (_spriteGorMok == null) _spriteGorMok = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GorMok");
-                return _spriteGorMok;
+                if (_spriteDeityBloodBeast == null)
+                    _spriteDeityBloodBeast = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodBeast")
+                        ?? Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GorMok");
+                return _spriteDeityBloodBeast;
 
-            // Goliath Gikk: Cự Thần Titan / Thiết Bích / Sinh Lực Bất Diệt
+            // Cự Thần Hộ Vệ / Titan Thiết Bích: Máu / Giáp / Hồi Phục / Bất Tử
             case AugmentDatabase.AugmentType.BonusHealth:
             case AugmentDatabase.AugmentType.BonusDefense:
             case AugmentDatabase.AugmentType.AncientShield:
@@ -935,10 +939,12 @@ public class LevelUpChoiceUI : MonoBehaviour
             case AugmentDatabase.AugmentType.PrismaticTitan:
             case AugmentDatabase.AugmentType.AcidMembrane:
             case AugmentDatabase.AugmentType.VirulentBloom:
-                if (_spriteGoliathGikk == null) _spriteGoliathGikk = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GoliathGikk");
-                return _spriteGoliathGikk;
+                if (_spriteDeityIronTitan == null)
+                    _spriteDeityIronTitan = Resources.Load<Sprite>("UI/CardDeities/CardDeity_IronTitan")
+                        ?? Resources.Load<Sprite>("Enemies/BossPortraits/Splash_GoliathGikk");
+                return _spriteDeityIronTitan;
 
-            // Skeleton King: Kiếm Thánh Hoàng Gia / Kiếm Khí & Tốc Độ Vũ Bão
+            // Chiến Thần Kiếm Khách: Tấn Công Vật Lý / Tốc Độ / Kiếm Khí / Vũ Bão
             case AugmentDatabase.AugmentType.BonusAttack:
             case AugmentDatabase.AugmentType.BonusSpeed:
             case AugmentDatabase.AugmentType.SwiftShadow:
@@ -953,14 +959,18 @@ public class LevelUpChoiceUI : MonoBehaviour
             case AugmentDatabase.AugmentType.RelentlessAssault:
             case AugmentDatabase.AugmentType.GiantSlayer:
             case AugmentDatabase.AugmentType.StaticOverload:
-                if (_spriteSkeletonKing == null) _spriteSkeletonKing = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_SkeletonKing");
-                return _spriteSkeletonKing;
+                if (_spriteDeityBladeSaint == null)
+                    _spriteDeityBladeSaint = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BladeSaint")
+                        ?? Resources.Load<Sprite>("Enemies/BossPortraits/Splash_SkeletonKing");
+                return _spriteDeityBladeSaint;
 
-            // Shadow Doppelganger: Bóng Ma Định Mệnh / Hư Ảnh May Mắn
+            // Bóng Ma Hư Không / Thần May Rủi & Vận Mệnh: Tiền Thưởng / Tinh Thể / May Mắn
             case AugmentDatabase.AugmentType.BountyHunter:
             default:
-                if (_spriteShadowDoppel == null) _spriteShadowDoppel = Resources.Load<Sprite>("Enemies/BossPortraits/Splash_ShadowDoppelganger");
-                return _spriteShadowDoppel ?? (_spriteValenthus ?? Resources.Load<Sprite>("Enemies/BossPortraits/Splash_Valenthus"));
+                if (_spriteDeityVoidPhantom == null)
+                    _spriteDeityVoidPhantom = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VoidPhantom")
+                        ?? Resources.Load<Sprite>("Enemies/BossPortraits/Splash_ShadowDoppelganger");
+                return _spriteDeityVoidPhantom ?? (_spriteDeityCelestial ?? Resources.Load<Sprite>("Enemies/BossPortraits/Splash_Valenthus"));
         }
     }
 
@@ -1027,36 +1037,24 @@ public class LevelUpChoiceUI : MonoBehaviour
         _spawnedCardGroups.Add(cardCG);
         _spawnedCardRects.Add(cardRT);
 
-        // Outer Ambient Glow behind card
+        // Outer Ambient Glow behind card (Dịu nhẹ, không lóa mắt)
         var outerGlowObj = new GameObject("OuterGlow", typeof(RectTransform), typeof(Image));
         outerGlowObj.transform.SetParent(card.transform, false);
         var ogRT = outerGlowObj.GetComponent<RectTransform>();
-        ogRT.anchorMin = new Vector2(-0.08f, -0.06f);
-        ogRT.anchorMax = new Vector2(1.08f, 1.06f);
+        ogRT.anchorMin = new Vector2(-0.04f, -0.03f);
+        ogRT.anchorMax = new Vector2(1.04f, 1.03f);
         ogRT.offsetMin = ogRT.offsetMax = Vector2.zero;
         var outerGlowImg = outerGlowObj.GetComponent<Image>();
         outerGlowImg.sprite = GetRadialGlowSprite();
-        outerGlowImg.color = new Color(tierFrameColor.r, tierFrameColor.g, tierFrameColor.b, isPrismatic ? 0.42f : 0.20f);
+        outerGlowImg.color = new Color(tierFrameColor.r, tierFrameColor.g, tierFrameColor.b, isPrismatic ? 0.16f : 0.08f);
         outerGlowImg.raycastTarget = false;
 
-        // Card Body Image
+        // Card Body Image: Tông màu đen Obsidian sâu thẳm giúp tôn vinh hình vẽ độc bản
         var cardBodyImg = card.GetComponent<Image>();
         cardBodyImg.sprite = GetCardBodySprite();
         cardBodyImg.type = Image.Type.Sliced;
-        cardBodyImg.color = tierBodyTint;
+        cardBodyImg.color = new Color(0.06f, 0.07f, 0.09f, 0.98f);
         cardBodyImg.raycastTarget = true;
-
-        // Top Arch Inner Glow inside card
-        var topArchObj = new GameObject("TopHeaderArchGlow", typeof(RectTransform), typeof(Image));
-        topArchObj.transform.SetParent(card.transform, false);
-        var taRT = topArchObj.GetComponent<RectTransform>();
-        taRT.anchorMin = new Vector2(0.03f, 0.52f);
-        taRT.anchorMax = new Vector2(0.97f, 0.97f);
-        taRT.offsetMin = taRT.offsetMax = Vector2.zero;
-        var topArchImg = topArchObj.GetComponent<Image>();
-        topArchImg.sprite = GetRadialGlowSprite();
-        topArchImg.color = tierTopArchColor;
-        topArchImg.raycastTarget = false;
 
         // ── 2.5. Phantom Deity / Cổ Thần Watermark Artwork ────────────────────
         Sprite deitySprite = GetDeityWatermarkSprite(aug.type);
@@ -1066,8 +1064,9 @@ public class LevelUpChoiceUI : MonoBehaviour
             var phantomObj = new GameObject("PhantomDeityWatermark", typeof(RectTransform), typeof(Image));
             phantomObj.transform.SetParent(card.transform, false);
             phantomRT = phantomObj.GetComponent<RectTransform>();
+            // Canh chuẩn nửa trên & giữa thẻ bài để khoe trọn vẹn chân dung / quái thú
             phantomRT.anchorMin = new Vector2(0.04f, 0.20f);
-            phantomRT.anchorMax = new Vector2(0.96f, 0.88f);
+            phantomRT.anchorMax = new Vector2(0.96f, 0.92f);
             phantomRT.offsetMin = phantomRT.offsetMax = Vector2.zero;
             phantomRT.pivot = new Vector2(0.5f, 0.5f);
 
@@ -1076,11 +1075,23 @@ public class LevelUpChoiceUI : MonoBehaviour
             phantomImg.preserveAspect = true;
             phantomImg.raycastTarget = false;
 
-            // Độ mờ huyền ảo: 0.18 - 0.26 để tạo chiều sâu cổ đại ma mị mà vẫn đọc rõ 100% nội dung
-            float phantomAlpha = isPrismatic ? 0.26f : (aug.rarity == AugmentDatabase.AugmentData.Rarity.Rare ? 0.22f : 0.18f);
-            Color blendedDeityTint = Color.Lerp(tierFrameColor, typeColor, 0.35f);
-            phantomImg.color = new Color(blendedDeityTint.r, blendedDeityTint.g, blendedDeityTint.b, phantomAlpha);
+            // Giữ nguyên màu sắc tranh gốc không áp màu phát sáng gây mờ, hiển thị rõ ràng, chi tiết
+            float phantomAlpha = isPrismatic ? 0.72f : (aug.rarity == AugmentDatabase.AugmentData.Rarity.Rare ? 0.65f : 0.58f);
+            phantomImg.color = new Color(1f, 1f, 1f, phantomAlpha);
         }
+
+        // Lớp Scrim tối nhẹ ở nửa dưới thẻ bài để bảo đảm chữ mô tả luôn dễ đọc trên nền tranh
+        var scrimObj = new GameObject("TextBackingScrim", typeof(RectTransform), typeof(Image));
+        scrimObj.transform.SetParent(card.transform, false);
+        var scrimRT = scrimObj.GetComponent<RectTransform>();
+        scrimRT.anchorMin = new Vector2(0.03f, 0.02f);
+        scrimRT.anchorMax = new Vector2(0.97f, 0.54f);
+        scrimRT.offsetMin = scrimRT.offsetMax = Vector2.zero;
+        var scrimImg = scrimObj.GetComponent<Image>();
+        scrimImg.sprite = GetCardBodySprite();
+        scrimImg.type = Image.Type.Sliced;
+        scrimImg.color = new Color(0.04f, 0.05f, 0.07f, 0.78f);
+        scrimImg.raycastTarget = false;
 
         // Ornate Metallic Double Frame
         var frameObj = new GameObject("FrameBorder", typeof(RectTransform), typeof(Image));
@@ -1180,25 +1191,13 @@ public class LevelUpChoiceUI : MonoBehaviour
         rbTxt.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.35f, Color.black);
 
-        // ── 5. Central Medallion + Breathing Elemental Halo (Idea 1) ──────────
-        var haloObj = new GameObject("ElementalHalo", typeof(RectTransform), typeof(Image));
-        haloObj.transform.SetParent(card.transform, false);
-        var haloRT = haloObj.GetComponent<RectTransform>();
-        haloRT.anchorMin = new Vector2(0.5f, 0.720f);
-        haloRT.anchorMax = new Vector2(0.5f, 0.720f);
-        haloRT.sizeDelta = new Vector2(154f, 154f);
-        haloRT.pivot = new Vector2(0.5f, 0.5f);
-        var haloImg = haloObj.GetComponent<Image>();
-        haloImg.sprite = GetRadialGlowSprite();
-        haloImg.color = new Color(typeColor.r, typeColor.g, typeColor.b, 0.48f);
-        haloImg.raycastTarget = false;
-
+        // ── 5. Central Medallion (Viền tinh gọn, loại bỏ quầng sáng che khuất tranh) ─
         var medallionObj = new GameObject("Medallion", typeof(RectTransform), typeof(Image), typeof(Outline));
         medallionObj.transform.SetParent(card.transform, false);
         var medRT = medallionObj.GetComponent<RectTransform>();
         medRT.anchorMin = new Vector2(0.5f, 0.720f);
         medRT.anchorMax = new Vector2(0.5f, 0.720f);
-        medRT.sizeDelta = new Vector2(106f, 106f);
+        medRT.sizeDelta = new Vector2(96f, 96f);
         medRT.pivot = new Vector2(0.5f, 0.5f);
 
         var coreImg = medallionObj.GetComponent<Image>();
@@ -1392,7 +1391,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         // ── 10. Animations: Entrance Flip-in, Hover Scale, & Ambient/Prismatic
         SetupCardHover(card, cardRT, cardFrameImg, outerGlowImg, btnImg, tierFrameColor, isPrismatic);
         StartCoroutine(AnimateCardEntranceRoutine(cardRT, cardCG, index));
-        StartCoroutine(AnimateCardAmbientRoutine(cardRT, haloRT, phantomRT, haloImg, cardFrameImg, tbOutline, outerGlowImg, tierTxt, isPrismatic, index));
+        StartCoroutine(AnimateCardAmbientRoutine(cardRT, phantomRT, cardFrameImg, tbOutline, outerGlowImg, tierTxt, isPrismatic, index));
     }
 
     private string FormatCardDescription(AugmentDatabase.AugmentData aug, int currentRank, bool isVN)
@@ -1478,9 +1477,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
     private IEnumerator AnimateCardAmbientRoutine(
         RectTransform cardRT,
-        RectTransform haloRT,
         RectTransform phantomRT,
-        Image haloImg,
         Image frameImg,
         Outline bannerOutline,
         Image outerGlowImg,
@@ -1489,32 +1486,19 @@ public class LevelUpChoiceUI : MonoBehaviour
         int index)
     {
         float timeOffset = index * 0.85f;
-        Color baseHaloCol = haloImg != null ? haloImg.color : Color.white;
 
         while (cardRT != null && _isShowing)
         {
             float uTime = Time.unscaledTime + timeOffset;
 
-            // 1. Subtle breathing pulse for Phantom Deity Watermark
+            // 1. Subtle breathing pulse for Phantom Deity Watermark Artwork
             if (phantomRT != null)
             {
                 float pPulse = 1.0f + 0.035f * Mathf.Sin(uTime * 1.8f);
                 phantomRT.localScale = new Vector3(pPulse, pPulse, 1f);
             }
 
-            // 2. Breathing Elemental Medallion Halo
-            if (haloRT != null)
-            {
-                float pulse = 1.0f + 0.08f * Mathf.Sin(uTime * 3.2f);
-                haloRT.localScale = new Vector3(pulse, pulse, 1f);
-                if (haloImg != null)
-                {
-                    float a = Mathf.Clamp01(baseHaloCol.a + 0.12f * Mathf.Sin(uTime * 3.2f));
-                    haloImg.color = new Color(baseHaloCol.r, baseHaloCol.g, baseHaloCol.b, a);
-                }
-            }
-
-            // 3. Live Prismatic Shimmer for Epic/Prismatic Tier Cards
+            // 2. Live Prismatic Shimmer for Epic/Prismatic Tier Cards (Viền lăng kính nhẹ nhàng)
             if (isPrismatic)
             {
                 // Cycle smoothly between Magenta-Rose, Celestial Cyan, and Imperial Gold
@@ -1532,7 +1516,7 @@ public class LevelUpChoiceUI : MonoBehaviour
                 if (tierTxt != null) tierTxt.color = prisCol;
                 if (outerGlowImg != null)
                 {
-                    outerGlowImg.color = new Color(prisCol.r, prisCol.g, prisCol.b, 0.42f + 0.12f * Mathf.Sin(uTime * 4f));
+                    outerGlowImg.color = new Color(prisCol.r, prisCol.g, prisCol.b, 0.14f + 0.04f * Mathf.Sin(uTime * 3f));
                 }
             }
 
