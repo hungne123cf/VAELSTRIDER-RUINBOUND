@@ -946,6 +946,36 @@ public class LevelUpChoiceUI : MonoBehaviour
     private static Sprite _spriteRelentlessAssault;
     private static Sprite _spriteGiantSlayer;
 
+    // ─── ĐỢT 4: 26 TRANH ĐỘC BẢN CUỐI CÙNG (TINH TÚ, CỰ THẦN TITAN & HƯ KHÔNG) ───
+    private static Sprite _spriteBonusAbilityPower;
+    private static Sprite _spriteArcaneWand;
+    private static Sprite _spriteRunicEmpowerment;
+    private static Sprite _spriteBonusSpellVamp;
+    private static Sprite _spriteBonusCooldownReduction;
+    private static Sprite _spriteBonusMaxEnergy;
+    private static Sprite _spriteUltimateCharge;
+    private static Sprite _spriteCelestialCascade;
+    private static Sprite _spriteArcaneOverdrive;
+    private static Sprite _spriteSurgingPulse;
+    private static Sprite _spriteChainReaction;
+    private static Sprite _spriteAscendedDivinity;
+    private static Sprite _spriteEchoingVoid;
+
+    private static Sprite _spriteBonusHealth;
+    private static Sprite _spriteBonusDefense;
+    private static Sprite _spriteAncientShield;
+    private static Sprite _spriteRegenerativeCore;
+    private static Sprite _spriteUndyingSovereign;
+    private static Sprite _spriteAbundantVitality;
+    private static Sprite _spriteSecondWind;
+    private static Sprite _spriteLifeTransfusion;
+    private static Sprite _spriteUnwaveringWill;
+    private static Sprite _spritePrismaticTitan;
+
+    private static Sprite _spriteBountyHunter;
+    private static Sprite _spriteVoidTranscendence;
+    private static Sprite _spriteShadowMirroring;
+
     private static void EnsureDeitySpritesLoaded()
     {
         if (_spriteDeityBloodBeast == null) _spriteDeityBloodBeast = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodBeast");
@@ -1011,6 +1041,36 @@ public class LevelUpChoiceUI : MonoBehaviour
         if (_spriteFleetWind == null) _spriteFleetWind = Resources.Load<Sprite>("UI/CardDeities/CardDeity_FleetWind");
         if (_spriteRelentlessAssault == null) _spriteRelentlessAssault = Resources.Load<Sprite>("UI/CardDeities/CardDeity_RelentlessAssault");
         if (_spriteGiantSlayer == null) _spriteGiantSlayer = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GiantSlayer");
+
+        // Nạp Đợt 4: 26 tranh độc bản cuối cùng
+        if (_spriteBonusAbilityPower == null) _spriteBonusAbilityPower = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusAbilityPower");
+        if (_spriteArcaneWand == null) _spriteArcaneWand = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ArcaneWand");
+        if (_spriteRunicEmpowerment == null) _spriteRunicEmpowerment = Resources.Load<Sprite>("UI/CardDeities/CardDeity_RunicEmpowerment");
+        if (_spriteBonusSpellVamp == null) _spriteBonusSpellVamp = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusSpellVamp");
+        if (_spriteBonusCooldownReduction == null) _spriteBonusCooldownReduction = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusCooldownReduction");
+        if (_spriteBonusMaxEnergy == null) _spriteBonusMaxEnergy = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusMaxEnergy");
+        if (_spriteUltimateCharge == null) _spriteUltimateCharge = Resources.Load<Sprite>("UI/CardDeities/CardDeity_UltimateCharge");
+        if (_spriteCelestialCascade == null) _spriteCelestialCascade = Resources.Load<Sprite>("UI/CardDeities/CardDeity_CelestialCascade");
+        if (_spriteArcaneOverdrive == null) _spriteArcaneOverdrive = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ArcaneOverdrive");
+        if (_spriteSurgingPulse == null) _spriteSurgingPulse = Resources.Load<Sprite>("UI/CardDeities/CardDeity_SurgingPulse");
+        if (_spriteChainReaction == null) _spriteChainReaction = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ChainReaction");
+        if (_spriteAscendedDivinity == null) _spriteAscendedDivinity = Resources.Load<Sprite>("UI/CardDeities/CardDeity_AscendedDivinity");
+        if (_spriteEchoingVoid == null) _spriteEchoingVoid = Resources.Load<Sprite>("UI/CardDeities/CardDeity_EchoingVoid");
+
+        if (_spriteBonusHealth == null) _spriteBonusHealth = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusHealth");
+        if (_spriteBonusDefense == null) _spriteBonusDefense = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BonusDefense");
+        if (_spriteAncientShield == null) _spriteAncientShield = Resources.Load<Sprite>("UI/CardDeities/CardDeity_AncientShield");
+        if (_spriteRegenerativeCore == null) _spriteRegenerativeCore = Resources.Load<Sprite>("UI/CardDeities/CardDeity_RegenerativeCore");
+        if (_spriteUndyingSovereign == null) _spriteUndyingSovereign = Resources.Load<Sprite>("UI/CardDeities/CardDeity_UndyingSovereign");
+        if (_spriteAbundantVitality == null) _spriteAbundantVitality = Resources.Load<Sprite>("UI/CardDeities/CardDeity_AbundantVitality");
+        if (_spriteSecondWind == null) _spriteSecondWind = Resources.Load<Sprite>("UI/CardDeities/CardDeity_SecondWind");
+        if (_spriteLifeTransfusion == null) _spriteLifeTransfusion = Resources.Load<Sprite>("UI/CardDeities/CardDeity_LifeTransfusion");
+        if (_spriteUnwaveringWill == null) _spriteUnwaveringWill = Resources.Load<Sprite>("UI/CardDeities/CardDeity_UnwaveringWill");
+        if (_spritePrismaticTitan == null) _spritePrismaticTitan = Resources.Load<Sprite>("UI/CardDeities/CardDeity_PrismaticTitan");
+
+        if (_spriteBountyHunter == null) _spriteBountyHunter = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BountyHunter");
+        if (_spriteVoidTranscendence == null) _spriteVoidTranscendence = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VoidTranscendence");
+        if (_spriteShadowMirroring == null) _spriteShadowMirroring = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ShadowMirroring");
     }
 
     public static Sprite GetAugmentCardIllustrationSprite(AugmentDatabase.AugmentData aug, HashSet<Sprite> usedSprites = null)
@@ -1149,39 +1209,64 @@ public class LevelUpChoiceUI : MonoBehaviour
                 case AugmentDatabase.AugmentType.GiantSlayer:
                     chosenSprite = _spriteGiantSlayer; break;
 
-                // Cổ Thần Tinh Tú: Sức Mạnh Phép (AP), Hồi Chiêu (CDR), Tinh Vân & Thần Chú
+                // ─── ĐỢT 4: 26 LÕI TINH TÚ, CỰ THẦN TITAN, HƯ KHÔNG & VẬN MAY (Độc bản 100% 68/68 Lõi) ───
+                // Nhóm Cổ Thần Tinh Tú: AP, Hồi Chiêu, Tinh Vân & Thần Chú
                 case AugmentDatabase.AugmentType.BonusAbilityPower:
+                    chosenSprite = _spriteBonusAbilityPower; break;
                 case AugmentDatabase.AugmentType.ArcaneWand:
+                    chosenSprite = _spriteArcaneWand; break;
                 case AugmentDatabase.AugmentType.RunicEmpowerment:
+                    chosenSprite = _spriteRunicEmpowerment; break;
                 case AugmentDatabase.AugmentType.BonusSpellVamp:
+                    chosenSprite = _spriteBonusSpellVamp; break;
                 case AugmentDatabase.AugmentType.BonusCooldownReduction:
+                    chosenSprite = _spriteBonusCooldownReduction; break;
                 case AugmentDatabase.AugmentType.BonusMaxEnergy:
+                    chosenSprite = _spriteBonusMaxEnergy; break;
                 case AugmentDatabase.AugmentType.UltimateCharge:
+                    chosenSprite = _spriteUltimateCharge; break;
                 case AugmentDatabase.AugmentType.CelestialCascade:
+                    chosenSprite = _spriteCelestialCascade; break;
                 case AugmentDatabase.AugmentType.ArcaneOverdrive:
+                    chosenSprite = _spriteArcaneOverdrive; break;
                 case AugmentDatabase.AugmentType.SurgingPulse:
+                    chosenSprite = _spriteSurgingPulse; break;
                 case AugmentDatabase.AugmentType.ChainReaction:
+                    chosenSprite = _spriteChainReaction; break;
                 case AugmentDatabase.AugmentType.AscendedDivinity:
+                    chosenSprite = _spriteAscendedDivinity; break;
                 case AugmentDatabase.AugmentType.EchoingVoid:
-                    chosenSprite = _spriteDeityCelestial; break;
+                    chosenSprite = _spriteEchoingVoid; break;
 
-                // Cự Thần Titan: Máu Tối Đa (HP), Giáp Thủ, Hồi Phục Sinh Lực & Thể Trọng
+                // Nhóm Cự Thần Titan: Máu, Giáp Thủ, Hồi Phục & Thể Trọng
                 case AugmentDatabase.AugmentType.BonusHealth:
+                    chosenSprite = _spriteBonusHealth; break;
                 case AugmentDatabase.AugmentType.BonusDefense:
+                    chosenSprite = _spriteBonusDefense; break;
                 case AugmentDatabase.AugmentType.AncientShield:
+                    chosenSprite = _spriteAncientShield; break;
                 case AugmentDatabase.AugmentType.RegenerativeCore:
+                    chosenSprite = _spriteRegenerativeCore; break;
                 case AugmentDatabase.AugmentType.UndyingSovereign:
+                    chosenSprite = _spriteUndyingSovereign; break;
                 case AugmentDatabase.AugmentType.AbundantVitality:
+                    chosenSprite = _spriteAbundantVitality; break;
                 case AugmentDatabase.AugmentType.SecondWind:
+                    chosenSprite = _spriteSecondWind; break;
                 case AugmentDatabase.AugmentType.LifeTransfusion:
+                    chosenSprite = _spriteLifeTransfusion; break;
                 case AugmentDatabase.AugmentType.UnwaveringWill:
+                    chosenSprite = _spriteUnwaveringWill; break;
                 case AugmentDatabase.AugmentType.PrismaticTitan:
-                    chosenSprite = _spriteDeityIronTitan; break;
+                    chosenSprite = _spritePrismaticTitan; break;
 
-                // Bóng Ma Hư Không & Thần May Mắn: Tiền Thưởng, Tinh Thể, Vọng Âm & Hư Vô
+                // Nhóm Vận May & Hư Không
                 case AugmentDatabase.AugmentType.BountyHunter:
+                    chosenSprite = _spriteBountyHunter; break;
                 case AugmentDatabase.AugmentType.VoidTranscendence:
+                    chosenSprite = _spriteVoidTranscendence; break;
                 case AugmentDatabase.AugmentType.ShadowMirroring:
+                    chosenSprite = _spriteShadowMirroring; break;
                 default:
                     chosenSprite = _spriteDeityVoidPhantom; break;
             }
