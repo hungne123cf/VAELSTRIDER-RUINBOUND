@@ -1215,8 +1215,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         var statusRowObj = new GameObject("StatusRow", typeof(RectTransform));
         statusRowObj.transform.SetParent(card.transform, false);
         var srRT = statusRowObj.GetComponent<RectTransform>();
-        srRT.anchorMin = new Vector2(0.05f, 0.865f);
-        srRT.anchorMax = new Vector2(0.95f, 0.905f);
+        srRT.anchorMin = new Vector2(0.05f, 0.860f);
+        srRT.anchorMax = new Vector2(0.95f, 0.900f);
         srRT.offsetMin = srRT.offsetMax = Vector2.zero;
 
         // Tier Title Badge
@@ -1277,7 +1277,14 @@ public class LevelUpChoiceUI : MonoBehaviour
         rbTxt.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.30f, Color.black);
 
-        // ── 5. Khung Tranh Minh Họa Riêng Biệt (Picture Frame - FitInParent Ôm Vừa Khít Tỷ Lệ Ảnh) ──
+        // ── 5. Vùng Chứa Tranh (PictureArea Container) - Tuyệt đối không tràn đè lên các vùng khác ──
+        var picAreaObj = new GameObject("PictureArea", typeof(RectTransform));
+        picAreaObj.transform.SetParent(card.transform, false);
+        var paRT = picAreaObj.GetComponent<RectTransform>();
+        paRT.anchorMin = new Vector2(0.05f, 0.395f);
+        paRT.anchorMax = new Vector2(0.95f, 0.850f);
+        paRT.offsetMin = paRT.offsetMax = Vector2.zero;
+
         Sprite illustrationSprite = GetAugmentCardIllustrationSprite(aug);
         float artRatio = 0.747f; // Mặc định tỷ lệ chuẩn 3:4 của Card Deities
         if (illustrationSprite != null && illustrationSprite.rect.height > 0)
@@ -1285,11 +1292,12 @@ public class LevelUpChoiceUI : MonoBehaviour
             artRatio = (float)illustrationSprite.rect.width / illustrationSprite.rect.height;
         }
 
+        // Khung Tranh Fit Trong PictureArea: Tự động co giãn theo artRatio và ÔM KHÍT VỪA VẶN
         var picFrameObj = new GameObject("PictureFrame", typeof(RectTransform), typeof(Image), typeof(RectMask2D), typeof(AspectRatioFitter));
-        picFrameObj.transform.SetParent(card.transform, false);
+        picFrameObj.transform.SetParent(picAreaObj.transform, false);
         var pfRT = picFrameObj.GetComponent<RectTransform>();
-        pfRT.anchorMin = new Vector2(0.045f, 0.365f);
-        pfRT.anchorMax = new Vector2(0.955f, 0.858f);
+        pfRT.anchorMin = Vector2.zero;
+        pfRT.anchorMax = Vector2.one;
         pfRT.offsetMin = pfRT.offsetMax = Vector2.zero;
         pfRT.pivot = new Vector2(0.5f, 0.5f);
 
@@ -1319,7 +1327,7 @@ public class LevelUpChoiceUI : MonoBehaviour
             var artImg = artObj.GetComponent<Image>();
             artImg.sprite = illustrationSprite;
             artImg.color = Color.white;
-            artImg.preserveAspect = false; // Phủ khít khung tranh vì khung đã ôm chuẩn tỷ lệ tranh gốc bằng FitInParent
+            artImg.preserveAspect = false; // Phủ khít khung tranh vì khung đã ôm chuẩn tỷ lệ tranh gốc bằng FitInParent trong PictureArea
             artImg.raycastTarget = false;
         }
 
@@ -1336,12 +1344,12 @@ public class LevelUpChoiceUI : MonoBehaviour
         pbImg.color = tierFrameColor;
         pbImg.raycastTarget = false;
 
-        // ── 6. Hộp Mô Tả Văn Bản Riêng Biệt (Card Description Text Box - Lùi Sát Đáy) ──
+        // ── 6. Hộp Mô Tả Văn Bản Riêng Biệt (Card Description Text Box - Nằm Gọn Đáy Thẻ) ──
         var descBoxObj = new GameObject("DescriptionBox", typeof(RectTransform), typeof(Image), typeof(Outline));
         descBoxObj.transform.SetParent(card.transform, false);
         var dbRT = descBoxObj.GetComponent<RectTransform>();
         dbRT.anchorMin = new Vector2(0.045f, 0.016f);
-        dbRT.anchorMax = new Vector2(0.955f, 0.355f);
+        dbRT.anchorMax = new Vector2(0.955f, 0.385f);
         dbRT.offsetMin = dbRT.offsetMax = Vector2.zero;
 
         var dbImg = descBoxObj.GetComponent<Image>();
@@ -1623,7 +1631,14 @@ public class LevelUpChoiceUI : MonoBehaviour
             new Vector2(0.06f, 0.865f), new Vector2(0.94f, 0.875f),
             tierColor * 0.85f);
 
-        // Bên Trái: Khung Tranh Thu Nhỏ (Ôm vừa khít chuẩn tỷ lệ 3:4)
+        // Bên Trái: Khung Tranh Thu Nhỏ (Container riêng biệt để FitInParent không bung ra modal)
+        var leftThumbArea = new GameObject("LeftThumbArea", typeof(RectTransform));
+        leftThumbArea.transform.SetParent(modal.transform, false);
+        var ltaRT = leftThumbArea.GetComponent<RectTransform>();
+        ltaRT.anchorMin = new Vector2(0.06f, 0.20f);
+        ltaRT.anchorMax = new Vector2(0.40f, 0.84f);
+        ltaRT.offsetMin = ltaRT.offsetMax = Vector2.zero;
+
         Sprite thumbSprite = GetAugmentCardIllustrationSprite(aug);
         float thumbRatio = 0.747f;
         if (thumbSprite != null && thumbSprite.rect.height > 0)
@@ -1632,10 +1647,10 @@ public class LevelUpChoiceUI : MonoBehaviour
         }
 
         var leftThumb = new GameObject("LeftThumbnail", typeof(RectTransform), typeof(Image), typeof(AspectRatioFitter), typeof(Outline));
-        leftThumb.transform.SetParent(modal.transform, false);
+        leftThumb.transform.SetParent(leftThumbArea.transform, false);
         var ltRT = leftThumb.GetComponent<RectTransform>();
-        ltRT.anchorMin = new Vector2(0.06f, 0.20f);
-        ltRT.anchorMax = new Vector2(0.40f, 0.84f);
+        ltRT.anchorMin = Vector2.zero;
+        ltRT.anchorMax = Vector2.one;
         ltRT.offsetMin = ltRT.offsetMax = Vector2.zero;
         ltRT.pivot = new Vector2(0.5f, 0.5f);
 
