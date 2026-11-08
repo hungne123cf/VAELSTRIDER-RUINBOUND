@@ -1667,7 +1667,44 @@ public class WanderingShopUI : MonoBehaviour
         }
     }
 
-    // ─── Build 3 Relic Cards (Đồng bộ 100% thiết kế Tarot Relic Dark Fantasy với LevelUpChoiceUI) ────────────
+    // ─── Build 3 Relic Cards (Đồng bộ 100% thiết kế Dark Fantasy Yu-Gi-Oh + 3D Parallax Tilt với LevelUpChoiceUI) ──
+    private static Sprite GetShopRelicIllustrationSprite(ShopRelicItem item, HashSet<Sprite> usedSprites)
+    {
+        if (item == null) return null;
+
+        if (item.augmentType.HasValue)
+        {
+            var dummyAug = new AugmentDatabase.AugmentData
+            {
+                type = item.augmentType.Value,
+                rarity = item.rarity
+            };
+            return LevelUpChoiceUI.GetAugmentCardIllustrationSprite(dummyAug, usedSprites);
+        }
+
+        var dummyType = AugmentDatabase.AugmentType.BonusHealth;
+        string t = (item.titleVN ?? "").ToLower();
+        if (t.Contains("kiếm") || t.Contains("tấn công") || t.Contains("sát thương") || t.Contains("chém"))
+            dummyType = AugmentDatabase.AugmentType.BonusAttack;
+        else if (t.Contains("giáp") || t.Contains("khiên") || t.Contains("thủ") || t.Contains("hộ"))
+            dummyType = AugmentDatabase.AugmentType.BonusDefense;
+        else if (t.Contains("tốc") || t.Contains("gió") || t.Contains("lướt"))
+            dummyType = AugmentDatabase.AugmentType.BonusSpeed;
+        else if (t.Contains("máu") || t.Contains("sinh") || t.Contains("huyết") || t.Contains("hút"))
+            dummyType = AugmentDatabase.AugmentType.BonusLifesteal;
+        else if (t.Contains("phép") || t.Contains("hồi") || t.Contains("năng") || t.Contains("chú"))
+            dummyType = AugmentDatabase.AugmentType.BonusAbilityPower;
+        else if (t.Contains("tinh thể") || t.Contains("vàng") || t.Contains("tiền"))
+            dummyType = AugmentDatabase.AugmentType.BountyHunter;
+
+        var mappedAug = new AugmentDatabase.AugmentData
+        {
+            type = dummyType,
+            rarity = item.rarity
+        };
+        return LevelUpChoiceUI.GetAugmentCardIllustrationSprite(mappedAug, usedSprites);
+    }
+
     private void BuildCardItems()
     {
         foreach (var c in cardObjects) if (c != null) Destroy(c);
@@ -1683,9 +1720,12 @@ public class WanderingShopUI : MonoBehaviour
 
         bool isVi = LocalizationManager.IsVietnamese;
 
-        float cardWidth = 0.30f;
-        float startX    = 0.035f;
+        float cardWidth = 0.296f;
+        float startX    = 0.024f;
         float gap       = (1f - startX * 2f - cardWidth * 3f) / 2f;
+
+        // Tập hợp theo dõi sprite đã xuất hiện trong shop đợt này (Triệt tiêu 100% trùng hình)
+        var usedSpritesInShop = new HashSet<Sprite>();
 
         for (int i = 0; i < activeChoices.Count; i++)
         {
@@ -1695,11 +1735,10 @@ public class WanderingShopUI : MonoBehaviour
             float xMin = startX + i * (cardWidth + gap);
             float xMax = xMin + cardWidth;
 
-            // Màu viền, nền vòm Tarot và banner phẩm chất đồng bộ 100% với LevelUpChoiceUI
+            // Màu viền và banner phẩm chất đồng bộ 100% với LevelUpChoiceUI
             string tierTitle;
             Color tierFrameColor;
             Color tierBodyTint;
-            Color tierTopArchColor;
             Color tierBannerBg;
             int tierGemCount;
             bool isPrismatic = (item.rarity == AugmentDatabase.AugmentData.Rarity.Epic);
@@ -1709,8 +1748,7 @@ public class WanderingShopUI : MonoBehaviour
                 case AugmentDatabase.AugmentData.Rarity.Epic:
                     tierTitle        = isVi ? "BẬC KIM CƯƠNG" : "PRISMATIC TIER";
                     tierFrameColor   = new Color(0.95f, 0.52f, 1.00f, 1.00f); // Lăng kính Tinh Vân
-                    tierBodyTint     = new Color(0.11f, 0.08f, 0.19f, 0.98f); // Tím Hắc Ám sâu
-                    tierTopArchColor = new Color(0.55f, 0.22f, 0.78f, 0.45f);
+                    tierBodyTint     = new Color(0.10f, 0.07f, 0.16f, 0.98f); // Tím Hắc Ám sâu
                     tierBannerBg     = new Color(0.26f, 0.09f, 0.38f, 0.98f);
                     tierGemCount     = 3;
                     break;
@@ -1718,8 +1756,7 @@ public class WanderingShopUI : MonoBehaviour
                 case AugmentDatabase.AugmentData.Rarity.Rare:
                     tierTitle        = isVi ? "BẬC VÀNG" : "GOLD TIER";
                     tierFrameColor   = new Color(1.00f, 0.82f, 0.26f, 1.00f); // Hoàng Kim Vương Giả
-                    tierBodyTint     = new Color(0.12f, 0.095f, 0.065f, 0.98f); // Đen Hổ Phách
-                    tierTopArchColor = new Color(0.75f, 0.50f, 0.12f, 0.40f);
+                    tierBodyTint     = new Color(0.11f, 0.085f, 0.055f, 0.98f); // Đen Hổ Phách
                     tierBannerBg     = new Color(0.32f, 0.20f, 0.05f, 0.98f);
                     tierGemCount     = 2;
                     break;
@@ -1727,19 +1764,18 @@ public class WanderingShopUI : MonoBehaviour
                 default:
                     tierTitle        = isVi ? "BẬC BẠC" : "SILVER TIER";
                     tierFrameColor   = new Color(0.82f, 0.90f, 1.00f, 0.98f); // Bạch Kim Băng Giá
-                    tierBodyTint     = new Color(0.075f, 0.105f, 0.155f, 0.98f); // Xanh Đá Phiến
-                    tierTopArchColor = new Color(0.32f, 0.52f, 0.78f, 0.36f);
+                    tierBodyTint     = new Color(0.065f, 0.085f, 0.125f, 0.98f); // Xanh Đá Phiến
                     tierBannerBg     = new Color(0.12f, 0.18f, 0.28f, 0.98f);
                     tierGemCount     = 1;
                     break;
             }
 
-            // 1. Thẻ Tarot Cổ Vật Khung Đá Obsidian & Viền Chạm Khắc Kim Loại Kép
+            // 1. Thẻ Bài Root Khung Đá Obsidian & Viền Chạm Khắc Kim Loại Kép
             var card = new GameObject($"Card_{item.id}", typeof(RectTransform), typeof(CanvasGroup), typeof(Image));
             card.transform.SetParent(cardContainer, false);
             var cardRT = card.GetComponent<RectTransform>();
-            cardRT.anchorMin = new Vector2(xMin, 0.02f);
-            cardRT.anchorMax = new Vector2(xMax, 0.98f);
+            cardRT.anchorMin = new Vector2(xMin, 0.015f);
+            cardRT.anchorMax = new Vector2(xMax, 0.985f);
             cardRT.offsetMin = cardRT.offsetMax = Vector2.zero;
             cardRT.pivot = new Vector2(0.5f, 0.5f);
 
@@ -1747,12 +1783,12 @@ public class WanderingShopUI : MonoBehaviour
             var outerGlowObj = new GameObject("OuterGlow", typeof(RectTransform), typeof(Image));
             outerGlowObj.transform.SetParent(card.transform, false);
             var ogRT = outerGlowObj.GetComponent<RectTransform>();
-            ogRT.anchorMin = new Vector2(-0.07f, -0.05f);
-            ogRT.anchorMax = new Vector2(1.07f, 1.05f);
+            ogRT.anchorMin = new Vector2(-0.04f, -0.03f);
+            ogRT.anchorMax = new Vector2(1.04f, 1.03f);
             ogRT.offsetMin = ogRT.offsetMax = Vector2.zero;
             var outerGlowImg = outerGlowObj.GetComponent<Image>();
             outerGlowImg.sprite = LevelUpChoiceUI.GetRadialGlowSprite();
-            outerGlowImg.color = new Color(tierFrameColor.r, tierFrameColor.g, tierFrameColor.b, isPrismatic ? 0.40f : 0.18f);
+            outerGlowImg.color = new Color(tierFrameColor.r, tierFrameColor.g, tierFrameColor.b, isPrismatic ? 0.16f : 0.08f);
             outerGlowImg.raycastTarget = false;
 
             // Thân thẻ Tarot (Card Body)
@@ -1761,18 +1797,6 @@ public class WanderingShopUI : MonoBehaviour
             cardBodyImg.type = Image.Type.Sliced;
             cardBodyImg.color = tierBodyTint;
             cardBodyImg.raycastTarget = true;
-
-            // Vòm sáng nội tâm phía trên (Top Arch Glow)
-            var topArchObj = new GameObject("TopHeaderArchGlow", typeof(RectTransform), typeof(Image));
-            topArchObj.transform.SetParent(card.transform, false);
-            var taRT = topArchObj.GetComponent<RectTransform>();
-            taRT.anchorMin = new Vector2(0.03f, 0.52f);
-            taRT.anchorMax = new Vector2(0.97f, 0.97f);
-            taRT.offsetMin = taRT.offsetMax = Vector2.zero;
-            var topArchImg = topArchObj.GetComponent<Image>();
-            topArchImg.sprite = LevelUpChoiceUI.GetRadialGlowSprite();
-            topArchImg.color = tierTopArchColor;
-            topArchImg.raycastTarget = false;
 
             // Khung kim loại chạm khắc kép (Ornate Metallic Double Frame)
             var frameObj = new GameObject("FrameBorder", typeof(RectTransform), typeof(Image));
@@ -1787,23 +1811,93 @@ public class WanderingShopUI : MonoBehaviour
             cardFrameImg.color = tierFrameColor;
             cardFrameImg.raycastTarget = false;
 
-            // 2. Banner Bậc Phẩm Chất Trên Cùng (Tier Banner) kèm Ngọc Kim Cương hai bên
-            var tierBannerObj = new GameObject("TierBanner", typeof(RectTransform), typeof(Image), typeof(Outline));
-            tierBannerObj.transform.SetParent(card.transform, false);
-            var tbRT = tierBannerObj.GetComponent<RectTransform>();
-            tbRT.anchorMin = new Vector2(0.06f, 0.922f);
-            tbRT.anchorMax = new Vector2(0.94f, 0.978f);
-            tbRT.offsetMin = tbRT.offsetMax = Vector2.zero;
+            // 2. Top Header Bar (Tên Vật Phẩm + Icon Thuộc Tính ở góc trên bên phải)
+            var headerBarObj = new GameObject("HeaderBar", typeof(RectTransform), typeof(Image));
+            headerBarObj.transform.SetParent(card.transform, false);
+            var hbRT = headerBarObj.GetComponent<RectTransform>();
+            hbRT.anchorMin = new Vector2(0.045f, 0.910f);
+            hbRT.anchorMax = new Vector2(0.955f, 0.985f);
+            hbRT.offsetMin = hbRT.offsetMax = Vector2.zero;
 
+            var hbImg = headerBarObj.GetComponent<Image>();
+            hbImg.sprite = LevelUpChoiceUI.GetPillBadgeSprite();
+            hbImg.type = Image.Type.Sliced;
+            hbImg.color = new Color(0.04f, 0.05f, 0.08f, 0.95f);
+            hbImg.raycastTarget = false;
+
+            var hbOutline = headerBarObj.AddComponent<Outline>();
+            hbOutline.effectColor = tierFrameColor * 0.85f;
+            hbOutline.effectDistance = new Vector2(1f, -1f);
+
+            var nameObj = new GameObject("ItemTitle", typeof(RectTransform), typeof(TextMeshProUGUI));
+            nameObj.transform.SetParent(headerBarObj.transform, false);
+            var nameRT = nameObj.GetComponent<RectTransform>();
+            nameRT.anchorMin = new Vector2(0.04f, 0f);
+            nameRT.anchorMax = new Vector2(0.82f, 1f);
+            nameRT.offsetMin = nameRT.offsetMax = Vector2.zero;
+
+            var nameTMP = nameObj.GetComponent<TextMeshProUGUI>();
+            nameTMP.text = isVi ? item.titleVN : item.titleEN;
+            nameTMP.enableAutoSizing = true;
+            nameTMP.fontSizeMin = 13f;
+            nameTMP.fontSizeMax = 18f;
+            nameTMP.fontStyle = FontStyles.Bold;
+            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            nameTMP.color = new Color(1f, 0.95f, 0.82f);
+            nameTMP.raycastTarget = false;
+            SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.38f, new Color(0.02f, 0.02f, 0.04f, 0.98f));
+
+            // Attribute Element Badge ở góc phải Header
+            var attrBadgeObj = new GameObject("AttributeElementBadge", typeof(RectTransform), typeof(Image), typeof(Outline));
+            attrBadgeObj.transform.SetParent(headerBarObj.transform, false);
+            var attrRT = attrBadgeObj.GetComponent<RectTransform>();
+            attrRT.anchorMin = new Vector2(0.84f, 0.08f);
+            attrRT.anchorMax = new Vector2(0.98f, 0.92f);
+            attrRT.offsetMin = attrRT.offsetMax = Vector2.zero;
+            var attrImg = attrBadgeObj.GetComponent<Image>();
+            attrImg.sprite = GetObsidianCoreSprite();
+            attrImg.color = new Color(0.05f, 0.07f, 0.12f, 1f);
+            attrImg.raycastTarget = false;
+
+            var attrOutline = attrBadgeObj.GetComponent<Outline>();
+            attrOutline.effectColor = item.badgeColor;
+            attrOutline.effectDistance = new Vector2(1.2f, -1.2f);
+
+            Sprite iconSprite = GetRelicSprite(item);
+            if (iconSprite != null)
+            {
+                var attrIconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                attrIconObj.transform.SetParent(attrBadgeObj.transform, false);
+                var aicRT = attrIconObj.GetComponent<RectTransform>();
+                aicRT.anchorMin = new Vector2(0.12f, 0.12f);
+                aicRT.anchorMax = new Vector2(0.88f, 0.88f);
+                aicRT.offsetMin = aicRT.offsetMax = Vector2.zero;
+                var aicImg = attrIconObj.GetComponent<Image>();
+                aicImg.sprite = iconSprite;
+                aicImg.color = Color.white;
+                aicImg.preserveAspect = true;
+                aicImg.raycastTarget = false;
+            }
+
+            // 3. StatusRow (Bậc Phẩm Chất + Huy Hiệu Tiến Độ Cấp)
+            var statusRowObj = new GameObject("StatusRow", typeof(RectTransform));
+            statusRowObj.transform.SetParent(card.transform, false);
+            var srRT = statusRowObj.GetComponent<RectTransform>();
+            srRT.anchorMin = new Vector2(0.05f, 0.860f);
+            srRT.anchorMax = new Vector2(0.95f, 0.900f);
+            srRT.offsetMin = srRT.offsetMax = Vector2.zero;
+
+            var tierBannerObj = new GameObject("TierBanner", typeof(RectTransform), typeof(Image));
+            tierBannerObj.transform.SetParent(statusRowObj.transform, false);
+            var tbRT = tierBannerObj.GetComponent<RectTransform>();
+            tbRT.anchorMin = new Vector2(0f, 0f);
+            tbRT.anchorMax = new Vector2(0.48f, 1f);
+            tbRT.offsetMin = tbRT.offsetMax = Vector2.zero;
             var tbImg = tierBannerObj.GetComponent<Image>();
             tbImg.sprite = LevelUpChoiceUI.GetPillBadgeSprite();
             tbImg.type = Image.Type.Sliced;
             tbImg.color = tierBannerBg;
             tbImg.raycastTarget = false;
-
-            var tbOutline = tierBannerObj.GetComponent<Outline>();
-            tbOutline.effectColor = tierFrameColor;
-            tbOutline.effectDistance = new Vector2(1.2f, -1.2f);
 
             var tierTxtObj = new GameObject("TierText", typeof(RectTransform), typeof(TextMeshProUGUI));
             tierTxtObj.transform.SetParent(tierBannerObj.transform, false);
@@ -1811,40 +1905,26 @@ public class WanderingShopUI : MonoBehaviour
             ttRT.anchorMin = Vector2.zero;
             ttRT.anchorMax = Vector2.one;
             ttRT.offsetMin = ttRT.offsetMax = Vector2.zero;
-
             var tierTxt = tierTxtObj.GetComponent<TextMeshProUGUI>();
             tierTxt.text = tierTitle;
             tierTxt.color = tierFrameColor;
-            tierTxt.fontSize = 13.5f;
+            tierTxt.fontSize = 11.5f;
             tierTxt.alignment = TextAlignmentOptions.Center;
             tierTxt.fontStyle = FontStyles.Bold;
             tierTxt.raycastTarget = false;
-            SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.35f, new Color(0.02f, 0.02f, 0.02f, 0.95f));
+            SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.30f, Color.black);
 
-            for (int g = 0; g < tierGemCount; g++)
-            {
-                float offset = 0.065f + g * 0.042f;
-                CreateCardGem(tierBannerObj.transform, $"GemL_{g}", new Vector2(offset, 0.5f), 13f, tierFrameColor);
-                CreateCardGem(tierBannerObj.transform, $"GemR_{g}", new Vector2(1f - offset, 0.5f), 13f, tierFrameColor);
-            }
-
-            // 3. Huy hiệu Trạng thái Lõi ("LÕI MỚI" / "THĂNG CẤP: CẤP X -> CẤP Y") ngay dưới TierBanner
-            var rankBadgeObj = new GameObject("UpgradeTier", typeof(RectTransform), typeof(Image), typeof(Outline));
-            rankBadgeObj.transform.SetParent(card.transform, false);
+            var rankBadgeObj = new GameObject("UpgradeTier", typeof(RectTransform), typeof(Image));
+            rankBadgeObj.transform.SetParent(statusRowObj.transform, false);
             var rbRT = rankBadgeObj.GetComponent<RectTransform>();
-            rbRT.anchorMin = new Vector2(0.18f, 0.862f);
-            rbRT.anchorMax = new Vector2(0.82f, 0.912f);
+            rbRT.anchorMin = new Vector2(0.52f, 0f);
+            rbRT.anchorMax = new Vector2(1f, 1f);
             rbRT.offsetMin = rbRT.offsetMax = Vector2.zero;
-
             var rbImg = rankBadgeObj.GetComponent<Image>();
             rbImg.sprite = LevelUpChoiceUI.GetPillBadgeSprite();
             rbImg.type = Image.Type.Sliced;
-            rbImg.color = new Color(0.05f, 0.22f, 0.15f, 0.96f);
+            rbImg.color = new Color(0.04f, 0.20f, 0.12f, 0.96f);
             rbImg.raycastTarget = false;
-
-            var rbOut = rankBadgeObj.GetComponent<Outline>();
-            rbOut.effectColor = new Color(0.22f, 0.95f, 0.62f, 0.95f);
-            rbOut.effectDistance = new Vector2(1.2f, -1.2f);
 
             var progObj = new GameObject("RankStatusText", typeof(RectTransform), typeof(TextMeshProUGUI));
             progObj.transform.SetParent(rankBadgeObj.transform, false);
@@ -1854,106 +1934,117 @@ public class WanderingShopUI : MonoBehaviour
             progRT.offsetMin = progRT.offsetMax = Vector2.zero;
 
             var progTMP = progObj.GetComponent<TextMeshProUGUI>();
-            progTMP.fontSize = 12.5f;
+            progTMP.fontSize = 11.5f;
             progTMP.fontStyle = FontStyles.Bold;
             progTMP.alignment = TextAlignmentOptions.Center;
             progTMP.raycastTarget = false;
-            SoulslikeHUDStyler.SetSafeOutline(progTMP, 0.35f, Color.black);
+            SoulslikeHUDStyler.SetSafeOutline(progTMP, 0.30f, Color.black);
             progressTexts.Add(progTMP);
 
-            // 4. Central Runic Medallion (102x102) + Hào Quang Nguyên Tố (Elemental Halo)
-            var haloObj = new GameObject("ElementalHalo", typeof(RectTransform), typeof(Image));
-            haloObj.transform.SetParent(card.transform, false);
-            var haloRT = haloObj.GetComponent<RectTransform>();
-            haloRT.anchorMin = new Vector2(0.5f, 0.720f);
-            haloRT.anchorMax = new Vector2(0.5f, 0.720f);
-            haloRT.sizeDelta = new Vector2(148f, 148f);
-            haloRT.pivot = new Vector2(0.5f, 0.5f);
-            var haloImg = haloObj.GetComponent<Image>();
-            haloImg.sprite = LevelUpChoiceUI.GetRadialGlowSprite();
-            haloImg.color = new Color(item.badgeColor.r, item.badgeColor.g, item.badgeColor.b, 0.46f);
-            haloImg.raycastTarget = false;
+            // 4. PictureArea: Vùng Tranh Lớn Ôm Khít Tỷ Lệ Chuẩn 3:4 (Không Bè, Không Lệch)
+            var picAreaObj = new GameObject("PictureArea", typeof(RectTransform));
+            picAreaObj.transform.SetParent(card.transform, false);
+            var paRT = picAreaObj.GetComponent<RectTransform>();
+            paRT.anchorMin = new Vector2(0.05f, 0.270f);
+            paRT.anchorMax = new Vector2(0.95f, 0.850f);
+            paRT.offsetMin = paRT.offsetMax = Vector2.zero;
 
-            var medallionObj = new GameObject("Medallion", typeof(RectTransform), typeof(Image), typeof(Outline));
-            medallionObj.transform.SetParent(card.transform, false);
-            var medRT = medallionObj.GetComponent<RectTransform>();
-            medRT.anchorMin = new Vector2(0.5f, 0.720f);
-            medRT.anchorMax = new Vector2(0.5f, 0.720f);
-            medRT.sizeDelta = new Vector2(102f, 102f);
-            medRT.pivot = new Vector2(0.5f, 0.5f);
-
-            var coreImg = medallionObj.GetComponent<Image>();
-            coreImg.sprite = GetObsidianCoreSprite();
-            coreImg.color = new Color(0.07f, 0.09f, 0.14f, 1f);
-            coreImg.raycastTarget = false;
-
-            var medOutline = medallionObj.GetComponent<Outline>();
-            medOutline.effectColor = tierFrameColor;
-            medOutline.effectDistance = new Vector2(1.8f, -1.8f);
-
-            var ringObj = new GameObject("RunicRing", typeof(RectTransform), typeof(Image));
-            ringObj.transform.SetParent(medallionObj.transform, false);
-            var ringRT = ringObj.GetComponent<RectTransform>();
-            ringRT.anchorMin = Vector2.zero;
-            ringRT.anchorMax = Vector2.one;
-            ringRT.offsetMin = ringRT.offsetMax = Vector2.zero;
-            var ringImg = ringObj.GetComponent<Image>();
-            ringImg.sprite = GetRunicRingSprite();
-            ringImg.color = Color.Lerp(tierFrameColor, Color.white, 0.35f);
-            ringImg.raycastTarget = false;
-
-            // Biểu tượng Lõi 128x128 Full-Color sắc nét ở chính giữa Medallion
-            Sprite iconSprite = GetRelicSprite(item);
-            if (iconSprite != null)
+            Sprite illustrationSprite = GetShopRelicIllustrationSprite(item, usedSpritesInShop);
+            float artRatio = 0.747f;
+            if (illustrationSprite != null && illustrationSprite.rect.height > 0)
             {
-                var iconImgObj = new GameObject("IconImg", typeof(RectTransform), typeof(Image));
-                iconImgObj.transform.SetParent(medallionObj.transform, false);
-                var iconRT = iconImgObj.GetComponent<RectTransform>();
-                iconRT.anchorMin = new Vector2(0.08f, 0.08f);
-                iconRT.anchorMax = new Vector2(0.92f, 0.92f);
-                iconRT.offsetMin = iconRT.offsetMax = Vector2.zero;
-
-                var iconImg = iconImgObj.GetComponent<Image>();
-                iconImg.sprite = iconSprite;
-                iconImg.color = Color.white; // Giữ nguyên màu đa sắc 128x128 giống hệt LevelUpChoiceUI
-                iconImg.preserveAspect = true;
-                iconImg.raycastTarget = false;
-            }
-            else
-            {
-                var iconTxtObj = new GameObject("IconText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                iconTxtObj.transform.SetParent(medallionObj.transform, false);
-                var iconRT = iconTxtObj.GetComponent<RectTransform>();
-                iconRT.anchorMin = Vector2.zero;
-                iconRT.anchorMax = Vector2.one;
-                iconRT.offsetMin = iconRT.offsetMax = Vector2.zero;
-
-                var iconTMP = iconTxtObj.GetComponent<TextMeshProUGUI>();
-                iconTMP.text = GetStatShortCode(item);
-                iconTMP.fontSize = 20f;
-                iconTMP.fontStyle = FontStyles.Bold;
-                iconTMP.alignment = TextAlignmentOptions.Center;
-                iconTMP.color = item.badgeColor;
-                SoulslikeHUDStyler.SetSafeOutline(iconTMP, 0.35f, Color.black);
+                artRatio = (float)illustrationSprite.rect.width / illustrationSprite.rect.height;
             }
 
-            // 5. Stat Tag Pill (Bên dưới Medallion - Đồng bộ vị trí với LevelUpChoiceUI)
-            var statTagObj = new GameObject("StatTag", typeof(RectTransform), typeof(Image), typeof(Outline));
-            statTagObj.transform.SetParent(card.transform, false);
+            var picFrameObj = new GameObject("PictureFrame", typeof(RectTransform), typeof(Image), typeof(RectMask2D), typeof(AspectRatioFitter));
+            picFrameObj.transform.SetParent(picAreaObj.transform, false);
+            var pfRT = picFrameObj.GetComponent<RectTransform>();
+            pfRT.anchorMin = Vector2.zero;
+            pfRT.anchorMax = Vector2.one;
+            pfRT.offsetMin = pfRT.offsetMax = Vector2.zero;
+            pfRT.pivot = new Vector2(0.5f, 0.5f);
+
+            var arf = picFrameObj.GetComponent<AspectRatioFitter>();
+            arf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            arf.aspectRatio = artRatio;
+
+            var pfImg = picFrameObj.GetComponent<Image>();
+            pfImg.sprite = LevelUpChoiceUI.GetCardBodySprite();
+            pfImg.type = Image.Type.Sliced;
+            pfImg.color = new Color(0.03f, 0.04f, 0.06f, 1f);
+            pfImg.raycastTarget = false;
+
+            RectTransform phantomRT = null;
+            if (illustrationSprite != null)
+            {
+                var artObj = new GameObject("CardIllustration", typeof(RectTransform), typeof(Image));
+                artObj.transform.SetParent(picFrameObj.transform, false);
+                phantomRT = artObj.GetComponent<RectTransform>();
+                phantomRT.anchorMin = Vector2.zero;
+                phantomRT.anchorMax = Vector2.one;
+                phantomRT.offsetMin = phantomRT.offsetMax = Vector2.zero;
+                phantomRT.pivot = new Vector2(0.5f, 0.5f);
+
+                var artImg = artObj.GetComponent<Image>();
+                artImg.sprite = illustrationSprite;
+                artImg.color = Color.white;
+                artImg.preserveAspect = false;
+                artImg.raycastTarget = false;
+            }
+
+            // Lớp Phản Quang Kim Tuyến Cầu Vồng 2.5D (Holographic Foil Shimmer)
+            var holoFoilObj = new GameObject("HolographicFoil", typeof(RectTransform), typeof(Image));
+            holoFoilObj.transform.SetParent(picFrameObj.transform, false);
+            var holoRT = holoFoilObj.GetComponent<RectTransform>();
+            holoRT.anchorMin = Vector2.zero;
+            holoRT.anchorMax = Vector2.one;
+            holoRT.offsetMin = holoRT.offsetMax = Vector2.zero;
+            holoRT.pivot = new Vector2(0.5f, 0.5f);
+
+            var holoImg = holoFoilObj.GetComponent<Image>();
+            holoImg.sprite = Card3DParallaxTilt.GetHolographicFoilSprite();
+            holoImg.color = new Color(1f, 1f, 1f, 0.12f);
+            holoImg.raycastTarget = false;
+
+            // Khung viền kim loại kép mạ vàng bao quanh bức tranh
+            var picBorderObj = new GameObject("PictureBorder", typeof(RectTransform), typeof(Image));
+            picBorderObj.transform.SetParent(picFrameObj.transform, false);
+            var pbRT = picBorderObj.GetComponent<RectTransform>();
+            pbRT.anchorMin = Vector2.zero;
+            pbRT.anchorMax = Vector2.one;
+            pbRT.offsetMin = pbRT.offsetMax = Vector2.zero;
+            var pbImg = picBorderObj.GetComponent<Image>();
+            pbImg.sprite = LevelUpChoiceUI.GetOrnateCardFrameSprite();
+            pbImg.type = Image.Type.Sliced;
+            pbImg.color = tierFrameColor;
+            pbImg.raycastTarget = false;
+            picBorderObj.transform.SetAsLastSibling();
+
+            // 5. DescriptionBox: Hộp Mô Tả Văn Bản Riêng Biệt + Nút Mua Khắc Vát
+            var descBoxObj = new GameObject("DescriptionBox", typeof(RectTransform), typeof(Image), typeof(Outline));
+            descBoxObj.transform.SetParent(card.transform, false);
+            var dbRT = descBoxObj.GetComponent<RectTransform>();
+            dbRT.anchorMin = new Vector2(0.045f, 0.016f);
+            dbRT.anchorMax = new Vector2(0.955f, 0.260f);
+            dbRT.offsetMin = dbRT.offsetMax = Vector2.zero;
+
+            var dbImg = descBoxObj.GetComponent<Image>();
+            dbImg.sprite = LevelUpChoiceUI.GetCardBodySprite();
+            dbImg.type = Image.Type.Sliced;
+            dbImg.color = new Color(0.05f, 0.06f, 0.09f, 0.98f);
+            dbImg.raycastTarget = false;
+
+            var dbOut = descBoxObj.GetComponent<Outline>();
+            dbOut.effectColor = tierFrameColor * 0.75f;
+            dbOut.effectDistance = new Vector2(1.2f, -1.2f);
+
+            // Dòng phân loại Tag hệ kỹ năng
+            var statTagObj = new GameObject("StatTag", typeof(RectTransform));
+            statTagObj.transform.SetParent(descBoxObj.transform, false);
             var stRT = statTagObj.GetComponent<RectTransform>();
-            stRT.anchorMin = new Vector2(0.18f, 0.565f);
-            stRT.anchorMax = new Vector2(0.82f, 0.612f);
+            stRT.anchorMin = new Vector2(0.04f, 0.78f);
+            stRT.anchorMax = new Vector2(0.96f, 0.96f);
             stRT.offsetMin = stRT.offsetMax = Vector2.zero;
-
-            var stImg = statTagObj.GetComponent<Image>();
-            stImg.sprite = LevelUpChoiceUI.GetPillBadgeSprite();
-            stImg.type = Image.Type.Sliced;
-            stImg.color = new Color(0.04f, 0.06f, 0.10f, 0.96f);
-            stImg.raycastTarget = false;
-
-            var stOutline = statTagObj.GetComponent<Outline>();
-            stOutline.effectColor = item.badgeColor;
-            stOutline.effectDistance = new Vector2(1.2f, -1.2f);
 
             var stTxtObj = new GameObject("StatTagText", typeof(RectTransform), typeof(TextMeshProUGUI));
             stTxtObj.transform.SetParent(statTagObj.transform, false);
@@ -1963,73 +2054,50 @@ public class WanderingShopUI : MonoBehaviour
             sttRT.offsetMin = sttRT.offsetMax = Vector2.zero;
 
             var stTxt = stTxtObj.GetComponent<TextMeshProUGUI>();
-            stTxt.text = isVi ? item.categoryVN : item.categoryEN;
+            stTxt.text = isVi ? $"[{item.categoryVN.ToUpper()}]" : $"[{item.categoryEN.ToUpper()}]";
             stTxt.color = item.badgeColor;
-            stTxt.fontSize = 12.2f;
-            stTxt.alignment = TextAlignmentOptions.Center;
+            stTxt.fontSize = 12f;
+            stTxt.alignment = TextAlignmentOptions.MidlineLeft;
             stTxt.fontStyle = FontStyles.Bold;
             stTxt.raycastTarget = false;
             SoulslikeHUDStyler.SetSafeOutline(stTxt, 0.30f, Color.black);
 
-            // 6. Tên Cổ Vật (Item Title)
-            var nameObj = new GameObject("ItemTitle", typeof(RectTransform), typeof(TextMeshProUGUI));
-            nameObj.transform.SetParent(card.transform, false);
-            var nameRT = nameObj.GetComponent<RectTransform>();
-            nameRT.anchorMin = new Vector2(0.05f, 0.475f);
-            nameRT.anchorMax = new Vector2(0.95f, 0.558f);
-            nameRT.offsetMin = nameRT.offsetMax = Vector2.zero;
+            CreateOrnamentDivider(descBoxObj.transform, "DescInnerDivider",
+                new Vector2(0.04f, 0.74f), new Vector2(0.96f, 0.76f),
+                tierFrameColor * 0.65f);
 
-            var nameTMP = nameObj.GetComponent<TextMeshProUGUI>();
-            nameTMP.text = isVi ? item.titleVN : item.titleEN;
-            nameTMP.fontSize = 20.5f;
-            nameTMP.fontStyle = FontStyles.Bold;
-            nameTMP.alignment = TextAlignmentOptions.Center;
-            nameTMP.color = new Color(1f, 0.96f, 0.88f);
-            nameTMP.enableWordWrapping = true;
-            SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.40f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
-
-            // 7. Ornamental Divider 1
-            CreateOrnamentDivider(card.transform, "Divider1",
-                new Vector2(0.08f, 0.456f), new Vector2(0.92f, 0.470f),
-                tierFrameColor * 0.85f);
-
-            // 8. Mô tả Chi Tiết + Trích dẫn phong vị tàn tích (Desc + Flavor)
+            // Nội dung mô tả
             string descText = isVi ? item.descVN : item.descEN;
             string flavorText = isVi ? item.flavorVN : item.flavorEN;
             string fullDesc = descText;
             if (!string.IsNullOrEmpty(flavorText))
             {
-                fullDesc += $"\n\n<size=82%><color=#94A3B8><i>{flavorText}</i></color></size>";
+                fullDesc += $"\n<size=82%><color=#94A3B8><i>«{flavorText}»</i></color></size>";
             }
 
             var descObj = new GameObject("ItemDesc", typeof(RectTransform), typeof(TextMeshProUGUI));
-            descObj.transform.SetParent(card.transform, false);
+            descObj.transform.SetParent(descBoxObj.transform, false);
             var descRT = descObj.GetComponent<RectTransform>();
-            descRT.anchorMin = new Vector2(0.06f, 0.185f);
-            descRT.anchorMax = new Vector2(0.94f, 0.450f);
+            descRT.anchorMin = new Vector2(0.04f, 0.33f);
+            descRT.anchorMax = new Vector2(0.96f, 0.72f);
             descRT.offsetMin = descRT.offsetMax = Vector2.zero;
 
             var descTMP = descObj.GetComponent<TextMeshProUGUI>();
             descTMP.text = fullDesc;
-            descTMP.fontSize = 14f;
             descTMP.enableAutoSizing = true;
-            descTMP.fontSizeMin = 11.5f;
-            descTMP.fontSizeMax = 14.5f;
-            descTMP.alignment = TextAlignmentOptions.Center;
+            descTMP.fontSizeMin = 10.5f;
+            descTMP.fontSizeMax = 13.5f;
+            descTMP.alignment = TextAlignmentOptions.TopLeft;
             descTMP.color = new Color(0.92f, 0.95f, 1f);
             descTMP.enableWordWrapping = true;
             SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.25f, new Color(0f, 0f, 0f, 0.85f));
 
-            // 9. Ornamental Divider 2
-            CreateOrnamentDivider(card.transform, "Divider2", new Vector2(0.08f, 0.165f), new Vector2(0.92f, 0.178f),
-                tierFrameColor * 0.85f);
-
-            // 10. Nút Mua (BUY BUTTON) khắc vát đồng bộ Tarot Relic
+            // Nút Mua (BUY BUTTON) đặt gọn gàng ở đáy Hộp Mô Tả
             var btnObj = new GameObject("BuyBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
-            btnObj.transform.SetParent(card.transform, false);
+            btnObj.transform.SetParent(descBoxObj.transform, false);
             var btnRT = btnObj.GetComponent<RectTransform>();
-            btnRT.anchorMin = new Vector2(0.07f, 0.030f);
-            btnRT.anchorMax = new Vector2(0.93f, 0.148f);
+            btnRT.anchorMin = new Vector2(0.04f, 0.04f);
+            btnRT.anchorMax = new Vector2(0.96f, 0.30f);
             btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
             var btnImg = btnObj.GetComponent<Image>();
@@ -2039,7 +2107,7 @@ public class WanderingShopUI : MonoBehaviour
 
             var bOut = btnObj.GetComponent<Outline>();
             bOut.effectColor = tierFrameColor;
-            bOut.effectDistance = new Vector2(1.5f, -1.5f);
+            bOut.effectDistance = new Vector2(1.2f, -1.2f);
 
             var btn = btnObj.GetComponent<Button>();
             btn.targetGraphic = btnImg;
@@ -2053,20 +2121,25 @@ public class WanderingShopUI : MonoBehaviour
             btnTxtRT.offsetMin = btnTxtRT.offsetMax = Vector2.zero;
 
             var btnTMP = btnTxtObj.GetComponent<TextMeshProUGUI>();
-            btnTMP.fontSize = 18.5f;
+            btnTMP.fontSize = 14f;
             btnTMP.fontStyle = FontStyles.Bold;
             btnTMP.alignment = TextAlignmentOptions.Center;
             btnTMP.color = Color.white;
-            SoulslikeHUDStyler.SetSafeOutline(btnTMP, 0.40f, new Color(0f, 0f, 0f, 0.95f));
+            SoulslikeHUDStyler.SetSafeOutline(btnTMP, 0.35f, new Color(0f, 0f, 0f, 0.95f));
 
             cardObjects.Add(card);
             buyButtons.Add(btn);
             buyButtonTexts.Add(btnTMP);
 
+            // Gắn hệ thống Hiệu ứng Con quay hồi chuyển (Gyroscopic Tilt) & Parallax 2.5D cho Thẻ Bài Shop
+            var tiltComp = card.AddComponent<Card3DParallaxTilt>();
+            tiltComp.Setup(cardRT, phantomRT, holoImg);
+
             // Hiệu ứng Hover tương tác
             SetupCardHover(card, cardRT, cardFrameImg, tierFrameColor);
         }
 
+        Canvas.ForceUpdateCanvases();
         RefreshUI();
     }
 
@@ -2352,16 +2425,19 @@ public class WanderingShopUI : MonoBehaviour
             if (card == null) continue;
 
             // Stat tag text (Không dấu "[ ]")
-            var badge = card.transform.Find("StatTag/StatTagText")?.GetComponent<TextMeshProUGUI>();
+            var badge = card.transform.Find("DescriptionBox/StatTag/StatTagText")?.GetComponent<TextMeshProUGUI>()
+                        ?? card.transform.Find("StatTag/StatTagText")?.GetComponent<TextMeshProUGUI>();
             if (badge != null)
             {
-                badge.text = isVi ? item.categoryVN : item.categoryEN;
+                badge.text = isVi ? $"[{item.categoryVN.ToUpper()}]" : $"[{item.categoryEN.ToUpper()}]";
             }
 
-            var title = card.transform.Find("ItemTitle")?.GetComponent<TextMeshProUGUI>();
+            var title = card.transform.Find("HeaderBar/ItemTitle")?.GetComponent<TextMeshProUGUI>()
+                        ?? card.transform.Find("ItemTitle")?.GetComponent<TextMeshProUGUI>();
             if (title != null) title.text = isVi ? item.titleVN : item.titleEN;
 
-            var desc = card.transform.Find("ItemDesc")?.GetComponent<TextMeshProUGUI>();
+            var desc = card.transform.Find("DescriptionBox/ItemDesc")?.GetComponent<TextMeshProUGUI>()
+                       ?? card.transform.Find("ItemDesc")?.GetComponent<TextMeshProUGUI>();
             if (desc != null)
             {
                 string descText = isVi ? item.descVN : item.descEN;
@@ -2369,7 +2445,7 @@ public class WanderingShopUI : MonoBehaviour
                 string fullDesc = descText;
                 if (!string.IsNullOrEmpty(flavorText))
                 {
-                    fullDesc += $"\n\n<size=82%><color=#94A3B8><i>{flavorText}</i></color></size>";
+                    fullDesc += $"\n<size=82%><color=#94A3B8><i>«{flavorText}»</i></color></size>";
                 }
                 desc.text = fullDesc;
             }

@@ -578,6 +578,9 @@ public class LevelUpChoiceUI : MonoBehaviour
         float startX    = 0.024f;
         float gap       = (1f - startX * 2f - cardWidth * 3f) / 2f;
 
+        // Tập hợp theo dõi sprite đã xuất hiện trong lượt roll này (Triệt tiêu 100% trùng hình)
+        var usedSpritesInRoll = new HashSet<Sprite>();
+
         for (int i = 0; i < _currentChoices.Count; i++)
         {
             var aug = _currentChoices[i];
@@ -585,7 +588,7 @@ public class LevelUpChoiceUI : MonoBehaviour
             float xMin = startX + i * (cardWidth + gap);
             float xMax = xMin + cardWidth;
             BuildCard(_cardsContainer, aug, i, isVietnamese,
-                new Vector2(xMin, 0.015f), new Vector2(xMax, 0.985f));
+                new Vector2(xMin, 0.015f), new Vector2(xMax, 0.985f), usedSpritesInRoll);
         }
 
         Canvas.ForceUpdateCanvases();
@@ -877,8 +880,9 @@ public class LevelUpChoiceUI : MonoBehaviour
         return AugmentIconHelper.GetAugmentShortCode(type);
     }
 
-    // ─── 12 Tác Phẩm Nghệ Thuật Dark Fantasy Độc Bản & Player Avatars ─────────
+    // ─── 13 Tác Phẩm Nghệ Thuật Dark Fantasy Độc Bản & Player Avatars ─────────
     private static Sprite _spriteDeityBloodBeast;
+    private static Sprite _spriteDeityBerserkerWarlord;
     private static Sprite _spriteDeityCelestial;
     private static Sprite _spriteDeityBladeSaint;
     private static Sprite _spriteDeityIronTitan;
@@ -891,170 +895,209 @@ public class LevelUpChoiceUI : MonoBehaviour
     private static Sprite _spriteDeityCursedDemon;
     private static Sprite _spriteDeityShieldGoddess;
 
-    public static Sprite GetAugmentCardIllustrationSprite(AugmentDatabase.AugmentData aug)
+    private static void EnsureDeitySpritesLoaded()
+    {
+        if (_spriteDeityBloodBeast == null) _spriteDeityBloodBeast = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodBeast");
+        if (_spriteDeityBerserkerWarlord == null) _spriteDeityBerserkerWarlord = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BerserkerWarlord");
+        if (_spriteDeityCelestial == null) _spriteDeityCelestial = Resources.Load<Sprite>("UI/CardDeities/CardDeity_CelestialAstral");
+        if (_spriteDeityBladeSaint == null) _spriteDeityBladeSaint = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BladeSaint");
+        if (_spriteDeityIronTitan == null) _spriteDeityIronTitan = Resources.Load<Sprite>("UI/CardDeities/CardDeity_IronTitan");
+        if (_spriteDeityVoidPhantom == null) _spriteDeityVoidPhantom = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VoidPhantom");
+        if (_spriteDeityFrostEmpress == null) _spriteDeityFrostEmpress = Resources.Load<Sprite>("UI/CardDeities/CardDeity_FrostEmpress");
+        if (_spriteDeityInfernoFiend == null) _spriteDeityInfernoFiend = Resources.Load<Sprite>("UI/CardDeities/CardDeity_InfernoFiend");
+        if (_spriteDeityVenomQueen == null) _spriteDeityVenomQueen = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VenomQueen");
+        if (_spriteDeityThunderGod == null) _spriteDeityThunderGod = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ThunderGod");
+        if (_spriteDeityGrimReaper == null) _spriteDeityGrimReaper = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GrimReaper");
+        if (_spriteDeityCursedDemon == null) _spriteDeityCursedDemon = Resources.Load<Sprite>("UI/CardDeities/CardDeity_CursedDemon");
+        if (_spriteDeityShieldGoddess == null) _spriteDeityShieldGoddess = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ShieldGoddess");
+    }
+
+    public static Sprite GetAugmentCardIllustrationSprite(AugmentDatabase.AugmentData aug, HashSet<Sprite> usedSprites = null)
     {
         if (aug == null) return null;
+        EnsureDeitySpritesLoaded();
+
+        Sprite chosenSprite = null;
 
         // 1. Trường hợp đặc biệt: Lõi riêng của chính Player -> Hiển thị avatar/chân dung của Player đó
         if (aug.heroFilter != null && aug.heroFilter.Length > 0 && !string.IsNullOrEmpty(aug.heroFilter[0]))
         {
-            Sprite heroSprite = PlayerAvatarUI.GetHeroFaceSprite(aug.heroFilter[0]);
-            if (heroSprite != null) return heroSprite;
+            chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(aug.heroFilter[0]);
         }
 
-        switch (aug.type)
+        if (chosenSprite == null)
         {
-            // Lõi đặc quyền của 6 Tướng người chơi
-            case AugmentDatabase.AugmentType.TripleMirageTornado:
-                return PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_DUNE_ASSASSIN);
-            case AugmentDatabase.AugmentType.TripleRuinGale:
-                return PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_VAELSTRIDER);
-            case AugmentDatabase.AugmentType.EightWayTempest:
-                return PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_GALE_RONIN);
-            case AugmentDatabase.AugmentType.TwinFrostNova:
-                return PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_AZURE_BLADE);
-            case AugmentDatabase.AugmentType.CataclysmicQuake:
-                return PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_TITAN_BERSERKER);
-            case AugmentDatabase.AugmentType.MeteorSupercluster:
-                return PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_CELESTIAL_MAGE);
+            switch (aug.type)
+            {
+                // Lõi đặc quyền của 6 Tướng người chơi
+                case AugmentDatabase.AugmentType.TripleMirageTornado:
+                    chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_DUNE_ASSASSIN); break;
+                case AugmentDatabase.AugmentType.TripleRuinGale:
+                    chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_VAELSTRIDER); break;
+                case AugmentDatabase.AugmentType.EightWayTempest:
+                    chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_GALE_RONIN); break;
+                case AugmentDatabase.AugmentType.TwinFrostNova:
+                    chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_AZURE_BLADE); break;
+                case AugmentDatabase.AugmentType.CataclysmicQuake:
+                    chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_TITAN_BERSERKER); break;
+                case AugmentDatabase.AugmentType.MeteorSupercluster:
+                    chosenSprite = PlayerAvatarUI.GetHeroFaceSprite(CharacterManager.CHAR_CELESTIAL_MAGE); break;
 
-            // Nữ Chúa Băng Giá (Glacial Frost Empress): Hệ Băng Tuyết & Hàn Khí
-            case AugmentDatabase.AugmentType.GlacialSoul:
-            case AugmentDatabase.AugmentType.AbsoluteZeroNova:
-                if (_spriteDeityFrostEmpress == null)
-                    _spriteDeityFrostEmpress = Resources.Load<Sprite>("UI/CardDeities/CardDeity_FrostEmpress");
-                return _spriteDeityFrostEmpress;
+                // Đại Tướng Cuồng Bạo (Berserker Warlord): Cuồng Chiến, Tàn Sát, Va Chạm Nặng
+                case AugmentDatabase.AugmentType.BattleFrenzy:
+                case AugmentDatabase.AugmentType.BerserkerMode:
+                case AugmentDatabase.AugmentType.HeavyImpact:
+                case AugmentDatabase.AugmentType.DemonicPact:
+                    chosenSprite = _spriteDeityBerserkerWarlord; break;
 
-            // Chúa Tể Hỏa Ngục Dung Nham (Inferno Hellfire Fiend): Lửa, Hỏa Nham & Cuồng Nộ
-            case AugmentDatabase.AugmentType.FlameAdaptation:
-            case AugmentDatabase.AugmentType.MagmaEruption:
-            case AugmentDatabase.AugmentType.RagingFire:
-                if (_spriteDeityInfernoFiend == null)
-                    _spriteDeityInfernoFiend = Resources.Load<Sprite>("UI/CardDeities/CardDeity_InfernoFiend");
-                return _spriteDeityInfernoFiend;
+                // Thần Thú Huyết Long / Huyết Quỷ: Hút Máu, Huyết Tế, Khát Máu
+                case AugmentDatabase.AugmentType.BonusCritChance:
+                case AugmentDatabase.AugmentType.BonusCritDamage:
+                case AugmentDatabase.AugmentType.BonusLifesteal:
+                case AugmentDatabase.AugmentType.VampireBlood:
+                case AugmentDatabase.AugmentType.BloodGodTribute:
+                    chosenSprite = _spriteDeityBloodBeast; break;
 
-            // Nữ Chúa Độc Tố (Venom Hydra Queen): Độc Dược & Axit Ăn Mòn
-            case AugmentDatabase.AugmentType.PoisonTouch:
-            case AugmentDatabase.AugmentType.AcidMembrane:
-            case AugmentDatabase.AugmentType.VirulentBloom:
-                if (_spriteDeityVenomQueen == null)
-                    _spriteDeityVenomQueen = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VenomQueen");
-                return _spriteDeityVenomQueen;
+                // Nữ Chúa Băng Giá (Glacial Frost Empress): Hệ Băng Tuyết & Hàn Khí
+                case AugmentDatabase.AugmentType.GlacialSoul:
+                case AugmentDatabase.AugmentType.AbsoluteZeroNova:
+                    chosenSprite = _spriteDeityFrostEmpress; break;
 
-            // Lôi Thần Tử Điện (Thunderstorm Deity): Sấm Sét, Lôi Đình & Bão Tố
-            case AugmentDatabase.AugmentType.StaticOverload:
-            case AugmentDatabase.AugmentType.EchoStrike:
-            case AugmentDatabase.AugmentType.StormDancer:
-                if (_spriteDeityThunderGod == null)
-                    _spriteDeityThunderGod = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ThunderGod");
-                return _spriteDeityThunderGod;
+                // Chúa Tể Hỏa Ngục Dung Nham (Inferno Hellfire Fiend): Lửa, Hỏa Nham & Cuồng Nộ
+                case AugmentDatabase.AugmentType.FlameAdaptation:
+                case AugmentDatabase.AugmentType.MagmaEruption:
+                case AugmentDatabase.AugmentType.RagingFire:
+                    chosenSprite = _spriteDeityInfernoFiend; break;
 
-            // Tử Thần Thu Hoạch Linh Hồn (Grim Reaper): Hút Linh Hồn & Kết Liễu
-            case AugmentDatabase.AugmentType.SoulHarvest:
-            case AugmentDatabase.AugmentType.SoulHarvesterMultiplier:
-            case AugmentDatabase.AugmentType.SkillSoulSurge:
-            case AugmentDatabase.AugmentType.DeathsTouch:
-            case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
-                if (_spriteDeityGrimReaper == null)
-                    _spriteDeityGrimReaper = Resources.Load<Sprite>("UI/CardDeities/CardDeity_GrimReaper");
-                return _spriteDeityGrimReaper;
+                // Nữ Chúa Độc Tố (Venom Hydra Queen): Độc Dược & Axit Ăn Mòn
+                case AugmentDatabase.AugmentType.PoisonTouch:
+                case AugmentDatabase.AugmentType.AcidMembrane:
+                case AugmentDatabase.AugmentType.VirulentBloom:
+                    chosenSprite = _spriteDeityVenomQueen; break;
 
-            // Tà Thần Lời Nguyền Cổ Xưa (Ancient Cursed Demon): Lõi Hai Mặt Đánh Đổi Lời Nguyền
-            case AugmentDatabase.AugmentType.CursedMight:
-            case AugmentDatabase.AugmentType.IroncladPact:
-            case AugmentDatabase.AugmentType.ChronoStasis:
-            case AugmentDatabase.AugmentType.BloodTitheBlade:
-            case AugmentDatabase.AugmentType.GlassCannonTitan:
-            case AugmentDatabase.AugmentType.PhantomRush:
-                if (_spriteDeityCursedDemon == null)
-                    _spriteDeityCursedDemon = Resources.Load<Sprite>("UI/CardDeities/CardDeity_CursedDemon");
-                return _spriteDeityCursedDemon;
+                // Lôi Thần Tử Điện (Thunderstorm Deity): Sấm Sét, Lôi Đình & Bão Tố
+                case AugmentDatabase.AugmentType.StaticOverload:
+                case AugmentDatabase.AugmentType.EchoStrike:
+                case AugmentDatabase.AugmentType.StormDancer:
+                    chosenSprite = _spriteDeityThunderGod; break;
 
-            // Nữ Thần Thánh Khiên Vàng Kim (Divine Aegis Goddess): Khiên Hộ Mệnh & Bất Hoại
-            case AugmentDatabase.AugmentType.DivineAegis:
-            case AugmentDatabase.AugmentType.GoldenSanctuary:
-            case AugmentDatabase.AugmentType.IronBastion:
-            case AugmentDatabase.AugmentType.ArcaneShield:
-                if (_spriteDeityShieldGoddess == null)
-                    _spriteDeityShieldGoddess = Resources.Load<Sprite>("UI/CardDeities/CardDeity_ShieldGoddess");
-                return _spriteDeityShieldGoddess;
+                // Tử Thần Thu Hoạch Linh Hồn (Grim Reaper): Hút Linh Hồn & Kết Liễu
+                case AugmentDatabase.AugmentType.SoulHarvest:
+                case AugmentDatabase.AugmentType.SoulHarvesterMultiplier:
+                case AugmentDatabase.AugmentType.SkillSoulSurge:
+                case AugmentDatabase.AugmentType.DeathsTouch:
+                case AugmentDatabase.AugmentType.PercentCurrentHpExecute:
+                    chosenSprite = _spriteDeityGrimReaper; break;
 
-            // Thần Thú Huyết Long / Huyết Quỷ: Hút Máu, Chí Mạng, Cuồng Bạo
-            case AugmentDatabase.AugmentType.BonusCritChance:
-            case AugmentDatabase.AugmentType.BonusCritDamage:
-            case AugmentDatabase.AugmentType.BonusLifesteal:
-            case AugmentDatabase.AugmentType.VampireBlood:
-            case AugmentDatabase.AugmentType.BerserkerMode:
-            case AugmentDatabase.AugmentType.DemonicPact:
-            case AugmentDatabase.AugmentType.BloodGodTribute:
-            case AugmentDatabase.AugmentType.BattleFrenzy:
-                if (_spriteDeityBloodBeast == null)
-                    _spriteDeityBloodBeast = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodBeast");
-                return _spriteDeityBloodBeast;
+                // Tà Thần Lời Nguyền Cổ Xưa (Ancient Cursed Demon): Lõi Hai Mặt Đánh Đổi Lời Nguyền
+                case AugmentDatabase.AugmentType.CursedMight:
+                case AugmentDatabase.AugmentType.IroncladPact:
+                case AugmentDatabase.AugmentType.ChronoStasis:
+                case AugmentDatabase.AugmentType.BloodTitheBlade:
+                case AugmentDatabase.AugmentType.GlassCannonTitan:
+                case AugmentDatabase.AugmentType.PhantomRush:
+                    chosenSprite = _spriteDeityCursedDemon; break;
 
-            // Cổ Thần Tinh Tú: Sức Mạnh Phép (AP), Hồi Chiêu (CDR), Tinh Vân & Thần Chú
-            case AugmentDatabase.AugmentType.BonusAbilityPower:
-            case AugmentDatabase.AugmentType.ArcaneWand:
-            case AugmentDatabase.AugmentType.RunicEmpowerment:
-            case AugmentDatabase.AugmentType.BonusSpellVamp:
-            case AugmentDatabase.AugmentType.BonusCooldownReduction:
-            case AugmentDatabase.AugmentType.BonusMaxEnergy:
-            case AugmentDatabase.AugmentType.UltimateCharge:
-            case AugmentDatabase.AugmentType.CelestialCascade:
-            case AugmentDatabase.AugmentType.ArcaneOverdrive:
-            case AugmentDatabase.AugmentType.SurgingPulse:
-            case AugmentDatabase.AugmentType.ChainReaction:
-            case AugmentDatabase.AugmentType.AscendedDivinity:
-            case AugmentDatabase.AugmentType.EchoingVoid:
-                if (_spriteDeityCelestial == null)
-                    _spriteDeityCelestial = Resources.Load<Sprite>("UI/CardDeities/CardDeity_CelestialAstral");
-                return _spriteDeityCelestial;
+                // Nữ Thần Thánh Khiên Vàng Kim (Divine Aegis Goddess): Khiên Hộ Mệnh & Bất Hoại
+                case AugmentDatabase.AugmentType.DivineAegis:
+                case AugmentDatabase.AugmentType.GoldenSanctuary:
+                case AugmentDatabase.AugmentType.IronBastion:
+                case AugmentDatabase.AugmentType.ArcaneShield:
+                    chosenSprite = _spriteDeityShieldGoddess; break;
 
-            // Chiến Thần Kiếm Khách: Tấn Công Vật Lý (ATK), Tốc Đánh, Tốc Độ Di Chuyển & Kiếm Khí
-            case AugmentDatabase.AugmentType.BonusAttack:
-            case AugmentDatabase.AugmentType.BonusSpeed:
-            case AugmentDatabase.AugmentType.SwiftShadow:
-            case AugmentDatabase.AugmentType.ComboMastery:
-            case AugmentDatabase.AugmentType.GodforgedArsenal:
-            case AugmentDatabase.AugmentType.ShadowAmbush:
-            case AugmentDatabase.AugmentType.LaceratingEdge:
-            case AugmentDatabase.AugmentType.FleetWind:
-            case AugmentDatabase.AugmentType.HeavyImpact:
-            case AugmentDatabase.AugmentType.RelentlessAssault:
-            case AugmentDatabase.AugmentType.GiantSlayer:
-                if (_spriteDeityBladeSaint == null)
-                    _spriteDeityBladeSaint = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BladeSaint");
-                return _spriteDeityBladeSaint;
+                // Cổ Thần Tinh Tú: Sức Mạnh Phép (AP), Hồi Chiêu (CDR), Tinh Vân & Thần Chú
+                case AugmentDatabase.AugmentType.BonusAbilityPower:
+                case AugmentDatabase.AugmentType.ArcaneWand:
+                case AugmentDatabase.AugmentType.RunicEmpowerment:
+                case AugmentDatabase.AugmentType.BonusSpellVamp:
+                case AugmentDatabase.AugmentType.BonusCooldownReduction:
+                case AugmentDatabase.AugmentType.BonusMaxEnergy:
+                case AugmentDatabase.AugmentType.UltimateCharge:
+                case AugmentDatabase.AugmentType.CelestialCascade:
+                case AugmentDatabase.AugmentType.ArcaneOverdrive:
+                case AugmentDatabase.AugmentType.SurgingPulse:
+                case AugmentDatabase.AugmentType.ChainReaction:
+                case AugmentDatabase.AugmentType.AscendedDivinity:
+                case AugmentDatabase.AugmentType.EchoingVoid:
+                    chosenSprite = _spriteDeityCelestial; break;
 
-            // Cự Thần Titan: Máu Tối Đa (HP), Giáp Thủ, Hồi Phục Sinh Lực & Thể Trọng
-            case AugmentDatabase.AugmentType.BonusHealth:
-            case AugmentDatabase.AugmentType.BonusDefense:
-            case AugmentDatabase.AugmentType.AncientShield:
-            case AugmentDatabase.AugmentType.RegenerativeCore:
-            case AugmentDatabase.AugmentType.UndyingSovereign:
-            case AugmentDatabase.AugmentType.AbundantVitality:
-            case AugmentDatabase.AugmentType.SecondWind:
-            case AugmentDatabase.AugmentType.LifeTransfusion:
-            case AugmentDatabase.AugmentType.UnwaveringWill:
-            case AugmentDatabase.AugmentType.PrismaticTitan:
-                if (_spriteDeityIronTitan == null)
-                    _spriteDeityIronTitan = Resources.Load<Sprite>("UI/CardDeities/CardDeity_IronTitan");
-                return _spriteDeityIronTitan;
+                // Chiến Thần Kiếm Khách: Tấn Công Vật Lý (ATK), Tốc Đánh, Tốc Độ Di Chuyển & Kiếm Khí
+                case AugmentDatabase.AugmentType.BonusAttack:
+                case AugmentDatabase.AugmentType.BonusSpeed:
+                case AugmentDatabase.AugmentType.SwiftShadow:
+                case AugmentDatabase.AugmentType.ComboMastery:
+                case AugmentDatabase.AugmentType.GodforgedArsenal:
+                case AugmentDatabase.AugmentType.ShadowAmbush:
+                case AugmentDatabase.AugmentType.LaceratingEdge:
+                case AugmentDatabase.AugmentType.FleetWind:
+                case AugmentDatabase.AugmentType.RelentlessAssault:
+                case AugmentDatabase.AugmentType.GiantSlayer:
+                    chosenSprite = _spriteDeityBladeSaint; break;
 
-            // Bóng Ma Hư Không & Thần May Mắn: Tiền Thưởng, Tinh Thể, Vọng Âm & Hư Vô
-            case AugmentDatabase.AugmentType.BountyHunter:
-            case AugmentDatabase.AugmentType.VoidTranscendence:
-            case AugmentDatabase.AugmentType.ShadowMirroring:
-            default:
-                if (_spriteDeityVoidPhantom == null)
-                    _spriteDeityVoidPhantom = Resources.Load<Sprite>("UI/CardDeities/CardDeity_VoidPhantom");
-                return _spriteDeityVoidPhantom;
+                // Cự Thần Titan: Máu Tối Đa (HP), Giáp Thủ, Hồi Phục Sinh Lực & Thể Trọng
+                case AugmentDatabase.AugmentType.BonusHealth:
+                case AugmentDatabase.AugmentType.BonusDefense:
+                case AugmentDatabase.AugmentType.AncientShield:
+                case AugmentDatabase.AugmentType.RegenerativeCore:
+                case AugmentDatabase.AugmentType.UndyingSovereign:
+                case AugmentDatabase.AugmentType.AbundantVitality:
+                case AugmentDatabase.AugmentType.SecondWind:
+                case AugmentDatabase.AugmentType.LifeTransfusion:
+                case AugmentDatabase.AugmentType.UnwaveringWill:
+                case AugmentDatabase.AugmentType.PrismaticTitan:
+                    chosenSprite = _spriteDeityIronTitan; break;
+
+                // Bóng Ma Hư Không & Thần May Mắn: Tiền Thưởng, Tinh Thể, Vọng Âm & Hư Vô
+                case AugmentDatabase.AugmentType.BountyHunter:
+                case AugmentDatabase.AugmentType.VoidTranscendence:
+                case AugmentDatabase.AugmentType.ShadowMirroring:
+                default:
+                    chosenSprite = _spriteDeityVoidPhantom; break;
+            }
         }
+
+        // ── 2. Deduplication: Triệt tiêu 100% trùng hình trong cùng 1 lần Roll ──
+        if (usedSprites != null && chosenSprite != null && usedSprites.Contains(chosenSprite))
+        {
+            // Danh sách các ứng viên dự phòng ưu tiên theo nhánh liên quan
+            Sprite[] fallbacks = new Sprite[]
+            {
+                _spriteDeityBerserkerWarlord,
+                _spriteDeityBladeSaint,
+                _spriteDeityBloodBeast,
+                _spriteDeityInfernoFiend,
+                _spriteDeityCursedDemon,
+                _spriteDeityThunderGod,
+                _spriteDeityCelestial,
+                _spriteDeityIronTitan,
+                _spriteDeityShieldGoddess,
+                _spriteDeityFrostEmpress,
+                _spriteDeityGrimReaper,
+                _spriteDeityVenomQueen,
+                _spriteDeityVoidPhantom
+            };
+
+            foreach (var fb in fallbacks)
+            {
+                if (fb != null && !usedSprites.Contains(fb))
+                {
+                    chosenSprite = fb;
+                    break;
+                }
+            }
+        }
+
+        if (usedSprites != null && chosenSprite != null)
+        {
+            usedSprites.Add(chosenSprite);
+        }
+
+        return chosenSprite != null ? chosenSprite : _spriteDeityVoidPhantom;
     }
 
     // ─── Build Individual Yu-Gi-Oh Style Dark Fantasy Augment Card ────────────
     private void BuildCard(Transform parent, AugmentDatabase.AugmentData aug, int index,
-        bool isVN, Vector2 anchorMin, Vector2 anchorMax)
+        bool isVN, Vector2 anchorMin, Vector2 anchorMax, HashSet<Sprite> usedSprites = null)
     {
         Color typeColor = GetDamageTypeColor(aug.type);
         string typeName = GetDamageTypeName(aug.type, isVN);
@@ -1285,7 +1328,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         paRT.anchorMax = new Vector2(0.95f, 0.850f);
         paRT.offsetMin = paRT.offsetMax = Vector2.zero;
 
-        Sprite illustrationSprite = GetAugmentCardIllustrationSprite(aug);
+        Sprite illustrationSprite = GetAugmentCardIllustrationSprite(aug, usedSprites);
         float artRatio = 0.747f; // Mặc định tỷ lệ chuẩn 3:4 của Card Deities
         if (illustrationSprite != null && illustrationSprite.rect.height > 0)
         {
@@ -1311,7 +1354,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         pfImg.color = new Color(0.03f, 0.04f, 0.06f, 1f);
         pfImg.raycastTarget = false;
 
-        // Bức tranh nghệ thuật minh họa Lõi / Player (Hiển thị sắc nét, ĐỨNG YÊN, KHUNG ÔM VỪA KHÍT)
+        // Bức tranh nghệ thuật minh họa Lõi / Player (Hiển thị sắc nét, HỖ TRỢ PARALLAX 2.5D)
         RectTransform phantomRT = null;
         if (illustrationSprite != null)
         {
@@ -1322,7 +1365,6 @@ public class LevelUpChoiceUI : MonoBehaviour
             phantomRT.anchorMax = Vector2.one;
             phantomRT.offsetMin = phantomRT.offsetMax = Vector2.zero;
             phantomRT.pivot = new Vector2(0.5f, 0.5f);
-            phantomRT.localScale = Vector3.one; // Đứng yên hoàn toàn không nhấp nhô
 
             var artImg = artObj.GetComponent<Image>();
             artImg.sprite = illustrationSprite;
@@ -1330,6 +1372,20 @@ public class LevelUpChoiceUI : MonoBehaviour
             artImg.preserveAspect = false; // Phủ khít khung tranh vì khung đã ôm chuẩn tỷ lệ tranh gốc bằng FitInParent trong PictureArea
             artImg.raycastTarget = false;
         }
+
+        // Lớp Phản Quang Kim Tuyến Cầu Vồng 2.5D (Holographic Foil Shimmer)
+        var holoFoilObj = new GameObject("HolographicFoil", typeof(RectTransform), typeof(Image));
+        holoFoilObj.transform.SetParent(picFrameObj.transform, false);
+        var holoRT = holoFoilObj.GetComponent<RectTransform>();
+        holoRT.anchorMin = Vector2.zero;
+        holoRT.anchorMax = Vector2.one;
+        holoRT.offsetMin = holoRT.offsetMax = Vector2.zero;
+        holoRT.pivot = new Vector2(0.5f, 0.5f);
+
+        var holoImg = holoFoilObj.GetComponent<Image>();
+        holoImg.sprite = Card3DParallaxTilt.GetHolographicFoilSprite();
+        holoImg.color = new Color(1f, 1f, 1f, 0.12f);
+        holoImg.raycastTarget = false;
 
         // Khung viền kim loại kép mạ vàng bao quanh bức tranh (Ôm vừa khít mép tranh từng pixel)
         var picBorderObj = new GameObject("PictureBorder", typeof(RectTransform), typeof(Image));
@@ -1343,6 +1399,11 @@ public class LevelUpChoiceUI : MonoBehaviour
         pbImg.type = Image.Type.Sliced;
         pbImg.color = tierFrameColor;
         pbImg.raycastTarget = false;
+        picBorderObj.transform.SetAsLastSibling();
+
+        // Gắn hệ thống Hiệu ứng Con quay hồi chuyển (Gyroscopic Tilt) & Parallax 2.5D cao cấp
+        var tiltComp = card.AddComponent<Card3DParallaxTilt>();
+        tiltComp.Setup(cardRT, phantomRT, holoImg);
 
         // ── 6. Hộp Mô Tả Văn Bản Riêng Biệt (Card Description Text Box - Tối ưu gọn khít sát đáy) ──
         var descBoxObj = new GameObject("DescriptionBox", typeof(RectTransform), typeof(Image), typeof(Outline));
