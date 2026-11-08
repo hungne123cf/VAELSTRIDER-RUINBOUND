@@ -1345,7 +1345,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         string heroNameHeader = "";
         if (isHeroSignature)
         {
-            var charData = CharacterManager.EnsureInstance()?.GetCharacterData(aug.heroFilter[0]);
+            var charData = CharacterManager.EnsureInstance()?.GetCharacter(aug.heroFilter[0]);
             heroNameHeader = charData != null ? (isVN ? charData.nameVN : charData.nameEN) : aug.heroFilter[0];
         }
 
@@ -1550,7 +1550,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         // 1. Root Backdrop (Chặn click ra ngoài)
         _confirmPopupObj = new GameObject("AugmentConfirmPopup", typeof(RectTransform), typeof(CanvasGroup), typeof(Image));
-        _confirmPopupObj.transform.SetParent(_canvas.transform, false);
+        _confirmPopupObj.transform.SetParent(_root != null ? _root.transform : transform, false);
         _confirmPopupObj.transform.SetAsLastSibling();
 
         var bgRT = _confirmPopupObj.GetComponent<RectTransform>();
