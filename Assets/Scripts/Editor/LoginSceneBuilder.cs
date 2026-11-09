@@ -486,6 +486,7 @@ public static class LoginSceneBuilder
         skTmp.color = new Color(1f, 0.88f, 0.45f);
         skTmp.alignment = TextAlignmentOptions.Center;
         skTmp.raycastTarget = false;
+        skipObj.SetActive(false); // Bỏ nút Bỏ Qua theo yêu cầu người dùng, chạm màn hình để tiếp tục
 
         // 9B-2. Loading Progress Panel
         GameObject loadPanelObj = new GameObject("LoadingProgressPanel");
@@ -496,8 +497,9 @@ public static class LoginSceneBuilder
         lpRt.sizeDelta = Vector2.zero;
         var lpCg = loadPanelObj.AddComponent<CanvasGroup>();
         var lpBg = loadPanelObj.AddComponent<Image>();
-        lpBg.sprite = sandBgSprite;
-        lpBg.color = new Color(0.55f, 0.50f, 0.45f, 1f);
+        lpBg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        lpBg.type = Image.Type.Sliced;
+        lpBg.color = new Color(0.015f, 0.02f, 0.035f, 1f); // Nền Đá Obsidian Dark Fantasy Huyền Ảo
 
         // Loading Title
         GameObject loadTitleObj = new GameObject("GameTitle");
@@ -540,14 +542,16 @@ public static class LoginSceneBuilder
         sldRt.anchorMin = new Vector2(0.5f, 0.5f);
         sldRt.anchorMax = new Vector2(0.5f, 0.5f);
         sldRt.pivot = new Vector2(0.5f, 0.5f);
-        sldRt.anchoredPosition = new Vector2(0f, -160f);
-        sldRt.sizeDelta = new Vector2(840f, 24f);
+        sldRt.anchoredPosition = new Vector2(0f, -145f);
+        sldRt.sizeDelta = new Vector2(760f, 22f); // Kích thước thanh thoát chuẩn Soulslike
 
         var sldBg = sliderObj.AddComponent<Image>();
-        sldBg.color = new Color(0.06f, 0.08f, 0.12f, 0.95f);
+        sldBg.sprite = SoulslikeHUDStyler.GetObsidianTroughSprite();
+        sldBg.type = Image.Type.Sliced;
+        sldBg.color = new Color(0.12f, 0.14f, 0.18f, 1f);
         var sldOutline = sliderObj.AddComponent<Outline>();
-        sldOutline.effectColor = new Color(0.95f, 0.80f, 0.35f, 0.85f);
-        sldOutline.effectDistance = new Vector2(1.5f, -1.5f);
+        sldOutline.effectColor = new Color(0.90f, 0.82f, 0.45f, 0.75f);
+        sldOutline.effectDistance = new Vector2(1.2f, -1.2f);
 
         var slider = sliderObj.AddComponent<Slider>();
         slider.minValue = 0f;
@@ -570,6 +574,8 @@ public static class LoginSceneBuilder
         fRt.anchorMax = Vector2.one;
         fRt.offsetMin = fRt.offsetMax = Vector2.zero;
         var fillImg = fillObj.AddComponent<Image>();
+        fillImg.sprite = SoulslikeHUDStyler.GetSapphireFillSprite();
+        fillImg.type = Image.Type.Sliced;
         fillImg.color = new Color(0.98f, 0.99f, 1.0f, 1f); // Trắng Bạch Kim Phát Sáng chuẩn Dark Fantasy
         var fillOutline = fillObj.AddComponent<Outline>();
         fillOutline.effectColor = new Color(0.85f, 0.95f, 1f, 0.80f);
@@ -579,18 +585,18 @@ public static class LoginSceneBuilder
         // Status text (Tips / Action)
         GameObject tipObj = new GameObject("StatusText");
         tipObj.transform.SetParent(loadPanelObj.transform, false);
-        var tipRt = tipObj.AddComponent<RectTransform>();
+        var tipRt = tipObj.GetComponent<RectTransform>();
         tipRt.anchorMin = new Vector2(0.5f, 0.5f);
         tipRt.anchorMax = new Vector2(0.5f, 0.5f);
         tipRt.pivot = new Vector2(0.5f, 0.5f);
-        tipRt.anchoredPosition = new Vector2(0f, -120f);
+        tipRt.anchoredPosition = new Vector2(0f, -105f);
         tipRt.sizeDelta = new Vector2(800f, 32f);
         var tipTmp = tipObj.AddComponent<TextMeshProUGUI>();
         tipTmp.text = "Đang khởi hành vào vương quốc...";
         tipTmp.fontSize = 17;
         tipTmp.fontStyle = FontStyles.Bold;
         tipTmp.alignment = TextAlignmentOptions.Center;
-        tipTmp.color = new Color(0.35f, 0.95f, 0.65f);
+        tipTmp.color = new Color(1f, 0.90f, 0.65f); // Vàng Kim Quý Tộc
         tipTmp.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(tipTmp, 0.35f, Color.black);
 
@@ -601,14 +607,14 @@ public static class LoginSceneBuilder
         pctRt.anchorMin = new Vector2(0.5f, 0.5f);
         pctRt.anchorMax = new Vector2(0.5f, 0.5f);
         pctRt.pivot = new Vector2(0.5f, 0.5f);
-        pctRt.anchoredPosition = new Vector2(0f, -200f);
+        pctRt.anchoredPosition = new Vector2(0f, -190f);
         pctRt.sizeDelta = new Vector2(300f, 30f);
         var pctTmp = pctObj.AddComponent<TextMeshProUGUI>();
         pctTmp.text = "0%";
-        pctTmp.fontSize = 16;
+        pctTmp.fontSize = 15;
         pctTmp.fontStyle = FontStyles.Bold;
         pctTmp.alignment = TextAlignmentOptions.Center;
-        pctTmp.color = new Color(1f, 0.95f, 0.82f);
+        pctTmp.color = new Color(0.95f, 0.98f, 1f); // Trắng Sáng
         pctTmp.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(pctTmp, 0.35f, Color.black);
 
