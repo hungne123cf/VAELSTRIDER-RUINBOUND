@@ -76,10 +76,15 @@ public class GameIntroLoadingController : MonoBehaviour
     /// </summary>
     private void FormatCleanVisuals()
     {
-        // 1. Tắt vĩnh viễn nút Bỏ Qua thô kệch
+        // 1. Tắt vĩnh viễn nút Bỏ Qua thô kệch và dòng chữ Subtitle đè lên tranh
         if (skipButton != null)
         {
             skipButton.gameObject.SetActive(false);
+        }
+
+        if (cinematicSubtitleText != null)
+        {
+            cinematicSubtitleText.gameObject.SetActive(false);
         }
 
         // 2. Xóa sạch lớp phủ màu tím mờ đục và bề mặt video nếu còn tồn tại
@@ -104,15 +109,16 @@ public class GameIntroLoadingController : MonoBehaviour
         }
 
         // 3. Khóa chuẩn tỉ lệ dọc 3:4 cho tranh vẽ, triệt tiêu 100% hiện tượng phình ngang
+        // Đặt vị trí tranh ở vùng trên (y: 17% -> 96%) để dành trọn vẹn 17% đáy cho thanh tiến trình
         if (cinematicSlideImage != null)
         {
             cinematicSlideImage.gameObject.SetActive(true);
             cinematicSlideImage.preserveAspect = true;
-            cinematicSlideImage.color = Color.white; // Màu gốc nguyên bản, không ám màu
+            cinematicSlideImage.color = Color.white; // Màu gốc nguyên bản 100%, không bị ám màu
 
             _slideRectTransform = cinematicSlideImage.GetComponent<RectTransform>();
-            _slideRectTransform.anchorMin = new Vector2(0.15f, 0.12f);
-            _slideRectTransform.anchorMax = new Vector2(0.85f, 0.90f);
+            _slideRectTransform.anchorMin = new Vector2(0.12f, 0.17f);
+            _slideRectTransform.anchorMax = new Vector2(0.88f, 0.96f);
             _slideRectTransform.offsetMin = _slideRectTransform.offsetMax = Vector2.zero;
 
             _slideAspectFitter = cinematicSlideImage.GetComponent<AspectRatioFitter>();
@@ -121,76 +127,125 @@ public class GameIntroLoadingController : MonoBehaviour
             _slideAspectFitter.aspectRatio = 0.747f; // Chuẩn tỉ lệ 896x1200 của tranh gốc
         }
 
-        // 4. Định dạng lại Màn Hình Loading Progress Panel theo đúng Asset Soulslike
+        // 4. Đồng bộ thanh tiến trình sang màn hình DUY NHẤT (Cinematic Panel) nằm ngay dưới tranh
+        if (cinematicPanel != null)
+        {
+            if (progressSlider != null && progressSlider.transform.parent != cinematicPanel.transform)
+            {
+                progressSlider.transform.SetParent(cinematicPanel.transform, false);
+            }
+            if (progressStatusText != null && progressStatusText.transform.parent != cinematicPanel.transform)
+            {
+                progressStatusText.transform.SetParent(cinematicPanel.transform, false);
+            }
+            if (progressPercentText != null && progressPercentText.transform.parent != cinematicPanel.transform)
+            {
+                progressPercentText.transform.SetParent(cinematicPanel.transform, false);
+            }
+        }
+
+        // Tắt panel loading riêng biệt nếu có (vì toàn bộ đã tích hợp trực tiếp ngay dưới tranh)
         if (loadingProgressPanel != null)
         {
-            // Bỏ nền cát pixel nâu vỡ hạt, dùng nền đen đá tàn tích Dark Fantasy
-            var lpImg = loadingProgressPanel.GetComponent<Image>();
-            if (lpImg != null)
+            loadingProgressPanel.SetActive(false);
+        }
+
+        // 5. Định dạng Thanh Tiến Trình chuẩn Bộ Asset Soulslike:
+        // - Khung ngoài: Boss_Bar_Frame.png mạ viền vàng hoàng kim Gothic
+        // - Rãnh máng: Bar_Obsidian_Trough.png rãnh đá đen sâu thẳm
+        // - Ruột fill: Soulslike_Button_Stone.png màu Trắng Bạch Kim phát sáng
+        if (progressSlider != null)
+        {
+            progressSlider.gameObject.SetActive(true);
+            var sRt = progressSlider.GetComponent<RectTransform>();
+            sRt.anchorMin = new Vector2(0.5f, 0f);
+            sRt.anchorMax = new Vector2(0.5f, 0f);
+            sRt.pivot = new Vector2(0.5f, 0.5f);
+            sRt.anchoredPosition = new Vector2(0f, 62f);
+            sRt.sizeDelta = new Vector2(680f, 20f);
+
+            // Rãnh đá Obsidian
+            var sImg = progressSlider.GetComponent<Image>();
+            if (sImg != null)
             {
-                lpImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
-                lpImg.type = Image.Type.Sliced;
-                lpImg.color = new Color(0.02f, 0.02f, 0.035f, 1f);
+                sImg.sprite = SoulslikeHUDStyler.GetObsidianTroughSprite();
+                sImg.type = Image.Type.Sliced;
+                sImg.color = new Color(0.06f, 0.07f, 0.10f, 0.96f);
             }
 
-            // Định dạng lại thanh Slider theo Asset Game
-            if (progressSlider != null)
+            // Khung viền ngoài Boss Bar Gothic hoàng kim
+            Transform frameTr = progressSlider.transform.Find("BossFrameDecoration");
+            Image frameImg = null;
+            if (frameTr == null)
             {
-                var sRt = progressSlider.GetComponent<RectTransform>();
-                sRt.anchorMin = new Vector2(0.5f, 0.5f);
-                sRt.anchorMax = new Vector2(0.5f, 0.5f);
-                sRt.pivot = new Vector2(0.5f, 0.5f);
-                sRt.anchoredPosition = new Vector2(0f, -145f);
-                sRt.sizeDelta = new Vector2(800f, 18f); // Thanh mảnh, tinh tế
-
-                // Rãnh đá Runic Plaque
-                var sImg = progressSlider.GetComponent<Image>();
-                if (sImg != null)
-                {
-                    sImg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
-                    sImg.type = Image.Type.Sliced;
-                    sImg.color = new Color(0.04f, 0.05f, 0.08f, 0.98f);
-                }
-
-                var sOutline = progressSlider.GetComponent<Outline>();
-                if (sOutline == null) sOutline = progressSlider.gameObject.AddComponent<Outline>();
-                sOutline.effectColor = new Color(0.85f, 0.75f, 0.35f, 0.75f); // Viền vàng kim tinh tế
-                sOutline.effectDistance = new Vector2(1.2f, -1.2f);
+                GameObject frameObj = new GameObject("BossFrameDecoration");
+                frameObj.transform.SetParent(progressSlider.transform, false);
+                frameObj.transform.SetAsFirstSibling();
+                RectTransform fRt = frameObj.AddComponent<RectTransform>();
+                fRt.anchorMin = Vector2.zero;
+                fRt.anchorMax = Vector2.one;
+                fRt.offsetMin = new Vector2(-10f, -5f);
+                fRt.offsetMax = new Vector2(10f, 5f);
+                frameImg = frameObj.AddComponent<Image>();
+            }
+            else
+            {
+                frameImg = frameTr.GetComponent<Image>();
             }
 
-            // Thanh Fill bên trong: Trắng Bạch Kim Phát Sáng theo Asset đá rèn
-            if (progressFillImage != null)
+            if (frameImg != null)
             {
-                progressFillImage.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
-                progressFillImage.type = Image.Type.Sliced;
-                progressFillImage.color = new Color(0.98f, 0.99f, 1.0f, 1f); // Trắng sáng tinh khiết
-
-                var fOutline = progressFillImage.GetComponent<Outline>();
-                if (fOutline == null) fOutline = progressFillImage.gameObject.AddComponent<Outline>();
-                fOutline.effectColor = new Color(0.85f, 0.95f, 1f, 0.85f);
-                fOutline.effectDistance = new Vector2(1.5f, 1.5f);
+                frameImg.sprite = SoulslikeHUDStyler.GetBossBarFrameSprite();
+                frameImg.type = Image.Type.Sliced;
+                frameImg.color = new Color(1f, 0.95f, 0.85f, 1f);
+                frameImg.raycastTarget = false;
             }
+        }
 
-            // Status Text (Tip)
-            if (progressStatusText != null)
-            {
-                progressStatusText.rectTransform.anchoredPosition = new Vector2(0f, -105f);
-                progressStatusText.fontSize = 16;
-                progressStatusText.fontStyle = FontStyles.Bold;
-                progressStatusText.color = new Color(1f, 0.88f, 0.55f);
-                SoulslikeHUDStyler.SetSafeOutline(progressStatusText, 0.35f, Color.black);
-            }
+        // Thanh Fill bên trong: Trắng Bạch Kim Phát Sáng theo Asset đá rèn
+        if (progressFillImage != null)
+        {
+            progressFillImage.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+            progressFillImage.type = Image.Type.Sliced;
+            progressFillImage.color = new Color(0.98f, 0.99f, 1.0f, 1f); // Trắng sáng tinh khiết
 
-            // Percent Text
-            if (progressPercentText != null)
-            {
-                progressPercentText.rectTransform.anchoredPosition = new Vector2(0f, -185f);
-                progressPercentText.fontSize = 15;
-                progressPercentText.fontStyle = FontStyles.Bold;
-                progressPercentText.characterSpacing = 2.0f;
-                progressPercentText.color = new Color(0.96f, 0.98f, 1f);
-                SoulslikeHUDStyler.SetSafeOutline(progressPercentText, 0.35f, Color.black);
-            }
+            var fOutline = progressFillImage.GetComponent<Outline>();
+            if (fOutline == null) fOutline = progressFillImage.gameObject.AddComponent<Outline>();
+            fOutline.effectColor = new Color(0.85f, 0.95f, 1f, 0.85f);
+            fOutline.effectDistance = new Vector2(1.5f, 1.5f);
+        }
+
+        // Status Text (Tip - Nằm ngay trên thanh slider, cách xa chân tranh)
+        if (progressStatusText != null)
+        {
+            progressStatusText.gameObject.SetActive(true);
+            progressStatusText.rectTransform.anchorMin = new Vector2(0.5f, 0f);
+            progressStatusText.rectTransform.anchorMax = new Vector2(0.5f, 0f);
+            progressStatusText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            progressStatusText.rectTransform.anchoredPosition = new Vector2(0f, 95f);
+            progressStatusText.rectTransform.sizeDelta = new Vector2(800f, 28f);
+            progressStatusText.fontSize = 15;
+            progressStatusText.fontStyle = FontStyles.Bold;
+            progressStatusText.alignment = TextAlignmentOptions.Center;
+            progressStatusText.color = new Color(1f, 0.88f, 0.55f);
+            SoulslikeHUDStyler.SetSafeOutline(progressStatusText, 0.35f, Color.black);
+        }
+
+        // Percent Text (Nằm ngay dưới thanh slider)
+        if (progressPercentText != null)
+        {
+            progressPercentText.gameObject.SetActive(true);
+            progressPercentText.rectTransform.anchorMin = new Vector2(0.5f, 0f);
+            progressPercentText.rectTransform.anchorMax = new Vector2(0.5f, 0f);
+            progressPercentText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            progressPercentText.rectTransform.anchoredPosition = new Vector2(0f, 32f);
+            progressPercentText.rectTransform.sizeDelta = new Vector2(300f, 26f);
+            progressPercentText.fontSize = 14;
+            progressPercentText.fontStyle = FontStyles.Bold;
+            progressPercentText.alignment = TextAlignmentOptions.Center;
+            progressPercentText.characterSpacing = 2.0f;
+            progressPercentText.color = new Color(0.96f, 0.98f, 1f);
+            SoulslikeHUDStyler.SetSafeOutline(progressPercentText, 0.35f, Color.black);
         }
     }
 
@@ -218,6 +273,7 @@ public class GameIntroLoadingController : MonoBehaviour
     private IEnumerator IntroFlowRoutine()
     {
         _isInCinematic = true;
+        _isLoadingScene = true;
         _hasSkipped = false;
         FormatCleanVisuals();
 
@@ -233,121 +289,32 @@ public class GameIntroLoadingController : MonoBehaviour
             if (loadingProgressCg != null) loadingProgressCg.alpha = 0f;
         }
 
-        // 3 Phân Cảnh Cốt Truyện sử dụng trực tiếp tranh Digital Art Dark Fantasy nguyên bản
-        var slides = new[]
+        // Tác phẩm Digital Art nguyên bản chuẩn phong cách Dark Fantasy TCG
+        Sprite[] slides = new Sprite[]
         {
-            new {
-                sprite = _spriteVoidPhantom,
-                textVN = "Vương quốc cổ đại chìm sâu dưới tro tàn của đại lục Tàn Tích...",
-                textEN = "An ancient kingdom lies submerged in the ashes of the Ruinbound realm...",
-                duration = 3.5f
-            },
-            new {
-                sprite = _spriteInfernoFiend != null ? _spriteInfernoFiend : _spriteVoidPhantom,
-                textVN = "Lời nguyền Hắc Ám trỗi dậy, những sinh linh sa đọa gầm thét trong bóng tối...",
-                textEN = "The Dark Curse stirs, fallen horrors howling from within the abyss...",
-                duration = 3.5f
-            },
-            new {
-                sprite = _spriteBladeSaint != null ? _spriteBladeSaint : _spriteVoidPhantom,
-                textVN = "Chỉ có kẻ thức tỉnh Lõi Sức Mạnh mới có thể cứu rỗi vạn vật...",
-                textEN = "Only the awakened wielders of Ancient Augments can pierce the oblivion...",
-                duration = 3.8f
-            }
+            _spriteVoidPhantom,
+            _spriteInfernoFiend != null ? _spriteInfernoFiend : _spriteVoidPhantom,
+            _spriteBladeSaint != null ? _spriteBladeSaint : _spriteVoidPhantom
         };
 
-        bool isVi = LocalizationManager.IsVietnamese;
-
-        for (int i = 0; i < slides.Length; i++)
+        int currentSlideIndex = 0;
+        if (cinematicSlideImage != null && slides[0] != null)
         {
-            if (_hasSkipped) break;
-
-            var slide = slides[i];
-            _advanceSlideRequested = false;
-
-            if (cinematicSlideImage != null && slide.sprite != null)
+            cinematicSlideImage.sprite = slides[0];
+            cinematicSlideImage.preserveAspect = true;
+            if (_slideAspectFitter != null && slides[0].rect.height > 0)
             {
-                cinematicSlideImage.sprite = slide.sprite;
-                cinematicSlideImage.preserveAspect = true;
-                if (_slideAspectFitter != null && slide.sprite.rect.height > 0)
-                {
-                    _slideAspectFitter.aspectRatio = (float)slide.sprite.rect.width / slide.sprite.rect.height;
-                }
-            }
-
-            if (cinematicSubtitleText != null)
-            {
-                cinematicSubtitleText.text = isVi ? slide.textVN : slide.textEN;
-                SoulslikeHUDStyler.SetSafeOutline(cinematicSubtitleText, 0.45f, new Color(0.01f, 0.01f, 0.02f, 0.98f));
-            }
-
-            // Chuyển động Zoom điện ảnh chậm nhẹ (từ 1.0 -> 1.04) giữ trọn độ nét
-            float elapsed = 0f;
-            float totalDur = slide.duration;
-
-            while (elapsed < totalDur && !_hasSkipped)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float progress = elapsed / totalDur;
-
-                if (_slideRectTransform != null)
-                {
-                    float scale = Mathf.Lerp(1.0f, 1.04f, progress);
-                    _slideRectTransform.localScale = new Vector3(scale, scale, 1f);
-                }
-
-                if (_advanceSlideRequested && elapsed > 0.8f)
-                {
-                    break;
-                }
-
-                yield return null;
-            }
-
-            // Fade nhẹ nhàng chuyển tranh
-            if (cinematicSlideImage != null)
-            {
-                float fadeOut = 0.20f;
-                float f = 0f;
-                Color originalColor = cinematicSlideImage.color;
-                while (f < fadeOut && !_hasSkipped)
-                {
-                    f += Time.unscaledDeltaTime;
-                    cinematicSlideImage.color = Color.Lerp(originalColor, new Color(0.1f, 0.1f, 0.12f, 0.7f), f / fadeOut);
-                    yield return null;
-                }
-                cinematicSlideImage.color = originalColor;
+                _slideAspectFitter.aspectRatio = (float)slides[0].rect.width / slides[0].rect.height;
             }
         }
 
-        _isInCinematic = false;
-
-        // Chuyển cảnh mềm mại sang Màn Hình Loading
-        float transitionTime = 0.4f;
-        float t = 0f;
-        if (loadingProgressPanel != null) loadingProgressPanel.SetActive(true);
-
-        while (t < transitionTime)
+        // Tuyệt đối không hiển thị bất kỳ dòng chữ Subtitle nào đè lên chân tranh
+        if (cinematicSubtitleText != null)
         {
-            t += Time.unscaledDeltaTime;
-            float ratio = t / transitionTime;
-            if (cinematicCg != null) cinematicCg.alpha = 1f - ratio;
-            if (loadingProgressCg != null) loadingProgressCg.alpha = ratio;
-            yield return null;
+            cinematicSubtitleText.gameObject.SetActive(false);
         }
 
-        if (cinematicPanel != null) cinematicPanel.SetActive(false);
-        if (loadingProgressCg != null) loadingProgressCg.alpha = 1f;
-
-        // Giai đoạn 2: Thanh Tiến Trình Loading Nạp Game
-        yield return StartCoroutine(RunProgressLoadingRoutine());
-    }
-
-    private IEnumerator RunProgressLoadingRoutine()
-    {
-        _isLoadingScene = true;
         bool isVi = LocalizationManager.IsVietnamese;
-
         string[] loadingTips = new string[]
         {
             isVi ? "Đang đánh thức linh hồn tàn tích..." : "Awakening ancient ruin spirits...",
@@ -356,12 +323,15 @@ public class GameIntroLoadingController : MonoBehaviour
             isVi ? "Đang khởi hành vào vương quốc..." : "Entering the Ruinbound realm..."
         };
 
+        // BẮT ĐẦU NẠP BẤT ĐỒNG BỘ NGAY TRÊN MÀN HÌNH NÀY (1 Màn hình duy nhất chạy xuyên suốt)
         AsyncOperation asyncOp = SceneManager.LoadSceneAsync("MainMenuScene");
         asyncOp.allowSceneActivation = false;
 
         float displayProgress = 0f;
         int tipIndex = 0;
         float tipTimer = 0f;
+        float slideTimer = 0f;
+        float slideDuration = 4.0f;
 
         while (displayProgress < 1f)
         {
@@ -375,8 +345,9 @@ public class GameIntroLoadingController : MonoBehaviour
                 SoulslikeHUDStyler.SetSafeOutline(progressPercentText, 0.35f, Color.black);
             }
 
+            // Chu kỳ đổi gợi ý tip
             tipTimer += Time.unscaledDeltaTime;
-            if (tipTimer > 0.8f && tipIndex < loadingTips.Length - 1)
+            if (tipTimer > 1.2f && tipIndex < loadingTips.Length - 1)
             {
                 tipTimer = 0f;
                 tipIndex++;
@@ -388,6 +359,30 @@ public class GameIntroLoadingController : MonoBehaviour
                 SoulslikeHUDStyler.SetSafeOutline(progressStatusText, 0.30f, Color.black);
             }
 
+            // Hiệu ứng "Tranh Động Sống Động" (Living Canvas): Nhịp thở điện ảnh chậm nhẹ (1.00 -> 1.025)
+            if (_slideRectTransform != null)
+            {
+                float breath = 1.0f + 0.022f * Mathf.Sin(Time.unscaledTime * 1.6f);
+                _slideRectTransform.localScale = new Vector3(breath, breath, 1f);
+            }
+
+            // Chuyển slide tranh nếu thời gian load kéo dài qua tranh tiếp theo
+            slideTimer += Time.unscaledDeltaTime;
+            if (slideTimer > slideDuration && slides.Length > 1)
+            {
+                slideTimer = 0f;
+                currentSlideIndex = (currentSlideIndex + 1) % slides.Length;
+                if (cinematicSlideImage != null && slides[currentSlideIndex] != null)
+                {
+                    cinematicSlideImage.sprite = slides[currentSlideIndex];
+                    if (_slideAspectFitter != null && slides[currentSlideIndex].rect.height > 0)
+                    {
+                        _slideAspectFitter.aspectRatio = (float)slides[currentSlideIndex].rect.width / slides[currentSlideIndex].rect.height;
+                    }
+                }
+            }
+
+            // Hoàn tất nạp game
             if (displayProgress >= 0.999f && asyncOp.progress >= 0.9f)
             {
                 displayProgress = 1f;
@@ -401,6 +396,16 @@ public class GameIntroLoadingController : MonoBehaviour
                 break;
             }
 
+            yield return null;
+        }
+
+        // Fade out màn hình Intro sang MainMenuScene mềm mại
+        float fadeTime = 0.35f;
+        float ft = 0f;
+        while (ft < fadeTime)
+        {
+            ft += Time.unscaledDeltaTime;
+            if (cinematicCg != null) cinematicCg.alpha = 1f - (ft / fadeTime);
             yield return null;
         }
 

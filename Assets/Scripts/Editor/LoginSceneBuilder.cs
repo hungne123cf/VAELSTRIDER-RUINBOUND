@@ -430,8 +430,8 @@ public static class LoginSceneBuilder
         GameObject slideObj = new GameObject("CinematicSlide");
         slideObj.transform.SetParent(cinePanelObj.transform, false);
         var slideRt = slideObj.AddComponent<RectTransform>();
-        slideRt.anchorMin = new Vector2(0.15f, 0.12f);
-        slideRt.anchorMax = new Vector2(0.85f, 0.90f);
+        slideRt.anchorMin = new Vector2(0.12f, 0.17f);
+        slideRt.anchorMax = new Vector2(0.88f, 0.96f);
         slideRt.offsetMin = slideRt.offsetMax = Vector2.zero;
         var slideImg = slideObj.AddComponent<Image>();
         Sprite cineBg = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/UI/CardDeities/CardDeity_VoidPhantom.png");
@@ -443,7 +443,7 @@ public static class LoginSceneBuilder
         sArf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
         sArf.aspectRatio = 0.747f; // Khóa chuẩn tỉ lệ dọc 3:4, triệt tiêu 100% hiện tượng phình ngang
 
-        // Subtitle text (Story Narration)
+        // Subtitle text (Ẩn hoàn toàn theo yêu cầu để không che lấp chân tranh)
         GameObject cineTxtObj = new GameObject("CinematicSubtitle");
         cineTxtObj.transform.SetParent(cinePanelObj.transform, false);
         var ctRt = cineTxtObj.AddComponent<RectTransform>();
@@ -457,6 +457,7 @@ public static class LoginSceneBuilder
         cineTmp.color = new Color(1f, 0.92f, 0.65f);
         cineTmp.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(cineTmp, 0.45f, Color.black);
+        cineTxtObj.SetActive(false); // Bỏ vĩnh viễn dòng chữ đè lên tranh
 
         // Skip Button (Ẩn vĩnh viễn theo yêu cầu để màn hình sạch sẽ tinh tế)
         GameObject skipObj = new GameObject("Btn_SkipTrailer");
@@ -474,7 +475,7 @@ public static class LoginSceneBuilder
         var skipCg = skipObj.AddComponent<CanvasGroup>();
         skipObj.SetActive(false); // Bỏ chữ Bỏ Qua
 
-        // 9B-2. Loading Progress Panel
+        // 9B-2. Loading Progress Panel (Dormant, toàn bộ tích hợp vào CinematicPanel bên dưới tranh)
         GameObject loadPanelObj = new GameObject("LoadingProgressPanel");
         loadPanelObj.transform.SetParent(introObj.transform, false);
         var lpRt = loadPanelObj.AddComponent<RectTransform>();
@@ -483,61 +484,41 @@ public static class LoginSceneBuilder
         lpRt.sizeDelta = Vector2.zero;
         var lpCg = loadPanelObj.AddComponent<CanvasGroup>();
         var lpBg = loadPanelObj.AddComponent<Image>();
-        lpBg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg(); // Nền đá tàn tích Dark Fantasy
+        lpBg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
         lpBg.type = Image.Type.Sliced;
         lpBg.color = new Color(0.02f, 0.02f, 0.035f, 1f);
+        loadPanelObj.SetActive(false);
 
-        // Loading Title
-        GameObject loadTitleObj = new GameObject("GameTitle");
-        loadTitleObj.transform.SetParent(loadPanelObj.transform, false);
-        var ltRt = loadTitleObj.AddComponent<RectTransform>();
-        ltRt.anchorMin = new Vector2(0.5f, 0.5f);
-        ltRt.anchorMax = new Vector2(0.5f, 0.5f);
-        ltRt.pivot = new Vector2(0.5f, 0.5f);
-        ltRt.anchoredPosition = new Vector2(0f, 220f);
-        ltRt.sizeDelta = new Vector2(1000f, 90f);
-        var ltTmp = loadTitleObj.AddComponent<TextMeshProUGUI>();
-        ltTmp.text = "VAELSTRIDER: RUINBOUND";
-        ltTmp.fontSize = 46;
-        ltTmp.fontStyle = FontStyles.Bold;
-        ltTmp.alignment = TextAlignmentOptions.Center;
-        ltTmp.color = new Color(1f, 0.85f, 0.35f);
-        ltTmp.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(ltTmp, 0.45f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
-
-        GameObject loadSubObj = new GameObject("Subtitle");
-        loadSubObj.transform.SetParent(loadPanelObj.transform, false);
-        var lsRt = loadSubObj.AddComponent<RectTransform>();
-        lsRt.anchorMin = new Vector2(0.5f, 0.5f);
-        lsRt.anchorMax = new Vector2(0.5f, 0.5f);
-        lsRt.pivot = new Vector2(0.5f, 0.5f);
-        lsRt.anchoredPosition = new Vector2(0f, 165f);
-        lsRt.sizeDelta = new Vector2(800f, 35f);
-        var lsTmp = loadSubObj.AddComponent<TextMeshProUGUI>();
-        lsTmp.text = "— HÀNH TRÌNH TÀN TÍCH THƯỢNG CỔ —";
-        lsTmp.fontSize = 17;
-        lsTmp.fontStyle = FontStyles.Bold;
-        lsTmp.alignment = TextAlignmentOptions.Center;
-        lsTmp.color = new Color(0.92f, 0.45f, 0.45f);
-        lsTmp.raycastTarget = false;
-
-        // Progress Slider (Khung Đá Runic Plaque & Thanh Fill Đá Rèn Trắng Sáng Chuẩn Soulslike)
+        // Progress Slider (Khung Boss Gothic Hoàng Kim & Rãnh Obsidian & Ruột Trắng Phát Sáng Chuẩn Soulslike)
         GameObject sliderObj = new GameObject("ProgressSlider");
-        sliderObj.transform.SetParent(loadPanelObj.transform, false);
+        sliderObj.transform.SetParent(cinePanelObj.transform, false);
         var sldRt = sliderObj.AddComponent<RectTransform>();
-        sldRt.anchorMin = new Vector2(0.5f, 0.5f);
-        sldRt.anchorMax = new Vector2(0.5f, 0.5f);
+        sldRt.anchorMin = new Vector2(0.5f, 0f);
+        sldRt.anchorMax = new Vector2(0.5f, 0f);
         sldRt.pivot = new Vector2(0.5f, 0.5f);
-        sldRt.anchoredPosition = new Vector2(0f, -145f);
-        sldRt.sizeDelta = new Vector2(800f, 18f); // Thanh mảnh, sang trọng
+        sldRt.anchoredPosition = new Vector2(0f, 62f);
+        sldRt.sizeDelta = new Vector2(680f, 20f); // Thanh mảnh, sang trọng
 
+        // Rãnh đá Obsidian
         var sldBg = sliderObj.AddComponent<Image>();
-        sldBg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
+        sldBg.sprite = SoulslikeHUDStyler.GetObsidianTroughSprite();
         sldBg.type = Image.Type.Sliced;
-        sldBg.color = new Color(0.04f, 0.05f, 0.08f, 0.98f);
-        var sldOutline = sliderObj.AddComponent<Outline>();
-        sldOutline.effectColor = new Color(0.85f, 0.75f, 0.35f, 0.75f);
-        sldOutline.effectDistance = new Vector2(1.2f, -1.2f);
+        sldBg.color = new Color(0.06f, 0.07f, 0.10f, 0.96f);
+
+        // Khung viền ngoài Boss Bar Gothic
+        GameObject frameObj = new GameObject("BossFrameDecoration");
+        frameObj.transform.SetParent(sliderObj.transform, false);
+        frameObj.transform.SetAsFirstSibling();
+        RectTransform fDecorRt = frameObj.AddComponent<RectTransform>();
+        fDecorRt.anchorMin = Vector2.zero;
+        fDecorRt.anchorMax = Vector2.one;
+        fDecorRt.offsetMin = new Vector2(-10f, -5f);
+        fDecorRt.offsetMax = new Vector2(10f, 5f);
+        var frameImg = frameObj.AddComponent<Image>();
+        frameImg.sprite = SoulslikeHUDStyler.GetBossBarFrameSprite();
+        frameImg.type = Image.Type.Sliced;
+        frameImg.color = new Color(1f, 0.95f, 0.85f, 1f);
+        frameImg.raycastTarget = false;
 
         var slider = sliderObj.AddComponent<Slider>();
         slider.minValue = 0f;
@@ -568,39 +549,40 @@ public static class LoginSceneBuilder
         fillOutline.effectDistance = new Vector2(1.5f, 1.5f);
         slider.fillRect = fRt;
 
-        // Status text (Tips / Action)
+        // Status text (Tips / Action - Vị trí nằm ngay phía trên thanh tiến trình, cách xa chân tranh)
         GameObject tipObj = new GameObject("StatusText");
-        tipObj.transform.SetParent(loadPanelObj.transform, false);
+        tipObj.transform.SetParent(cinePanelObj.transform, false);
         var tipRt = tipObj.AddComponent<RectTransform>();
-        tipRt.anchorMin = new Vector2(0.5f, 0.5f);
-        tipRt.anchorMax = new Vector2(0.5f, 0.5f);
+        tipRt.anchorMin = new Vector2(0.5f, 0f);
+        tipRt.anchorMax = new Vector2(0.5f, 0f);
         tipRt.pivot = new Vector2(0.5f, 0.5f);
-        tipRt.anchoredPosition = new Vector2(0f, -120f);
-        tipRt.sizeDelta = new Vector2(800f, 32f);
+        tipRt.anchoredPosition = new Vector2(0f, 95f);
+        tipRt.sizeDelta = new Vector2(800f, 28f);
         var tipTmp = tipObj.AddComponent<TextMeshProUGUI>();
         tipTmp.text = "Đang khởi hành vào vương quốc...";
-        tipTmp.fontSize = 17;
+        tipTmp.fontSize = 15;
         tipTmp.fontStyle = FontStyles.Bold;
         tipTmp.alignment = TextAlignmentOptions.Center;
-        tipTmp.color = new Color(0.35f, 0.95f, 0.65f);
+        tipTmp.color = new Color(1f, 0.88f, 0.55f);
         tipTmp.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(tipTmp, 0.35f, Color.black);
 
-        // Percent text
+        // Percent text (Vị trí nằm ngay phía dưới thanh tiến trình)
         GameObject pctObj = new GameObject("PercentText");
-        pctObj.transform.SetParent(loadPanelObj.transform, false);
+        pctObj.transform.SetParent(cinePanelObj.transform, false);
         var pctRt = pctObj.AddComponent<RectTransform>();
-        pctRt.anchorMin = new Vector2(0.5f, 0.5f);
-        pctRt.anchorMax = new Vector2(0.5f, 0.5f);
+        pctRt.anchorMin = new Vector2(0.5f, 0f);
+        pctRt.anchorMax = new Vector2(0.5f, 0f);
         pctRt.pivot = new Vector2(0.5f, 0.5f);
-        pctRt.anchoredPosition = new Vector2(0f, -200f);
-        pctRt.sizeDelta = new Vector2(300f, 30f);
+        pctRt.anchoredPosition = new Vector2(0f, 32f);
+        pctRt.sizeDelta = new Vector2(300f, 26f);
         var pctTmp = pctObj.AddComponent<TextMeshProUGUI>();
         pctTmp.text = "0%";
-        pctTmp.fontSize = 16;
+        pctTmp.fontSize = 14;
         pctTmp.fontStyle = FontStyles.Bold;
         pctTmp.alignment = TextAlignmentOptions.Center;
-        pctTmp.color = new Color(1f, 0.95f, 0.82f);
+        pctTmp.characterSpacing = 2.0f;
+        pctTmp.color = new Color(0.96f, 0.98f, 1f);
         pctTmp.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(pctTmp, 0.35f, Color.black);
 
@@ -618,8 +600,6 @@ public static class LoginSceneBuilder
         introSo.FindProperty("progressFillImage").objectReferenceValue = fillImg;
         introSo.FindProperty("progressPercentText").objectReferenceValue = pctTmp;
         introSo.FindProperty("progressStatusText").objectReferenceValue = tipTmp;
-        introSo.FindProperty("gameTitleText").objectReferenceValue = ltTmp;
-        introSo.FindProperty("gameSubtitleText").objectReferenceValue = lsTmp;
         introSo.ApplyModifiedProperties();
 
         // 10. Link all references into LoginManager
