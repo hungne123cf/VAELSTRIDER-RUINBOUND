@@ -313,21 +313,48 @@ public class GameAutoBootstrap : MonoBehaviour
 
     public static Canvas GetMainGameplayCanvas()
     {
-        var cObj = GameObject.Find("Canvas");
-        if (cObj != null)
+        // 1. Ưu tiên tìm theo tên chuẩn của Canvas chính trong Scene
+        string[] primaryCanvasNames = new string[] { "MainMenuCanvas", "Canvas", "MainCanvas", "GameplayCanvas" };
+        foreach (var cName in primaryCanvasNames)
         {
-            var c = cObj.GetComponent<Canvas>();
-            if (c != null && c.isRootCanvas && c.enabled) return c;
+            var cObj = GameObject.Find(cName);
+            if (cObj != null)
+            {
+                var c = cObj.GetComponent<Canvas>();
+                if (c != null && c.isRootCanvas && c.enabled) return c;
+            }
         }
 
+        // 2. Tìm trong Scene đang Active (loại trừ tuyệt đối Transition, Loading, Intro, Overlay Canvas)
+        var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
         var all = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+
         foreach (var c in all)
         {
-            if (c != null && c.isRootCanvas && c.enabled && !c.name.Contains("UltiCinematic") && !c.name.Contains("GameOver") && !c.name.Contains("ShrineUpgrade"))
+            if (c == null || !c.enabled || !c.isRootCanvas) continue;
+            string n = c.name;
+            if (n.Contains("Transition") || n.Contains("Loading") || n.Contains("Intro") ||
+                n.Contains("UltiCinematic") || n.Contains("GameOver") || n.Contains("ShrineUpgrade"))
+                continue;
+
+            if (c.gameObject.scene == activeScene)
             {
                 return c;
             }
         }
+
+        // 3. Fallback: Bất kỳ Canvas nào hợp lệ không thuộc hệ thống chuyển cảnh/loading
+        foreach (var c in all)
+        {
+            if (c == null || !c.enabled || !c.isRootCanvas) continue;
+            string n = c.name;
+            if (n.Contains("Transition") || n.Contains("Loading") || n.Contains("Intro") ||
+                n.Contains("UltiCinematic") || n.Contains("GameOver") || n.Contains("ShrineUpgrade"))
+                continue;
+
+            return c;
+        }
+
         return all.Length > 0 ? all[0] : null;
     }
 

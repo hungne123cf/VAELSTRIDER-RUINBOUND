@@ -396,8 +396,7 @@ public class MainMenuManager : MonoBehaviour
         if (heroStatsSummaryText != null) heroStatsSummaryText.gameObject.SetActive(false);
 
         // Find HeroStage or center hero containers under Canvas or scene
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GetMainMenuCanvas();
         if (canvas != null)
         {
             for (int i = canvas.transform.childCount - 1; i >= 0; i--)
@@ -467,8 +466,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void EnsureDynamicBackground()
     {
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GetMainMenuCanvas();
         if (canvas != null)
         {
             // Remove any old conflicting solid black backgrounds
@@ -484,6 +482,20 @@ public class MainMenuManager : MonoBehaviour
 
             MainMenuDynamicBackground.EnsureBackground(canvas);
         }
+    }
+
+    public Canvas GetMainMenuCanvas()
+    {
+        var mmcObj = GameObject.Find("MainMenuCanvas");
+        if (mmcObj != null)
+        {
+            var c = mmcObj.GetComponent<Canvas>();
+            if (c != null && c.enabled) return c;
+        }
+        var pCanvas = GetComponentInParent<Canvas>();
+        if (pCanvas != null && pCanvas.enabled && !pCanvas.name.Contains("Transition")) return pCanvas;
+
+        return GameAutoBootstrap.GetMainGameplayCanvas();
     }
 
     public void EnsureInputSystemUIModule()
@@ -512,7 +524,14 @@ public class MainMenuManager : MonoBehaviour
         {
             inputModule = eventSystem.gameObject.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
         }
-        inputModule.AssignDefaultActions();
+        if (inputModule.actionsAsset == null)
+        {
+            inputModule.AssignDefaultActions();
+        }
+        if (inputModule.actionsAsset != null)
+        {
+            inputModule.actionsAsset.Enable();
+        }
         inputModule.enabled = true;
 #else
         var standalone = eventSystem.GetComponent<UnityEngine.EventSystems.StandaloneInputModule>();
@@ -561,8 +580,7 @@ public class MainMenuManager : MonoBehaviour
 
         if (navParent == null)
         {
-            Canvas c = GameAutoBootstrap.GetMainGameplayCanvas();
-            if (c == null) c = FindAnyObjectByType<Canvas>();
+            Canvas c = GetMainMenuCanvas();
             if (c != null) navParent = c.transform;
         }
 
@@ -583,6 +601,10 @@ public class MainMenuManager : MonoBehaviour
             pRt.pivot = new Vector2(0.5f, 0f);
             pRt.anchoredPosition = new Vector2(0f, playPosY);
             pRt.sizeDelta = new Vector2(playWidth, playHeight);
+
+            playButton.onClick.RemoveAllListeners();
+            playButton.onClick.AddListener(OnPlayClicked);
+            AttachPointerClick(playButton.gameObject, OnPlayClicked);
         }
 
         // Hide Hero, Inventory, Shop, Skills buttons as requested
@@ -603,17 +625,16 @@ public class MainMenuManager : MonoBehaviour
             }
         }
 
-        // Move Settings Button to Top-Right Corner
-        Transform topParent = mainPanel != null ? mainPanel.transform : navParent;
-        Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (rootCanvas == null) rootCanvas = FindAnyObjectByType<Canvas>();
-        if (rootCanvas != null) topParent = rootCanvas.transform;
+        // Move Settings Button to Top-Right Corner of MainMenuCanvas
+        Canvas rootCanvas = GetMainMenuCanvas();
+        Transform topParent = rootCanvas != null ? rootCanvas.transform : (mainPanel != null ? mainPanel.transform : navParent);
 
         // Phóng to nút Cài Đặt (Gear) góc trên để ngón tay dễ chạm trên điện thoại
         settingsButton = EnsureNavButton(topParent, settingsButton, "Btn_Settings", "", Vector2.zero, new Vector2(72f, 72f), new Color(0.12f, 0.16f, 0.24f, 0.94f), out settingsBtnText);
         if (settingsButton != null)
         {
             settingsButton.transform.SetParent(topParent, false);
+            settingsButton.transform.SetAsLastSibling();
             RectTransform sRt = settingsButton.GetComponent<RectTransform>();
             sRt.anchorMin = new Vector2(1f, 1f);
             sRt.anchorMax = new Vector2(1f, 1f);
@@ -622,6 +643,10 @@ public class MainMenuManager : MonoBehaviour
             sRt.sizeDelta = new Vector2(72f, 72f);
             settingsButton.gameObject.SetActive(true);
             WhiteIconLoader.ReplaceTextWithIcon(settingsButton, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(44f, 44f));
+
+            settingsButton.onClick.RemoveAllListeners();
+            settingsButton.onClick.AddListener(OnSettingsClicked);
+            AttachPointerClick(settingsButton.gameObject, OnSettingsClicked);
         }
 
         // 1. Mailbox Button (Hòm Thư Hiệp Sĩ - Nhận 5,000 Linh Hồn Tân Thủ & Giftcode)
@@ -630,6 +655,7 @@ public class MainMenuManager : MonoBehaviour
         if (mailboxButton != null)
         {
             mailboxButton.transform.SetParent(topParent, false);
+            mailboxButton.transform.SetAsLastSibling();
             RectTransform mRt = mailboxButton.GetComponent<RectTransform>();
             mRt.anchorMin = new Vector2(1f, 1f);
             mRt.anchorMax = new Vector2(1f, 1f);
@@ -638,6 +664,10 @@ public class MainMenuManager : MonoBehaviour
             mRt.sizeDelta = new Vector2(72f, 72f);
             mailboxButton.gameObject.SetActive(true);
             mailboxRedDot = CreateLobbyButtonIconAndRedDot(mailboxButton, Resources.Load<Sprite>("UI/icon_mail"), "TalkBubble", new Color(1f, 0.88f, 0.45f));
+
+            mailboxButton.onClick.RemoveAllListeners();
+            mailboxButton.onClick.AddListener(OnMailboxClicked);
+            AttachPointerClick(mailboxButton.gameObject, OnMailboxClicked);
         }
 
         // 2. Daily Login Button (Điểm Danh 7 Ngày - Reset 07:00 Sáng)
@@ -646,6 +676,7 @@ public class MainMenuManager : MonoBehaviour
         if (dailyLoginButton != null)
         {
             dailyLoginButton.transform.SetParent(topParent, false);
+            dailyLoginButton.transform.SetAsLastSibling();
             RectTransform dRt = dailyLoginButton.GetComponent<RectTransform>();
             dRt.anchorMin = new Vector2(1f, 1f);
             dRt.anchorMax = new Vector2(1f, 1f);
@@ -653,7 +684,11 @@ public class MainMenuManager : MonoBehaviour
             dRt.anchoredPosition = new Vector2(-200f, -28f);
             dRt.sizeDelta = new Vector2(72f, 72f);
             dailyLoginButton.gameObject.SetActive(true);
-            dailyLoginRedDot = CreateLobbyButtonIconAndRedDot(dailyLoginButton, Resources.Load<Sprite>("UI/icon_daily"), "Star", new Color(0.35f, 0.95f, 0.85f));
+            dailyLoginRedDot = CreateLobbyButtonIconAndRedDot(dailyLoginButton, Resources.Load<Sprite>("UI/icon_calendar"), "Calendar", new Color(1f, 0.88f, 0.45f));
+
+            dailyLoginButton.onClick.RemoveAllListeners();
+            dailyLoginButton.onClick.AddListener(OnDailyLoginClicked);
+            AttachPointerClick(dailyLoginButton.gameObject, OnDailyLoginClicked);
         }
 
         UpdateMailboxBadge();
@@ -900,8 +935,7 @@ public class MainMenuManager : MonoBehaviour
     {
         if (mapSelectPanel != null) return;
 
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GetMainMenuCanvas();
         if (canvas == null) return;
 
         var existing = canvas.transform.Find("MapSelectModalPanel");
@@ -1153,8 +1187,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void EnsureRosterPanel()
     {
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GetMainMenuCanvas();
         if (canvas == null) return;
 
         EnsureHeroSprites();
@@ -1982,8 +2015,7 @@ public class MainMenuManager : MonoBehaviour
         EquipmentItemDetailPopupUI.Hide();
         if (rosterPanel != null) rosterPanel.SetActive(false);
 
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GetMainMenuCanvas();
         if (canvas != null)
         {
             for (int i = 0; i < canvas.transform.childCount; i++)
@@ -4917,8 +4949,7 @@ public class MainMenuManager : MonoBehaviour
     {
         if (heroSelectCarouselModal != null) return;
 
-        Canvas rootCanvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (rootCanvas == null) rootCanvas = FindAnyObjectByType<Canvas>();
+        Canvas rootCanvas = GetMainMenuCanvas();
         if (rootCanvas == null) return;
 
         Transform existing = rootCanvas.transform.Find("HeroSelectCarouselModal");
@@ -5997,8 +6028,7 @@ public class MainMenuManager : MonoBehaviour
         if (mapSelectPanel != null) mapSelectPanel.SetActive(false);
         if (rosterPanel != null) rosterPanel.SetActive(false);
 
-        Canvas canvas = GameAutoBootstrap.GetMainGameplayCanvas();
-        if (canvas == null) canvas = Object.FindAnyObjectByType<Canvas>();
+        Canvas canvas = GetMainMenuCanvas();
         if (canvas != null)
         {
             var r = canvas.transform.Find("RosterModalPanel");

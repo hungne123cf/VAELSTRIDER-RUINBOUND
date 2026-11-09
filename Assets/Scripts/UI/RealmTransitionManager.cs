@@ -118,6 +118,7 @@ public class RealmTransitionManager : MonoBehaviour
         _backgroundImage = bgObj.GetComponent<Image>();
         _backgroundImage.color = Color.white;
         _backgroundImage.preserveAspect = true; // KHÔNG BAO GIỜ CO KÉO BÉO PHÌNH TRANH
+        _backgroundImage.raycastTarget = false; // Tuyệt đối không chặn raycast của UI khác
         _baseBackgroundPos = Vector2.zero;
 
         var bgArf = bgObj.GetComponent<AspectRatioFitter>();
@@ -248,6 +249,10 @@ public class RealmTransitionManager : MonoBehaviour
         _progressText.alignment = TextAlignmentOptions.Center;
         _progressText.color = new Color(0.96f, 0.98f, 1f);
         SoulslikeHUDStyler.SetSafeOutline(_progressText, 0.35f, Color.black);
+
+        // Mặc định ẩn hoàn toàn Canvas và Container khi chưa có lệnh chuyển cảnh
+        if (_containerRt != null) _containerRt.gameObject.SetActive(false);
+        if (_canvas != null) _canvas.enabled = false;
     }
 
     private void Update()
@@ -348,6 +353,10 @@ public class RealmTransitionManager : MonoBehaviour
 
         ApplyThemeVisuals(theme, targetSceneName);
 
+        // Đảm bảo Canvas và Container được bật lên cho đợt chuyển cảnh này
+        if (_canvas != null) _canvas.enabled = true;
+        if (_containerRt != null) _containerRt.gameObject.SetActive(true);
+
         // 1. Fade In Màn Chuyển Cảnh CHE PHỦ 100% MÀN HÌNH CŨ
         _canvasGroup.blocksRaycasts = true;
         _canvasGroup.interactable = true;
@@ -420,6 +429,10 @@ public class RealmTransitionManager : MonoBehaviour
         _canvasGroup.alpha = 0f;
         _canvasGroup.blocksRaycasts = false;
         _canvasGroup.interactable = false;
+
+        // Tắt hoàn toàn Container và Canvas để không bao giờ chắn raycast hoặc bị nhầm lẫn
+        if (_containerRt != null) _containerRt.gameObject.SetActive(false);
+        if (_canvas != null) _canvas.enabled = false;
 
         _isTransitioning = false;
     }
