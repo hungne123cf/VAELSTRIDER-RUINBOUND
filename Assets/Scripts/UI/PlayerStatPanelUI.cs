@@ -69,7 +69,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         panelRt.anchorMin = panelRt.anchorMax = new Vector2(0f, 1f);
         panelRt.pivot = new Vector2(0f, 1f);
         panelRt.anchoredPosition = new Vector2(24f, -234f); // Dưới cụm Avatar/Thanh máu/Lõi Nâng Cấp
-        panelRt.sizeDelta = new Vector2(456f, 226f);
+        panelRt.sizeDelta = new Vector2(580f, 280f);
 
         // Nội dung (nền + 2 cột)
         contentObj = new GameObject("Content", typeof(RectTransform), typeof(Image));
@@ -84,7 +84,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         outline.effectColor = new Color(0.62f, 0.55f, 0.40f, 0.85f);
         outline.effectDistance = new Vector2(2f, -2f);
 
-        float rowH = 40f, top = -16f;
+        float rowH = 50f, top = -16f;
         // Cột trái
         hpTxt   = CreateRow(font, 0, top - rowH * 0, new Color(0.45f, 0.95f, 0.35f), "♥");
         atkTxt  = CreateRow(font, 0, top - rowH * 1, new Color(1f, 0.55f, 0.20f), "⚔");
@@ -129,7 +129,7 @@ public class PlayerStatPanelUI : MonoBehaviour
 
     private TextMeshProUGUI CreateRow(TMP_FontAsset font, int col, float y, Color iconColor, string glyph)
     {
-        float x = col == 0 ? 18f : 250f;
+        float x = col == 0 ? 20f : 300f;
 
         GameObject icon = new GameObject("Icon", typeof(RectTransform), typeof(Image));
         icon.transform.SetParent(contentObj.transform, false);
@@ -137,7 +137,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         iRt.anchorMin = iRt.anchorMax = new Vector2(0f, 1f);
         iRt.pivot = new Vector2(0f, 1f);
         iRt.anchoredPosition = new Vector2(x, y);
-        iRt.sizeDelta = new Vector2(32f, 32f);
+        iRt.sizeDelta = new Vector2(40f, 40f);
         var img = icon.GetComponent<Image>();
         img.sprite = GetPixelIcon(glyph, iconColor);
         img.color = Color.white;
@@ -149,11 +149,11 @@ public class PlayerStatPanelUI : MonoBehaviour
         var tRt = t.GetComponent<RectTransform>();
         tRt.anchorMin = tRt.anchorMax = new Vector2(0f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.anchoredPosition = new Vector2(x + 42f, y + 2f);
-        tRt.sizeDelta = new Vector2(185f, 36f);
+        tRt.anchoredPosition = new Vector2(x + 50f, y + 4f);
+        tRt.sizeDelta = new Vector2(215f, 40f);
         var tmp = t.AddComponent<TextMeshProUGUI>();
         if (font != null) tmp.font = font;
-        tmp.fontSize = 24.5f;
+        tmp.fontSize = 28f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = new Color(0.95f, 0.92f, 0.85f);
         tmp.alignment = TextAlignmentOptions.Left;

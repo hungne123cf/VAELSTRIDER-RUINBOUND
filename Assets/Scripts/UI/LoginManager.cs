@@ -134,16 +134,35 @@ public class LoginManager : MonoBehaviour
         if (titleText != null)
         {
             SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
-            titleText.fontSize = 92f;
+            titleText.fontSize = 86f;
             titleText.color = new Color(0.98f, 0.88f, 0.50f, 1f);
             titleText.overflowMode = TextOverflowModes.Overflow;
             SoulslikeHUDStyler.SetSafeOutline(titleText, 0.0f, Color.black);
+            RectTransform titleRt = titleText.GetComponent<RectTransform>();
+            if (titleRt != null)
+            {
+                titleRt.anchorMin = new Vector2(0.5f, 0.5f);
+                titleRt.anchorMax = new Vector2(0.5f, 0.5f);
+                titleRt.pivot = new Vector2(0.5f, 0.5f);
+                titleRt.anchoredPosition = new Vector2(0f, 350f);
+                titleRt.sizeDelta = new Vector2(1300f, 100f);
+            }
+
             if (subtitleText != null)
             {
-                subtitleText.fontSize = 40f;
+                subtitleText.fontSize = 32f;
                 subtitleText.color = new Color(0.94f, 0.92f, 0.88f, 0.95f);
                 subtitleText.overflowMode = TextOverflowModes.Overflow;
                 SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.0f, Color.black);
+                RectTransform subRt = subtitleText.GetComponent<RectTransform>();
+                if (subRt != null)
+                {
+                    subRt.anchorMin = new Vector2(0.5f, 0.5f);
+                    subRt.anchorMax = new Vector2(0.5f, 0.5f);
+                    subRt.pivot = new Vector2(0.5f, 0.5f);
+                    subRt.anchoredPosition = new Vector2(0f, 260f);
+                    subRt.sizeDelta = new Vector2(1100f, 50f);
+                }
             }
         }
 
@@ -195,13 +214,12 @@ public class LoginManager : MonoBehaviour
 
     private void Update()
     {
-        // Hiệu ứng nhịp thở cho chữ TAP TO START
+        // Hiệu ứng nhịp thở cho chữ TAP TO START - Giữ độ sáng từ 0.65 đến 1.0 để luôn nổi bật trên nền nâu
         if (tapToStartPanel != null && tapToStartPanel.activeSelf && tapToStartText != null && !isStartingGame)
         {
             pulseTimer += Time.deltaTime * 3.5f;
-            float alpha = Mathf.PingPong(pulseTimer, 0.7f) + 0.3f;
-            Color c = tapToStartText.color;
-            c.a = alpha;
+            float alpha = Mathf.PingPong(pulseTimer, 0.35f) + 0.65f;
+            Color c = new Color(1f, 0.90f, 0.45f, alpha);
             tapToStartText.color = c;
 
             // Hỗ trợ nhấn phím bất kỳ (Space, Enter, Gamepad, click chuột) để bắt đầu game
@@ -409,18 +427,30 @@ public class LoginManager : MonoBehaviour
         if (titleText != null)
         {
             titleText.text = LocalizationManager.Get("APP_TITLE");
-            titleText.fontSize = 92f;
+            titleText.fontSize = 86f;
             titleText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(titleText, true);
             SoulslikeHUDStyler.SetSafeOutline(titleText, 0.0f, Color.black);
+            RectTransform titleRt = titleText.GetComponent<RectTransform>();
+            if (titleRt != null)
+            {
+                titleRt.anchoredPosition = new Vector2(0f, 350f);
+                titleRt.sizeDelta = new Vector2(1300f, 100f);
+            }
         }
         if (subtitleText != null)
         {
             subtitleText.text = LocalizationManager.Get("LOGIN_SUBTITLE");
-            subtitleText.fontSize = 40f;
+            subtitleText.fontSize = 32f;
             subtitleText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(subtitleText);
             SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.0f, Color.black);
+            RectTransform subRt = subtitleText.GetComponent<RectTransform>();
+            if (subRt != null)
+            {
+                subRt.anchoredPosition = new Vector2(0f, 260f);
+                subRt.sizeDelta = new Vector2(1100f, 50f);
+            }
         }
         if (tapToStartText != null)
         {
@@ -428,6 +458,12 @@ public class LoginManager : MonoBehaviour
             tapToStartText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(tapToStartText);
             SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.0f, Color.black);
+            RectTransform tRt = tapToStartText.GetComponent<RectTransform>();
+            if (tRt != null)
+            {
+                tRt.anchoredPosition = new Vector2(0f, -220f);
+                tRt.sizeDelta = new Vector2(1100f, 140f);
+            }
         }
 
         if (tabLoginTxt != null) tabLoginTxt.text = LocalizationManager.T("ĐĂNG NHẬP", "LOGIN");

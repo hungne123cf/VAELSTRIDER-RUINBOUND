@@ -18,6 +18,11 @@ public class MinimapHUD : MonoBehaviour
     /// </summary>
     public static bool EnableMinimapHUD = true;
 
+    // --- DỮ LIỆU ĐỊA HÌNH CHIA SẺ VỚI FULLSCREEN MAP ---
+    public static Sprite SharedTerrainSprite { get; private set; }
+    public static Vector2 SharedTerrainOriginWorld { get; private set; }
+    public static Vector2 SharedTerrainSizeWorld { get; private set; }
+
     [Header("Minimap Settings")]
     [SerializeField] private float radarRadius = 35f; // Bán kính quét thực tế trong game (35m)
     [SerializeField] private float mapUiRadius = 56f;  // Bán kính hiển thị trên Minimap UI (pixel)
@@ -226,6 +231,12 @@ public class MinimapHUD : MonoBehaviour
         terrainPixelsPerUnit = (mapUiRadius / radarRadius);
 
         Sprite terrSprite = Sprite.Create(tex, new Rect(0, 0, texW, texH), Vector2.zero);
+
+        // Lưu dữ liệu chia sẻ với FullscreenMapUI
+        SharedTerrainSprite = terrSprite;
+        SharedTerrainOriginWorld = terrainOriginWorld;
+        SharedTerrainSizeWorld = new Vector2(widthCells, heightCells);
+
         if (terrainMapImg != null)
         {
             terrainMapImg.sprite = terrSprite;
@@ -235,6 +246,29 @@ public class MinimapHUD : MonoBehaviour
         {
             terrainMapRt.sizeDelta = new Vector2(widthCells, heightCells) * terrainPixelsPerUnit;
         }
+    }
+
+    public static Sprite GetOrBuildTerrainSprite(out Vector2 origin, out Vector2 size)
+    {
+        if (SharedTerrainSprite != null)
+        {
+            origin = SharedTerrainOriginWorld;
+            size = SharedTerrainSizeWorld;
+            return SharedTerrainSprite;
+        }
+
+        if (Instance != null)
+        {
+            Instance.BuildTerrainMap();
+            origin = SharedTerrainOriginWorld;
+            size = SharedTerrainSizeWorld;
+            return SharedTerrainSprite;
+        }
+
+        // Quét độc lập nếu Instance chưa có
+        origin = Vector2.zero;
+        size = Vector2.zero;
+        return null;
     }
 
     private void FindPlayer()

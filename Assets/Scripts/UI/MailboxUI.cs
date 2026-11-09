@@ -301,7 +301,7 @@ public class MailboxUI : MonoBehaviour
         wRt.anchorMax = new Vector2(0.5f, 0.5f);
         wRt.pivot = new Vector2(0.5f, 0.5f);
         wRt.anchoredPosition = Vector2.zero;
-        wRt.sizeDelta = new Vector2(1160f, 640f);
+        wRt.sizeDelta = new Vector2(1840f, 1020f);
 
         Image winImg = win.GetComponent<Image>();
         winImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -313,11 +313,11 @@ public class MailboxUI : MonoBehaviour
         winOut.effectColor = new Color(0.85f, 0.70f, 0.32f, 0.95f);
         winOut.effectDistance = new Vector2(2f, -2f);
 
-        // --- TOP NAVIGATION HEADER (Height 70px) ---
+        // --- TOP NAVIGATION HEADER (Height 85px) ---
         BuildTopHeader(win.transform);
 
         // Filigree Divider under Header
-        SoulslikeHUDStyler.AddFiligreeDivider(win.transform, new Vector2(0f, -70f), new Vector2(1120f, 6f));
+        SoulslikeHUDStyler.AddFiligreeDivider(win.transform, new Vector2(0f, -85f), new Vector2(1760f, 8f));
 
         // --- TAB 1 CONTAINER: THƯ & QUÀ TẶNG ---
         tabContentMails = new GameObject("TabContent_Mails", typeof(RectTransform));
@@ -325,8 +325,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform t1Rt = tabContentMails.GetComponent<RectTransform>();
         t1Rt.anchorMin = Vector2.zero;
         t1Rt.anchorMax = Vector2.one;
-        t1Rt.offsetMin = new Vector2(20f, 15f);
-        t1Rt.offsetMax = new Vector2(-20f, -76f);
+        t1Rt.offsetMin = new Vector2(25f, 20f);
+        t1Rt.offsetMax = new Vector2(-25f, -95f);
 
         BuildMailsTab(tabContentMails.transform);
 
@@ -336,8 +336,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform t2Rt = tabContentNotices.GetComponent<RectTransform>();
         t2Rt.anchorMin = Vector2.zero;
         t2Rt.anchorMax = Vector2.one;
-        t2Rt.offsetMin = new Vector2(20f, 15f);
-        t2Rt.offsetMax = new Vector2(-20f, -76f);
+        t2Rt.offsetMin = new Vector2(25f, 20f);
+        t2Rt.offsetMax = new Vector2(-25f, -95f);
 
         BuildNoticesTab(tabContentNotices.transform);
 
@@ -347,8 +347,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform t3Rt = tabContentGiftcode.GetComponent<RectTransform>();
         t3Rt.anchorMin = Vector2.zero;
         t3Rt.anchorMax = Vector2.one;
-        t3Rt.offsetMin = new Vector2(20f, 15f);
-        t3Rt.offsetMax = new Vector2(-20f, -76f);
+        t3Rt.offsetMin = new Vector2(25f, 20f);
+        t3Rt.offsetMax = new Vector2(-25f, -95f);
 
         BuildGiftcodeTab(tabContentGiftcode.transform);
 
@@ -375,7 +375,7 @@ public class MailboxUI : MonoBehaviour
         hRt.anchorMax = new Vector2(1f, 1f);
         hRt.pivot = new Vector2(0.5f, 1f);
         hRt.anchoredPosition = Vector2.zero;
-        hRt.sizeDelta = new Vector2(0f, 70f);
+        hRt.sizeDelta = new Vector2(0f, 85f);
 
         // Title on the Left: Crest Icon + Text
         GameObject titleGroup = new GameObject("TitleGroup", typeof(RectTransform));
@@ -384,8 +384,8 @@ public class MailboxUI : MonoBehaviour
         tgRt.anchorMin = new Vector2(0f, 0.5f);
         tgRt.anchorMax = new Vector2(0f, 0.5f);
         tgRt.pivot = new Vector2(0f, 0.5f);
-        tgRt.anchoredPosition = new Vector2(24f, 0f);
-        tgRt.sizeDelta = new Vector2(300f, 50f);
+        tgRt.anchoredPosition = new Vector2(28f, 0f);
+        tgRt.sizeDelta = new Vector2(400f, 56f);
 
         // Royal Mail Crest Icon
         GameObject iconObj = new GameObject("CrestIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -395,7 +395,7 @@ public class MailboxUI : MonoBehaviour
         iRt.anchorMax = new Vector2(0f, 0.5f);
         iRt.pivot = new Vector2(0f, 0.5f);
         iRt.anchoredPosition = new Vector2(0f, 0f);
-        iRt.sizeDelta = new Vector2(38f, 38f);
+        iRt.sizeDelta = new Vector2(48f, 48f);
 
         Image iImg = iconObj.GetComponent<Image>();
         iImg.sprite = GetMailIconSprite();
@@ -407,12 +407,12 @@ public class MailboxUI : MonoBehaviour
         RectTransform ttRt = tTxtObj.GetComponent<RectTransform>();
         ttRt.anchorMin = new Vector2(0f, 0f);
         ttRt.anchorMax = new Vector2(1f, 1f);
-        ttRt.offsetMin = new Vector2(46f, 0f);
+        ttRt.offsetMin = new Vector2(58f, 0f);
         ttRt.offsetMax = Vector2.zero;
 
         var ttTmp = tTxtObj.AddComponent<TextMeshProUGUI>();
         ttTmp.text = isVi ? "<b>HÒM THƯ HOÀNG GIA</b>" : "<b>ROYAL MAILBOX</b>";
-        ttTmp.fontSize = 20f;
+        ttTmp.fontSize = 26f;
         ttTmp.color = new Color(1f, 0.88f, 0.45f);
         ttTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -424,25 +424,28 @@ public class MailboxUI : MonoBehaviour
         tbRt.anchorMax = new Vector2(0.5f, 0.5f);
         tbRt.pivot = new Vector2(0.5f, 0.5f);
         tbRt.anchoredPosition = new Vector2(40f, 0f);
-        tbRt.sizeDelta = new Vector2(580f, 46f);
+        tbRt.sizeDelta = new Vector2(760f, 56f);
 
         // Tab 1: THƯ & QUÀ TẶNG
         tabBtnMailsBg = CreateTabButton(tabsGroup.transform, "Tab_Mails", 
             isVi ? "<b>THƯ & QUÀ TẶNG</b>" : "<b>MAILS & GIFTS</b>", 
-            new Vector2(-190f, 0f), new Vector2(180f, 44f), 
+            new Vector2(-250f, 0f), new Vector2(235f, 52f), 
             () => SwitchTab(MailTab.MailsAndGifts), out tabBtnMailsText, out tabMailsRedDot);
+        tabBtnMailsText.fontSize = 20f;
 
         // Tab 2: THÔNG BÁO HỆ THỐNG
         tabBtnNoticesBg = CreateTabButton(tabsGroup.transform, "Tab_Notices", 
             isVi ? "<b>THÔNG BÁO</b>" : "<b>NOTICES</b>", 
-            new Vector2(0f, 0f), new Vector2(180f, 44f), 
+            new Vector2(0f, 0f), new Vector2(235f, 52f), 
             () => SwitchTab(MailTab.SystemNotices), out tabBtnNoticesText, out _);
+        tabBtnNoticesText.fontSize = 20f;
 
         // Tab 3: MÃ QUÀ TẶNG
         tabBtnGiftcodeBg = CreateTabButton(tabsGroup.transform, "Tab_Giftcode", 
             isVi ? "<b>MÃ QUÀ TẶNG</b>" : "<b>GIFTCODES</b>", 
-            new Vector2(190f, 0f), new Vector2(180f, 44f), 
+            new Vector2(250f, 0f), new Vector2(235f, 52f), 
             () => SwitchTab(MailTab.GiftcodeHub), out tabBtnGiftcodeText, out _);
+        tabBtnGiftcodeText.fontSize = 20f;
 
         // Royal Runic Close Button [✕] at Top Right
         GameObject closeBtnObj = new GameObject("Btn_Close", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -452,8 +455,8 @@ public class MailboxUI : MonoBehaviour
         cRt.anchorMin = new Vector2(1f, 0.5f);
         cRt.anchorMax = new Vector2(1f, 0.5f);
         cRt.pivot = new Vector2(1f, 0.5f);
-        cRt.anchoredPosition = new Vector2(-22f, 0f);
-        cRt.sizeDelta = new Vector2(48f, 48f);
+        cRt.anchoredPosition = new Vector2(-28f, 0f);
+        cRt.sizeDelta = new Vector2(62f, 62f);
 
         Image cImg = closeBtnObj.GetComponent<Image>();
         cImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -612,7 +615,7 @@ public class MailboxUI : MonoBehaviour
     {
         bool isVi = LocalizationManager.IsVietnamese;
 
-        // --- LEFT COLUMN: Mail List (Width 420px) ---
+        // --- LEFT COLUMN: Mail List (Width 580px Fullscreen) ---
         GameObject leftCol = new GameObject("LeftColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         leftCol.transform.SetParent(parent, false);
         RectTransform lcRt = leftCol.GetComponent<RectTransform>();
@@ -620,7 +623,7 @@ public class MailboxUI : MonoBehaviour
         lcRt.anchorMax = new Vector2(0f, 1f);
         lcRt.pivot = new Vector2(0f, 0.5f);
         lcRt.anchoredPosition = new Vector2(0f, 0f);
-        lcRt.sizeDelta = new Vector2(420f, 0f);
+        lcRt.sizeDelta = new Vector2(580f, 0f);
 
         Image lcImg = leftCol.GetComponent<Image>();
         lcImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -639,7 +642,7 @@ public class MailboxUI : MonoBehaviour
         lhRt.anchorMax = new Vector2(1f, 1f);
         lhRt.pivot = new Vector2(0.5f, 1f);
         lhRt.anchoredPosition = new Vector2(0f, -8f);
-        lhRt.sizeDelta = new Vector2(-24f, 32f);
+        lhRt.sizeDelta = new Vector2(-24f, 36f);
 
         GameObject lhTxtObj = new GameObject("CounterText", typeof(RectTransform), typeof(CanvasRenderer));
         lhTxtObj.transform.SetParent(listHeadObj.transform, false);
@@ -649,7 +652,7 @@ public class MailboxUI : MonoBehaviour
         lhtRt.sizeDelta = Vector2.zero;
 
         mailCounterText = lhTxtObj.AddComponent<TextMeshProUGUI>();
-        mailCounterText.fontSize = 12.5f;
+        mailCounterText.fontSize = 20f;
         mailCounterText.color = new Color(0.75f, 0.85f, 0.95f);
         mailCounterText.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -659,8 +662,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform srRt = scrollRoot.GetComponent<RectTransform>();
         srRt.anchorMin = new Vector2(0f, 0f);
         srRt.anchorMax = new Vector2(1f, 1f);
-        srRt.offsetMin = new Vector2(8f, 62f);
-        srRt.offsetMax = new Vector2(-8f, -44f);
+        srRt.offsetMin = new Vector2(8f, 78f);
+        srRt.offsetMax = new Vector2(-8f, -48f);
 
         ScrollRect sRect = scrollRoot.GetComponent<ScrollRect>();
         sRect.horizontal = false;
@@ -697,8 +700,8 @@ public class MailboxUI : MonoBehaviour
         abRt.anchorMin = new Vector2(0f, 0f);
         abRt.anchorMax = new Vector2(1f, 0f);
         abRt.pivot = new Vector2(0.5f, 0f);
-        abRt.anchoredPosition = new Vector2(0f, 8f);
-        abRt.sizeDelta = new Vector2(-16f, 48f);
+        abRt.anchoredPosition = new Vector2(0f, 10f);
+        abRt.sizeDelta = new Vector2(-20f, 56f);
 
         // Nút NHẬN TẤT CẢ (Claim All) - Radiant Gold
         GameObject claimAllBtnObj = new GameObject("Btn_ClaimAll", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -708,7 +711,7 @@ public class MailboxUI : MonoBehaviour
         caRt.anchorMax = new Vector2(0f, 0.5f);
         caRt.pivot = new Vector2(0f, 0.5f);
         caRt.anchoredPosition = new Vector2(0f, 0f);
-        caRt.sizeDelta = new Vector2(230f, 44f);
+        caRt.sizeDelta = new Vector2(300f, 52f);
 
         Image caImg = claimAllBtnObj.GetComponent<Image>();
         caImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -728,7 +731,7 @@ public class MailboxUI : MonoBehaviour
         var catTmp = catObj.AddComponent<TextMeshProUGUI>();
         catTmp.raycastTarget = false;
         catTmp.text = isVi ? "<b>NHẬN TẤT CẢ</b>" : "<b>CLAIM ALL</b>";
-        catTmp.fontSize = 13.5f;
+        catTmp.fontSize = 20f;
         catTmp.alignment = TextAlignmentOptions.Center;
         catTmp.color = new Color(0.12f, 0.08f, 0.02f);
 
@@ -745,7 +748,7 @@ public class MailboxUI : MonoBehaviour
         drRt.anchorMax = new Vector2(1f, 0.5f);
         drRt.pivot = new Vector2(1f, 0.5f);
         drRt.anchoredPosition = new Vector2(0f, 0f);
-        drRt.sizeDelta = new Vector2(160f, 44f);
+        drRt.sizeDelta = new Vector2(230f, 52f);
 
         Image drImg = delReadBtnObj.GetComponent<Image>();
         drImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -765,7 +768,7 @@ public class MailboxUI : MonoBehaviour
         var drtTmp = drtObj.AddComponent<TextMeshProUGUI>();
         drtTmp.raycastTarget = false;
         drtTmp.text = isVi ? "<b>XÓA ĐÃ ĐỌC</b>" : "<b>DELETE READ</b>";
-        drtTmp.fontSize = 12.5f;
+        drtTmp.fontSize = 18f;
         drtTmp.alignment = TextAlignmentOptions.Center;
         drtTmp.color = Color.white;
 
@@ -774,7 +777,7 @@ public class MailboxUI : MonoBehaviour
         delReadBtn.onClick.AddListener(OnDeleteAllReadMails);
         AttachPointerClick(delReadBtnObj, OnDeleteAllReadMails);
 
-        // --- RIGHT COLUMN: Inspection Panel (Width 685px) ---
+        // --- RIGHT COLUMN: Inspection Panel (Width 1180px Fullscreen) ---
         GameObject rightCol = new GameObject("RightColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rightCol.transform.SetParent(parent, false);
         RectTransform rcRt = rightCol.GetComponent<RectTransform>();
@@ -782,7 +785,7 @@ public class MailboxUI : MonoBehaviour
         rcRt.anchorMax = new Vector2(1f, 1f);
         rcRt.pivot = new Vector2(1f, 0.5f);
         rcRt.anchoredPosition = new Vector2(0f, 0f);
-        rcRt.sizeDelta = new Vector2(685f, 0f);
+        rcRt.sizeDelta = new Vector2(1180f, 0f);
 
         Image rcImg = rightCol.GetComponent<Image>();
         rcImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -1031,8 +1034,8 @@ public class MailboxUI : MonoBehaviour
         esiRt.anchorMin = new Vector2(0.5f, 0.5f);
         esiRt.anchorMax = new Vector2(0.5f, 0.5f);
         esiRt.pivot = new Vector2(0.5f, 0.5f);
-        esiRt.anchoredPosition = new Vector2(0f, 60f);
-        esiRt.sizeDelta = new Vector2(80f, 80f);
+        esiRt.anchoredPosition = new Vector2(0f, 90f);
+        esiRt.sizeDelta = new Vector2(140f, 140f);
 
         Image esiImg = esIconObj.GetComponent<Image>();
         esiImg.sprite = GetMailIconSprite();
@@ -1046,11 +1049,11 @@ public class MailboxUI : MonoBehaviour
         estRt.anchorMax = new Vector2(0.5f, 0.5f);
         estRt.pivot = new Vector2(0.5f, 0.5f);
         estRt.anchoredPosition = new Vector2(0f, -8f);
-        estRt.sizeDelta = new Vector2(500f, 32f);
+        estRt.sizeDelta = new Vector2(800f, 44f);
 
         var estTmp = estObj.AddComponent<TextMeshProUGUI>();
         estTmp.text = isVi ? "<b>HÒM THƯ HIỆP SĨ TRỐNG</b>" : "<b>KNIGHT'S MAILBOX IS EMPTY</b>";
-        estTmp.fontSize = 17f;
+        estTmp.fontSize = 28f;
         estTmp.color = new Color(1f, 0.88f, 0.45f, 0.85f);
         estTmp.alignment = TextAlignmentOptions.Center;
 
@@ -1061,15 +1064,15 @@ public class MailboxUI : MonoBehaviour
         essRt.anchorMin = new Vector2(0.5f, 0.5f);
         essRt.anchorMax = new Vector2(0.5f, 0.5f);
         essRt.pivot = new Vector2(0.5f, 0.5f);
-        essRt.anchoredPosition = new Vector2(0f, -44f);
-        essRt.sizeDelta = new Vector2(540f, 48f);
+        essRt.anchoredPosition = new Vector2(0f, -65f);
+        essRt.sizeDelta = new Vector2(900f, 65f);
 
         var essTmp = essObj.AddComponent<TextMeshProUGUI>();
         essTmp.text = isVi 
             ? "Hiện không có thư hoặc quà mới nào từ Hội Đồng Vaelstrider.\nMọi thông báo và phần thưởng tri ân sẽ được gửi tại đây."
             : "No active mails or gifts from the Council of Vaelstrider.\nSystem notices and event rewards will appear here.";
-        essTmp.fontSize = 13f;
-        essTmp.lineSpacing = 12f;
+        essTmp.fontSize = 20f;
+        essTmp.lineSpacing = 14f;
         essTmp.color = new Color(0.60f, 0.70f, 0.82f, 0.75f);
         essTmp.alignment = TextAlignmentOptions.Center;
 
@@ -1080,8 +1083,8 @@ public class MailboxUI : MonoBehaviour
         rstRt.anchorMin = new Vector2(0.5f, 0.5f);
         rstRt.anchorMax = new Vector2(0.5f, 0.5f);
         rstRt.pivot = new Vector2(0.5f, 0.5f);
-        rstRt.anchoredPosition = new Vector2(0f, -100f);
-        rstRt.sizeDelta = new Vector2(240f, 44f);
+        rstRt.anchoredPosition = new Vector2(0f, -145f);
+        rstRt.sizeDelta = new Vector2(340f, 65f);
 
         Image rstImg = rstBtnObj.GetComponent<Image>();
         rstImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1090,7 +1093,7 @@ public class MailboxUI : MonoBehaviour
 
         var rstOut = rstBtnObj.AddComponent<Outline>();
         rstOut.effectColor = new Color(0.55f, 0.75f, 1f, 0.65f);
-        rstOut.effectDistance = new Vector2(1.2f, -1.2f);
+        rstOut.effectDistance = new Vector2(1.5f, -1.5f);
 
         GameObject rsttObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
         rsttObj.transform.SetParent(rstBtnObj.transform, false);
@@ -1100,7 +1103,7 @@ public class MailboxUI : MonoBehaviour
         rsttRt.sizeDelta = Vector2.zero;
         var rsttTmp = rsttObj.AddComponent<TextMeshProUGUI>();
         rsttTmp.text = isVi ? "<b>↺ KHÔI PHỤC THƯ MẪU</b>" : "<b>↺ RESTORE MAILS</b>";
-        rsttTmp.fontSize = 13f;
+        rsttTmp.fontSize = 20f;
         rsttTmp.alignment = TextAlignmentOptions.Center;
         rsttTmp.color = Color.white;
 

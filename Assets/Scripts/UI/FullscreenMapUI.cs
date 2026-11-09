@@ -237,6 +237,30 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
 
         if (roomsContainerRt == null) return;
 
+        // 0. ĐỒNG BỘ 100% ĐỊA HÌNH THỰC TẾ TỪ TILEMAP (GIỐNG HỆT MINIMAP RADAR)
+        Vector2 terrOrigin, terrSize;
+        Sprite terrSprite = MinimapHUD.GetOrBuildTerrainSprite(out terrOrigin, out terrSize);
+        if (terrSprite != null && terrSize.x > 0 && terrSize.y > 0)
+        {
+            GameObject terrObj = new GameObject("RealtimeTerrainGraphic", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            terrObj.layer = 5;
+            terrObj.transform.SetParent(roomsContainerRt, false);
+
+            RectTransform tRt = terrObj.GetComponent<RectTransform>();
+            tRt.anchorMin = new Vector2(0.5f, 0.5f);
+            tRt.anchorMax = new Vector2(0.5f, 0.5f);
+            tRt.pivot = new Vector2(0f, 0f); // Pivot góc dưới trái tại minX, minY
+            tRt.anchoredPosition = terrOrigin * MAP_SCALE;
+            tRt.sizeDelta = terrSize * MAP_SCALE;
+
+            Image tImg = terrObj.GetComponent<Image>();
+            tImg.sprite = terrSprite;
+            tImg.type = Image.Type.Simple;
+            tImg.color = Color.white;
+
+            roomVisuals.Add(terrObj);
+        }
+
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
         // 1. Kiểm tra nếu có DungeonRoomManager (Map 1)
@@ -268,15 +292,15 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
 
                 if (isCurrent)
                 {
-                    rImg.color = new Color(0.15f, 0.65f, 1f, 0.45f); // Phòng hiện tại: Lam ngọc sáng
+                    rImg.color = new Color(0.15f, 0.65f, 1f, 0.35f); // Lam ngọc viền phòng hiện tại
                 }
                 else if (isCleared)
                 {
-                    rImg.color = new Color(0.12f, 0.5f, 0.25f, 0.35f); // Đã dọn sạch: Xanh lá mờ
+                    rImg.color = new Color(0.12f, 0.5f, 0.25f, 0.20f); // Đã dọn sạch: Xanh lá mờ
                 }
                 else
                 {
-                    rImg.color = new Color(0.18f, 0.12f, 0.14f, 0.40f); // Chưa vào / Chưa dọn: Tối
+                    rImg.color = new Color(0.18f, 0.12f, 0.14f, 0.25f); // Chưa vào: Tối
                 }
 
                 // Nhãn tên phòng
@@ -288,31 +312,31 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
                 lblRt.anchorMax = new Vector2(0.5f, 1f);
                 lblRt.pivot = new Vector2(0.5f, 1f);
                 lblRt.anchoredPosition = new Vector2(0f, -8f);
-                lblRt.sizeDelta = new Vector2(180f, 30f);
+                lblRt.sizeDelta = new Vector2(240f, 36f);
 
                 var tmp = labelObj.AddComponent<TextMeshProUGUI>();
                 tmp.text = $"<b>{r.GetLocalizedTitle()}</b>";
-                tmp.fontSize = 14f;
+                tmp.fontSize = 20f;
                 tmp.alignment = TextAlignmentOptions.Center;
-                tmp.color = isCurrent ? new Color(1f, 0.9f, 0.3f) : new Color(0.85f, 0.85f, 0.85f, 0.8f);
+                tmp.color = isCurrent ? new Color(1f, 0.9f, 0.3f) : new Color(0.92f, 0.92f, 0.92f, 0.9f);
 
                 roomVisuals.Add(rObj);
             }
         }
         else if (sceneName.Contains("Map2") || sceneName.Contains("Valley"))
         {
-            // 2. Map 2 (Thung Lũng Cổ Xưa) - Hiển thị 5 Khu Vực Chiến Thuật & Hành Lang Liên Thông
+            // 2. Map 2 (Thung Lũng Cổ Xưa) - Hiển thị các Khu Vực Chiến Thuật & Hành Lang
             var map2Zones = new (string titleVN, string titleEN, Vector2 center, Vector2 size, Color color)[]
             {
-                ("KHU TRUNG TÂM", "STARTING SANCTUARY", new Vector2(0f, 0f), new Vector2(38f, 26f), new Color(0.18f, 0.45f, 0.70f, 0.35f)),
-                ("HÀNH LANG NAM", "SOUTH PASSAGE", new Vector2(0f, -16.5f), new Vector2(8f, 7f), new Color(0.15f, 0.25f, 0.40f, 0.30f)),
-                ("PHÒNG QUÁI NAM", "SOUTH TRIAL CHAMBER", new Vector2(0f, -28f), new Vector2(24f, 16f), new Color(0.60f, 0.22f, 0.18f, 0.35f)),
-                ("LỐI VÀO ĐẠI ĐIỆN", "SANCTUM GATE", new Vector2(0f, -39f), new Vector2(8f, 6f), new Color(0.15f, 0.25f, 0.40f, 0.30f)),
-                ("ĐẠI ĐIỆN GOR'MOK", "GOR'MOK LAIR [BOSS]", new Vector2(0f, -53f), new Vector2(28f, 22f), new Color(0.75f, 0.15f, 0.20f, 0.45f)),
-                ("HÀNH LANG ĐÔNG", "EAST PASSAGE", new Vector2(22.5f, 0f), new Vector2(7f, 8f), new Color(0.15f, 0.25f, 0.40f, 0.30f)),
-                ("PHÒNG QUÁI ĐÔNG", "EAST BATTLE ROOM", new Vector2(35f, 0f), new Vector2(18f, 20f), new Color(0.60f, 0.22f, 0.18f, 0.35f)),
-                ("LỐI QUA BÓNG MA", "SHADOW GATEWAY", new Vector2(47f, 0f), new Vector2(6f, 8f), new Color(0.15f, 0.25f, 0.40f, 0.30f)),
-                ("SÀN ĐẤU BÓNG MA", "SHADOW DOPPELGANGER [BOSS]", new Vector2(62f, 0f), new Vector2(24f, 24f), new Color(0.55f, 0.15f, 0.65f, 0.45f))
+                ("KHU TRUNG TÂM", "STARTING SANCTUARY", new Vector2(0f, 0f), new Vector2(38f, 26f), new Color(0.18f, 0.45f, 0.70f, 0.22f)),
+                ("HÀNH LANG NAM", "SOUTH PASSAGE", new Vector2(0f, -16.5f), new Vector2(8f, 7f), new Color(0.15f, 0.25f, 0.40f, 0.18f)),
+                ("PHÒNG QUÁI NAM", "SOUTH TRIAL CHAMBER", new Vector2(0f, -28f), new Vector2(24f, 16f), new Color(0.60f, 0.22f, 0.18f, 0.22f)),
+                ("LỐI VÀO ĐẠI ĐIỆN", "SANCTUM GATE", new Vector2(0f, -39f), new Vector2(8f, 6f), new Color(0.15f, 0.25f, 0.40f, 0.18f)),
+                ("ĐẠI ĐIỆN GOR'MOK", "GOR'MOK LAIR [BOSS]", new Vector2(0f, -53f), new Vector2(28f, 22f), new Color(0.75f, 0.15f, 0.20f, 0.30f)),
+                ("HÀNH LANG ĐÔNG", "EAST PASSAGE", new Vector2(22.5f, 0f), new Vector2(7f, 8f), new Color(0.15f, 0.25f, 0.40f, 0.18f)),
+                ("PHÒNG QUÁI ĐÔNG", "EAST BATTLE ROOM", new Vector2(35f, 0f), new Vector2(18f, 20f), new Color(0.60f, 0.22f, 0.18f, 0.22f)),
+                ("LỐI QUA BÓNG MA", "SHADOW GATEWAY", new Vector2(47f, 0f), new Vector2(6f, 8f), new Color(0.15f, 0.25f, 0.40f, 0.18f)),
+                ("SÀN ĐẤU BÓNG MA", "SHADOW DOPPELGANGER [BOSS]", new Vector2(62f, 0f), new Vector2(24f, 24f), new Color(0.55f, 0.15f, 0.65f, 0.30f))
             };
 
             foreach (var zone in map2Zones)
@@ -340,13 +364,13 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
                     lblRt.anchorMax = new Vector2(0.5f, 1f);
                     lblRt.pivot = new Vector2(0.5f, 1f);
                     lblRt.anchoredPosition = new Vector2(0f, -6f);
-                    lblRt.sizeDelta = new Vector2(zone.size.x * MAP_SCALE * 0.95f, 26f);
+                    lblRt.sizeDelta = new Vector2(zone.size.x * MAP_SCALE * 0.95f, 32f);
 
                     var tmp = labelObj.AddComponent<TextMeshProUGUI>();
                     tmp.text = $"<b>{LocalizationManager.T(zone.titleVN, zone.titleEN)}</b>";
-                    tmp.fontSize = 11.5f;
+                    tmp.fontSize = 18f;
                     tmp.alignment = TextAlignmentOptions.Center;
-                    tmp.color = new Color(1f, 0.92f, 0.65f, 0.90f);
+                    tmp.color = new Color(1f, 0.92f, 0.65f, 0.95f);
                 }
 
                 roomVisuals.Add(rObj);
@@ -653,13 +677,13 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         Image bdImg = backdrop.GetComponent<Image>();
         bdImg.color = new Color(0.02f, 0.03f, 0.06f, 0.88f);
 
-        // 2. Khung viền chính của Bản Đồ (Map Frame)
+        // 2. Khung viền chính của Bản Đồ (Map Frame) - Phóng to Fullscreen Toàn Màn Hình
         GameObject frameObj = new GameObject("MapWindowFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         frameObj.layer = 5;
         frameObj.transform.SetParent(transform, false);
         RectTransform frameRt = frameObj.GetComponent<RectTransform>();
-        frameRt.anchorMin = new Vector2(0.04f, 0.04f);
-        frameRt.anchorMax = new Vector2(0.96f, 0.96f);
+        frameRt.anchorMin = new Vector2(0.015f, 0.015f);
+        frameRt.anchorMax = new Vector2(0.985f, 0.985f);
         frameRt.sizeDelta = Vector2.zero;
         Image fImg = frameObj.GetComponent<Image>();
         fImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -676,7 +700,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         hRt.anchorMax = new Vector2(1f, 1f);
         hRt.pivot = new Vector2(0.5f, 1f);
         hRt.anchoredPosition = Vector2.zero;
-        hRt.sizeDelta = new Vector2(0f, 50f);
+        hRt.sizeDelta = new Vector2(0f, 65f);
         Image hImg = headerObj.GetComponent<Image>();
         hImg.sprite = SoulslikeHUDStyler.GetRunicPlaqueSprite();
         hImg.type = Image.Type.Sliced;
@@ -687,13 +711,13 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         titleObj.layer = 5;
         titleObj.transform.SetParent(headerObj.transform, false);
         RectTransform tRt = titleObj.GetComponent<RectTransform>();
-        tRt.anchorMin = new Vector2(0f, 0f);
+        tRt.anchorMin = new Vector2(0f, 0.35f);
         tRt.anchorMax = new Vector2(1f, 1f);
-        tRt.offsetMin = new Vector2(25f, 4f);
-        tRt.offsetMax = new Vector2(-80f, -4f);
+        tRt.offsetMin = new Vector2(25f, 0f);
+        tRt.offsetMax = new Vector2(-90f, -2f);
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = "<b>PHẾ TÍCH NGẬP NƯỚC</b>";
-        titleText.fontSize = 32f;
+        titleText.fontSize = 36f;
         titleText.color = new Color(0.98f, 0.88f, 0.55f);
         titleText.alignment = TextAlignmentOptions.Left;
 
@@ -703,17 +727,17 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         subObj.transform.SetParent(headerObj.transform, false);
         RectTransform sRt = subObj.GetComponent<RectTransform>();
         sRt.anchorMin = new Vector2(0f, 0f);
-        sRt.anchorMax = new Vector2(1f, 0.4f);
+        sRt.anchorMax = new Vector2(1f, 0.42f);
         sRt.offsetMin = new Vector2(25f, 2f);
-        sRt.offsetMax = new Vector2(-80f, 0f);
+        sRt.offsetMax = new Vector2(-90f, 0f);
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = "TẦNG 1 - TÀN TÍCH CỔ ĐẠI | KHÁM PHÁ TOÀN CẢNH";
-        subtitleText.fontSize = 22f;
+        subtitleText.fontSize = 24f;
         subtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
         subtitleText.alignment = TextAlignmentOptions.Left;
         SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
 
-        // Nút Đóng [X]
+        // Nút Đóng [X] - Kích thước lớn dễ bấm trên màn cảm ứng
         GameObject closeObj = new GameObject("Btn_Close", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         closeObj.layer = 5;
         closeObj.transform.SetParent(headerObj.transform, false);
@@ -721,8 +745,8 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         cRt.anchorMin = new Vector2(1f, 0.5f);
         cRt.anchorMax = new Vector2(1f, 0.5f);
         cRt.pivot = new Vector2(1f, 0.5f);
-        cRt.anchoredPosition = new Vector2(-12f, 0f);
-        cRt.sizeDelta = new Vector2(36f, 36f);
+        cRt.anchoredPosition = new Vector2(-15f, 0f);
+        cRt.sizeDelta = new Vector2(50f, 50f);
         Button cBtn = closeObj.GetComponent<Button>();
         cBtn.onClick.AddListener(CloseMap);
         SoulslikeHUDStyler.StyleCloseButton(cBtn);
@@ -734,8 +758,8 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         mapViewportRt = viewportObj.GetComponent<RectTransform>();
         mapViewportRt.anchorMin = Vector2.zero;
         mapViewportRt.anchorMax = Vector2.one;
-        mapViewportRt.offsetMin = new Vector2(15f, 15f);
-        mapViewportRt.offsetMax = new Vector2(-15f, -55f);
+        mapViewportRt.offsetMin = new Vector2(10f, 10f);
+        mapViewportRt.offsetMax = new Vector2(-10f, -72f);
 
         Image vpImg = viewportObj.GetComponent<Image>();
         vpImg.color = new Color(0.02f, 0.04f, 0.08f, 1f);
@@ -792,7 +816,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         playerMarkerImg.sprite = arrowFillSprite;
         playerMarkerImg.color = new Color(0.18f, 1f, 0.45f, 1f);
 
-        // 6. Bảng Thống Kê Dưới Góc Trái (Dungeon Stats Panel)
+        // 6. Bảng Thống Kê Dưới Góc Trái (Dungeon Stats Panel) - Phóng to hiển thị rõ
         GameObject statsPanel = new GameObject("StatsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         statsPanel.layer = 5;
         statsPanel.transform.SetParent(frameObj.transform, false);
@@ -801,9 +825,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         stRt.anchorMax = new Vector2(0f, 0f);
         stRt.pivot = new Vector2(0f, 0f);
         stRt.anchoredPosition = new Vector2(25f, 25f);
-        stRt.sizeDelta = new Vector2(280f, 95f);
+        stRt.sizeDelta = new Vector2(420f, 130f);
         Image stImg = statsPanel.GetComponent<Image>();
-        stImg.color = new Color(0.05f, 0.08f, 0.14f, 0.92f);
+        stImg.color = new Color(0.05f, 0.08f, 0.14f, 0.94f);
         var stOutline = statsPanel.AddComponent<Outline>();
         stOutline.effectColor = new Color(0.2f, 0.45f, 0.7f, 0.7f);
 
@@ -813,10 +837,10 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         RectTransform stTxtRt = stTxtObj.GetComponent<RectTransform>();
         stTxtRt.anchorMin = Vector2.zero;
         stTxtRt.anchorMax = Vector2.one;
-        stTxtRt.offsetMin = new Vector2(12f, 6f);
-        stTxtRt.offsetMax = new Vector2(-12f, -6f);
+        stTxtRt.offsetMin = new Vector2(16f, 10f);
+        stTxtRt.offsetMax = new Vector2(-16f, -10f);
         statsText = stTxtObj.AddComponent<TextMeshProUGUI>();
-        statsText.fontSize = 22f;
+        statsText.fontSize = 24f;
         statsText.color = Color.white;
         statsText.lineSpacing = 4f;
 
@@ -829,9 +853,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         hntRt.anchorMax = new Vector2(1f, 0f);
         hntRt.pivot = new Vector2(1f, 0f);
         hntRt.anchoredPosition = new Vector2(-25f, 25f);
-        hntRt.sizeDelta = new Vector2(360f, 95f);
+        hntRt.sizeDelta = new Vector2(500f, 130f);
         Image hntImg = hintPanel.GetComponent<Image>();
-        hntImg.color = new Color(0.05f, 0.08f, 0.14f, 0.92f);
+        hntImg.color = new Color(0.05f, 0.08f, 0.14f, 0.94f);
         var hntOutline = hintPanel.AddComponent<Outline>();
         hntOutline.effectColor = new Color(0.2f, 0.45f, 0.7f, 0.7f);
 
@@ -841,13 +865,13 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         RectTransform hntTxtRt = hntTxtObj.GetComponent<RectTransform>();
         hntTxtRt.anchorMin = Vector2.zero;
         hntTxtRt.anchorMax = Vector2.one;
-        hntTxtRt.offsetMin = new Vector2(12f, 6f);
-        hntTxtRt.offsetMax = new Vector2(-12f, -6f);
+        hntTxtRt.offsetMin = new Vector2(16f, 10f);
+        hntTxtRt.offsetMax = new Vector2(-16f, -10f);
         hintText = hntTxtObj.AddComponent<TextMeshProUGUI>();
-        hintText.fontSize = 22f;
+        hintText.fontSize = 24f;
         hintText.color = Color.white;
 
-        // 8. Cụm Nút Điều Khiển Bản Đồ (Zoom In, Zoom Out, Focus Player)
+        // 8. Cụm Nút Điều Khiển Bản Đồ (Zoom In, Zoom Out, Focus Player) - To rõ cảm ứng
         GameObject ctrlPanel = new GameObject("MapControls", typeof(RectTransform));
         ctrlPanel.layer = 5;
         ctrlPanel.transform.SetParent(frameObj.transform, false);
@@ -855,12 +879,12 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         cpRt.anchorMin = new Vector2(1f, 0.5f);
         cpRt.anchorMax = new Vector2(1f, 0.5f);
         cpRt.pivot = new Vector2(1f, 0.5f);
-        cpRt.anchoredPosition = new Vector2(-25f, 20f);
-        cpRt.sizeDelta = new Vector2(45f, 150f);
+        cpRt.anchoredPosition = new Vector2(-25f, 30f);
+        cpRt.sizeDelta = new Vector2(65f, 210f);
 
-        CreateControlButton(ctrlPanel.transform, "+", new Vector2(0f, 45f), () => AdjustZoom(0.25f));
+        CreateControlButton(ctrlPanel.transform, "+", new Vector2(0f, 70f), () => AdjustZoom(0.25f));
         CreateControlButton(ctrlPanel.transform, "-", new Vector2(0f, 0f), () => AdjustZoom(-0.25f));
-        CreateControlButton(ctrlPanel.transform, "[MUC TIEU]", new Vector2(0f, -45f), FocusOnPlayer);
+        CreateControlButton(ctrlPanel.transform, "TARGET", new Vector2(0f, -70f), FocusOnPlayer);
     }
 
     private void CreateControlButton(Transform parent, string label, Vector2 pos, UnityEngine.Events.UnityAction onClick)
@@ -870,7 +894,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         btnObj.transform.SetParent(parent, false);
         RectTransform rt = btnObj.GetComponent<RectTransform>();
         rt.anchoredPosition = pos;
-        rt.sizeDelta = new Vector2(36f, 36f);
+        rt.sizeDelta = new Vector2(58f, 58f);
 
         Image img = btnObj.GetComponent<Image>();
         img.color = new Color(0.1f, 0.16f, 0.26f, 0.95f);
@@ -889,7 +913,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         tRt.sizeDelta = Vector2.zero;
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         tmp.text = $"<b>{label}</b>";
-        tmp.fontSize = 16f;
+        tmp.fontSize = 22f;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = Color.white;
     }

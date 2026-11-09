@@ -5318,10 +5318,10 @@ public class MainMenuManager : MonoBehaviour
         CreateStatRow(statsBox.transform, "Row_DEF", new Vector2(0f, -15f), "GIÁP (ARMOR)", new Color(0.38f, 0.85f, 1f, 1f), troughSp, sapphireSp, out carouselDefBarFill, out carouselDefValText, out carouselDefLabelText);
         CreateStatRow(statsBox.transform, "Row_SPD", new Vector2(0f, -44f), "TỐC ĐỘ (SPD)", new Color(0.35f, 0.92f, 0.65f, 1f), troughSp, sapphireSp, out carouselSpdBarFill, out carouselSpdValText, out _);
 
-        // 3 Combat Arsenal Breakdown Cards
-        CreateSkillCard(dosObj.transform, "SkillCard_Normal", new Vector2(0f, 86f), new Vector2(660f, 82f), out carouselSkillNormalTitle, out carouselSkillNormalDesc);
-        CreateSkillCard(dosObj.transform, "SkillCard_Guard", new Vector2(0f, -6f), new Vector2(660f, 82f), out carouselSkillGuardTitle, out carouselSkillGuardDesc);
-        CreateSkillCard(dosObj.transform, "SkillCard_Ulti", new Vector2(0f, -98f), new Vector2(660f, 82f), out carouselSkillUltiTitle, out carouselSkillUltiDesc);
+        // 3 Combat Arsenal Breakdown Cards (Phóng to khung & chữ cho Mobile)
+        CreateSkillCard(dosObj.transform, "SkillCard_Normal", new Vector2(0f, 102f), new Vector2(660f, 104f), out carouselSkillNormalTitle, out carouselSkillNormalDesc);
+        CreateSkillCard(dosObj.transform, "SkillCard_Guard", new Vector2(0f, -10f), new Vector2(660f, 104f), out carouselSkillGuardTitle, out carouselSkillGuardDesc);
+        CreateSkillCard(dosObj.transform, "SkillCard_Ulti", new Vector2(0f, -122f), new Vector2(660f, 104f), out carouselSkillUltiTitle, out carouselSkillUltiDesc);
 
         // 5. Bottom Strip: Horizontal Deck & Enter Battle Button
         GameObject btmBar = new GameObject("BottomBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -5471,10 +5471,10 @@ public class MainMenuManager : MonoBehaviour
         lrt.anchorMax = new Vector2(0f, 0.5f);
         lrt.pivot = new Vector2(0f, 0.5f);
         lrt.anchoredPosition = new Vector2(6f, 0f);
-        lrt.sizeDelta = new Vector2(175f, 22f);
+        lrt.sizeDelta = new Vector2(175f, 26f);
         var lTxt = lObj.GetComponent<TextMeshProUGUI>();
         lTxt.text = labelText;
-        lTxt.fontSize = 12f;
+        lTxt.fontSize = 17f;
         lTxt.fontStyle = FontStyles.Bold;
         lTxt.color = labelColor;
         SoulslikeHUDStyler.SetSafeOutline(lTxt, 0.25f, Color.black);
@@ -5488,7 +5488,7 @@ public class MainMenuManager : MonoBehaviour
         trt.anchorMax = new Vector2(0f, 0.5f);
         trt.pivot = new Vector2(0f, 0.5f);
         trt.anchoredPosition = new Vector2(185f, 0f);
-        trt.sizeDelta = new Vector2(310f, 15f);
+        trt.sizeDelta = new Vector2(310f, 18f);
         Image trImg = trObj.GetComponent<Image>();
         if (troughSp != null) { trImg.sprite = troughSp; trImg.type = Image.Type.Sliced; }
         else trImg.color = new Color(0.04f, 0.05f, 0.08f, 0.9f);
@@ -5515,9 +5515,9 @@ public class MainMenuManager : MonoBehaviour
         vrt.anchorMax = new Vector2(0f, 0.5f);
         vrt.pivot = new Vector2(0f, 0.5f);
         vrt.anchoredPosition = new Vector2(510f, 0f);
-        vrt.sizeDelta = new Vector2(105f, 22f);
+        vrt.sizeDelta = new Vector2(120f, 26f);
         valTxt = vObj.GetComponent<TextMeshProUGUI>();
-        valTxt.fontSize = 12.5f;
+        valTxt.fontSize = 17f;
         valTxt.fontStyle = FontStyles.Bold;
         valTxt.color = Color.white;
         valTxt.alignment = TextAlignmentOptions.MidlineLeft;
@@ -5554,10 +5554,10 @@ public class MainMenuManager : MonoBehaviour
         trt.anchorMax = new Vector2(1f, 1f);
         trt.pivot = new Vector2(0f, 1f);
         trt.anchoredPosition = new Vector2(14f, -7f);
-        trt.sizeDelta = new Vector2(-28f, 22f);
+        trt.sizeDelta = new Vector2(-28f, 28f);
 
         titleTxt = tObj.GetComponent<TextMeshProUGUI>();
-        titleTxt.fontSize = 13.5f;
+        titleTxt.fontSize = 20f;
         titleTxt.fontStyle = FontStyles.Bold;
         titleTxt.color = new Color(1f, 0.88f, 0.45f, 1f);
         SoulslikeHUDStyler.SetSafeOutline(titleTxt, 0.25f, Color.black);
@@ -5569,14 +5569,14 @@ public class MainMenuManager : MonoBehaviour
         drt.anchorMin = new Vector2(0f, 0f);
         drt.anchorMax = new Vector2(1f, 1f);
         drt.pivot = new Vector2(0.5f, 0.5f);
-        drt.offsetMin = new Vector2(14f, 6f);
-        drt.offsetMax = new Vector2(-14f, -28f);
+        drt.offsetMin = new Vector2(14f, 8f);
+        drt.offsetMax = new Vector2(-14f, -34f);
 
         descTxt = dObj.GetComponent<TextMeshProUGUI>();
-        descTxt.fontSize = 11.5f;
+        descTxt.fontSize = 16f;
         descTxt.color = new Color(0.85f, 0.88f, 0.92f, 0.95f);
         descTxt.enableWordWrapping = true;
-        descTxt.lineSpacing = -4f;
+        descTxt.lineSpacing = 2f;
     }
 
     private void BuildBottomRosterDeck(Transform parent)
