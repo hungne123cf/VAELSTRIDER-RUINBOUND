@@ -557,7 +557,7 @@ public class DailyLoginUI : MonoBehaviour
             else
             {
                 stImg.color = new Color(0.10f, 0.12f, 0.16f, 0.80f);
-                stTmp.text = isVi ? "<color=#8898AA>🔒 CHƯA ĐẾN</color>" : "<color=#8898AA>🔒 LOCKED</color>";
+                stTmp.text = isVi ? "<color=#8898AA>[CHƯA ĐẾN]</color>" : "<color=#8898AA>[LOCKED]</color>";
             }
         }
 
