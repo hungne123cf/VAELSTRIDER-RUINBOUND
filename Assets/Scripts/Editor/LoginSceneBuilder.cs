@@ -425,6 +425,7 @@ public static class LoginSceneBuilder
         var cpCg = cinePanelObj.AddComponent<CanvasGroup>();
         var cpBg = cinePanelObj.AddComponent<Image>();
         cpBg.color = new Color(0.02f, 0.02f, 0.04f, 1f);
+        cinePanelObj.SetActive(false); // Ban đầu ẩn, chỉ hiện khi người chơi bấm Bắt Đầu (Tap To Start)
 
         // Slide illustration
         GameObject slideObj = new GameObject("CinematicSlide");

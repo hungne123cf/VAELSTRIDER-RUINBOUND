@@ -108,17 +108,9 @@ public class LoginManager : MonoBehaviour
             welcomeUserBannerText.gameObject.SetActive(false);
         }
 
-        // Tự động kích hoạt Intro Trailer & Thanh Tiến Trình Loading nếu có
         if (introLoadingController == null)
         {
             introLoadingController = Object.FindAnyObjectByType<GameIntroLoadingController>();
-        }
-
-        if (introLoadingController != null)
-        {
-            if (tapToStartPanel != null) tapToStartPanel.SetActive(false);
-            introLoadingController.StartIntroSequence();
-            return;
         }
 
         // Tự động ẩn toàn bộ các thanh Divider trắng thừa trên Canvas
@@ -636,10 +628,24 @@ public class LoginManager : MonoBehaviour
             tapToStartText.text = LocalizationManager.T("ĐANG KHỞI HÀNH VÀO VƯƠNG QUỐC...", "ENTERING RUINBOUND REALM...");
         }
 
-        Debug.Log($"<color=green>[START GAME]</color> Chuyển đến MainMenuScene...");
-        yield return new WaitForSeconds(0.45f);
+        Debug.Log($"<color=green>[START GAME]</color> Người chơi bấm Bắt Đầu -> Kích hoạt màn hình nạp game...");
+        yield return new WaitForSeconds(0.25f);
 
-        SceneManager.LoadScene("MainMenuScene");
+        if (introLoadingController == null)
+        {
+            introLoadingController = Object.FindAnyObjectByType<GameIntroLoadingController>();
+        }
+
+        if (introLoadingController != null)
+        {
+            if (tapToStartPanel != null) tapToStartPanel.SetActive(false);
+            if (loginCardPanel != null) loginCardPanel.SetActive(false);
+            introLoadingController.StartIntroSequence();
+        }
+        else
+        {
+            SceneManager.LoadScene("MainMenuScene");
+        }
     }
 
     private void ShowStatusLoading(string msg)

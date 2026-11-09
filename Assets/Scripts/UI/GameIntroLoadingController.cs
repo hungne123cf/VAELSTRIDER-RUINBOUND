@@ -56,6 +56,11 @@ public class GameIntroLoadingController : MonoBehaviour
         Instance = this;
         LoadDeityArtwork();
         FormatCleanVisuals();
+
+        // QUAN TRỌNG: Luôn ẩn Cinematic Panel và Loading Panel khi Awake
+        // Chỉ kích hoạt khi người chơi thực sự bấm "CHẠM ĐỂ BẮT ĐẦU" (Tap To Start)
+        if (cinematicPanel != null) cinematicPanel.SetActive(false);
+        if (loadingProgressPanel != null) loadingProgressPanel.SetActive(false);
     }
 
     private void LoadDeityArtwork()
