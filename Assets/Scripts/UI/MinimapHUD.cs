@@ -14,9 +14,9 @@ public class MinimapHUD : MonoBehaviour
 
     /// <summary>
     /// Cho phép bật/tắt toàn bộ hệ thống Minimap Radar trên màn hình.
-    /// Đặt false để tắt và ẩn hoàn toàn theo yêu cầu người dùng.
+    /// Đặt true để hiển thị chuẩn Dark Fantasy Action RPG.
     /// </summary>
-    public static bool EnableMinimapHUD = false;
+    public static bool EnableMinimapHUD = true;
 
     [Header("Minimap Settings")]
     [SerializeField] private float radarRadius = 35f; // Bán kính quét thực tế trong game (35m)
@@ -518,7 +518,7 @@ public class MinimapHUD : MonoBehaviour
         rootRt.anchorMin = new Vector2(1f, 1f);
         rootRt.anchorMax = new Vector2(1f, 1f);
         rootRt.pivot = new Vector2(1f, 1f);
-        rootRt.anchoredPosition = new Vector2(-20f, -80f); // Không bao giờ đè lên 3 nút trên cùng!
+        rootRt.anchoredPosition = new Vector2(-20f, -125f); // Không đè lên nút Settings Gear (-20, -20)!
         rootRt.sizeDelta = new Vector2(125f, 155f);
 
         // 2. Radar Background Disc (115x115 px tròn chống răng cưa - Có thể chạm/click để mở Bản đồ Toàn màn hình)

@@ -66,6 +66,8 @@ public class GameAutoBootstrap : MonoBehaviour
             MinimapHUD.EnsureUIExists();
             FullscreenMapUI.EnsureUIExists();
             PotionQuickSlotUI.EnsureUIExists();
+            LowHealthVignetteFX.EnsureUIExists();
+            AdaptiveCameraAspect.EnsureCameraAdaptive();
             GameOverUI.EnsureUIExists();
             EnsureSpecialSkillButton();
             SettingsUI.EnsureSettingsButtonExists();
@@ -106,6 +108,8 @@ public class GameAutoBootstrap : MonoBehaviour
             MinimapHUD.EnsureUIExists();
             FullscreenMapUI.EnsureUIExists();
             PotionQuickSlotUI.EnsureUIExists();
+            LowHealthVignetteFX.EnsureUIExists();
+            AdaptiveCameraAspect.EnsureCameraAdaptive();
             GameOverUI.EnsureUIExists();
             EnsureSpecialSkillButton();
             SettingsUI.EnsureSettingsButtonExists();
@@ -155,6 +159,8 @@ public class GameAutoBootstrap : MonoBehaviour
         MinimapHUD.EnsureUIExists();
         FullscreenMapUI.EnsureUIExists();
         PotionQuickSlotUI.EnsureUIExists();
+        LowHealthVignetteFX.EnsureUIExists();
+        AdaptiveCameraAspect.EnsureCameraAdaptive();
         GameOverUI.EnsureUIExists();
 
         // 2. Khoi tao nut Tuyet Ky Ruin Whirlwind tren Canvas
@@ -313,6 +319,7 @@ public class GameAutoBootstrap : MonoBehaviour
 
     public static Canvas GetMainGameplayCanvas()
     {
+        Canvas chosen = null;
         // 1. Ưu tiên tìm theo tên chuẩn của Canvas chính trong Scene
         string[] primaryCanvasNames = new string[] { "MainMenuCanvas", "Canvas", "MainCanvas", "GameplayCanvas" };
         foreach (var cName in primaryCanvasNames)
@@ -321,41 +328,62 @@ public class GameAutoBootstrap : MonoBehaviour
             if (cObj != null)
             {
                 var c = cObj.GetComponent<Canvas>();
-                if (c != null && c.isRootCanvas && c.enabled) return c;
+                if (c != null && c.isRootCanvas && c.enabled) { chosen = c; break; }
             }
         }
 
         // 2. Tìm trong Scene đang Active (loại trừ tuyệt đối Transition, Loading, Intro, Overlay Canvas)
-        var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-        var all = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
-
-        foreach (var c in all)
+        if (chosen == null)
         {
-            if (c == null || !c.enabled || !c.isRootCanvas) continue;
-            string n = c.name;
-            if (n.Contains("Transition") || n.Contains("Loading") || n.Contains("Intro") ||
-                n.Contains("UltiCinematic") || n.Contains("GameOver") || n.Contains("ShrineUpgrade"))
-                continue;
+            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            var all = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
 
-            if (c.gameObject.scene == activeScene)
+            foreach (var c in all)
             {
-                return c;
+                if (c == null || !c.enabled || !c.isRootCanvas) continue;
+                string n = c.name;
+                if (n.Contains("Transition") || n.Contains("Loading") || n.Contains("Intro") ||
+                    n.Contains("UltiCinematic") || n.Contains("GameOver") || n.Contains("ShrineUpgrade"))
+                    continue;
+
+                if (c.gameObject.scene == activeScene)
+                {
+                    chosen = c;
+                    break;
+                }
+            }
+
+            // 3. Fallback: Bất kỳ Canvas nào hợp lệ không thuộc hệ thống chuyển cảnh/loading
+            if (chosen == null)
+            {
+                foreach (var c in all)
+                {
+                    if (c == null || !c.enabled || !c.isRootCanvas) continue;
+                    string n = c.name;
+                    if (n.Contains("Transition") || n.Contains("Loading") || n.Contains("Intro") ||
+                        n.Contains("UltiCinematic") || n.Contains("GameOver") || n.Contains("ShrineUpgrade"))
+                        continue;
+
+                    chosen = c;
+                    break;
+                }
+            }
+
+            if (chosen == null && all.Length > 0) chosen = all[0];
+        }
+
+        if (chosen != null)
+        {
+            var scaler = chosen.GetComponent<UnityEngine.UI.CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920f, 1080f);
+                scaler.matchWidthOrHeight = 0.5f;
             }
         }
 
-        // 3. Fallback: Bất kỳ Canvas nào hợp lệ không thuộc hệ thống chuyển cảnh/loading
-        foreach (var c in all)
-        {
-            if (c == null || !c.enabled || !c.isRootCanvas) continue;
-            string n = c.name;
-            if (n.Contains("Transition") || n.Contains("Loading") || n.Contains("Intro") ||
-                n.Contains("UltiCinematic") || n.Contains("GameOver") || n.Contains("ShrineUpgrade"))
-                continue;
-
-            return c;
-        }
-
-        return all.Length > 0 ? all[0] : null;
+        return chosen;
     }
 
     public static GameObject EnsureSpecialSkillButton()
