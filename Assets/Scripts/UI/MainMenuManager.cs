@@ -629,8 +629,8 @@ public class MainMenuManager : MonoBehaviour
         Canvas rootCanvas = GetMainMenuCanvas();
         Transform topParent = rootCanvas != null ? rootCanvas.transform : (mainPanel != null ? mainPanel.transform : navParent);
 
-        // Phóng to nút Cài Đặt (Gear) góc trên để ngón tay dễ chạm trên điện thoại
-        settingsButton = EnsureNavButton(topParent, settingsButton, "Btn_Settings", "", Vector2.zero, new Vector2(72f, 72f), new Color(0.12f, 0.16f, 0.24f, 0.94f), out settingsBtnText);
+        // Nút Cài Đặt (Gear) - Huy Hiệu Cổ Điển Soulslike Runic Ring
+        settingsButton = EnsureNavButton(topParent, settingsButton, "Btn_Settings", "", Vector2.zero, new Vector2(66f, 66f), new Color(0.10f, 0.12f, 0.16f, 0.95f), out settingsBtnText);
         if (settingsButton != null)
         {
             settingsButton.transform.SetParent(topParent, false);
@@ -640,9 +640,9 @@ public class MainMenuManager : MonoBehaviour
             sRt.anchorMax = new Vector2(1f, 1f);
             sRt.pivot = new Vector2(1f, 1f);
             sRt.anchoredPosition = new Vector2(-28f, -28f);
-            sRt.sizeDelta = new Vector2(72f, 72f);
+            sRt.sizeDelta = new Vector2(66f, 66f);
             settingsButton.gameObject.SetActive(true);
-            WhiteIconLoader.ReplaceTextWithIcon(settingsButton, "Gear", new Color(1f, 0.88f, 0.45f), new Vector2(44f, 44f));
+            SetupSoulslikeLobbyButton(settingsButton, Resources.Load<Sprite>("White-Icon/Gear"), "Gear", new Color(1f, 0.88f, 0.48f), false);
 
             settingsButton.onClick.RemoveAllListeners();
             settingsButton.onClick.AddListener(OnSettingsClicked);
@@ -651,7 +651,7 @@ public class MainMenuManager : MonoBehaviour
 
         // 1. Mailbox Button (Hòm Thư Hiệp Sĩ - Nhận 5,000 Linh Hồn Tân Thủ & Giftcode)
         TextMeshProUGUI mbTxt;
-        mailboxButton = EnsureNavButton(topParent, mailboxButton, "Btn_Mailbox", "", Vector2.zero, new Vector2(72f, 72f), new Color(0.12f, 0.16f, 0.24f, 0.94f), out mbTxt);
+        mailboxButton = EnsureNavButton(topParent, mailboxButton, "Btn_Mailbox", "", Vector2.zero, new Vector2(66f, 66f), new Color(0.10f, 0.12f, 0.16f, 0.95f), out mbTxt);
         if (mailboxButton != null)
         {
             mailboxButton.transform.SetParent(topParent, false);
@@ -660,10 +660,10 @@ public class MainMenuManager : MonoBehaviour
             mRt.anchorMin = new Vector2(1f, 1f);
             mRt.anchorMax = new Vector2(1f, 1f);
             mRt.pivot = new Vector2(1f, 1f);
-            mRt.anchoredPosition = new Vector2(-114f, -28f);
-            mRt.sizeDelta = new Vector2(72f, 72f);
+            mRt.anchoredPosition = new Vector2(-104f, -28f);
+            mRt.sizeDelta = new Vector2(66f, 66f);
             mailboxButton.gameObject.SetActive(true);
-            mailboxRedDot = CreateLobbyButtonIconAndRedDot(mailboxButton, Resources.Load<Sprite>("UI/icon_mail"), "TalkBubble", new Color(1f, 0.88f, 0.45f));
+            mailboxRedDot = SetupSoulslikeLobbyButton(mailboxButton, Resources.Load<Sprite>("UI/icon_mail"), "TalkBubble", new Color(1f, 0.88f, 0.48f), true);
 
             mailboxButton.onClick.RemoveAllListeners();
             mailboxButton.onClick.AddListener(OnMailboxClicked);
@@ -672,7 +672,7 @@ public class MainMenuManager : MonoBehaviour
 
         // 2. Daily Login Button (Điểm Danh 7 Ngày - Reset 07:00 Sáng)
         TextMeshProUGUI dlTxt;
-        dailyLoginButton = EnsureNavButton(topParent, dailyLoginButton, "Btn_DailyLogin", "", Vector2.zero, new Vector2(72f, 72f), new Color(0.12f, 0.16f, 0.24f, 0.94f), out dlTxt);
+        dailyLoginButton = EnsureNavButton(topParent, dailyLoginButton, "Btn_DailyLogin", "", Vector2.zero, new Vector2(66f, 66f), new Color(0.10f, 0.12f, 0.16f, 0.95f), out dlTxt);
         if (dailyLoginButton != null)
         {
             dailyLoginButton.transform.SetParent(topParent, false);
@@ -681,10 +681,10 @@ public class MainMenuManager : MonoBehaviour
             dRt.anchorMin = new Vector2(1f, 1f);
             dRt.anchorMax = new Vector2(1f, 1f);
             dRt.pivot = new Vector2(1f, 1f);
-            dRt.anchoredPosition = new Vector2(-200f, -28f);
-            dRt.sizeDelta = new Vector2(72f, 72f);
+            dRt.anchoredPosition = new Vector2(-180f, -28f);
+            dRt.sizeDelta = new Vector2(66f, 66f);
             dailyLoginButton.gameObject.SetActive(true);
-            dailyLoginRedDot = CreateLobbyButtonIconAndRedDot(dailyLoginButton, Resources.Load<Sprite>("UI/icon_calendar"), "Calendar", new Color(1f, 0.88f, 0.45f));
+            dailyLoginRedDot = SetupSoulslikeLobbyButton(dailyLoginButton, Resources.Load<Sprite>("UI/icon_daily"), "Star", new Color(1f, 0.90f, 0.48f), true);
 
             dailyLoginButton.onClick.RemoveAllListeners();
             dailyLoginButton.onClick.AddListener(OnDailyLoginClicked);
@@ -6199,11 +6199,45 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    private GameObject CreateLobbyButtonIconAndRedDot(Button btn, Sprite sprite, string fallbackIconName, Color iconColor)
+    private GameObject SetupSoulslikeLobbyButton(Button btn, Sprite sprite, string fallbackIconName, Color iconColor, bool withRedDot = false)
     {
+        if (btn == null) return null;
+
+        // 1. Nền nút: Lõi đá Obsidian đen tuyền bóng bẩy
+        Image btnImg = btn.GetComponent<Image>();
+        if (btnImg != null)
+        {
+            Sprite coreSpr = SoulslikeHUDStyler.GetActionButtonCoreSprite();
+            if (coreSpr != null) btnImg.sprite = coreSpr;
+            btnImg.type = Image.Type.Simple;
+            btnImg.color = new Color(0.10f, 0.12f, 0.16f, 0.95f);
+        }
+
+        // 2. Viền Runic Ring hoàng kim chạm khắc cổ xưa
+        Transform exRing = btn.transform.Find("RunicRing");
+        if (exRing != null) Destroy(exRing.gameObject);
+
+        GameObject ringObj = new GameObject("RunicRing", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        ringObj.transform.SetParent(btn.transform, false);
+        ringObj.transform.SetAsFirstSibling();
+        RectTransform rRt = ringObj.GetComponent<RectTransform>();
+        rRt.anchorMin = new Vector2(0.5f, 0.5f);
+        rRt.anchorMax = new Vector2(0.5f, 0.5f);
+        rRt.pivot = new Vector2(0.5f, 0.5f);
+        rRt.anchoredPosition = Vector2.zero;
+        rRt.sizeDelta = new Vector2(70f, 70f);
+
+        Image ringImg = ringObj.GetComponent<Image>();
+        ringImg.raycastTarget = false;
+        Sprite ringSpr = SoulslikeHUDStyler.GetActionButtonRingSprite();
+        if (ringSpr != null) ringImg.sprite = ringSpr;
+        ringImg.color = new Color(0.92f, 0.78f, 0.42f, 0.95f);
+
+        // Ẩn text cũ
         Transform txtT = btn.transform.Find("Text");
         if (txtT != null) txtT.gameObject.SetActive(false);
 
+        // 3. Icon ở trung tâm
         Transform exIcon = btn.transform.Find("Icon");
         if (exIcon != null) Destroy(exIcon.gameObject);
 
@@ -6214,7 +6248,7 @@ public class MainMenuManager : MonoBehaviour
         iRt.anchorMax = new Vector2(0.5f, 0.5f);
         iRt.pivot = new Vector2(0.5f, 0.5f);
         iRt.anchoredPosition = Vector2.zero;
-        iRt.sizeDelta = new Vector2(40f, 40f);
+        iRt.sizeDelta = new Vector2(36f, 36f);
 
         Image iImg = iconObj.GetComponent<Image>();
         iImg.raycastTarget = false;
@@ -6223,8 +6257,11 @@ public class MainMenuManager : MonoBehaviour
         else iImg.sprite = WhiteIconLoader.GetSprite(fallbackIconName);
         iImg.color = iconColor;
 
+        // 4. RedDot (Huy hiệu ngọc đỏ Ruby phát sáng viền vàng)
         Transform exRd = btn.transform.Find("RedDot");
         if (exRd != null) Destroy(exRd.gameObject);
+
+        if (!withRedDot) return null;
 
         GameObject rdObj = new GameObject("RedDot", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rdObj.transform.SetParent(btn.transform, false);
@@ -6233,13 +6270,15 @@ public class MainMenuManager : MonoBehaviour
         rdRt.anchorMax = new Vector2(1f, 1f);
         rdRt.pivot = new Vector2(1f, 1f);
         rdRt.anchoredPosition = new Vector2(2f, 2f);
-        rdRt.sizeDelta = new Vector2(22f, 22f);
+        rdRt.sizeDelta = new Vector2(20f, 20f);
 
         Image rdImg = rdObj.GetComponent<Image>();
-        rdImg.color = new Color(0.95f, 0.20f, 0.20f, 1f);
+        rdImg.color = new Color(0.92f, 0.15f, 0.18f, 1f);
+        Sprite circleSpr = Resources.Load<Sprite>("Combat/circle_fill");
+        if (circleSpr != null) rdImg.sprite = circleSpr;
 
         var rdOut = rdObj.AddComponent<Outline>();
-        rdOut.effectColor = Color.white;
+        rdOut.effectColor = new Color(1f, 0.85f, 0.40f, 0.90f);
         rdOut.effectDistance = new Vector2(1f, -1f);
 
         GameObject rdtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
@@ -6250,12 +6289,17 @@ public class MainMenuManager : MonoBehaviour
         rdtRt.sizeDelta = Vector2.zero;
         var rdtTmp = rdtObj.AddComponent<TextMeshProUGUI>();
         rdtTmp.text = "<b>!</b>";
-        rdtTmp.fontSize = 13f;
+        rdtTmp.fontSize = 12f;
         rdtTmp.fontStyle = FontStyles.Bold;
         rdtTmp.alignment = TextAlignmentOptions.Center;
         rdtTmp.color = Color.white;
 
         return rdObj;
+    }
+
+    private GameObject CreateLobbyButtonIconAndRedDot(Button btn, Sprite sprite, string fallbackIconName, Color iconColor)
+    {
+        return SetupSoulslikeLobbyButton(btn, sprite, fallbackIconName, iconColor, true);
     }
 
     private System.Collections.IEnumerator AutoOpenDailyLoginRoutine()
