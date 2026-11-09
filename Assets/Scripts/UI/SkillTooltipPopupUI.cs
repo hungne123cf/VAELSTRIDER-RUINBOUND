@@ -79,24 +79,26 @@ public class SkillTooltipPopupUI : MonoBehaviour
     private void BuildUIStructure(GameObject root, Canvas canvas)
     {
         panelRt = root.GetComponent<RectTransform>();
-        // Neo ở góc trên bên phải màn hình (tránh xa ngón tay cái và nút HỦY CHIÊU ở góc dưới)
-        panelRt.anchorMin = new Vector2(1f, 1f);
-        panelRt.anchorMax = new Vector2(1f, 1f);
-        panelRt.pivot = new Vector2(1f, 1f);
-        panelRt.sizeDelta = new Vector2(580f, 220f);
-        panelRt.anchoredPosition = new Vector2(-45f, -140f);
+        // Neo ở giữa phía trên màn hình (đỉnh cao thoáng, tuyệt đối không bị ngón tay cái và nút bánh răng hay nút hủy chiêu che khuất)
+        panelRt.anchorMin = new Vector2(0.5f, 1f);
+        panelRt.anchorMax = new Vector2(0.5f, 1f);
+        panelRt.pivot = new Vector2(0.5f, 1f);
+        panelRt.sizeDelta = new Vector2(1100f, 320f);
+        panelRt.anchoredPosition = new Vector2(0f, -55f);
 
         canvasGroup = root.AddComponent<CanvasGroup>();
         canvasGroup.alpha = 0f;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
 
-        // 1. Nền thẻ bài Dark Fantasy sang trọng (Màu đá than chì #101217 viền vàng đồng)
+        // 1. Nền thẻ bài Dark Fantasy sang trọng (Màu đá than chì #101217 viền vàng đồng sliced)
         var bgImg = root.AddComponent<Image>();
-        bgImg.color = new Color(0.06f, 0.08f, 0.11f, 0.97f);
+        bgImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
+        bgImg.type = Image.Type.Sliced;
+        bgImg.color = new Color(0.04f, 0.05f, 0.08f, 0.98f);
 
         var outline = root.AddComponent<Outline>();
-        outline.effectColor = new Color(0.88f, 0.75f, 0.38f, 0.98f); // Viền vàng hoàng kim TFT
+        outline.effectColor = new Color(0.95f, 0.82f, 0.40f, 0.98f); // Viền vàng hoàng kim TFT
         outline.effectDistance = new Vector2(2.5f, -2.5f);
 
         TMP_FontAsset font = GameFontManager.BodyFont;
@@ -104,68 +106,70 @@ public class SkillTooltipPopupUI : MonoBehaviour
 
         TMP_SpriteAsset spriteAsset = VaelstriderSpriteAssetFactory.GetOrCreateSpriteAsset();
 
-        // 2. Header Container (Icon Chiêu + Tên Chiêu + Hồi Chiêu)
+        // 2. Header Container (Icon Chiêu 96x96 + Tên Chiêu 36pt + Hồi Chiêu 24pt)
         GameObject headerObj = new GameObject("Header", typeof(RectTransform));
         headerObj.transform.SetParent(root.transform, false);
         var hRt = headerObj.GetComponent<RectTransform>();
         hRt.anchorMin = new Vector2(0f, 1f);
         hRt.anchorMax = new Vector2(1f, 1f);
         hRt.pivot = new Vector2(0.5f, 1f);
-        hRt.sizeDelta = new Vector2(-32f, 72f);
-        hRt.anchoredPosition = new Vector2(0f, -10f);
+        hRt.sizeDelta = new Vector2(-44f, 105f);
+        hRt.anchoredPosition = new Vector2(0f, -14f);
 
-        // Icon Kỹ Năng (Phóng to sắc nét 62x62 cho điện thoại)
+        // Icon Kỹ Năng (Phóng to sắc nét 96x96 cho điện thoại)
         GameObject iconObj = new GameObject("SkillIcon", typeof(RectTransform), typeof(Image));
         iconObj.transform.SetParent(headerObj.transform, false);
         var iRt = iconObj.GetComponent<RectTransform>();
         iRt.anchorMin = new Vector2(0f, 0.5f);
         iRt.anchorMax = new Vector2(0f, 0.5f);
         iRt.pivot = new Vector2(0f, 0.5f);
-        iRt.sizeDelta = new Vector2(62f, 62f);
-        iRt.anchoredPosition = new Vector2(6f, 0f);
+        iRt.sizeDelta = new Vector2(96f, 96f);
+        iRt.anchoredPosition = new Vector2(8f, 0f);
 
         iconImg = iconObj.GetComponent<Image>();
         iconImg.preserveAspect = true;
         var iconOutline = iconObj.AddComponent<Outline>();
-        iconOutline.effectColor = new Color(0.95f, 0.78f, 0.38f, 0.90f);
+        iconOutline.effectColor = new Color(0.98f, 0.85f, 0.42f, 0.95f);
         iconOutline.effectDistance = new Vector2(2f, -2f);
 
-        // Tên Kỹ Năng (Vàng kim đậm nét, tăng kích cỡ lên 23 rõ ràng trên mobile)
+        // Tên Kỹ Năng (Vàng kim đậm nét, tăng kích cỡ lên 36pt rõ ràng trên mobile)
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform));
         titleObj.transform.SetParent(headerObj.transform, false);
         var tRt = titleObj.GetComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0f, 1f);
         tRt.anchorMax = new Vector2(1f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.sizeDelta = new Vector2(-88f, 32f);
-        tRt.anchoredPosition = new Vector2(80f, -4f);
+        tRt.sizeDelta = new Vector2(-128f, 48f);
+        tRt.anchoredPosition = new Vector2(120f, -4f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         if (headerFont != null) titleText.font = headerFont;
-        titleText.fontSize = 23f;
+        titleText.fontSize = 36f;
         titleText.fontStyle = FontStyles.Bold;
-        titleText.color = new Color(1f, 0.88f, 0.35f);
+        titleText.color = new Color(1f, 0.88f, 0.45f);
         titleText.alignment = TextAlignmentOptions.Left;
         titleText.text = "TÊN CHIÊU THỨC";
+        SoulslikeHUDStyler.SetSafeOutline(titleText, 0.25f, Color.black);
 
-        // Category & Cooldown Row (Loại Chiêu • Tiêu Hao • Hồi Chiêu, tăng lên 17 rõ nét)
+        // Category & Cooldown Row (Loại Chiêu • Tiêu Hao • Hồi Chiêu, tăng lên 24pt rõ nét)
         GameObject subRowObj = new GameObject("SubRow", typeof(RectTransform));
         subRowObj.transform.SetParent(headerObj.transform, false);
         var sRt = subRowObj.GetComponent<RectTransform>();
         sRt.anchorMin = new Vector2(0f, 0f);
         sRt.anchorMax = new Vector2(1f, 0f);
         sRt.pivot = new Vector2(0f, 0f);
-        sRt.sizeDelta = new Vector2(-88f, 28f);
-        sRt.anchoredPosition = new Vector2(80f, 4f);
+        sRt.sizeDelta = new Vector2(-128f, 40f);
+        sRt.anchoredPosition = new Vector2(120f, 6f);
 
         categoryText = subRowObj.AddComponent<TextMeshProUGUI>();
         if (font != null) categoryText.font = font;
         if (spriteAsset != null) categoryText.spriteAsset = spriteAsset;
-        categoryText.fontSize = 17f;
+        categoryText.fontSize = 24f;
         categoryText.fontStyle = FontStyles.Bold;
         categoryText.color = new Color(0.4f, 0.85f, 1f);
         categoryText.alignment = TextAlignmentOptions.Left;
-        categoryText.text = "[KÍCH HOẠT]  •  Tiêu hao: 0  •  Hồi chiêu: 0s";
+        categoryText.text = "◆ KÍCH HOẠT ◆  •  Tiêu hao: 0  •  Hồi chiêu: 0s";
+        SoulslikeHUDStyler.SetSafeOutline(categoryText, 0.2f, Color.black);
 
         // 3. Đường kẻ ngang phân cách tinh tế
         GameObject sepObj = new GameObject("Separator", typeof(RectTransform), typeof(Image));
@@ -174,30 +178,32 @@ public class SkillTooltipPopupUI : MonoBehaviour
         sepRt.anchorMin = new Vector2(0f, 1f);
         sepRt.anchorMax = new Vector2(1f, 1f);
         sepRt.pivot = new Vector2(0.5f, 1f);
-        sepRt.sizeDelta = new Vector2(-32f, 2f);
-        sepRt.anchoredPosition = new Vector2(0f, -88f);
-        sepObj.GetComponent<Image>().color = new Color(0.88f, 0.75f, 0.40f, 0.55f);
+        sepRt.sizeDelta = new Vector2(-44f, 3f);
+        sepRt.anchoredPosition = new Vector2(0f, -126f);
+        sepObj.GetComponent<Image>().color = new Color(0.92f, 0.78f, 0.42f, 0.65f);
 
-        // 4. Mô tả kỹ năng gộp chung với sát thương (Tăng font size lên 18.5f, khoảng cách dòng thoáng đãng)
+        // 4. Mô tả kỹ năng gộp chung với sát thương (Tăng font size lên 28pt Bold, khoảng cách dòng thoáng đãng)
         GameObject descObj = new GameObject("DescText", typeof(RectTransform));
         descObj.transform.SetParent(root.transform, false);
         var dRt = descObj.GetComponent<RectTransform>();
         dRt.anchorMin = new Vector2(0f, 1f);
         dRt.anchorMax = new Vector2(1f, 1f);
         dRt.pivot = new Vector2(0f, 1f);
-        dRt.sizeDelta = new Vector2(-36f, 120f);
-        dRt.anchoredPosition = new Vector2(18f, -98f);
+        dRt.sizeDelta = new Vector2(-50f, 160f);
+        dRt.anchoredPosition = new Vector2(25f, -140f);
 
         descText = descObj.AddComponent<TextMeshProUGUI>();
         if (font != null) descText.font = font;
         if (spriteAsset != null) descText.spriteAsset = spriteAsset;
-        descText.fontSize = 18.5f;
-        descText.color = new Color(0.90f, 0.92f, 0.96f);
-        descText.lineSpacing = 6f;
+        descText.fontSize = 28f;
+        descText.fontStyle = FontStyles.Bold;
+        descText.color = new Color(0.92f, 0.95f, 1f);
+        descText.lineSpacing = 14f;
         descText.alignment = TextAlignmentOptions.TopLeft;
         descText.enableWordWrapping = true;
         descText.overflowMode = TextOverflowModes.Overflow;
         descText.text = "Mô tả chi tiết kỹ năng và lượng sát thương gây ra.";
+        SoulslikeHUDStyler.SetSafeOutline(descText, 0.22f, Color.black);
     }
 
     /// <summary>
@@ -256,24 +262,28 @@ public class SkillTooltipPopupUI : MonoBehaviour
         if (titleText != null) titleText.text = info.skillName;
         if (categoryText != null)
         {
-            categoryText.text = $"<color=#38BDF8>[{info.skillCategory}]</color>  •  {info.energyCostText}  •  {info.cooldownText}";
+            string catClean = info.skillCategory != null ? info.skillCategory.Replace("[", "").Replace("]", "") : "";
+            categoryText.text = $"<color=#38BDF8>◆ {catClean.ToUpper()} ◆</color>  •  {info.energyCostText}  •  {info.cooldownText}";
         }
 
         if (descText != null)
         {
-            descText.text = info.description;
+            // Thay thế dấu [ và ] bằng ( ) để không bao giờ bị font biến thành ký tự Z ô vuông
+            string descClean = info.description != null ? info.description.Replace("[", "(").Replace("]", ")") : "";
+            descText.text = descClean;
+
             // Tự động co giãn chiều cao thẻ bài theo độ dài mô tả để layout luôn vừa vặn không thừa thãi
             Canvas.ForceUpdateCanvases();
             float textH = descText.preferredHeight;
-            float targetH = Mathf.Max(220f, textH + 118f);
+            float targetH = Mathf.Max(320f, textH + 165f);
             if (panelRt != null)
             {
-                panelRt.sizeDelta = new Vector2(580f, targetH);
-                panelRt.anchoredPosition = new Vector2(-45f, -140f);
+                panelRt.sizeDelta = new Vector2(1100f, targetH);
+                panelRt.anchoredPosition = new Vector2(0f, -55f);
             }
             if (descText.rectTransform != null)
             {
-                descText.rectTransform.sizeDelta = new Vector2(-36f, textH + 15f);
+                descText.rectTransform.sizeDelta = new Vector2(-50f, textH + 20f);
             }
         }
 
