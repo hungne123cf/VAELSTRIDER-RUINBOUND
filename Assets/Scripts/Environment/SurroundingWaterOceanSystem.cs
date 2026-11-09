@@ -627,8 +627,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// Kẹp chặt vị trí thực thể trên đất liền / đảo hợp lệ, ngăn tuyệt đối việc lọt ra vùng nước
-    /// trong khi vẫn cho phép đi qua các cầu nối giữa các đảo liền kề mượt mà.
+    /// Kẹp chặt vị trí thực thể trên đất liền / đảo hợp lệ, ngăn tuyệt đối việc lọt ra vùng nước.
+    /// Cho phép tiếp cận sát mép tường và chướng ngại vật tự nhiên, để Unity Physics 2D xử lý.
     /// </summary>
     public static Vector3 ClampToWalkableLand(Vector3 pos, float padding = 0.55f)
     {
@@ -689,7 +689,6 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
             // Nếu người chơi đang đứng trên ô đất hợp lệ: Để nguyên cho hệ thống Collider vật lý của Unity (Tilemap/Walls)
             // tự nhiên ngăn chặn va chạm, tuyệt đối KHÔNG ép thêm khoảng đệm padding nhân tạo gây cảm giác "tường vô hình cản lại"
             return pos;
-        }
         }
 
         if (hasWalkableRects)
