@@ -815,7 +815,6 @@ public class MinimapHUD : MonoBehaviour
         realmTmp.fontStyle = FontStyles.Bold;
         realmTmp.alignment = TextAlignmentOptions.Center;
         realmTmp.enableWordWrapping = false;
-        realmTitleText = realmTmp;
 
         // 2. Radar Background Disc (120x120 px viền vàng Rune, hỗ trợ Mask cắt địa hình và click mở Bản đồ Lớn)
         GameObject radarBg = new GameObject("RadarDisc", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Mask), typeof(Button));
