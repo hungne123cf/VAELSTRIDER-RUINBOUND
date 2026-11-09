@@ -682,39 +682,34 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                     cy = bestCell.y;
                     x = Mathf.Clamp(x, cx + 0.05f, cx + 0.95f);
                     y = Mathf.Clamp(y, cy + 0.05f, cy + 0.95f);
+                    return new Vector3(x, y, pos.z);
                 }
             }
 
-            // Đang đứng trên ô đất (cx, cy): kiểm tra 4 hướng xem có giáp mặt nước không để giữ khoảng cách padding
-            float pad = Mathf.Clamp(padding, 0.25f, 0.92f);
-            if (!cells.Contains(new Vector2Int(cx + 1, cy)))
-            {
-                x = Mathf.Min(x, (cx + 1) - pad);
-            }
-            if (!cells.Contains(new Vector2Int(cx - 1, cy)))
-            {
-                x = Mathf.Max(x, cx + pad);
-            }
-            if (!cells.Contains(new Vector2Int(cx, cy + 1)))
-            {
-                y = Mathf.Min(y, (cy + 1) - pad);
-            }
-            if (!cells.Contains(new Vector2Int(cx, cy - 1)))
-            {
-                y = Mathf.Max(y, cy + pad);
-            }
-
-            return new Vector3(x, y, pos.z);
+            // Nếu người chơi đang đứng trên ô đất hợp lệ: Để nguyên cho hệ thống Collider vật lý của Unity (Tilemap/Walls)
+            // tự nhiên ngăn chặn va chạm, tuyệt đối KHÔNG ép thêm khoảng đệm padding nhân tạo gây cảm giác "tường vô hình cản lại"
+            return pos;
+        }
         }
 
         if (hasWalkableRects)
         {
+            // Nếu đã nằm trong ít nhất một WalkableRect hợp lệ: Cho phép di chuyển tự do sát tường
+            foreach (var r in builder.WalkableRects)
+            {
+                if (pos.x >= r.xMin && pos.x <= r.xMax && pos.y >= r.yMin && pos.y <= r.yMax)
+                {
+                    return pos;
+                }
+            }
+
+            // Chỉ cứu hộ kéo về mép khi thực sự lọt ra ngoài vùng đi bộ
             float bestDistSq = float.MaxValue;
             Vector2 bestPt = new Vector2(pos.x, pos.y);
             foreach (var r in builder.WalkableRects)
             {
-                float rx = Mathf.Clamp(pos.x, r.xMin + padding, r.xMax - padding);
-                float ry = Mathf.Clamp(pos.y, r.yMin + padding, r.yMax - padding);
+                float rx = Mathf.Clamp(pos.x, r.xMin, r.xMax);
+                float ry = Mathf.Clamp(pos.y, r.yMin, r.yMax);
                 float dSq = (pos.x - rx) * (pos.x - rx) + (pos.y - ry) * (pos.y - ry);
                 if (dSq < bestDistSq)
                 {
