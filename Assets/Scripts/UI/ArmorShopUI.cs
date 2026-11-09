@@ -539,7 +539,8 @@ public class ArmorShopUI : MonoBehaviour
         rootRt.anchorMax = Vector2.one;
         rootRt.sizeDelta = Vector2.zero;
 
-        canvasGroup = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
+        canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
         canvasGroup.alpha = 1f;
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;

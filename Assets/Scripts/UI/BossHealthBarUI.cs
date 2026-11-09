@@ -70,10 +70,12 @@ public class BossHealthBarUI : MonoBehaviour
             {
                 if (cObj == null) cObj = new GameObject("BossCanvas");
                 cObj.SetActive(true);
-                canvas = cObj.GetComponent<Canvas>() ?? cObj.AddComponent<Canvas>();
+                canvas = cObj.GetComponent<Canvas>();
+                if (canvas == null) canvas = cObj.AddComponent<Canvas>();
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
                 canvas.sortingOrder = 9000;
-                var scaler = cObj.GetComponent<CanvasScaler>() ?? cObj.AddComponent<CanvasScaler>();
+                var scaler = cObj.GetComponent<CanvasScaler>();
+                if (scaler == null) scaler = cObj.AddComponent<CanvasScaler>();
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1920, 1080);
                 if (cObj.GetComponent<GraphicRaycaster>() == null) cObj.AddComponent<GraphicRaycaster>();

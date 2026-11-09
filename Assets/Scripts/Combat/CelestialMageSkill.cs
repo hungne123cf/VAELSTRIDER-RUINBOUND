@@ -1788,10 +1788,11 @@ public class AstralResidueField : MonoBehaviour
                 }
             }
 
-            // Gắn debuff làm chậm 50% cho quái
+            // Gắn debuff làm chậm 50% cho quái (Tránh Unity fake null trap)
             var enemyObj = col.gameObject;
-            var debuff = enemyObj.GetComponent<EnemySlowDebuff>() ?? enemyObj.AddComponent<EnemySlowDebuff>();
-            debuff.ApplySlow(slowRatio, 0.75f);
+            var debuff = enemyObj.GetComponent<EnemySlowDebuff>();
+            if (debuff == null) debuff = enemyObj.AddComponent<EnemySlowDebuff>();
+            if (debuff != null) debuff.ApplySlow(slowRatio, 0.75f);
         }
     }
 }

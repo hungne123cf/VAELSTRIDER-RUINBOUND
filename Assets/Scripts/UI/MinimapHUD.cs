@@ -65,6 +65,9 @@ public class MinimapHUD : MonoBehaviour
         }
 
         Instance = this;
+        var cg = GetComponent<CanvasGroup>();
+        if (cg == null) gameObject.AddComponent<CanvasGroup>();
+
         EnsureProceduralSprites();
     }
 

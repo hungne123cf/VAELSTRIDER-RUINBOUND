@@ -758,22 +758,25 @@ public class BossIntroCutsceneUI : MonoBehaviour
 
     private void SetGameplayHUDVisible(bool visible)
     {
-        // Ẩn/Hiện Minimap
-        var minimap = MinimapHUD.Instance ?? Object.FindAnyObjectByType<MinimapHUD>();
-        if (minimap != null && minimap.gameObject.activeInHierarchy)
+        // Ẩn/Hiện Minimap (Tránh Unity fake-null trap khi dùng ??)
+        var minimap = MinimapHUD.Instance;
+        if (minimap == null) minimap = Object.FindAnyObjectByType<MinimapHUD>();
+        if (minimap != null && minimap.gameObject != null && minimap.gameObject.activeInHierarchy)
         {
-            var cg = minimap.GetComponent<CanvasGroup>() ?? minimap.gameObject.AddComponent<CanvasGroup>();
-            cg.alpha = visible ? 1f : 0f;
+            var cg = minimap.GetComponent<CanvasGroup>();
+            if (cg == null) cg = minimap.gameObject.AddComponent<CanvasGroup>();
+            if (cg != null) cg.alpha = visible ? 1f : 0f;
         }
 
         // Ẩn/Hiện Phím Lướt & Phím Đánh ảo trên Mobile
         var mobileBtns = Object.FindObjectsByType<MobileActionButton>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var mb in mobileBtns)
         {
-            if (mb != null)
+            if (mb != null && mb.gameObject != null)
             {
-                var cg = mb.GetComponent<CanvasGroup>() ?? mb.gameObject.AddComponent<CanvasGroup>();
-                cg.alpha = visible ? 1f : 0f;
+                var cg = mb.GetComponent<CanvasGroup>();
+                if (cg == null) cg = mb.gameObject.AddComponent<CanvasGroup>();
+                if (cg != null) cg.alpha = visible ? 1f : 0f;
             }
         }
     }
