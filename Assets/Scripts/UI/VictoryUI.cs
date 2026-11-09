@@ -273,7 +273,7 @@ public class VictoryUI : MonoBehaviour
         {
             if (Application.CanStreamedLevelBeLoaded("Map2_ValleyRuin"))
             {
-                SceneManager.LoadScene("Map2_ValleyRuin");
+                RealmTransitionManager.LoadSceneWithTransition("Map2_ValleyRuin", RealmTransitionManager.TransitionTheme.PortalWarpMap2);
                 return;
             }
         }
@@ -281,7 +281,7 @@ public class VictoryUI : MonoBehaviour
         {
             if (Application.CanStreamedLevelBeLoaded("Map3_ForgottenMemories"))
             {
-                SceneManager.LoadScene("Map3_ForgottenMemories");
+                RealmTransitionManager.LoadSceneWithTransition("Map3_ForgottenMemories", RealmTransitionManager.TransitionTheme.PortalWarpMap3);
                 return;
             }
         }

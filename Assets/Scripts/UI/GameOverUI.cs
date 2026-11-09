@@ -325,7 +325,7 @@ public class GameOverUI : MonoBehaviour
         Debug.Log("<color=cyan>[RESTART MAP]</color> Bat dau run moi tu dau (Map 1 - Level 1)!");
         if (Application.CanStreamedLevelBeLoaded("Map1_Thestart"))
         {
-            SceneManager.LoadScene("Map1_Thestart");
+            RealmTransitionManager.LoadSceneWithTransition("Map1_Thestart", RealmTransitionManager.TransitionTheme.DeployBattle);
         }
         else
         {
@@ -358,7 +358,7 @@ public class GameOverUI : MonoBehaviour
         PlayerHealth.ResetRunPreservedHealth();
 
         Debug.Log("<color=cyan>[MAIN MENU]</color> Tro ve MainMenuScene voi toan bo Linh Hon thu thap duoc...");
-        SceneManager.LoadScene("MainMenuScene");
+        RealmTransitionManager.LoadSceneWithTransition("MainMenuScene", RealmTransitionManager.TransitionTheme.ReturnSanctuary);
     }
 
     /// <summary>

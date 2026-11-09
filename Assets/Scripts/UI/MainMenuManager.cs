@@ -4743,7 +4743,7 @@ public class MainMenuManager : MonoBehaviour
         PlayerHealth.ResetRunPreservedHealth();
         MatchTimerUI.ResetRunTimer();
         Time.timeScale = 1.0f;
-        SceneManager.LoadScene("Map1_Thestart");
+        RealmTransitionManager.LoadSceneWithTransition("Map1_Thestart", RealmTransitionManager.TransitionTheme.DeployBattle);
     }
 
     private string GetHeroAlias(string normHeroId)
@@ -6132,7 +6132,7 @@ public class MainMenuManager : MonoBehaviour
         PlayerHealth.ResetRunPreservedHealth();
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         Time.timeScale = 1.0f;
-        SceneManager.LoadScene(sceneName);
+        RealmTransitionManager.LoadSceneWithTransition(sceneName, RealmTransitionManager.TransitionTheme.Auto);
     }
 
     private void OnMailboxClicked()
