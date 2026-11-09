@@ -399,10 +399,13 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
         }
         else
         {
-            // Bao gồm toàn bộ ô sàn và tường hợp lệ của Dungeon để người chơi có thể tiếp xúc sát tường tự nhiên
+            // Chỉ bao gồm các ô sàn đi bộ (Ground), loại trừ tuyệt đối ô tường (Walls) để không cho phép nhân vật bước lấn lên tường
             foreach (var c in landCells)
             {
-                validLandCells.Add(c);
+                if (!wallCells.Contains(c))
+                {
+                    validLandCells.Add(c);
+                }
             }
         }
 
@@ -543,7 +546,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.down; // Sóng vỗ từ trên xuống bờ
                 edgeStart = new Vector2(seg.startCoord, boundaryY);
                 edgeEnd = new Vector2(seg.endCoord, boundaryY);
-                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY + 0.8f), new Vector2(length + 0.4f, 1.6f));
+                // Bờ Bắc: Đá vươn xuống mép sàn. Collider phủ xuống chạm sát mép sàn để chân nhân vật dừng chuẩn xác
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY + 0.8f), new Vector2(length, 2.0f));
             }
             else if (seg.dir == ShoreDir.South)
             {
@@ -558,7 +562,9 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.up; // Sóng vỗ từ dưới lên bờ
                 edgeStart = new Vector2(seg.startCoord, boundaryY);
                 edgeEnd = new Vector2(seg.endCoord, boundaryY);
-                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY - 0.8f), new Vector2(length + 0.4f, 1.6f));
+                // Bờ Nam: Bờ đá dạt lên phía trên mép sàn. Collider che chắn từ (boundaryY + 0.40f) trở xuống sông
+                // ngăn tuyệt đối việc nhân vật giẫm lấn lên đá bờ sông hoặc mép tường nước
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY - 0.60f), new Vector2(length, 2.0f));
             }
             else if (seg.dir == ShoreDir.East)
             {
@@ -573,7 +579,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.left; // Sóng vỗ từ phải sang bờ trái
                 edgeStart = new Vector2(boundaryX, seg.startCoord);
                 edgeEnd = new Vector2(boundaryX, seg.endCoord);
-                SpawnShorelineWallCollider(shoresRoot, new Vector2(boundaryX + 0.8f, mid), new Vector2(1.6f, length + 0.4f));
+                // Bờ Đông: Collider che chắn từ (boundaryX - 0.20f) trở sang phải dòng sông
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(boundaryX + 0.8f, mid), new Vector2(2.0f, length));
             }
             else if (seg.dir == ShoreDir.West)
             {
@@ -588,7 +595,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.right; // Sóng vỗ từ trái sang bờ phải
                 edgeStart = new Vector2(boundaryX, seg.startCoord);
                 edgeEnd = new Vector2(boundaryX, seg.endCoord);
-                SpawnShorelineWallCollider(shoresRoot, new Vector2(boundaryX - 0.8f, mid), new Vector2(1.6f, length + 0.4f));
+                // Bờ Tây: Collider che chắn từ (boundaryX + 0.20f) trở sang trái dòng sông
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(boundaryX - 0.8f, mid), new Vector2(2.0f, length));
             }
 
             foamObj.transform.position = foamBasePos;
