@@ -1797,12 +1797,12 @@ public class MailboxUI : MonoBehaviour
         tRt.anchorMin = new Vector2(0.5f, 1f);
         tRt.anchorMax = new Vector2(0.5f, 1f);
         tRt.pivot = new Vector2(0.5f, 1f);
-        tRt.anchoredPosition = new Vector2(0f, -20f);
-        tRt.sizeDelta = new Vector2(800f, 32f);
+        tRt.anchoredPosition = new Vector2(0f, -24f);
+        tRt.sizeDelta = new Vector2(1200f, 38f);
 
         var tTmp = tObj.AddComponent<TextMeshProUGUI>();
         tTmp.text = isVi ? "<b>TRUNG TÂM ĐỔI MÃ QUÀ TẶNG VƯƠNG QUỐC</b>" : "<b>KINGDOM GIFTCODE REDEMPTION</b>";
-        tTmp.fontSize = 19f;
+        tTmp.fontSize = 28f;
         tTmp.color = new Color(1f, 0.88f, 0.45f);
         tTmp.alignment = TextAlignmentOptions.Center;
 
@@ -1812,26 +1812,26 @@ public class MailboxUI : MonoBehaviour
         stRt.anchorMin = new Vector2(0.5f, 1f);
         stRt.anchorMax = new Vector2(0.5f, 1f);
         stRt.pivot = new Vector2(0.5f, 1f);
-        stRt.anchoredPosition = new Vector2(0f, -54f);
-        stRt.sizeDelta = new Vector2(900f, 24f);
+        stRt.anchoredPosition = new Vector2(0f, -68f);
+        stRt.sizeDelta = new Vector2(1200f, 30f);
 
         var stTmp = stObj.AddComponent<TextMeshProUGUI>();
         stTmp.text = isVi 
             ? "Nhập mã quà tặng từ sự kiện, cộng đồng hoặc nhà phát triển để nhận Linh Hồn và vật phẩm quý giá."
             : "Redeem giftcodes from events, community, and dev milestones to claim Soul Shards.";
-        stTmp.fontSize = 13f;
+        stTmp.fontSize = 19f;
         stTmp.color = new Color(0.65f, 0.75f, 0.88f);
         stTmp.alignment = TextAlignmentOptions.Center;
 
-        // Redemption Input Box (Height 54px)
+        // Redemption Input Box (Height 72px, Rộng 1280px)
         GameObject inputBar = new GameObject("InputBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         inputBar.transform.SetParent(mainCard.transform, false);
         RectTransform ibRt = inputBar.GetComponent<RectTransform>();
         ibRt.anchorMin = new Vector2(0.5f, 1f);
         ibRt.anchorMax = new Vector2(0.5f, 1f);
         ibRt.pivot = new Vector2(0.5f, 1f);
-        ibRt.anchoredPosition = new Vector2(0f, -94f);
-        ibRt.sizeDelta = new Vector2(920f, 60f);
+        ibRt.anchoredPosition = new Vector2(0f, -108f);
+        ibRt.sizeDelta = new Vector2(1280f, 72f);
 
         Image ibImg = inputBar.GetComponent<Image>();
         ibImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -1850,7 +1850,7 @@ public class MailboxUI : MonoBehaviour
         ifRt.anchorMax = new Vector2(0f, 0.5f);
         ifRt.pivot = new Vector2(0f, 0.5f);
         ifRt.anchoredPosition = new Vector2(16f, 0f);
-        ifRt.sizeDelta = new Vector2(430f, 44f);
+        ifRt.sizeDelta = new Vector2(600f, 52f);
 
         Image ifBg = ifObj.GetComponent<Image>();
         ifBg.color = new Color(0.04f, 0.06f, 0.09f, 0.95f);
@@ -1875,7 +1875,7 @@ public class MailboxUI : MonoBehaviour
         phRt.sizeDelta = Vector2.zero;
         var phTmp = phObj.AddComponent<TextMeshProUGUI>();
         phTmp.text = isVi ? "Chạm để nhập mã quà tặng..." : "Tap to enter giftcode...";
-        phTmp.fontSize = 13.5f;
+        phTmp.fontSize = 19f;
         phTmp.fontStyle = FontStyles.Italic;
         phTmp.color = new Color(0.5f, 0.6f, 0.7f, 0.7f);
         phTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1888,7 +1888,7 @@ public class MailboxUI : MonoBehaviour
         itRt.anchorMax = Vector2.one;
         itRt.sizeDelta = Vector2.zero;
         var itTmp = itObj.AddComponent<TextMeshProUGUI>();
-        itTmp.fontSize = 14.5f;
+        itTmp.fontSize = 22f;
         itTmp.fontStyle = FontStyles.Bold;
         itTmp.color = Color.white;
         itTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1916,8 +1916,8 @@ public class MailboxUI : MonoBehaviour
         pRt.anchorMin = new Vector2(0f, 0.5f);
         pRt.anchorMax = new Vector2(0f, 0.5f);
         pRt.pivot = new Vector2(0f, 0.5f);
-        pRt.anchoredPosition = new Vector2(456f, 0f);
-        pRt.sizeDelta = new Vector2(90f, 44f);
+        pRt.anchoredPosition = new Vector2(630f, 0f);
+        pRt.sizeDelta = new Vector2(130f, 52f);
 
         Image pImg = pasteBtnObj.GetComponent<Image>();
         pImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1932,7 +1932,7 @@ public class MailboxUI : MonoBehaviour
         ptRt.sizeDelta = Vector2.zero;
         var ptTmp = ptObj.AddComponent<TextMeshProUGUI>();
         ptTmp.text = isVi ? "<b>DÁN MÃ</b>" : "<b>PASTE</b>";
-        ptTmp.fontSize = 12.5f;
+        ptTmp.fontSize = 18f;
         ptTmp.alignment = TextAlignmentOptions.Center;
         ptTmp.color = new Color(0.7f, 0.9f, 1f);
 
@@ -1947,8 +1947,8 @@ public class MailboxUI : MonoBehaviour
         kbRt.anchorMin = new Vector2(0f, 0.5f);
         kbRt.anchorMax = new Vector2(0f, 0.5f);
         kbRt.pivot = new Vector2(0f, 0.5f);
-        kbRt.anchoredPosition = new Vector2(554f, 0f);
-        kbRt.sizeDelta = new Vector2(100f, 44f);
+        kbRt.anchoredPosition = new Vector2(775f, 0f);
+        kbRt.sizeDelta = new Vector2(140f, 52f);
 
         Image kbImg = kbdBtnObj.GetComponent<Image>();
         kbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1963,7 +1963,7 @@ public class MailboxUI : MonoBehaviour
         kbtRt.sizeDelta = Vector2.zero;
         var kbtTmp = kbtObj.AddComponent<TextMeshProUGUI>();
         kbtTmp.text = isVi ? "<b>⌨ PHÍM</b>" : "<b>⌨ KEYBD</b>";
-        kbtTmp.fontSize = 12.5f;
+        kbtTmp.fontSize = 18f;
         kbtTmp.alignment = TextAlignmentOptions.Center;
         kbtTmp.color = new Color(0.9f, 0.85f, 1f);
 
@@ -1979,7 +1979,7 @@ public class MailboxUI : MonoBehaviour
         rdRt.anchorMax = new Vector2(1f, 0.5f);
         rdRt.pivot = new Vector2(1f, 0.5f);
         rdRt.anchoredPosition = new Vector2(-16f, 0f);
-        rdRt.sizeDelta = new Vector2(230f, 44f);
+        rdRt.sizeDelta = new Vector2(300f, 52f);
 
         Image rdImg = rdBtnObj.GetComponent<Image>();
         rdImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1998,7 +1998,7 @@ public class MailboxUI : MonoBehaviour
         rdtRt.sizeDelta = Vector2.zero;
         var rdtTmp = rdtObj.AddComponent<TextMeshProUGUI>();
         rdtTmp.text = isVi ? "<b>ĐỔI QUÀ NGAY</b>" : "<b>REDEEM NOW</b>";
-        rdtTmp.fontSize = 14f;
+        rdtTmp.fontSize = 20f;
         rdtTmp.alignment = TextAlignmentOptions.Center;
         rdtTmp.color = Color.white;
 
@@ -2013,16 +2013,16 @@ public class MailboxUI : MonoBehaviour
         fbRt.anchorMin = new Vector2(0.5f, 1f);
         fbRt.anchorMax = new Vector2(0.5f, 1f);
         fbRt.pivot = new Vector2(0.5f, 1f);
-        fbRt.anchoredPosition = new Vector2(0f, -160f);
-        fbRt.sizeDelta = new Vector2(900f, 26f);
+        fbRt.anchoredPosition = new Vector2(0f, -190f);
+        fbRt.sizeDelta = new Vector2(1200f, 30f);
 
         giftcodeFeedbackText = fbObj.AddComponent<TextMeshProUGUI>();
-        giftcodeFeedbackText.fontSize = 13.5f;
+        giftcodeFeedbackText.fontSize = 18f;
         giftcodeFeedbackText.alignment = TextAlignmentOptions.Center;
         giftcodeFeedbackText.color = new Color(0.35f, 0.95f, 0.85f);
 
         // Filigree Divider
-        SoulslikeHUDStyler.AddFiligreeDivider(mainCard.transform, new Vector2(0f, -190f), new Vector2(920f, 6f));
+        SoulslikeHUDStyler.AddFiligreeDivider(mainCard.transform, new Vector2(0f, -225f), new Vector2(1280f, 6f));
 
         // Public Codes Section Header
         GameObject pcHeadObj = new GameObject("PublicCodesHeader", typeof(RectTransform), typeof(CanvasRenderer));
@@ -2031,14 +2031,14 @@ public class MailboxUI : MonoBehaviour
         pchRt.anchorMin = new Vector2(0.5f, 1f);
         pchRt.anchorMax = new Vector2(0.5f, 1f);
         pchRt.pivot = new Vector2(0.5f, 1f);
-        pchRt.anchoredPosition = new Vector2(0f, -206f);
-        pchRt.sizeDelta = new Vector2(900f, 26f);
+        pchRt.anchoredPosition = new Vector2(0f, -245f);
+        pchRt.sizeDelta = new Vector2(1200f, 32f);
 
         var pchTmp = pcHeadObj.AddComponent<TextMeshProUGUI>();
         pchTmp.text = isVi 
             ? "<b>MÃ QUÀ TẶNG CÔNG KHAI CÓ SẴN (CHẠM ĐỂ NHẬN NHANH)</b>" 
             : "<b>AVAILABLE PUBLIC GIFTCODES (TAP TO INSTANTLY REDEEM)</b>";
-        pchTmp.fontSize = 13f;
+        pchTmp.fontSize = 20f;
         pchTmp.color = new Color(1f, 0.88f, 0.45f);
         pchTmp.alignment = TextAlignmentOptions.Center;
 
@@ -2049,8 +2049,8 @@ public class MailboxUI : MonoBehaviour
         cgRt.anchorMin = new Vector2(0.5f, 0f);
         cgRt.anchorMax = new Vector2(0.5f, 0f);
         cgRt.pivot = new Vector2(0.5f, 0f);
-        cgRt.anchoredPosition = new Vector2(0f, 18f);
-        cgRt.sizeDelta = new Vector2(920f, 150f);
+        cgRt.anchoredPosition = new Vector2(0f, 25f);
+        cgRt.sizeDelta = new Vector2(1650f, 230f);
 
         publicCodesContainer = codesContainer.transform;
         PopulatePublicGiftcodeCards();
@@ -2070,9 +2070,9 @@ public class MailboxUI : MonoBehaviour
             ("VAELSTRIDER", "Hào Khí Chiến Binh", "Warrior Spirit", 1000)
         };
 
-        float cardWidth = 220f;
-        float cardHeight = 140f;
-        float gap = 12f;
+        float cardWidth = 370f;
+        float cardHeight = 220f;
+        float gap = 24f;
         float totalWidth = 4 * cardWidth + 3 * gap;
         float startX = -totalWidth * 0.5f + cardWidth * 0.5f;
 
@@ -2103,7 +2103,7 @@ public class MailboxUI : MonoBehaviour
 
             var cOut = card.AddComponent<Outline>();
             cOut.effectColor = isUsed ? new Color(0.3f, 0.4f, 0.5f, 0.4f) : new Color(0.85f, 0.70f, 0.32f, 0.70f);
-            cOut.effectDistance = new Vector2(1f, -1f);
+            cOut.effectDistance = new Vector2(1.5f, -1.5f);
 
             // Code Text
             GameObject ctObj = new GameObject("CodeName", typeof(RectTransform), typeof(CanvasRenderer));
@@ -2112,12 +2112,12 @@ public class MailboxUI : MonoBehaviour
             ctRt.anchorMin = new Vector2(0.5f, 1f);
             ctRt.anchorMax = new Vector2(0.5f, 1f);
             ctRt.pivot = new Vector2(0.5f, 1f);
-            ctRt.anchoredPosition = new Vector2(0f, -10f);
-            ctRt.sizeDelta = new Vector2(cardWidth - 16f, 24f);
+            ctRt.anchoredPosition = new Vector2(0f, -14f);
+            ctRt.sizeDelta = new Vector2(cardWidth - 20f, 32f);
 
             var ctTmp = ctObj.AddComponent<TextMeshProUGUI>();
             ctTmp.text = $"<b>{item.code}</b>";
-            ctTmp.fontSize = 14f;
+            ctTmp.fontSize = 24f;
             ctTmp.alignment = TextAlignmentOptions.Center;
             ctTmp.color = isUsed ? new Color(0.6f, 0.7f, 0.8f) : new Color(1f, 0.88f, 0.45f);
 
@@ -2128,14 +2128,14 @@ public class MailboxUI : MonoBehaviour
             cdRt.anchorMin = new Vector2(0.5f, 1f);
             cdRt.anchorMax = new Vector2(0.5f, 1f);
             cdRt.pivot = new Vector2(0.5f, 1f);
-            cdRt.anchoredPosition = new Vector2(0f, -34f);
-            cdRt.sizeDelta = new Vector2(cardWidth - 16f, 20f);
+            cdRt.anchoredPosition = new Vector2(0f, -50f);
+            cdRt.sizeDelta = new Vector2(cardWidth - 20f, 26f);
 
             var cdTmp = cdObj.AddComponent<TextMeshProUGUI>();
             cdTmp.text = isVi ? item.descVi : item.descEn;
-            cdTmp.fontSize = 11f;
+            cdTmp.fontSize = 17f;
             cdTmp.alignment = TextAlignmentOptions.Center;
-            cdTmp.color = new Color(0.65f, 0.75f, 0.88f);
+            cdTmp.color = new Color(0.70f, 0.80f, 0.92f);
 
             // Shards Value
             GameObject csObj = new GameObject("Shards", typeof(RectTransform), typeof(CanvasRenderer));
@@ -2144,12 +2144,12 @@ public class MailboxUI : MonoBehaviour
             csRt.anchorMin = new Vector2(0.5f, 1f);
             csRt.anchorMax = new Vector2(0.5f, 1f);
             csRt.pivot = new Vector2(0.5f, 1f);
-            csRt.anchoredPosition = new Vector2(0f, -54f);
-            csRt.sizeDelta = new Vector2(cardWidth - 16f, 22f);
+            csRt.anchoredPosition = new Vector2(0f, -80f);
+            csRt.sizeDelta = new Vector2(cardWidth - 20f, 30f);
 
             var csTmp = csObj.AddComponent<TextMeshProUGUI>();
             csTmp.text = $"<color=#55EFC4><b>+{item.shards:N0} Linh Hồn</b></color>";
-            csTmp.fontSize = 12f;
+            csTmp.fontSize = 22f;
             csTmp.alignment = TextAlignmentOptions.Center;
 
             // 1-Click Action Button
@@ -2159,15 +2159,15 @@ public class MailboxUI : MonoBehaviour
             abRt.anchorMin = new Vector2(0.5f, 0f);
             abRt.anchorMax = new Vector2(0.5f, 0f);
             abRt.pivot = new Vector2(0.5f, 0f);
-            abRt.anchoredPosition = new Vector2(0f, 10f);
-            abRt.sizeDelta = new Vector2(cardWidth - 24f, 34f);
+            abRt.anchoredPosition = new Vector2(0f, 14f);
+            abRt.sizeDelta = new Vector2(cardWidth - 28f, 52f);
 
             Image abImg = actBtnObj.GetComponent<Image>();
             abImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
             abImg.type = Image.Type.Sliced;
             abImg.color = isUsed 
                 ? new Color(0.20f, 0.24f, 0.30f, 0.95f) 
-                : new Color(0.12f, 0.46f, 0.26f, 0.98f);
+                : new Color(0.12f, 0.52f, 0.28f, 0.98f);
 
             GameObject abtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
             abtObj.transform.SetParent(actBtnObj.transform, false);
@@ -2180,7 +2180,7 @@ public class MailboxUI : MonoBehaviour
             abtTmp.text = isUsed 
                 ? (isVi ? "<b>ĐÃ DÙNG</b>" : "<b>USED</b>") 
                 : (isVi ? "<b>SỬ DỤNG</b>" : "<b>USE CODE</b>");
-            abtTmp.fontSize = 12f;
+            abtTmp.fontSize = 20f;
             abtTmp.alignment = TextAlignmentOptions.Center;
             abtTmp.color = isUsed ? new Color(0.6f, 0.7f, 0.8f) : Color.white;
 

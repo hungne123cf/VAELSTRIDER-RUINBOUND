@@ -116,10 +116,11 @@ public class MinimapHUD : MonoBehaviour
         }
 
         // Cập nhật hướng xoay của icon Player trên Minimap
-        float playerFacing = playerTransform.localScale.x > 0 ? 0f : 180f;
+        float playerFacing = playerTransform.localScale.x > 0 ? 1f : -1f;
         if (playerIconRt != null)
         {
-            playerIconRt.localRotation = Quaternion.Euler(0f, 0f, playerFacing == 0f ? -90f : 90f);
+            // Lật mặt avatar theo hướng di chuyển của nhân vật (trái / phải)
+            playerIconRt.localScale = new Vector3(playerFacing, 1f, 1f);
         }
 
         // Cập nhật vị trí địa hình di chuyển mượt mà dưới tâm la bàn
@@ -269,6 +270,37 @@ public class MinimapHUD : MonoBehaviour
         origin = Vector2.zero;
         size = Vector2.zero;
         return null;
+    }
+
+    public static Sprite GetPlayerAvatarSprite()
+    {
+        string heroId = PlayerPrefs.GetString("SelectedHero", "vael");
+        if (string.IsNullOrEmpty(heroId)) heroId = "vael";
+        heroId = heroId.ToLower();
+
+        // 1. Thử load avatar từ UI/Avatars
+        Sprite av = Resources.Load<Sprite>($"UI/Avatars/Avatar_{heroId}");
+        if (av == null) av = Resources.Load<Sprite>($"UI/Avatars/avatar_{heroId}");
+        if (av == null)
+        {
+            if (heroId.Contains("titan")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_TitanBerserker") ?? Resources.Load<Sprite>("UI/Avatars/avatar_titan");
+            else if (heroId.Contains("azure")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_AzureBlade") ?? Resources.Load<Sprite>("UI/Avatars/avatar_azure");
+            else if (heroId.Contains("ronin")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_GaleRonin") ?? Resources.Load<Sprite>("UI/Avatars/avatar_ronin");
+            else if (heroId.Contains("dune")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_DuneAssassin") ?? Resources.Load<Sprite>("UI/Avatars/avatar_dune");
+            else if (heroId.Contains("mage")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_CelestialMage") ?? Resources.Load<Sprite>("UI/Avatars/avatar_mage");
+            else av = Resources.Load<Sprite>("UI/Avatars/Avatar_Vaelstrider") ?? Resources.Load<Sprite>("UI/Avatars/avatar_vael");
+        }
+        if (av != null) return av;
+
+        // 2. Fallback: Lấy SpriteRenderer từ Player trong scene
+        var pc = Object.FindAnyObjectByType<PlayerController>();
+        if (pc != null)
+        {
+            var sr = pc.GetComponentInChildren<SpriteRenderer>();
+            if (sr != null && sr.sprite != null) return sr.sprite;
+        }
+
+        return roundDotSprite;
     }
 
     private void FindPlayer()
@@ -754,19 +786,19 @@ public class MinimapHUD : MonoBehaviour
         rootRt.anchorMax = new Vector2(1f, 1f);
         rootRt.pivot = new Vector2(1f, 1f);
         rootRt.anchoredPosition = new Vector2(-15f, -95f); // Cách lề phải 15px, dưới nút gear 95px
-        rootRt.sizeDelta = new Vector2(130f, 175f);
+        rootRt.sizeDelta = new Vector2(190f, 210f);
 
-        // 1.1 Badge Tên Vùng Đất (Realm Title Header)
+        // 1.1 Badge Tên Vùng Đất (Realm Title Header - Nằm cách xa phía trên vòng tròn la bàn)
         GameObject realmObj = new GameObject("RealmTitleBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         realmObj.layer = 5;
         realmObj.transform.SetParent(rootObj.transform, false);
         RectTransform realmRt = realmObj.GetComponent<RectTransform>();
-        realmRt.anchoredPosition = new Vector2(0f, 18f);
-        realmRt.sizeDelta = new Vector2(125f, 18f);
+        realmRt.anchoredPosition = new Vector2(0f, 24f);
+        realmRt.sizeDelta = new Vector2(180f, 24f);
         Image realmBg = realmObj.GetComponent<Image>();
-        realmBg.color = new Color(0.04f, 0.06f, 0.10f, 0.85f);
+        realmBg.color = new Color(0.04f, 0.06f, 0.10f, 0.88f);
         var realmOutline = realmObj.AddComponent<Outline>();
-        realmOutline.effectColor = new Color(0.85f, 0.70f, 0.25f, 0.65f);
+        realmOutline.effectColor = new Color(0.85f, 0.70f, 0.25f, 0.75f);
         realmOutline.effectDistance = new Vector2(1f, -1f);
 
         GameObject realmTxtObj = new GameObject("RealmText", typeof(RectTransform), typeof(CanvasRenderer));
@@ -775,12 +807,15 @@ public class MinimapHUD : MonoBehaviour
         RectTransform realmTxtRt = realmTxtObj.GetComponent<RectTransform>();
         realmTxtRt.anchorMin = Vector2.zero;
         realmTxtRt.anchorMax = Vector2.one;
-        realmTxtRt.sizeDelta = Vector2.zero;
+        realmTxtRt.offsetMin = new Vector2(8f, 0f);
+        realmTxtRt.offsetMax = new Vector2(-8f, 0f);
         var realmTmp = realmTxtObj.AddComponent<TextMeshProUGUI>();
         realmTmp.text = "<color=#FFD700>THUNG LŨNG TÀN TÍCH</color>";
-        realmTmp.fontSize = 10.5f;
+        realmTmp.fontSize = 12.5f;
         realmTmp.fontStyle = FontStyles.Bold;
         realmTmp.alignment = TextAlignmentOptions.Center;
+        realmTmp.enableWordWrapping = false;
+        realmTitleText = realmTmp;
 
         // 2. Radar Background Disc (120x120 px viền vàng Rune, hỗ trợ Mask cắt địa hình và click mở Bản đồ Lớn)
         GameObject radarBg = new GameObject("RadarDisc", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Mask), typeof(Button));
@@ -832,18 +867,24 @@ public class MinimapHUD : MonoBehaviour
         bRt.anchorMax = Vector2.one;
         bRt.sizeDelta = Vector2.zero;
 
-        // 2.3 Player Center Icon (Glowing Emerald Arrow)
+        // 2.3 Player Center Icon: AVATAR CHÂN DUNG PLAYER THAY CHO TAM GIÁC XANH
         GameObject pIconObj = new GameObject("PlayerIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         pIconObj.layer = 5;
         pIconObj.transform.SetParent(radarBg.transform, false);
         RectTransform pRt = pIconObj.GetComponent<RectTransform>();
-        pRt.sizeDelta = new Vector2(18f, 18f);
+        pRt.sizeDelta = new Vector2(24f, 24f);
         pRt.anchoredPosition = Vector2.zero;
 
         var pImg = pIconObj.GetComponent<Image>();
-        pImg.sprite = arrowSprite;
-        pImg.color = new Color(0.18f, 1f, 0.45f);
+        pImg.sprite = GetPlayerAvatarSprite();
+        pImg.color = Color.white;
+        pImg.preserveAspect = true;
         pImg.raycastTarget = false;
+
+        // Viền vàng kim hào quang bao quanh Avatar Player
+        var pOutline = pIconObj.AddComponent<Outline>();
+        pOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
+        pOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
         // 2.4 La Bàn Dẫn Đường: Needle Pointer chạy quanh viền hình tròn
         GameObject needleObj = new GameObject("CompassNeedle", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -863,8 +904,8 @@ public class MinimapHUD : MonoBehaviour
         distObj.layer = 5;
         distObj.transform.SetParent(rootObj.transform, false);
         RectTransform dRt = distObj.GetComponent<RectTransform>();
-        dRt.anchoredPosition = new Vector2(0f, -118f);
-        dRt.sizeDelta = new Vector2(125f, 22f);
+        dRt.anchoredPosition = new Vector2(0f, -125f);
+        dRt.sizeDelta = new Vector2(170f, 24f);
 
         Image dImg = distObj.GetComponent<Image>();
         dImg.color = new Color(0.06f, 0.08f, 0.14f, 0.92f);

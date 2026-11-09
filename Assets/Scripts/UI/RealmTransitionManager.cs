@@ -161,19 +161,20 @@ public class RealmTransitionManager : MonoBehaviour
         _subtitleText = subObj.GetComponent<TextMeshProUGUI>();
         subObj.SetActive(false); // Bỏ subtitle đè tranh
 
-        // Lore Tip Box (Nằm ngay phía trên thanh loading ở đáy màn hình, cách xa trung tâm tranh)
+        // Lore Tip Box (Nằm cách xa thanh loading, font tinh gọn, không bao giờ đè lên bar)
         GameObject tipObj = new GameObject("LoreTipText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         tipObj.transform.SetParent(containerObj.transform, false);
         var tipRt = tipObj.GetComponent<RectTransform>();
         tipRt.anchorMin = new Vector2(0.5f, 0f);
         tipRt.anchorMax = new Vector2(0.5f, 0f);
         tipRt.pivot = new Vector2(0.5f, 0.5f);
-        tipRt.anchoredPosition = new Vector2(0f, 95f);
-        tipRt.sizeDelta = new Vector2(850f, 28f);
+        tipRt.anchoredPosition = new Vector2(0f, 135f);
+        tipRt.sizeDelta = new Vector2(1200f, 40f);
         _loreTipText = tipObj.GetComponent<TextMeshProUGUI>();
-        _loreTipText.fontSize = 15f;
+        _loreTipText.fontSize = 22f;
         _loreTipText.fontStyle = FontStyles.Bold;
         _loreTipText.alignment = TextAlignmentOptions.Center;
+        _loreTipText.enableWordWrapping = false;
         _loreTipText.color = new Color(1f, 0.88f, 0.55f);
         SoulslikeHUDStyler.SetSafeOutline(_loreTipText, 0.35f, Color.black);
 
@@ -184,8 +185,8 @@ public class RealmTransitionManager : MonoBehaviour
         sRt.anchorMin = new Vector2(0.5f, 0f);
         sRt.anchorMax = new Vector2(0.5f, 0f);
         sRt.pivot = new Vector2(0.5f, 0.5f);
-        sRt.anchoredPosition = new Vector2(0f, 62f);
-        sRt.sizeDelta = new Vector2(680f, 20f); // Thanh mảnh, tinh tế chuẩn Soulslike
+        sRt.anchoredPosition = new Vector2(0f, 75f);
+        sRt.sizeDelta = new Vector2(750f, 22f); // Thanh mảnh, tinh tế chuẩn Soulslike
         _loadingSlider = sliderObj.GetComponent<Slider>();
         _loadingSlider.interactable = false;
 
@@ -246,10 +247,10 @@ public class RealmTransitionManager : MonoBehaviour
         pRt.anchorMin = new Vector2(0.5f, 0f);
         pRt.anchorMax = new Vector2(0.5f, 0f);
         pRt.pivot = new Vector2(0.5f, 0.5f);
-        pRt.anchoredPosition = new Vector2(0f, 32f);
-        pRt.sizeDelta = new Vector2(300f, 26f);
+        pRt.anchoredPosition = new Vector2(0f, 36f);
+        pRt.sizeDelta = new Vector2(300f, 28f);
         _progressText = prgObj.GetComponent<TextMeshProUGUI>();
-        _progressText.fontSize = 14f;
+        _progressText.fontSize = 20f;
         _progressText.fontStyle = FontStyles.Bold;
         _progressText.characterSpacing = 2.0f;
         _progressText.alignment = TextAlignmentOptions.Center;
@@ -471,8 +472,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« Đang khởi hành vào vương quốc Tàn Tích thượng cổ... »" 
-                        : "« Entering the ancient Ruinbound realm... »";
+                        ? "« Đang tiến vào Tàn Tích cổ đại... »" 
+                        : "« Entering the ancient Realm... »";
                 }
                 break;
 
@@ -481,8 +482,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« MẸO CHIẾN ĐẤU: Tấn công trúng đích liên tiếp để tích lũy Nộ Khí và giải phóng Tuyệt Kỹ tối thượng! »" 
-                        : "« COMBAT TIP: Chain attacks to build Fury and unleash your devastating Ultimate! »";
+                        ? "« Tích Nộ Khí để tung Tuyệt Kỹ »" 
+                        : "« Build Fury for your Ultimate »";
                 }
                 break;
 
@@ -491,8 +492,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« THUNG LŨNG TÀN TÍCH: Bọ Cạp Độc và Tộc Goblin xuất hiện với số lượng áp đảo. Hãy cẩn thận các vũng axit! »" 
-                        : "« VALLEY RUINS: Toxic Scorpions and Goblin tribes swarm in masses. Avoid toxic pools! »";
+                        ? "« Cẩn thận Bọ Cạp độc và bẫy axit »" 
+                        : "« Beware toxic Scorpions and acid »";
                 }
                 break;
 
@@ -501,8 +502,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« KÝ ỨC LÃNG QUÊN: Tà khí hư không ngập tràn cõi giới. Chuẩn bị tinh thần cho trận đại chiến sinh tử! »" 
-                        : "« FORGOTTEN MEMORIES: The void aether chills your soul. Brace yourself for the ultimate trial! »";
+                        ? "« Tà khí Hư Không trỗi dậy »" 
+                        : "« Void aether stirs within »";
                 }
                 break;
 
@@ -516,23 +517,23 @@ public class RealmTransitionManager : MonoBehaviour
                     {
                         case CalamityRealm.VoidNightmare:
                             _loreTipText.text = isVi 
-                                ? "« CÕI ÁC MỘNG HƯ KHÔNG: Tà khí nuốt chửng ánh sáng. Hãy cảnh giác với các quả cầu ác mộng! »" 
-                                : "« VOID NIGHTMARE REALM: Shadows consume all light. Beware the orbs of darkness! »";
+                                ? "« Cõi Ác Mộng Hư Không »" 
+                                : "« Void Nightmare Realm »";
                             break;
                         case CalamityRealm.AcidDownpour:
                             _loreTipText.text = isVi 
-                                ? "« CÕI MƯA AXIT ĂN MÒN: Mưa độc rút máu liên tục. Tấn công quái dồn dập để duy trì trung hòa độc tố! »" 
-                                : "« ACID DOWNPOUR REALM: Toxic rain corrodes health. Attack continuously to neutralize venom! »";
+                                ? "« Cõi Mưa Axit Ăn Mòn »" 
+                                : "« Acid Downpour Realm »";
                             break;
                         case CalamityRealm.MagmaCalamity:
                             _loreTipText.text = isVi 
-                                ? "« CÕI DUNG NHAM RỰC LỬA: Nham thạch sôi trào dưới chân. Tránh xa các cột lửa và vụ nổ địa ngục! »" 
-                                : "« MAGMA CALAMITY REALM: Lava boils beneath your feet. Dodge fiery pillars and hellish blasts! »";
+                                ? "« Cõi Dung Nham Rực Lửa »" 
+                                : "« Magma Calamity Realm »";
                             break;
                         case CalamityRealm.FrostfallBlizzard:
                             _loreTipText.text = isVi 
-                                ? "« CÕI BÃO TUYẾT BĂNG GIÁ: Bão tuyết làm chậm và đóng băng linh hồn. Luôn di chuyển và tung chiêu để sinh tồn! »" 
-                                : "« FROSTFALL BLIZZARD REALM: Howling blizzards chill your soul. Keep moving to survive the freeze! »";
+                                ? "« Cõi Bão Tuyết Băng Giá »" 
+                                : "« Frostfall Blizzard Realm »";
                             break;
                         default:
                             _loreTipText.text = isVi 

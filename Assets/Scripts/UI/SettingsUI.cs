@@ -433,25 +433,25 @@ public class SettingsUI : MonoBehaviour
         WhiteIconLoader.ApplyGothicFrame(controlsCard, new Color(0.35f, 0.55f, 0.75f, 0.55f), 0.45f);
 
         // Title inside Card
-        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>TÙY CHỈNH NÚT BẤM TRỰC TIẾP TRONG TRẬN ĐẤU</b>", new Vector2(30f, -22f), new Vector2(1280f, 36f));
+        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>TÙY CHỈNH NÚT CẢM ỨNG</b>", new Vector2(30f, -25f), new Vector2(1280f, 40f));
         controlsCardTitle.fontSize = 24f;
         controlsCardTitle.color = new Color(1f, 0.88f, 0.45f);
 
-        // Description inside Card
-        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt & Tuyệt kỹ trực tiếp trên màn hình trận đấu.\n\nVị trí và kích thước mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!", new Vector2(30f, -68f), new Vector2(1280f, 110f));
-        controlsCardDesc.fontSize = 19f;
+        // Description inside Card - Tinh gọn 1 câu duy nhất, không xuống dòng
+        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Kéo thả phím di chuyển, đánh & lướt trực tiếp trên màn hình trận đấu.", new Vector2(30f, -75f), new Vector2(1280f, 40f));
+        controlsCardDesc.fontSize = 20f;
         controlsCardDesc.color = new Color(0.82f, 0.88f, 0.95f, 0.9f);
 
-        // 2 Big Action Buttons inside Card
-        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(30f, -195f), new Vector2(1280f, 75f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
+        // 2 Big Action Buttons inside Card - Đặt cách xa mô tả, không bao giờ bị đè text
+        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(30f, -140f), new Vector2(1280f, 75f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
         customizeLayoutBtnText.fontSize = 22f;
 
-        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(30f, -285f), new Vector2(1280f, 70f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
+        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(30f, -235f), new Vector2(1280f, 70f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
         resetControlsDefaultBtnText.fontSize = 20f;
 
         // Bottom Tip below Card
-        controlsCardTip = CreateLabel(pageControls.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí và kích thước các nút.</color></i>", new Vector2(30f, -485f), new Vector2(1300f, 30f));
-        controlsCardTip.fontSize = 17f;
+        controlsCardTip = CreateLabel(controlsCard.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí các nút.</color></i>", new Vector2(30f, -330f), new Vector2(1280f, 35f));
+        controlsCardTip.fontSize = 18f;
 
         // --- PAGE 3: GAME DATA & SYSTEM ---
         pageGameData = CreatePage(contentPanel.transform, "Page_GameData");
@@ -1003,12 +1003,12 @@ public class SettingsUI : MonoBehaviour
         if (pageControlsHeader != null) pageControlsHeader.text = isVi ? "<b><color=#55EFC4>2. NÚT ĐIỀU KHIỂN CẢM ỨNG</color></b>" : "<b><color=#55EFC4>2. TOUCH CONTROLS SETTINGS</color></b>";
         if (pageControlsSub != null) pageControlsSub.text = isVi ? "Tùy chỉnh trực tiếp vị trí & kích thước các nút bấm trên màn hình" : "Custom position and scale buttons on the battle screen";
 
-        if (controlsCardTitle != null) controlsCardTitle.text = isVi ? "<b>TÙY CHỈNH NÚT BẤM TRỰC TIẾP TRONG TRẬN ĐẤU</b>" : "<b>DIRECT IN-MATCH CONTROLS CUSTOMIZATION</b>";
+        if (controlsCardTitle != null) controlsCardTitle.text = isVi ? "<b>TÙY CHỈNH NÚT CẢM ỨNG</b>" : "<b>CUSTOMIZE TOUCH CONTROLS</b>";
         if (controlsCardDesc != null)
         {
             controlsCardDesc.text = isVi
-                ? "Chạm và kéo tự do Cần di chuyển (Joystick), Nút Đánh, Lướt & Tuyệt kỹ trực tiếp trên màn hình trận đấu để phù hợp nhất với cỡ tay của bạn.\n\nVị trí mới sẽ được lưu tự động và áp dụng vĩnh viễn cho tất cả các trận đấu!"
-                : "Touch and drag the Joystick, Attack, Dash & Skill buttons directly on screen to fit your hand grip.\n\nCustom positions are saved automatically and applied for all future battles!";
+                ? "Kéo thả phím di chuyển, đánh & lướt trực tiếp trên màn hình trận đấu."
+                : "Drag & scale buttons directly on the battle screen.";
         }
 
         if (customizeLayoutBtnText != null)

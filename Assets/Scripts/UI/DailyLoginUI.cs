@@ -535,29 +535,30 @@ public class DailyLoginUI : MonoBehaviour
             sttRt.sizeDelta = Vector2.zero;
 
             var stTmp = stTxtObj.AddComponent<TextMeshProUGUI>();
-            stTmp.fontSize = 20f;
+            stTmp.fontSize = 24f;
             stTmp.fontStyle = FontStyles.Bold;
             stTmp.alignment = TextAlignmentOptions.Center;
+            SoulslikeHUDStyler.SetSafeOutline(stTmp, 0.25f, Color.black);
 
             if (isClaimed)
             {
                 stImg.color = new Color(0.12f, 0.28f, 0.18f, 0.90f);
-                stTmp.text = isVi ? "<color=#2ECC71>ĐÃ NHẬN</color>" : "<color=#2ECC71>CLAIMED</color>";
+                stTmp.text = isVi ? "<color=#2ECC71><b>ĐÃ NHẬN</b></color>" : "<color=#2ECC71><b>CLAIMED</b></color>";
             }
             else if (isMissed)
             {
                 stImg.color = new Color(0.24f, 0.10f, 0.12f, 0.80f);
-                stTmp.text = isVi ? "<color=#E74C3C>BỎ LỠ</color>" : "<color=#E74C3C>MISSED</color>";
+                stTmp.text = isVi ? "<color=#E74C3C><b>BỎ LỠ</b></color>" : "<color=#E74C3C><b>MISSED</b></color>";
             }
             else if (isAvailableToday)
             {
                 stImg.color = new Color(0.12f, 0.40f, 0.35f, 0.95f);
-                stTmp.text = isVi ? "<color=#55EFC4>[ NHẬN NGAY ]</color>" : "<color=#55EFC4>[ CLAIM NOW ]</color>";
+                stTmp.text = isVi ? "<color=#55EFC4><b>[ NHẬN NGAY ]</b></color>" : "<color=#55EFC4><b>[ CLAIM NOW ]</b></color>";
             }
             else
             {
-                stImg.color = new Color(0.10f, 0.12f, 0.16f, 0.80f);
-                stTmp.text = isVi ? "<color=#8898AA>[CHƯA ĐẾN]</color>" : "<color=#8898AA>[LOCKED]</color>";
+                stImg.color = new Color(0.10f, 0.12f, 0.16f, 0.85f);
+                stTmp.text = isVi ? "<color=#CFD8DC><b>[CHƯA ĐẾN]</b></color>" : "<color=#CFD8DC><b>[LOCKED]</b></color>";
             }
         }
 

@@ -412,8 +412,12 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         {
             playerMarkerRt.gameObject.SetActive(true);
             playerMarkerRt.anchoredPosition = new Vector2(playerTransform.position.x, playerTransform.position.y) * MAP_SCALE;
-            float facing = playerTransform.localScale.x > 0 ? 0f : 180f;
-            playerMarkerRt.localRotation = Quaternion.Euler(0f, 0f, facing == 0f ? -90f : 90f);
+            float facing = playerTransform.localScale.x > 0 ? 1f : -1f;
+            playerMarkerRt.localScale = new Vector3(facing, 1f, 1f);
+            if (playerMarkerImg != null && playerMarkerImg.sprite == null)
+            {
+                playerMarkerImg.sprite = MinimapHUD.GetPlayerAvatarSprite();
+            }
         }
 
         // 2. Quét Kẻ Thù Thường & Boss (Chấm ĐỎ và Đầu Lâu Đỏ)
@@ -806,15 +810,35 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         markersContainerRt.anchorMax = Vector2.one;
         markersContainerRt.sizeDelta = Vector2.zero;
 
-        // Player Marker (Icon Mũi Tên Xanh Ngọc Bích)
+        // Player Marker: AVATAR CHÂN DUNG CỦA PLAYER TRÊN BẢN ĐỒ TOÀN CẢNH
         GameObject pMarkerObj = new GameObject("PlayerMarker", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         pMarkerObj.layer = 5;
         pMarkerObj.transform.SetParent(markersContainerRt, false);
         playerMarkerRt = pMarkerObj.GetComponent<RectTransform>();
-        playerMarkerRt.sizeDelta = new Vector2(22f, 22f);
+        playerMarkerRt.sizeDelta = new Vector2(32f, 32f);
         playerMarkerImg = pMarkerObj.GetComponent<Image>();
-        playerMarkerImg.sprite = arrowFillSprite;
-        playerMarkerImg.color = new Color(0.18f, 1f, 0.45f, 1f);
+        playerMarkerImg.sprite = MinimapHUD.GetPlayerAvatarSprite();
+        playerMarkerImg.color = Color.white;
+        playerMarkerImg.preserveAspect = true;
+
+        var pMarkerOutline = pMarkerObj.AddComponent<Outline>();
+        pMarkerOutline.effectColor = new Color(1f, 0.88f, 0.35f, 0.95f);
+        pMarkerOutline.effectDistance = new Vector2(2f, 2f);
+
+        // Nhãn [BẠN] nhỏ trên đầu Avatar Player
+        GameObject pLblObj = new GameObject("PlayerLabel", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        pLblObj.layer = 5;
+        pLblObj.transform.SetParent(pMarkerObj.transform, false);
+        RectTransform plRt = pLblObj.GetComponent<RectTransform>();
+        plRt.anchorMin = new Vector2(0.5f, 1f);
+        plRt.anchorMax = new Vector2(0.5f, 1f);
+        plRt.pivot = new Vector2(0.5f, 0f);
+        plRt.anchoredPosition = new Vector2(0f, 4f);
+        plRt.sizeDelta = new Vector2(100f, 20f);
+        var pLblTmp = pLblObj.GetComponent<TextMeshProUGUI>();
+        pLblTmp.text = "<b><color=#55EFC4>[BẠN]</color></b>";
+        pLblTmp.fontSize = 14f;
+        pLblTmp.alignment = TextAlignmentOptions.Center;
 
         // 6. Bảng Thống Kê Dưới Góc Trái (Dungeon Stats Panel) - Phóng to hiển thị rõ
         GameObject statsPanel = new GameObject("StatsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
