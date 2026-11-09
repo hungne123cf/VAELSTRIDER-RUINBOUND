@@ -272,7 +272,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         bRt.anchoredPosition = new Vector2(0f, -74f);
         bRt.sizeDelta = new Vector2(160f, 20f);
         portalStatusBadge = badgeObj.AddComponent<TextMeshProUGUI>();
-        portalStatusBadge.text = "<color=#34D399>● KẾT NỐI MỞ</color>";
+        portalStatusBadge.text = "<color=#34D399>KẾT NỐI MỞ</color>";
         portalStatusBadge.fontSize = 11f;
         portalStatusBadge.fontStyle = FontStyles.Bold;
         portalStatusBadge.alignment = TextAlignmentOptions.Center;
@@ -457,7 +457,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         {
             if (portalImage != null) portalImage.sprite = GetPortalSprite("heavenly");
             if (portalOutline != null) portalOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
-            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#FCD34D>✦ THĂNG HOA</color>";
+            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#FCD34D>THĂNG HOA</color>";
 
             if (titleText != null)
             {
@@ -554,7 +554,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
 
         if (portalImage != null) portalImage.sprite = GetPortalSprite("void");
         if (portalOutline != null) portalOutline.effectColor = realmColor;
-        if (portalStatusBadge != null) portalStatusBadge.text = $"<color=#{ColorUtility.ToHtmlStringRGB(realmColor)}>● VẾT NỨT ÁC MỘNG</color>";
+        if (portalStatusBadge != null) portalStatusBadge.text = $"<color=#{ColorUtility.ToHtmlStringRGB(realmColor)}>VẾT NỨT ÁC MỘNG</color>";
 
         if (titleText != null)
         {
@@ -599,7 +599,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         {
             if (portalImage != null) portalImage.sprite = GetPortalSprite("map2");
             if (portalOutline != null) portalOutline.effectColor = new Color(0.35f, 0.85f, 1f, 0.85f);
-            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#38BDF8>● CÕI TÀN TÍCH</color>";
+            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#38BDF8>CÕI TÀN TÍCH</color>";
 
             if (destinationNameText != null)
             {
@@ -618,7 +618,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         {
             if (portalImage != null) portalImage.sprite = GetPortalSprite("map3");
             if (portalOutline != null) portalOutline.effectColor = new Color(0.85f, 0.45f, 1f, 0.85f);
-            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#C084FC>● CÕI KÝ ỨC</color>";
+            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#C084FC>CÕI KÝ ỨC</color>";
 
             if (destinationNameText != null)
             {
@@ -637,7 +637,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
         {
             if (portalImage != null) portalImage.sprite = GetPortalSprite("heavenly");
             if (portalOutline != null) portalOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
-            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#FCD34D>✦ CÕI THIÊN ĐƯỜNG</color>";
+            if (portalStatusBadge != null) portalStatusBadge.text = "<color=#FCD34D>CÕI THIÊN ĐƯỜNG</color>";
 
             if (destinationNameText != null)
             {

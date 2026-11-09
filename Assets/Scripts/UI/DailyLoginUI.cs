@@ -542,17 +542,17 @@ public class DailyLoginUI : MonoBehaviour
             if (isClaimed)
             {
                 stImg.color = new Color(0.12f, 0.28f, 0.18f, 0.90f);
-                stTmp.text = isVi ? "<color=#2ECC71>✓ ĐÃ NHẬN</color>" : "<color=#2ECC71>✓ CLAIMED</color>";
+                stTmp.text = isVi ? "<color=#2ECC71>ĐÃ NHẬN</color>" : "<color=#2ECC71>CLAIMED</color>";
             }
             else if (isMissed)
             {
                 stImg.color = new Color(0.24f, 0.10f, 0.12f, 0.80f);
-                stTmp.text = isVi ? "<color=#E74C3C>✕ BỎ LỠ</color>" : "<color=#E74C3C>✕ MISSED</color>";
+                stTmp.text = isVi ? "<color=#E74C3C>BỎ LỠ</color>" : "<color=#E74C3C>MISSED</color>";
             }
             else if (isAvailableToday)
             {
                 stImg.color = new Color(0.12f, 0.40f, 0.35f, 0.95f);
-                stTmp.text = isVi ? "<color=#55EFC4>❖ NHẬN NGAY ❖</color>" : "<color=#55EFC4>❖ CLAIM NOW ❖</color>";
+                stTmp.text = isVi ? "<color=#55EFC4>[ NHẬN NGAY ]</color>" : "<color=#55EFC4>[ CLAIM NOW ]</color>";
             }
             else
             {
@@ -572,8 +572,8 @@ public class DailyLoginUI : MonoBehaviour
             bOut.effectColor = new Color(1f, 0.88f, 0.45f, 0.95f);
             string todayName = isVi ? DAY_NAMES_VI[todayIndex] : DAY_NAMES_EN[todayIndex];
             claimBtnText.text = isVi 
-                ? $"<b>❖ ĐIỂM DANH {todayName} (+{REWARDS[todayIndex]:N0} LINH HỒN) ❖</b>"
-                : $"<b>❖ CLAIM {todayName} (+{REWARDS[todayIndex]:N0} SOULS) ❖</b>";
+                ? $"<b>ĐIỂM DANH {todayName} (+{REWARDS[todayIndex]:N0} LINH HỒN)</b>"
+                : $"<b>CLAIM {todayName} (+{REWARDS[todayIndex]:N0} SOULS)</b>";
             claimBtnText.color = new Color(1f, 0.95f, 0.70f);
             SoulslikeHUDStyler.SetSafeOutline(claimBtnText, 0.35f, Color.black);
         }
@@ -583,8 +583,8 @@ public class DailyLoginUI : MonoBehaviour
             bImg.color = new Color(0.10f, 0.12f, 0.16f, 0.92f);
             bOut.effectColor = new Color(0.35f, 0.40f, 0.50f, 0.60f);
             claimBtnText.text = isVi 
-                ? "<b>✓ HÔM NAY ĐÃ ĐIỂM DANH (LÀM MỚI LÚC 07:00 SÁNG)</b>"
-                : "<b>✓ CLAIMED TODAY (RESETS AT 07:00 AM)</b>";
+                ? "<b>HÔM NAY ĐÃ ĐIỂM DANH (LÀM MỚI LÚC 07:00 SÁNG)</b>"
+                : "<b>CLAIMED TODAY (RESETS AT 07:00 AM)</b>";
             claimBtnText.color = new Color(0.65f, 0.72f, 0.82f);
         }
     }

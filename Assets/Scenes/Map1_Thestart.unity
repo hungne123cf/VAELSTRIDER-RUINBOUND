@@ -1037,7 +1037,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonRoom
   roomIndex: 2
   roomType: 1
-  roomTitle: "\u2726 THE SUNKEN HALL \u2726"
+  roomTitle: "THE SUNKEN HALL"
   roomSubtitle: "Ti\xEAu di\u1EC7t to\xE1n V\u1EC7 Binh Tu\u1EA7n Tra (Wave 1)"
   roomBounds:
     serializedVersion: 2
@@ -3079,7 +3079,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonRoom
   roomIndex: 3
   roomType: 2
-  roomTitle: "\u2726 THE CURSED CRYPT \u2726"
+  roomTitle: "THE CURSED CRYPT"
   roomSubtitle: "Thanh t\u1EA9y H\u1EA7m M\u1ED9 B\u1ECB Nguy\u1EC1n R\u1EE7a (Wave
     2)"
   roomBounds:
@@ -41696,7 +41696,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonRoom
   roomIndex: 1
   roomType: 0
-  roomTitle: "\u2726 SANCTUARY OF AWAKENING \u2726"
+  roomTitle: "SANCTUARY OF AWAKENING"
   roomSubtitle: "\u0110\u1EC1n Th\u1EDD Kh\u1EDFi \u0110\u1EA7u - V\xF9ng An To\xE0n"
   roomBounds:
     serializedVersion: 2
@@ -44862,7 +44862,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonRoom
   roomIndex: 4
   roomType: 3
-  roomTitle: "\u2726 SANCTUM OF THE TITAN \u2726"
+  roomTitle: "SANCTUM OF THE TITAN"
   roomSubtitle: "\u0110\u1EA0I CHI\u1EBEN BOSS: TITAN WHEEL"
   roomBounds:
     serializedVersion: 2

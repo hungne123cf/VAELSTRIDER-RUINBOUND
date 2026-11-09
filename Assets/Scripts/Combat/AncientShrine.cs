@@ -101,7 +101,7 @@ public class AncientShrine : MonoBehaviour
         arrowIndicatorObj.transform.localPosition = promptOffset;
 
         arrowTextMesh = arrowIndicatorObj.AddComponent<TextMeshPro>();
-        arrowTextMesh.text = "▼";
+        arrowTextMesh.text = "V";
         arrowTextMesh.fontSize = 5.2f;
         arrowTextMesh.fontStyle = FontStyles.Bold;
         arrowTextMesh.alignment = TextAlignmentOptions.Center;

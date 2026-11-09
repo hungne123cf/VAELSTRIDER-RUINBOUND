@@ -484,7 +484,7 @@ public class MailboxUI : MonoBehaviour
         xtRt.anchorMax = Vector2.one;
         xtRt.sizeDelta = Vector2.zero;
         var xtTmp = xTxtObj.AddComponent<TextMeshProUGUI>();
-        xtTmp.text = "<b>✕</b>";
+        xtTmp.text = "<b>X</b>";
         xtTmp.fontSize = 20f;
         xtTmp.alignment = TextAlignmentOptions.Center;
         xtTmp.color = new Color(1f, 0.92f, 0.70f);
@@ -726,7 +726,7 @@ public class MailboxUI : MonoBehaviour
         catRt.anchorMax = Vector2.one;
         catRt.sizeDelta = Vector2.zero;
         var catTmp = catObj.AddComponent<TextMeshProUGUI>();
-        catTmp.text = isVi ? "<b>★ NHẬN TẤT CẢ</b>" : "<b>★ CLAIM ALL</b>";
+        catTmp.text = isVi ? "<b>NHẬN TẤT CẢ</b>" : "<b>CLAIM ALL</b>";
         catTmp.fontSize = 13.5f;
         catTmp.alignment = TextAlignmentOptions.Center;
         catTmp.color = new Color(0.12f, 0.08f, 0.02f);
@@ -1330,7 +1330,7 @@ public class MailboxUI : MonoBehaviour
             if (isClaimed)
             {
                 clImg.color = new Color(0.20f, 0.25f, 0.32f, 0.95f);
-                detailClaimBtnText.text = isVi ? "<b>✓ ĐÃ NHẬN</b>" : "<b>✓ CLAIMED</b>";
+                detailClaimBtnText.text = isVi ? "<b>ĐÃ NHẬN</b>" : "<b>CLAIMED</b>";
                 detailClaimBtnText.color = new Color(0.65f, 0.72f, 0.82f);
             }
             else
@@ -1967,7 +1967,7 @@ public class MailboxUI : MonoBehaviour
         rdtRt.anchorMax = Vector2.one;
         rdtRt.sizeDelta = Vector2.zero;
         var rdtTmp = rdtObj.AddComponent<TextMeshProUGUI>();
-        rdtTmp.text = isVi ? "<b>★ ĐỔI QUÀ NGAY</b>" : "<b>★ REDEEM NOW</b>";
+        rdtTmp.text = isVi ? "<b>ĐỔI QUÀ NGAY</b>" : "<b>REDEEM NOW</b>";
         rdtTmp.fontSize = 14f;
         rdtTmp.alignment = TextAlignmentOptions.Center;
         rdtTmp.color = Color.white;
