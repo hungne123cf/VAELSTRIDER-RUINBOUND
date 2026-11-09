@@ -931,8 +931,8 @@ public class PlayerController : MonoBehaviour
         // thay vì bao phủ cả ngực/đầu (offset.y = 1.25).
         // Nhờ vậy, bàn chân nhân vật có thể đi chạm sát chân tường và mép cầu/nước tự nhiên,
         // trong khi đầu và ngực tự nhiên đè lên lớp tường theo phối cảnh 2D chân thực.
-        Vector2 feetOffset = new Vector2(0f, 0.45f);
-        Vector2 feetSize = new Vector2(0.55f, 0.60f);
+        Vector2 feetOffset = new Vector2(0f, 0.35f);
+        Vector2 feetSize = new Vector2(0.50f, 0.50f);
 
         string curChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         if (curChar == CharacterManager.CHAR_TITAN_BERSERKER || GetComponent<TitanBerserkerSkill>() != null)

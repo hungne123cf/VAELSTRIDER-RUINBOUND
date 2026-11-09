@@ -66,24 +66,31 @@ public class DungeonRoom : MonoBehaviour
 
     void LateUpdate()
     {
-        // Khóa chặt người chơi trong ranh giới phòng khi trận chiến đang diễn ra (chưa dọn sạch quái)
-        // Tuyệt đối không cho phép lướt/teleport/kẹt xuyên tường hoặc vượt qua hành lang sang phòng khác khi đang đánh quái
+        // Cứu hộ khẩn cấp: Chỉ kích hoạt nếu người chơi bị kẹt/lướt xuyên tường ra HẲN BÊN NGOÀI căn phòng khi đang chiến đấu.
+        // Bên trong phòng, để cho hệ thống vật lý Collider (Walls & RoomBarriers) tự nhiên cản lại,
+        // tuyệt đối KHÔNG ép clamp thu nhỏ biên khiến người chơi không thể đi sát hoặc chạm vào tường!
         if (isEntered && !isCleared && roomType != RoomType.Sanctuary)
         {
             var player = GetCachedPlayer();
             if (player != null)
             {
                 Vector3 p = player.transform.position;
-                float clampedX = Mathf.Clamp(p.x, roomBounds.xMin + 0.65f, roomBounds.xMax - 0.65f);
-                float clampedY = Mathf.Clamp(p.y, roomBounds.yMin + 0.65f, roomBounds.yMax - 0.65f);
-                if (Mathf.Abs(clampedX - p.x) > 0.01f || Mathf.Abs(clampedY - p.y) > 0.01f)
+                // Chỉ kéo về khi thực sự vượt ra ngoài phạm vi tường của phòng (ngoài lề > 1.2m)
+                float outerMargin = 1.2f;
+                bool isOutside = p.x < (roomBounds.xMin - outerMargin) ||
+                                 p.x > (roomBounds.xMax + outerMargin) ||
+                                 p.y < (roomBounds.yMin - outerMargin) ||
+                                 p.y > (roomBounds.yMax + outerMargin);
+                if (isOutside)
                 {
-                    Vector3 newPos = new Vector3(clampedX, clampedY, 0f);
+                    float insideX = Mathf.Clamp(p.x, roomBounds.xMin + 0.5f, roomBounds.xMax - 0.5f);
+                    float insideY = Mathf.Clamp(p.y, roomBounds.yMin + 0.5f, roomBounds.yMax - 0.5f);
+                    Vector3 newPos = new Vector3(insideX, insideY, 0f);
                     player.transform.position = newPos;
                     if (s_cachedPlayerRb == null) s_cachedPlayerRb = player.GetComponent<Rigidbody2D>();
                     if (s_cachedPlayerRb != null)
                     {
-                        s_cachedPlayerRb.position = new Vector2(clampedX, clampedY);
+                        s_cachedPlayerRb.position = new Vector2(insideX, insideY);
                         s_cachedPlayerRb.linearVelocity = Vector2.zero;
                     }
                 }
