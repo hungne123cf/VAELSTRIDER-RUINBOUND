@@ -404,7 +404,17 @@ public class GameIntroLoadingController : MonoBehaviour
             yield return null;
         }
 
-        // Fade out màn hình Intro sang MainMenuScene mềm mại
+        // Kích hoạt Scene mới trong khi Canvas vẫn giữ nguyên 100% Opaque (Không bao giờ fade out trước để tránh lộ màn hình cũ)
+        asyncOp.allowSceneActivation = true;
+
+        while (SceneManager.GetActiveScene().name != "MainMenuScene" && !asyncOp.isDone)
+        {
+            yield return null;
+        }
+        yield return null;
+        yield return new WaitForEndOfFrame();
+
+        // Bây giờ MainMenuScene đã sẵn sàng ở phía sau -> Fade out nhẹ nhàng
         float fadeTime = 0.35f;
         float ft = 0f;
         while (ft < fadeTime)
@@ -413,7 +423,5 @@ public class GameIntroLoadingController : MonoBehaviour
             if (cinematicCg != null) cinematicCg.alpha = 1f - (ft / fadeTime);
             yield return null;
         }
-
-        asyncOp.allowSceneActivation = true;
     }
 }

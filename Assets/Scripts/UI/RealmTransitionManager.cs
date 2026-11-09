@@ -34,6 +34,7 @@ public class RealmTransitionManager : MonoBehaviour
     public enum TransitionTheme
     {
         Auto,
+        LoginIntro,         // Mở đầu từ màn hình Login vào Sảnh
         DeployBattle,       // Xuất trận vào chiến trường
         PortalWarpMap2,     // Bước vào Cổng tới Thung Lũng Tàn Tích (Map 2)
         PortalWarpMap3,     // Bước vào Cổng tới Ký Ức Lãng Quên (Map 3)
@@ -107,30 +108,31 @@ public class RealmTransitionManager : MonoBehaviour
         _containerRt.anchorMax = Vector2.one;
         _containerRt.offsetMin = _containerRt.offsetMax = Vector2.zero;
 
-        // Background Image (Ken Burns & 3D Tilt)
-        GameObject bgObj = new GameObject("TransitionBackground", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        // Background Image (Chuẩn 16:9 Widescreen Landscape, EnvelopeParent với preserveAspect = true)
+        GameObject bgObj = new GameObject("TransitionBackground", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(AspectRatioFitter));
         bgObj.transform.SetParent(containerObj.transform, false);
         var bgRt = bgObj.GetComponent<RectTransform>();
-        bgRt.anchorMin = new Vector2(-0.06f, -0.06f);
-        bgRt.anchorMax = new Vector2(1.06f, 1.06f);
+        bgRt.anchorMin = Vector2.zero;
+        bgRt.anchorMax = Vector2.one;
         bgRt.offsetMin = bgRt.offsetMax = Vector2.zero;
         _backgroundImage = bgObj.GetComponent<Image>();
-        _backgroundImage.color = Color.black;
-        _backgroundImage.preserveAspect = false;
-        _baseBackgroundPos = bgRt.anchoredPosition;
+        _backgroundImage.color = Color.white;
+        _backgroundImage.preserveAspect = true; // KHÔNG BAO GIỜ CO KÉO BÉO PHÌNH TRANH
+        _baseBackgroundPos = Vector2.zero;
 
-        // Breathing Aura Glow Overlay
+        var bgArf = bgObj.GetComponent<AspectRatioFitter>();
+        bgArf.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+        bgArf.aspectRatio = 1.7778f; // Chuẩn 16:9
+
+        // Breathing Aura Glow Overlay (Ẩn hoàn toàn để loại bỏ lớp phủ màu tím/cam mờ đục theo yêu cầu)
         GameObject auraObj = new GameObject("BreathingAura", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         auraObj.transform.SetParent(containerObj.transform, false);
-        var auraRt = auraObj.GetComponent<RectTransform>();
-        auraRt.anchorMin = Vector2.zero;
-        auraRt.anchorMax = Vector2.one;
-        auraRt.offsetMin = auraRt.offsetMax = Vector2.zero;
         _breathingAuraOverlay = auraObj.GetComponent<Image>();
-        _breathingAuraOverlay.color = new Color(0.45f, 0.15f, 0.75f, 0.18f);
+        _breathingAuraOverlay.color = Color.clear;
         _breathingAuraOverlay.raycastTarget = false;
+        auraObj.SetActive(false); // Bỏ hiệu ứng màu mè mờ đục
 
-        // Dark Vignette Frame
+        // Dark Vignette Frame (Nhẹ nhàng ở 4 góc để thanh tiến trình nổi bật)
         GameObject vigObj = new GameObject("VignetteFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         vigObj.transform.SetParent(containerObj.transform, false);
         var vigRt = vigObj.GetComponent<RectTransform>();
@@ -138,77 +140,68 @@ public class RealmTransitionManager : MonoBehaviour
         vigRt.anchorMax = Vector2.one;
         vigRt.offsetMin = vigRt.offsetMax = Vector2.zero;
         var vigImg = vigObj.GetComponent<Image>();
-        vigImg.color = new Color(0.01f, 0.01f, 0.02f, 0.45f);
+        vigImg.color = new Color(0.01f, 0.01f, 0.02f, 0.25f);
         vigImg.raycastTarget = false;
 
-        // Title Text
+        // Title Text & Subtitle Text (Ẩn hoàn toàn để không đè chữ to lên ngực nhân vật/tranh vẽ)
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         titleObj.transform.SetParent(containerObj.transform, false);
-        var titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchorMin = new Vector2(0.10f, 0.68f);
-        titleRt.anchorMax = new Vector2(0.90f, 0.85f);
-        titleRt.offsetMin = titleRt.offsetMax = Vector2.zero;
         _titleText = titleObj.GetComponent<TextMeshProUGUI>();
-        _titleText.fontSize = 36f;
-        _titleText.fontStyle = FontStyles.Bold;
-        _titleText.alignment = TextAlignmentOptions.Center;
-        _titleText.characterSpacing = 2.5f;
-        _titleText.color = new Color(1f, 0.92f, 0.65f);
-        SoulslikeHUDStyler.SetSafeOutline(_titleText, 0.50f, Color.black);
+        titleObj.SetActive(false); // Bỏ chữ to đùng đè lên tranh
 
-        // Subtitle Text
         GameObject subObj = new GameObject("SubtitleText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         subObj.transform.SetParent(containerObj.transform, false);
-        var subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchorMin = new Vector2(0.12f, 0.56f);
-        subRt.anchorMax = new Vector2(0.88f, 0.68f);
-        subRt.offsetMin = subRt.offsetMax = Vector2.zero;
         _subtitleText = subObj.GetComponent<TextMeshProUGUI>();
-        _subtitleText.fontSize = 19f;
-        _subtitleText.fontStyle = FontStyles.Normal;
-        _subtitleText.alignment = TextAlignmentOptions.Center;
-        _subtitleText.color = new Color(0.85f, 0.90f, 1f, 0.95f);
-        SoulslikeHUDStyler.SetSafeOutline(_subtitleText, 0.35f, Color.black);
+        subObj.SetActive(false); // Bỏ subtitle đè tranh
 
-        // Lore Tip Box (Nằm ngay phía trên thanh loading)
+        // Lore Tip Box (Nằm ngay phía trên thanh loading ở đáy màn hình, cách xa trung tâm tranh)
         GameObject tipObj = new GameObject("LoreTipText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         tipObj.transform.SetParent(containerObj.transform, false);
         var tipRt = tipObj.GetComponent<RectTransform>();
-        tipRt.anchorMin = new Vector2(0.12f, 0.11f);
-        tipRt.anchorMax = new Vector2(0.88f, 0.22f);
-        tipRt.offsetMin = tipRt.offsetMax = Vector2.zero;
+        tipRt.anchorMin = new Vector2(0.5f, 0f);
+        tipRt.anchorMax = new Vector2(0.5f, 0f);
+        tipRt.pivot = new Vector2(0.5f, 0.5f);
+        tipRt.anchoredPosition = new Vector2(0f, 95f);
+        tipRt.sizeDelta = new Vector2(850f, 28f);
         _loreTipText = tipObj.GetComponent<TextMeshProUGUI>();
         _loreTipText.fontSize = 15f;
-        _loreTipText.fontStyle = FontStyles.Normal;
+        _loreTipText.fontStyle = FontStyles.Bold;
         _loreTipText.alignment = TextAlignmentOptions.Center;
-        _loreTipText.lineSpacing = 1.3f;
-        _loreTipText.color = new Color(0.92f, 0.88f, 0.75f, 0.90f);
-        SoulslikeHUDStyler.SetSafeOutline(_loreTipText, 0.30f, Color.black);
+        _loreTipText.color = new Color(1f, 0.88f, 0.55f);
+        SoulslikeHUDStyler.SetSafeOutline(_loreTipText, 0.35f, Color.black);
 
-        // ─── Loading Progress Bar: Chuẩn Phong Cách Dark Fantasy Trắng Bạch Kim Phát Sáng ───
+        // ─── Loading Progress Bar: Chuẩn Asset Soulslike Khung Hoàng Kim & Ruột Trắng Phát Sáng ───
         GameObject sliderObj = new GameObject("LoadingBar", typeof(RectTransform), typeof(Slider));
         sliderObj.transform.SetParent(containerObj.transform, false);
         var sRt = sliderObj.GetComponent<RectTransform>();
-        sRt.anchorMin = new Vector2(0.20f, 0.075f);
-        sRt.anchorMax = new Vector2(0.80f, 0.092f); // Độ dày thanh mảnh tinh tế 12px chuẩn Soulslike
-        sRt.offsetMin = sRt.offsetMax = Vector2.zero;
+        sRt.anchorMin = new Vector2(0.5f, 0f);
+        sRt.anchorMax = new Vector2(0.5f, 0f);
+        sRt.pivot = new Vector2(0.5f, 0.5f);
+        sRt.anchoredPosition = new Vector2(0f, 62f);
+        sRt.sizeDelta = new Vector2(680f, 20f); // Thanh mảnh, tinh tế chuẩn Soulslike
         _loadingSlider = sliderObj.GetComponent<Slider>();
         _loadingSlider.interactable = false;
 
-        // Khung viền đá rèn cổ kính bao bọc thanh loading
-        var sOutline = sliderObj.AddComponent<Outline>();
-        sOutline.effectColor = new Color(0.88f, 0.90f, 0.98f, 0.60f); // Viền ánh bạc bạch kim sắc nét
-        sOutline.effectDistance = new Vector2(1.2f, -1.2f);
+        // Rãnh Đá Obsidian Đen Sâu Thẳm
+        var sbgImg = sliderObj.AddComponent<Image>();
+        sbgImg.sprite = SoulslikeHUDStyler.GetObsidianTroughSprite();
+        sbgImg.type = Image.Type.Sliced;
+        sbgImg.color = new Color(0.06f, 0.07f, 0.10f, 0.96f);
 
-        // Slider Background (Rãnh Đá Obsidian Đen Sâu Thẳm)
-        GameObject sBgObj = new GameObject("Background", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        sBgObj.transform.SetParent(sliderObj.transform, false);
-        var sbgRt = sBgObj.GetComponent<RectTransform>();
-        sbgRt.anchorMin = Vector2.zero;
-        sbgRt.anchorMax = Vector2.one;
-        sbgRt.offsetMin = sbgRt.offsetMax = Vector2.zero;
-        var sbgImg = sBgObj.GetComponent<Image>();
-        sbgImg.color = new Color(0.03f, 0.04f, 0.06f, 0.96f); // Đen tuyền đá tàn tích
+        // Khung viền ngoài Boss Bar Gothic Hoàng Kim
+        GameObject frameObj = new GameObject("BossFrameDecoration", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        frameObj.transform.SetParent(sliderObj.transform, false);
+        frameObj.transform.SetAsFirstSibling();
+        var fDecorRt = frameObj.GetComponent<RectTransform>();
+        fDecorRt.anchorMin = Vector2.zero;
+        fDecorRt.anchorMax = Vector2.one;
+        fDecorRt.offsetMin = new Vector2(-10f, -5f);
+        fDecorRt.offsetMax = new Vector2(10f, 5f);
+        var frameImg = frameObj.GetComponent<Image>();
+        frameImg.sprite = SoulslikeHUDStyler.GetBossBarFrameSprite();
+        frameImg.type = Image.Type.Sliced;
+        frameImg.color = new Color(1f, 0.95f, 0.85f, 1f);
+        frameImg.raycastTarget = false;
 
         // Slider Fill Area
         GameObject fillArea = new GameObject("Fill Area", typeof(RectTransform));
@@ -219,7 +212,7 @@ public class RealmTransitionManager : MonoBehaviour
         faRt.offsetMin = new Vector2(2f, 2f);
         faRt.offsetMax = new Vector2(-2f, -2f);
 
-        // Dải nạp chính: MÀU TRẮNG BẠCH KIM PHÁT SÁNG (White Soul Aether Glow)
+        // Dải nạp chính: MÀU TRẮNG BẠCH KIM PHÁT SÁNG (White Platinum Glow)
         GameObject fillObj = new GameObject("Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         fillObj.transform.SetParent(fillArea.transform, false);
         var fRt = fillObj.GetComponent<RectTransform>();
@@ -227,30 +220,34 @@ public class RealmTransitionManager : MonoBehaviour
         fRt.anchorMax = Vector2.one;
         fRt.offsetMin = fRt.offsetMax = Vector2.zero;
         var fImg = fillObj.GetComponent<Image>();
-        fImg.color = new Color(0.98f, 0.99f, 1.0f, 1f); // Trắng Tinh Khiết / Bạch Kim Phát Sáng
+        fImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        fImg.type = Image.Type.Sliced;
+        fImg.color = new Color(0.98f, 0.99f, 1.0f, 1f); // Trắng sáng tinh khiết
 
         // Hào quang tỏa sáng trắng bạc bao quanh dòng năng lượng
         var fillGlow = fillObj.AddComponent<Outline>();
-        fillGlow.effectColor = new Color(0.85f, 0.95f, 1f, 0.80f);
+        fillGlow.effectColor = new Color(0.85f, 0.95f, 1f, 0.85f);
         fillGlow.effectDistance = new Vector2(1.5f, 1.5f);
 
         _loadingSlider.fillRect = fRt;
         _loadingSlider.value = 0f;
 
-        // Progress Percent Text (Nằm ngay bên dưới thanh loading, cân giữa hoàn hảo)
+        // Progress Percent Text (Nằm ngay bên dưới thanh loading)
         GameObject prgObj = new GameObject("ProgressText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         prgObj.transform.SetParent(containerObj.transform, false);
         var pRt = prgObj.GetComponent<RectTransform>();
-        pRt.anchorMin = new Vector2(0.40f, 0.035f);
-        pRt.anchorMax = new Vector2(0.60f, 0.068f);
-        pRt.offsetMin = pRt.offsetMax = Vector2.zero;
+        pRt.anchorMin = new Vector2(0.5f, 0f);
+        pRt.anchorMax = new Vector2(0.5f, 0f);
+        pRt.pivot = new Vector2(0.5f, 0.5f);
+        pRt.anchoredPosition = new Vector2(0f, 32f);
+        pRt.sizeDelta = new Vector2(300f, 26f);
         _progressText = prgObj.GetComponent<TextMeshProUGUI>();
-        _progressText.fontSize = 15f;
+        _progressText.fontSize = 14f;
         _progressText.fontStyle = FontStyles.Bold;
         _progressText.characterSpacing = 2.0f;
         _progressText.alignment = TextAlignmentOptions.Center;
-        _progressText.color = new Color(0.96f, 0.98f, 1f, 0.95f); // Trắng sáng ngọc bích
-        SoulslikeHUDStyler.SetSafeOutline(_progressText, 0.40f, Color.black);
+        _progressText.color = new Color(0.96f, 0.98f, 1f);
+        SoulslikeHUDStyler.SetSafeOutline(_progressText, 0.35f, Color.black);
     }
 
     private void Update()
@@ -344,17 +341,18 @@ public class RealmTransitionManager : MonoBehaviour
             if (targetSceneName.Contains("Map1")) theme = TransitionTheme.DeployBattle;
             else if (targetSceneName.Contains("Map2") || targetSceneName.Contains("Valley")) theme = TransitionTheme.PortalWarpMap2;
             else if (targetSceneName.Contains("Map3") || targetSceneName.Contains("Forgotten")) theme = TransitionTheme.PortalWarpMap3;
-            else if (targetSceneName.Contains("Login") || targetSceneName.Contains("Menu")) theme = TransitionTheme.ReturnSanctuary;
+            else if (targetSceneName.Contains("Login")) theme = TransitionTheme.LoginIntro;
+            else if (targetSceneName.Contains("Menu")) theme = TransitionTheme.ReturnSanctuary;
             else theme = TransitionTheme.DeployBattle;
         }
 
         ApplyThemeVisuals(theme, targetSceneName);
 
-        // 1. Fade In Màn Chuyển Cảnh
+        // 1. Fade In Màn Chuyển Cảnh CHE PHỦ 100% MÀN HÌNH CŨ
         _canvasGroup.blocksRaycasts = true;
         _canvasGroup.interactable = true;
 
-        float fadeDuration = 0.35f;
+        float fadeDuration = 0.30f;
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
@@ -374,15 +372,14 @@ public class RealmTransitionManager : MonoBehaviour
         while (displayProgress < 1f)
         {
             kenBurnsElapsed += Time.unscaledDeltaTime;
-            // Hiệu ứng Ken Burns Zoom từ 1.0 -> 1.08
             if (_backgroundImage != null)
             {
-                float scale = 1.0f + Mathf.PingPong(kenBurnsElapsed * 0.04f, 0.08f);
+                float scale = 1.0f + Mathf.PingPong(kenBurnsElapsed * 0.03f, 0.04f);
                 _backgroundImage.rectTransform.localScale = new Vector3(scale, scale, 1f);
             }
 
             float targetProgress = Mathf.Clamp01(asyncOp.progress / 0.9f);
-            displayProgress = Mathf.MoveTowards(displayProgress, targetProgress, Time.unscaledDeltaTime * 1.2f);
+            displayProgress = Mathf.MoveTowards(displayProgress, targetProgress, Time.unscaledDeltaTime * 1.0f);
 
             if (_loadingSlider != null) _loadingSlider.value = displayProgress;
             if (_progressText != null) _progressText.text = $"{(int)(displayProgress * 100f)}%";
@@ -398,13 +395,21 @@ public class RealmTransitionManager : MonoBehaviour
             yield return null;
         }
 
-        // Kích hoạt Scene mới
+        // 3. KÍCH HOẠT SCENE MỚI TRONG KHI MÀN HÌNH CHUYỂN CẢNH VẪN GIỮ NGUYÊN 100% OPAQUE (alpha = 1.0)
+        // Tuyệt đối không fade out ở đây để triệt tiêu 100% lỗi lộ lại màn hình cũ
         asyncOp.allowSceneActivation = true;
 
-        // Đợi scene mới thức tỉnh hoàn toàn
-        yield return new WaitForSecondsRealtime(0.25f);
+        // Chờ đến khi scene mới thực sự là Active Scene trong Unity
+        while (SceneManager.GetActiveScene().name != targetSceneName && !asyncOp.isDone)
+        {
+            yield return null;
+        }
 
-        // 3. Fade Out Màn Chuyển Cảnh hé lộ Map mới
+        // Đợi thêm 1 frame cuối cùng để Camera và UI của Scene mới thức tỉnh và render xong hoàn chỉnh frame đầu
+        yield return null;
+        yield return new WaitForEndOfFrame();
+
+        // 4. BÂY GIỜ SCENE MỚI ĐÃ SẴN SÀNG PHÍA SAU -> Fade Out Màn Chuyển Cảnh để hé lộ Scene mới
         elapsed = 0f;
         while (elapsed < fadeDuration)
         {
@@ -424,65 +429,64 @@ public class RealmTransitionManager : MonoBehaviour
         bool isVi = LocalizationManager.IsVietnamese;
         Sprite chosenBg = null;
 
+        // Sử dụng các bức tranh phong cảnh Dark Fantasy 16:9 Widescreen Landscape nguyên bản, vừa khít screen
         switch (theme)
         {
+            case TransitionTheme.LoginIntro:
+            case TransitionTheme.ReturnSanctuary:
+                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/WCP_Example");
+                if (_loreTipText != null)
+                {
+                    _loreTipText.text = isVi 
+                        ? "« Đang khởi hành vào vương quốc Tàn Tích thượng cổ... »" 
+                        : "« Entering the ancient Ruinbound realm... »";
+                }
+                break;
+
             case TransitionTheme.DeployBattle:
-                chosenBg = LoadSprite("UI/CardDeities/CardDeity_BladeSaint");
-                _titleText.text = isVi ? "XUẤT TRẬN: BƯỚC VÀO CÕI TÀN TÍCH" : "DEPLOY: ENTERING THE RUINS";
-                _titleText.color = new Color(1f, 0.88f, 0.45f);
-                _subtitleText.text = isVi ? "Chiến binh thức tỉnh - Rút kiếm phá tan bóng đêm" : "Warrior Awakens - Blade drawn against the dark";
-                _loreTipText.text = isVi 
-                    ? "« MẸO CHIẾN ĐẤU: Tấn công trúng địch liên tiếp để tích lũy Nộ Khí và giải phóng Tuyệt Kỹ tối thượng! »" 
-                    : "« COMBAT TIP: Chain attacks to build Fury and unleash your devastating Ultimate! »";
-                _breathingAuraOverlay.color = new Color(0.95f, 0.60f, 0.20f, 0.16f); // Ánh Lửa Chiến Trận
+                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/WCP_Example");
+                if (_loreTipText != null)
+                {
+                    _loreTipText.text = isVi 
+                        ? "« MẸO CHIẾN ĐẤU: Tấn công trúng đích liên tiếp để tích lũy Nộ Khí và giải phóng Tuyệt Kỹ tối thượng! »" 
+                        : "« COMBAT TIP: Chain attacks to build Fury and unleash your devastating Ultimate! »";
+                }
                 break;
 
             case TransitionTheme.PortalWarpMap2:
-                chosenBg = LoadSprite("UI/CardDeities/CardDeity_VoidPhantom");
-                _titleText.text = isVi ? "VẾT NỨT KHÔNG GIAN: THUNG LŨNG TÀN TÍCH" : "SPATIAL RIFT: VALLEY OF RUIN";
-                _titleText.color = new Color(0.35f, 0.85f, 1f);
-                _subtitleText.text = isVi ? "Tiến vào Cõi Giới Thứ Hai - Nham thạch & Gai độc bủa vây" : "Entering Realm II - Venom and crumbling chasms";
-                _loreTipText.text = isVi 
-                    ? "« CẢNH BÁO QUÁI VẬT: Bọ Cạp Độc và Tộc Goblin xuất hiện với số lượng áp đảo. Hãy cẩn thận các vũng axit! »" 
-                    : "« MONSTER WARNING: Toxic Scorpions and Goblin tribes swarm in masses. Avoid toxic pools! »";
-                _breathingAuraOverlay.color = new Color(0.30f, 0.70f, 1f, 0.18f); // Ánh Xanh Cõi Tàn Tích
+                chosenBg = LoadSprite("Backgrounds/WCP_Example");
+                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                if (_loreTipText != null)
+                {
+                    _loreTipText.text = isVi 
+                        ? "« CẢNH BÁO QUÁI VẬT: Bọ Cạp Độc và Tộc Goblin xuất hiện với số lượng áp đảo. Hãy cẩn thận các vũng axit! »" 
+                        : "« MONSTER WARNING: Toxic Scorpions and Goblin tribes swarm in masses. Avoid toxic pools! »";
+                }
                 break;
 
             case TransitionTheme.PortalWarpMap3:
-                chosenBg = LoadSprite("UI/CardDeities/CardDeity_GrimReaper");
-                if (chosenBg == null) chosenBg = LoadSprite("UI/CardDeities/CardDeity_VoidPhantom");
-                _titleText.text = isVi ? "DỊCH CHUYỂN CÕI GIỚI: KÝ ỨC LÃNG QUÊN" : "REALM WARP: FORGOTTEN MEMORIES";
-                _titleText.color = new Color(0.85f, 0.45f, 1f);
-                _subtitleText.text = isVi ? "Cõi Tâm Thức Cổ Xưa - Lãnh địa của Chúa Tể Nhện Skeleton King" : "Ancient Sanctum - Domain of the dread Skeleton King";
-                _loreTipText.text = isVi 
-                    ? "« TÀN TÍCH HUYỀN BÍ: Tà khí hư không ngập tràn cõi giới. Chuẩn bị tinh thần cho trận đại chiến sinh tử! »" 
-                    : "« DREAD SANCTUM: The void aether chills your soul. Brace yourself for the ultimate trial! »";
-                _breathingAuraOverlay.color = new Color(0.65f, 0.25f, 0.95f, 0.20f); // Ánh Tím Thạch Anh
+                chosenBg = LoadSprite("Backgrounds/WCP_Example");
+                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                if (_loreTipText != null)
+                {
+                    _loreTipText.text = isVi 
+                        ? "« TÀN TÍCH HUYỀN BÍ: Tà khí hư không ngập tràn cõi giới. Chuẩn bị tinh thần cho trận đại chiến sinh tử! »" 
+                        : "« DREAD SANCTUM: The void aether chills your soul. Brace yourself for the ultimate trial! »";
+                }
                 break;
 
             case TransitionTheme.AscensionGate:
-                chosenBg = LoadSprite("UI/CardDeities/CardDeity_GoldenSanctuary");
-                if (chosenBg == null) chosenBg = LoadSprite("UI/CardDeities/CardDeity_ShieldGoddess");
-                _titleText.text = isVi ? "CỔNG THĂNG HOA: KHẮC DANH CHIẾN CÔNG" : "HEAVENLY GATE: ASCENSION";
-                _titleText.color = new Color(1f, 0.92f, 0.55f);
-                _subtitleText.text = isVi ? "Thanh tẩy hoàn toàn cõi tàn tích - Ghi danh vào bảng vàng anh hùng" : "Realm purified - Your legend is sealed in eternity";
-                _loreTipText.text = isVi 
-                    ? "« CHIẾN TÍCH BẤT DIỆT: Ánh sáng thần thánh bao bọc lấy linh hồn bạn, giải thoát vạn vật khỏi bóng đêm. »" 
-                    : "« IMMORTAL TRIUMPH: The divine light cradles your soul, delivering the realm from darkness. »";
-                _breathingAuraOverlay.color = new Color(1f, 0.85f, 0.35f, 0.22f); // Ánh Kim Thần Thánh
-                break;
-
-            case TransitionTheme.ReturnSanctuary:
             default:
-                chosenBg = LoadSprite("UI/CardDeities/CardDeity_GoldenSanctuary");
-                if (chosenBg == null) chosenBg = LoadSprite("UI/CardDeities/CardDeity_BladeSaint");
-                _titleText.text = isVi ? "TRỞ VỀ THÁNH ĐỊA AN BÌNH" : "RETURN TO SANCTUARY";
-                _titleText.color = new Color(1f, 0.90f, 0.65f);
-                _subtitleText.text = isVi ? "Nơi nghỉ chân của các chiến binh - Dưỡng sức & Chuẩn bị hành trang" : "Sanctuary of heroes - Rest and prepare for battle";
-                _loreTipText.text = isVi 
-                    ? "« BÌNH YÊN TẠM THỜI: Hãy ghé thăm Gian Hàng Du Mục và rèn lại các Lõi Thần Vực mạnh nhất! »" 
-                    : "« SANCTUARY REST: Visit the Wandering Merchant to forge your ultimate Augment setup! »";
-                _breathingAuraOverlay.color = new Color(0.85f, 0.70f, 0.30f, 0.15f);
+                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/WCP_Example");
+                if (_loreTipText != null)
+                {
+                    _loreTipText.text = isVi 
+                        ? "« CHIẾN TÍCH BẤT DIỆT: Ánh sáng thần thánh bao bọc lấy linh hồn bạn, giải thoát vạn vật khỏi bóng đêm. »" 
+                        : "« IMMORTAL TRIUMPH: The divine light cradles your soul, delivering the realm from darkness. »";
+                }
                 break;
         }
 
@@ -490,6 +494,7 @@ public class RealmTransitionManager : MonoBehaviour
         {
             _backgroundImage.sprite = chosenBg;
             _backgroundImage.color = Color.white;
+            _backgroundImage.preserveAspect = true;
         }
     }
 
@@ -499,6 +504,13 @@ public class RealmTransitionManager : MonoBehaviour
         if (sp != null) return sp;
 #if UNITY_EDITOR
         sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/" + path + ".png");
+        if (sp != null) return sp;
+        sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/" + path + ".jpg");
+        if (sp != null) return sp;
+        sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/" + path + ".jpg");
+        if (sp != null) return sp;
+        sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ART/" + path + ".png");
+        if (sp != null) return sp;
 #endif
         return sp;
     }

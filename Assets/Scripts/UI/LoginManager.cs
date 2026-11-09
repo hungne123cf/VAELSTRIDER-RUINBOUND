@@ -628,24 +628,12 @@ public class LoginManager : MonoBehaviour
             tapToStartText.text = LocalizationManager.T("ĐANG KHỞI HÀNH VÀO VƯƠNG QUỐC...", "ENTERING RUINBOUND REALM...");
         }
 
-        Debug.Log($"<color=green>[START GAME]</color> Người chơi bấm Bắt Đầu -> Kích hoạt màn hình nạp game...");
-        yield return new WaitForSeconds(0.25f);
+        Debug.Log($"<color=green>[START GAME]</color> Người chơi bấm Bắt Đầu -> Kích hoạt RealmTransitionManager...");
+        yield return new WaitForSeconds(0.12f);
 
-        if (introLoadingController == null)
-        {
-            introLoadingController = Object.FindAnyObjectByType<GameIntroLoadingController>();
-        }
-
-        if (introLoadingController != null)
-        {
-            if (tapToStartPanel != null) tapToStartPanel.SetActive(false);
-            if (loginCardPanel != null) loginCardPanel.SetActive(false);
-            introLoadingController.StartIntroSequence();
-        }
-        else
-        {
-            SceneManager.LoadScene("MainMenuScene");
-        }
+        // Sử dụng RealmTransitionManager (DontDestroyOnLoad, Canvas sortingOrder 9999) để nạp ngầm bất đồng bộ
+        // Giữ màn hình 100% che phủ cho đến khi MainMenuScene render xong frame đầu tiên -> Triệt tiêu 100% lỗi lộ lại màn hình cũ!
+        RealmTransitionManager.LoadSceneWithTransition("MainMenuScene", RealmTransitionManager.TransitionTheme.LoginIntro);
     }
 
     private void ShowStatusLoading(string msg)
