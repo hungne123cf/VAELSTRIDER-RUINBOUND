@@ -19,6 +19,8 @@ public static class GameFontManager
     private static TMP_FontAsset _bodyFont;
     private static Font _trueTypeFont;
     private static bool _isInitialized = false;
+    private static readonly HashSet<int> _scaledTextIds = new HashSet<int>();
+    private static readonly HashSet<int> _scaledLegacyIds = new HashSet<int>();
 
     public static TMP_FontAsset HeaderFont
     {
@@ -188,37 +190,33 @@ public static class GameFontManager
                 }
             }
 
-            // PHÓNG TO CHỮ HẾT CỠ CHO ĐIỆN THOẠI (Mobile Maximum Accessibility)
-            // Kích thước siêu lớn đảm bảo người cận thị trên điện thoại cũng đọc rõ ràng 100%
-            if (txt.enableAutoSizing)
+            // PHÓNG TO CHỮ CHO ĐIỆN THOẠI (Mobile Accessibility) - CHỈ SCALE 1 LẦN DUY NHẤT
+            // Tránh lỗi gọi ApplyFontsGlobally nhiều lần làm chữ bị nhân đôi/nhân ba liên tục đè lên nhau
+            int id = txt.GetInstanceID();
+            if (!_scaledTextIds.Contains(id))
             {
-                if (txt.fontSizeMin < 24f) txt.fontSizeMin = 24f;
-                if (txt.fontSizeMax < 44f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.6f, 44f);
-            }
-            else
-            {
-                if (txt.fontSize < 20f)
+                _scaledTextIds.Add(id);
+
+                if (txt.enableAutoSizing)
                 {
-                    txt.fontSize = Mathf.Max(txt.fontSize * 1.85f, 26f);
-                }
-                else if (txt.fontSize < 32f)
-                {
-                    txt.fontSize = Mathf.Max(txt.fontSize * 1.55f, 36f);
-                }
-                else if (txt.fontSize < 50f)
-                {
-                    txt.fontSize = Mathf.Max(txt.fontSize * 1.35f, 54f);
+                    if (txt.fontSizeMin < 22f) txt.fontSizeMin = 22f;
+                    if (txt.fontSizeMax < 40f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.35f, 40f);
                 }
                 else
                 {
-                    txt.fontSize = Mathf.Min(txt.fontSize * 1.25f, 96f);
+                    if (txt.fontSize < 18f)
+                    {
+                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.55f, 22f, 28f);
+                    }
+                    else if (txt.fontSize < 28f)
+                    {
+                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.35f, 28f, 36f);
+                    }
+                    else if (txt.fontSize < 44f)
+                    {
+                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.25f, 38f, 48f);
+                    }
                 }
-            }
-
-            // Đảm bảo chữ tự động xuống dòng mượt mà khi phóng to, không bị cắt xén
-            if (txt.overflowMode == TextOverflowModes.Truncate)
-            {
-                txt.overflowMode = TextOverflowModes.Overflow;
             }
         }
         catch (Exception ex)
@@ -231,9 +229,14 @@ public static class GameFontManager
     {
         if (txt == null) return;
         if (_trueTypeFont != null) txt.font = _trueTypeFont;
-        if (txt.fontSize < 20)
+        int id = txt.GetInstanceID();
+        if (!_scaledLegacyIds.Contains(id))
         {
-            txt.fontSize = Mathf.Max((int)(txt.fontSize * 1.6f), 24);
+            _scaledLegacyIds.Add(id);
+            if (txt.fontSize < 20)
+            {
+                txt.fontSize = Mathf.Max((int)(txt.fontSize * 1.4f), 22);
+            }
         }
     }
 }

@@ -425,30 +425,30 @@ public class MailboxUI : MonoBehaviour
         tbRt.anchorMax = new Vector2(0.5f, 0.5f);
         tbRt.pivot = new Vector2(0.5f, 0.5f);
         tbRt.anchoredPosition = new Vector2(40f, 0f);
-        tbRt.sizeDelta = new Vector2(760f, 56f);
+        tbRt.sizeDelta = new Vector2(880f, 62f);
 
         // Tab 1: THƯ & QUÀ TẶNG
         tabBtnMailsBg = CreateTabButton(tabsGroup.transform, "Tab_Mails", 
             isVi ? "<b>THƯ & QUÀ TẶNG</b>" : "<b>MAILS & GIFTS</b>", 
-            new Vector2(-250f, 0f), new Vector2(235f, 52f), 
+            new Vector2(-290f, 0f), new Vector2(270f, 56f), 
             () => SwitchTab(MailTab.MailsAndGifts), out tabBtnMailsText, out tabMailsRedDot);
-        tabBtnMailsText.fontSize = 20f;
+        tabBtnMailsText.fontSize = 22f;
 
         // Tab 2: THÔNG BÁO HỆ THỐNG
         tabBtnNoticesBg = CreateTabButton(tabsGroup.transform, "Tab_Notices", 
             isVi ? "<b>THÔNG BÁO</b>" : "<b>NOTICES</b>", 
-            new Vector2(0f, 0f), new Vector2(235f, 52f), 
+            new Vector2(0f, 0f), new Vector2(270f, 56f), 
             () => SwitchTab(MailTab.SystemNotices), out tabBtnNoticesText, out _);
-        tabBtnNoticesText.fontSize = 20f;
+        tabBtnNoticesText.fontSize = 22f;
 
         // Tab 3: MÃ QUÀ TẶNG
         tabBtnGiftcodeBg = CreateTabButton(tabsGroup.transform, "Tab_Giftcode", 
             isVi ? "<b>MÃ QUÀ TẶNG</b>" : "<b>GIFTCODES</b>", 
-            new Vector2(250f, 0f), new Vector2(235f, 52f), 
+            new Vector2(290f, 0f), new Vector2(270f, 56f), 
             () => SwitchTab(MailTab.GiftcodeHub), out tabBtnGiftcodeText, out _);
-        tabBtnGiftcodeText.fontSize = 20f;
+        tabBtnGiftcodeText.fontSize = 22f;
 
-        // Royal Runic Close Button [✕] at Top Right
+        // Nút Đóng [X] - Huy Hiệu Tròn Runic Ruby Quý Phái Đồng Nhất Toàn Bộ Game (72x72px chuẩn)
         GameObject closeBtnObj = new GameObject("Btn_Close", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         closeBtnObj.layer = 5;
         closeBtnObj.transform.SetParent(headObj.transform, false);
@@ -456,42 +456,42 @@ public class MailboxUI : MonoBehaviour
         cRt.anchorMin = new Vector2(1f, 0.5f);
         cRt.anchorMax = new Vector2(1f, 0.5f);
         cRt.pivot = new Vector2(1f, 0.5f);
-        cRt.anchoredPosition = new Vector2(-28f, 0f);
-        cRt.sizeDelta = new Vector2(62f, 62f);
+        cRt.anchoredPosition = new Vector2(-22f, 0f);
+        cRt.sizeDelta = new Vector2(72f, 72f);
 
         Image cImg = closeBtnObj.GetComponent<Image>();
-        cImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
-        cImg.type = Image.Type.Sliced;
-        cImg.color = new Color(0.35f, 0.12f, 0.14f, 0.95f);
+        Sprite coreSpr = SoulslikeHUDStyler.GetActionButtonCoreSprite();
+        if (coreSpr != null) cImg.sprite = coreSpr;
+        cImg.color = new Color(0.22f, 0.08f, 0.10f, 0.98f);
 
-        var cOut = closeBtnObj.AddComponent<Outline>();
-        cOut.effectColor = new Color(0.95f, 0.40f, 0.40f, 0.85f);
-        cOut.effectDistance = new Vector2(1.5f, -1.5f);
+        // Viền Runic Ring vàng cổ cho nút Đóng
+        GameObject cRingObj = new GameObject("CloseRing", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        cRingObj.transform.SetParent(closeBtnObj.transform, false);
+        RectTransform crRt = cRingObj.GetComponent<RectTransform>();
+        crRt.anchorMin = Vector2.zero;
+        crRt.anchorMax = Vector2.one;
+        crRt.pivot = new Vector2(0.5f, 0.5f);
+        crRt.anchoredPosition = Vector2.zero;
+        crRt.sizeDelta = Vector2.zero;
+        Image crImg = cRingObj.GetComponent<Image>();
+        crImg.sprite = SoulslikeHUDStyler.GetActionButtonRingSprite();
+        crImg.color = new Color(0.92f, 0.78f, 0.42f, 0.95f);
+        crImg.raycastTarget = false;
 
-        // Circular Runic Ring over close button
-        GameObject ringObj = new GameObject("Ring", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        ringObj.transform.SetParent(closeBtnObj.transform, false);
-        RectTransform rRt = ringObj.GetComponent<RectTransform>();
-        rRt.anchorMin = Vector2.zero;
-        rRt.anchorMax = Vector2.one;
-        rRt.sizeDelta = Vector2.zero;
-        Image rImg = ringObj.GetComponent<Image>();
-        rImg.sprite = SoulslikeHUDStyler.GetActionButtonRingSprite();
-        rImg.color = new Color(1f, 0.85f, 0.45f, 0.75f);
-        rImg.raycastTarget = false;
-
-        // Golden Cross [✕]
-        GameObject xTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        xTxtObj.transform.SetParent(closeBtnObj.transform, false);
-        RectTransform xtRt = xTxtObj.GetComponent<RectTransform>();
-        xtRt.anchorMin = Vector2.zero;
-        xtRt.anchorMax = Vector2.one;
-        xtRt.sizeDelta = Vector2.zero;
-        var xtTmp = xTxtObj.AddComponent<TextMeshProUGUI>();
-        xtTmp.text = "<b>X</b>";
-        xtTmp.fontSize = 20f;
-        xtTmp.alignment = TextAlignmentOptions.Center;
-        xtTmp.color = new Color(1f, 0.92f, 0.70f);
+        // Icon X bên trong - Sprite Cross đồng nhất với DailyLoginUI và SettingsUI
+        GameObject cIconObj = new GameObject("CrossIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        cIconObj.transform.SetParent(closeBtnObj.transform, false);
+        RectTransform ciRt = cIconObj.GetComponent<RectTransform>();
+        ciRt.anchorMin = new Vector2(0.5f, 0.5f);
+        ciRt.anchorMax = new Vector2(0.5f, 0.5f);
+        ciRt.pivot = new Vector2(0.5f, 0.5f);
+        ciRt.anchoredPosition = Vector2.zero;
+        ciRt.sizeDelta = new Vector2(36f, 36f);
+        Image ciImg = cIconObj.GetComponent<Image>();
+        ciImg.sprite = WhiteIconLoader.GetSprite("Cross");
+        ciImg.color = new Color(1f, 0.95f, 0.88f);
+        ciImg.preserveAspect = true;
+        ciImg.raycastTarget = false;
 
         Button closeBtn = closeBtnObj.GetComponent<Button>();
         closeBtn.targetGraphic = cImg;
@@ -645,7 +645,7 @@ public class MailboxUI : MonoBehaviour
         lhRt.anchorMax = new Vector2(1f, 1f);
         lhRt.pivot = new Vector2(0.5f, 1f);
         lhRt.anchoredPosition = new Vector2(0f, -8f);
-        lhRt.sizeDelta = new Vector2(-24f, 36f);
+        lhRt.sizeDelta = new Vector2(-24f, 44f);
 
         GameObject lhTxtObj = new GameObject("CounterText", typeof(RectTransform), typeof(CanvasRenderer));
         lhTxtObj.transform.SetParent(listHeadObj.transform, false);
@@ -655,9 +655,11 @@ public class MailboxUI : MonoBehaviour
         lhtRt.sizeDelta = Vector2.zero;
 
         mailCounterText = lhTxtObj.AddComponent<TextMeshProUGUI>();
-        mailCounterText.fontSize = 20f;
-        mailCounterText.color = new Color(0.75f, 0.85f, 0.95f);
+        mailCounterText.fontSize = 24f;
+        mailCounterText.fontStyle = FontStyles.Bold;
+        mailCounterText.color = new Color(0.92f, 0.95f, 1f);
         mailCounterText.alignment = TextAlignmentOptions.MidlineLeft;
+        SoulslikeHUDStyler.SetSafeOutline(mailCounterText, 0.25f, Color.black);
 
         // Scroll Container for Mail Cards
         GameObject scrollRoot = new GameObject("ScrollRoot", typeof(RectTransform), typeof(ScrollRect), typeof(RectMask2D));
@@ -665,8 +667,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform srRt = scrollRoot.GetComponent<RectTransform>();
         srRt.anchorMin = new Vector2(0f, 0f);
         srRt.anchorMax = new Vector2(1f, 1f);
-        srRt.offsetMin = new Vector2(8f, 78f);
-        srRt.offsetMax = new Vector2(-8f, -48f);
+        srRt.offsetMin = new Vector2(8f, 84f);
+        srRt.offsetMax = new Vector2(-8f, -54f);
 
         ScrollRect sRect = scrollRoot.GetComponent<ScrollRect>();
         sRect.horizontal = false;
@@ -703,8 +705,8 @@ public class MailboxUI : MonoBehaviour
         abRt.anchorMin = new Vector2(0f, 0f);
         abRt.anchorMax = new Vector2(1f, 0f);
         abRt.pivot = new Vector2(0.5f, 0f);
-        abRt.anchoredPosition = new Vector2(0f, 10f);
-        abRt.sizeDelta = new Vector2(-20f, 56f);
+        abRt.anchoredPosition = new Vector2(0f, 12f);
+        abRt.sizeDelta = new Vector2(-20f, 62f);
 
         // Nút NHẬN TẤT CẢ (Claim All) - Radiant Gold
         GameObject claimAllBtnObj = new GameObject("Btn_ClaimAll", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -714,7 +716,7 @@ public class MailboxUI : MonoBehaviour
         caRt.anchorMax = new Vector2(0f, 0.5f);
         caRt.pivot = new Vector2(0f, 0.5f);
         caRt.anchoredPosition = new Vector2(0f, 0f);
-        caRt.sizeDelta = new Vector2(300f, 52f);
+        caRt.sizeDelta = new Vector2(300f, 58f);
 
         Image caImg = claimAllBtnObj.GetComponent<Image>();
         caImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -734,7 +736,8 @@ public class MailboxUI : MonoBehaviour
         var catTmp = catObj.AddComponent<TextMeshProUGUI>();
         catTmp.raycastTarget = false;
         catTmp.text = isVi ? "<b>NHẬN TẤT CẢ</b>" : "<b>CLAIM ALL</b>";
-        catTmp.fontSize = 20f;
+        catTmp.fontSize = 22f;
+        catTmp.fontStyle = FontStyles.Bold;
         catTmp.alignment = TextAlignmentOptions.Center;
         catTmp.color = new Color(0.12f, 0.08f, 0.02f);
 
@@ -751,7 +754,7 @@ public class MailboxUI : MonoBehaviour
         drRt.anchorMax = new Vector2(1f, 0.5f);
         drRt.pivot = new Vector2(1f, 0.5f);
         drRt.anchoredPosition = new Vector2(0f, 0f);
-        drRt.sizeDelta = new Vector2(230f, 52f);
+        drRt.sizeDelta = new Vector2(240f, 58f);
 
         Image drImg = delReadBtnObj.GetComponent<Image>();
         drImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -771,9 +774,11 @@ public class MailboxUI : MonoBehaviour
         var drtTmp = drtObj.AddComponent<TextMeshProUGUI>();
         drtTmp.raycastTarget = false;
         drtTmp.text = isVi ? "<b>XÓA ĐÃ ĐỌC</b>" : "<b>DELETE READ</b>";
-        drtTmp.fontSize = 18f;
+        drtTmp.fontSize = 20f;
+        drtTmp.fontStyle = FontStyles.Bold;
         drtTmp.alignment = TextAlignmentOptions.Center;
         drtTmp.color = Color.white;
+        SoulslikeHUDStyler.SetSafeOutline(drtTmp, 0.25f, Color.black);
 
         Button delReadBtn = delReadBtnObj.GetComponent<Button>();
         delReadBtn.targetGraphic = drImg;
@@ -813,13 +818,14 @@ public class MailboxUI : MonoBehaviour
         RectTransform dtRt = dtObj.GetComponent<RectTransform>();
         dtRt.anchorMin = new Vector2(0f, 1f);
         dtRt.anchorMax = new Vector2(1f, 1f);
-        dtRt.offsetMin = new Vector2(24f, -48f);
-        dtRt.offsetMax = new Vector2(-24f, -14f);
+        dtRt.offsetMin = new Vector2(24f, -54f);
+        dtRt.offsetMax = new Vector2(-24f, -12f);
 
         detailTitleText = dtObj.AddComponent<TextMeshProUGUI>();
-        detailTitleText.fontSize = 17f;
+        detailTitleText.fontSize = 32f;
         detailTitleText.fontStyle = FontStyles.Bold;
         detailTitleText.color = new Color(1f, 0.88f, 0.45f);
+        SoulslikeHUDStyler.SetSafeOutline(detailTitleText, 0.25f, Color.black);
 
         // Detail Meta: Sender & Date
         GameObject dmObj = new GameObject("DetailMeta", typeof(RectTransform), typeof(CanvasRenderer));
@@ -827,15 +833,16 @@ public class MailboxUI : MonoBehaviour
         RectTransform dmRt = dmObj.GetComponent<RectTransform>();
         dmRt.anchorMin = new Vector2(0f, 1f);
         dmRt.anchorMax = new Vector2(1f, 1f);
-        dmRt.offsetMin = new Vector2(24f, -74f);
-        dmRt.offsetMax = new Vector2(-24f, -48f);
+        dmRt.offsetMin = new Vector2(24f, -92f);
+        dmRt.offsetMax = new Vector2(-24f, -56f);
 
         detailSenderText = dmObj.AddComponent<TextMeshProUGUI>();
-        detailSenderText.fontSize = 12.5f;
-        detailSenderText.color = new Color(0.55f, 0.72f, 0.92f);
+        detailSenderText.fontSize = 20f;
+        detailSenderText.color = new Color(0.65f, 0.80f, 0.98f);
+        SoulslikeHUDStyler.SetSafeOutline(detailSenderText, 0.2f, Color.black);
 
         // Divider
-        SoulslikeHUDStyler.AddFiligreeDivider(mailDetailPanel.transform, new Vector2(0f, -80f), new Vector2(635f, 6f));
+        SoulslikeHUDStyler.AddFiligreeDivider(mailDetailPanel.transform, new Vector2(0f, -98f), new Vector2(850f, 6f));
 
         // Scrollable Body Text
         GameObject bodyScrollRoot = new GameObject("BodyScrollRoot", typeof(RectTransform), typeof(ScrollRect), typeof(RectMask2D));
@@ -843,13 +850,13 @@ public class MailboxUI : MonoBehaviour
         RectTransform bsrRt = bodyScrollRoot.GetComponent<RectTransform>();
         bsrRt.anchorMin = new Vector2(0f, 0f);
         bsrRt.anchorMax = new Vector2(1f, 1f);
-        bsrRt.offsetMin = new Vector2(24f, 142f);
-        bsrRt.offsetMax = new Vector2(-24f, -92f);
+        bsrRt.offsetMin = new Vector2(24f, 160f);
+        bsrRt.offsetMax = new Vector2(-24f, -112f);
 
         ScrollRect bodyScroll = bodyScrollRoot.GetComponent<ScrollRect>();
         bodyScroll.horizontal = false;
         bodyScroll.vertical = true;
-        bodyScroll.scrollSensitivity = 24f;
+        bodyScroll.scrollSensitivity = 28f;
 
         GameObject bodyContentObj = new GameObject("BodyContent", typeof(RectTransform), typeof(ContentSizeFitter));
         bodyContentObj.transform.SetParent(bodyScrollRoot.transform, false);
@@ -863,10 +870,12 @@ public class MailboxUI : MonoBehaviour
         bcsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         detailBodyText = bodyContentObj.AddComponent<TextMeshProUGUI>();
-        detailBodyText.fontSize = 14f;
+        detailBodyText.fontSize = 24f;
+        detailBodyText.fontStyle = FontStyles.Bold;
         detailBodyText.lineSpacing = 16f;
-        detailBodyText.color = new Color(0.88f, 0.92f, 0.98f);
+        detailBodyText.color = new Color(0.92f, 0.95f, 1f);
         detailBodyText.enableWordWrapping = true;
+        SoulslikeHUDStyler.SetSafeOutline(detailBodyText, 0.22f, Color.black);
 
         bodyScroll.content = bcRt;
         bodyScroll.viewport = bsrRt;
@@ -878,8 +887,8 @@ public class MailboxUI : MonoBehaviour
         rbRt.anchorMin = new Vector2(0.5f, 0f);
         rbRt.anchorMax = new Vector2(0.5f, 0f);
         rbRt.pivot = new Vector2(0.5f, 0f);
-        rbRt.anchoredPosition = new Vector2(0f, 68f);
-        rbRt.sizeDelta = new Vector2(640f, 64f);
+        rbRt.anchoredPosition = new Vector2(0f, 76f);
+        rbRt.sizeDelta = new Vector2(740f, 74f);
 
         Image rbImg = detailRewardBox.GetComponent<Image>();
         rbImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -897,8 +906,8 @@ public class MailboxUI : MonoBehaviour
         rwsRt.anchorMin = new Vector2(0f, 0.5f);
         rwsRt.anchorMax = new Vector2(0f, 0.5f);
         rwsRt.pivot = new Vector2(0f, 0.5f);
-        rwsRt.anchoredPosition = new Vector2(12f, 0f);
-        rwsRt.sizeDelta = new Vector2(50f, 50f);
+        rwsRt.anchoredPosition = new Vector2(14f, 0f);
+        rwsRt.sizeDelta = new Vector2(58f, 58f);
 
         Image rwsImg = rwSlotObj.GetComponent<Image>();
         rwsImg.sprite = SoulslikeHUDStyler.GetPotionSlotFrameSprite();
@@ -911,7 +920,7 @@ public class MailboxUI : MonoBehaviour
         rwiRt.anchorMax = new Vector2(0.5f, 0.5f);
         rwiRt.pivot = new Vector2(0.5f, 0.5f);
         rwiRt.anchoredPosition = Vector2.zero;
-        rwiRt.sizeDelta = new Vector2(34f, 34f);
+        rwiRt.sizeDelta = new Vector2(40f, 40f);
 
         Image rwiImg = rwIconObj.GetComponent<Image>();
         Sprite shardSprite = Resources.Load<Sprite>("UI/Soulslike/Bar_Amber_Fill");
@@ -925,14 +934,15 @@ public class MailboxUI : MonoBehaviour
         RectTransform rwtRt = rwTxtObj.GetComponent<RectTransform>();
         rwtRt.anchorMin = new Vector2(0f, 0f);
         rwtRt.anchorMax = new Vector2(1f, 1f);
-        rwtRt.offsetMin = new Vector2(72f, 0f);
-        rwtRt.offsetMax = new Vector2(-12f, 0f);
+        rwtRt.offsetMin = new Vector2(85f, 0f);
+        rwtRt.offsetMax = new Vector2(-14f, 0f);
 
         detailRewardValText = rwTxtObj.AddComponent<TextMeshProUGUI>();
-        detailRewardValText.fontSize = 14.5f;
+        detailRewardValText.fontSize = 22f;
         detailRewardValText.fontStyle = FontStyles.Bold;
         detailRewardValText.alignment = TextAlignmentOptions.MidlineLeft;
         detailRewardValText.color = new Color(1f, 0.90f, 0.55f);
+        SoulslikeHUDStyler.SetSafeOutline(detailRewardValText, 0.25f, Color.black);
 
         // Action Buttons at Bottom of Inspection Panel
         GameObject detailActionRow = new GameObject("DetailActionRow", typeof(RectTransform));
@@ -942,7 +952,7 @@ public class MailboxUI : MonoBehaviour
         darRt.anchorMax = new Vector2(0.5f, 0f);
         darRt.pivot = new Vector2(0.5f, 0f);
         darRt.anchoredPosition = new Vector2(0f, 12f);
-        darRt.sizeDelta = new Vector2(640f, 48f);
+        darRt.sizeDelta = new Vector2(740f, 60f);
 
         // Nút NHẬN PHẦN THƯỞNG (Claim Mail) - Emerald / Radiant Green
         GameObject claimBtnObj = new GameObject("Btn_Claim", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -952,8 +962,8 @@ public class MailboxUI : MonoBehaviour
         clRt.anchorMin = new Vector2(0.5f, 0.5f);
         clRt.anchorMax = new Vector2(0.5f, 0.5f);
         clRt.pivot = new Vector2(0.5f, 0.5f);
-        clRt.anchoredPosition = new Vector2(-80f, 0f);
-        clRt.sizeDelta = new Vector2(280f, 46f);
+        clRt.anchoredPosition = new Vector2(-120f, 0f);
+        clRt.sizeDelta = new Vector2(340f, 56f);
 
         Image clImg = claimBtnObj.GetComponent<Image>();
         clImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -974,9 +984,10 @@ public class MailboxUI : MonoBehaviour
         detailClaimBtnText = clTxtObj.AddComponent<TextMeshProUGUI>();
         detailClaimBtnText.raycastTarget = false;
         detailClaimBtnText.text = isVi ? "<b>NHẬN PHẦN THƯỞNG</b>" : "<b>CLAIM REWARD</b>";
-        detailClaimBtnText.fontSize = 15f;
+        detailClaimBtnText.fontSize = 22f;
         detailClaimBtnText.alignment = TextAlignmentOptions.Center;
         detailClaimBtnText.color = Color.white;
+        SoulslikeHUDStyler.SetSafeOutline(detailClaimBtnText, 0.25f, Color.black);
 
         detailClaimButton = claimBtnObj.GetComponent<Button>();
         detailClaimButton.targetGraphic = clImg;
@@ -991,8 +1002,8 @@ public class MailboxUI : MonoBehaviour
         dotRt.anchorMin = new Vector2(0.5f, 0.5f);
         dotRt.anchorMax = new Vector2(0.5f, 0.5f);
         dotRt.pivot = new Vector2(0.5f, 0.5f);
-        dotRt.anchoredPosition = new Vector2(180f, 0f);
-        dotRt.sizeDelta = new Vector2(180f, 46f);
+        dotRt.anchoredPosition = new Vector2(210f, 0f);
+        dotRt.sizeDelta = new Vector2(240f, 56f);
 
         Image dotImg = delOneBtnObj.GetComponent<Image>();
         dotImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1013,9 +1024,10 @@ public class MailboxUI : MonoBehaviour
         var dottTmp = dottObj.AddComponent<TextMeshProUGUI>();
         dottTmp.raycastTarget = false;
         dottTmp.text = isVi ? "<b>XÓA THƯ NÀY</b>" : "<b>DELETE THIS</b>";
-        dottTmp.fontSize = 13.5f;
+        dottTmp.fontSize = 20f;
         dottTmp.alignment = TextAlignmentOptions.Center;
         dottTmp.color = Color.white;
+        SoulslikeHUDStyler.SetSafeOutline(dottTmp, 0.25f, Color.black);
 
         detailDeleteButton = delOneBtnObj.GetComponent<Button>();
         detailDeleteButton.targetGraphic = dotImg;
@@ -1037,12 +1049,12 @@ public class MailboxUI : MonoBehaviour
         esiRt.anchorMin = new Vector2(0.5f, 0.5f);
         esiRt.anchorMax = new Vector2(0.5f, 0.5f);
         esiRt.pivot = new Vector2(0.5f, 0.5f);
-        esiRt.anchoredPosition = new Vector2(0f, 90f);
-        esiRt.sizeDelta = new Vector2(140f, 140f);
+        esiRt.anchoredPosition = new Vector2(0f, 130f);
+        esiRt.sizeDelta = new Vector2(200f, 200f);
 
         Image esiImg = esIconObj.GetComponent<Image>();
         esiImg.sprite = GetMailIconSprite();
-        esiImg.color = new Color(1f, 0.85f, 0.40f, 0.35f);
+        esiImg.color = new Color(1f, 0.88f, 0.45f, 0.90f);
 
         // Empty State Title
         GameObject estObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
@@ -1051,14 +1063,16 @@ public class MailboxUI : MonoBehaviour
         estRt.anchorMin = new Vector2(0.5f, 0.5f);
         estRt.anchorMax = new Vector2(0.5f, 0.5f);
         estRt.pivot = new Vector2(0.5f, 0.5f);
-        estRt.anchoredPosition = new Vector2(0f, -8f);
-        estRt.sizeDelta = new Vector2(800f, 44f);
+        estRt.anchoredPosition = new Vector2(0f, -10f);
+        estRt.sizeDelta = new Vector2(1100f, 60f);
 
         var estTmp = estObj.AddComponent<TextMeshProUGUI>();
         estTmp.text = isVi ? "<b>HÒM THƯ HIỆP SĨ TRỐNG</b>" : "<b>KNIGHT'S MAILBOX IS EMPTY</b>";
-        estTmp.fontSize = 28f;
-        estTmp.color = new Color(1f, 0.88f, 0.45f, 0.85f);
+        estTmp.fontSize = 38f;
+        estTmp.fontStyle = FontStyles.Bold;
+        estTmp.color = new Color(1f, 0.88f, 0.45f);
         estTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(estTmp, 0.35f, Color.black);
 
         // Empty State Subtitle
         GameObject essObj = new GameObject("SubTitle", typeof(RectTransform), typeof(CanvasRenderer));
@@ -1067,17 +1081,19 @@ public class MailboxUI : MonoBehaviour
         essRt.anchorMin = new Vector2(0.5f, 0.5f);
         essRt.anchorMax = new Vector2(0.5f, 0.5f);
         essRt.pivot = new Vector2(0.5f, 0.5f);
-        essRt.anchoredPosition = new Vector2(0f, -65f);
-        essRt.sizeDelta = new Vector2(900f, 65f);
+        essRt.anchoredPosition = new Vector2(0f, -85f);
+        essRt.sizeDelta = new Vector2(1100f, 90f);
 
         var essTmp = essObj.AddComponent<TextMeshProUGUI>();
         essTmp.text = isVi 
             ? "Hiện không có thư hoặc quà mới nào từ Hội Đồng Vaelstrider.\nMọi thông báo và phần thưởng tri ân sẽ được gửi tại đây."
             : "No active mails or gifts from the Council of Vaelstrider.\nSystem notices and event rewards will appear here.";
-        essTmp.fontSize = 20f;
-        essTmp.lineSpacing = 14f;
-        essTmp.color = new Color(0.60f, 0.70f, 0.82f, 0.75f);
+        essTmp.fontSize = 24f;
+        essTmp.fontStyle = FontStyles.Bold;
+        essTmp.lineSpacing = 16f;
+        essTmp.color = new Color(0.85f, 0.90f, 0.96f);
         essTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(essTmp, 0.25f, Color.black);
 
         // Button: KHÔI PHỤC THƯ MẪU (Restore Default Mails)
         GameObject rstBtnObj = new GameObject("Btn_RestoreMails", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -1086,8 +1102,8 @@ public class MailboxUI : MonoBehaviour
         rstRt.anchorMin = new Vector2(0.5f, 0.5f);
         rstRt.anchorMax = new Vector2(0.5f, 0.5f);
         rstRt.pivot = new Vector2(0.5f, 0.5f);
-        rstRt.anchoredPosition = new Vector2(0f, -145f);
-        rstRt.sizeDelta = new Vector2(340f, 65f);
+        rstRt.anchoredPosition = new Vector2(0f, -185f);
+        rstRt.sizeDelta = new Vector2(460f, 82f);
 
         Image rstImg = rstBtnObj.GetComponent<Image>();
         rstImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1106,9 +1122,11 @@ public class MailboxUI : MonoBehaviour
         rsttRt.sizeDelta = Vector2.zero;
         var rsttTmp = rsttObj.AddComponent<TextMeshProUGUI>();
         rsttTmp.text = isVi ? "<b>[KHÔI PHỤC THƯ MẪU]</b>" : "<b>[RESTORE MAILS]</b>";
-        rsttTmp.fontSize = 20f;
+        rsttTmp.fontSize = 26f;
+        rsttTmp.fontStyle = FontStyles.Bold;
         rsttTmp.alignment = TextAlignmentOptions.Center;
         rsttTmp.color = Color.white;
+        SoulslikeHUDStyler.SetSafeOutline(rsttTmp, 0.25f, Color.black);
 
         Button rstBtn = rstBtnObj.GetComponent<Button>();
         rstBtn.targetGraphic = rstImg;
@@ -1144,12 +1162,12 @@ public class MailboxUI : MonoBehaviour
             bool isClaimed = hasReward && PlayerPrefs.GetInt("Mail_Claimed_" + mail.id, 0) == 1;
             bool isSelected = selectedMail != null && selectedMail.id == mail.id;
 
-            // Mail Card (400 x 82px)
+            // Mail Card (Expanded for Mobile Readability)
             GameObject item = new GameObject("MailItem_" + mail.id, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             item.transform.SetParent(mailListContent, false);
 
             RectTransform itRt = item.GetComponent<RectTransform>();
-            itRt.sizeDelta = new Vector2(0f, 82f);
+            itRt.sizeDelta = new Vector2(0f, 105f);
 
             Image itemImg = item.GetComponent<Image>();
             itemImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -1185,35 +1203,36 @@ public class MailboxUI : MonoBehaviour
                 itemOut.effectDistance = new Vector2(1f, -1f);
             }
 
-            // Envelope Icon on the Left (44x44px)
+            // Envelope Icon on the Left (52x52px)
             GameObject iconObj = new GameObject("EnvelopeIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             iconObj.transform.SetParent(item.transform, false);
             RectTransform icRt = iconObj.GetComponent<RectTransform>();
             icRt.anchorMin = new Vector2(0f, 0.5f);
             icRt.anchorMax = new Vector2(0f, 0.5f);
             icRt.pivot = new Vector2(0f, 0.5f);
-            icRt.anchoredPosition = new Vector2(14f, 0f);
-            icRt.sizeDelta = new Vector2(40f, 40f);
+            icRt.anchoredPosition = new Vector2(16f, 0f);
+            icRt.sizeDelta = new Vector2(52f, 52f);
 
             Image icImg = iconObj.GetComponent<Image>();
             icImg.sprite = GetMailIconSprite();
             icImg.color = isClaimed ? new Color(0.55f, 0.65f, 0.75f, 0.7f) : new Color(1f, 0.88f, 0.45f);
 
-            // Card Title
+            // Card Title (Big & Bold)
             GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
             titleObj.transform.SetParent(item.transform, false);
             RectTransform tRt = titleObj.GetComponent<RectTransform>();
             tRt.anchorMin = new Vector2(0f, 1f);
             tRt.anchorMax = new Vector2(1f, 1f);
-            tRt.offsetMin = new Vector2(62f, -34f);
+            tRt.offsetMin = new Vector2(80f, -48f);
             tRt.offsetMax = new Vector2(-16f, -10f);
 
             var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
             tTmp.text = isVi ? mail.titleVi : mail.titleEn;
-            tTmp.fontSize = 13.5f;
+            tTmp.fontSize = 22f;
             tTmp.fontStyle = FontStyles.Bold;
             tTmp.color = isClaimed ? new Color(0.65f, 0.72f, 0.82f) : new Color(1f, 0.90f, 0.50f);
             tTmp.overflowMode = TextOverflowModes.Ellipsis;
+            SoulslikeHUDStyler.SetSafeOutline(tTmp, 0.2f, Color.black);
 
             // Sender & Meta line
             GameObject subObj = new GameObject("Meta", typeof(RectTransform), typeof(CanvasRenderer));
@@ -1221,8 +1240,8 @@ public class MailboxUI : MonoBehaviour
             RectTransform sRt = subObj.GetComponent<RectTransform>();
             sRt.anchorMin = new Vector2(0f, 0f);
             sRt.anchorMax = new Vector2(1f, 0f);
-            sRt.offsetMin = new Vector2(62f, 10f);
-            sRt.offsetMax = new Vector2(-16f, 32f);
+            sRt.offsetMin = new Vector2(80f, 10f);
+            sRt.offsetMax = new Vector2(-16f, 50f);
 
             var sTmp = subObj.AddComponent<TextMeshProUGUI>();
             string sender = isVi ? mail.senderVi : mail.senderEn;
@@ -1230,7 +1249,8 @@ public class MailboxUI : MonoBehaviour
                 ? (isVi ? "<color=#718096>[Đã nhận]</color>" : "<color=#718096>[Claimed]</color>") 
                 : $"<color=#55EFC4><b>+{mail.rewardShards:N0} Linh Hồn</b></color>";
             sTmp.text = $"{sender} • {statusStr}";
-            sTmp.fontSize = 11.5f;
+            sTmp.fontSize = 18f;
+            sTmp.fontStyle = FontStyles.Bold;
 
             // Red Dot if unclaimed reward
             if (hasReward && !isClaimed)
@@ -1551,15 +1571,15 @@ public class MailboxUI : MonoBehaviour
         sRect.viewport = srRt;
         noticeListContent = contentObj.transform;
 
-        // Right Column: Notice Inspection Panel (Width 685px)
+        // Right Column: Notice Inspection Panel (Full right width)
         GameObject rightCol = new GameObject("RightColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rightCol.transform.SetParent(parent, false);
         RectTransform rcRt = rightCol.GetComponent<RectTransform>();
-        rcRt.anchorMin = new Vector2(1f, 0f);
+        rcRt.anchorMin = new Vector2(0f, 0f);
         rcRt.anchorMax = new Vector2(1f, 1f);
-        rcRt.pivot = new Vector2(1f, 0.5f);
-        rcRt.anchoredPosition = new Vector2(0f, 0f);
-        rcRt.sizeDelta = new Vector2(685f, 0f);
+        rcRt.pivot = new Vector2(0.5f, 0.5f);
+        rcRt.offsetMin = new Vector2(440f, 0f);
+        rcRt.offsetMax = new Vector2(0f, 0f);
 
         Image rcImg = rightCol.GetComponent<Image>();
         rcImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -1576,13 +1596,14 @@ public class MailboxUI : MonoBehaviour
         RectTransform ntRt = ntObj.GetComponent<RectTransform>();
         ntRt.anchorMin = new Vector2(0f, 1f);
         ntRt.anchorMax = new Vector2(1f, 1f);
-        ntRt.offsetMin = new Vector2(24f, -48f);
-        ntRt.offsetMax = new Vector2(-24f, -14f);
+        ntRt.offsetMin = new Vector2(24f, -54f);
+        ntRt.offsetMax = new Vector2(-24f, -12f);
 
         noticeDetailTitleText = ntObj.AddComponent<TextMeshProUGUI>();
-        noticeDetailTitleText.fontSize = 17f;
+        noticeDetailTitleText.fontSize = 32f;
         noticeDetailTitleText.fontStyle = FontStyles.Bold;
         noticeDetailTitleText.color = new Color(1f, 0.88f, 0.45f);
+        SoulslikeHUDStyler.SetSafeOutline(noticeDetailTitleText, 0.25f, Color.black);
 
         // Notice Meta
         GameObject nmObj = new GameObject("NoticeMeta", typeof(RectTransform), typeof(CanvasRenderer));
@@ -1590,14 +1611,15 @@ public class MailboxUI : MonoBehaviour
         RectTransform nmRt = nmObj.GetComponent<RectTransform>();
         nmRt.anchorMin = new Vector2(0f, 1f);
         nmRt.anchorMax = new Vector2(1f, 1f);
-        nmRt.offsetMin = new Vector2(24f, -74f);
-        nmRt.offsetMax = new Vector2(-24f, -48f);
+        nmRt.offsetMin = new Vector2(24f, -92f);
+        nmRt.offsetMax = new Vector2(-24f, -56f);
 
         noticeDetailMetaText = nmObj.AddComponent<TextMeshProUGUI>();
-        noticeDetailMetaText.fontSize = 12.5f;
-        noticeDetailMetaText.color = new Color(0.55f, 0.72f, 0.92f);
+        noticeDetailMetaText.fontSize = 20f;
+        noticeDetailMetaText.color = new Color(0.65f, 0.80f, 0.98f);
+        SoulslikeHUDStyler.SetSafeOutline(noticeDetailMetaText, 0.2f, Color.black);
 
-        SoulslikeHUDStyler.AddFiligreeDivider(rightCol.transform, new Vector2(0f, -80f), new Vector2(635f, 6f));
+        SoulslikeHUDStyler.AddFiligreeDivider(rightCol.transform, new Vector2(0f, -98f), new Vector2(900f, 6f));
 
         // Notice Scrollable Body Text
         GameObject nBodyScroll = new GameObject("NoticeBodyScroll", typeof(RectTransform), typeof(ScrollRect), typeof(RectMask2D));
@@ -1606,12 +1628,12 @@ public class MailboxUI : MonoBehaviour
         nbsRt.anchorMin = Vector2.zero;
         nbsRt.anchorMax = Vector2.one;
         nbsRt.offsetMin = new Vector2(24f, 20f);
-        nbsRt.offsetMax = new Vector2(-24f, -92f);
+        nbsRt.offsetMax = new Vector2(-24f, -112f);
 
         ScrollRect nbScroll = nBodyScroll.GetComponent<ScrollRect>();
         nbScroll.horizontal = false;
         nbScroll.vertical = true;
-        nbScroll.scrollSensitivity = 24f;
+        nbScroll.scrollSensitivity = 28f;
 
         GameObject nbContent = new GameObject("BodyContent", typeof(RectTransform), typeof(ContentSizeFitter));
         nbContent.transform.SetParent(nBodyScroll.transform, false);
@@ -1624,10 +1646,12 @@ public class MailboxUI : MonoBehaviour
         nbcsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         noticeDetailBodyText = nbContent.AddComponent<TextMeshProUGUI>();
-        noticeDetailBodyText.fontSize = 14f;
+        noticeDetailBodyText.fontSize = 24f;
+        noticeDetailBodyText.fontStyle = FontStyles.Bold;
         noticeDetailBodyText.lineSpacing = 16f;
-        noticeDetailBodyText.color = new Color(0.88f, 0.92f, 0.98f);
+        noticeDetailBodyText.color = new Color(0.92f, 0.95f, 1f);
         noticeDetailBodyText.enableWordWrapping = true;
+        SoulslikeHUDStyler.SetSafeOutline(noticeDetailBodyText, 0.22f, Color.black);
 
         nbScroll.content = nbcRt;
         nbScroll.viewport = nbsRt;
@@ -1652,7 +1676,7 @@ public class MailboxUI : MonoBehaviour
             item.transform.SetParent(noticeListContent, false);
 
             RectTransform itRt = item.GetComponent<RectTransform>();
-            itRt.sizeDelta = new Vector2(0f, 76f);
+            itRt.sizeDelta = new Vector2(0f, 105f);
 
             Image itemImg = item.GetComponent<Image>();
             itemImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -1680,8 +1704,8 @@ public class MailboxUI : MonoBehaviour
             tgRt.anchorMin = new Vector2(0f, 0.5f);
             tgRt.anchorMax = new Vector2(0f, 0.5f);
             tgRt.pivot = new Vector2(0f, 0.5f);
-            tgRt.anchoredPosition = new Vector2(12f, 0f);
-            tgRt.sizeDelta = new Vector2(80f, 26f);
+            tgRt.anchoredPosition = new Vector2(14f, 0f);
+            tgRt.sizeDelta = new Vector2(110f, 36f);
 
             Image tgImg = tagObj.GetComponent<Image>();
             tgImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1696,7 +1720,8 @@ public class MailboxUI : MonoBehaviour
             tgttRt.sizeDelta = Vector2.zero;
             var tgTmp = tgtObj.AddComponent<TextMeshProUGUI>();
             tgTmp.text = $"<b>{notice.categoryTag}</b>";
-            tgTmp.fontSize = 10.5f;
+            tgTmp.fontSize = 16f;
+            tgTmp.fontStyle = FontStyles.Bold;
             tgTmp.alignment = TextAlignmentOptions.Center;
             tgTmp.color = Color.white;
 
@@ -1706,15 +1731,16 @@ public class MailboxUI : MonoBehaviour
             RectTransform tRt = titleObj.GetComponent<RectTransform>();
             tRt.anchorMin = new Vector2(0f, 1f);
             tRt.anchorMax = new Vector2(1f, 1f);
-            tRt.offsetMin = new Vector2(100f, -32f);
-            tRt.offsetMax = new Vector2(-12f, -8f);
+            tRt.offsetMin = new Vector2(135f, -48f);
+            tRt.offsetMax = new Vector2(-12f, -10f);
 
             var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
             tTmp.text = isVi ? notice.titleVi : notice.titleEn;
-            tTmp.fontSize = 12.5f;
+            tTmp.fontSize = 22f;
             tTmp.fontStyle = FontStyles.Bold;
             tTmp.color = isSelected ? new Color(1f, 0.90f, 0.50f) : new Color(0.85f, 0.90f, 0.96f);
             tTmp.overflowMode = TextOverflowModes.Ellipsis;
+            SoulslikeHUDStyler.SetSafeOutline(tTmp, 0.2f, Color.black);
 
             // Sender & Date
             GameObject subObj = new GameObject("Meta", typeof(RectTransform), typeof(CanvasRenderer));
@@ -1722,13 +1748,14 @@ public class MailboxUI : MonoBehaviour
             RectTransform sRt = subObj.GetComponent<RectTransform>();
             sRt.anchorMin = new Vector2(0f, 0f);
             sRt.anchorMax = new Vector2(1f, 0f);
-            sRt.offsetMin = new Vector2(100f, 8f);
-            sRt.offsetMax = new Vector2(-12f, 28f);
+            sRt.offsetMin = new Vector2(135f, 10f);
+            sRt.offsetMax = new Vector2(-12f, 50f);
 
             var sTmp = subObj.AddComponent<TextMeshProUGUI>();
             string sender = isVi ? notice.senderVi : notice.senderEn;
             sTmp.text = $"{sender} • {notice.date}";
-            sTmp.fontSize = 11f;
+            sTmp.fontSize = 18f;
+            sTmp.fontStyle = FontStyles.Bold;
             sTmp.color = new Color(0.55f, 0.65f, 0.78f);
 
             MailItemData capturedNotice = notice;

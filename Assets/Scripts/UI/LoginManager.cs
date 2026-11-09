@@ -98,6 +98,10 @@ public class LoginManager : MonoBehaviour
         if (tapToStartPanel != null) tapToStartPanel.SetActive(true);
         if (switchAccountBtn != null) switchAccountBtn.gameObject.SetActive(false); // Ẩn nút đổi tài khoản vì là game offline
 
+        // Đảm bảo LoadingProgressPanel (chứa GameTitle & thanh slider trắng thừa) bị ẩn hoàn toàn khi ở màn hình Tap To Start
+        var lpp = GameObject.Find("LoadingProgressPanel");
+        if (lpp != null) lpp.SetActive(false);
+
         if (welcomeUserBannerText != null)
         {
             if (welcomeUserBannerText.transform.parent != null && 
@@ -487,7 +491,10 @@ public class LoginManager : MonoBehaviour
 
         if (tapToStartText != null && !isStartingGame)
         {
-            tapToStartText.text = LocalizationManager.T("- BẮT ĐẦU TRÒ CHƠI -\n<size=34><color=#FFE082>Chạm vào màn hình để bắt đầu</color></size>", "- START GAME -\n<size=34><color=#FFE082>Tap anywhere to start</color></size>");
+            tapToStartText.text = LocalizationManager.T(
+                "<b><color=#FFE57F>— BẮT ĐẦU TRÒ CHƠI —</color></b>\n<size=30><color=#F1F5F9>Chạm vào màn hình để bắt đầu</color></size>", 
+                "<b><color=#FFE57F>— START GAME —</color></b>\n<size=30><color=#F1F5F9>Tap anywhere to start</color></size>"
+            );
         }
         if (versionText != null)
         {

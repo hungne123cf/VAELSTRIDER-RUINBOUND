@@ -272,14 +272,14 @@ public class SettingsUI : MonoBehaviour
 
     public void BuildUI()
     {
-        // Clean up old children
+        // Clean up old children triệt để để không bao giờ bị lưu vết text cũ
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
             var child = transform.GetChild(i);
             if (child != null)
             {
-                if (Application.isPlaying) Destroy(child.gameObject);
-                else DestroyImmediate(child.gameObject);
+                child.gameObject.SetActive(false);
+                DestroyImmediate(child.gameObject);
             }
         }
 
@@ -292,8 +292,8 @@ public class SettingsUI : MonoBehaviour
         boxRt.anchorMin = Vector2.zero;
         boxRt.anchorMax = Vector2.one;
         boxRt.pivot = new Vector2(0.5f, 0.5f);
-        boxRt.offsetMin = new Vector2(30f, 20f);
-        boxRt.offsetMax = new Vector2(-30f, -20f);
+        boxRt.offsetMin = new Vector2(16f, 12f);
+        boxRt.offsetMax = new Vector2(-16f, -12f);
         boxRt.sizeDelta = Vector2.zero;
 
         Image boxImg = dialogBox.GetComponent<Image>();
@@ -302,6 +302,49 @@ public class SettingsUI : MonoBehaviour
         boxImg.color = Color.white;
         WhiteIconLoader.ApplyGothicFrame(dialogBox, Color.white, 0.40f);
 
+        // Nút Đóng [X] Runic Cross chuẩn ở góc trên bên phải
+        GameObject closeXObj = new GameObject("Btn_Close_X", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        closeXObj.layer = 5;
+        closeXObj.transform.SetParent(dialogBox.transform, false);
+        RectTransform cxRt = closeXObj.GetComponent<RectTransform>();
+        cxRt.anchorMin = new Vector2(1f, 1f);
+        cxRt.anchorMax = new Vector2(1f, 1f);
+        cxRt.pivot = new Vector2(1f, 1f);
+        cxRt.anchoredPosition = new Vector2(-22f, -18f);
+        cxRt.sizeDelta = new Vector2(72f, 72f);
+
+        Image cxBg = closeXObj.GetComponent<Image>();
+        cxBg.sprite = SoulslikeHUDStyler.GetActionButtonCoreSprite();
+        cxBg.color = new Color(0.22f, 0.08f, 0.10f, 0.98f);
+
+        GameObject ringObj = new GameObject("Ring", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        ringObj.layer = 5;
+        ringObj.transform.SetParent(closeXObj.transform, false);
+        RectTransform ringRt = ringObj.GetComponent<RectTransform>();
+        ringRt.anchorMin = Vector2.zero;
+        ringRt.anchorMax = Vector2.one;
+        ringRt.sizeDelta = Vector2.zero;
+        Image ringImg = ringObj.GetComponent<Image>();
+        ringImg.sprite = SoulslikeHUDStyler.GetActionButtonRingSprite();
+        ringImg.color = new Color(0.92f, 0.78f, 0.42f, 0.95f);
+        ringImg.raycastTarget = false;
+
+        GameObject crossObj = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        crossObj.layer = 5;
+        crossObj.transform.SetParent(closeXObj.transform, false);
+        RectTransform crossRt = crossObj.GetComponent<RectTransform>();
+        crossRt.anchorMin = new Vector2(0.5f, 0.5f);
+        crossRt.anchorMax = new Vector2(0.5f, 0.5f);
+        crossRt.pivot = new Vector2(0.5f, 0.5f);
+        crossRt.sizeDelta = new Vector2(36f, 36f);
+        Image crossImg = crossObj.GetComponent<Image>();
+        crossImg.sprite = WhiteIconLoader.GetSprite("Cross");
+        crossImg.color = new Color(1f, 0.95f, 0.88f);
+        crossImg.raycastTarget = false;
+
+        Button cxBtn = closeXObj.GetComponent<Button>();
+        cxBtn.onClick.AddListener(CloseSettings);
+
         // 2. Header Title & Subtitle
         GameObject titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer));
         titleObj.transform.SetParent(dialogBox.transform, false);
@@ -309,11 +352,11 @@ public class SettingsUI : MonoBehaviour
         titleRt.anchorMin = new Vector2(0f, 1f);
         titleRt.anchorMax = new Vector2(1f, 1f);
         titleRt.pivot = new Vector2(0.5f, 1f);
-        titleRt.anchoredPosition = new Vector2(0f, -20f);
-        titleRt.sizeDelta = new Vector2(0f, 48f);
+        titleRt.anchoredPosition = new Vector2(0f, -16f);
+        titleRt.sizeDelta = new Vector2(-180f, 48f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
-        titleText.fontSize = 36f;
+        titleText.fontSize = 38f;
         titleText.fontStyle = FontStyles.Bold;
         titleText.alignment = TextAlignmentOptions.Center;
         titleText.color = new Color(0.98f, 0.88f, 0.55f);
@@ -326,8 +369,8 @@ public class SettingsUI : MonoBehaviour
         subRt.anchorMin = new Vector2(0f, 1f);
         subRt.anchorMax = new Vector2(1f, 1f);
         subRt.pivot = new Vector2(0.5f, 1f);
-        subRt.anchoredPosition = new Vector2(0f, -72f);
-        subRt.sizeDelta = new Vector2(0f, 32f);
+        subRt.anchoredPosition = new Vector2(0f, -68f);
+        subRt.sizeDelta = new Vector2(-180f, 32f);
 
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.fontSize = 20f;
@@ -335,7 +378,7 @@ public class SettingsUI : MonoBehaviour
         subtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
         subtitleText.text = LocalizationManager.IsVietnamese ? "Âm thanh, Điều khiển & Dữ liệu trò chơi" : "Audio, Controls & Game Data";
         SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
-        SoulslikeHUDStyler.AddFiligreeDivider(dialogBox.transform, new Vector2(0f, -108f), new Vector2(1600f, 12f));
+        SoulslikeHUDStyler.AddFiligreeDivider(dialogBox.transform, new Vector2(0f, -104f), new Vector2(1600f, 12f));
 
         // 3. LEFT CATEGORY SIDEBAR
         categorySidebar = new GameObject("CategorySidebar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -345,7 +388,7 @@ public class SettingsUI : MonoBehaviour
         sbRt.anchorMax = new Vector2(0f, 1f);
         sbRt.pivot = new Vector2(0f, 0.5f);
         sbRt.offsetMin = new Vector2(25f, 100f);
-        sbRt.offsetMax = new Vector2(360f, -125f);
+        sbRt.offsetMax = new Vector2(360f, -120f);
 
         Image sbImg = categorySidebar.GetComponent<Image>();
         sbImg.color = new Color(0.05f, 0.07f, 0.11f, 0.95f);
@@ -374,7 +417,7 @@ public class SettingsUI : MonoBehaviour
         cpRt.anchorMax = new Vector2(1f, 1f);
         cpRt.pivot = new Vector2(0.5f, 0.5f);
         cpRt.offsetMin = new Vector2(380f, 100f);
-        cpRt.offsetMax = new Vector2(-25f, -125f);
+        cpRt.offsetMax = new Vector2(-25f, -120f);
 
         Image cpImg = contentPanel.GetComponent<Image>();
         cpImg.color = new Color(0.06f, 0.08f, 0.13f, 0.95f);
@@ -426,7 +469,7 @@ public class SettingsUI : MonoBehaviour
         ccRt.anchorMin = new Vector2(0f, 1f);
         ccRt.anchorMax = new Vector2(1f, 1f);
         ccRt.pivot = new Vector2(0.5f, 1f);
-        ccRt.anchoredPosition = new Vector2(0f, -135f);
+        ccRt.anchoredPosition = new Vector2(0f, -140f);
         ccRt.sizeDelta = new Vector2(-40f, 560f);
 
         Image ccImg = controlsCard.GetComponent<Image>();
@@ -435,26 +478,21 @@ public class SettingsUI : MonoBehaviour
         ccImg.color = new Color(0.04f, 0.06f, 0.10f, 0.92f);
         WhiteIconLoader.ApplyGothicFrame(controlsCard, new Color(0.35f, 0.55f, 0.75f, 0.55f), 0.45f);
 
-        // Title inside Card
-        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>TÙY CHỈNH NÚT CẢM ỨNG</b>", new Vector2(35f, -25f), new Vector2(1280f, 42f));
-        controlsCardTitle.fontSize = 24f;
-        controlsCardTitle.color = new Color(1f, 0.88f, 0.45f);
-
-        // Description inside Card - Tinh gọn 1 câu duy nhất, không xuống dòng
-        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Kéo thả phím di chuyển, đánh & lướt trực tiếp trên màn hình trận đấu.", new Vector2(35f, -75f), new Vector2(1280f, 36f));
-        controlsCardDesc.fontSize = 20f;
-        controlsCardDesc.color = new Color(0.82f, 0.88f, 0.95f, 0.9f);
+        // Hướng dẫn bên trong Card
+        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Kéo thả phím di chuyển, đánh & lướt trực tiếp trên màn hình trận đấu.", new Vector2(35f, -35f), new Vector2(1280f, 40f));
+        controlsCardDesc.fontSize = 22f;
+        controlsCardDesc.color = new Color(1f, 0.88f, 0.45f);
 
         // 2 Big Action Buttons inside Card - Đặt cách xa mô tả, không bao giờ bị đè text
-        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(35f, -140f), new Vector2(1280f, 75f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
-        customizeLayoutBtnText.fontSize = 22f;
+        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(35f, -105f), new Vector2(1280f, 85f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
+        customizeLayoutBtnText.fontSize = 24f;
 
-        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(35f, -245f), new Vector2(1280f, 70f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
-        resetControlsDefaultBtnText.fontSize = 20f;
+        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(35f, -225f), new Vector2(1280f, 80f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
+        resetControlsDefaultBtnText.fontSize = 22f;
 
         // Bottom Tip below Card
-        controlsCardTip = CreateLabel(controlsCard.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí các nút.</color></i>", new Vector2(35f, -360f), new Vector2(1280f, 40f));
-        controlsCardTip.fontSize = 18f;
+        controlsCardTip = CreateLabel(controlsCard.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí các nút.</color></i>", new Vector2(35f, -345f), new Vector2(1280f, 44f));
+        controlsCardTip.fontSize = 20f;
 
         // --- PAGE 3: GAME DATA & SYSTEM ---
         pageGameData = CreatePage(contentPanel.transform, "Page_GameData");
@@ -465,18 +503,18 @@ public class SettingsUI : MonoBehaviour
         pageDataSub.color = new Color(0.75f, 0.82f, 0.92f, 0.85f);
         SoulslikeHUDStyler.AddFiligreeDivider(pageGameData.transform, new Vector2(0f, -118f), new Vector2(1400f, 8f));
 
-        resetDataDesc = CreateLabel(pageGameData.transform, "ResetDesc", "Xóa toàn bộ dữ liệu lưu trữ để bắt đầu một hành trình mới:", new Vector2(35f, -145f), new Vector2(1150f, 34f));
+        resetDataDesc = CreateLabel(pageGameData.transform, "ResetDesc", "Xóa toàn bộ dữ liệu lưu trữ để bắt đầu một hành trình mới:", new Vector2(35f, -140f), new Vector2(1150f, 36f));
         resetDataDesc.fontSize = 22f;
-        resetDataButton = CreateStyledButton(pageGameData.transform, "Btn_ResetData", new Vector2(35f, -190f), new Vector2(1150f, 70f), new Color(0.38f, 0.14f, 0.16f), out resetDataBtnText);
-        resetDataBtnText.fontSize = 22f;
+        resetDataButton = CreateStyledButton(pageGameData.transform, "Btn_ResetData", new Vector2(35f, -190f), new Vector2(1150f, 75f), new Color(0.38f, 0.14f, 0.16f), out resetDataBtnText);
+        resetDataBtnText.fontSize = 24f;
 
-        mainMenuDesc = CreateLabel(pageGameData.transform, "MainMenuDesc", "Thoát khỏi màn chơi hiện tại và quay về sảnh chính:", new Vector2(35f, -295f), new Vector2(1150f, 34f));
+        mainMenuDesc = CreateLabel(pageGameData.transform, "MainMenuDesc", "Thoát khỏi màn chơi hiện tại và quay về sảnh chính:", new Vector2(35f, -295f), new Vector2(1150f, 36f));
         mainMenuDesc.fontSize = 22f;
-        mainMenuButton = CreateStyledButton(pageGameData.transform, "Btn_MainMenu", new Vector2(35f, -340f), new Vector2(1150f, 70f), new Color(0.2f, 0.25f, 0.35f), out mainMenuBtnText);
-        mainMenuBtnText.fontSize = 22f;
+        mainMenuButton = CreateStyledButton(pageGameData.transform, "Btn_MainMenu", new Vector2(35f, -345f), new Vector2(1150f, 75f), new Color(0.2f, 0.25f, 0.35f), out mainMenuBtnText);
+        mainMenuBtnText.fontSize = 24f;
 
-        offlineNoteText = CreateLabel(pageGameData.transform, "OfflineNote", "", new Vector2(35f, -445f), new Vector2(1150f, 50f));
-        offlineNoteText.fontSize = 19f;
+        offlineNoteText = CreateLabel(pageGameData.transform, "OfflineNote", "", new Vector2(35f, -455f), new Vector2(1150f, 55f));
+        offlineNoteText.fontSize = 20f;
 
         // 5. BOTTOM ROW: CLOSE BUTTON
         closeButton = CreateStyledButton(dialogBox.transform, "Btn_Close", Vector2.zero, new Vector2(520f, 75f), new Color(0.12f, 0.48f, 0.24f), out closeBtnText);

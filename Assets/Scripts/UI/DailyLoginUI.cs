@@ -157,8 +157,8 @@ public class DailyLoginUI : MonoBehaviour
         wRt.anchorMin = Vector2.zero;
         wRt.anchorMax = Vector2.one;
         wRt.pivot = new Vector2(0.5f, 0.5f);
-        wRt.offsetMin = new Vector2(30f, 20f);
-        wRt.offsetMax = new Vector2(-30f, -20f);
+        wRt.offsetMin = new Vector2(18f, 14f);
+        wRt.offsetMax = new Vector2(-18f, -14f);
         wRt.sizeDelta = Vector2.zero;
 
         Image winImg = win.GetComponent<Image>();
@@ -178,12 +178,12 @@ public class DailyLoginUI : MonoBehaviour
         tRt.anchorMin = new Vector2(0.5f, 1f);
         tRt.anchorMax = new Vector2(0.5f, 1f);
         tRt.pivot = new Vector2(0.5f, 1f);
-        tRt.anchoredPosition = new Vector2(0f, -20f);
+        tRt.anchoredPosition = new Vector2(0f, -18f);
         tRt.sizeDelta = new Vector2(1300f, 50f);
 
         var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
         tTmp.text = isVi ? "<b>ĐIỂM DANH TUẦN NHẬN LINH HỒN</b>" : "<b>WEEKLY SOUL ATTENDANCE</b>";
-        tTmp.fontSize = 36f;
+        tTmp.fontSize = 38f;
         tTmp.fontStyle = FontStyles.Bold;
         tTmp.color = new Color(1f, 0.88f, 0.45f);
         tTmp.alignment = TextAlignmentOptions.Center;
@@ -196,7 +196,7 @@ public class DailyLoginUI : MonoBehaviour
         stRt.anchorMin = new Vector2(0.5f, 1f);
         stRt.anchorMax = new Vector2(0.5f, 1f);
         stRt.pivot = new Vector2(0.5f, 1f);
-        stRt.anchoredPosition = new Vector2(0f, -72f);
+        stRt.anchoredPosition = new Vector2(0f, -68f);
         stRt.sizeDelta = new Vector2(1500f, 34f);
 
         var stTmp = subObj.AddComponent<TextMeshProUGUI>();
@@ -215,23 +215,23 @@ public class DailyLoginUI : MonoBehaviour
         cRt.anchorMin = new Vector2(1f, 1f);
         cRt.anchorMax = new Vector2(1f, 1f);
         cRt.pivot = new Vector2(1f, 1f);
-        cRt.anchoredPosition = new Vector2(-28f, -24f);
-        cRt.sizeDelta = new Vector2(62f, 62f);
+        cRt.anchoredPosition = new Vector2(-22f, -18f);
+        cRt.sizeDelta = new Vector2(72f, 72f);
 
         Image cImg = closeBtnObj.GetComponent<Image>();
         Sprite coreSpr = SoulslikeHUDStyler.GetActionButtonCoreSprite();
         if (coreSpr != null) cImg.sprite = coreSpr;
-        cImg.color = new Color(0.22f, 0.08f, 0.10f, 0.95f);
+        cImg.color = new Color(0.22f, 0.08f, 0.10f, 0.98f);
 
         // Viền Runic Ring vàng cổ cho nút Đóng
         GameObject cRingObj = new GameObject("CloseRing", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         cRingObj.transform.SetParent(closeBtnObj.transform, false);
         RectTransform crRt = cRingObj.GetComponent<RectTransform>();
-        crRt.anchorMin = new Vector2(0.5f, 0.5f);
-        crRt.anchorMax = new Vector2(0.5f, 0.5f);
+        crRt.anchorMin = Vector2.zero;
+        crRt.anchorMax = Vector2.one;
         crRt.pivot = new Vector2(0.5f, 0.5f);
         crRt.anchoredPosition = Vector2.zero;
-        crRt.sizeDelta = new Vector2(68f, 68f);
+        crRt.sizeDelta = Vector2.zero;
         Image crImg = cRingObj.GetComponent<Image>();
         crImg.sprite = SoulslikeHUDStyler.GetActionButtonRingSprite();
         crImg.color = new Color(0.92f, 0.78f, 0.42f, 0.95f);
@@ -245,10 +245,10 @@ public class DailyLoginUI : MonoBehaviour
         ciRt.anchorMax = new Vector2(0.5f, 0.5f);
         ciRt.pivot = new Vector2(0.5f, 0.5f);
         ciRt.anchoredPosition = Vector2.zero;
-        ciRt.sizeDelta = new Vector2(28f, 28f);
+        ciRt.sizeDelta = new Vector2(36f, 36f);
         Image ciImg = cIconObj.GetComponent<Image>();
         ciImg.sprite = WhiteIconLoader.GetSprite("Cross");
-        ciImg.color = new Color(1f, 0.92f, 0.80f);
+        ciImg.color = new Color(1f, 0.95f, 0.88f);
         ciImg.preserveAspect = true;
         ciImg.raycastTarget = false;
 
@@ -257,7 +257,7 @@ public class DailyLoginUI : MonoBehaviour
         closeBtn.onClick.AddListener(CloseUI);
 
         // Divider
-        SoulslikeHUDStyler.AddFiligreeDivider(win.transform, new Vector2(0f, -104f), new Vector2(1400f, 8f));
+        SoulslikeHUDStyler.AddFiligreeDivider(win.transform, new Vector2(0f, -100f), new Vector2(1600f, 8f));
 
         // Cards Container - Rộng rãi toàn màn hình
         GameObject cardsObj = new GameObject("CardsContainer", typeof(RectTransform));
@@ -266,8 +266,8 @@ public class DailyLoginUI : MonoBehaviour
         cdRt.anchorMin = new Vector2(0.5f, 0.5f);
         cdRt.anchorMax = new Vector2(0.5f, 0.5f);
         cdRt.pivot = new Vector2(0.5f, 0.5f);
-        cdRt.anchoredPosition = new Vector2(0f, 25f);
-        cdRt.sizeDelta = new Vector2(1780f, 540f);
+        cdRt.anchoredPosition = new Vector2(0f, 32f);
+        cdRt.sizeDelta = new Vector2(1820f, 620f);
 
         cardsContainer = cardsObj.transform;
 
@@ -278,11 +278,12 @@ public class DailyLoginUI : MonoBehaviour
         tmRt.anchorMin = new Vector2(0.5f, 0f);
         tmRt.anchorMax = new Vector2(0.5f, 0f);
         tmRt.pivot = new Vector2(0.5f, 0f);
-        tmRt.anchoredPosition = new Vector2(0f, 122f);
-        tmRt.sizeDelta = new Vector2(1200f, 38f);
+        tmRt.anchoredPosition = new Vector2(0f, 116f);
+        tmRt.sizeDelta = new Vector2(1400f, 38f);
 
         timerText = tmObj.AddComponent<TextMeshProUGUI>();
         timerText.fontSize = 24f;
+        timerText.fontStyle = FontStyles.Bold;
         timerText.alignment = TextAlignmentOptions.Center;
         SoulslikeHUDStyler.SetSafeOutline(timerText, 0.25f, Color.black);
 
@@ -294,8 +295,8 @@ public class DailyLoginUI : MonoBehaviour
         clRt.anchorMin = new Vector2(0.5f, 0f);
         clRt.anchorMax = new Vector2(0.5f, 0f);
         clRt.pivot = new Vector2(0.5f, 0f);
-        clRt.anchoredPosition = new Vector2(0f, 24f);
-        clRt.sizeDelta = new Vector2(740f, 88f);
+        clRt.anchoredPosition = new Vector2(0f, 20f);
+        clRt.sizeDelta = new Vector2(920f, 88f);
 
         Image clImg = claimBtnObj.GetComponent<Image>();
         clImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -312,7 +313,7 @@ public class DailyLoginUI : MonoBehaviour
         cltRt.sizeDelta = Vector2.zero;
 
         claimBtnText = clTxtObj.AddComponent<TextMeshProUGUI>();
-        claimBtnText.fontSize = 32f;
+        claimBtnText.fontSize = 34f;
         claimBtnText.fontStyle = FontStyles.Bold;
         claimBtnText.alignment = TextAlignmentOptions.Center;
         SoulslikeHUDStyler.SetSafeOutline(claimBtnText, 0.25f, Color.black);
@@ -338,10 +339,10 @@ public class DailyLoginUI : MonoBehaviour
             Destroy(cardsContainer.GetChild(i).gameObject);
         }
 
-        float cardW = 235f;
-        float cardH = 540f;
-        float spacing = 20f;
-        float startX = -((cardW * 6 + 255f + spacing * 6) * 0.5f) + cardW * 0.5f;
+        float cardW = 240f;
+        float cardH = 590f;
+        float spacing = 18f;
+        float startX = -((cardW * 6 + 265f + spacing * 6) * 0.5f) + cardW * 0.5f;
 
         for (int i = 0; i < 7; i++)
         {
@@ -357,8 +358,8 @@ public class DailyLoginUI : MonoBehaviour
             bool isMissed = isPastDay && !isClaimed;
             bool isAvailableToday = isToday && canClaim;
 
-            float curW = isDay7 ? 255f : cardW;
-            float curH = isDay7 ? 560f : cardH;
+            float curW = isDay7 ? 265f : cardW;
+            float curH = isDay7 ? 610f : cardH;
             float posX = startX + i * (cardW + spacing) + (isDay7 ? 10f : 0f);
 
             GameObject card = new GameObject("Card_Day" + (i + 1), typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -383,7 +384,7 @@ public class DailyLoginUI : MonoBehaviour
                 cardImg.color = new Color(0.08f, 0.18f, 0.24f, 0.98f);
                 outline.effectColor = new Color(0.35f, 0.95f, 0.85f, 0.95f);
                 outline.effectDistance = new Vector2(2f, -2f);
-                card.transform.localScale = Vector3.one * 1.04f;
+                card.transform.localScale = Vector3.one * 1.03f;
             }
             else if (isClaimed)
             {
@@ -402,7 +403,7 @@ public class DailyLoginUI : MonoBehaviour
                 // Thẻ Chủ Nhật - Hoàng Kim Tối Thượng
                 cardImg.color = new Color(0.18f, 0.12f, 0.04f, 0.98f);
                 outline.effectColor = new Color(1f, 0.85f, 0.30f, 0.95f);
-                outline.effectDistance = new Vector2(2f, -2f);
+                outline.effectDistance = new Vector2(2.5f, -2.5f);
             }
             else // Future day bình thường
             {
@@ -418,15 +419,16 @@ public class DailyLoginUI : MonoBehaviour
             thRt.anchorMin = new Vector2(0.5f, 1f);
             thRt.anchorMax = new Vector2(0.5f, 1f);
             thRt.pivot = new Vector2(0.5f, 1f);
-            thRt.anchoredPosition = new Vector2(0f, -14f);
-            thRt.sizeDelta = new Vector2(curW - 10f, 38f);
+            thRt.anchoredPosition = new Vector2(0f, -16f);
+            thRt.sizeDelta = new Vector2(curW - 10f, 44f);
 
             var thTmp = topObj.AddComponent<TextMeshProUGUI>();
             string dayLabel = isVi ? DAY_NAMES_VI[i] : DAY_NAMES_EN[i];
             thTmp.text = $"<b>{dayLabel} (N{i + 1})</b>";
-            thTmp.fontSize = isDay7 ? 24f : 22f;
+            thTmp.fontSize = isDay7 ? 28f : 25f;
+            thTmp.fontStyle = FontStyles.Bold;
             thTmp.alignment = TextAlignmentOptions.Center;
-            thTmp.color = isDay7 ? new Color(1f, 0.90f, 0.45f) : (isAvailableToday ? new Color(0.4f, 0.95f, 1f) : new Color(0.75f, 0.82f, 0.90f));
+            thTmp.color = isDay7 ? new Color(1f, 0.90f, 0.45f) : (isAvailableToday ? new Color(0.4f, 0.95f, 1f) : new Color(0.80f, 0.86f, 0.94f));
             SoulslikeHUDStyler.SetSafeOutline(thTmp, 0.25f, Color.black);
 
             // 2. Icon Phần Thưởng Đồ Họa Đẳng Cấp
@@ -464,15 +466,15 @@ public class DailyLoginUI : MonoBehaviour
                     break;
             }
 
-            // Khung Icon Slot
+            // Khung Icon Slot - Siêu To Lớn & Rực Rỡ
             GameObject iconBoxObj = new GameObject("RewardSlot", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             iconBoxObj.transform.SetParent(card.transform, false);
             RectTransform ibRt = iconBoxObj.GetComponent<RectTransform>();
             ibRt.anchorMin = new Vector2(0.5f, 0.5f);
             ibRt.anchorMax = new Vector2(0.5f, 0.5f);
             ibRt.pivot = new Vector2(0.5f, 0.5f);
-            ibRt.anchoredPosition = new Vector2(0f, 60f);
-            float ibSize = isDay7 ? 140f : 125f;
+            ibRt.anchoredPosition = new Vector2(0f, 75f);
+            float ibSize = isDay7 ? 175f : 155f;
             ibRt.sizeDelta = new Vector2(ibSize, ibSize);
 
             Image ibImg = iconBoxObj.GetComponent<Image>();
@@ -488,7 +490,7 @@ public class DailyLoginUI : MonoBehaviour
             icRt.anchorMax = new Vector2(0.5f, 0.5f);
             icRt.pivot = new Vector2(0.5f, 0.5f);
             icRt.anchoredPosition = Vector2.zero;
-            float icSize = isDay7 ? 100f : 88f;
+            float icSize = isDay7 ? 135f : 118f;
             icRt.sizeDelta = new Vector2(icSize, icSize);
 
             Image icImg = icObj.GetComponent<Image>();
@@ -497,33 +499,33 @@ public class DailyLoginUI : MonoBehaviour
             if (rewardSpr != null) icImg.sprite = rewardSpr;
             icImg.color = isMissed ? new Color(0.5f, 0.5f, 0.5f, 0.5f) : iconColor;
 
-            // 3. Số Lượng Linh Hồn ở Giữa
+            // 3. Số Lượng Linh Hồn ở Giữa (To Rõ Nhìn Xa Vẫn Đọc Được)
             GameObject rwObj = new GameObject("RewardText", typeof(RectTransform), typeof(CanvasRenderer));
             rwObj.transform.SetParent(card.transform, false);
             RectTransform rwRt = rwObj.GetComponent<RectTransform>();
             rwRt.anchorMin = new Vector2(0.5f, 0.5f);
             rwRt.anchorMax = new Vector2(0.5f, 0.5f);
             rwRt.pivot = new Vector2(0.5f, 0.5f);
-            rwRt.anchoredPosition = new Vector2(0f, -52f);
-            rwRt.sizeDelta = new Vector2(curW - 10f, 75f);
+            rwRt.anchoredPosition = new Vector2(0f, -48f);
+            rwRt.sizeDelta = new Vector2(curW - 10f, 90f);
 
             var rwTmp = rwObj.AddComponent<TextMeshProUGUI>();
-            rwTmp.text = $"<b>+{REWARDS[i]:N0}</b>\n<size=22>{(isVi ? "LINH HỒN" : "SOULS")}</size>";
-            rwTmp.fontSize = isDay7 ? 32f : 28f;
+            rwTmp.text = $"<b>+{REWARDS[i]:N0}</b>\n<size=24>{(isVi ? "LINH HỒN" : "SOULS")}</size>";
+            rwTmp.fontSize = isDay7 ? 36f : 30f;
             rwTmp.fontStyle = FontStyles.Bold;
             rwTmp.alignment = TextAlignmentOptions.Center;
             rwTmp.color = isDay7 ? new Color(1f, 0.88f, 0.35f) : (isMissed ? new Color(0.6f, 0.5f, 0.5f) : Color.white);
             SoulslikeHUDStyler.SetSafeOutline(rwTmp, 0.25f, Color.black);
 
-            // 4. Huy Hiệu Trạng Thái ở Chân Thẻ
+            // 4. Huy Hiệu Trạng Thái ở Chân Thẻ (Đầy Đặn & Rõ Nét)
             GameObject stObj = new GameObject("StatusBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             stObj.transform.SetParent(card.transform, false);
             RectTransform stRt = stObj.GetComponent<RectTransform>();
             stRt.anchorMin = new Vector2(0.5f, 0f);
             stRt.anchorMax = new Vector2(0.5f, 0f);
             stRt.pivot = new Vector2(0.5f, 0f);
-            stRt.anchoredPosition = new Vector2(0f, 16f);
-            stRt.sizeDelta = new Vector2(curW - 16f, 54f);
+            stRt.anchoredPosition = new Vector2(0f, 18f);
+            stRt.sizeDelta = new Vector2(curW - 14f, 62f);
 
             Image stImg = stObj.GetComponent<Image>();
             Sprite stBgSpr = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -538,7 +540,7 @@ public class DailyLoginUI : MonoBehaviour
             sttRt.sizeDelta = Vector2.zero;
 
             var stTmp = stTxtObj.AddComponent<TextMeshProUGUI>();
-            stTmp.fontSize = 24f;
+            stTmp.fontSize = 25f;
             stTmp.fontStyle = FontStyles.Bold;
             stTmp.alignment = TextAlignmentOptions.Center;
             SoulslikeHUDStyler.SetSafeOutline(stTmp, 0.25f, Color.black);
