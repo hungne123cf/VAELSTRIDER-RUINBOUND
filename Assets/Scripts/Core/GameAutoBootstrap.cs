@@ -94,6 +94,12 @@ public class GameAutoBootstrap : MonoBehaviour
             FrostfallBlizzardHazardManager.EnsureManager();
             MultiPathMapExpansionBuilder.EnsureExpandedMap();
             SurroundingWaterOceanSystem.EnsureWaterSystem();
+
+            // Áp dụng chuẩn Typography Dreams Unwound cho toàn bộ UI
+            GameFontManager.EnsureInitialized();
+            var allCanvasesM2 = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var c in allCanvasesM2) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
+
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 2 (Valley Ruin)! Đã khởi tạo Hệ thống Level Farm & Lõi TFT cùng hiệu ứng nguyên tố.");
             return;
         }
@@ -135,6 +141,12 @@ public class GameAutoBootstrap : MonoBehaviour
             FrostfallBlizzardHazardManager.EnsureManager();
             MultiPathMapExpansionBuilder.EnsureExpandedMap();
             SurroundingWaterOceanSystem.EnsureWaterSystem();
+
+            // Áp dụng chuẩn Typography Dreams Unwound cho toàn bộ UI
+            GameFontManager.EnsureInitialized();
+            var allCanvasesM3 = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var c in allCanvasesM3) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
+
             // Map 3 hoan toan do Map3WaveSpawner quan ly (Goblin, Skeleton, Slime, Skeleton King Boss)
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Forgotten Memories)! Tải toàn diện hệ thống Map 3.");
             return;
@@ -210,13 +222,10 @@ public class GameAutoBootstrap : MonoBehaviour
         FrostfallBlizzardHazardManager.EnsureManager();
         SurroundingWaterOceanSystem.EnsureWaterSystem();
 
-        // 11. Áp dụng chuẩn Typography Dark Fantasy (Cinzel cho Header/Boss, Be Vietnam Pro cho UI/Stats)
+        // 11. Áp dụng chuẩn Typography Dreams Unwound cho toàn bộ UI
         GameFontManager.EnsureInitialized();
-        Canvas mainCanvas = GetMainGameplayCanvas();
-        if (mainCanvas != null)
-        {
-            GameFontManager.ApplyFontsGlobally(mainCanvas.gameObject);
-        }
+        var allCanvasesM1 = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var c in allCanvasesM1) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
 
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
     }

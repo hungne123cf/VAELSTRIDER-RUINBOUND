@@ -543,8 +543,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.down; // Sóng vỗ từ trên xuống bờ
                 edgeStart = new Vector2(seg.startCoord, boundaryY);
                 edgeEnd = new Vector2(seg.endCoord, boundaryY);
-                // Bờ Bắc: Nước ở phía trên boundaryY. Đặt collider lùi lên trên (+0.35f) để người chơi có thể chạm sát bờ/tường tự nhiên, không bị cản từ xa
-                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY + 1.35f), new Vector2(length, 2.0f));
+                // Bờ Bắc: Nước ở phía trên boundaryY. Đặt collider nằm hoàn toàn ngoài vùng nước (từ boundaryY trở lên) để người chơi chạm sát chân tường tự nhiên
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY + 1.0f), new Vector2(length, 2.0f));
             }
             else if (seg.dir == ShoreDir.South)
             {
@@ -559,8 +559,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.up; // Sóng vỗ từ dưới lên bờ
                 edgeStart = new Vector2(seg.startCoord, boundaryY);
                 edgeEnd = new Vector2(seg.endCoord, boundaryY);
-                // Bờ Nam: Nước ở phía dưới boundaryY. Đặt collider dâng lên +0.35f để chân nhân vật đứng chắc chắn trên mặt sàn đá, không bị lố đè lên bờ đá/tường
-                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY - 0.65f), new Vector2(length, 2.0f));
+                // Bờ Nam: Nước ở phía dưới boundaryY. Collider nằm hoàn toàn dưới mép sàn đá (từ boundaryY trở xuống), giúp người chơi đi sát tới mép tường mà không bị chặn từ xa
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY - 1.0f), new Vector2(length, 2.0f));
             }
             else if (seg.dir == ShoreDir.East)
             {

@@ -81,3 +81,4 @@ public class AdaptiveCameraAspect : MonoBehaviour
         return comp;
     }
 }
+

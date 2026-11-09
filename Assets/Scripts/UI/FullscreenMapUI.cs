@@ -299,9 +299,62 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
                 roomVisuals.Add(rObj);
             }
         }
+        else if (sceneName.Contains("Map2") || sceneName.Contains("Valley"))
+        {
+            // 2. Map 2 (Thung Lũng Cổ Xưa) - Hiển thị 5 Khu Vực Chiến Thuật & Hành Lang Liên Thông
+            var map2Zones = new (string titleVN, string titleEN, Vector2 center, Vector2 size, Color color)[]
+            {
+                ("KHU TRUNG TÂM", "STARTING SANCTUARY", new Vector2(0f, 0f), new Vector2(38f, 26f), new Color(0.18f, 0.45f, 0.70f, 0.35f)),
+                ("HÀNH LANG NAM", "SOUTH PASSAGE", new Vector2(0f, -16.5f), new Vector2(8f, 7f), new Color(0.15f, 0.25f, 0.40f, 0.30f)),
+                ("PHÒNG QUÁI NAM", "SOUTH TRIAL CHAMBER", new Vector2(0f, -28f), new Vector2(24f, 16f), new Color(0.60f, 0.22f, 0.18f, 0.35f)),
+                ("LỐI VÀO ĐẠI ĐIỆN", "SANCTUM GATE", new Vector2(0f, -39f), new Vector2(8f, 6f), new Color(0.15f, 0.25f, 0.40f, 0.30f)),
+                ("ĐẠI ĐIỆN GOR'MOK", "GOR'MOK LAIR [BOSS]", new Vector2(0f, -53f), new Vector2(28f, 22f), new Color(0.75f, 0.15f, 0.20f, 0.45f)),
+                ("HÀNH LANG ĐÔNG", "EAST PASSAGE", new Vector2(22.5f, 0f), new Vector2(7f, 8f), new Color(0.15f, 0.25f, 0.40f, 0.30f)),
+                ("PHÒNG QUÁI ĐÔNG", "EAST BATTLE ROOM", new Vector2(35f, 0f), new Vector2(18f, 20f), new Color(0.60f, 0.22f, 0.18f, 0.35f)),
+                ("LỐI QUA BÓNG MA", "SHADOW GATEWAY", new Vector2(47f, 0f), new Vector2(6f, 8f), new Color(0.15f, 0.25f, 0.40f, 0.30f)),
+                ("SÀN ĐẤU BÓNG MA", "SHADOW DOPPELGANGER [BOSS]", new Vector2(62f, 0f), new Vector2(24f, 24f), new Color(0.55f, 0.15f, 0.65f, 0.45f))
+            };
+
+            foreach (var zone in map2Zones)
+            {
+                GameObject rObj = new GameObject($"Zone_{zone.titleEN}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                rObj.layer = 5;
+                rObj.transform.SetParent(roomsContainerRt, false);
+
+                RectTransform rRt = rObj.GetComponent<RectTransform>();
+                rRt.anchoredPosition = zone.center * MAP_SCALE;
+                rRt.sizeDelta = zone.size * MAP_SCALE;
+
+                Image rImg = rObj.GetComponent<Image>();
+                rImg.sprite = squareBorderSprite;
+                rImg.type = Image.Type.Sliced;
+                rImg.color = zone.color;
+
+                if (zone.size.x >= 15f && zone.size.y >= 12f)
+                {
+                    GameObject labelObj = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer));
+                    labelObj.layer = 5;
+                    labelObj.transform.SetParent(rObj.transform, false);
+                    RectTransform lblRt = labelObj.GetComponent<RectTransform>();
+                    lblRt.anchorMin = new Vector2(0.5f, 1f);
+                    lblRt.anchorMax = new Vector2(0.5f, 1f);
+                    lblRt.pivot = new Vector2(0.5f, 1f);
+                    lblRt.anchoredPosition = new Vector2(0f, -6f);
+                    lblRt.sizeDelta = new Vector2(zone.size.x * MAP_SCALE * 0.95f, 26f);
+
+                    var tmp = labelObj.AddComponent<TextMeshProUGUI>();
+                    tmp.text = $"<b>{LocalizationManager.T(zone.titleVN, zone.titleEN)}</b>";
+                    tmp.fontSize = 11.5f;
+                    tmp.alignment = TextAlignmentOptions.Center;
+                    tmp.color = new Color(1f, 0.92f, 0.65f, 0.90f);
+                }
+
+                roomVisuals.Add(rObj);
+            }
+        }
         else
         {
-            // 2. Với Map 2 (Thung Lũng) hoặc Map 3 (Ký Ức) - Tạo khung đại sảnh
+            // 3. Với các Map đấu trường khác - Tạo khung đại sảnh chuẩn
             GameObject arenaObj = new GameObject("ArenaVisual", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             arenaObj.layer = 5;
             arenaObj.transform.SetParent(roomsContainerRt, false);

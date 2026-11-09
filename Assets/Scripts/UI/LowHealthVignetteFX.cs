@@ -14,8 +14,8 @@ public class LowHealthVignetteFX : MonoBehaviour
     public static LowHealthVignetteFX Instance { get; private set; }
 
     [Header("Health Thresholds")]
-    [Range(0.1f, 0.5f)] public float lowHealthThreshold = 0.30f;
-    [Range(0.05f, 0.2f)] public float criticalHealthThreshold = 0.15f;
+    [Range(0.2f, 0.6f)] public float lowHealthThreshold = 0.50f; // Kích hoạt từ 50% máu trở xuống để người chơi lập tức nhận biết
+    [Range(0.05f, 0.3f)] public float criticalHealthThreshold = 0.25f; // Báo động khẩn cấp khi dưới 25% máu
 
     [Header("Visual Components")]
     private Image vignetteImage;
@@ -44,6 +44,11 @@ public class LowHealthVignetteFX : MonoBehaviour
         Instance = this;
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     void Start()
     {
         FindPlayerHealth();
@@ -52,6 +57,23 @@ public class LowHealthVignetteFX : MonoBehaviour
 
     void Update()
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Phím tắt TEST nhanh: Bấm H hoặc K để tự trừ máu xuống 20 HP và xem ngay hiệu ứng đập đỏ!
+        if (Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.K))
+        {
+            if (playerHealth != null)
+            {
+                int targetHp = Mathf.Max(15, (int)(playerHealth.MaxHealth * 0.20f));
+                int dmg = playerHealth.CurrentHealth - targetHp;
+                if (dmg > 0)
+                {
+                    playerHealth.TakeDamage(dmg);
+                    Debug.Log($"<color=red>[LowHealthVignetteFX TEST]</color> Đã trừ {dmg} HP! Máu hiện tại: {playerHealth.CurrentHealth}/{playerHealth.MaxHealth} ({(float)playerHealth.CurrentHealth / playerHealth.MaxHealth * 100:F0}%). Viền đỏ bắt đầu đập theo nhịp tim!");
+                }
+            }
+        }
+#endif
+
         if (playerHealth == null)
         {
             FindPlayerHealth();
@@ -76,7 +98,7 @@ public class LowHealthVignetteFX : MonoBehaviour
 
         if (hpPercent < lowHealthThreshold)
         {
-            // Tỷ lệ nguy hiểm từ 0.0 (sát tử) đến 1.0 (vừa chạm 30%)
+            // Tỷ lệ nguy hiểm từ 0.0 (vừa chạm 50%) đến 1.0 (sát tử 0%)
             float dangerFactor = 1f - Mathf.Clamp01(hpPercent / lowHealthThreshold);
 
             // Tần số nhịp tim: Máu càng thấp tim đập càng nhanh (3.5 Hz -> 8.5 Hz)
@@ -85,14 +107,14 @@ public class LowHealthVignetteFX : MonoBehaviour
 
             // Xung nhịp tim kép (Double beat thump: Lub-Dub)
             float rawSin = Mathf.Sin(pulseTimer);
-            float pulseWave = Mathf.Pow(Mathf.Clamp01(rawSin), 2.5f);
+            float pulseWave = Mathf.Pow(Mathf.Clamp01(rawSin), 2.0f);
 
-            // Độ đậm viền đỏ: dao động nhấp nháy theo nhịp
-            float minAlpha = Mathf.Lerp(0.12f, 0.40f, dangerFactor);
-            float maxAlpha = Mathf.Lerp(0.38f, 0.85f, dangerFactor);
+            // Độ đậm viền đỏ: dao động nhấp nháy rõ nét theo nhịp đập
+            float minAlpha = Mathf.Lerp(0.32f, 0.60f, dangerFactor);
+            float maxAlpha = Mathf.Lerp(0.65f, 0.98f, dangerFactor);
             float targetAlpha = Mathf.Lerp(minAlpha, maxAlpha, pulseWave);
 
-            currentAlpha = Mathf.MoveTowards(currentAlpha, targetAlpha, Time.deltaTime * 5f);
+            currentAlpha = Mathf.MoveTowards(currentAlpha, targetAlpha, Time.deltaTime * 6f);
 
             // Âm thanh nhịp tim thình thịch
             if (hpPercent < criticalHealthThreshold && Time.time >= nextHeartbeatTime)
@@ -104,8 +126,8 @@ public class LowHealthVignetteFX : MonoBehaviour
         }
         else
         {
-            // Máu an toàn (> 30%): Mờ dần êm ái
-            currentAlpha = Mathf.MoveTowards(currentAlpha, 0f, Time.deltaTime * 2.5f);
+            // Máu an toàn (> 50%): Mờ dần êm ái
+            currentAlpha = Mathf.MoveTowards(currentAlpha, 0f, Time.deltaTime * 3.0f);
         }
 
         // Cập nhật màu sắc viền màn hình
@@ -113,23 +135,23 @@ public class LowHealthVignetteFX : MonoBehaviour
         {
             if (currentAlpha > 0.001f)
             {
-                if (!vignetteImage.gameObject.activeSelf) vignetteImage.gameObject.SetActive(true);
-                // Đỏ thẫm máu Dark Fantasy (Crimson Red)
-                vignetteImage.color = new Color(0.85f, 0.04f, 0.04f, currentAlpha);
+                if (!vignetteImage.enabled) vignetteImage.enabled = true;
+                // Đỏ thẫm máu Dark Fantasy đậm đà (Crimson Blood Red)
+                vignetteImage.color = new Color(0.92f, 0.02f, 0.04f, currentAlpha);
             }
             else
             {
-                if (vignetteImage.gameObject.activeSelf) vignetteImage.gameObject.SetActive(false);
+                if (vignetteImage.enabled) vignetteImage.enabled = false;
             }
         }
     }
 
     private void FadeOutDirect()
     {
-        currentAlpha = Mathf.MoveTowards(currentAlpha, 0f, Time.deltaTime * 3.5f);
-        if (vignetteImage != null && currentAlpha <= 0.001f && vignetteImage.gameObject.activeSelf)
+        currentAlpha = Mathf.MoveTowards(currentAlpha, 0f, Time.deltaTime * 4.0f);
+        if (vignetteImage != null && currentAlpha <= 0.001f && vignetteImage.enabled)
         {
-            vignetteImage.gameObject.SetActive(false);
+            vignetteImage.enabled = false;
         }
     }
 
@@ -206,27 +228,27 @@ public class LowHealthVignetteFX : MonoBehaviour
         tex.filterMode = FilterMode.Bilinear;
 
         Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
-        float maxDist = center.x * 1.4142f; // Tính tới 4 góc
 
         for (int y = 0; y < size; y++)
         {
             for (int x = 0; x < size; x++)
             {
-                // Khoảng cách normalized từ tâm (0 ở tâm, 1 ở 4 góc)
+                // Khoảng cách normalized từ tâm (0 ở tâm, 1 ở mép viền, 1.414 ở 4 góc)
                 float dx = (x - center.x) / center.x;
                 float dy = (y - center.y) / center.y;
                 float d = Mathf.Sqrt(dx * dx + dy * dy);
 
-                // Trong tâm (d < 0.45) trong suốt hoàn toàn, viền ngoài chuyển mịn sang đậm
-                if (d < 0.45f)
+                // Tâm màn hình (d < 0.25): trong suốt hoàn toàn để người chơi quan sát nhân vật
+                // Từ 0.25 đến 0.95: tăng dần độ đỏ máu lên cực đại 1.0 ở rìa
+                if (d < 0.25f)
                 {
                     tex.SetPixel(x, y, Color.clear);
                 }
                 else
                 {
-                    float factor = Mathf.Clamp01((d - 0.45f) / 0.85f);
-                    // Đường cong mượt mà quadratic
-                    float alpha = factor * factor;
+                    float factor = Mathf.Clamp01((d - 0.25f) / 0.70f);
+                    // Đường cong mượt mà Hermite SmoothStep đạt 1.0 tại rìa mép
+                    float alpha = Mathf.SmoothStep(0f, 1f, factor);
                     tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
                 }
             }
@@ -262,8 +284,8 @@ public class LowHealthVignetteFX : MonoBehaviour
         GameObject vigObj = new GameObject("LowHealthVignette_Overlay", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         vigObj.layer = 5;
         vigObj.transform.SetParent(rootCanvas.transform, false);
-        // Đặt ở lớp thấp trong Canvas để không đè lên các nút tương tác
-        vigObj.transform.SetSiblingIndex(0);
+        // Đặt ở lớp hiển thị trên cùng (nhưng raycastTarget = false nên không cản trở nút bấm/joystick)
+        vigObj.transform.SetAsLastSibling();
 
         RectTransform rt = vigObj.GetComponent<RectTransform>();
         rt.anchorMin = Vector2.zero;
@@ -274,9 +296,11 @@ public class LowHealthVignetteFX : MonoBehaviour
         Image img = vigObj.GetComponent<Image>();
         img.sprite = GetRadialVignetteSprite();
         img.type = Image.Type.Simple;
-        img.color = new Color(0.85f, 0.04f, 0.04f, 0f);
+        img.color = new Color(0.88f, 0.03f, 0.03f, 0f);
         img.raycastTarget = false; // Tuyệt đối không chặn tương tác chạm
-        vigObj.SetActive(false);
+        img.enabled = false; // Tắt renderer khi chưa kích hoạt để 0 draw calls
+
+        vigObj.SetActive(true); // Luôn bật để Update() theo dõi máu nhân vật liên tục!
 
         var fx = vigObj.AddComponent<LowHealthVignetteFX>();
         fx.vignetteImage = img;
@@ -286,3 +310,4 @@ public class LowHealthVignetteFX : MonoBehaviour
         return fx;
     }
 }
+

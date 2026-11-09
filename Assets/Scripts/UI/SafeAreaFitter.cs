@@ -83,3 +83,4 @@ public class SafeAreaFitter : MonoBehaviour
         return fitter;
     }
 }
+
