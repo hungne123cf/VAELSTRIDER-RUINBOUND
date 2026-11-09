@@ -694,10 +694,6 @@ public static class SoulslikeHUDStyler
             SetSafeOutline(subtitle, 0.10f, new Color(0.02f, 0.02f, 0.04f, 0.90f));
         }
     }
-            subtitle.color = new Color(0.80f, 0.82f, 0.88f, 0.85f); // Bạc cổ
-            SetSafeOutline(subtitle, 0.25f, new Color(0.02f, 0.02f, 0.04f, 0.90f));
-        }
-    }
 
     public static void StyleModalWindow(Transform window)
     {
