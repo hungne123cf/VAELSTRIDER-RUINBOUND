@@ -101,6 +101,15 @@ public class MailboxUI : MonoBehaviour
     // INITIALIZATION & DATA
     // =========================================================================
 
+    private static Sprite _cachedMailIcon;
+    public static Sprite GetMailIconSprite()
+    {
+        if (_cachedMailIcon != null) return _cachedMailIcon;
+        _cachedMailIcon = Resources.Load<Sprite>("UI/icon_mail");
+        if (_cachedMailIcon == null) _cachedMailIcon = SoulslikeHUDStyler.GetAmberFillSprite();
+        return _cachedMailIcon;
+    }
+
     public static void InitializeDefaultMails()
     {
         _mails.Clear();
@@ -400,9 +409,7 @@ public class MailboxUI : MonoBehaviour
         iRt.sizeDelta = new Vector2(38f, 38f);
 
         Image iImg = iconObj.GetComponent<Image>();
-        Sprite mailIcon = Resources.Load<Sprite>("UI/icon_mail");
-        if (mailIcon == null) mailIcon = SoulslikeHUDStyler.GetAmberFillSprite();
-        iImg.sprite = mailIcon;
+        iImg.sprite = GetMailIconSprite();
         iImg.color = new Color(1f, 0.88f, 0.45f);
 
         // Title Text
@@ -1031,7 +1038,7 @@ public class MailboxUI : MonoBehaviour
         esiRt.sizeDelta = new Vector2(80f, 80f);
 
         Image esiImg = esIconObj.GetComponent<Image>();
-        esiImg.sprite = mailIcon;
+        esiImg.sprite = GetMailIconSprite();
         esiImg.color = new Color(1f, 0.85f, 0.40f, 0.35f);
 
         // Empty State Title
@@ -1186,9 +1193,7 @@ public class MailboxUI : MonoBehaviour
             icRt.sizeDelta = new Vector2(40f, 40f);
 
             Image icImg = iconObj.GetComponent<Image>();
-            Sprite mailIco = Resources.Load<Sprite>("UI/icon_mail");
-            if (mailIco == null) mailIco = SoulslikeHUDStyler.GetAmberFillSprite();
-            icImg.sprite = mailIco;
+            icImg.sprite = GetMailIconSprite();
             icImg.color = isClaimed ? new Color(0.55f, 0.65f, 0.75f, 0.7f) : new Color(1f, 0.88f, 0.45f);
 
             // Card Title
