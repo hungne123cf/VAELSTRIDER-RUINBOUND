@@ -290,18 +290,19 @@ public class MailboxUI : MonoBehaviour
         if (_mails.Count == 0) InitializeDefaultMails();
         bool isVi = LocalizationManager.IsVietnamese;
 
-        // --- MODAL WINDOW (1160 x 640px) ---
+        // --- MODAL WINDOW - Phóng to toàn màn hình sát viền an toàn ---
         GameObject win = new GameObject("Window", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         win.layer = 5;
         win.transform.SetParent(transform, false);
 
         RectTransform wRt = win.GetComponent<RectTransform>();
         modalWindowRect = wRt;
-        wRt.anchorMin = new Vector2(0.5f, 0.5f);
-        wRt.anchorMax = new Vector2(0.5f, 0.5f);
+        wRt.anchorMin = Vector2.zero;
+        wRt.anchorMax = Vector2.one;
         wRt.pivot = new Vector2(0.5f, 0.5f);
-        wRt.anchoredPosition = Vector2.zero;
-        wRt.sizeDelta = new Vector2(1840f, 1020f);
+        wRt.offsetMin = new Vector2(30f, 20f);
+        wRt.offsetMax = new Vector2(-30f, -20f);
+        wRt.sizeDelta = Vector2.zero;
 
         Image winImg = win.GetComponent<Image>();
         winImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -527,9 +528,11 @@ public class MailboxUI : MonoBehaviour
 
         textComp = tTxtObj.AddComponent<TextMeshProUGUI>();
         textComp.text = label;
-        textComp.fontSize = 13.5f;
+        textComp.fontSize = 20f;
+        textComp.fontStyle = FontStyles.Bold;
         textComp.alignment = TextAlignmentOptions.Center;
         textComp.color = new Color(0.75f, 0.82f, 0.92f);
+        SoulslikeHUDStyler.SetSafeOutline(textComp, 0.2f, Color.black);
 
         // Red notification dot
         GameObject rdObj = new GameObject("RedDot", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -1102,7 +1105,7 @@ public class MailboxUI : MonoBehaviour
         rsttRt.anchorMax = Vector2.one;
         rsttRt.sizeDelta = Vector2.zero;
         var rsttTmp = rsttObj.AddComponent<TextMeshProUGUI>();
-        rsttTmp.text = isVi ? "<b>↺ KHÔI PHỤC THƯ MẪU</b>" : "<b>↺ RESTORE MAILS</b>";
+        rsttTmp.text = isVi ? "<b>[KHÔI PHỤC THƯ MẪU]</b>" : "<b>[RESTORE MAILS]</b>";
         rsttTmp.fontSize = 20f;
         rsttTmp.alignment = TextAlignmentOptions.Center;
         rsttTmp.color = Color.white;
@@ -1962,7 +1965,7 @@ public class MailboxUI : MonoBehaviour
         kbtRt.anchorMax = Vector2.one;
         kbtRt.sizeDelta = Vector2.zero;
         var kbtTmp = kbtObj.AddComponent<TextMeshProUGUI>();
-        kbtTmp.text = isVi ? "<b>⌨ PHÍM</b>" : "<b>⌨ KEYBD</b>";
+        kbtTmp.text = isVi ? "<b>BÀN PHÍM</b>" : "<b>KEYBOARD</b>";
         kbtTmp.fontSize = 18f;
         kbtTmp.alignment = TextAlignmentOptions.Center;
         kbtTmp.color = new Color(0.9f, 0.85f, 1f);

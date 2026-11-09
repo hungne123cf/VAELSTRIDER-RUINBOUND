@@ -283,16 +283,18 @@ public class SettingsUI : MonoBehaviour
             }
         }
 
-        // 1. Center Dialog Box - Phóng to toàn màn hình (Fullscreen Responsive 96% màn hình)
+        // 1. Center Dialog Box - Phóng to toàn màn hình (Fullscreen Responsive sát viền an toàn)
         dialogBox = new GameObject("DialogBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         dialogBox.layer = 5;
         dialogBox.transform.SetParent(transform, false);
 
         RectTransform boxRt = dialogBox.GetComponent<RectTransform>();
-        boxRt.anchorMin = new Vector2(0.5f, 0.5f);
-        boxRt.anchorMax = new Vector2(0.5f, 0.5f);
+        boxRt.anchorMin = Vector2.zero;
+        boxRt.anchorMax = Vector2.one;
         boxRt.pivot = new Vector2(0.5f, 0.5f);
-        boxRt.sizeDelta = new Vector2(1840f, 1020f);
+        boxRt.offsetMin = new Vector2(30f, 20f);
+        boxRt.offsetMax = new Vector2(-30f, -20f);
+        boxRt.sizeDelta = Vector2.zero;
 
         Image boxImg = dialogBox.GetComponent<Image>();
         boxImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -307,15 +309,16 @@ public class SettingsUI : MonoBehaviour
         titleRt.anchorMin = new Vector2(0f, 1f);
         titleRt.anchorMax = new Vector2(1f, 1f);
         titleRt.pivot = new Vector2(0.5f, 1f);
-        titleRt.anchoredPosition = new Vector2(0f, -22f);
+        titleRt.anchoredPosition = new Vector2(0f, -20f);
         titleRt.sizeDelta = new Vector2(0f, 48f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
-        titleText.fontSize = 34;
+        titleText.fontSize = 36f;
         titleText.fontStyle = FontStyles.Bold;
         titleText.alignment = TextAlignmentOptions.Center;
         titleText.color = new Color(0.98f, 0.88f, 0.55f);
         titleText.text = "<b>CÀI ĐẶT HỆ THỐNG</b>";
+        SoulslikeHUDStyler.SetSafeOutline(titleText, 0.25f, Color.black);
 
         GameObject subObj = new GameObject("SubtitleText", typeof(RectTransform), typeof(CanvasRenderer));
         subObj.transform.SetParent(dialogBox.transform, false);
@@ -332,7 +335,7 @@ public class SettingsUI : MonoBehaviour
         subtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
         subtitleText.text = LocalizationManager.IsVietnamese ? "Âm thanh, Điều khiển & Dữ liệu trò chơi" : "Audio, Controls & Game Data";
         SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
-        SoulslikeHUDStyler.AddFiligreeDivider(dialogBox.transform, new Vector2(0f, -108f), new Vector2(1400f, 12f));
+        SoulslikeHUDStyler.AddFiligreeDivider(dialogBox.transform, new Vector2(0f, -108f), new Vector2(1600f, 12f));
 
         // 3. LEFT CATEGORY SIDEBAR
         categorySidebar = new GameObject("CategorySidebar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -341,27 +344,27 @@ public class SettingsUI : MonoBehaviour
         sbRt.anchorMin = new Vector2(0f, 0f);
         sbRt.anchorMax = new Vector2(0f, 1f);
         sbRt.pivot = new Vector2(0f, 0.5f);
-        sbRt.offsetMin = new Vector2(30f, 110f);
-        sbRt.offsetMax = new Vector2(380f, -125f);
+        sbRt.offsetMin = new Vector2(25f, 100f);
+        sbRt.offsetMax = new Vector2(360f, -125f);
 
         Image sbImg = categorySidebar.GetComponent<Image>();
         sbImg.color = new Color(0.05f, 0.07f, 0.11f, 0.95f);
         WhiteIconLoader.ApplyGothicFrame(categorySidebar, new Color(0.35f, 0.50f, 0.70f, 0.65f), 0.50f);
 
-        sidebarTitleText = CreateLabel(categorySidebar.transform, "SidebarTitle", "<b>DANH MỤC</b>", new Vector2(25f, -18f), new Vector2(300f, 36f));
-        sidebarTitleText.fontSize = 22;
+        sidebarTitleText = CreateLabel(categorySidebar.transform, "SidebarTitle", "<b>DANH MỤC</b>", new Vector2(25f, -18f), new Vector2(290f, 36f));
+        sidebarTitleText.fontSize = 24f;
         sidebarTitleText.color = new Color(0.98f, 0.85f, 0.40f);
         sidebarTitleText.fontStyle = FontStyles.Bold;
 
-        SoulslikeHUDStyler.AddFiligreeDivider(categorySidebar.transform, new Vector2(0f, -55f), new Vector2(300f, 8f));
+        SoulslikeHUDStyler.AddFiligreeDivider(categorySidebar.transform, new Vector2(0f, -55f), new Vector2(290f, 8f));
 
         // Category Tab Buttons
-        tabAudioBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Audio", new Vector2(20f, -70f), new Vector2(310f, 75f), new Color(0.08f, 0.10f, 0.15f), out tabAudioText);
-        tabAudioText.fontSize = 22;
-        tabControlsBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Controls", new Vector2(20f, -160f), new Vector2(310f, 75f), new Color(0.08f, 0.10f, 0.15f), out tabControlsText);
-        tabControlsText.fontSize = 22;
-        tabDataBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Data", new Vector2(20f, -250f), new Vector2(310f, 75f), new Color(0.08f, 0.10f, 0.15f), out tabDataText);
-        tabDataText.fontSize = 22;
+        tabAudioBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Audio", new Vector2(18f, -75f), new Vector2(300f, 80f), new Color(0.08f, 0.10f, 0.15f), out tabAudioText);
+        tabAudioText.fontSize = 22f;
+        tabControlsBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Controls", new Vector2(18f, -170f), new Vector2(300f, 80f), new Color(0.08f, 0.10f, 0.15f), out tabControlsText);
+        tabControlsText.fontSize = 22f;
+        tabDataBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Data", new Vector2(18f, -265f), new Vector2(300f, 80f), new Color(0.08f, 0.10f, 0.15f), out tabDataText);
+        tabDataText.fontSize = 22f;
 
         // 4. RIGHT CONTENT PANEL
         contentPanel = new GameObject("ContentPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -370,8 +373,8 @@ public class SettingsUI : MonoBehaviour
         cpRt.anchorMin = new Vector2(0f, 0f);
         cpRt.anchorMax = new Vector2(1f, 1f);
         cpRt.pivot = new Vector2(0.5f, 0.5f);
-        cpRt.offsetMin = new Vector2(400f, 110f);
-        cpRt.offsetMax = new Vector2(-30f, -125f);
+        cpRt.offsetMin = new Vector2(380f, 100f);
+        cpRt.offsetMax = new Vector2(-25f, -125f);
 
         Image cpImg = contentPanel.GetComponent<Image>();
         cpImg.color = new Color(0.06f, 0.08f, 0.13f, 0.95f);
@@ -379,52 +382,52 @@ public class SettingsUI : MonoBehaviour
 
         // --- PAGE 1: AUDIO & LANGUAGE ---
         pageAudioLang = CreatePage(contentPanel.transform, "Page_AudioLang");
-        pageAudioHeader = CreateLabel(pageAudioLang.transform, "Header", "<b><color=#55EFC4>1. ÂM THANH & NGÔN NGỮ</color></b>", new Vector2(30f, -20f), new Vector2(1000f, 36f));
-        pageAudioHeader.fontSize = 24;
-        pageAudioSub = CreateLabel(pageAudioLang.transform, "Sub", "Tùy chỉnh âm lượng nhạc nền, hiệu ứng âm thanh và ngôn ngữ hiển thị", new Vector2(30f, -60f), new Vector2(1000f, 28f));
-        pageAudioSub.fontSize = 17f;
-        pageAudioSub.color = new Color(0.75f, 0.82f, 0.92f, 0.8f);
-        SoulslikeHUDStyler.AddFiligreeDivider(pageAudioLang.transform, new Vector2(0f, -95f), new Vector2(1300f, 8f));
+        pageAudioHeader = CreateLabel(pageAudioLang.transform, "Header", "<b><color=#55EFC4>1. ÂM THANH & NGÔN NGỮ</color></b>", new Vector2(35f, -25f), new Vector2(1300f, 44f));
+        pageAudioHeader.fontSize = 26f;
+        pageAudioSub = CreateLabel(pageAudioLang.transform, "Sub", "Tùy chỉnh âm lượng nhạc nền, hiệu ứng âm thanh và ngôn ngữ hiển thị", new Vector2(35f, -75f), new Vector2(1300f, 32f));
+        pageAudioSub.fontSize = 18f;
+        pageAudioSub.color = new Color(0.75f, 0.82f, 0.92f, 0.85f);
+        SoulslikeHUDStyler.AddFiligreeDivider(pageAudioLang.transform, new Vector2(0f, -118f), new Vector2(1400f, 8f));
 
-        bgmLabel = CreateLabel(pageAudioLang.transform, "BGMLabel", "Âm nhạc nền (BGM):", new Vector2(30f, -120f), new Vector2(800f, 34f));
-        bgmLabel.fontSize = 22;
-        bgmSlider = CreateSlider(pageAudioLang.transform, "BGMSlider", new Vector2(30f, -165f), new Vector2(1050f, 40f));
-        bgmValueText = CreateLabel(pageAudioLang.transform, "BGMVal", "80%", new Vector2(1110f, -165f), new Vector2(140f, 40f));
-        bgmValueText.fontSize = 24;
+        bgmLabel = CreateLabel(pageAudioLang.transform, "BGMLabel", "Âm nhạc nền (BGM):", new Vector2(35f, -145f), new Vector2(900f, 34f));
+        bgmLabel.fontSize = 22f;
+        bgmSlider = CreateSlider(pageAudioLang.transform, "BGMSlider", new Vector2(35f, -190f), new Vector2(1150f, 44f));
+        bgmValueText = CreateLabel(pageAudioLang.transform, "BGMVal", "80%", new Vector2(1210f, -190f), new Vector2(140f, 44f));
+        bgmValueText.fontSize = 24f;
         bgmValueText.fontStyle = FontStyles.Bold;
         bgmValueText.color = new Color(1f, 0.85f, 0.35f);
 
-        sfxLabel = CreateLabel(pageAudioLang.transform, "SFXLabel", "Hiệu ứng âm thanh (SFX):", new Vector2(30f, -235f), new Vector2(800f, 34f));
-        sfxLabel.fontSize = 22;
-        sfxSlider = CreateSlider(pageAudioLang.transform, "SFXSlider", new Vector2(30f, -280f), new Vector2(1050f, 40f));
-        sfxValueText = CreateLabel(pageAudioLang.transform, "SFXVal", "80%", new Vector2(1110f, -280f), new Vector2(140f, 40f));
-        sfxValueText.fontSize = 24;
+        sfxLabel = CreateLabel(pageAudioLang.transform, "SFXLabel", "Hiệu ứng âm thanh (SFX):", new Vector2(35f, -270f), new Vector2(900f, 34f));
+        sfxLabel.fontSize = 22f;
+        sfxSlider = CreateSlider(pageAudioLang.transform, "SFXSlider", new Vector2(35f, -315f), new Vector2(1150f, 44f));
+        sfxValueText = CreateLabel(pageAudioLang.transform, "SFXVal", "80%", new Vector2(1210f, -315f), new Vector2(140f, 44f));
+        sfxValueText.fontSize = 24f;
         sfxValueText.fontStyle = FontStyles.Bold;
         sfxValueText.color = new Color(1f, 0.85f, 0.35f);
 
-        languageLabel = CreateLabel(pageAudioLang.transform, "LangLabel", "Ngôn ngữ hiển thị (Display Language):", new Vector2(30f, -350f), new Vector2(800f, 34f));
-        languageLabel.fontSize = 22;
-        languageToggleButton = CreateStyledButton(pageAudioLang.transform, "Btn_LanguageToggle", new Vector2(30f, -395f), new Vector2(1050f, 65f), new Color(0.16f, 0.24f, 0.38f), out languageButtonText);
-        languageButtonText.fontSize = 22;
+        languageLabel = CreateLabel(pageAudioLang.transform, "LangLabel", "Ngôn ngữ hiển thị (Display Language):", new Vector2(35f, -395f), new Vector2(900f, 34f));
+        languageLabel.fontSize = 22f;
+        languageToggleButton = CreateStyledButton(pageAudioLang.transform, "Btn_LanguageToggle", new Vector2(35f, -440f), new Vector2(1150f, 70f), new Color(0.16f, 0.24f, 0.38f), out languageButtonText);
+        languageButtonText.fontSize = 22f;
 
         // --- PAGE 2: TOUCH CONTROLS ---
         pageControls = CreatePage(contentPanel.transform, "Page_Controls");
-        pageControlsHeader = CreateLabel(pageControls.transform, "Header", "<b><color=#55EFC4>2. NÚT ĐIỀU KHIỂN CẢM ỨNG</color></b>", new Vector2(30f, -20f), new Vector2(1000f, 36f));
-        pageControlsHeader.fontSize = 24;
-        pageControlsSub = CreateLabel(pageControls.transform, "Sub", "Tùy chỉnh trực tiếp vị trí & kích thước các nút bấm trên màn hình", new Vector2(30f, -60f), new Vector2(1000f, 28f));
-        pageControlsSub.fontSize = 17f;
-        pageControlsSub.color = new Color(0.75f, 0.82f, 0.92f, 0.8f);
-        SoulslikeHUDStyler.AddFiligreeDivider(pageControls.transform, new Vector2(0f, -95f), new Vector2(1300f, 8f));
+        pageControlsHeader = CreateLabel(pageControls.transform, "Header", "<b><color=#55EFC4>2. NÚT ĐIỀU KHIỂN CẢM ỨNG</color></b>", new Vector2(35f, -25f), new Vector2(1300f, 44f));
+        pageControlsHeader.fontSize = 26f;
+        pageControlsSub = CreateLabel(pageControls.transform, "Sub", "Tùy chỉnh trực tiếp vị trí & kích thước các nút bấm trên màn hình", new Vector2(35f, -75f), new Vector2(1300f, 32f));
+        pageControlsSub.fontSize = 18f;
+        pageControlsSub.color = new Color(0.75f, 0.82f, 0.92f, 0.85f);
+        SoulslikeHUDStyler.AddFiligreeDivider(pageControls.transform, new Vector2(0f, -118f), new Vector2(1400f, 8f));
 
         // Showcase Container Card
         controlsCard = new GameObject("ControlsCard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         controlsCard.transform.SetParent(pageControls.transform, false);
         RectTransform ccRt = controlsCard.GetComponent<RectTransform>();
         ccRt.anchorMin = new Vector2(0f, 1f);
-        ccRt.anchorMax = new Vector2(0f, 1f);
-        ccRt.pivot = new Vector2(0f, 1f);
-        ccRt.anchoredPosition = new Vector2(30f, -115f);
-        ccRt.sizeDelta = new Vector2(1340f, 550f);
+        ccRt.anchorMax = new Vector2(1f, 1f);
+        ccRt.pivot = new Vector2(0.5f, 1f);
+        ccRt.anchoredPosition = new Vector2(0f, -135f);
+        ccRt.sizeDelta = new Vector2(-40f, 560f);
 
         Image ccImg = controlsCard.GetComponent<Image>();
         ccImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -433,47 +436,47 @@ public class SettingsUI : MonoBehaviour
         WhiteIconLoader.ApplyGothicFrame(controlsCard, new Color(0.35f, 0.55f, 0.75f, 0.55f), 0.45f);
 
         // Title inside Card
-        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>TÙY CHỈNH NÚT CẢM ỨNG</b>", new Vector2(30f, -25f), new Vector2(1280f, 40f));
+        controlsCardTitle = CreateLabel(controlsCard.transform, "CardTitle", "<b>TÙY CHỈNH NÚT CẢM ỨNG</b>", new Vector2(35f, -25f), new Vector2(1280f, 42f));
         controlsCardTitle.fontSize = 24f;
         controlsCardTitle.color = new Color(1f, 0.88f, 0.45f);
 
         // Description inside Card - Tinh gọn 1 câu duy nhất, không xuống dòng
-        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Kéo thả phím di chuyển, đánh & lướt trực tiếp trên màn hình trận đấu.", new Vector2(30f, -75f), new Vector2(1280f, 40f));
+        controlsCardDesc = CreateLabel(controlsCard.transform, "CardDesc", "Kéo thả phím di chuyển, đánh & lướt trực tiếp trên màn hình trận đấu.", new Vector2(35f, -75f), new Vector2(1280f, 36f));
         controlsCardDesc.fontSize = 20f;
         controlsCardDesc.color = new Color(0.82f, 0.88f, 0.95f, 0.9f);
 
         // 2 Big Action Buttons inside Card - Đặt cách xa mô tả, không bao giờ bị đè text
-        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(30f, -140f), new Vector2(1280f, 75f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
+        customizeLayoutBtn = CreateStyledButton(controlsCard.transform, "Btn_CustomizeLayout", new Vector2(35f, -140f), new Vector2(1280f, 75f), new Color(0.10f, 0.38f, 0.42f), out customizeLayoutBtnText);
         customizeLayoutBtnText.fontSize = 22f;
 
-        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(30f, -235f), new Vector2(1280f, 70f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
+        resetControlsDefaultBtn = CreateStyledButton(controlsCard.transform, "Btn_ResetControlsDefault", new Vector2(35f, -245f), new Vector2(1280f, 70f), new Color(0.26f, 0.14f, 0.18f), out resetControlsDefaultBtnText);
         resetControlsDefaultBtnText.fontSize = 20f;
 
         // Bottom Tip below Card
-        controlsCardTip = CreateLabel(controlsCard.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí các nút.</color></i>", new Vector2(30f, -330f), new Vector2(1280f, 35f));
+        controlsCardTip = CreateLabel(controlsCard.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí các nút.</color></i>", new Vector2(35f, -360f), new Vector2(1280f, 40f));
         controlsCardTip.fontSize = 18f;
 
         // --- PAGE 3: GAME DATA & SYSTEM ---
         pageGameData = CreatePage(contentPanel.transform, "Page_GameData");
-        pageDataHeader = CreateLabel(pageGameData.transform, "Header", "<b><color=#FFA502>3. DỮ LIỆU TRÒ CHƠI & HỆ THỐNG</color></b>", new Vector2(30f, -20f), new Vector2(1000f, 36f));
-        pageDataHeader.fontSize = 24;
-        pageDataSub = CreateLabel(pageGameData.transform, "Sub", "Quản lý tiến trình trò chơi ngoại tuyến và thao tác thoát trận", new Vector2(30f, -60f), new Vector2(1000f, 28f));
-        pageDataSub.fontSize = 17f;
-        pageDataSub.color = new Color(0.75f, 0.82f, 0.92f, 0.8f);
-        SoulslikeHUDStyler.AddFiligreeDivider(pageGameData.transform, new Vector2(0f, -95f), new Vector2(1300f, 8f));
+        pageDataHeader = CreateLabel(pageGameData.transform, "Header", "<b><color=#FFA502>3. DỮ LIỆU TRÒ CHƠI & HỆ THỐNG</color></b>", new Vector2(35f, -25f), new Vector2(1300f, 44f));
+        pageDataHeader.fontSize = 26f;
+        pageDataSub = CreateLabel(pageGameData.transform, "Sub", "Quản lý tiến trình trò chơi ngoại tuyến và thao tác thoát trận", new Vector2(35f, -75f), new Vector2(1300f, 32f));
+        pageDataSub.fontSize = 18f;
+        pageDataSub.color = new Color(0.75f, 0.82f, 0.92f, 0.85f);
+        SoulslikeHUDStyler.AddFiligreeDivider(pageGameData.transform, new Vector2(0f, -118f), new Vector2(1400f, 8f));
 
-        resetDataDesc = CreateLabel(pageGameData.transform, "ResetDesc", "Xóa toàn bộ dữ liệu lưu trữ để bắt đầu một hành trình mới:", new Vector2(30f, -120f), new Vector2(1000f, 34f));
-        resetDataDesc.fontSize = 21;
-        resetDataButton = CreateStyledButton(pageGameData.transform, "Btn_ResetData", new Vector2(30f, -165f), new Vector2(1050f, 65f), new Color(0.38f, 0.14f, 0.16f), out resetDataBtnText);
+        resetDataDesc = CreateLabel(pageGameData.transform, "ResetDesc", "Xóa toàn bộ dữ liệu lưu trữ để bắt đầu một hành trình mới:", new Vector2(35f, -145f), new Vector2(1150f, 34f));
+        resetDataDesc.fontSize = 22f;
+        resetDataButton = CreateStyledButton(pageGameData.transform, "Btn_ResetData", new Vector2(35f, -190f), new Vector2(1150f, 70f), new Color(0.38f, 0.14f, 0.16f), out resetDataBtnText);
         resetDataBtnText.fontSize = 22f;
 
-        mainMenuDesc = CreateLabel(pageGameData.transform, "MainMenuDesc", "Thoát khỏi màn chơi hiện tại và quay về sảnh chính:", new Vector2(30f, -255f), new Vector2(1000f, 34f));
-        mainMenuDesc.fontSize = 21;
-        mainMenuButton = CreateStyledButton(pageGameData.transform, "Btn_MainMenu", new Vector2(30f, -300f), new Vector2(1050f, 65f), new Color(0.2f, 0.25f, 0.35f), out mainMenuBtnText);
+        mainMenuDesc = CreateLabel(pageGameData.transform, "MainMenuDesc", "Thoát khỏi màn chơi hiện tại và quay về sảnh chính:", new Vector2(35f, -295f), new Vector2(1150f, 34f));
+        mainMenuDesc.fontSize = 22f;
+        mainMenuButton = CreateStyledButton(pageGameData.transform, "Btn_MainMenu", new Vector2(35f, -340f), new Vector2(1150f, 70f), new Color(0.2f, 0.25f, 0.35f), out mainMenuBtnText);
         mainMenuBtnText.fontSize = 22f;
 
-        offlineNoteText = CreateLabel(pageGameData.transform, "OfflineNote", "", new Vector2(30f, -390f), new Vector2(1050f, 50f));
-        offlineNoteText.fontSize = 18f;
+        offlineNoteText = CreateLabel(pageGameData.transform, "OfflineNote", "", new Vector2(35f, -445f), new Vector2(1150f, 50f));
+        offlineNoteText.fontSize = 19f;
 
         // 5. BOTTOM ROW: CLOSE BUTTON
         closeButton = CreateStyledButton(dialogBox.transform, "Btn_Close", Vector2.zero, new Vector2(520f, 75f), new Color(0.12f, 0.48f, 0.24f), out closeBtnText);
@@ -481,8 +484,8 @@ public class SettingsUI : MonoBehaviour
         cbRt.anchorMin = new Vector2(0.5f, 0f);
         cbRt.anchorMax = new Vector2(0.5f, 0f);
         cbRt.pivot = new Vector2(0.5f, 0.5f);
-        cbRt.anchoredPosition = new Vector2(0f, 52f);
-        closeBtnText.fontSize = 26;
+        cbRt.anchoredPosition = new Vector2(0f, 48f);
+        closeBtnText.fontSize = 26f;
 
         // 6. Reset Confirmation Modal
         BuildResetConfirmModal(dialogBox.transform);
@@ -986,7 +989,7 @@ public class SettingsUI : MonoBehaviour
 
         // Page 1
         if (pageAudioHeader != null) pageAudioHeader.text = isVi ? "<b><color=#55EFC4>1. ÂM THANH & NGÔN NGỮ</color></b>" : "<b><color=#55EFC4>1. AUDIO & LANGUAGE</color></b>";
-        if (pageAudioSub != null) pageAudioSub.text = isVi ? "Tùy chỉnh âm lượng nhạc nền, hiệu ứng âm thanh và ngôn ngữ hiển thị" : "Adjust background music, sound effects volume and display language";
+        if (pageAudioSub != null) pageAudioSub.text = isVi ? "Tùy chỉnh âm lượng nhạc nền, hiệu ứng âm thanh và ngôn ngữ hiển thị" : "Adjust BGM, SFX volume and display language";
         if (bgmLabel != null) bgmLabel.text = isVi ? "Âm nhạc nền (BGM):" : "Music Volume (BGM):";
         if (sfxLabel != null) sfxLabel.text = isVi ? "Hiệu ứng âm thanh (SFX):" : "Sound Effects (SFX):";
         if (languageLabel != null) languageLabel.text = isVi ? "Ngôn ngữ hiển thị (Display Language):" : "Display Language:";
@@ -1001,7 +1004,7 @@ public class SettingsUI : MonoBehaviour
 
         // Page 2
         if (pageControlsHeader != null) pageControlsHeader.text = isVi ? "<b><color=#55EFC4>2. NÚT ĐIỀU KHIỂN CẢM ỨNG</color></b>" : "<b><color=#55EFC4>2. TOUCH CONTROLS SETTINGS</color></b>";
-        if (pageControlsSub != null) pageControlsSub.text = isVi ? "Tùy chỉnh trực tiếp vị trí & kích thước các nút bấm trên màn hình" : "Custom position and scale buttons on the battle screen";
+        if (pageControlsSub != null) pageControlsSub.text = isVi ? "Tùy chỉnh trực tiếp vị trí & kích thước các nút bấm trên màn hình" : "Customize position and scale buttons on the battle screen";
 
         if (controlsCardTitle != null) controlsCardTitle.text = isVi ? "<b>TÙY CHỈNH NÚT CẢM ỨNG</b>" : "<b>CUSTOMIZE TOUCH CONTROLS</b>";
         if (controlsCardDesc != null)
@@ -1035,7 +1038,7 @@ public class SettingsUI : MonoBehaviour
 
         // Page 3
         if (pageDataHeader != null) pageDataHeader.text = isVi ? "<b><color=#FFA502>3. DỮ LIỆU TRÒ CHƠI & HỆ THỐNG</color></b>" : "<b><color=#FFA502>3. GAME DATA & SYSTEM</color></b>";
-        if (pageDataSub != null) pageDataSub.text = isVi ? "Quản lý tiến trình trò chơi ngoại tuyến và thao tác thoát trận" : "Manage local offline save progress and match exit options";
+        if (pageDataSub != null) pageDataSub.text = isVi ? "Quản lý tiến trình trò chơi ngoại tuyến và thao tác thoát trận" : "Manage offline save progress and match exit options";
         if (resetDataDesc != null) resetDataDesc.text = isVi ? "Xóa toàn bộ dữ liệu lưu trữ để bắt đầu một hành trình mới:" : "Reset all saved progress to start a fresh adventure:";
         if (resetDataBtnText != null)
         {

@@ -197,15 +197,15 @@ public class LoginManager : MonoBehaviour
 
         if (tapToStartText != null)
         {
-            tapToStartText.fontSize = 58f;
+            tapToStartText.fontSize = 52f;
             tapToStartText.fontStyle = FontStyles.Bold;
-            tapToStartText.color = new Color(0.98f, 0.90f, 0.58f);
+            tapToStartText.color = new Color(1f, 0.95f, 0.55f);
             tapToStartText.overflowMode = TextOverflowModes.Overflow;
-            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.0f, Color.black);
+            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.35f, Color.black);
             RectTransform tRt = tapToStartText.GetComponent<RectTransform>();
             if (tRt != null)
             {
-                tRt.sizeDelta = new Vector2(1000f, 180f);
+                tRt.sizeDelta = new Vector2(1200f, 180f);
             }
         }
 
@@ -214,12 +214,12 @@ public class LoginManager : MonoBehaviour
 
     private void Update()
     {
-        // Hiệu ứng nhịp thở cho chữ TAP TO START - Giữ độ sáng từ 0.65 đến 1.0 để luôn nổi bật trên nền nâu
+        // Hiệu ứng nhịp thở cho chữ TAP TO START - Giữ độ sáng từ 0.85 đến 1.0 với viền đen sắc nét để luôn nổi bật
         if (tapToStartPanel != null && tapToStartPanel.activeSelf && tapToStartText != null && !isStartingGame)
         {
-            pulseTimer += Time.deltaTime * 3.5f;
-            float alpha = Mathf.PingPong(pulseTimer, 0.35f) + 0.65f;
-            Color c = new Color(1f, 0.90f, 0.45f, alpha);
+            pulseTimer += Time.deltaTime * 3.0f;
+            float alpha = Mathf.PingPong(pulseTimer, 0.15f) + 0.85f;
+            Color c = new Color(1f, 0.95f, 0.55f, alpha);
             tapToStartText.color = c;
 
             // Hỗ trợ nhấn phím bất kỳ (Space, Enter, Gamepad, click chuột) để bắt đầu game
@@ -427,42 +427,45 @@ public class LoginManager : MonoBehaviour
         if (titleText != null)
         {
             titleText.text = LocalizationManager.Get("APP_TITLE");
-            titleText.fontSize = 86f;
+            titleText.fontSize = 76f;
+            titleText.fontStyle = FontStyles.Normal;
+            titleText.characterSpacing = 6f;
             titleText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(titleText, true);
-            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.0f, Color.black);
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.28f, Color.black);
             RectTransform titleRt = titleText.GetComponent<RectTransform>();
             if (titleRt != null)
             {
                 titleRt.anchoredPosition = new Vector2(0f, 350f);
-                titleRt.sizeDelta = new Vector2(1300f, 100f);
+                titleRt.sizeDelta = new Vector2(1400f, 110f);
             }
         }
         if (subtitleText != null)
         {
             subtitleText.text = LocalizationManager.Get("LOGIN_SUBTITLE");
-            subtitleText.fontSize = 32f;
+            subtitleText.fontSize = 28f;
             subtitleText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(subtitleText);
-            SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.0f, Color.black);
+            SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.22f, Color.black);
             RectTransform subRt = subtitleText.GetComponent<RectTransform>();
             if (subRt != null)
             {
                 subRt.anchoredPosition = new Vector2(0f, 260f);
-                subRt.sizeDelta = new Vector2(1100f, 50f);
+                subRt.sizeDelta = new Vector2(1200f, 50f);
             }
         }
         if (tapToStartText != null)
         {
-            tapToStartText.fontSize = 58f;
+            tapToStartText.fontSize = 52f;
+            tapToStartText.fontStyle = FontStyles.Bold;
             tapToStartText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(tapToStartText);
-            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.0f, Color.black);
+            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.35f, Color.black);
             RectTransform tRt = tapToStartText.GetComponent<RectTransform>();
             if (tRt != null)
             {
                 tRt.anchoredPosition = new Vector2(0f, -220f);
-                tRt.sizeDelta = new Vector2(1100f, 140f);
+                tRt.sizeDelta = new Vector2(1200f, 150f);
             }
         }
 
