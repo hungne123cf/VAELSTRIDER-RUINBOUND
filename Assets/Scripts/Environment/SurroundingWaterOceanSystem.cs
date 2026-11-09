@@ -543,8 +543,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.down; // Sóng vỗ từ trên xuống bờ
                 edgeStart = new Vector2(seg.startCoord, boundaryY);
                 edgeEnd = new Vector2(seg.endCoord, boundaryY);
-                // Bờ Bắc: Nước ở phía trên boundaryY. Collider nằm hoàn toàn ngoài vùng nước (từ boundaryY trở lên)
-                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY + 1.0f), new Vector2(length, 2.0f));
+                // Bờ Bắc: Nước ở phía trên boundaryY. Đặt collider lùi lên trên (+0.35f) để người chơi có thể chạm sát bờ/tường tự nhiên, không bị cản từ xa
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY + 1.35f), new Vector2(length, 2.0f));
             }
             else if (seg.dir == ShoreDir.South)
             {
@@ -559,8 +559,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                 surgeDir = Vector3.up; // Sóng vỗ từ dưới lên bờ
                 edgeStart = new Vector2(seg.startCoord, boundaryY);
                 edgeEnd = new Vector2(seg.endCoord, boundaryY);
-                // Bờ Nam: Nước ở phía dưới boundaryY. Collider nằm hoàn toàn ngoài vùng nước (từ boundaryY trở xuống)
-                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY - 1.0f), new Vector2(length, 2.0f));
+                // Bờ Nam: Nước ở phía dưới boundaryY. Đặt collider dâng lên +0.35f để chân nhân vật đứng chắc chắn trên mặt sàn đá, không bị lố đè lên bờ đá/tường
+                SpawnShorelineWallCollider(shoresRoot, new Vector2(mid, boundaryY - 0.65f), new Vector2(length, 2.0f));
             }
             else if (seg.dir == ShoreDir.East)
             {
@@ -682,8 +682,8 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
                     }
                     cx = bestCell.x;
                     cy = bestCell.y;
-                    x = Mathf.Clamp(x, (float)cx, cx + 1.0f);
-                    y = Mathf.Clamp(y, (float)cy, cy + 1.0f);
+                    x = Mathf.Clamp(x, (float)cx + 0.25f, (float)cx + 0.75f);
+                    y = Mathf.Clamp(y, (float)cy + 0.25f, (float)cy + 0.75f);
                     return new Vector3(x, y, pos.z);
                 }
             }

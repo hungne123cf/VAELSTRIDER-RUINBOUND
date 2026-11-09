@@ -726,6 +726,7 @@ public class MailboxUI : MonoBehaviour
         catRt.anchorMax = Vector2.one;
         catRt.sizeDelta = Vector2.zero;
         var catTmp = catObj.AddComponent<TextMeshProUGUI>();
+        catTmp.raycastTarget = false;
         catTmp.text = isVi ? "<b>NHẬN TẤT CẢ</b>" : "<b>CLAIM ALL</b>";
         catTmp.fontSize = 13.5f;
         catTmp.alignment = TextAlignmentOptions.Center;
@@ -734,6 +735,7 @@ public class MailboxUI : MonoBehaviour
         Button claimAllBtn = claimAllBtnObj.GetComponent<Button>();
         claimAllBtn.targetGraphic = caImg;
         claimAllBtn.onClick.AddListener(OnClaimAllMails);
+        AttachPointerClick(claimAllBtnObj, OnClaimAllMails);
 
         // Nút XÓA ĐÃ ĐỌC (Delete Read) - Dark Stone
         GameObject delReadBtnObj = new GameObject("Btn_DeleteRead", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -761,6 +763,7 @@ public class MailboxUI : MonoBehaviour
         drtRt.anchorMax = Vector2.one;
         drtRt.sizeDelta = Vector2.zero;
         var drtTmp = drtObj.AddComponent<TextMeshProUGUI>();
+        drtTmp.raycastTarget = false;
         drtTmp.text = isVi ? "<b>XÓA ĐÃ ĐỌC</b>" : "<b>DELETE READ</b>";
         drtTmp.fontSize = 12.5f;
         drtTmp.alignment = TextAlignmentOptions.Center;
@@ -769,6 +772,7 @@ public class MailboxUI : MonoBehaviour
         Button delReadBtn = delReadBtnObj.GetComponent<Button>();
         delReadBtn.targetGraphic = drImg;
         delReadBtn.onClick.AddListener(OnDeleteAllReadMails);
+        AttachPointerClick(delReadBtnObj, OnDeleteAllReadMails);
 
         // --- RIGHT COLUMN: Inspection Panel (Width 685px) ---
         GameObject rightCol = new GameObject("RightColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -962,6 +966,7 @@ public class MailboxUI : MonoBehaviour
         cltRt.sizeDelta = Vector2.zero;
 
         detailClaimBtnText = clTxtObj.AddComponent<TextMeshProUGUI>();
+        detailClaimBtnText.raycastTarget = false;
         detailClaimBtnText.text = isVi ? "<b>NHẬN PHẦN THƯỞNG</b>" : "<b>CLAIM REWARD</b>";
         detailClaimBtnText.fontSize = 15f;
         detailClaimBtnText.alignment = TextAlignmentOptions.Center;
@@ -970,6 +975,7 @@ public class MailboxUI : MonoBehaviour
         detailClaimButton = claimBtnObj.GetComponent<Button>();
         detailClaimButton.targetGraphic = clImg;
         detailClaimButton.onClick.AddListener(OnClaimSelectedMail);
+        AttachPointerClick(claimBtnObj, OnClaimSelectedMail);
 
         // Nút XÓA THƯ NÀY (Delete This Mail)
         GameObject delOneBtnObj = new GameObject("Btn_DeleteThis", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -999,6 +1005,7 @@ public class MailboxUI : MonoBehaviour
         dottRt.sizeDelta = Vector2.zero;
 
         var dottTmp = dottObj.AddComponent<TextMeshProUGUI>();
+        dottTmp.raycastTarget = false;
         dottTmp.text = isVi ? "<b>XÓA THƯ NÀY</b>" : "<b>DELETE THIS</b>";
         dottTmp.fontSize = 13.5f;
         dottTmp.alignment = TextAlignmentOptions.Center;
@@ -1007,6 +1014,7 @@ public class MailboxUI : MonoBehaviour
         detailDeleteButton = delOneBtnObj.GetComponent<Button>();
         detailDeleteButton.targetGraphic = dotImg;
         detailDeleteButton.onClick.AddListener(OnDeleteSelectedMail);
+        AttachPointerClick(delOneBtnObj, OnDeleteSelectedMail);
 
         // --- EMPTY STATE WATERMARK ILLUSTRATION ---
         mailEmptyStateObj = new GameObject("EmptyStateIllustration", typeof(RectTransform));
@@ -1241,6 +1249,7 @@ public class MailboxUI : MonoBehaviour
             btn.onClick.AddListener(() => {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
                 SelectMail(capturedMail);
+                RefreshMailList();
             });
         }
 
@@ -1406,8 +1415,11 @@ public class MailboxUI : MonoBehaviour
         if (selectedMail == null) return;
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        PlayerPrefs.SetInt("Mail_Deleted_" + selectedMail.id, 1);
+        string delId = selectedMail.id;
+        PlayerPrefs.SetInt("Mail_Deleted_" + delId, 1);
         PlayerPrefs.Save();
+
+        _mails.RemoveAll(m => m.id == delId);
 
         SelectFirstAvailableMail();
         RefreshMailList();
@@ -1420,12 +1432,14 @@ public class MailboxUI : MonoBehaviour
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
 
         int deletedCount = 0;
+        List<string> deletedIds = new List<string>();
         foreach (var m in _mails)
         {
             bool isClaimed = m.rewardShards <= 0 || PlayerPrefs.GetInt("Mail_Claimed_" + m.id, 0) == 1;
             if (isClaimed && !IsMailDeleted(m.id))
             {
                 PlayerPrefs.SetInt("Mail_Deleted_" + m.id, 1);
+                deletedIds.Add(m.id);
                 deletedCount++;
             }
         }
@@ -1433,11 +1447,24 @@ public class MailboxUI : MonoBehaviour
         if (deletedCount > 0)
         {
             PlayerPrefs.Save();
+            _mails.RemoveAll(m => deletedIds.Contains(m.id));
             SelectFirstAvailableMail();
             RefreshMailList();
             UpdateLobbyBadge();
             if (tabMailsRedDot != null) tabMailsRedDot.SetActive(HasUnclaimedMail());
         }
+    }
+
+    private static void AttachPointerClick(GameObject obj, UnityEngine.Events.UnityAction action)
+    {
+        if (obj == null || action == null) return;
+        var trigger = obj.GetComponent<UnityEngine.EventSystems.EventTrigger>();
+        if (trigger == null) trigger = obj.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+        trigger.triggers.Clear();
+        var entry = new UnityEngine.EventSystems.EventTrigger.Entry();
+        entry.eventID = UnityEngine.EventSystems.EventTriggerType.PointerClick;
+        entry.callback.AddListener((data) => action.Invoke());
+        trigger.triggers.Add(entry);
     }
 
     // =========================================================================
