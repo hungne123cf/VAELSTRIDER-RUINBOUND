@@ -1,18 +1,23 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 /// <summary>
-/// Quản lý font chuẩn Dark Fantasy / Roguelike cho toàn bộ dự án:
-/// - Header / Title / Boss / Banners: Cinzel (phong cách Dark Fantasy cổ điển, uy nghiêm)
-/// - Body / UI / Buttons / Stats / Tooltips: Be Vietnam Pro (chuẩn tiếng Việt có dấu, sắc nét trên Android)
-/// Đảm bảo Zero-Bug: Tự động fallback sang Be Vietnam Pro khi gặp ký tự có dấu, không bao giờ bị lỗi ô vuông '?'.
+/// VAELSTRIDER: RUINBOUND - Universal Typography & Accessibility Font Manager
+/// Quản lý font chuẩn Dreams Unwound VH cho TOÀN BỘ dự án:
+/// - Phủ 100% font chữ: Menu, HUD, Lõi TFT (LevelUp), Cửa Hàng Trang Bị, Shop NPC, Bàn Thờ, Hội Thoại...
+/// - Tự động phóng to kích thước chữ để người cận thị trên điện thoại cũng đọc rõ ràng 100%.
+/// - Chống nhòe (Anti-Smear): Giới hạn Outline tối đa 0.15f, ngăn tuyệt đối lỗi chữ bị biến thành khối màu đặc.
+/// - Đảm bảo Zero-Bug: Fallback tự động khi gặp ký tự emoji/ký tự đặc biệt.
 /// </summary>
 public static class GameFontManager
 {
     private static TMP_FontAsset _headerFont;
     private static TMP_FontAsset _bodyFont;
+    private static Font _trueTypeFont;
     private static bool _isInitialized = false;
 
     public static TMP_FontAsset HeaderFont
@@ -33,10 +38,26 @@ public static class GameFontManager
         }
     }
 
+    public static Font TrueTypeFont
+    {
+        get
+        {
+            EnsureInitialized();
+            return _trueTypeFont;
+        }
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static void Initialize()
     {
         EnsureInitialized();
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ApplyFontsToAllCanvases();
     }
 
     public static void EnsureInitialized()
@@ -45,41 +66,43 @@ public static class GameFontManager
 
         try
         {
-            // 1. Thử nạp Font Asset Dreams Unwound đã bake sẵn từ Resources/Fonts
+            // 1. Nạp file TrueType TTF gốc
+            if (_trueTypeFont == null)
+            {
+                _trueTypeFont = Resources.Load<Font>("Fonts/iCielDreamsUnwound-Regular")
+                             ?? Resources.Load<Font>("Fonts/DreamsUnwound_italic")
+                             ?? Resources.Load<Font>("Fonts/BeVietnamPro-SemiBold");
+            }
+
+            // 2. Nạp Font Asset Dreams Unwound SDF từ Resources/Fonts
             if (_bodyFont == null)
             {
                 _bodyFont = Resources.Load<TMP_FontAsset>("Fonts/DreamsUnwound SDF")
                          ?? Resources.Load<TMP_FontAsset>("Fonts/iCielDreamsUnwound SDF");
             }
 
-            // 2. Nếu chưa có TMP_FontAsset, tạo Dynamic SDF từ file TrueType (.ttf/.otf) trong Resources/Fonts
-            if (_bodyFont == null)
+            // 3. Nếu chưa có TMP_FontAsset, tạo Dynamic SDF từ TTF
+            if (_bodyFont == null && _trueTypeFont != null)
             {
-                Font dreamsFont = Resources.Load<Font>("Fonts/iCielDreamsUnwound-Regular")
-                               ?? Resources.Load<Font>("Fonts/DreamsUnwound_italic")
-                               ?? Resources.Load<Font>("Fonts/BeVietnamPro-SemiBold");
-                if (dreamsFont != null)
+                _bodyFont = TMP_FontAsset.CreateFontAsset(_trueTypeFont);
+                if (_bodyFont != null)
                 {
-                    _bodyFont = TMP_FontAsset.CreateFontAsset(dreamsFont);
-                    if (_bodyFont != null)
+                    _bodyFont.name = "DreamsUnwound SDF (Dynamic)";
+                    if (_bodyFont.material != null && _bodyFont.atlasTextures != null && _bodyFont.atlasTextures.Length > 0 && _bodyFont.atlasTextures[0] != null)
                     {
-                        _bodyFont.name = "DreamsUnwound SDF (Dynamic)";
-                        if (_bodyFont.material != null && _bodyFont.atlasTextures != null && _bodyFont.atlasTextures.Length > 0 && _bodyFont.atlasTextures[0] != null)
-                        {
-                            _bodyFont.material.SetTexture(ShaderUtilities.ID_MainTex, _bodyFont.atlasTextures[0]);
-                        }
+                        _bodyFont.material.SetTexture(ShaderUtilities.ID_MainTex, _bodyFont.atlasTextures[0]);
                     }
                 }
             }
 
-            // Header cũng dùng font Dreams Unwound theo đúng yêu cầu người dùng
+            // Header và Body đều dùng đồng nhất font Dreams Unwound
             _headerFont = _bodyFont;
 
             // Fallback an toàn nếu font không load được
             if (_bodyFont == null) _bodyFont = TMP_Settings.defaultFontAsset;
             if (_headerFont == null) _headerFont = _bodyFont;
 
-            // 3. Cấu hình bảng Fallback sang Default TMP Font phòng khi gặp ký tự emoji/biểu tượng
+            // 4. Cấu hình bảng Fallback sang Default TMP Font phòng khi gặp ký tự emoji
             if (_bodyFont != null && TMP_Settings.defaultFontAsset != null && _bodyFont != TMP_Settings.defaultFontAsset)
             {
                 if (_bodyFont.fallbackFontAssetTable == null)
@@ -92,7 +115,7 @@ public static class GameFontManager
             }
 
             _isInitialized = true;
-            Debug.Log("<color=green>[GameFontManager]</color> Successfully initialized Dreams Unwound font as primary game font!");
+            Debug.Log("<color=green>[GameFontManager]</color> Successfully initialized Dreams Unwound font as universal game font!");
         }
         catch (Exception ex)
         {
@@ -101,24 +124,102 @@ public static class GameFontManager
     }
 
     /// <summary>
-    /// Quét và áp dụng chuẩn font Dreams Unwound cho toàn bộ cây UI phân cấp.
+    /// Quét và áp dụng chuẩn font Dreams Unwound cùng kích thước chữ to rõ ràng cho toàn bộ cây UI phân cấp.
     /// </summary>
     public static void ApplyFontsGlobally(GameObject root)
     {
         if (root == null) return;
         EnsureInitialized();
 
-        var texts = root.GetComponentsInChildren<TextMeshProUGUI>(true);
-        foreach (var txt in texts)
+        // 1. TextMeshProUGUI
+        var tmps = root.GetComponentsInChildren<TextMeshProUGUI>(true);
+        foreach (var txt in tmps)
         {
             ApplyFontToText(txt);
         }
+
+        // 2. Standard Unity UI Text (nếu có)
+        var legacyTexts = root.GetComponentsInChildren<Text>(true);
+        foreach (var legTxt in legacyTexts)
+        {
+            ApplyFontToLegacyText(legTxt);
+        }
     }
 
-    public static void ApplyFontToText(TextMeshProUGUI txt)
+    /// <summary>
+    /// Quét toàn bộ Canvases trong Scene (bao gồm cả các Modal ẩn) để áp dụng font Dreams Unwound và phóng to chữ.
+    /// </summary>
+    public static void ApplyFontsToAllCanvases()
+    {
+        EnsureInitialized();
+        var allCanvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var c in allCanvases)
+        {
+            if (c != null)
+            {
+                ApplyFontsGlobally(c.gameObject);
+            }
+        }
+    }
+
+    public static void ApplyFontToText(TextMeshProUGUI txt, bool isHeader = false)
     {
         if (txt == null) return;
-        txt.font = BodyFont;
+        var targetFont = isHeader ? HeaderFont : BodyFont;
+        if (targetFont == null) return;
+
+        txt.font = targetFont;
+
+        // Reset shared material về đúng material của Dreams Unwound để tránh lỗi lệch Texture / Shader
+        if (targetFont.material != null)
+        {
+            txt.fontSharedMaterial = targetFont.material;
+        }
+
+        // KHẮC PHỤC LỖI NHÒE CHỮ: Giới hạn Outline tối đa 0.14f
+        if (txt.outlineWidth > 0.16f)
+        {
+            txt.outlineWidth = 0.12f;
+        }
+
+        // PHÓNG TO CHỮ HẾT CỠ CHO ĐIỆN THOẠI (Mobile Accessibility)
+        // Đảm bảo người cận thị trên điện thoại cũng nhìn ra rõ ràng
+        if (txt.enableAutoSizing)
+        {
+            if (txt.fontSizeMin < 18f) txt.fontSizeMin = 18f;
+            if (txt.fontSizeMax < 30f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.50f, 30f);
+        }
+        else
+        {
+            if (txt.fontSize < 16f)
+            {
+                txt.fontSize = Mathf.Max(txt.fontSize * 1.55f, 20f);
+            }
+            else if (txt.fontSize < 24f)
+            {
+                txt.fontSize = Mathf.Min(txt.fontSize * 1.35f, 34f);
+            }
+            else
+            {
+                txt.fontSize = Mathf.Min(txt.fontSize * 1.20f, 72f);
+            }
+        }
+
+        // Đảm bảo chữ tự động xuống dòng mượt mà khi phóng to, không bị cắt xén
+        if (txt.overflowMode == TextOverflowModes.Truncate)
+        {
+            txt.overflowMode = TextOverflowModes.Overflow;
+        }
+    }
+
+    public static void ApplyFontToLegacyText(Text txt)
+    {
+        if (txt == null) return;
+        if (_trueTypeFont != null) txt.font = _trueTypeFont;
+        if (txt.fontSize < 16)
+        {
+            txt.fontSize = Mathf.Max((int)(txt.fontSize * 1.45f), 18);
+        }
     }
 }
 

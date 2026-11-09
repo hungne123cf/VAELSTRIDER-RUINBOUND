@@ -46,6 +46,7 @@ public class GameAutoBootstrap : MonoBehaviour
         {
             SoundManager.EnsureInstance();
             LoginManager.EnsureInstance();
+            GameFontManager.ApplyFontsToAllCanvases();
             Debug.Log("<color=cyan>[BOOTSTRAP]</color> Dang o LoginScene. Khoi tao Sound va Login UI.");
             return;
         }
@@ -53,6 +54,7 @@ public class GameAutoBootstrap : MonoBehaviour
         {
             SoundManager.EnsureInstance();
             MainMenuManager.EnsureInstance();
+            GameFontManager.ApplyFontsToAllCanvases();
             Debug.Log("<color=cyan>[BOOTSTRAP]</color> Dang o MainMenuScene. Khoi tao Sound va MainMenu UI.");
             return;
         }

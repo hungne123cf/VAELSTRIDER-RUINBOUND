@@ -134,12 +134,14 @@ public class LoginManager : MonoBehaviour
         if (titleText != null)
         {
             SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
+            titleText.fontSize = 62f;
             titleText.color = new Color(0.98f, 0.85f, 0.45f, 1f);
-            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.45f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.14f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
             if (subtitleText != null)
             {
+                subtitleText.fontSize = 24f;
                 subtitleText.color = new Color(0.92f, 0.90f, 0.85f, 0.95f);
-                SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.35f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+                SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.10f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
             }
         }
 
@@ -170,10 +172,13 @@ public class LoginManager : MonoBehaviour
 
         if (tapToStartText != null)
         {
+            tapToStartText.fontSize = 32f;
             tapToStartText.fontStyle = FontStyles.Bold;
             tapToStartText.color = new Color(0.98f, 0.88f, 0.55f);
-            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.45f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
+            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.12f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
         }
+
+        GameFontManager.ApplyFontsGlobally(gameObject);
     }
 
     private void Update()
@@ -389,8 +394,26 @@ public class LoginManager : MonoBehaviour
 
     public void UpdateAllTexts()
     {
-        if (titleText != null) titleText.text = LocalizationManager.Get("APP_TITLE");
-        if (subtitleText != null) subtitleText.text = LocalizationManager.Get("LOGIN_SUBTITLE");
+        if (titleText != null)
+        {
+            titleText.text = LocalizationManager.Get("APP_TITLE");
+            titleText.fontSize = 62f;
+            GameFontManager.ApplyFontToText(titleText, true);
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.14f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+        }
+        if (subtitleText != null)
+        {
+            subtitleText.text = LocalizationManager.Get("LOGIN_SUBTITLE");
+            subtitleText.fontSize = 24f;
+            GameFontManager.ApplyFontToText(subtitleText);
+            SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.10f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+        }
+        if (tapToStartText != null)
+        {
+            tapToStartText.fontSize = 32f;
+            GameFontManager.ApplyFontToText(tapToStartText);
+            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.12f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
+        }
 
         if (tabLoginTxt != null) tabLoginTxt.text = LocalizationManager.T("ĐĂNG NHẬP", "LOGIN");
         if (tabRegisterTxt != null) tabRegisterTxt.text = LocalizationManager.T("ĐĂNG KÝ", "REGISTER");

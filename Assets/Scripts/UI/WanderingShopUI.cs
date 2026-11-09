@@ -2372,6 +2372,7 @@ public class WanderingShopUI : MonoBehaviour
 
         RefreshUI();
         SoundManager.EnsureInstance()?.PlayMenuHover();
+        GameFontManager.ApplyFontsGlobally(gameObject);
     }
 
     public void Close()

@@ -137,7 +137,11 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         // Build UI
         BuildUI(level);
-        if (_root != null) _root.SetActive(true);
+        if (_root != null)
+        {
+            _root.SetActive(true);
+            GameFontManager.ApplyFontsGlobally(_root);
+        }
 
         SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
 
@@ -1433,13 +1437,14 @@ public class LevelUpChoiceUI : MonoBehaviour
         var nameTMP = nameObj.GetComponent<TextMeshProUGUI>();
         nameTMP.text = isVN ? aug.nameVN : aug.nameEN;
         nameTMP.enableAutoSizing = true;
-        nameTMP.fontSizeMin = 13f;
-        nameTMP.fontSizeMax = 18f;
+        nameTMP.fontSizeMin = 18f;
+        nameTMP.fontSizeMax = 25f;
         nameTMP.fontStyle = FontStyles.Bold;
         nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
         nameTMP.color = new Color(1f, 0.95f, 0.82f);
         nameTMP.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.38f, new Color(0.02f, 0.02f, 0.04f, 0.98f));
+        GameFontManager.ApplyFontToText(nameTMP, true);
+        SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.12f, new Color(0.02f, 0.02f, 0.04f, 0.98f));
 
         // Icon Thuộc Tính / Kỹ Năng ở góc trên bên phải thẻ bài (Chuẩn Yu-Gi-Oh Attribute Element)
         var attrBadgeObj = new GameObject("AttributeElementBadge", typeof(RectTransform), typeof(Image), typeof(Outline));
@@ -1503,11 +1508,12 @@ public class LevelUpChoiceUI : MonoBehaviour
         var tierTxt = tierTxtObj.GetComponent<TextMeshProUGUI>();
         tierTxt.text = tierTitle;
         tierTxt.color = tierFrameColor;
-        tierTxt.fontSize = 11.5f;
+        tierTxt.fontSize = 17f;
         tierTxt.alignment = TextAlignmentOptions.Center;
         tierTxt.fontStyle = FontStyles.Bold;
         tierTxt.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.30f, Color.black);
+        GameFontManager.ApplyFontToText(tierTxt);
+        SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.12f, Color.black);
 
         // Rank Status Badge (LÕI MỚI hoặc THĂNG CẤP)
         var rankBadgeObj = new GameObject("RankBadge", typeof(RectTransform), typeof(Image));
@@ -1533,11 +1539,12 @@ public class LevelUpChoiceUI : MonoBehaviour
             ? (isVN ? $"CẤP {currentRank} -> {currentRank + 1}" : $"LV.{currentRank} -> {currentRank + 1}")
             : (isVN ? "LÕI MỚI" : "NEW");
         rbTxt.color = isUpgrade ? new Color(1f, 0.92f, 0.50f) : new Color(0.45f, 1f, 0.75f);
-        rbTxt.fontSize = 11.5f;
+        rbTxt.fontSize = 17f;
         rbTxt.fontStyle = FontStyles.Bold;
         rbTxt.alignment = TextAlignmentOptions.Center;
         rbTxt.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.30f, Color.black);
+        GameFontManager.ApplyFontToText(rbTxt);
+        SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.12f, Color.black);
 
         // ── 5. Vùng Chứa Tranh (PictureArea Container) - Mở rộng tối đa xuống dưới ──
         var picAreaObj = new GameObject("PictureArea", typeof(RectTransform));
@@ -1688,16 +1695,14 @@ public class LevelUpChoiceUI : MonoBehaviour
         var descTMP = descObj.GetComponent<TextMeshProUGUI>();
         descTMP.text = fullDesc;
         descTMP.enableAutoSizing = true;
-        descTMP.fontSizeMin = 11.5f;
-        descTMP.fontSizeMax = 15.0f;
-        descTMP.enableAutoSizing = true;
-        descTMP.fontSizeMin = 11.5f;
-        descTMP.fontSizeMax = 15.5f;
+        descTMP.fontSizeMin = 16f;
+        descTMP.fontSizeMax = 22f;
         descTMP.alignment = TextAlignmentOptions.TopLeft;
         descTMP.color = new Color(0.94f, 0.96f, 1.0f);
         descTMP.enableWordWrapping = true;
         descTMP.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.28f, new Color(0f, 0f, 0f, 0.92f));
+        GameFontManager.ApplyFontToText(descTMP);
+        SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.12f, new Color(0f, 0f, 0f, 0.92f));
 
         // ── 7. Toàn bộ thẻ bài là nút bấm tương tác mở Popup Xác Nhận ─────────
         var captured = aug;

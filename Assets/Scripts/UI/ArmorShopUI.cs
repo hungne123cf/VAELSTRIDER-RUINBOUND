@@ -1449,6 +1449,7 @@ public class ArmorShopUI : MonoBehaviour
         if (SoundManager.Instance != null) SoundManager.Instance.PlayMenuOpen();
         RefreshCategoryTabsVisual();
         RefreshUI();
+        GameFontManager.ApplyFontsGlobally(gameObject);
     }
 
     public void Close()

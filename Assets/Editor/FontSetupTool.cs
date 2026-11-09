@@ -23,17 +23,29 @@ public static class FontSetupTool
         try
         {
             string assetPath = "Assets/Resources/Fonts/DreamsUnwound SDF.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
+            if (existing != null)
+            {
+                // Asset đã tồn tại hoàn hảo, không xóa để bảo toàn GUID và tham chiếu
+                if (TMP_Settings.defaultFontAsset != null && TMP_Settings.defaultFontAsset != existing)
+                {
+                    if (existing.fallbackFontAssetTable == null) existing.fallbackFontAssetTable = new List<TMP_FontAsset>();
+                    if (!existing.fallbackFontAssetTable.Contains(TMP_Settings.defaultFontAsset))
+                    {
+                        existing.fallbackFontAssetTable.Add(TMP_Settings.defaultFontAsset);
+                        EditorUtility.SetDirty(existing);
+                        AssetDatabase.SaveAssets();
+                    }
+                }
+                return;
+            }
+
             Font dreamsTtf = AssetDatabase.LoadAssetAtPath<Font>("Assets/Resources/Fonts/iCielDreamsUnwound-Regular.ttf");
             if (dreamsTtf == null)
             {
                 dreamsTtf = AssetDatabase.LoadAssetAtPath<Font>("Assets/Fonts/Dreams Unwound VH/Dreams Unwound VH/Regular Fonts/iCielDreamsUnwound-Regular.ttf");
             }
             if (dreamsTtf == null) return;
-
-            if (File.Exists(assetPath))
-            {
-                AssetDatabase.DeleteAsset(assetPath);
-            }
 
             TMP_FontAsset dreamsSdf = CreateAndSaveFontAsset(dreamsTtf, assetPath, "DreamsUnwound SDF");
             if (dreamsSdf != null)
@@ -52,6 +64,33 @@ public static class FontSetupTool
         {
             Debug.LogWarning("[FontSetupTool] Dreams Unwound generation note: " + ex.Message);
         }
+    }
+
+    [MenuItem("Tools/Fonts/Apply Dreams Unwound To Active Scene")]
+    public static void ApplyDreamsUnwoundToActiveScene()
+    {
+        var dreamsSdf = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/DreamsUnwound SDF.asset");
+        if (dreamsSdf == null)
+        {
+            Debug.LogWarning("[FontSetupTool] DreamsUnwound SDF.asset not found.");
+            return;
+        }
+
+        var tmps = UnityEngine.Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        int count = 0;
+        foreach (var txt in tmps)
+        {
+            if (txt == null) continue;
+            txt.font = dreamsSdf;
+            txt.fontSharedMaterial = dreamsSdf.material;
+            if (txt.outlineWidth > 0.16f) txt.outlineWidth = 0.12f;
+            if (txt.fontSize < 16f) txt.fontSize = Mathf.Max(txt.fontSize * 1.45f, 18f);
+            else if (txt.fontSize < 24f) txt.fontSize = Mathf.Min(txt.fontSize * 1.25f, 32f);
+            EditorUtility.SetDirty(txt);
+            count++;
+        }
+        UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
+        Debug.Log($"<color=green>[FontSetupTool] SUCCESS!</color> Applied Dreams Unwound to {count} TextMeshPro objects in scene!");
     }
 
     [MenuItem("Tools/Fonts/Generate Dark Fantasy Fonts")]

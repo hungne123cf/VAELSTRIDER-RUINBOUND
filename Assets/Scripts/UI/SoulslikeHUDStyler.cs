@@ -643,12 +643,16 @@ public static class SoulslikeHUDStyler
         if (tmp == null) return;
         try
         {
-            if (tmp.font == null)
+            // Outline trong TMPro Distance Field từ 0.04f đến 0.16f là chuẩn và sắc nét nhất trên mobile.
+            // Tuyệt đối không để vượt quá 0.18f vì sẽ làm nhòe toàn bộ chữ thành thanh màu đặc!
+            width = Mathf.Clamp(width, 0.04f, 0.16f);
+
+            if (tmp.font == null || tmp.font != GameFontManager.BodyFont)
             {
                 tmp.font = GameFontManager.BodyFont;
             }
 
-            if (tmp.font != null && tmp.fontSharedMaterial == null)
+            if (tmp.font != null)
             {
                 tmp.fontSharedMaterial = tmp.font.material;
             }
@@ -675,14 +679,21 @@ public static class SoulslikeHUDStyler
         if (title != null)
         {
             title.font = GameFontManager.HeaderFont;
+            if (GameFontManager.HeaderFont != null) title.fontSharedMaterial = GameFontManager.HeaderFont.material;
             title.fontStyle = FontStyles.Bold;
             title.color = new Color(0.98f, 0.88f, 0.55f, 1f); // Hoàng kim Soulslike
-            SetSafeOutline(title, 0.40f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+            SetSafeOutline(title, 0.14f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
         }
 
         if (subtitle != null)
         {
             subtitle.font = GameFontManager.BodyFont;
+            if (GameFontManager.BodyFont != null) subtitle.fontSharedMaterial = GameFontManager.BodyFont.material;
+            subtitle.fontStyle = FontStyles.Normal;
+            subtitle.color = new Color(0.85f, 0.82f, 0.75f, 0.90f);
+            SetSafeOutline(subtitle, 0.10f, new Color(0.02f, 0.02f, 0.04f, 0.90f));
+        }
+    }
             subtitle.color = new Color(0.80f, 0.82f, 0.88f, 0.85f); // Bạc cổ
             SetSafeOutline(subtitle, 0.25f, new Color(0.02f, 0.02f, 0.04f, 0.90f));
         }
