@@ -1503,7 +1503,7 @@ public class MailboxUI : MonoBehaviour
     {
         bool isVi = LocalizationManager.IsVietnamese;
 
-        // Left Column: Notices List (Width 420px)
+        // Left Column: Notices List (Width 580px - Rộng rãi như cột Mails)
         GameObject leftCol = new GameObject("LeftColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         leftCol.transform.SetParent(parent, false);
         RectTransform lcRt = leftCol.GetComponent<RectTransform>();
@@ -1511,7 +1511,7 @@ public class MailboxUI : MonoBehaviour
         lcRt.anchorMax = new Vector2(0f, 1f);
         lcRt.pivot = new Vector2(0f, 0.5f);
         lcRt.anchoredPosition = new Vector2(0f, 0f);
-        lcRt.sizeDelta = new Vector2(420f, 0f);
+        lcRt.sizeDelta = new Vector2(580f, 0f);
 
         Image lcImg = leftCol.GetComponent<Image>();
         lcImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -1522,20 +1522,22 @@ public class MailboxUI : MonoBehaviour
         lcOut.effectColor = new Color(0.30f, 0.42f, 0.58f, 0.50f);
         lcOut.effectDistance = new Vector2(1f, -1f);
 
-        // Header
+        // Header - BẢNG TIN VƯƠNG QUỐC (Chữ bự 28pt Bold)
         GameObject lhObj = new GameObject("NoticeHeader", typeof(RectTransform), typeof(CanvasRenderer));
         lhObj.transform.SetParent(leftCol.transform, false);
         RectTransform lhRt = lhObj.GetComponent<RectTransform>();
         lhRt.anchorMin = new Vector2(0f, 1f);
         lhRt.anchorMax = new Vector2(1f, 1f);
-        lhRt.offsetMin = new Vector2(14f, -40f);
-        lhRt.offsetMax = new Vector2(-14f, -8f);
+        lhRt.offsetMin = new Vector2(20f, -54f);
+        lhRt.offsetMax = new Vector2(-20f, -6f);
 
         var lhTmp = lhObj.AddComponent<TextMeshProUGUI>();
         lhTmp.text = isVi ? "<b>BẢNG TIN VƯƠNG QUỐC</b>" : "<b>REALM BULLETIN</b>";
-        lhTmp.fontSize = 13.5f;
-        lhTmp.color = new Color(0.85f, 0.90f, 0.96f);
+        lhTmp.fontSize = 28f;
+        lhTmp.fontStyle = FontStyles.Bold;
+        lhTmp.color = new Color(1f, 0.88f, 0.45f);
         lhTmp.alignment = TextAlignmentOptions.MidlineLeft;
+        SoulslikeHUDStyler.SetSafeOutline(lhTmp, 0.25f, Color.black);
 
         // Scroll Container
         GameObject scrollRoot = new GameObject("NoticeScrollRoot", typeof(RectTransform), typeof(ScrollRect), typeof(RectMask2D));
@@ -1543,8 +1545,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform srRt = scrollRoot.GetComponent<RectTransform>();
         srRt.anchorMin = Vector2.zero;
         srRt.anchorMax = Vector2.one;
-        srRt.offsetMin = new Vector2(8f, 10f);
-        srRt.offsetMax = new Vector2(-8f, -44f);
+        srRt.offsetMin = new Vector2(10f, 12f);
+        srRt.offsetMax = new Vector2(-10f, -60f);
 
         ScrollRect sRect = scrollRoot.GetComponent<ScrollRect>();
         sRect.horizontal = false;
@@ -1559,8 +1561,8 @@ public class MailboxUI : MonoBehaviour
         cntRt.pivot = new Vector2(0.5f, 1f);
 
         var vlg = contentObj.GetComponent<VerticalLayoutGroup>();
-        vlg.spacing = 8f;
-        vlg.padding = new RectOffset(4, 4, 4, 4);
+        vlg.spacing = 10f;
+        vlg.padding = new RectOffset(6, 6, 6, 6);
         vlg.childControlHeight = false;
         vlg.childControlWidth = true;
         vlg.childForceExpandHeight = false;
@@ -1573,14 +1575,14 @@ public class MailboxUI : MonoBehaviour
         sRect.viewport = srRt;
         noticeListContent = contentObj.transform;
 
-        // Right Column: Notice Inspection Panel (Full right width)
+        // Right Column: Notice Inspection Panel (Full right width, bám sát cột trái)
         GameObject rightCol = new GameObject("RightColumn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         rightCol.transform.SetParent(parent, false);
         RectTransform rcRt = rightCol.GetComponent<RectTransform>();
         rcRt.anchorMin = new Vector2(0f, 0f);
         rcRt.anchorMax = new Vector2(1f, 1f);
         rcRt.pivot = new Vector2(0.5f, 0.5f);
-        rcRt.offsetMin = new Vector2(440f, 0f);
+        rcRt.offsetMin = new Vector2(600f, 0f);
         rcRt.offsetMax = new Vector2(0f, 0f);
 
         Image rcImg = rightCol.GetComponent<Image>();
@@ -1592,45 +1594,46 @@ public class MailboxUI : MonoBehaviour
         rcOut.effectColor = new Color(0.30f, 0.42f, 0.58f, 0.50f);
         rcOut.effectDistance = new Vector2(1f, -1f);
 
-        // Notice Title
+        // Notice Title (Bự 44pt Bold)
         GameObject ntObj = new GameObject("NoticeTitle", typeof(RectTransform), typeof(CanvasRenderer));
         ntObj.transform.SetParent(rightCol.transform, false);
         RectTransform ntRt = ntObj.GetComponent<RectTransform>();
         ntRt.anchorMin = new Vector2(0f, 1f);
         ntRt.anchorMax = new Vector2(1f, 1f);
-        ntRt.offsetMin = new Vector2(24f, -54f);
-        ntRt.offsetMax = new Vector2(-24f, -12f);
+        ntRt.offsetMin = new Vector2(30f, -70f);
+        ntRt.offsetMax = new Vector2(-30f, -14f);
 
         noticeDetailTitleText = ntObj.AddComponent<TextMeshProUGUI>();
-        noticeDetailTitleText.fontSize = 32f;
+        noticeDetailTitleText.fontSize = 44f;
         noticeDetailTitleText.fontStyle = FontStyles.Bold;
         noticeDetailTitleText.color = new Color(1f, 0.88f, 0.45f);
         SoulslikeHUDStyler.SetSafeOutline(noticeDetailTitleText, 0.25f, Color.black);
 
-        // Notice Meta
+        // Notice Meta (Bự 24pt Bold)
         GameObject nmObj = new GameObject("NoticeMeta", typeof(RectTransform), typeof(CanvasRenderer));
         nmObj.transform.SetParent(rightCol.transform, false);
         RectTransform nmRt = nmObj.GetComponent<RectTransform>();
         nmRt.anchorMin = new Vector2(0f, 1f);
         nmRt.anchorMax = new Vector2(1f, 1f);
-        nmRt.offsetMin = new Vector2(24f, -92f);
-        nmRt.offsetMax = new Vector2(-24f, -56f);
+        nmRt.offsetMin = new Vector2(30f, -118f);
+        nmRt.offsetMax = new Vector2(-30f, -72f);
 
         noticeDetailMetaText = nmObj.AddComponent<TextMeshProUGUI>();
-        noticeDetailMetaText.fontSize = 20f;
+        noticeDetailMetaText.fontSize = 24f;
+        noticeDetailMetaText.fontStyle = FontStyles.Bold;
         noticeDetailMetaText.color = new Color(0.65f, 0.80f, 0.98f);
         SoulslikeHUDStyler.SetSafeOutline(noticeDetailMetaText, 0.2f, Color.black);
 
-        SoulslikeHUDStyler.AddFiligreeDivider(rightCol.transform, new Vector2(0f, -98f), new Vector2(900f, 6f));
+        SoulslikeHUDStyler.AddFiligreeDivider(rightCol.transform, new Vector2(0f, -126f), new Vector2(1100f, 6f));
 
-        // Notice Scrollable Body Text
+        // Notice Scrollable Body Text (Bự 34pt Bold, lấp đầy toàn bộ khung phải)
         GameObject nBodyScroll = new GameObject("NoticeBodyScroll", typeof(RectTransform), typeof(ScrollRect), typeof(RectMask2D));
         nBodyScroll.transform.SetParent(rightCol.transform, false);
         RectTransform nbsRt = nBodyScroll.GetComponent<RectTransform>();
         nbsRt.anchorMin = Vector2.zero;
         nbsRt.anchorMax = Vector2.one;
-        nbsRt.offsetMin = new Vector2(24f, 20f);
-        nbsRt.offsetMax = new Vector2(-24f, -112f);
+        nbsRt.offsetMin = new Vector2(30f, 25f);
+        nbsRt.offsetMax = new Vector2(-30f, -138f);
 
         ScrollRect nbScroll = nBodyScroll.GetComponent<ScrollRect>();
         nbScroll.horizontal = false;
@@ -1648,9 +1651,9 @@ public class MailboxUI : MonoBehaviour
         nbcsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         noticeDetailBodyText = nbContent.AddComponent<TextMeshProUGUI>();
-        noticeDetailBodyText.fontSize = 24f;
+        noticeDetailBodyText.fontSize = 34f;
         noticeDetailBodyText.fontStyle = FontStyles.Bold;
-        noticeDetailBodyText.lineSpacing = 16f;
+        noticeDetailBodyText.lineSpacing = 22f;
         noticeDetailBodyText.color = new Color(0.92f, 0.95f, 1f);
         noticeDetailBodyText.enableWordWrapping = true;
         SoulslikeHUDStyler.SetSafeOutline(noticeDetailBodyText, 0.22f, Color.black);
@@ -1678,7 +1681,7 @@ public class MailboxUI : MonoBehaviour
             item.transform.SetParent(noticeListContent, false);
 
             RectTransform itRt = item.GetComponent<RectTransform>();
-            itRt.sizeDelta = new Vector2(0f, 105f);
+            itRt.sizeDelta = new Vector2(0f, 125f);
 
             Image itemImg = item.GetComponent<Image>();
             itemImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -1699,7 +1702,7 @@ public class MailboxUI : MonoBehaviour
                 itemOut.effectDistance = new Vector2(1f, -1f);
             }
 
-            // Tag Pill (QUY TẮC / LỊCH TRÌNH / CẬP NHẬT)
+            // Tag Pill (QUY TẮC / LỊCH TRÌNH / CẬP NHẬT) - Rộng 135px, cao 48px, chữ 22pt Bold
             GameObject tagObj = new GameObject("TagPill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             tagObj.transform.SetParent(item.transform, false);
             RectTransform tgRt = tagObj.GetComponent<RectTransform>();
@@ -1707,7 +1710,7 @@ public class MailboxUI : MonoBehaviour
             tgRt.anchorMax = new Vector2(0f, 0.5f);
             tgRt.pivot = new Vector2(0f, 0.5f);
             tgRt.anchoredPosition = new Vector2(14f, 0f);
-            tgRt.sizeDelta = new Vector2(110f, 36f);
+            tgRt.sizeDelta = new Vector2(135f, 48f);
 
             Image tgImg = tagObj.GetComponent<Image>();
             tgImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1722,41 +1725,41 @@ public class MailboxUI : MonoBehaviour
             tgttRt.sizeDelta = Vector2.zero;
             var tgTmp = tgtObj.AddComponent<TextMeshProUGUI>();
             tgTmp.text = $"<b>{notice.categoryTag}</b>";
-            tgTmp.fontSize = 16f;
+            tgTmp.fontSize = 22f;
             tgTmp.fontStyle = FontStyles.Bold;
             tgTmp.alignment = TextAlignmentOptions.Center;
             tgTmp.color = Color.white;
 
-            // Title
+            // Title - Bự 26pt Bold
             GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
             titleObj.transform.SetParent(item.transform, false);
             RectTransform tRt = titleObj.GetComponent<RectTransform>();
             tRt.anchorMin = new Vector2(0f, 1f);
             tRt.anchorMax = new Vector2(1f, 1f);
-            tRt.offsetMin = new Vector2(135f, -48f);
-            tRt.offsetMax = new Vector2(-12f, -10f);
+            tRt.offsetMin = new Vector2(160f, -58f);
+            tRt.offsetMax = new Vector2(-14f, -10f);
 
             var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
             tTmp.text = isVi ? notice.titleVi : notice.titleEn;
-            tTmp.fontSize = 22f;
+            tTmp.fontSize = 26f;
             tTmp.fontStyle = FontStyles.Bold;
             tTmp.color = isSelected ? new Color(1f, 0.90f, 0.50f) : new Color(0.85f, 0.90f, 0.96f);
             tTmp.overflowMode = TextOverflowModes.Ellipsis;
             SoulslikeHUDStyler.SetSafeOutline(tTmp, 0.2f, Color.black);
 
-            // Sender & Date
+            // Sender & Date - Bự 20pt Bold
             GameObject subObj = new GameObject("Meta", typeof(RectTransform), typeof(CanvasRenderer));
             subObj.transform.SetParent(item.transform, false);
             RectTransform sRt = subObj.GetComponent<RectTransform>();
             sRt.anchorMin = new Vector2(0f, 0f);
             sRt.anchorMax = new Vector2(1f, 0f);
-            sRt.offsetMin = new Vector2(135f, 10f);
-            sRt.offsetMax = new Vector2(-12f, 50f);
+            sRt.offsetMin = new Vector2(160f, 12f);
+            sRt.offsetMax = new Vector2(-14f, 56f);
 
             var sTmp = subObj.AddComponent<TextMeshProUGUI>();
             string sender = isVi ? notice.senderVi : notice.senderEn;
             sTmp.text = $"{sender} • {notice.date}";
-            sTmp.fontSize = 18f;
+            sTmp.fontSize = 20f;
             sTmp.fontStyle = FontStyles.Bold;
             sTmp.color = new Color(0.55f, 0.65f, 0.78f);
 
@@ -1822,21 +1825,23 @@ public class MailboxUI : MonoBehaviour
         mcOut.effectColor = new Color(0.30f, 0.42f, 0.58f, 0.50f);
         mcOut.effectDistance = new Vector2(1f, -1f);
 
-        // Header Title & Subtitle
+        // Header Title & Subtitle - Phóng to 44pt và 26pt Bold
         GameObject tObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
         tObj.transform.SetParent(mainCard.transform, false);
         RectTransform tRt = tObj.GetComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0.5f, 1f);
         tRt.anchorMax = new Vector2(0.5f, 1f);
         tRt.pivot = new Vector2(0.5f, 1f);
-        tRt.anchoredPosition = new Vector2(0f, -24f);
-        tRt.sizeDelta = new Vector2(1200f, 38f);
+        tRt.anchoredPosition = new Vector2(0f, -20f);
+        tRt.sizeDelta = new Vector2(1600f, 56f);
 
         var tTmp = tObj.AddComponent<TextMeshProUGUI>();
         tTmp.text = isVi ? "<b>TRUNG TÂM ĐỔI MÃ QUÀ TẶNG VƯƠNG QUỐC</b>" : "<b>KINGDOM GIFTCODE REDEMPTION</b>";
-        tTmp.fontSize = 28f;
+        tTmp.fontSize = 44f;
+        tTmp.fontStyle = FontStyles.Bold;
         tTmp.color = new Color(1f, 0.88f, 0.45f);
         tTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(tTmp, 0.25f, Color.black);
 
         GameObject stObj = new GameObject("SubTitle", typeof(RectTransform), typeof(CanvasRenderer));
         stObj.transform.SetParent(mainCard.transform, false);
@@ -1844,26 +1849,27 @@ public class MailboxUI : MonoBehaviour
         stRt.anchorMin = new Vector2(0.5f, 1f);
         stRt.anchorMax = new Vector2(0.5f, 1f);
         stRt.pivot = new Vector2(0.5f, 1f);
-        stRt.anchoredPosition = new Vector2(0f, -68f);
-        stRt.sizeDelta = new Vector2(1200f, 30f);
+        stRt.anchoredPosition = new Vector2(0f, -78f);
+        stRt.sizeDelta = new Vector2(1600f, 40f);
 
         var stTmp = stObj.AddComponent<TextMeshProUGUI>();
         stTmp.text = isVi 
             ? "Nhập mã quà tặng từ sự kiện, cộng đồng hoặc nhà phát triển để nhận Linh Hồn và vật phẩm quý giá."
             : "Redeem giftcodes from events, community, and dev milestones to claim Soul Shards.";
-        stTmp.fontSize = 19f;
-        stTmp.color = new Color(0.65f, 0.75f, 0.88f);
+        stTmp.fontSize = 26f;
+        stTmp.fontStyle = FontStyles.Bold;
+        stTmp.color = new Color(0.75f, 0.85f, 0.96f);
         stTmp.alignment = TextAlignmentOptions.Center;
 
-        // Redemption Input Box (Height 72px, Rộng 1280px)
+        // Redemption Input Box (Height 92px, Rộng 1500px)
         GameObject inputBar = new GameObject("InputBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         inputBar.transform.SetParent(mainCard.transform, false);
         RectTransform ibRt = inputBar.GetComponent<RectTransform>();
         ibRt.anchorMin = new Vector2(0.5f, 1f);
         ibRt.anchorMax = new Vector2(0.5f, 1f);
         ibRt.pivot = new Vector2(0.5f, 1f);
-        ibRt.anchoredPosition = new Vector2(0f, -108f);
-        ibRt.sizeDelta = new Vector2(1280f, 72f);
+        ibRt.anchoredPosition = new Vector2(0f, -126f);
+        ibRt.sizeDelta = new Vector2(1500f, 92f);
 
         Image ibImg = inputBar.GetComponent<Image>();
         ibImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
@@ -1874,15 +1880,15 @@ public class MailboxUI : MonoBehaviour
         ibOut.effectColor = new Color(0.85f, 0.70f, 0.30f, 0.65f);
         ibOut.effectDistance = new Vector2(1.5f, -1.5f);
 
-        // Input Field Component
+        // Input Field Component (Rộng 720px, Cao 68px, chữ 30pt Bold)
         GameObject ifObj = new GameObject("InputField", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(TMP_InputField));
         ifObj.transform.SetParent(inputBar.transform, false);
         RectTransform ifRt = ifObj.GetComponent<RectTransform>();
         ifRt.anchorMin = new Vector2(0f, 0.5f);
         ifRt.anchorMax = new Vector2(0f, 0.5f);
         ifRt.pivot = new Vector2(0f, 0.5f);
-        ifRt.anchoredPosition = new Vector2(16f, 0f);
-        ifRt.sizeDelta = new Vector2(600f, 52f);
+        ifRt.anchoredPosition = new Vector2(18f, 0f);
+        ifRt.sizeDelta = new Vector2(720f, 68f);
 
         Image ifBg = ifObj.GetComponent<Image>();
         ifBg.color = new Color(0.04f, 0.06f, 0.09f, 0.95f);
@@ -1896,8 +1902,8 @@ public class MailboxUI : MonoBehaviour
         RectTransform taRt = taObj.GetComponent<RectTransform>();
         taRt.anchorMin = Vector2.zero;
         taRt.anchorMax = Vector2.one;
-        taRt.offsetMin = new Vector2(12f, 2f);
-        taRt.offsetMax = new Vector2(-12f, -2f);
+        taRt.offsetMin = new Vector2(14f, 2f);
+        taRt.offsetMax = new Vector2(-14f, -2f);
 
         GameObject phObj = new GameObject("Placeholder", typeof(RectTransform), typeof(CanvasRenderer));
         phObj.transform.SetParent(taObj.transform, false);
@@ -1907,7 +1913,7 @@ public class MailboxUI : MonoBehaviour
         phRt.sizeDelta = Vector2.zero;
         var phTmp = phObj.AddComponent<TextMeshProUGUI>();
         phTmp.text = isVi ? "Chạm để nhập mã quà tặng..." : "Tap to enter giftcode...";
-        phTmp.fontSize = 19f;
+        phTmp.fontSize = 26f;
         phTmp.fontStyle = FontStyles.Italic;
         phTmp.color = new Color(0.5f, 0.6f, 0.7f, 0.7f);
         phTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1920,7 +1926,7 @@ public class MailboxUI : MonoBehaviour
         itRt.anchorMax = Vector2.one;
         itRt.sizeDelta = Vector2.zero;
         var itTmp = itObj.AddComponent<TextMeshProUGUI>();
-        itTmp.fontSize = 22f;
+        itTmp.fontSize = 30f;
         itTmp.fontStyle = FontStyles.Bold;
         itTmp.color = Color.white;
         itTmp.alignment = TextAlignmentOptions.MidlineLeft;
@@ -1941,15 +1947,15 @@ public class MailboxUI : MonoBehaviour
             UpdateKeyboardPreview();
         });
 
-        // Button DÁN MÃ (Paste)
+        // Button DÁN MÃ (Paste) - Rộng 160px, cao 68px, chữ 24pt Bold
         GameObject pasteBtnObj = new GameObject("Btn_Paste", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         pasteBtnObj.transform.SetParent(inputBar.transform, false);
         RectTransform pRt = pasteBtnObj.GetComponent<RectTransform>();
         pRt.anchorMin = new Vector2(0f, 0.5f);
         pRt.anchorMax = new Vector2(0f, 0.5f);
         pRt.pivot = new Vector2(0f, 0.5f);
-        pRt.anchoredPosition = new Vector2(630f, 0f);
-        pRt.sizeDelta = new Vector2(130f, 52f);
+        pRt.anchoredPosition = new Vector2(755f, 0f);
+        pRt.sizeDelta = new Vector2(160f, 68f);
 
         Image pImg = pasteBtnObj.GetComponent<Image>();
         pImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1964,7 +1970,8 @@ public class MailboxUI : MonoBehaviour
         ptRt.sizeDelta = Vector2.zero;
         var ptTmp = ptObj.AddComponent<TextMeshProUGUI>();
         ptTmp.text = isVi ? "<b>DÁN MÃ</b>" : "<b>PASTE</b>";
-        ptTmp.fontSize = 18f;
+        ptTmp.fontSize = 24f;
+        ptTmp.fontStyle = FontStyles.Bold;
         ptTmp.alignment = TextAlignmentOptions.Center;
         ptTmp.color = new Color(0.7f, 0.9f, 1f);
 
@@ -1972,15 +1979,15 @@ public class MailboxUI : MonoBehaviour
         pasteBtn.targetGraphic = pImg;
         pasteBtn.onClick.AddListener(OnPasteFromClipboard);
 
-        // Button BÀN PHÍM ẢO (Virtual Keyboard)
+        // Button BÀN PHÍM ẢO (Virtual Keyboard) - Rộng 180px, cao 68px, chữ 24pt Bold
         GameObject kbdBtnObj = new GameObject("Btn_ToggleKeyboard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         kbdBtnObj.transform.SetParent(inputBar.transform, false);
         RectTransform kbRt = kbdBtnObj.GetComponent<RectTransform>();
         kbRt.anchorMin = new Vector2(0f, 0.5f);
         kbRt.anchorMax = new Vector2(0f, 0.5f);
         kbRt.pivot = new Vector2(0f, 0.5f);
-        kbRt.anchoredPosition = new Vector2(775f, 0f);
-        kbRt.sizeDelta = new Vector2(140f, 52f);
+        kbRt.anchoredPosition = new Vector2(930f, 0f);
+        kbRt.sizeDelta = new Vector2(180f, 68f);
 
         Image kbImg = kbdBtnObj.GetComponent<Image>();
         kbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1995,7 +2002,8 @@ public class MailboxUI : MonoBehaviour
         kbtRt.sizeDelta = Vector2.zero;
         var kbtTmp = kbtObj.AddComponent<TextMeshProUGUI>();
         kbtTmp.text = isVi ? "<b>BÀN PHÍM</b>" : "<b>KEYBOARD</b>";
-        kbtTmp.fontSize = 18f;
+        kbtTmp.fontSize = 24f;
+        kbtTmp.fontStyle = FontStyles.Bold;
         kbtTmp.alignment = TextAlignmentOptions.Center;
         kbtTmp.color = new Color(0.9f, 0.85f, 1f);
 
@@ -2003,15 +2011,15 @@ public class MailboxUI : MonoBehaviour
         kbdBtn.targetGraphic = kbImg;
         kbdBtn.onClick.AddListener(ToggleVirtualKeyboard);
 
-        // Button ĐỔI QUÀ NGAY (Redeem Now) - Radiant Gold / Emerald
+        // Button ĐỔI QUÀ NGAY (Redeem Now) - Rộng 340px, cao 68px, chữ 28pt Bold
         GameObject rdBtnObj = new GameObject("Btn_Redeem", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         rdBtnObj.transform.SetParent(inputBar.transform, false);
         RectTransform rdRt = rdBtnObj.GetComponent<RectTransform>();
         rdRt.anchorMin = new Vector2(1f, 0.5f);
         rdRt.anchorMax = new Vector2(1f, 0.5f);
         rdRt.pivot = new Vector2(1f, 0.5f);
-        rdRt.anchoredPosition = new Vector2(-16f, 0f);
-        rdRt.sizeDelta = new Vector2(300f, 52f);
+        rdRt.anchoredPosition = new Vector2(-18f, 0f);
+        rdRt.sizeDelta = new Vector2(340f, 68f);
 
         Image rdImg = rdBtnObj.GetComponent<Image>();
         rdImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -2030,7 +2038,8 @@ public class MailboxUI : MonoBehaviour
         rdtRt.sizeDelta = Vector2.zero;
         var rdtTmp = rdtObj.AddComponent<TextMeshProUGUI>();
         rdtTmp.text = isVi ? "<b>ĐỔI QUÀ NGAY</b>" : "<b>REDEEM NOW</b>";
-        rdtTmp.fontSize = 20f;
+        rdtTmp.fontSize = 28f;
+        rdtTmp.fontStyle = FontStyles.Bold;
         rdtTmp.alignment = TextAlignmentOptions.Center;
         rdtTmp.color = Color.white;
 
@@ -2038,51 +2047,53 @@ public class MailboxUI : MonoBehaviour
         rdBtn.targetGraphic = rdImg;
         rdBtn.onClick.AddListener(OnRedeemGiftcode);
 
-        // Feedback Text Line
+        // Feedback Text Line (24pt)
         GameObject fbObj = new GameObject("FeedbackText", typeof(RectTransform), typeof(CanvasRenderer));
         fbObj.transform.SetParent(mainCard.transform, false);
         RectTransform fbRt = fbObj.GetComponent<RectTransform>();
         fbRt.anchorMin = new Vector2(0.5f, 1f);
         fbRt.anchorMax = new Vector2(0.5f, 1f);
         fbRt.pivot = new Vector2(0.5f, 1f);
-        fbRt.anchoredPosition = new Vector2(0f, -190f);
-        fbRt.sizeDelta = new Vector2(1200f, 30f);
+        fbRt.anchoredPosition = new Vector2(0f, -228f);
+        fbRt.sizeDelta = new Vector2(1500f, 36f);
 
         giftcodeFeedbackText = fbObj.AddComponent<TextMeshProUGUI>();
-        giftcodeFeedbackText.fontSize = 18f;
+        giftcodeFeedbackText.fontSize = 24f;
         giftcodeFeedbackText.alignment = TextAlignmentOptions.Center;
         giftcodeFeedbackText.color = new Color(0.35f, 0.95f, 0.85f);
 
         // Filigree Divider
-        SoulslikeHUDStyler.AddFiligreeDivider(mainCard.transform, new Vector2(0f, -225f), new Vector2(1280f, 6f));
+        SoulslikeHUDStyler.AddFiligreeDivider(mainCard.transform, new Vector2(0f, -268f), new Vector2(1500f, 6f));
 
-        // Public Codes Section Header
+        // Public Codes Section Header (28pt Bold)
         GameObject pcHeadObj = new GameObject("PublicCodesHeader", typeof(RectTransform), typeof(CanvasRenderer));
         pcHeadObj.transform.SetParent(mainCard.transform, false);
         RectTransform pchRt = pcHeadObj.GetComponent<RectTransform>();
         pchRt.anchorMin = new Vector2(0.5f, 1f);
         pchRt.anchorMax = new Vector2(0.5f, 1f);
         pchRt.pivot = new Vector2(0.5f, 1f);
-        pchRt.anchoredPosition = new Vector2(0f, -245f);
-        pchRt.sizeDelta = new Vector2(1200f, 32f);
+        pchRt.anchoredPosition = new Vector2(0f, -282f);
+        pchRt.sizeDelta = new Vector2(1500f, 44f);
 
         var pchTmp = pcHeadObj.AddComponent<TextMeshProUGUI>();
         pchTmp.text = isVi 
             ? "<b>MÃ QUÀ TẶNG CÔNG KHAI CÓ SẴN (CHẠM ĐỂ NHẬN NHANH)</b>" 
             : "<b>AVAILABLE PUBLIC GIFTCODES (TAP TO INSTANTLY REDEEM)</b>";
-        pchTmp.fontSize = 20f;
+        pchTmp.fontSize = 28f;
+        pchTmp.fontStyle = FontStyles.Bold;
         pchTmp.color = new Color(1f, 0.88f, 0.45f);
         pchTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(pchTmp, 0.22f, Color.black);
 
-        // Container for Public Codes Cards
+        // Container for Public Codes Cards (Nâng độ cao lên 300px, vị trí thoáng đãng cân đối)
         GameObject codesContainer = new GameObject("CodesGrid", typeof(RectTransform));
         codesContainer.transform.SetParent(mainCard.transform, false);
         RectTransform cgRt = codesContainer.GetComponent<RectTransform>();
         cgRt.anchorMin = new Vector2(0.5f, 0f);
         cgRt.anchorMax = new Vector2(0.5f, 0f);
         cgRt.pivot = new Vector2(0.5f, 0f);
-        cgRt.anchoredPosition = new Vector2(0f, 25f);
-        cgRt.sizeDelta = new Vector2(1650f, 230f);
+        cgRt.anchoredPosition = new Vector2(0f, 35f);
+        cgRt.sizeDelta = new Vector2(1650f, 300f);
 
         publicCodesContainer = codesContainer.transform;
         PopulatePublicGiftcodeCards();
@@ -2102,9 +2113,9 @@ public class MailboxUI : MonoBehaviour
             ("VAELSTRIDER", "Hào Khí Chiến Binh", "Warrior Spirit", 1000)
         };
 
-        float cardWidth = 370f;
-        float cardHeight = 220f;
-        float gap = 24f;
+        float cardWidth = 390f;
+        float cardHeight = 280f;
+        float gap = 20f;
         float totalWidth = 4 * cardWidth + 3 * gap;
         float startX = -totalWidth * 0.5f + cardWidth * 0.5f;
 
@@ -2137,62 +2148,67 @@ public class MailboxUI : MonoBehaviour
             cOut.effectColor = isUsed ? new Color(0.3f, 0.4f, 0.5f, 0.4f) : new Color(0.85f, 0.70f, 0.32f, 0.70f);
             cOut.effectDistance = new Vector2(1.5f, -1.5f);
 
-            // Code Text
+            // Code Text - Bự 34pt Bold rực rỡ
             GameObject ctObj = new GameObject("CodeName", typeof(RectTransform), typeof(CanvasRenderer));
             ctObj.transform.SetParent(card.transform, false);
             RectTransform ctRt = ctObj.GetComponent<RectTransform>();
             ctRt.anchorMin = new Vector2(0.5f, 1f);
             ctRt.anchorMax = new Vector2(0.5f, 1f);
             ctRt.pivot = new Vector2(0.5f, 1f);
-            ctRt.anchoredPosition = new Vector2(0f, -14f);
-            ctRt.sizeDelta = new Vector2(cardWidth - 20f, 32f);
+            ctRt.anchoredPosition = new Vector2(0f, -16f);
+            ctRt.sizeDelta = new Vector2(cardWidth - 20f, 44f);
 
             var ctTmp = ctObj.AddComponent<TextMeshProUGUI>();
             ctTmp.text = $"<b>{item.code}</b>";
-            ctTmp.fontSize = 24f;
+            ctTmp.fontSize = 34f;
+            ctTmp.fontStyle = FontStyles.Bold;
             ctTmp.alignment = TextAlignmentOptions.Center;
             ctTmp.color = isUsed ? new Color(0.6f, 0.7f, 0.8f) : new Color(1f, 0.88f, 0.45f);
+            SoulslikeHUDStyler.SetSafeOutline(ctTmp, 0.22f, Color.black);
 
-            // Description
+            // Description - Bự 24pt Bold
             GameObject cdObj = new GameObject("Desc", typeof(RectTransform), typeof(CanvasRenderer));
             cdObj.transform.SetParent(card.transform, false);
             RectTransform cdRt = cdObj.GetComponent<RectTransform>();
             cdRt.anchorMin = new Vector2(0.5f, 1f);
             cdRt.anchorMax = new Vector2(0.5f, 1f);
             cdRt.pivot = new Vector2(0.5f, 1f);
-            cdRt.anchoredPosition = new Vector2(0f, -50f);
-            cdRt.sizeDelta = new Vector2(cardWidth - 20f, 26f);
+            cdRt.anchoredPosition = new Vector2(0f, -68f);
+            cdRt.sizeDelta = new Vector2(cardWidth - 20f, 36f);
 
             var cdTmp = cdObj.AddComponent<TextMeshProUGUI>();
             cdTmp.text = isVi ? item.descVi : item.descEn;
-            cdTmp.fontSize = 17f;
+            cdTmp.fontSize = 24f;
+            cdTmp.fontStyle = FontStyles.Bold;
             cdTmp.alignment = TextAlignmentOptions.Center;
-            cdTmp.color = new Color(0.70f, 0.80f, 0.92f);
+            cdTmp.color = new Color(0.75f, 0.85f, 0.96f);
 
-            // Shards Value
+            // Shards Value - Bự 30pt Bold màu ngọc
             GameObject csObj = new GameObject("Shards", typeof(RectTransform), typeof(CanvasRenderer));
             csObj.transform.SetParent(card.transform, false);
             RectTransform csRt = csObj.GetComponent<RectTransform>();
             csRt.anchorMin = new Vector2(0.5f, 1f);
             csRt.anchorMax = new Vector2(0.5f, 1f);
             csRt.pivot = new Vector2(0.5f, 1f);
-            csRt.anchoredPosition = new Vector2(0f, -80f);
-            csRt.sizeDelta = new Vector2(cardWidth - 20f, 30f);
+            csRt.anchoredPosition = new Vector2(0f, -112f);
+            csRt.sizeDelta = new Vector2(cardWidth - 20f, 40f);
 
             var csTmp = csObj.AddComponent<TextMeshProUGUI>();
             csTmp.text = $"<color=#55EFC4><b>+{item.shards:N0} Linh Hồn</b></color>";
-            csTmp.fontSize = 22f;
+            csTmp.fontSize = 30f;
+            csTmp.fontStyle = FontStyles.Bold;
             csTmp.alignment = TextAlignmentOptions.Center;
+            SoulslikeHUDStyler.SetSafeOutline(csTmp, 0.2f, Color.black);
 
-            // 1-Click Action Button
+            // 1-Click Action Button - Cao 66px, chữ 26pt Bold
             GameObject actBtnObj = new GameObject("Btn_UseCode", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             actBtnObj.transform.SetParent(card.transform, false);
             RectTransform abRt = actBtnObj.GetComponent<RectTransform>();
             abRt.anchorMin = new Vector2(0.5f, 0f);
             abRt.anchorMax = new Vector2(0.5f, 0f);
             abRt.pivot = new Vector2(0.5f, 0f);
-            abRt.anchoredPosition = new Vector2(0f, 14f);
-            abRt.sizeDelta = new Vector2(cardWidth - 28f, 52f);
+            abRt.anchoredPosition = new Vector2(0f, 18f);
+            abRt.sizeDelta = new Vector2(cardWidth - 28f, 66f);
 
             Image abImg = actBtnObj.GetComponent<Image>();
             abImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -2212,7 +2228,8 @@ public class MailboxUI : MonoBehaviour
             abtTmp.text = isUsed 
                 ? (isVi ? "<b>ĐÃ DÙNG</b>" : "<b>USED</b>") 
                 : (isVi ? "<b>SỬ DỤNG</b>" : "<b>USE CODE</b>");
-            abtTmp.fontSize = 20f;
+            abtTmp.fontSize = 26f;
+            abtTmp.fontStyle = FontStyles.Bold;
             abtTmp.alignment = TextAlignmentOptions.Center;
             abtTmp.color = isUsed ? new Color(0.6f, 0.7f, 0.8f) : Color.white;
 
