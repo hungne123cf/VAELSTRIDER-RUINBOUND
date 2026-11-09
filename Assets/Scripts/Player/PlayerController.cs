@@ -926,72 +926,48 @@ public class PlayerController : MonoBehaviour
         var box = GetComponent<BoxCollider2D>();
         var cap = GetComponent<CapsuleCollider2D>();
 
+        // Chuẩn hóa kích thước Collider cho nhân vật Top-Down 2D:
+        // Đặt Collider ở vùng bàn chân (footprint: offset.y ~ 0.25, size ~ 0.48 x 0.40)
+        // thay vì bao phủ cả ngực/đầu (offset.y = 1.25).
+        // Nhờ vậy, bàn chân nhân vật có thể đi chạm sát chân tường và mép cầu/nước tự nhiên,
+        // trong khi đầu và ngực tự nhiên đè lên lớp tường theo phối cảnh 2D chân thực.
+        Vector2 feetOffset = new Vector2(0f, 0.25f);
+        Vector2 feetSize = new Vector2(0.48f, 0.40f);
+
+        string curChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+        if (curChar == CharacterManager.CHAR_TITAN_BERSERKER || GetComponent<TitanBerserkerSkill>() != null)
+        {
+            feetOffset = new Vector2(0f, 0.35f);
+            feetSize = new Vector2(0.65f, 0.50f);
+        }
+
         if (box != null)
         {
-            Vector2 oldOffset = box.offset;
-            Vector2 oldSize = box.size;
-            if (Application.isPlaying)
-            {
-                Destroy(box);
-            }
-            else
-            {
-#if UNITY_EDITOR
-                var b = box;
-                UnityEditor.EditorApplication.delayCall += () =>
-                {
-                    if (b != null) DestroyImmediate(b);
-                };
-#else
-                Destroy(box);
-#endif
-            }
-
-            if (cap == null)
-            {
-                cap = gameObject.AddComponent<CapsuleCollider2D>();
-                cap.offset = oldOffset;
-                cap.size = oldSize;
-            }
+            box.offset = feetOffset;
+            box.size = feetSize;
+            box.sharedMaterial = slipMat;
         }
-        else if (cap == null)
+
+        if (cap != null)
         {
-            cap = gameObject.AddComponent<CapsuleCollider2D>();
+            cap.offset = feetOffset;
+            cap.size = feetSize;
+            cap.sharedMaterial = slipMat;
         }
 
-        cap.sharedMaterial = slipMat;
+        if (box == null && cap == null)
+        {
+            box = gameObject.AddComponent<BoxCollider2D>();
+            box.offset = feetOffset;
+            box.size = feetSize;
+            box.sharedMaterial = slipMat;
+        }
+
         if (rb != null)
         {
             rb.sharedMaterial = slipMat;
             rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-        }
-
-        var sr = GetComponent<SpriteRenderer>();
-        string curChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
-        if (curChar == CharacterManager.CHAR_TITAN_BERSERKER || GetComponent<TitanBerserkerSkill>() != null)
-        {
-            cap.offset = new Vector2(0f, 0.65f);
-            cap.size = new Vector2(0.90f, 1.30f);
-        }
-        else if (curChar == CharacterManager.CHAR_DUNE_ASSASSIN || GetComponent<DuneAssassinSkill>() != null)
-        {
-            cap.offset = new Vector2(0f, 0f);
-            cap.size = new Vector2(0.48f, 0.72f);
-        }
-        else if (sr != null && sr.sprite != null)
-        {
-            Bounds b = sr.sprite.bounds;
-            float cy = Mathf.Clamp(b.center.y, 0f, 0.35f);
-            float h = Mathf.Clamp(b.size.y * 0.5f, 0.5f, 0.75f);
-            float w = Mathf.Clamp(b.size.x * 0.5f, 0.45f, 0.6f);
-            cap.offset = new Vector2(0f, cy);
-            cap.size = new Vector2(w, h);
-        }
-        else
-        {
-            cap.offset = new Vector2(0f, 0.2f);
-            cap.size = new Vector2(0.48f, 0.65f);
         }
 
         var combat = GetComponent<PlayerCombat>();

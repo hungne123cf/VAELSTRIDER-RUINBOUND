@@ -399,12 +399,10 @@ public class SurroundingWaterOceanSystem : MonoBehaviour
         }
         else
         {
+            // Bao gồm toàn bộ ô sàn và tường hợp lệ của Dungeon để người chơi có thể tiếp xúc sát tường tự nhiên
             foreach (var c in landCells)
             {
-                if (!wallCells.Contains(c))
-                {
-                    validLandCells.Add(c);
-                }
+                validLandCells.Add(c);
             }
         }
 

@@ -290,17 +290,6 @@ public class MailboxUI : MonoBehaviour
         if (_mails.Count == 0) InitializeDefaultMails();
         bool isVi = LocalizationManager.IsVietnamese;
 
-        // Auto-restore default mails if all were deleted in past tests, so user is never faced with empty void!
-        int visibleMailCount = 0;
-        foreach (var m in _mails)
-        {
-            if (!IsMailDeleted(m.id)) visibleMailCount++;
-        }
-        if (visibleMailCount == 0)
-        {
-            RestoreDefaultMails();
-        }
-
         // --- MODAL WINDOW (1160 x 640px) ---
         GameObject win = new GameObject("Window", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         win.layer = 5;
@@ -1291,6 +1280,7 @@ public class MailboxUI : MonoBehaviour
         selectedMail = null;
         if (mailDetailPanel != null) mailDetailPanel.SetActive(false);
         if (mailEmptyStateObj != null) mailEmptyStateObj.SetActive(true);
+        RefreshMailList();
     }
 
     private void SelectMail(MailItemData mail)
@@ -1420,6 +1410,7 @@ public class MailboxUI : MonoBehaviour
         PlayerPrefs.Save();
 
         SelectFirstAvailableMail();
+        RefreshMailList();
         UpdateLobbyBadge();
         if (tabMailsRedDot != null) tabMailsRedDot.SetActive(HasUnclaimedMail());
     }
@@ -1443,6 +1434,7 @@ public class MailboxUI : MonoBehaviour
         {
             PlayerPrefs.Save();
             SelectFirstAvailableMail();
+            RefreshMailList();
             UpdateLobbyBadge();
             if (tabMailsRedDot != null) tabMailsRedDot.SetActive(HasUnclaimedMail());
         }
