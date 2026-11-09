@@ -253,7 +253,8 @@ public class VictoryUI : MonoBehaviour
         Time.timeScale = 1f;
         runStartTime = 0f;
         enemiesKilled = 0;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        string curScene = SceneManager.GetActiveScene().name;
+        RealmTransitionManager.LoadSceneWithTransition(curScene, RealmTransitionManager.TransitionTheme.DeployBattle);
     }
 
     public void GoToNextRealm()
@@ -292,7 +293,7 @@ public class VictoryUI : MonoBehaviour
         }
 
         Debug.LogWarning("[VICTORY] Không tìm thấy Scene tiếp theo! Tải lại scene hiện tại.");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        RealmTransitionManager.LoadSceneWithTransition(SceneManager.GetActiveScene().name, RealmTransitionManager.TransitionTheme.DeployBattle);
     }
 
     public static void CreateRuntimeVictoryUI()

@@ -6007,7 +6007,7 @@ public class MainMenuManager : MonoBehaviour
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         AccountDatabase.SaveActiveSessionToDatabase();
-        SceneManager.LoadScene("LoginScene");
+        RealmTransitionManager.LoadSceneWithTransition("LoginScene", RealmTransitionManager.TransitionTheme.LoginIntro);
     }
 
     public void OnExitClicked()

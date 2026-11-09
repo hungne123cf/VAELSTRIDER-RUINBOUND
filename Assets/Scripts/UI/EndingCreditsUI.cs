@@ -238,14 +238,7 @@ public class EndingCreditsUI : MonoBehaviour
         PlayerInventory.ResetRunShards();
         PlayerHealth.ResetRunPreservedHealth();
         Time.timeScale = 1f;
-        if (Application.CanStreamedLevelBeLoaded("Map1_Thestart"))
-        {
-            SceneManager.LoadScene("Map1_Thestart");
-        }
-        else
-        {
-            SceneManager.LoadScene(0);
-        }
+        RealmTransitionManager.LoadSceneWithTransition("Map1_Thestart", RealmTransitionManager.TransitionTheme.DeployBattle);
     }
 
     public void OnClickEnterCorruptedCycle()
@@ -259,14 +252,7 @@ public class EndingCreditsUI : MonoBehaviour
         PlayerInventory.ResetRunShards();
         PlayerHealth.ResetRunPreservedHealth();
         Time.timeScale = 1f;
-        if (Application.CanStreamedLevelBeLoaded("MainMenuScene"))
-        {
-            SceneManager.LoadScene("MainMenuScene");
-        }
-        else
-        {
-            SceneManager.LoadScene(0);
-        }
+        RealmTransitionManager.LoadSceneWithTransition("MainMenuScene", RealmTransitionManager.TransitionTheme.ReturnSanctuary);
     }
 
     public static void CreateRuntimeEndingUI()

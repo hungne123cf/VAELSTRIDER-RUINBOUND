@@ -416,7 +416,7 @@ public class RuinPortal : MonoBehaviour
             }
             else
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                RealmTransitionManager.LoadSceneWithTransition(SceneManager.GetActiveScene().name, RealmTransitionManager.TransitionTheme.DeployBattle);
             }
         }
     }

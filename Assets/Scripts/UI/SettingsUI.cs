@@ -1165,7 +1165,7 @@ public class SettingsUI : MonoBehaviour
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         Time.timeScale = 1.0f;
         CloseSettings();
-        SceneManager.LoadScene("MainMenuScene");
+        RealmTransitionManager.LoadSceneWithTransition("MainMenuScene", RealmTransitionManager.TransitionTheme.ReturnSanctuary);
     }
 
     private void OnResetDataClicked()
@@ -1180,7 +1180,7 @@ public class SettingsUI : MonoBehaviour
         AccountDatabase.ResetActiveUserProgress();
         if (resetConfirmModal != null) resetConfirmModal.SetActive(false);
         CloseSettings();
-        SceneManager.LoadScene("MainMenuScene");
+        RealmTransitionManager.LoadSceneWithTransition("MainMenuScene", RealmTransitionManager.TransitionTheme.ReturnSanctuary);
     }
 
     private void OnConfirmResetNo()

@@ -329,7 +329,7 @@ public class GameOverUI : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene(0);
+            RealmTransitionManager.LoadSceneWithTransition("Map1_Thestart", RealmTransitionManager.TransitionTheme.DeployBattle);
         }
     }
 

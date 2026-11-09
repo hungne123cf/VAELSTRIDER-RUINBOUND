@@ -38,6 +38,7 @@ public class RealmTransitionManager : MonoBehaviour
         DeployBattle,       // Xuất trận vào chiến trường
         PortalWarpMap2,     // Bước vào Cổng tới Thung Lũng Tàn Tích (Map 2)
         PortalWarpMap3,     // Bước vào Cổng tới Ký Ức Lãng Quên (Map 3)
+        CalamityRealm,      // Bước vào Vết Nứt Ác Mộng & Cõi Thảm Họa Thời Tiết (Mưa Axit, Bão Tuyết, Dung Nham)
         AscensionGate,      // Cổng Thăng Hoa kết thúc hành trình
         ReturnSanctuary     // Trở về Thành / Thánh địa an bình
     }
@@ -83,7 +84,8 @@ public class RealmTransitionManager : MonoBehaviour
         _canvas = gameObject.GetComponent<Canvas>();
         if (_canvas == null) _canvas = gameObject.AddComponent<Canvas>();
         _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        _canvas.sortingOrder = 9999; // Luôn hiển thị trên cùng
+        _canvas.sortingOrder = 32767; // Tối đa tuyệt đối trong Unity Canvas (short.MaxValue), đảm bảo luôn nằm trên cùng tất cả mọi UI khác
+        _canvas.overrideSorting = true;
 
         var scaler = gameObject.GetComponent<CanvasScaler>();
         if (scaler == null) scaler = gameObject.AddComponent<CanvasScaler>();
@@ -118,7 +120,7 @@ public class RealmTransitionManager : MonoBehaviour
         bgRt.anchorMin = Vector2.zero;
         bgRt.anchorMax = Vector2.one;
         bgRt.offsetMin = bgRt.offsetMax = Vector2.zero;
-        bgRt.localScale = new Vector3(1.08f, 1.08f, 1f); // 8% overscan chống triệt để viền đen trên màn siêu dài 18:9, 19.5:9, 20:9
+        bgRt.localScale = new Vector3(1.10f, 1.10f, 1f); // 10% overscan chống triệt để viền đen trên màn siêu dài 18:9, 19.5:9, 20:9
         _backgroundImage = bgObj.GetComponent<Image>();
         _backgroundImage.color = Color.white;
         _backgroundImage.preserveAspect = false; // Tắt preserveAspect inner-fit để AspectRatioFitter EnvelopeParent lấp đầy 100% khung hình
@@ -347,7 +349,8 @@ public class RealmTransitionManager : MonoBehaviour
         // Xác định Theme nếu để Auto
         if (theme == TransitionTheme.Auto)
         {
-            if (targetSceneName.Contains("Map1")) theme = TransitionTheme.DeployBattle;
+            if (CorruptedCycleManager.IsCorruptedActive) theme = TransitionTheme.CalamityRealm;
+            else if (targetSceneName.Contains("Map1")) theme = TransitionTheme.DeployBattle;
             else if (targetSceneName.Contains("Map2") || targetSceneName.Contains("Valley")) theme = TransitionTheme.PortalWarpMap2;
             else if (targetSceneName.Contains("Map3") || targetSceneName.Contains("Forgotten")) theme = TransitionTheme.PortalWarpMap3;
             else if (targetSceneName.Contains("Login")) theme = TransitionTheme.LoginIntro;
@@ -357,25 +360,25 @@ public class RealmTransitionManager : MonoBehaviour
 
         ApplyThemeVisuals(theme, targetSceneName);
 
-        // Đảm bảo Canvas và Container được bật lên cho đợt chuyển cảnh này
-        if (_canvas != null) _canvas.enabled = true;
-        if (_containerRt != null) _containerRt.gameObject.SetActive(true);
+        // Đảm bảo Canvas và Container được bật lên và ĐẶT LÊN LỚP CAO NHẤT (SortingOrder = 32767)
+        if (_canvas != null)
+        {
+            _canvas.enabled = true;
+            _canvas.sortingOrder = 32767;
+        }
+        if (_containerRt != null)
+        {
+            _containerRt.gameObject.SetActive(true);
+            _containerRt.SetAsLastSibling();
+        }
 
         if (_loadingSlider != null) _loadingSlider.value = 0f;
         if (_progressText != null) _progressText.text = "0%";
 
-        // 1. Fade In Màn Chuyển Cảnh CHE PHỦ 100% MÀN HÌNH CŨ
+        // 1. CHE PHỦ 100% NGAY LẬP TỨC (Alpha = 1.0)
+        // Lập tức hiển thị màn hình chuyển cảnh full màn hình, chặn toàn bộ raycast, không để lộ 1 frame màn cũ
         _canvasGroup.blocksRaycasts = true;
         _canvasGroup.interactable = true;
-
-        float fadeDuration = 0.30f;
-        float elapsed = 0f;
-        while (elapsed < fadeDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            _canvasGroup.alpha = elapsed / fadeDuration;
-            yield return null;
-        }
         _canvasGroup.alpha = 1f;
 
         // 2. Bắt đầu Nạp Scene Bất Đồng Bộ
@@ -390,7 +393,7 @@ public class RealmTransitionManager : MonoBehaviour
             kenBurnsElapsed += Time.unscaledDeltaTime;
             if (_backgroundImage != null)
             {
-                float scale = 1.08f + Mathf.PingPong(kenBurnsElapsed * 0.02f, 0.04f);
+                float scale = 1.10f + Mathf.PingPong(kenBurnsElapsed * 0.02f, 0.04f);
                 _backgroundImage.rectTransform.localScale = new Vector3(scale, scale, 1f);
             }
 
@@ -415,18 +418,28 @@ public class RealmTransitionManager : MonoBehaviour
         // Tuyệt đối không fade out ở đây để triệt tiêu 100% lỗi lộ lại màn hình cũ
         asyncOp.allowSceneActivation = true;
 
-        // Chờ đến khi scene mới thực sự là Active Scene trong Unity
-        while (SceneManager.GetActiveScene().name != targetSceneName && !asyncOp.isDone)
+        // Chờ đến khi Unity hoàn tất nạp scene mới
+        while (!asyncOp.isDone)
         {
             yield return null;
         }
 
-        // Đợi thêm 1 frame cuối cùng để Camera và UI của Scene mới thức tỉnh và render xong hoàn chỉnh frame đầu
-        yield return null;
+        // Chờ đến khi Scene mới đã thực sự là Active Scene trong Unity
+        while (SceneManager.GetActiveScene().name != targetSceneName)
+        {
+            yield return null;
+        }
+
+        // Đợi 3 frame liên tiếp để Camera, Terrain, Spawner, Fog/Lighting và UI của Scene mới thức tỉnh và render xong 100%
+        for (int i = 0; i < 3; i++)
+        {
+            yield return null;
+        }
         yield return new WaitForEndOfFrame();
 
-        // 4. BÂY GIỜ SCENE MỚI ĐÃ SẴN SÀNG PHÍA SAU -> Fade Out Màn Chuyển Cảnh để hé lộ Scene mới
-        elapsed = 0f;
+        // 4. BÂY GIỜ SCENE MỚI ĐÃ SẴN SÀNG HOÀN TOÀN PHÍA SAU -> Fade Out Màn Chuyển Cảnh để hé lộ Scene mới
+        float fadeDuration = 0.25f;
+        float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
             elapsed += Time.unscaledDeltaTime;
@@ -490,6 +503,43 @@ public class RealmTransitionManager : MonoBehaviour
                     _loreTipText.text = isVi 
                         ? "« KÝ ỨC LÃNG QUÊN: Tà khí hư không ngập tràn cõi giới. Chuẩn bị tinh thần cho trận đại chiến sinh tử! »" 
                         : "« FORGOTTEN MEMORIES: The void aether chills your soul. Brace yourself for the ultimate trial! »";
+                }
+                break;
+
+            case TransitionTheme.CalamityRealm:
+                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                var currentRealm = CorruptedCycleManager.CurrentRealm;
+                string realmName = CorruptedCycleManager.GetRealmName(currentRealm);
+                if (_loreTipText != null)
+                {
+                    switch (currentRealm)
+                    {
+                        case CalamityRealm.VoidNightmare:
+                            _loreTipText.text = isVi 
+                                ? "« CÕI ÁC MỘNG HƯ KHÔNG: Tà khí nuốt chửng ánh sáng. Hãy cảnh giác với các quả cầu ác mộng! »" 
+                                : "« VOID NIGHTMARE REALM: Shadows consume all light. Beware the orbs of darkness! »";
+                            break;
+                        case CalamityRealm.AcidDownpour:
+                            _loreTipText.text = isVi 
+                                ? "« CÕI MƯA AXIT ĂN MÒN: Mưa độc rút máu liên tục. Tấn công quái dồn dập để duy trì trung hòa độc tố! »" 
+                                : "« ACID DOWNPOUR REALM: Toxic rain corrodes health. Attack continuously to neutralize venom! »";
+                            break;
+                        case CalamityRealm.MagmaCalamity:
+                            _loreTipText.text = isVi 
+                                ? "« CÕI DUNG NHAM RỰC LỬA: Nham thạch sôi trào dưới chân. Tránh xa các cột lửa và vụ nổ địa ngục! »" 
+                                : "« MAGMA CALAMITY REALM: Lava boils beneath your feet. Dodge fiery pillars and hellish blasts! »";
+                            break;
+                        case CalamityRealm.FrostfallBlizzard:
+                            _loreTipText.text = isVi 
+                                ? "« CÕI BÃO TUYẾT BĂNG GIÁ: Bão tuyết làm chậm và đóng băng linh hồn. Luôn di chuyển và tung chiêu để sinh tồn! »" 
+                                : "« FROSTFALL BLIZZARD REALM: Howling blizzards chill your soul. Keep moving to survive the freeze! »";
+                            break;
+                        default:
+                            _loreTipText.text = isVi 
+                                ? $"« TIẾN VÀO {realmName.ToUpper()}: Tai ương ập tới, thử thách tối thượng bắt đầu! »" 
+                                : $"« ENTERING {realmName.ToUpper()}: Calamity strikes, the ultimate trial begins! »";
+                            break;
+                    }
                 }
                 break;
 
