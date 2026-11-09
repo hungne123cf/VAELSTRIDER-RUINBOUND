@@ -101,29 +101,33 @@ public class RealmTransitionManager : MonoBehaviour
         _canvasGroup.blocksRaycasts = false;
 
         // Container Root
-        GameObject containerObj = new GameObject("TransitionContainer", typeof(RectTransform));
+        GameObject containerObj = new GameObject("TransitionContainer", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         containerObj.transform.SetParent(transform, false);
         _containerRt = containerObj.GetComponent<RectTransform>();
         _containerRt.anchorMin = Vector2.zero;
         _containerRt.anchorMax = Vector2.one;
         _containerRt.offsetMin = _containerRt.offsetMax = Vector2.zero;
+        var containerImg = containerObj.GetComponent<Image>();
+        containerImg.color = new Color(0.03f, 0.04f, 0.07f, 1f); // Dark fantasy solid backing chống hở viền 100%
+        containerImg.raycastTarget = false;
 
-        // Background Image (Chuẩn 16:9 Widescreen Landscape, EnvelopeParent với preserveAspect = true)
+        // Background Image (Chuẩn Widescreen Landscape, EnvelopeParent bao phủ 100% màn hình mọi tỉ lệ)
         GameObject bgObj = new GameObject("TransitionBackground", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(AspectRatioFitter));
         bgObj.transform.SetParent(containerObj.transform, false);
         var bgRt = bgObj.GetComponent<RectTransform>();
         bgRt.anchorMin = Vector2.zero;
         bgRt.anchorMax = Vector2.one;
         bgRt.offsetMin = bgRt.offsetMax = Vector2.zero;
+        bgRt.localScale = new Vector3(1.08f, 1.08f, 1f); // 8% overscan chống triệt để viền đen trên màn siêu dài 18:9, 19.5:9, 20:9
         _backgroundImage = bgObj.GetComponent<Image>();
         _backgroundImage.color = Color.white;
-        _backgroundImage.preserveAspect = true; // KHÔNG BAO GIỜ CO KÉO BÉO PHÌNH TRANH
+        _backgroundImage.preserveAspect = false; // Tắt preserveAspect inner-fit để AspectRatioFitter EnvelopeParent lấp đầy 100% khung hình
         _backgroundImage.raycastTarget = false; // Tuyệt đối không chặn raycast của UI khác
         _baseBackgroundPos = Vector2.zero;
 
         var bgArf = bgObj.GetComponent<AspectRatioFitter>();
         bgArf.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
-        bgArf.aspectRatio = 1.7778f; // Chuẩn 16:9
+        bgArf.aspectRatio = 1.7778f; // Chuẩn 16:9 gốc
 
         // Breathing Aura Glow Overlay (Ẩn hoàn toàn để loại bỏ lớp phủ màu tím/cam mờ đục theo yêu cầu)
         GameObject auraObj = new GameObject("BreathingAura", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -357,6 +361,9 @@ public class RealmTransitionManager : MonoBehaviour
         if (_canvas != null) _canvas.enabled = true;
         if (_containerRt != null) _containerRt.gameObject.SetActive(true);
 
+        if (_loadingSlider != null) _loadingSlider.value = 0f;
+        if (_progressText != null) _progressText.text = "0%";
+
         // 1. Fade In Màn Chuyển Cảnh CHE PHỦ 100% MÀN HÌNH CŨ
         _canvasGroup.blocksRaycasts = true;
         _canvasGroup.interactable = true;
@@ -383,7 +390,7 @@ public class RealmTransitionManager : MonoBehaviour
             kenBurnsElapsed += Time.unscaledDeltaTime;
             if (_backgroundImage != null)
             {
-                float scale = 1.0f + Mathf.PingPong(kenBurnsElapsed * 0.03f, 0.04f);
+                float scale = 1.08f + Mathf.PingPong(kenBurnsElapsed * 0.02f, 0.04f);
                 _backgroundImage.rectTransform.localScale = new Vector3(scale, scale, 1f);
             }
 
@@ -442,13 +449,12 @@ public class RealmTransitionManager : MonoBehaviour
         bool isVi = LocalizationManager.IsVietnamese;
         Sprite chosenBg = null;
 
-        // Sử dụng các bức tranh phong cảnh Dark Fantasy 16:9 Widescreen Landscape nguyên bản, vừa khít screen
+        // Sử dụng các bức tranh phong cảnh Dark Fantasy Widescreen Landscape sắc nét, bao phủ 100% màn hình
         switch (theme)
         {
             case TransitionTheme.LoginIntro:
             case TransitionTheme.ReturnSanctuary:
                 chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
-                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/WCP_Example");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
@@ -459,7 +465,6 @@ public class RealmTransitionManager : MonoBehaviour
 
             case TransitionTheme.DeployBattle:
                 chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
-                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/WCP_Example");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
@@ -469,31 +474,28 @@ public class RealmTransitionManager : MonoBehaviour
                 break;
 
             case TransitionTheme.PortalWarpMap2:
-                chosenBg = LoadSprite("Backgrounds/WCP_Example");
-                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« CẢNH BÁO QUÁI VẬT: Bọ Cạp Độc và Tộc Goblin xuất hiện với số lượng áp đảo. Hãy cẩn thận các vũng axit! »" 
-                        : "« MONSTER WARNING: Toxic Scorpions and Goblin tribes swarm in masses. Avoid toxic pools! »";
+                        ? "« THUNG LŨNG TÀN TÍCH: Bọ Cạp Độc và Tộc Goblin xuất hiện với số lượng áp đảo. Hãy cẩn thận các vũng axit! »" 
+                        : "« VALLEY RUINS: Toxic Scorpions and Goblin tribes swarm in masses. Avoid toxic pools! »";
                 }
                 break;
 
             case TransitionTheme.PortalWarpMap3:
-                chosenBg = LoadSprite("Backgrounds/WCP_Example");
-                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« TÀN TÍCH HUYỀN BÍ: Tà khí hư không ngập tràn cõi giới. Chuẩn bị tinh thần cho trận đại chiến sinh tử! »" 
-                        : "« DREAD SANCTUM: The void aether chills your soul. Brace yourself for the ultimate trial! »";
+                        ? "« KÝ ỨC LÃNG QUÊN: Tà khí hư không ngập tràn cõi giới. Chuẩn bị tinh thần cho trận đại chiến sinh tử! »" 
+                        : "« FORGOTTEN MEMORIES: The void aether chills your soul. Brace yourself for the ultimate trial! »";
                 }
                 break;
 
             case TransitionTheme.AscensionGate:
             default:
                 chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
-                if (chosenBg == null) chosenBg = LoadSprite("Backgrounds/WCP_Example");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
@@ -507,7 +509,14 @@ public class RealmTransitionManager : MonoBehaviour
         {
             _backgroundImage.sprite = chosenBg;
             _backgroundImage.color = Color.white;
-            _backgroundImage.preserveAspect = true;
+            _backgroundImage.preserveAspect = false;
+
+            var bgArf = _backgroundImage.GetComponent<AspectRatioFitter>();
+            if (bgArf != null && chosenBg.rect.height > 0)
+            {
+                bgArf.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                bgArf.aspectRatio = (float)chosenBg.rect.width / chosenBg.rect.height;
+            }
         }
     }
 

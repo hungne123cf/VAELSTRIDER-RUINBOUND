@@ -222,11 +222,11 @@ public static class CorruptedCycleManager
 
         if (Application.CanStreamedLevelBeLoaded("Map1_Thestart"))
         {
-            SceneManager.LoadScene("Map1_Thestart");
+            RealmTransitionManager.LoadSceneWithTransition("Map1_Thestart", RealmTransitionManager.TransitionTheme.PortalWarpMap2);
         }
         else
         {
-            SceneManager.LoadScene(0);
+            RealmTransitionManager.LoadSceneWithTransition("Map1_Thestart", RealmTransitionManager.TransitionTheme.PortalWarpMap2);
         }
     }
 

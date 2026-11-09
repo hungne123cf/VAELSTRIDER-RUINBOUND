@@ -50,6 +50,41 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         augmentBonusHp = bonusHp;
         RefreshSocketHealthBonus(suppressHealthReset: true);
+        if (currentHealth > maxHealth)
+        {
+            currentHealth = maxHealth;
+            RunPreservedCurrentHealth = currentHealth;
+            PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+            PlayerPrefs.Save();
+        }
+    }
+
+    /// <summary>
+    /// Hy sinh lượng máu cố định khi AugmentManager đã trừ trực tiếp vào augBonusHp.
+    /// Giữ nguyên vết trừ máu và bảo lưu chính xác qua mọi cảnh (RunPreservedCurrentHealth).
+    /// </summary>
+    public void ApplySacrificeHealth(int sacrificeAmount, string augmentName)
+    {
+        if (isDead) return;
+
+        // Trừ trực tiếp máu hiện tại (giữ lại tối thiểu 1 HP)
+        currentHealth = Mathf.Clamp(currentHealth - sacrificeAmount, 1, maxHealth);
+        RunPreservedCurrentHealth = currentHealth;
+        PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
+        PlayerPrefs.Save();
+
+        // Hiển thị số trừ máu đỏ thẫm bay lên
+        DamagePopup.CreateText(transform.position + Vector3.up * 1.2f, $"-{sacrificeAmount} HP [{augmentName.ToUpper()}]", new Color(1f, 0.15f, 0.15f));
+
+        // Hiệu ứng chớp đỏ thân thể & Rung màn hình
+        if (spriteRenderer != null)
+        {
+            StartCoroutine(FlashColorRoutine(new Color(1f, 0.1f, 0.1f, 0.95f)));
+        }
+        FindAnyObjectByType<CameraFollow>()?.Shake(0.35f, 0.25f);
+        SoundManager.EnsureInstance()?.PlayPlayerHurt();
+
+        Debug.Log($"<color=red>[HEALTH SACRIFICE]</color> Đã hy sinh -{sacrificeAmount} HP do {augmentName}! Sinh lực hiện tại: {currentHealth}/{maxHealth} HP (Đã lưu RunPreserved)");
     }
 
     /// <summary>
@@ -70,6 +105,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         // Trừ trực tiếp máu hiện tại (giữ lại tối thiểu 1 HP)
         currentHealth = Mathf.Clamp(currentHealth - sacrificeAmount, 1, maxHealth);
+        RunPreservedCurrentHealth = currentHealth;
         PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
         PlayerPrefs.Save();
 
@@ -370,7 +406,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         }
 
         // 2. Nếu không phải khởi tạo map:
-        if (maxHealth > oldMax && oldMax > 0)
+        if (maxHealth > oldMax && oldMax > 0 && !isSceneInitializing)
         {
             int deltaHp = maxHealth - oldMax;
             currentHealth += deltaHp;

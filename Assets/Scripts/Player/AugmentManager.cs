@@ -965,16 +965,14 @@ public class AugmentManager : MonoBehaviour
                 augBonusSpeed += 0.20f;
                 augBonusLifesteal += 0.15f;
                 augBonusSpellVamp += 0.15f;
+                int demonicSacrifice = Mathf.Max(15, Mathf.RoundToInt((PlayerHealth.Instance != null ? PlayerHealth.Instance.MaxHealth : 110) * 0.15f));
+                augBonusHp -= demonicSacrifice;
                 FlushStatsToCombat();
                 FlushStatsToController();
+                FlushStatsToHealth();
                 if (PlayerHealth.Instance != null)
                 {
-                    PlayerHealth.Instance.ApplySacrificeHealth(0.15f, "Khế Ước Quỷ Dữ");
-                }
-                else
-                {
-                    augBonusHp -= 60;
-                    FlushStatsToHealth();
+                    PlayerHealth.Instance.ApplySacrificeHealth(demonicSacrifice, "Khế Ước Quỷ Dữ");
                 }
                 break;
 
@@ -1222,15 +1220,14 @@ public class AugmentManager : MonoBehaviour
             case AugmentDatabase.AugmentType.PhantomRush:
                 // Bóng Ma Cuồng Nộ: Nhận +50% CDR, nhưng giảm 25% Máu tối đa
                 augBonusCDR += 0.50f;
+                int phantomSacrifice = Mathf.Max(25, Mathf.RoundToInt((PlayerHealth.Instance != null ? PlayerHealth.Instance.MaxHealth : 110) * 0.25f));
+                augBonusHp -= phantomSacrifice;
                 FlushStatsToCombat();
+                FlushStatsToController();
+                FlushStatsToHealth();
                 if (PlayerHealth.Instance != null)
                 {
-                    PlayerHealth.Instance.ApplySacrificeHealth(0.25f, "Bóng Ma Cuồng Nộ");
-                }
-                else
-                {
-                    augBonusHp -= 80;
-                    FlushStatsToHealth();
+                    PlayerHealth.Instance.ApplySacrificeHealth(phantomSacrifice, "Bóng Ma Cuồng Nộ");
                 }
                 Debug.Log("<color=purple>[PHANTOM RUSH]</color> Nhận +50% CDR! Đã hy sinh 25% Máu tối đa!");
                 break;
