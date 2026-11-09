@@ -165,63 +165,65 @@ public static class GameFontManager
     public static void ApplyFontToText(TextMeshProUGUI txt, bool isHeader = false)
     {
         if (txt == null) return;
-        var targetFont = isHeader ? HeaderFont : BodyFont;
-        if (targetFont == null) return;
-
-        txt.font = targetFont;
-
-        // Reset shared material về đúng material của Dreams Unwound để tránh lỗi lệch Texture / Shader
-        if (targetFont.material != null)
+        try
         {
-            txt.fontSharedMaterial = targetFont.material;
-        }
+            var targetFont = isHeader ? HeaderFont : BodyFont;
+            if (targetFont == null) return;
 
-        // TỰ ĐỘNG THAY THẾ KÝ TỰ EM-DASH / EN-DASH (—, –) BẰNG DẤU GẠCH NỐI CHUẨN (-)
-        // Tránh hoàn toàn lỗi thiếu ký tự glyph ô vuông / gạch đứt nét
-        if (!string.IsNullOrEmpty(txt.text))
-        {
-            if (txt.text.Contains("\u2014") || txt.text.Contains("\u2013"))
+            txt.font = targetFont;
+
+            // Reset shared material về đúng material của Dreams Unwound để tránh lỗi lệch Texture / Shader
+            if (targetFont.material != null)
             {
-                txt.text = txt.text.Replace('\u2014', '-').Replace('\u2013', '-');
+                txt.fontSharedMaterial = targetFont.material;
             }
-        }
 
-        // KHẮC PHỤC TRIỆT ĐỂ LỖI NHÒE CHỮ (ANTI-SMEAR):
-        // Font Dreams Unwound là nét mảnh, outline dày sẽ lấp đầy ruột chữ khiến chữ biến thành khối đặc.
-        // Tắt outlineWidth quá dày, ưu tiên đổ bóng viền sắc nét (Underlay) thay vì Outline dày.
-        txt.outlineWidth = 0f;
+            // TỰ ĐỘNG THAY THẾ KÝ TỰ EM-DASH / EN-DASH (—, –) BẰNG DẤU GẠCH NỐI CHUẨN (-)
+            // Tránh hoàn toàn lỗi thiếu ký tự glyph ô vuông / gạch đứt nét
+            if (!string.IsNullOrEmpty(txt.text))
+            {
+                if (txt.text.Contains("\u2014") || txt.text.Contains("\u2013"))
+                {
+                    txt.text = txt.text.Replace('\u2014', '-').Replace('\u2013', '-');
+                }
+            }
 
-        // PHÓNG TO CHỮ HẾT CỠ CHO ĐIỆN THOẠI (Mobile Maximum Accessibility)
-        // Kích thước siêu lớn đảm bảo người cận thị trên điện thoại cũng đọc rõ ràng 100%
-        if (txt.enableAutoSizing)
-        {
-            if (txt.fontSizeMin < 24f) txt.fontSizeMin = 24f;
-            if (txt.fontSizeMax < 44f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.6f, 44f);
-        }
-        else
-        {
-            if (txt.fontSize < 20f)
+            // PHÓNG TO CHỮ HẾT CỠ CHO ĐIỆN THOẠI (Mobile Maximum Accessibility)
+            // Kích thước siêu lớn đảm bảo người cận thị trên điện thoại cũng đọc rõ ràng 100%
+            if (txt.enableAutoSizing)
             {
-                txt.fontSize = Mathf.Max(txt.fontSize * 1.85f, 26f);
-            }
-            else if (txt.fontSize < 32f)
-            {
-                txt.fontSize = Mathf.Max(txt.fontSize * 1.55f, 36f);
-            }
-            else if (txt.fontSize < 50f)
-            {
-                txt.fontSize = Mathf.Max(txt.fontSize * 1.35f, 54f);
+                if (txt.fontSizeMin < 24f) txt.fontSizeMin = 24f;
+                if (txt.fontSizeMax < 44f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.6f, 44f);
             }
             else
             {
-                txt.fontSize = Mathf.Min(txt.fontSize * 1.25f, 96f);
+                if (txt.fontSize < 20f)
+                {
+                    txt.fontSize = Mathf.Max(txt.fontSize * 1.85f, 26f);
+                }
+                else if (txt.fontSize < 32f)
+                {
+                    txt.fontSize = Mathf.Max(txt.fontSize * 1.55f, 36f);
+                }
+                else if (txt.fontSize < 50f)
+                {
+                    txt.fontSize = Mathf.Max(txt.fontSize * 1.35f, 54f);
+                }
+                else
+                {
+                    txt.fontSize = Mathf.Min(txt.fontSize * 1.25f, 96f);
+                }
+            }
+
+            // Đảm bảo chữ tự động xuống dòng mượt mà khi phóng to, không bị cắt xén
+            if (txt.overflowMode == TextOverflowModes.Truncate)
+            {
+                txt.overflowMode = TextOverflowModes.Overflow;
             }
         }
-
-        // Đảm bảo chữ tự động xuống dòng mượt mà khi phóng to, không bị cắt xén
-        if (txt.overflowMode == TextOverflowModes.Truncate)
+        catch (Exception ex)
         {
-            txt.overflowMode = TextOverflowModes.Overflow;
+            Debug.LogWarning("[GameFontManager] ApplyFontToText safe fallback: " + ex.Message);
         }
     }
 

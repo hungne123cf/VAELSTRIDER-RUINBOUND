@@ -680,9 +680,6 @@ public static class SoulslikeHUDStyler
                 mat.SetFloat(ShaderUtilities.ID_UnderlayDilate, 0f);
                 mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.1f);
             }
-
-            tmp.outlineWidth = width;
-            tmp.outlineColor = color;
         }
         catch (System.Exception)
         {
