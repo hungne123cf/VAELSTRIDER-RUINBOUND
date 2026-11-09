@@ -693,7 +693,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         tRt.offsetMax = new Vector2(-80f, -4f);
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = "<b>PHẾ TÍCH NGẬP NƯỚC</b>";
-        titleText.fontSize = 20f;
+        titleText.fontSize = 32f;
         titleText.color = new Color(0.98f, 0.88f, 0.55f);
         titleText.alignment = TextAlignmentOptions.Left;
 
@@ -708,7 +708,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         sRt.offsetMax = new Vector2(-80f, 0f);
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = "TẦNG 1 - TÀN TÍCH CỔ ĐẠI | KHÁM PHÁ TOÀN CẢNH";
-        subtitleText.fontSize = 15.5f;
+        subtitleText.fontSize = 22f;
         subtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
         subtitleText.alignment = TextAlignmentOptions.Left;
         SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
@@ -816,7 +816,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         stTxtRt.offsetMin = new Vector2(12f, 6f);
         stTxtRt.offsetMax = new Vector2(-12f, -6f);
         statsText = stTxtObj.AddComponent<TextMeshProUGUI>();
-        statsText.fontSize = 15.5f;
+        statsText.fontSize = 22f;
         statsText.color = Color.white;
         statsText.lineSpacing = 4f;
 
@@ -844,7 +844,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         hntTxtRt.offsetMin = new Vector2(12f, 6f);
         hntTxtRt.offsetMax = new Vector2(-12f, -6f);
         hintText = hntTxtObj.AddComponent<TextMeshProUGUI>();
-        hintText.fontSize = 15f;
+        hintText.fontSize = 22f;
         hintText.color = Color.white;
 
         // 8. Cụm Nút Điều Khiển Bản Đồ (Zoom In, Zoom Out, Focus Player)

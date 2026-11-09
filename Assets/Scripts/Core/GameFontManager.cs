@@ -176,32 +176,45 @@ public static class GameFontManager
             txt.fontSharedMaterial = targetFont.material;
         }
 
-        // KHẮC PHỤC LỖI NHÒE CHỮ: Giới hạn Outline tối đa 0.14f
-        if (txt.outlineWidth > 0.16f)
+        // TỰ ĐỘNG THAY THẾ KÝ TỰ EM-DASH / EN-DASH (—, –) BẰNG DẤU GẠCH NỐI CHUẨN (-)
+        // Tránh hoàn toàn lỗi thiếu ký tự glyph ô vuông / gạch đứt nét
+        if (!string.IsNullOrEmpty(txt.text))
         {
-            txt.outlineWidth = 0.12f;
+            if (txt.text.Contains("\u2014") || txt.text.Contains("\u2013"))
+            {
+                txt.text = txt.text.Replace('\u2014', '-').Replace('\u2013', '-');
+            }
         }
 
-        // PHÓNG TO CHỮ HẾT CỠ CHO ĐIỆN THOẠI (Mobile Accessibility)
-        // Đảm bảo người cận thị trên điện thoại cũng nhìn ra rõ ràng
+        // KHẮC PHỤC TRIỆT ĐỂ LỖI NHÒE CHỮ (ANTI-SMEAR):
+        // Font Dreams Unwound là nét mảnh, outline dày sẽ lấp đầy ruột chữ khiến chữ biến thành khối đặc.
+        // Tắt outlineWidth quá dày, ưu tiên đổ bóng viền sắc nét (Underlay) thay vì Outline dày.
+        txt.outlineWidth = 0f;
+
+        // PHÓNG TO CHỮ HẾT CỠ CHO ĐIỆN THOẠI (Mobile Maximum Accessibility)
+        // Kích thước siêu lớn đảm bảo người cận thị trên điện thoại cũng đọc rõ ràng 100%
         if (txt.enableAutoSizing)
         {
-            if (txt.fontSizeMin < 18f) txt.fontSizeMin = 18f;
-            if (txt.fontSizeMax < 30f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.50f, 30f);
+            if (txt.fontSizeMin < 24f) txt.fontSizeMin = 24f;
+            if (txt.fontSizeMax < 44f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.6f, 44f);
         }
         else
         {
-            if (txt.fontSize < 16f)
+            if (txt.fontSize < 20f)
             {
-                txt.fontSize = Mathf.Max(txt.fontSize * 1.55f, 20f);
+                txt.fontSize = Mathf.Max(txt.fontSize * 1.85f, 26f);
             }
-            else if (txt.fontSize < 24f)
+            else if (txt.fontSize < 32f)
             {
-                txt.fontSize = Mathf.Min(txt.fontSize * 1.35f, 34f);
+                txt.fontSize = Mathf.Max(txt.fontSize * 1.55f, 36f);
+            }
+            else if (txt.fontSize < 50f)
+            {
+                txt.fontSize = Mathf.Max(txt.fontSize * 1.35f, 54f);
             }
             else
             {
-                txt.fontSize = Mathf.Min(txt.fontSize * 1.20f, 72f);
+                txt.fontSize = Mathf.Min(txt.fontSize * 1.25f, 96f);
             }
         }
 
@@ -216,9 +229,9 @@ public static class GameFontManager
     {
         if (txt == null) return;
         if (_trueTypeFont != null) txt.font = _trueTypeFont;
-        if (txt.fontSize < 16)
+        if (txt.fontSize < 20)
         {
-            txt.fontSize = Mathf.Max((int)(txt.fontSize * 1.45f), 18);
+            txt.fontSize = Mathf.Max((int)(txt.fontSize * 1.6f), 24);
         }
     }
 }

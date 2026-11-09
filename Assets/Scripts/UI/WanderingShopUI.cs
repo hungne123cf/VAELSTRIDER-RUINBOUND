@@ -1834,13 +1834,14 @@ public class WanderingShopUI : MonoBehaviour
             var nameTMP = nameObj.GetComponent<TextMeshProUGUI>();
             nameTMP.text = isVi ? item.titleVN : item.titleEN;
             nameTMP.enableAutoSizing = true;
-            nameTMP.fontSizeMin = 13f;
-            nameTMP.fontSizeMax = 18f;
+            nameTMP.fontSizeMin = 24f;
+            nameTMP.fontSizeMax = 36f;
             nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.color = new Color(1f, 0.95f, 0.82f);
             nameTMP.raycastTarget = false;
-            SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.38f, new Color(0.02f, 0.02f, 0.04f, 0.98f));
+            GameFontManager.ApplyFontToText(nameTMP, true);
+            SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.0f, Color.black);
 
             // Attribute Element Badge ở góc phải Header
             var attrBadgeObj = new GameObject("AttributeElementBadge", typeof(RectTransform), typeof(Image), typeof(Outline));
@@ -1903,11 +1904,12 @@ public class WanderingShopUI : MonoBehaviour
             var tierTxt = tierTxtObj.GetComponent<TextMeshProUGUI>();
             tierTxt.text = tierTitle;
             tierTxt.color = tierFrameColor;
-            tierTxt.fontSize = 11.5f;
+            tierTxt.fontSize = 24f;
             tierTxt.alignment = TextAlignmentOptions.Center;
             tierTxt.fontStyle = FontStyles.Bold;
             tierTxt.raycastTarget = false;
-            SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.30f, Color.black);
+            GameFontManager.ApplyFontToText(tierTxt);
+            SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.0f, Color.black);
 
             var rankBadgeObj = new GameObject("UpgradeTier", typeof(RectTransform), typeof(Image));
             rankBadgeObj.transform.SetParent(statusRowObj.transform, false);
@@ -1929,11 +1931,12 @@ public class WanderingShopUI : MonoBehaviour
             progRT.offsetMin = progRT.offsetMax = Vector2.zero;
 
             var progTMP = progObj.GetComponent<TextMeshProUGUI>();
-            progTMP.fontSize = 11.5f;
+            progTMP.fontSize = 24f;
             progTMP.fontStyle = FontStyles.Bold;
             progTMP.alignment = TextAlignmentOptions.Center;
             progTMP.raycastTarget = false;
-            SoulslikeHUDStyler.SetSafeOutline(progTMP, 0.30f, Color.black);
+            GameFontManager.ApplyFontToText(progTMP);
+            SoulslikeHUDStyler.SetSafeOutline(progTMP, 0.0f, Color.black);
             progressTexts.Add(progTMP);
 
             // 4. PictureArea: Vùng Tranh Lớn Ôm Khít Tỷ Lệ Chuẩn 3:4 (Không Bè, Không Lệch)
@@ -2051,11 +2054,12 @@ public class WanderingShopUI : MonoBehaviour
             var stTxt = stTxtObj.GetComponent<TextMeshProUGUI>();
             stTxt.text = isVi ? $"[{item.categoryVN.ToUpper()}]" : $"[{item.categoryEN.ToUpper()}]";
             stTxt.color = item.badgeColor;
-            stTxt.fontSize = 12f;
+            stTxt.fontSize = 20f;
             stTxt.alignment = TextAlignmentOptions.MidlineLeft;
             stTxt.fontStyle = FontStyles.Bold;
             stTxt.raycastTarget = false;
-            SoulslikeHUDStyler.SetSafeOutline(stTxt, 0.30f, Color.black);
+            GameFontManager.ApplyFontToText(stTxt);
+            SoulslikeHUDStyler.SetSafeOutline(stTxt, 0.0f, Color.black);
 
             CreateOrnamentDivider(descBoxObj.transform, "DescInnerDivider",
                 new Vector2(0.04f, 0.805f), new Vector2(0.96f, 0.825f),
@@ -2080,12 +2084,13 @@ public class WanderingShopUI : MonoBehaviour
             var descTMP = descObj.GetComponent<TextMeshProUGUI>();
             descTMP.text = fullDesc;
             descTMP.enableAutoSizing = true;
-            descTMP.fontSizeMin = 10.5f;
-            descTMP.fontSizeMax = 14.5f;
+            descTMP.fontSizeMin = 22f;
+            descTMP.fontSizeMax = 30f;
             descTMP.alignment = TextAlignmentOptions.TopLeft;
             descTMP.color = new Color(0.92f, 0.95f, 1f);
             descTMP.enableWordWrapping = true;
-            SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.25f, new Color(0f, 0f, 0f, 0.85f));
+            GameFontManager.ApplyFontToText(descTMP);
+            SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.0f, Color.black);
 
             // Nút Mua (BUY BUTTON) đặt gọn gàng ở đáy Hộp Mô Tả, hoàn toàn tách biệt không bao giờ che chữ
             var btnObj = new GameObject("BuyBtn", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(Outline));
@@ -2093,7 +2098,6 @@ public class WanderingShopUI : MonoBehaviour
             var btnRT = btnObj.GetComponent<RectTransform>();
             btnRT.anchorMin = new Vector2(0.04f, 0.035f);
             btnRT.anchorMax = new Vector2(0.96f, 0.225f);
-            btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
             btnRT.offsetMin = btnRT.offsetMax = Vector2.zero;
 
             var btnImg = btnObj.GetComponent<Image>();
@@ -2117,15 +2121,17 @@ public class WanderingShopUI : MonoBehaviour
             btnTxtRT.offsetMin = btnTxtRT.offsetMax = Vector2.zero;
 
             var btnTMP = btnTxtObj.GetComponent<TextMeshProUGUI>();
-            btnTMP.fontSize = 14f;
+            btnTMP.fontSize = 26f;
             btnTMP.fontStyle = FontStyles.Bold;
             btnTMP.alignment = TextAlignmentOptions.Center;
             btnTMP.color = Color.white;
-            SoulslikeHUDStyler.SetSafeOutline(btnTMP, 0.35f, new Color(0f, 0f, 0f, 0.95f));
+            GameFontManager.ApplyFontToText(btnTMP);
+            SoulslikeHUDStyler.SetSafeOutline(btnTMP, 0.0f, Color.black);
 
             cardObjects.Add(card);
             buyButtons.Add(btn);
             buyButtonTexts.Add(btnTMP);
+            GameFontManager.ApplyFontsGlobally(card);
 
             // Gắn hệ thống Hiệu ứng Con quay hồi chuyển (Gyroscopic Tilt) & Parallax 2.5D cho Thẻ Bài Shop
             var tiltComp = card.AddComponent<Card3DParallaxTilt>();

@@ -576,7 +576,7 @@ public class ArmorShopUI : MonoBehaviour
         tRt.anchoredPosition = new Vector2(0f, -25f);
         tRt.sizeDelta = new Vector2(0f, 40f);
         shopTitleText = titleObj.AddComponent<TextMeshProUGUI>();
-        shopTitleText.fontSize = 28;
+        shopTitleText.fontSize = 38;
         shopTitleText.fontStyle = FontStyles.Bold;
         shopTitleText.alignment = TextAlignmentOptions.Center;
         shopTitleText.color = new Color(0.98f, 0.88f, 0.55f);
@@ -853,7 +853,7 @@ public class ArmorShopUI : MonoBehaviour
         nameRt.anchoredPosition = new Vector2(0f, -152f);
         nameRt.sizeDelta = new Vector2(0f, 38f);
         detailNameText = nameObj.AddComponent<TextMeshProUGUI>();
-        detailNameText.fontSize = 28f;
+        detailNameText.fontSize = 34f;
         detailNameText.fontStyle = FontStyles.Bold;
         detailNameText.alignment = TextAlignmentOptions.Center;
         detailNameText.color = new Color(1f, 0.9f, 0.45f);
@@ -869,7 +869,7 @@ public class ArmorShopUI : MonoBehaviour
         badgeRt.anchoredPosition = new Vector2(0f, -194f);
         badgeRt.sizeDelta = new Vector2(0f, 28f);
         detailBadgeText = badgeObj.AddComponent<TextMeshProUGUI>();
-        detailBadgeText.fontSize = 18f;
+        detailBadgeText.fontSize = 24f;
         detailBadgeText.fontStyle = FontStyles.Bold;
         detailBadgeText.alignment = TextAlignmentOptions.Center;
 
@@ -883,7 +883,7 @@ public class ArmorShopUI : MonoBehaviour
         descRt.offsetMin = Vector2.zero;
         descRt.offsetMax = Vector2.zero;
         detailDescText = descObj.AddComponent<TextMeshProUGUI>();
-        detailDescText.fontSize = 17.5f;
+        detailDescText.fontSize = 24f;
         detailDescText.alignment = TextAlignmentOptions.Center;
         detailDescText.color = new Color(0.85f, 0.9f, 0.98f);
         detailDescText.enableWordWrapping = true;
@@ -901,13 +901,13 @@ public class ArmorShopUI : MonoBehaviour
         prcRt.anchoredPosition = new Vector2(0f, 235f);
         prcRt.sizeDelta = new Vector2(0f, 34f);
         detailPriceText = prcObj.AddComponent<TextMeshProUGUI>();
-        detailPriceText.fontSize = 22f;
+        detailPriceText.fontSize = 28f;
         detailPriceText.fontStyle = FontStyles.Bold;
         detailPriceText.alignment = TextAlignmentOptions.Center;
         detailPriceText.color = new Color(1f, 0.85f, 0.3f);
         detailPriceText.enableAutoSizing = true;
-        detailPriceText.fontSizeMin = 17f;
-        detailPriceText.fontSizeMax = 22f;
+        detailPriceText.fontSizeMin = 22f;
+        detailPriceText.fontSizeMax = 32f;
 
         // Balance Display
         GameObject balObj = new GameObject("BalanceText", typeof(RectTransform), typeof(CanvasRenderer));
@@ -920,13 +920,13 @@ public class ArmorShopUI : MonoBehaviour
         balRt.anchoredPosition = new Vector2(0f, 198f);
         balRt.sizeDelta = new Vector2(0f, 30f);
         balanceText = balObj.AddComponent<TextMeshProUGUI>();
-        balanceText.fontSize = 20f;
+        balanceText.fontSize = 26f;
         balanceText.fontStyle = FontStyles.Bold;
         balanceText.alignment = TextAlignmentOptions.Center;
         balanceText.color = new Color(0.35f, 0.85f, 1f);
         balanceText.enableAutoSizing = true;
-        balanceText.fontSizeMin = 16f;
-        balanceText.fontSizeMax = 20f;
+        balanceText.fontSizeMin = 20f;
+        balanceText.fontSizeMax = 30f;
 
         // Multiplier Buttons Row (x1, x5, x10, x20, MAX)
         GameObject multRowObj = new GameObject("MultiplierRow", typeof(RectTransform), typeof(CanvasRenderer), typeof(HorizontalLayoutGroup));
@@ -1181,10 +1181,11 @@ public class ArmorShopUI : MonoBehaviour
                 bRt.sizeDelta = new Vector2(80f, 20f);
                 var bTmp = badgeObj.AddComponent<TextMeshProUGUI>();
                 bTmp.text = LocalizationManager.T(item.badgeTextVi, item.badgeTextEn);
-                bTmp.fontSize = 11.5f;
+                bTmp.fontSize = 20f;
                 bTmp.fontStyle = FontStyles.Bold;
                 bTmp.alignment = TextAlignmentOptions.TopRight;
                 bTmp.color = item.badgeColor;
+                GameFontManager.ApplyFontToText(bTmp);
             }
 
             // Name (Top-Left relative to card, right of icon)
@@ -1199,13 +1200,14 @@ public class ArmorShopUI : MonoBehaviour
             nRt.sizeDelta = new Vector2(-160f, 48f);
             var nTmp = nameObj.AddComponent<TextMeshProUGUI>();
             nTmp.text = LocalizationManager.T(item.nameVi, item.nameEn);
-            nTmp.fontSize = 13.5f;
+            nTmp.fontSize = 24f;
             nTmp.lineSpacing = 1.1f;
             nTmp.fontStyle = FontStyles.Bold;
             nTmp.alignment = TextAlignmentOptions.TopLeft;
             nTmp.color = Color.white;
             nTmp.enableWordWrapping = true;
             nTmp.overflowMode = TextOverflowModes.Ellipsis;
+            GameFontManager.ApplyFontToText(nTmp, true);
 
             // Price Tag (Bottom-Left relative to card, right of icon)
             GameObject prcObj = new GameObject("Price", typeof(RectTransform), typeof(CanvasRenderer));
@@ -1220,9 +1222,11 @@ public class ArmorShopUI : MonoBehaviour
             var pTmp = prcObj.AddComponent<TextMeshProUGUI>();
             string prcStr = item.priceShards >= 10000 ? (item.priceShards / 1000.0).ToString("0.#") + "K" : item.priceShards.ToString("N0");
             pTmp.text = $"{prcStr} {LocalizationManager.T("Linh Hồn", "Shards")}";
-            pTmp.fontSize = 16.5f;
+            pTmp.fontSize = 22f;
             pTmp.fontStyle = FontStyles.Bold;
             pTmp.alignment = TextAlignmentOptions.BottomLeft;
+            GameFontManager.ApplyFontToText(pTmp);
+            GameFontManager.ApplyFontsGlobally(cardObj);
             pTmp.color = new Color(1f, 0.85f, 0.3f);
             pTmp.enableAutoSizing = true;
             pTmp.fontSizeMin = 14.5f;

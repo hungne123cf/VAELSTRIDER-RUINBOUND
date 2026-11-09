@@ -134,25 +134,31 @@ public class LoginManager : MonoBehaviour
         if (titleText != null)
         {
             SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
-            titleText.fontSize = 62f;
-            titleText.color = new Color(0.98f, 0.85f, 0.45f, 1f);
-            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.14f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+            titleText.fontSize = 92f;
+            titleText.color = new Color(0.98f, 0.88f, 0.50f, 1f);
+            titleText.overflowMode = TextOverflowModes.Overflow;
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.0f, Color.black);
             if (subtitleText != null)
             {
-                subtitleText.fontSize = 24f;
-                subtitleText.color = new Color(0.92f, 0.90f, 0.85f, 0.95f);
-                SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.10f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+                subtitleText.fontSize = 40f;
+                subtitleText.color = new Color(0.94f, 0.92f, 0.88f, 0.95f);
+                subtitleText.overflowMode = TextOverflowModes.Overflow;
+                SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.0f, Color.black);
             }
         }
 
         if (actionSubmitButton != null)
         {
             SoulslikeHUDStyler.StyleButton(actionSubmitButton);
+            var st = actionSubmitButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (st != null) st.fontSize = 32f;
         }
 
         if (quitButton != null)
         {
             SoulslikeHUDStyler.StyleButton(quitButton);
+            var qt = quitButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (qt != null) qt.fontSize = 30f;
         }
 
         if (switchAccountBtn != null)
@@ -172,10 +178,16 @@ public class LoginManager : MonoBehaviour
 
         if (tapToStartText != null)
         {
-            tapToStartText.fontSize = 32f;
+            tapToStartText.fontSize = 58f;
             tapToStartText.fontStyle = FontStyles.Bold;
-            tapToStartText.color = new Color(0.98f, 0.88f, 0.55f);
-            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.12f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
+            tapToStartText.color = new Color(0.98f, 0.90f, 0.58f);
+            tapToStartText.overflowMode = TextOverflowModes.Overflow;
+            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.0f, Color.black);
+            RectTransform tRt = tapToStartText.GetComponent<RectTransform>();
+            if (tRt != null)
+            {
+                tRt.sizeDelta = new Vector2(1000f, 180f);
+            }
         }
 
         GameFontManager.ApplyFontsGlobally(gameObject);
@@ -397,22 +409,25 @@ public class LoginManager : MonoBehaviour
         if (titleText != null)
         {
             titleText.text = LocalizationManager.Get("APP_TITLE");
-            titleText.fontSize = 62f;
+            titleText.fontSize = 92f;
+            titleText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(titleText, true);
-            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.14f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.0f, Color.black);
         }
         if (subtitleText != null)
         {
             subtitleText.text = LocalizationManager.Get("LOGIN_SUBTITLE");
-            subtitleText.fontSize = 24f;
+            subtitleText.fontSize = 40f;
+            subtitleText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(subtitleText);
-            SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.10f, new Color(0.05f, 0.05f, 0.05f, 0.95f));
+            SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.0f, Color.black);
         }
         if (tapToStartText != null)
         {
-            tapToStartText.fontSize = 32f;
+            tapToStartText.fontSize = 58f;
+            tapToStartText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(tapToStartText);
-            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.12f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
+            SoulslikeHUDStyler.SetSafeOutline(tapToStartText, 0.0f, Color.black);
         }
 
         if (tabLoginTxt != null) tabLoginTxt.text = LocalizationManager.T("ĐĂNG NHẬP", "LOGIN");
@@ -433,7 +448,7 @@ public class LoginManager : MonoBehaviour
 
         if (tapToStartText != null && !isStartingGame)
         {
-            tapToStartText.text = LocalizationManager.T("— BẮT ĐẦU TRÒ CHƠI —\n<size=18><color=#E6C875>Chạm vào màn hình để bắt đầu</color></size>", "— START GAME —\n<size=18><color=#E6C875>Tap anywhere to start</color></size>");
+            tapToStartText.text = LocalizationManager.T("- BẮT ĐẦU TRÒ CHƠI -\n<size=34><color=#FFE082>Chạm vào màn hình để bắt đầu</color></size>", "- START GAME -\n<size=34><color=#FFE082>Tap anywhere to start</color></size>");
         }
         if (versionText != null)
         {

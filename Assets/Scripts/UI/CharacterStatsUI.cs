@@ -808,7 +808,7 @@ public class CharacterStatsUI : MonoBehaviour
         hRt.sizeDelta = new Vector2(-160f, 38f);
 
         uiComp.characterTitleText = headerObj.AddComponent<TextMeshProUGUI>();
-        uiComp.characterTitleText.fontSize = 28;
+        uiComp.characterTitleText.fontSize = 38;
         uiComp.characterTitleText.fontStyle = FontStyles.Bold;
         uiComp.characterTitleText.alignment = TextAlignmentOptions.Center;
         uiComp.characterTitleText.color = new Color(0.98f, 0.88f, 0.55f);
@@ -823,7 +823,7 @@ public class CharacterStatsUI : MonoBehaviour
         sRt.sizeDelta = new Vector2(-160f, 26f);
 
         uiComp.characterSubtitleText = subObj.AddComponent<TextMeshProUGUI>();
-        uiComp.characterSubtitleText.fontSize = 15;
+        uiComp.characterSubtitleText.fontSize = 24;
         uiComp.characterSubtitleText.alignment = TextAlignmentOptions.Center;
         uiComp.characterSubtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
         SoulslikeHUDStyler.StyleHeader(uiComp.characterTitleText, uiComp.characterSubtitleText);
@@ -981,9 +981,10 @@ public class CharacterStatsUI : MonoBehaviour
 
         titleTmp = tObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = title;
-        titleTmp.fontSize = 17.5f;
+        titleTmp.fontSize = 28f;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.color = new Color(1f, 0.88f, 0.38f);
+        GameFontManager.ApplyFontToText(titleTmp, true);
 
         GameObject dObj = CreateUIObject("Desc", cardObj.transform);
         RectTransform dRt = dObj.GetComponent<RectTransform>();
@@ -994,9 +995,10 @@ public class CharacterStatsUI : MonoBehaviour
         dRt.sizeDelta = new Vector2(-(leftPad + 16f), -44f);
 
         descTmp = dObj.AddComponent<TextMeshProUGUI>();
-        descTmp.fontSize = 13.5f;
+        descTmp.fontSize = 22f;
         descTmp.lineSpacing = 6;
         descTmp.color = new Color(0.90f, 0.94f, 1f);
         descTmp.enableWordWrapping = true;
+        GameFontManager.ApplyFontToText(descTmp);
     }
 }

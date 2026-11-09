@@ -494,8 +494,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         var headerBanner = new GameObject("HeaderBanner", typeof(RectTransform), typeof(Image));
         headerBanner.transform.SetParent(overlay.transform, false);
         var hbRT = headerBanner.GetComponent<RectTransform>();
-        hbRT.anchorMin = new Vector2(0.18f, 0.865f);
-        hbRT.anchorMax = new Vector2(0.82f, 0.978f);
+        hbRT.anchorMin = new Vector2(0.12f, 0.855f);
+        hbRT.anchorMax = new Vector2(0.88f, 0.985f);
         hbRT.offsetMin = hbRT.offsetMax = Vector2.zero;
         var hbImg = headerBanner.GetComponent<Image>();
         hbImg.sprite = GetPillBadgeSprite();
@@ -520,12 +520,12 @@ public class LevelUpChoiceUI : MonoBehaviour
         string subStr   = isVietnamese
             ? "Chọn 1 Lõi Nâng Cấp để khắc ấn sức mạnh vĩnh cửu hoặc thăng cấp Lõi đã sở hữu"
             : "Select 1 Augment to engrave eternal power or upgrade an owned Augment";
-        titleTMP.text = $"<size=32><b><color=#FFEAA7>{titleStr}</color></b></size>\n<size=15><color=#CBD5E1>{subStr}</color></size>";
+        titleTMP.text = $"<size=44><b><color=#FFEAA7>{titleStr}</color></b></size>\n<size=22><color=#CBD5E1>{subStr}</color></size>";
         titleTMP.alignment = TextAlignmentOptions.Center;
         titleTMP.color = Color.white;
         titleTMP.enableWordWrapping = true;
         titleTMP.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(titleTMP, 0.42f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
+        SoulslikeHUDStyler.SetSafeOutline(titleTMP, 0.14f, new Color(0.02f, 0.02f, 0.02f, 0.98f));
 
         // Flanking gold gems on header
         CreateGemIcon(headerBanner.transform, "LeftCrestGem", new Vector2(0.035f, 0.5f), 22f, new Color(1f, 0.84f, 0.32f, 0.95f));
@@ -644,11 +644,11 @@ public class LevelUpChoiceUI : MonoBehaviour
         txtRT.offsetMin = txtRT.offsetMax = Vector2.zero;
 
         _rerollBtnText = txtObj.GetComponent<TextMeshProUGUI>();
-        _rerollBtnText.fontSize = 21f;
+        _rerollBtnText.fontSize = 32f;
         _rerollBtnText.fontStyle = FontStyles.Bold;
         _rerollBtnText.alignment = TextAlignmentOptions.Center;
         _rerollBtnText.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(_rerollBtnText, 0.40f, new Color(0f, 0f, 0f, 0.95f));
+        SoulslikeHUDStyler.SetSafeOutline(_rerollBtnText, 0.0f, Color.black);
 
         UpdateRerollButtonUI(isVN);
 
@@ -1437,14 +1437,14 @@ public class LevelUpChoiceUI : MonoBehaviour
         var nameTMP = nameObj.GetComponent<TextMeshProUGUI>();
         nameTMP.text = isVN ? aug.nameVN : aug.nameEN;
         nameTMP.enableAutoSizing = true;
-        nameTMP.fontSizeMin = 18f;
-        nameTMP.fontSizeMax = 25f;
+        nameTMP.fontSizeMin = 26f;
+        nameTMP.fontSizeMax = 38f;
         nameTMP.fontStyle = FontStyles.Bold;
         nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
         nameTMP.color = new Color(1f, 0.95f, 0.82f);
         nameTMP.raycastTarget = false;
         GameFontManager.ApplyFontToText(nameTMP, true);
-        SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.12f, new Color(0.02f, 0.02f, 0.04f, 0.98f));
+        SoulslikeHUDStyler.SetSafeOutline(nameTMP, 0.0f, Color.black);
 
         // Icon Thuộc Tính / Kỹ Năng ở góc trên bên phải thẻ bài (Chuẩn Yu-Gi-Oh Attribute Element)
         var attrBadgeObj = new GameObject("AttributeElementBadge", typeof(RectTransform), typeof(Image), typeof(Outline));
@@ -1508,12 +1508,12 @@ public class LevelUpChoiceUI : MonoBehaviour
         var tierTxt = tierTxtObj.GetComponent<TextMeshProUGUI>();
         tierTxt.text = tierTitle;
         tierTxt.color = tierFrameColor;
-        tierTxt.fontSize = 17f;
+        tierTxt.fontSize = 26f;
         tierTxt.alignment = TextAlignmentOptions.Center;
         tierTxt.fontStyle = FontStyles.Bold;
         tierTxt.raycastTarget = false;
         GameFontManager.ApplyFontToText(tierTxt);
-        SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.12f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(tierTxt, 0.0f, Color.black);
 
         // Rank Status Badge (LÕI MỚI hoặc THĂNG CẤP)
         var rankBadgeObj = new GameObject("RankBadge", typeof(RectTransform), typeof(Image));
@@ -1539,12 +1539,12 @@ public class LevelUpChoiceUI : MonoBehaviour
             ? (isVN ? $"CẤP {currentRank} -> {currentRank + 1}" : $"LV.{currentRank} -> {currentRank + 1}")
             : (isVN ? "LÕI MỚI" : "NEW");
         rbTxt.color = isUpgrade ? new Color(1f, 0.92f, 0.50f) : new Color(0.45f, 1f, 0.75f);
-        rbTxt.fontSize = 17f;
+        rbTxt.fontSize = 26f;
         rbTxt.fontStyle = FontStyles.Bold;
         rbTxt.alignment = TextAlignmentOptions.Center;
         rbTxt.raycastTarget = false;
         GameFontManager.ApplyFontToText(rbTxt);
-        SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.12f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(rbTxt, 0.0f, Color.black);
 
         // ── 5. Vùng Chứa Tranh (PictureArea Container) - Mở rộng tối đa xuống dưới ──
         var picAreaObj = new GameObject("PictureArea", typeof(RectTransform));
@@ -1670,12 +1670,12 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         var tagTMP = tagTxtObj.GetComponent<TextMeshProUGUI>();
         tagTMP.text = headerTagText;
-        tagTMP.fontSize = 12f;
+        tagTMP.fontSize = 22f;
         tagTMP.fontStyle = FontStyles.Bold;
         tagTMP.alignment = TextAlignmentOptions.MidlineLeft;
         tagTMP.color = isHeroSignature ? new Color(1f, 0.85f, 0.35f) : typeColor;
         tagTMP.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(tagTMP, 0.30f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(tagTMP, 0.0f, Color.black);
 
         // Đường kẻ trang trí trong hộp mô tả
         CreateOrnamentDivider(descBoxObj.transform, "DescInnerDivider",
@@ -1695,14 +1695,14 @@ public class LevelUpChoiceUI : MonoBehaviour
         var descTMP = descObj.GetComponent<TextMeshProUGUI>();
         descTMP.text = fullDesc;
         descTMP.enableAutoSizing = true;
-        descTMP.fontSizeMin = 16f;
-        descTMP.fontSizeMax = 22f;
+        descTMP.fontSizeMin = 24f;
+        descTMP.fontSizeMax = 32f;
         descTMP.alignment = TextAlignmentOptions.TopLeft;
         descTMP.color = new Color(0.94f, 0.96f, 1.0f);
         descTMP.enableWordWrapping = true;
         descTMP.raycastTarget = false;
         GameFontManager.ApplyFontToText(descTMP);
-        SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.12f, new Color(0f, 0f, 0f, 0.92f));
+        SoulslikeHUDStyler.SetSafeOutline(descTMP, 0.0f, Color.black);
 
         // ── 7. Toàn bộ thẻ bài là nút bấm tương tác mở Popup Xác Nhận ─────────
         var captured = aug;
@@ -1909,11 +1909,11 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         var hTMP = headerObj.GetComponent<TextMeshProUGUI>();
         hTMP.text = isVN ? "XÁC NHẬN KHẮC ẤN LÕI" : "CONFIRM AUGMENT ENGRAVING";
-        hTMP.fontSize = 20f;
+        hTMP.fontSize = 36f;
         hTMP.fontStyle = FontStyles.Bold;
         hTMP.alignment = TextAlignmentOptions.Center;
         hTMP.color = new Color(1f, 0.90f, 0.45f);
-        SoulslikeHUDStyler.SetSafeOutline(hTMP, 0.35f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(hTMP, 0.0f, Color.black);
 
         CreateOrnamentDivider(modal.transform, "ModalDivider",
             new Vector2(0.06f, 0.865f), new Vector2(0.94f, 0.875f),
@@ -1980,10 +1980,10 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         var dTMP = dTMPObj.GetComponent<TextMeshProUGUI>();
         dTMP.text = detailTxt;
-        dTMP.fontSize = 15f;
+        dTMP.fontSize = 26f;
         dTMP.enableWordWrapping = true;
         dTMP.color = Color.white;
-        SoulslikeHUDStyler.SetSafeOutline(dTMP, 0.30f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(dTMP, 0.0f, Color.black);
 
         // Bottom 2 Buttons: QUAY LẠI (Hủy) & XÁC NHẬN
         // Nút Quay Lại
@@ -2011,11 +2011,11 @@ public class LevelUpChoiceUI : MonoBehaviour
         bbtRT.offsetMin = bbtRT.offsetMax = Vector2.zero;
         var bbtTMP = bbTxt.GetComponent<TextMeshProUGUI>();
         bbtTMP.text = isVN ? "QUAY LẠI" : "BACK";
-        bbtTMP.fontSize = 17f;
+        bbtTMP.fontSize = 28f;
         bbtTMP.fontStyle = FontStyles.Bold;
         bbtTMP.alignment = TextAlignmentOptions.Center;
         bbtTMP.color = new Color(0.85f, 0.88f, 0.95f);
-        SoulslikeHUDStyler.SetSafeOutline(bbtTMP, 0.35f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(bbtTMP, 0.0f, Color.black);
 
         var bBackBtn = btnBack.GetComponent<Button>();
         bBackBtn.onClick.AddListener(() => {
@@ -2048,17 +2048,19 @@ public class LevelUpChoiceUI : MonoBehaviour
         bctRT.offsetMin = bctRT.offsetMax = Vector2.zero;
         var bctTMP = bcTxt.GetComponent<TextMeshProUGUI>();
         bctTMP.text = isVN ? "XÁC NHẬN KHẮC ẤN" : "CONFIRM";
-        bctTMP.fontSize = 17f;
+        bctTMP.fontSize = 28f;
         bctTMP.fontStyle = FontStyles.Bold;
         bctTMP.alignment = TextAlignmentOptions.Center;
         bctTMP.color = Color.white;
-        SoulslikeHUDStyler.SetSafeOutline(bctTMP, 0.35f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(bctTMP, 0.0f, Color.black);
 
         var bConfBtn = btnConfirm.GetComponent<Button>();
         bConfBtn.onClick.AddListener(() => {
             CloseAugmentConfirmPopup();
             OnCardSelected(aug, cardIndex);
         });
+
+        GameFontManager.ApplyFontsGlobally(modal);
 
         // Entrance scale
         StartCoroutine(AnimateModalEntrance(mRT, cg));

@@ -186,7 +186,7 @@ public static class SoulslikeHUDStyler
             txtRt.offsetMax = new Vector2(-10f, 0f);
 
             tmp.alignment = TextAlignmentOptions.MidlineRight;
-            tmp.fontSize = 18f;
+            tmp.fontSize = 24f;
             tmp.fontStyle = FontStyles.Bold;
         }
     }
@@ -233,10 +233,10 @@ public static class SoulslikeHUDStyler
                 tRt.offsetMax = new Vector2(-10f, 0f);
 
                 txt.alignment = TextAlignmentOptions.MidlineRight;
-                txt.fontSize = 16f;
+                txt.fontSize = 24f;
                 txt.fontStyle = FontStyles.Bold;
                 txt.color = new Color(0.85f, 0.96f, 1f, 1f); // Lam ngọc ánh sáng
-                SetSafeOutline(txt, 0.40f, Color.black);
+                SetSafeOutline(txt, 0.0f, Color.black);
             }
         }
 
@@ -314,10 +314,10 @@ public static class SoulslikeHUDStyler
             tRt.offsetMax = new Vector2(-10f, 0f);
 
             txt.alignment = TextAlignmentOptions.MidlineRight;
-            txt.fontSize = 15.5f;
+            txt.fontSize = 22f;
             txt.fontStyle = FontStyles.Bold;
             txt.color = new Color(0.98f, 0.94f, 1f, 1f);
-            SetSafeOutline(txt, 0.40f, Color.black);
+            SetSafeOutline(txt, 0.0f, Color.black);
         }
     }
 
@@ -382,16 +382,16 @@ public static class SoulslikeHUDStyler
             tRt.offsetMax = new Vector2(-8f, 0f);
 
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            tmp.fontSize = 19.5f;
+            tmp.fontSize = 26f;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = new Color(0.98f, 0.88f, 0.55f, 1f); // Vàng kim cổ điển Soulslike
-            SetSafeOutline(tmp, 0.40f, Color.black);
+            SetSafeOutline(tmp, 0.0f, Color.black);
         }
 
         var leg = sc.GetComponentInChildren<Text>();
         if (leg != null)
         {
-            leg.fontSize = 19;
+            leg.fontSize = 26;
             leg.fontStyle = FontStyle.Bold;
             leg.color = new Color(0.98f, 0.88f, 0.55f, 1f);
         }
@@ -452,10 +452,10 @@ public static class SoulslikeHUDStyler
                 tRt.offsetMax = new Vector2(-18f, 0f);
 
                 hpTmp.alignment = TextAlignmentOptions.MidlineRight;
-                hpTmp.fontSize = 11.5f;
+                hpTmp.fontSize = 22f;
                 hpTmp.fontStyle = FontStyles.Bold;
                 hpTmp.color = new Color(0.96f, 0.92f, 0.82f, 0.95f);
-                SetSafeOutline(hpTmp, 0.3f, Color.black);
+                SetSafeOutline(hpTmp, 0.0f, Color.black);
             }
         }
 
@@ -463,10 +463,10 @@ public static class SoulslikeHUDStyler
         var nameTmp = bossPanel.Find("BossNameText")?.GetComponent<TextMeshProUGUI>();
         if (nameTmp != null)
         {
-            nameTmp.fontSize = 20;
+            nameTmp.fontSize = 32;
             nameTmp.fontStyle = FontStyles.Bold;
             nameTmp.color = new Color(0.96f, 0.88f, 0.58f); // Antique gold
-            SetSafeOutline(nameTmp, 0.35f, Color.black);
+            SetSafeOutline(nameTmp, 0.0f, Color.black);
         }
 
         // Ensure Gothic Filigree Divider
@@ -643,16 +643,16 @@ public static class SoulslikeHUDStyler
         if (tmp == null) return;
         try
         {
-            // Outline trong TMPro Distance Field từ 0.04f đến 0.16f là chuẩn và sắc nét nhất trên mobile.
-            // Tuyệt đối không để vượt quá 0.18f vì sẽ làm nhòe toàn bộ chữ thành thanh màu đặc!
-            width = Mathf.Clamp(width, 0.04f, 0.16f);
+            // Đối với font Dreams Unwound, outline quá dày (>0.08f) sẽ lấp đầy ruột chữ (A, R, O, B)
+            // Giới hạn an toàn từ 0.0f đến 0.05f kết hợp Underlay Shadow để chữ luôn sắc nét và tương phản cao
+            width = Mathf.Clamp(width, 0.0f, 0.05f);
 
             if (tmp.font == null || tmp.font != GameFontManager.BodyFont)
             {
                 tmp.font = GameFontManager.BodyFont;
             }
 
-            if (tmp.font != null)
+            if (tmp.font != null && tmp.font.material != null)
             {
                 tmp.fontSharedMaterial = tmp.font.material;
             }
@@ -660,9 +660,25 @@ public static class SoulslikeHUDStyler
             var mat = tmp.fontMaterial;
             if (mat != null)
             {
-                mat.EnableKeyword(ShaderUtilities.Keyword_Outline);
-                mat.SetColor(ShaderUtilities.ID_OutlineColor, color);
-                mat.SetFloat(ShaderUtilities.ID_OutlineWidth, width);
+                if (width > 0.001f)
+                {
+                    mat.EnableKeyword(ShaderUtilities.Keyword_Outline);
+                    mat.SetColor(ShaderUtilities.ID_OutlineColor, color);
+                    mat.SetFloat(ShaderUtilities.ID_OutlineWidth, width);
+                }
+                else
+                {
+                    mat.DisableKeyword(ShaderUtilities.Keyword_Outline);
+                    mat.SetFloat(ShaderUtilities.ID_OutlineWidth, 0f);
+                }
+
+                // Kích hoạt Underlay Shadow để nổi bật chữ trên nền sáng/tối mà không làm dày nét chữ
+                mat.EnableKeyword(ShaderUtilities.Keyword_Underlay);
+                mat.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0f, 0f, 0f, 0.85f));
+                mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.35f);
+                mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.35f);
+                mat.SetFloat(ShaderUtilities.ID_UnderlayDilate, 0f);
+                mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.1f);
             }
 
             tmp.outlineWidth = width;

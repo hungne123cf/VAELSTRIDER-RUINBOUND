@@ -584,7 +584,7 @@ public class AugmentHUDBar : MonoBehaviour
         _tooltipRt.anchorMin = new Vector2(0f, 1f);
         _tooltipRt.anchorMax = new Vector2(0f, 1f);
         _tooltipRt.pivot = new Vector2(0f, 1f);
-        _tooltipRt.sizeDelta = new Vector2(340f, 118f);
+        _tooltipRt.sizeDelta = new Vector2(420f, 150f);
         _tooltipRt.anchoredPosition = new Vector2(24f, -245f);
 
         Image bg = _tooltipObj.GetComponent<Image>();
@@ -607,13 +607,14 @@ public class AugmentHUDBar : MonoBehaviour
         tRt.anchorMin = new Vector2(0f, 1f);
         tRt.anchorMax = new Vector2(1f, 1f);
         tRt.pivot = new Vector2(0.5f, 1f);
-        tRt.sizeDelta = new Vector2(-16f, 18f);
+        tRt.sizeDelta = new Vector2(-16f, 22f);
         tRt.anchoredPosition = new Vector2(0f, -8f);
 
         _tooltipTierText = tierObj.GetComponent<TextMeshProUGUI>();
-        _tooltipTierText.fontSize = 11f;
+        _tooltipTierText.fontSize = 20f;
         _tooltipTierText.fontStyle = FontStyles.Bold;
-        SoulslikeHUDStyler.SetSafeOutline(_tooltipTierText, 0.35f, Color.black);
+        GameFontManager.ApplyFontToText(_tooltipTierText);
+        SoulslikeHUDStyler.SetSafeOutline(_tooltipTierText, 0.0f, Color.black);
 
         // Title text
         var titleObj = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -622,14 +623,15 @@ public class AugmentHUDBar : MonoBehaviour
         tiRt.anchorMin = new Vector2(0f, 1f);
         tiRt.anchorMax = new Vector2(1f, 1f);
         tiRt.pivot = new Vector2(0.5f, 1f);
-        tiRt.sizeDelta = new Vector2(-16f, 22f);
-        tiRt.anchoredPosition = new Vector2(0f, -26f);
+        tiRt.sizeDelta = new Vector2(-16f, 28f);
+        tiRt.anchoredPosition = new Vector2(0f, -32f);
 
         _tooltipTitleText = titleObj.GetComponent<TextMeshProUGUI>();
-        _tooltipTitleText.fontSize = 14f;
+        _tooltipTitleText.fontSize = 26f;
         _tooltipTitleText.fontStyle = FontStyles.Bold;
         _tooltipTitleText.color = Color.white;
-        SoulslikeHUDStyler.SetSafeOutline(_tooltipTitleText, 0.35f, Color.black);
+        GameFontManager.ApplyFontToText(_tooltipTitleText, true);
+        SoulslikeHUDStyler.SetSafeOutline(_tooltipTitleText, 0.0f, Color.black);
 
         // Desc text
         var descObj = new GameObject("Desc", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -638,13 +640,14 @@ public class AugmentHUDBar : MonoBehaviour
         dRt.anchorMin = new Vector2(0f, 0f);
         dRt.anchorMax = new Vector2(1f, 1f);
         dRt.offsetMin = new Vector2(8f, 6f);
-        dRt.offsetMax = new Vector2(-8f, -48f);
+        dRt.offsetMax = new Vector2(-8f, -62f);
 
         _tooltipDescText = descObj.GetComponent<TextMeshProUGUI>();
-        _tooltipDescText.fontSize = 11.5f;
+        _tooltipDescText.fontSize = 22f;
         _tooltipDescText.color = new Color(0.85f, 0.90f, 0.98f);
         _tooltipDescText.enableWordWrapping = true;
-        SoulslikeHUDStyler.SetSafeOutline(_tooltipDescText, 0.25f, Color.black);
+        GameFontManager.ApplyFontToText(_tooltipDescText);
+        SoulslikeHUDStyler.SetSafeOutline(_tooltipDescText, 0.0f, Color.black);
 
         _tooltipObj.SetActive(false);
     }

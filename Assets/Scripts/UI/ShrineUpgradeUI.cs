@@ -331,7 +331,7 @@ public class ShrineUpgradeUI : MonoBehaviour
         tRt.sizeDelta = new Vector2(760, 32);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = LocalizationManager.T("BÀN THỜ NÂNG CẤP CỔ ĐẠI", "ANCIENT UPGRADE ALTAR");
-        titleTmp.fontSize = 25;
+        titleTmp.fontSize = 36;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.alignment = TextAlignmentOptions.Center;
         titleTmp.color = new Color(0.98f, 0.88f, 0.55f, 1f);
@@ -507,7 +507,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             rowTRt.anchoredPosition = new Vector2(25, 22);
             rowTRt.sizeDelta = new Vector2(360, 26);
             instance.titleTexts[i] = tObj.AddComponent<TextMeshProUGUI>();
-            instance.titleTexts[i].fontSize = 17;
+            instance.titleTexts[i].fontSize = 26;
             instance.titleTexts[i].fontStyle = FontStyles.Bold;
             instance.titleTexts[i].color = new Color(0.92f, 0.96f, 1f);
 
@@ -522,7 +522,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             dRt.anchoredPosition = new Vector2(25, -18);
             dRt.sizeDelta = new Vector2(360, 24);
             instance.descTexts[i] = dObj.AddComponent<TextMeshProUGUI>();
-            instance.descTexts[i].fontSize = 14.5f;
+            instance.descTexts[i].fontSize = 22f;
             instance.descTexts[i].color = new Color(0.78f, 0.84f, 0.94f);
 
             // Level Text (Cột giữa)
@@ -536,7 +536,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             lRt.anchoredPosition = new Vector2(405, 22);
             lRt.sizeDelta = new Vector2(270, 26);
             instance.levelTexts[i] = lObj.AddComponent<TextMeshProUGUI>();
-            instance.levelTexts[i].fontSize = 16.5f;
+            instance.levelTexts[i].fontSize = 24f;
             instance.levelTexts[i].fontStyle = FontStyles.Bold;
 
             // Next Bonus (Cột giữa bên dưới)
@@ -550,7 +550,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             bRt.anchoredPosition = new Vector2(405, -18);
             bRt.sizeDelta = new Vector2(270, 24);
             instance.bonusTexts[i] = bObj.AddComponent<TextMeshProUGUI>();
-            instance.bonusTexts[i].fontSize = 14.5f;
+            instance.bonusTexts[i].fontSize = 22f;
 
             // Upgrade Button (Cột phải)
             GameObject uBtnObj = new GameObject("Btn_Upgrade", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -584,7 +584,7 @@ public class ShrineUpgradeUI : MonoBehaviour
             clRt.sizeDelta = Vector2.zero;
 
             var cTmpTmp = cLabelObj.AddComponent<TextMeshProUGUI>();
-            cTmpTmp.fontSize = 15.5f;
+            cTmpTmp.fontSize = 24f;
             cTmpTmp.fontStyle = FontStyles.Bold;
             cTmpTmp.alignment = TextAlignmentOptions.Center;
             cTmpTmp.color = Color.white;
