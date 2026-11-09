@@ -467,7 +467,7 @@ public class RealmTransitionManager : MonoBehaviour
         {
             case TransitionTheme.LoginIntro:
             case TransitionTheme.ReturnSanctuary:
-                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                chosenBg = LoadSprite("Backgrounds/transition_sanctuary_return") ?? LoadSprite("Backgrounds/mainmenu_bg_epic");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
@@ -477,7 +477,7 @@ public class RealmTransitionManager : MonoBehaviour
                 break;
 
             case TransitionTheme.DeployBattle:
-                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                chosenBg = LoadSprite("Backgrounds/transition_map1_deploy") ?? LoadSprite("Backgrounds/mainmenu_bg_epic");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
@@ -487,7 +487,7 @@ public class RealmTransitionManager : MonoBehaviour
                 break;
 
             case TransitionTheme.PortalWarpMap2:
-                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                chosenBg = LoadSprite("Backgrounds/transition_map2_valley") ?? LoadSprite("Backgrounds/mainmenu_bg_epic");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
@@ -497,7 +497,7 @@ public class RealmTransitionManager : MonoBehaviour
                 break;
 
             case TransitionTheme.PortalWarpMap3:
-                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                chosenBg = LoadSprite("Backgrounds/transition_map3_void") ?? LoadSprite("Backgrounds/mainmenu_bg_epic");
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
@@ -507,7 +507,7 @@ public class RealmTransitionManager : MonoBehaviour
                 break;
 
             case TransitionTheme.CalamityRealm:
-                chosenBg = LoadSprite("Backgrounds/mainmenu_bg_epic");
+                chosenBg = LoadSprite("Backgrounds/transition_calamity_weather") ?? LoadSprite("Backgrounds/mainmenu_bg_epic");
                 var currentRealm = CorruptedCycleManager.CurrentRealm;
                 string realmName = CorruptedCycleManager.GetRealmName(currentRealm);
                 if (_loreTipText != null)
