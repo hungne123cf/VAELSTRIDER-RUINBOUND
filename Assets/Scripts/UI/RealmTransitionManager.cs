@@ -170,12 +170,12 @@ public class RealmTransitionManager : MonoBehaviour
         _subtitleText.color = new Color(0.85f, 0.90f, 1f, 0.95f);
         SoulslikeHUDStyler.SetSafeOutline(_subtitleText, 0.35f, Color.black);
 
-        // Lore Tip Box
+        // Lore Tip Box (Nằm ngay phía trên thanh loading)
         GameObject tipObj = new GameObject("LoreTipText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         tipObj.transform.SetParent(containerObj.transform, false);
         var tipRt = tipObj.GetComponent<RectTransform>();
-        tipRt.anchorMin = new Vector2(0.15f, 0.18f);
-        tipRt.anchorMax = new Vector2(0.85f, 0.32f);
+        tipRt.anchorMin = new Vector2(0.12f, 0.11f);
+        tipRt.anchorMax = new Vector2(0.88f, 0.22f);
         tipRt.offsetMin = tipRt.offsetMax = Vector2.zero;
         _loreTipText = tipObj.GetComponent<TextMeshProUGUI>();
         _loreTipText.fontSize = 15f;
@@ -185,17 +185,22 @@ public class RealmTransitionManager : MonoBehaviour
         _loreTipText.color = new Color(0.92f, 0.88f, 0.75f, 0.90f);
         SoulslikeHUDStyler.SetSafeOutline(_loreTipText, 0.30f, Color.black);
 
-        // Loading Progress Bar
+        // ─── Loading Progress Bar: Chuẩn Phong Cách Dark Fantasy Trắng Bạch Kim Phát Sáng ───
         GameObject sliderObj = new GameObject("LoadingBar", typeof(RectTransform), typeof(Slider));
         sliderObj.transform.SetParent(containerObj.transform, false);
         var sRt = sliderObj.GetComponent<RectTransform>();
-        sRt.anchorMin = new Vector2(0.25f, 0.10f);
-        sRt.anchorMax = new Vector2(0.75f, 0.13f);
+        sRt.anchorMin = new Vector2(0.20f, 0.075f);
+        sRt.anchorMax = new Vector2(0.80f, 0.092f); // Độ dày thanh mảnh tinh tế 12px chuẩn Soulslike
         sRt.offsetMin = sRt.offsetMax = Vector2.zero;
         _loadingSlider = sliderObj.GetComponent<Slider>();
         _loadingSlider.interactable = false;
 
-        // Slider Background
+        // Khung viền đá rèn cổ kính bao bọc thanh loading
+        var sOutline = sliderObj.AddComponent<Outline>();
+        sOutline.effectColor = new Color(0.88f, 0.90f, 0.98f, 0.60f); // Viền ánh bạc bạch kim sắc nét
+        sOutline.effectDistance = new Vector2(1.2f, -1.2f);
+
+        // Slider Background (Rãnh Đá Obsidian Đen Sâu Thẳm)
         GameObject sBgObj = new GameObject("Background", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         sBgObj.transform.SetParent(sliderObj.transform, false);
         var sbgRt = sBgObj.GetComponent<RectTransform>();
@@ -203,7 +208,7 @@ public class RealmTransitionManager : MonoBehaviour
         sbgRt.anchorMax = Vector2.one;
         sbgRt.offsetMin = sbgRt.offsetMax = Vector2.zero;
         var sbgImg = sBgObj.GetComponent<Image>();
-        sbgImg.color = new Color(0.08f, 0.10f, 0.15f, 0.95f);
+        sbgImg.color = new Color(0.03f, 0.04f, 0.06f, 0.96f); // Đen tuyền đá tàn tích
 
         // Slider Fill Area
         GameObject fillArea = new GameObject("Fill Area", typeof(RectTransform));
@@ -214,6 +219,7 @@ public class RealmTransitionManager : MonoBehaviour
         faRt.offsetMin = new Vector2(2f, 2f);
         faRt.offsetMax = new Vector2(-2f, -2f);
 
+        // Dải nạp chính: MÀU TRẮNG BẠCH KIM PHÁT SÁNG (White Soul Aether Glow)
         GameObject fillObj = new GameObject("Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         fillObj.transform.SetParent(fillArea.transform, false);
         var fRt = fillObj.GetComponent<RectTransform>();
@@ -221,24 +227,30 @@ public class RealmTransitionManager : MonoBehaviour
         fRt.anchorMax = Vector2.one;
         fRt.offsetMin = fRt.offsetMax = Vector2.zero;
         var fImg = fillObj.GetComponent<Image>();
-        fImg.color = new Color(0.98f, 0.82f, 0.35f, 1f); // Imperial Gold
+        fImg.color = new Color(0.98f, 0.99f, 1.0f, 1f); // Trắng Tinh Khiết / Bạch Kim Phát Sáng
+
+        // Hào quang tỏa sáng trắng bạc bao quanh dòng năng lượng
+        var fillGlow = fillObj.AddComponent<Outline>();
+        fillGlow.effectColor = new Color(0.85f, 0.95f, 1f, 0.80f);
+        fillGlow.effectDistance = new Vector2(1.5f, 1.5f);
 
         _loadingSlider.fillRect = fRt;
         _loadingSlider.value = 0f;
 
-        // Progress Percent Text
+        // Progress Percent Text (Nằm ngay bên dưới thanh loading, cân giữa hoàn hảo)
         GameObject prgObj = new GameObject("ProgressText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         prgObj.transform.SetParent(containerObj.transform, false);
         var pRt = prgObj.GetComponent<RectTransform>();
-        pRt.anchorMin = new Vector2(0.40f, 0.05f);
-        pRt.anchorMax = new Vector2(0.60f, 0.09f);
+        pRt.anchorMin = new Vector2(0.40f, 0.035f);
+        pRt.anchorMax = new Vector2(0.60f, 0.068f);
         pRt.offsetMin = pRt.offsetMax = Vector2.zero;
         _progressText = prgObj.GetComponent<TextMeshProUGUI>();
-        _progressText.fontSize = 14f;
+        _progressText.fontSize = 15f;
         _progressText.fontStyle = FontStyles.Bold;
+        _progressText.characterSpacing = 2.0f;
         _progressText.alignment = TextAlignmentOptions.Center;
-        _progressText.color = new Color(0.85f, 0.90f, 1f, 0.85f);
-        SoulslikeHUDStyler.SetSafeOutline(_progressText, 0.30f, Color.black);
+        _progressText.color = new Color(0.96f, 0.98f, 1f, 0.95f); // Trắng sáng ngọc bích
+        SoulslikeHUDStyler.SetSafeOutline(_progressText, 0.40f, Color.black);
     }
 
     private void Update()
@@ -491,3 +503,4 @@ public class RealmTransitionManager : MonoBehaviour
         return sp;
     }
 }
+

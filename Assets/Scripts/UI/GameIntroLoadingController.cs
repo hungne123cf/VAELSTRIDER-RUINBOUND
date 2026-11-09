@@ -444,6 +444,16 @@ public class GameIntroLoadingController : MonoBehaviour
         int tipIndex = 0;
         float tipTimer = 0f;
 
+        // Cập nhật phong cách thanh loading sang màu Trắng Bạch Kim Phát Sáng chuẩn Dark Fantasy
+        if (progressFillImage != null)
+        {
+            progressFillImage.color = new Color(0.98f, 0.99f, 1.0f, 1f);
+            var glow = progressFillImage.GetComponent<Outline>();
+            if (glow == null) glow = progressFillImage.gameObject.AddComponent<Outline>();
+            glow.effectColor = new Color(0.85f, 0.95f, 1f, 0.80f);
+            glow.effectDistance = new Vector2(1.5f, 1.5f);
+        }
+
         while (displayProgress < 1f)
         {
             float targetProgress = Mathf.Clamp01(asyncOp.progress / 0.9f);

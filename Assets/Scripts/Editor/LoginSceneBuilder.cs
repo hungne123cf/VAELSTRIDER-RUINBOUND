@@ -570,7 +570,10 @@ public static class LoginSceneBuilder
         fRt.anchorMax = Vector2.one;
         fRt.offsetMin = fRt.offsetMax = Vector2.zero;
         var fillImg = fillObj.AddComponent<Image>();
-        fillImg.color = new Color(0.18f, 0.85f, 0.45f, 1f); // Xanh ngọc sinh lực
+        fillImg.color = new Color(0.98f, 0.99f, 1.0f, 1f); // Trắng Bạch Kim Phát Sáng chuẩn Dark Fantasy
+        var fillOutline = fillObj.AddComponent<Outline>();
+        fillOutline.effectColor = new Color(0.85f, 0.95f, 1f, 0.80f);
+        fillOutline.effectDistance = new Vector2(1.5f, 1.5f);
         slider.fillRect = fRt;
 
         // Status text (Tips / Action)
