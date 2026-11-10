@@ -146,40 +146,86 @@ public class MinimapHUD : MonoBehaviour
         }
     }
 
-    private void BuildTerrainMap()
+    public void BuildTerrainMap()
     {
-        var tilemaps = Object.FindObjectsByType<UnityEngine.Tilemaps.Tilemap>(FindObjectsSortMode.None);
-        if (tilemaps == null || tilemaps.Length == 0) return;
-
         int minX = int.MaxValue, maxX = int.MinValue;
         int minY = int.MaxValue, maxY = int.MinValue;
 
         HashSet<Vector2Int> groundCells = new HashSet<Vector2Int>();
         HashSet<Vector2Int> wallCells = new HashSet<Vector2Int>();
 
-        foreach (var tm in tilemaps)
+        // 1. Quét dữ liệu từ toàn bộ Tilemaps trong Scene
+        var tilemaps = Object.FindObjectsByType<UnityEngine.Tilemaps.Tilemap>(FindObjectsSortMode.None);
+        if (tilemaps != null && tilemaps.Length > 0)
         {
-            if (tm == null) continue;
-            string n = tm.gameObject.name.ToLower();
-            bool isGround = n.Contains("ground") || n.Contains("floor");
-            bool isWall = n.Contains("wall");
-            if (!isGround && !isWall) continue;
-
-            BoundsInt b = tm.cellBounds;
-            for (int x = b.xMin; x < b.xMax; x++)
+            foreach (var tm in tilemaps)
             {
-                for (int y = b.yMin; y < b.yMax; y++)
-                {
-                    if (tm.HasTile(new Vector3Int(x, y, 0)))
-                    {
-                        if (x < minX) minX = x;
-                        if (x > maxX) maxX = x;
-                        if (y < minY) minY = y;
-                        if (y > maxY) maxY = y;
+                if (tm == null) continue;
+                string n = tm.gameObject.name.ToLower();
+                bool isGround = n.Contains("ground") || n.Contains("floor") || n.Contains("grass");
+                bool isWall = n.Contains("wall") || n.Contains("border") || n.Contains("cliff") || n.Contains("rock");
+                if (!isGround && !isWall) continue;
 
-                        Vector2Int c = new Vector2Int(x, y);
-                        if (isWall) wallCells.Add(c);
-                        else groundCells.Add(c);
+                BoundsInt b = tm.cellBounds;
+                Vector3 cellSize = tm.layoutGrid != null ? tm.layoutGrid.cellSize : Vector3.one;
+
+                for (int x = b.xMin; x < b.xMax; x++)
+                {
+                    for (int y = b.yMin; y < b.yMax; y++)
+                    {
+                        Vector3Int cellPos = new Vector3Int(x, y, 0);
+                        if (tm.HasTile(cellPos))
+                        {
+                            Vector3 worldPos = tm.CellToWorld(cellPos);
+                            int wx = Mathf.FloorToInt(worldPos.x);
+                            int wy = Mathf.FloorToInt(worldPos.y);
+
+                            if (wx < minX) minX = wx;
+                            if (wx > maxX) maxX = wx;
+                            if (wy < minY) minY = wy;
+                            if (wy > maxY) maxY = wy;
+
+                            Vector2Int c = new Vector2Int(wx, wy);
+                            if (isWall) wallCells.Add(c);
+                            else groundCells.Add(c);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Quét dữ liệu từ SpriteRenderer sàn đấu (Đặc biệt cho Map 3 hoặc sàn ArenaFloor)
+        var floorRenderers = Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None);
+        if (floorRenderers != null && floorRenderers.Length > 0)
+        {
+            foreach (var sr in floorRenderers)
+            {
+                if (sr == null || !sr.gameObject.activeInHierarchy) continue;
+                string sn = sr.gameObject.name.ToLower();
+                bool isFloor = sn.Contains("arenafloor") || sn.Contains("floor_moss") || sn.Contains("ground_floor") || sn.Contains("bridge_") || sn.Contains("island_");
+                bool isWall = sn.Contains("arenawall") || sn.Contains("wall_") || sn.Contains("rock_border");
+
+                if (isFloor || isWall)
+                {
+                    Bounds sb = sr.bounds;
+                    int sbMinX = Mathf.FloorToInt(sb.min.x);
+                    int sbMaxX = Mathf.CeilToInt(sb.max.x);
+                    int sbMinY = Mathf.FloorToInt(sb.min.y);
+                    int sbMaxY = Mathf.CeilToInt(sb.max.y);
+
+                    if (sbMinX < minX) minX = sbMinX;
+                    if (sbMaxX > maxX) maxX = sbMaxX;
+                    if (sbMinY < minY) minY = sbMinY;
+                    if (sbMaxY > maxY) maxY = sbMaxY;
+
+                    for (int fx = sbMinX; fx <= sbMaxX; fx++)
+                    {
+                        for (int fy = sbMinY; fy <= sbMaxY; fy++)
+                        {
+                            Vector2Int c = new Vector2Int(fx, fy);
+                            if (isWall) wallCells.Add(c);
+                            else groundCells.Add(c);
+                        }
                     }
                 }
             }
@@ -187,15 +233,17 @@ public class MinimapHUD : MonoBehaviour
 
         if (groundCells.Count == 0 && wallCells.Count == 0) return;
 
-        int pad = 3;
+        int pad = 4;
         minX -= pad; maxX += pad;
         minY -= pad; maxY += pad;
         int widthCells = Mathf.Max(1, maxX - minX + 1);
         int heightCells = Mathf.Max(1, maxY - minY + 1);
 
-        int ppu = 4; // 4 pixels per tile cell
-        int texW = Mathf.Clamp(widthCells * ppu, 64, 512);
-        int texH = Mathf.Clamp(heightCells * ppu, 64, 512);
+        // Tính tỷ lệ điểm ảnh động (Dynamic PPU) để giữ tỷ lệ 1:1 chuẩn xác 1000%, không bao giờ bị méo hình
+        int maxDim = Mathf.Max(widthCells, heightCells);
+        int ppu = maxDim > 220 ? 1 : (maxDim > 110 ? 2 : 4);
+        int texW = widthCells * ppu;
+        int texH = heightCells * ppu;
 
         Texture2D tex = new Texture2D(texW, texH, TextureFormat.RGBA32, false);
         tex.wrapMode = TextureWrapMode.Clamp;
@@ -248,8 +296,15 @@ public class MinimapHUD : MonoBehaviour
         }
         if (terrainMapRt != null)
         {
+            // PIVOT PHẢI LÀ GỐC (0, 0) ĐỂ KHỚP 1000% VỚI CÔNG THỨC TRƯỢT ĐỊA HÌNH
+            terrainMapRt.pivot = Vector2.zero;
             terrainMapRt.sizeDelta = new Vector2(widthCells, heightCells) * terrainPixelsPerUnit;
         }
+    }
+
+    public void RebuildTerrainMap()
+    {
+        BuildTerrainMap();
     }
 
     public static Sprite GetOrBuildTerrainSprite(out Vector2 origin, out Vector2 size)
@@ -376,6 +431,24 @@ public class MinimapHUD : MonoBehaviour
         }
         if (priorityTarget == null)
         {
+            var doppel = GameObject.Find("ShadowDoppelgangerBoss");
+            if (doppel != null && doppel.activeInHierarchy)
+            {
+                priorityTarget = doppel.transform;
+                targetLabel = LocalizationManager.T("BÓNG MA BẢN NGÃ", "SHADOW DOPPELGANGER");
+            }
+        }
+        if (priorityTarget == null)
+        {
+            var cocoon = Object.FindAnyObjectByType<BoneEggCocoon>();
+            if (cocoon != null && cocoon.gameObject.activeInHierarchy)
+            {
+                priorityTarget = cocoon.transform;
+                targetLabel = LocalizationManager.T("TRỨNG KÉN PHONG ẤN", "BONE COCOON");
+            }
+        }
+        if (priorityTarget == null)
+        {
             var bossGolem = Object.FindAnyObjectByType<ValleyGolemBossAI>();
             if (bossGolem != null && bossGolem.gameObject.activeInHierarchy)
             {
@@ -402,6 +475,24 @@ public class MinimapHUD : MonoBehaviour
             }
         }
 
+        // Ưu tiên 1b: Kẻ thù trong phòng chiến đấu chưa dọn sạch
+        if (priorityTarget == null)
+        {
+            var enemies = GetAllEnemies();
+            float nearestDist = float.MaxValue;
+            foreach (var e in enemies)
+            {
+                if (e == null || !e.activeInHierarchy) continue;
+                float d = Vector2.Distance(playerTransform.position, e.transform.position);
+                if (d < nearestDist)
+                {
+                    nearestDist = d;
+                    priorityTarget = e.transform;
+                    targetLabel = LocalizationManager.T("KẺ THÙ", "ENEMY");
+                }
+            }
+        }
+
         // Ưu tiên 2: Cổng Dịch Chuyển (Portal)
         if (priorityTarget == null)
         {
@@ -424,20 +515,20 @@ public class MinimapHUD : MonoBehaviour
             }
         }
 
-        // Ưu tiên 4: Kẻ thù gần nhất
+        // Ưu tiên 4: Rương Kho Báu chưa mở
         if (priorityTarget == null)
         {
-            var enemies = GetAllEnemies();
-            float nearestDist = float.MaxValue;
-            foreach (var e in enemies)
+            var chests = Object.FindObjectsByType<TreasureChest>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            float nearestChestDist = float.MaxValue;
+            foreach (var ch in chests)
             {
-                if (e == null || !e.activeInHierarchy) continue;
-                float d = Vector2.Distance(playerTransform.position, e.transform.position);
-                if (d < nearestDist)
+                if (ch == null || !ch.gameObject.activeInHierarchy || ch.IsOpened) continue;
+                float cd = Vector2.Distance(playerTransform.position, ch.transform.position);
+                if (cd < nearestChestDist)
                 {
-                    nearestDist = d;
-                    priorityTarget = e.transform;
-                    targetLabel = LocalizationManager.T("KẺ THÙ", "ENEMY");
+                    nearestChestDist = cd;
+                    priorityTarget = ch.transform;
+                    targetLabel = LocalizationManager.T("RƯƠNG BÁU", "CHEST");
                 }
             }
         }
@@ -689,27 +780,76 @@ public class MinimapHUD : MonoBehaviour
         texDot.Apply();
         roundDotSprite = Sprite.Create(texDot, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f));
 
-        // 3. Arrow Sprite (32x32)
-        Texture2D texArrow = new Texture2D(32, 32, TextureFormat.RGBA32, false);
-        for (int y = 0; y < 32; y++)
+        // 3. Arrow Sprite (32x32) - KIM LA BÀN DARK FANTASY CHỈ THẲNG LÊN TRÊN (+Y) CHUẨN XÁC 1000%
+        int arrowSize = 32;
+        Texture2D texArrow = new Texture2D(arrowSize, arrowSize, TextureFormat.RGBA32, false);
+        texArrow.wrapMode = TextureWrapMode.Clamp;
+        texArrow.filterMode = FilterMode.Bilinear;
+
+        for (int y = 0; y < arrowSize; y++)
         {
-            for (int x = 0; x < 32; x++)
+            for (int x = 0; x < arrowSize; x++)
             {
-                // Mũi tên nhọn hướng LÊN TRÊN (Pointing UP)
-                float nx = (x - 15.5f) / 15.5f;
-                float ny = y / 31f;
-                if (ny >= Mathf.Abs(nx) * 0.85f && y >= 4)
+                texArrow.SetPixel(x, y, Color.clear);
+            }
+        }
+
+        float tipX = 15.5f;
+        float tipY = 29.5f;   // Đỉnh nhọn trên cùng (+Y)
+        float leftX = 4.5f;
+        float rightX = 26.5f;
+        float baseY = 5.5f;   // Hai cánh đáy
+        float notchY = 12.0f; // Điểm lõm đáy hình chữ V
+
+        Color arrowGoldLight = new Color(1.0f, 0.94f, 0.55f, 1f);
+        Color arrowGoldDark  = new Color(0.85f, 0.65f, 0.15f, 1f);
+        Color arrowOutline   = new Color(0.12f, 0.08f, 0.02f, 1f);
+        Color arrowSpine     = new Color(1.0f, 1.0f, 0.95f, 1f);
+
+        for (int y = 5; y <= 30; y++)
+        {
+            float fy = y + 0.5f;
+            float tHeight = Mathf.Clamp01((tipY - fy) / (tipY - baseY));
+            float halfWidthOuter = tHeight * (rightX - tipX);
+
+            float halfWidthInner = 0f;
+            if (fy < notchY)
+            {
+                float tNotch = (notchY - fy) / (notchY - baseY);
+                halfWidthInner = tNotch * (rightX - tipX);
+            }
+
+            for (int x = 0; x < arrowSize; x++)
+            {
+                float fx = x + 0.5f;
+                float distFromCenter = Mathf.Abs(fx - tipX);
+
+                if (distFromCenter <= halfWidthOuter && distFromCenter >= halfWidthInner)
                 {
-                    texArrow.SetPixel(x, y, Color.white);
-                }
-                else
-                {
-                    texArrow.SetPixel(x, y, Color.clear);
+                    bool isEdge = (halfWidthOuter - distFromCenter < 1.1f) || 
+                                  (fy < notchY && distFromCenter - halfWidthInner < 1.1f) ||
+                                  (y <= 6);
+                    if (isEdge)
+                    {
+                        texArrow.SetPixel(x, y, arrowOutline);
+                    }
+                    else if (distFromCenter < 0.9f)
+                    {
+                        texArrow.SetPixel(x, y, arrowSpine);
+                    }
+                    else if (fx < tipX)
+                    {
+                        texArrow.SetPixel(x, y, arrowGoldLight);
+                    }
+                    else
+                    {
+                        texArrow.SetPixel(x, y, arrowGoldDark);
+                    }
                 }
             }
         }
         texArrow.Apply();
-        arrowSprite = Sprite.Create(texArrow, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f));
+        arrowSprite = Sprite.Create(texArrow, new Rect(0, 0, arrowSize, arrowSize), new Vector2(0.5f, 0.5f));
 
         // 4. Diamond Sprite (32x32)
         Texture2D texDia = new Texture2D(32, 32, TextureFormat.RGBA32, false);
@@ -854,7 +994,7 @@ public class MinimapHUD : MonoBehaviour
         RectTransform tRt = terrObj.GetComponent<RectTransform>();
         tRt.anchorMin = new Vector2(0.5f, 0.5f);
         tRt.anchorMax = new Vector2(0.5f, 0.5f);
-        tRt.pivot = new Vector2(0.5f, 0.5f);
+        tRt.pivot = Vector2.zero; // Pivot gốc (0, 0) để trượt địa hình chuẩn xác 1000%
         tRt.anchoredPosition = Vector2.zero;
         tRt.sizeDelta = new Vector2(120f, 120f);
         Image tImg = terrObj.GetComponent<Image>();
@@ -888,17 +1028,25 @@ public class MinimapHUD : MonoBehaviour
         pOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
         pOutline.effectDistance = new Vector2(1.5f, 1.5f);
 
-        // 2.4 La Bàn Dẫn Đường: Needle Pointer chạy quanh viền hình tròn
+        // 2.4 Compass Ring Overlay (Nằm ngoài Mask của radarBg để kim la bàn không bao giờ bị cắt xén)
+        GameObject compassRingObj = new GameObject("CompassRingOverlay", typeof(RectTransform));
+        compassRingObj.layer = 5;
+        compassRingObj.transform.SetParent(rootObj.transform, false);
+        RectTransform crRt = compassRingObj.GetComponent<RectTransform>();
+        crRt.anchoredPosition = new Vector2(0f, -48f); // Cùng tâm với radarBg
+        crRt.sizeDelta = new Vector2(120f, 120f);
+
+        // La Bàn Dẫn Đường: Needle Pointer chạy quanh viền hình tròn với độ sắc nét tối đa
         GameObject needleObj = new GameObject("CompassNeedle", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         needleObj.layer = 5;
-        needleObj.transform.SetParent(radarBg.transform, false);
+        needleObj.transform.SetParent(compassRingObj.transform, false);
         RectTransform nRt = needleObj.GetComponent<RectTransform>();
-        nRt.sizeDelta = new Vector2(20f, 20f);
+        nRt.sizeDelta = new Vector2(24f, 24f);
         nRt.anchoredPosition = Vector2.zero;
 
         var nImg = needleObj.GetComponent<Image>();
         nImg.sprite = arrowSprite;
-        nImg.color = new Color(1f, 0.85f, 0.25f);
+        nImg.color = Color.white;
         nImg.raycastTarget = false;
 
         // 3. Label Khoảng Cách Mục Tiêu Dưới Radar (Bấm vào cũng mở bản đồ)

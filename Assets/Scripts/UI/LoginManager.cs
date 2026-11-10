@@ -99,18 +99,58 @@ public class LoginManager : MonoBehaviour
         if (switchAccountBtn != null) switchAccountBtn.gameObject.SetActive(false); // Ẩn nút đổi tài khoản vì là game offline
 
         // Đảm bảo Tiêu Đề Game "VAELSTRIDER: RUINBOUND" luôn hiển thị tráng lệ ở nửa trên màn hình
+        if (tapToStartPanel != null)
+        {
+            Transform existingTitle = tapToStartPanel.transform.Find("TapTitleHeader");
+            TextMeshProUGUI headerTmp = null;
+            if (existingTitle != null)
+            {
+                existingTitle.gameObject.SetActive(true);
+                headerTmp = existingTitle.GetComponent<TextMeshProUGUI>();
+            }
+            else
+            {
+                GameObject tObj = new GameObject("TapTitleHeader", typeof(RectTransform), typeof(CanvasRenderer));
+                tObj.transform.SetParent(tapToStartPanel.transform, false);
+                tObj.transform.SetAsFirstSibling(); // Đặt sau Background nhưng trước nút chạm
+                RectTransform tRt = tObj.GetComponent<RectTransform>();
+                tRt.anchorMin = new Vector2(0.5f, 0.5f);
+                tRt.anchorMax = new Vector2(0.5f, 0.5f);
+                tRt.pivot = new Vector2(0.5f, 0.5f);
+                tRt.anchoredPosition = new Vector2(0f, 180f);
+                tRt.sizeDelta = new Vector2(1400f, 220f);
+
+                headerTmp = tObj.AddComponent<TextMeshProUGUI>();
+                headerTmp.raycastTarget = false;
+                GameFontManager.ApplyFontToText(headerTmp, true);
+            }
+
+            if (headerTmp != null)
+            {
+                headerTmp.text = "<size=90><color=#FFD700><b>VAELSTRIDER</b></color></size>\n<size=44><color=#FFAA33><b>— RUINBOUND —</b></color></size>";
+                headerTmp.alignment = TextAlignmentOptions.Center;
+                headerTmp.overflowMode = TextOverflowModes.Overflow;
+                SoulslikeHUDStyler.SetSafeOutline(headerTmp, 0.35f, Color.black);
+            }
+        }
+
         if (titleText != null)
         {
             titleText.gameObject.SetActive(true);
             if (titleText.transform.parent != null)
             {
                 titleText.transform.parent.gameObject.SetActive(true);
+                titleText.transform.parent.SetAsLastSibling();
             }
         }
         else
         {
             var header = GameObject.Find("Header");
-            if (header != null) header.SetActive(true);
+            if (header != null)
+            {
+                header.SetActive(true);
+                header.transform.SetAsLastSibling();
+            }
         }
 
         // Đảm bảo LoadingProgressPanel (chứa thanh slider trắng thừa) bị ẩn hoàn toàn khi ở màn hình Tap To Start

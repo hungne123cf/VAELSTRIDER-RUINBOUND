@@ -190,6 +190,16 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         SoundManager.EnsureInstance()?.PlayButtonClick();
     }
 
+    public void RefreshMap()
+    {
+        if (isOpen)
+        {
+            BuildRoomLayout();
+            UpdateRealtimeEntities();
+            UpdateStatsAndHints();
+        }
+    }
+
     public void OnBeginDrag(PointerEventData eventData) { }
 
     public void OnDrag(PointerEventData eventData)
@@ -779,7 +789,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         mapContentRt.anchorMax = new Vector2(0.5f, 0.5f);
         mapContentRt.pivot = new Vector2(0.5f, 0.5f);
         mapContentRt.anchoredPosition = Vector2.zero;
-        mapContentRt.sizeDelta = new Vector2(2000f, 2000f);
+        mapContentRt.sizeDelta = new Vector2(4000f, 4000f);
 
         // Grid lines nền bản đồ
         GameObject gridObj = new GameObject("GridBackground", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));

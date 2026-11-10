@@ -248,6 +248,10 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
         }
 
         SetupMap2RoomsAndBarriers();
+
+        // Đồng bộ hóa ngay lập tức với Minimap Radar & Fullscreen Map
+        MinimapHUD.Instance?.RebuildTerrainMap();
+        FullscreenMapUI.Instance?.RefreshMap();
     }
 
     private void CleanUpObstaclesAndOversizedCollidersMap2()
@@ -427,6 +431,10 @@ public class MultiPathMapExpansionBuilder : MonoBehaviour
 
         BuildPerimeterWallsFromWalkableRects(map3ExpRoot);
         SetupMap3RoomsAndBarriers();
+
+        // Đồng bộ hóa ngay lập tức với Minimap Radar & Fullscreen Map
+        MinimapHUD.Instance?.RebuildTerrainMap();
+        FullscreenMapUI.Instance?.RefreshMap();
     }
 
     private void CreateIslandFloor(Transform parent, Sprite sprite, Material mat, string name, int xMin, int yMin, int width, int height)
