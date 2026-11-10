@@ -88,7 +88,11 @@ public class MatchTimerUI : MonoBehaviour
         if (timerText != null)
         {
             string label = LocalizationManager.T("THỜI GIAN", "TIME");
-            timerText.text = $"<color=#FFA502><size=11>{label}</size></color>  <color=#FFFFFF><b>{FormatTime(totalRunElapsedTime)}</b></color>";
+            timerText.text = $"<color=#FFA502><b>{label}:</b></color> <color=#FFFFFF><b>{FormatTime(totalRunElapsedTime)}</b></color>";
+            timerText.fontSize = 24f;
+            timerText.fontStyle = FontStyles.Bold;
+            timerText.alignment = TextAlignmentOptions.Center;
+            SoulslikeHUDStyler.SetSafeOutline(timerText, 0.35f, Color.black);
         }
     }
 
@@ -181,7 +185,7 @@ public class MatchTimerUI : MonoBehaviour
             if (exRt != null)
             {
                 exRt.anchoredPosition = new Vector2(0f, -8f);
-                exRt.sizeDelta = new Vector2(150f, 34f);
+                exRt.sizeDelta = new Vector2(230f, 44f);
             }
             Instance = existing.GetComponent<MatchTimerUI>();
             if (Instance != null)
@@ -201,7 +205,7 @@ public class MatchTimerUI : MonoBehaviour
         rt.anchorMax = new Vector2(0.5f, 1f);
         rt.pivot = new Vector2(0.5f, 1f);
         rt.anchoredPosition = new Vector2(0f, -8f);
-        rt.sizeDelta = new Vector2(150f, 34f);
+        rt.sizeDelta = new Vector2(230f, 44f);
 
         Image bgImg = rootObj.GetComponent<Image>();
         bgImg.color = new Color(0.05f, 0.07f, 0.12f, 0.92f);
@@ -222,10 +226,11 @@ public class MatchTimerUI : MonoBehaviour
 
         var tmp = textObj.AddComponent<TextMeshProUGUI>();
         string label = LocalizationManager.T("THỜI GIAN", "TIME");
-        tmp.text = $"<color=#FFA502><size=11>{label}</size></color>  <color=#FFFFFF><b>{FormatTime(totalRunElapsedTime)}</b></color>";
-        tmp.fontSize = 15;
+        tmp.text = $"<color=#FFA502><b>{label}:</b></color> <color=#FFFFFF><b>{FormatTime(totalRunElapsedTime)}</b></color>";
+        tmp.fontSize = 24;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, Color.black);
 
         var timerComp = rootObj.AddComponent<MatchTimerUI>();
         timerComp.timerText = tmp;

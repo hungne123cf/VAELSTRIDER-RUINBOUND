@@ -293,9 +293,9 @@ public class HealthBarUI : MonoBehaviour
             tmpHpText.fontSize = 24f;
             tmpHpText.fontStyle = FontStyles.Bold;
 
-            // Xếp số máu hiện tại/tối đa trước, giáp và HP ảo ở cuối thanh theo đúng yêu cầu người chơi
+            // Xếp số máu hiện tại/tối đa trước, giáp và HP ảo ở cuối thanh dạng số thuần túy (bỏ hoàn toàn chữ Ảo)
             string shieldStr = (shield > 0) ? $" <color=#F59E0B><b>(+{shield})</b></color>" : "";
-            string vHpStr = (virtualHp > 0) ? $" <color=#FCD34D><b>(+{virtualHp} Ảo)</b></color>" : "";
+            string vHpStr = (virtualHp > 0) ? $" <color=#FCD34D><b>(+{virtualHp})</b></color>" : "";
 
             tmpHpText.text = $"<color=#FFFFFF><b>{current}</b></color> <color=#CBD5E1><b>/</b></color> <color=#FFFFFF><b>{max}</b></color>{shieldStr}{vHpStr}";
             SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.45f, Color.black);
@@ -305,7 +305,7 @@ public class HealthBarUI : MonoBehaviour
         {
             hpText.transform.SetAsLastSibling();
             string shieldStr = (shield > 0) ? $" (+{shield})" : "";
-            string vHpStr = (virtualHp > 0) ? $" (+{virtualHp} Ảo)" : "";
+            string vHpStr = (virtualHp > 0) ? $" (+{virtualHp})" : "";
             hpText.text = $"{current} / {max}{shieldStr}{vHpStr}";
         }
     }

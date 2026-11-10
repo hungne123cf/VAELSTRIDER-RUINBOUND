@@ -5063,22 +5063,23 @@ public class MainMenuManager : MonoBehaviour
         fdImg.color = new Color(0.85f, 0.72f, 0.35f, 0.8f);
         fdImg.raycastTarget = false;
 
-        // Counter Subtitle
+        // Counter Subtitle (- 1/6 -) Phóng to nổi bật
         GameObject cntObj = new GameObject("CounterSubtitle", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         cntObj.transform.SetParent(topBar.transform, false);
         RectTransform cntRt = cntObj.GetComponent<RectTransform>();
         cntRt.anchorMin = new Vector2(0.5f, 0.5f);
         cntRt.anchorMax = new Vector2(0.5f, 0.5f);
         cntRt.pivot = new Vector2(0.5f, 0.5f);
-        cntRt.anchoredPosition = new Vector2(0f, -24f);
-        cntRt.sizeDelta = new Vector2(240f, 18f);
+        cntRt.anchoredPosition = new Vector2(0f, -28f);
+        cntRt.sizeDelta = new Vector2(300f, 32f);
         carouselCounterText = cntObj.GetComponent<TextMeshProUGUI>();
-        carouselCounterText.fontSize = 12f;
+        carouselCounterText.fontSize = 24f;
         carouselCounterText.fontStyle = FontStyles.Bold;
         carouselCounterText.alignment = TextAlignmentOptions.Center;
-        carouselCounterText.color = new Color(0.72f, 0.78f, 0.88f, 0.85f);
+        carouselCounterText.color = new Color(1f, 0.90f, 0.45f, 1f);
+        SoulslikeHUDStyler.SetSafeOutline(carouselCounterText, 0.35f, Color.black);
 
-        // Currency Box (Top Right)
+        // Currency Box (Top Right) Phóng to hiển thị số Linh Hồn rõ nét
         GameObject curObj = new GameObject("CurrencyBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         curObj.transform.SetParent(topBar.transform, false);
         RectTransform curRt = curObj.GetComponent<RectTransform>();
@@ -5086,7 +5087,7 @@ public class MainMenuManager : MonoBehaviour
         curRt.anchorMax = new Vector2(1f, 0.5f);
         curRt.pivot = new Vector2(1f, 0.5f);
         curRt.anchoredPosition = new Vector2(-35f, 0f);
-        curRt.sizeDelta = new Vector2(200f, 40f);
+        curRt.sizeDelta = new Vector2(320f, 52f);
         Image curImg = curObj.GetComponent<Image>();
         Sprite plaqueBg = Resources.Load<Sprite>("UI/Soulslike/Runic_Plaque_Bg");
         if (plaqueBg != null) { curImg.sprite = plaqueBg; curImg.type = Image.Type.Sliced; }
@@ -5097,10 +5098,11 @@ public class MainMenuManager : MonoBehaviour
         RectTransform ctxtRt = curTxtObj.GetComponent<RectTransform>();
         ctxtRt.anchorMin = Vector2.zero; ctxtRt.anchorMax = Vector2.one; ctxtRt.sizeDelta = Vector2.zero;
         carouselTopCurrencyText = curTxtObj.GetComponent<TextMeshProUGUI>();
-        carouselTopCurrencyText.fontSize = 13.5f;
+        carouselTopCurrencyText.fontSize = 24f;
         carouselTopCurrencyText.fontStyle = FontStyles.Bold;
         carouselTopCurrencyText.alignment = TextAlignmentOptions.Center;
-        carouselTopCurrencyText.color = new Color(0.35f, 0.88f, 1f, 1f);
+        carouselTopCurrencyText.color = new Color(1f, 0.95f, 0.70f, 1f);
+        SoulslikeHUDStyler.SetSafeOutline(carouselTopCurrencyText, 0.35f, Color.black);
 
         // 3. Left Stage: Hero Showcase Area
         GameObject stageObj = new GameObject("HeroStage", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -5319,9 +5321,9 @@ public class MainMenuManager : MonoBehaviour
         CreateStatRow(statsBox.transform, "Row_SPD", new Vector2(0f, -44f), "TỐC ĐỘ (SPD)", new Color(0.35f, 0.92f, 0.65f, 1f), troughSp, sapphireSp, out carouselSpdBarFill, out carouselSpdValText, out _);
 
         // 3 Combat Arsenal Breakdown Cards (Phóng to tối đa chữ và khung cho Mobile không lem)
-        CreateSkillCard(dosObj.transform, "SkillCard_Normal", new Vector2(0f, 110f), new Vector2(660f, 115f), out carouselSkillNormalTitle, out carouselSkillNormalDesc);
-        CreateSkillCard(dosObj.transform, "SkillCard_Guard", new Vector2(0f, -12f), new Vector2(660f, 115f), out carouselSkillGuardTitle, out carouselSkillGuardDesc);
-        CreateSkillCard(dosObj.transform, "SkillCard_Ulti", new Vector2(0f, -134f), new Vector2(660f, 115f), out carouselSkillUltiTitle, out carouselSkillUltiDesc);
+        CreateSkillCard(dosObj.transform, "SkillCard_Normal", new Vector2(0f, 114f), new Vector2(660f, 122f), out carouselSkillNormalTitle, out carouselSkillNormalDesc);
+        CreateSkillCard(dosObj.transform, "SkillCard_Guard", new Vector2(0f, -14f), new Vector2(660f, 122f), out carouselSkillGuardTitle, out carouselSkillGuardDesc);
+        CreateSkillCard(dosObj.transform, "SkillCard_Ulti", new Vector2(0f, -142f), new Vector2(660f, 122f), out carouselSkillUltiTitle, out carouselSkillUltiDesc);
 
         // 5. Bottom Strip: Horizontal Deck & Enter Battle Button
         GameObject btmBar = new GameObject("BottomBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -5474,7 +5476,7 @@ public class MainMenuManager : MonoBehaviour
         lrt.sizeDelta = new Vector2(175f, 26f);
         var lTxt = lObj.GetComponent<TextMeshProUGUI>();
         lTxt.text = labelText;
-        lTxt.fontSize = 21f;
+        lTxt.fontSize = 23f;
         lTxt.fontStyle = FontStyles.Bold;
         lTxt.color = labelColor;
         SoulslikeHUDStyler.SetSafeOutline(lTxt, 0.25f, Color.black);
@@ -5487,8 +5489,8 @@ public class MainMenuManager : MonoBehaviour
         trt.anchorMin = new Vector2(0f, 0.5f);
         trt.anchorMax = new Vector2(0f, 0.5f);
         trt.pivot = new Vector2(0f, 0.5f);
-        trt.anchoredPosition = new Vector2(185f, 0f);
-        trt.sizeDelta = new Vector2(310f, 18f);
+        trt.anchoredPosition = new Vector2(195f, 0f);
+        trt.sizeDelta = new Vector2(300f, 20f);
         Image trImg = trObj.GetComponent<Image>();
         if (troughSp != null) { trImg.sprite = troughSp; trImg.type = Image.Type.Sliced; }
         else trImg.color = new Color(0.04f, 0.05f, 0.08f, 0.9f);
@@ -5514,10 +5516,10 @@ public class MainMenuManager : MonoBehaviour
         vrt.anchorMin = new Vector2(0f, 0.5f);
         vrt.anchorMax = new Vector2(0f, 0.5f);
         vrt.pivot = new Vector2(0f, 0.5f);
-        vrt.anchoredPosition = new Vector2(510f, 0f);
-        vrt.sizeDelta = new Vector2(120f, 26f);
+        vrt.anchoredPosition = new Vector2(505f, 0f);
+        vrt.sizeDelta = new Vector2(130f, 28f);
         valTxt = vObj.GetComponent<TextMeshProUGUI>();
-        valTxt.fontSize = 22f;
+        valTxt.fontSize = 25f;
         valTxt.fontStyle = FontStyles.Bold;
         valTxt.color = Color.white;
         valTxt.alignment = TextAlignmentOptions.MidlineLeft;
@@ -5553,30 +5555,32 @@ public class MainMenuManager : MonoBehaviour
         trt.anchorMin = new Vector2(0f, 1f);
         trt.anchorMax = new Vector2(1f, 1f);
         trt.pivot = new Vector2(0f, 1f);
-        trt.anchoredPosition = new Vector2(14f, -7f);
-        trt.sizeDelta = new Vector2(-28f, 28f);
+        trt.anchoredPosition = new Vector2(16f, -7f);
+        trt.sizeDelta = new Vector2(-32f, 32f);
 
         titleTxt = tObj.GetComponent<TextMeshProUGUI>();
-        titleTxt.fontSize = 24f;
+        titleTxt.fontSize = 26f;
         titleTxt.fontStyle = FontStyles.Bold;
         titleTxt.color = new Color(1f, 0.88f, 0.45f, 1f);
-        SoulslikeHUDStyler.SetSafeOutline(titleTxt, 0.25f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(titleTxt, 0.30f, Color.black);
 
-        // Description Text
+        // Description Text (Phóng to tối đa, đậm nét, viền đen sắc sảo)
         GameObject dObj = new GameObject("Desc", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         dObj.transform.SetParent(cardObj.transform, false);
         RectTransform drt = dObj.GetComponent<RectTransform>();
         drt.anchorMin = new Vector2(0f, 0f);
         drt.anchorMax = new Vector2(1f, 1f);
         drt.pivot = new Vector2(0.5f, 0.5f);
-        drt.offsetMin = new Vector2(14f, 6f);
-        drt.offsetMax = new Vector2(-14f, -36f);
+        drt.offsetMin = new Vector2(16f, 6f);
+        drt.offsetMax = new Vector2(-16f, -38f);
 
         descTxt = dObj.GetComponent<TextMeshProUGUI>();
-        descTxt.fontSize = 20f;
-        descTxt.color = new Color(0.85f, 0.88f, 0.92f, 0.95f);
+        descTxt.fontSize = 24f;
+        descTxt.fontStyle = FontStyles.Bold;
+        descTxt.color = new Color(0.92f, 0.94f, 0.97f, 1f);
         descTxt.enableWordWrapping = true;
         descTxt.lineSpacing = 1f;
+        SoulslikeHUDStyler.SetSafeOutline(descTxt, 0.22f, Color.black);
     }
 
     private void BuildBottomRosterDeck(Transform parent)
@@ -5699,8 +5703,8 @@ public class MainMenuManager : MonoBehaviour
         // 2. Top Currency Shards
         if (carouselTopCurrencyText != null)
         {
-            string shLabel = LocalizationManager.Get("LBL_SHARDS");
-            carouselTopCurrencyText.text = $"{shLabel}: {FormatCompactNumber(AccountDatabase.GetAethelShards())}";
+            string shLabel = isVN ? "LINH HỒN" : "SHARDS";
+            carouselTopCurrencyText.text = $"<color=#FFD700><b>{shLabel}:</b></color> <color=#FFFFFF><b>{AccountDatabase.GetAethelShards():N0}</b></color>";
         }
 
         // 3. Name & Role & Lock State
@@ -5714,16 +5718,18 @@ public class MainMenuManager : MonoBehaviour
         if (carouselHeroNameText != null) carouselHeroNameText.text = heroName;
         if (carouselHeroRoleText != null)
         {
+            carouselHeroRoleText.fontSize = 22f;
+            carouselHeroRoleText.fontStyle = FontStyles.Bold;
             if (isUnlocked)
             {
                 string ownedStr = LocalizationManager.T("ĐÃ SỞ HỮU", "OWNED");
-                carouselHeroRoleText.text = $"{heroRole}  |  <color=#55FFAA>[{ownedStr}]</color>";
+                carouselHeroRoleText.text = $"{heroRole}  |  <color=#55FFAA><b>◆ {ownedStr} ◆</b></color>";
             }
             else
             {
                 string lockedStr = LocalizationManager.T("KHÓA", "LOCKED");
                 string soulsStr = LocalizationManager.T("LINH HỒN", "SOULS");
-                carouselHeroRoleText.text = $"{heroRole}  |  <color=#FFD700>[{lockedStr}] {price:N0} {soulsStr}</color>";
+                carouselHeroRoleText.text = $"{heroRole}  |  <color=#FFD700><b>◆ {lockedStr} ({price:N0} {soulsStr}) ◆</b></color>";
             }
         }
 
