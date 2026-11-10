@@ -30,6 +30,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
     private bool isOpened = false;
+    public bool IsOpened => isOpened;
     private bool isLootGenerated = false;
     private List<ChestLootItem> lootItems = new List<ChestLootItem>();
 
