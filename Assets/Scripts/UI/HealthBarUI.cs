@@ -309,5 +309,4 @@ public class HealthBarUI : MonoBehaviour
             hpText.text = $"{current} / {max}{shieldStr}{vHpStr}";
         }
     }
-    }
 }
