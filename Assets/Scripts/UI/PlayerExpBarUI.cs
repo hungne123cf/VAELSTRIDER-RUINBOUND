@@ -183,7 +183,7 @@ public class PlayerExpBarUI : MonoBehaviour
 
         // Đặt ngay dưới 2 thanh năng lượng Soulslike (EnergyBar 24px + InnerEnergyBar 17px + đệm = 46px)
         float expOffsetY = startY - 46f;
-        float expBarHeight = 20f;
+        float expBarHeight = 28f;
 
         _root = new GameObject("PlayerExpBarHUD");
         _root.transform.SetParent(mainCanvas.transform, false);
@@ -240,10 +240,10 @@ public class PlayerExpBarUI : MonoBehaviour
         textRt.anchorMin = Vector2.zero;
         textRt.anchorMax = Vector2.one;
         textRt.offsetMin = new Vector2(10f, 0f);
-        textRt.offsetMax = new Vector2(-10f, 0f);
+        textRt.offsetMax = new Vector2(-12f, 0f);
 
         _expLabelText = textObj.AddComponent<TextMeshProUGUI>();
-        _expLabelText.fontSize = 20f;
+        _expLabelText.fontSize = 22f;
         _expLabelText.fontStyle = FontStyles.Bold;
         _expLabelText.color = new Color(0.98f, 0.94f, 1f, 1f);
         _expLabelText.alignment = TextAlignmentOptions.MidlineRight;

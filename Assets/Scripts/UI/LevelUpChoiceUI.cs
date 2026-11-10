@@ -1635,7 +1635,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         descBoxObj.transform.SetParent(card.transform, false);
         var dbRT = descBoxObj.GetComponent<RectTransform>();
         dbRT.anchorMin = new Vector2(0.045f, 0.016f);
-        dbRT.anchorMax = new Vector2(0.955f, 0.260f);
+        dbRT.anchorMax = new Vector2(0.955f, 0.300f);
         dbRT.offsetMin = dbRT.offsetMax = Vector2.zero;
 
         var dbImg = descBoxObj.GetComponent<Image>();
@@ -1648,7 +1648,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         dbOut.effectColor = tierFrameColor * 0.75f;
         dbOut.effectDistance = new Vector2(1.2f, -1.2f);
 
-        // Dòng phân loại Tag hệ kỹ năng / Đặc quyền tướng trên đầu hộp mô tả
+        // Dòng phân loại Tag hệ kỹ năng / Đặc quyền tướng trên đầu hộp mô tả (Dùng ◆ ◆ thay dấu [ ] để không bao giờ bị chữ z)
         bool isHeroSignature = (aug.heroFilter != null && aug.heroFilter.Length > 0);
         string heroNameHeader = "";
         if (isHeroSignature)
@@ -1658,8 +1658,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         }
 
         string headerTagText = isHeroSignature
-            ? (isVN ? $"[ĐẶC QUYỀN: {heroNameHeader.ToUpper()}]" : $"[SIGNATURE: {heroNameHeader.ToUpper()}]")
-            : (isVN ? $"[{typeName.ToUpper()}]" : $"[{typeName.ToUpper()}]");
+            ? (isVN ? $"◆ ĐẶC QUYỀN: {heroNameHeader.ToUpper()} ◆" : $"◆ SIGNATURE: {heroNameHeader.ToUpper()} ◆")
+            : (isVN ? $"◆ {typeName.ToUpper()} ◆" : $"◆ {typeName.ToUpper()} ◆");
 
         var tagTxtObj = new GameObject("CategoryTagText", typeof(RectTransform), typeof(TextMeshProUGUI));
         tagTxtObj.transform.SetParent(descBoxObj.transform, false);
@@ -1874,13 +1874,13 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         var cg = _confirmPopupObj.GetComponent<CanvasGroup>();
 
-        // 2. Modal Window Container
+        // 2. Modal Window Container (Mở rộng kích thước cho Mobile hiển thị chữ to rõ nét)
         var modal = new GameObject("ModalWindow", typeof(RectTransform), typeof(Image), typeof(Outline));
         modal.transform.SetParent(_confirmPopupObj.transform, false);
         var mRT = modal.GetComponent<RectTransform>();
         mRT.anchorMin = new Vector2(0.5f, 0.5f);
         mRT.anchorMax = new Vector2(0.5f, 0.5f);
-        mRT.sizeDelta = new Vector2(680f, 520f);
+        mRT.sizeDelta = new Vector2(920f, 580f);
         mRT.pivot = new Vector2(0.5f, 0.5f);
 
         Color tierColor = aug.rarity == AugmentDatabase.AugmentData.Rarity.Epic
@@ -1899,7 +1899,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         mOut.effectColor = tierColor;
         mOut.effectDistance = new Vector2(2f, -2f);
 
-        // Header Title
+        // Header Title (Phóng to 38pt Bold)
         var headerObj = new GameObject("HeaderTitle", typeof(RectTransform), typeof(TextMeshProUGUI));
         headerObj.transform.SetParent(modal.transform, false);
         var hRT = headerObj.GetComponent<RectTransform>();
@@ -1909,22 +1909,22 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         var hTMP = headerObj.GetComponent<TextMeshProUGUI>();
         hTMP.text = isVN ? "XÁC NHẬN KHẮC ẤN LÕI" : "CONFIRM AUGMENT ENGRAVING";
-        hTMP.fontSize = 36f;
+        hTMP.fontSize = 38f;
         hTMP.fontStyle = FontStyles.Bold;
         hTMP.alignment = TextAlignmentOptions.Center;
         hTMP.color = new Color(1f, 0.90f, 0.45f);
-        SoulslikeHUDStyler.SetSafeOutline(hTMP, 0.0f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(hTMP, 0.35f, Color.black);
 
         CreateOrnamentDivider(modal.transform, "ModalDivider",
             new Vector2(0.06f, 0.865f), new Vector2(0.94f, 0.875f),
             tierColor * 0.85f);
 
-        // Bên Trái: Khung Tranh Thu Nhỏ (Container riêng biệt để FitInParent không bung ra modal)
+        // Bên Trái: Khung Tranh Thu Nhỏ
         var leftThumbArea = new GameObject("LeftThumbArea", typeof(RectTransform));
         leftThumbArea.transform.SetParent(modal.transform, false);
         var ltaRT = leftThumbArea.GetComponent<RectTransform>();
-        ltaRT.anchorMin = new Vector2(0.06f, 0.20f);
-        ltaRT.anchorMax = new Vector2(0.40f, 0.84f);
+        ltaRT.anchorMin = new Vector2(0.05f, 0.18f);
+        ltaRT.anchorMax = new Vector2(0.38f, 0.84f);
         ltaRT.offsetMin = ltaRT.offsetMax = Vector2.zero;
 
         // Dùng đúng Sprite ban đầu của thẻ bài (hoặc lấy trực tiếp theo aug)
@@ -1956,20 +1956,20 @@ public class LevelUpChoiceUI : MonoBehaviour
         ltOut.effectColor = tierColor;
         ltOut.effectDistance = new Vector2(1.8f, -1.8f);
 
-        // Bên Phải: Chi Tiết Lõi
+        // Bên Phải: Chi Tiết Lõi (Phóng to kích thước chữ tối đa)
         var rightDetail = new GameObject("RightDetail", typeof(RectTransform));
         rightDetail.transform.SetParent(modal.transform, false);
         var rdRT = rightDetail.GetComponent<RectTransform>();
-        rdRT.anchorMin = new Vector2(0.42f, 0.22f);
-        rdRT.anchorMax = new Vector2(0.95f, 0.83f);
+        rdRT.anchorMin = new Vector2(0.40f, 0.20f);
+        rdRT.anchorMax = new Vector2(0.95f, 0.84f);
         rdRT.offsetMin = rdRT.offsetMax = Vector2.zero;
 
         int curRank = AugmentManager.Instance != null ? AugmentManager.Instance.GetOwnedAugmentCount(aug.type) : 0;
         bool isUp = curRank > 0;
 
-        string detailTxt = $"<size=22><b><color=#FFEAA7>{(isVN ? aug.nameVN : aug.nameEN)}</color></b></size>\n" +
-            $"<size=14><color={(isUp ? "#FBBF24" : "#55EFC4")}><b>{(isUp ? (isVN ? $"THĂNG CẤP: CẤP {curRank} -> CẤP {curRank + 1}" : $"UPGRADE: LV.{curRank} -> LV.{curRank + 1}") : (isVN ? "LÕI MỚI" : "NEW AUGMENT"))}</b></color></size>\n\n" +
-            $"<size=15>{FormatCardDescription(aug, curRank, isVN)}</size>";
+        string detailTxt = $"<size=30><b><color=#FFEAA7>{(isVN ? aug.nameVN : aug.nameEN)}</color></b></size>\n" +
+            $"<size=22><color={(isUp ? "#FBBF24" : "#55EFC4")}><b>{(isUp ? (isVN ? $"THĂNG CẤP: CẤP {curRank} -> CẤP {curRank + 1}" : $"UPGRADE: LV.{curRank} -> LV.{curRank + 1}") : (isVN ? "LÕI MỚI" : "NEW AUGMENT"))}</b></color></size>\n\n" +
+            $"<size=24>{FormatCardDescription(aug, curRank, isVN)}</size>";
 
         var dTMPObj = new GameObject("DetailText", typeof(RectTransform), typeof(TextMeshProUGUI));
         dTMPObj.transform.SetParent(rightDetail.transform, false);
@@ -1980,17 +1980,17 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         var dTMP = dTMPObj.GetComponent<TextMeshProUGUI>();
         dTMP.text = detailTxt;
-        dTMP.fontSize = 26f;
+        dTMP.fontSize = 24f;
         dTMP.enableWordWrapping = true;
         dTMP.color = Color.white;
-        SoulslikeHUDStyler.SetSafeOutline(dTMP, 0.0f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(dTMP, 0.35f, Color.black);
 
-        // Bottom 2 Buttons: QUAY LẠI (Hủy) & XÁC NHẬN
+        // Bottom 2 Buttons: QUAY LẠI (Hủy) & XÁC NHẬN (Phóng to 30pt Bold)
         // Nút Quay Lại
         var btnBack = new GameObject("BtnBack", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
         btnBack.transform.SetParent(modal.transform, false);
         var bbRT = btnBack.GetComponent<RectTransform>();
-        bbRT.anchorMin = new Vector2(0.12f, 0.05f);
+        bbRT.anchorMin = new Vector2(0.10f, 0.04f);
         bbRT.anchorMax = new Vector2(0.46f, 0.16f);
         bbRT.offsetMin = bbRT.offsetMax = Vector2.zero;
 
@@ -2011,11 +2011,11 @@ public class LevelUpChoiceUI : MonoBehaviour
         bbtRT.offsetMin = bbtRT.offsetMax = Vector2.zero;
         var bbtTMP = bbTxt.GetComponent<TextMeshProUGUI>();
         bbtTMP.text = isVN ? "QUAY LẠI" : "BACK";
-        bbtTMP.fontSize = 28f;
+        bbtTMP.fontSize = 30f;
         bbtTMP.fontStyle = FontStyles.Bold;
         bbtTMP.alignment = TextAlignmentOptions.Center;
         bbtTMP.color = new Color(0.85f, 0.88f, 0.95f);
-        SoulslikeHUDStyler.SetSafeOutline(bbtTMP, 0.0f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(bbtTMP, 0.35f, Color.black);
 
         var bBackBtn = btnBack.GetComponent<Button>();
         bBackBtn.onClick.AddListener(() => {
@@ -2027,8 +2027,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         var btnConfirm = new GameObject("BtnConfirm", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
         btnConfirm.transform.SetParent(modal.transform, false);
         var bcRT = btnConfirm.GetComponent<RectTransform>();
-        bcRT.anchorMin = new Vector2(0.54f, 0.05f);
-        bcRT.anchorMax = new Vector2(0.88f, 0.16f);
+        bcRT.anchorMin = new Vector2(0.54f, 0.04f);
+        bcRT.anchorMax = new Vector2(0.90f, 0.16f);
         bcRT.offsetMin = bcRT.offsetMax = Vector2.zero;
 
         var bcImg = btnConfirm.GetComponent<Image>();
@@ -2048,11 +2048,11 @@ public class LevelUpChoiceUI : MonoBehaviour
         bctRT.offsetMin = bctRT.offsetMax = Vector2.zero;
         var bctTMP = bcTxt.GetComponent<TextMeshProUGUI>();
         bctTMP.text = isVN ? "XÁC NHẬN KHẮC ẤN" : "CONFIRM";
-        bctTMP.fontSize = 28f;
+        bctTMP.fontSize = 30f;
         bctTMP.fontStyle = FontStyles.Bold;
         bctTMP.alignment = TextAlignmentOptions.Center;
         bctTMP.color = Color.white;
-        SoulslikeHUDStyler.SetSafeOutline(bctTMP, 0.0f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(bctTMP, 0.35f, Color.black);
 
         var bConfBtn = btnConfirm.GetComponent<Button>();
         bConfBtn.onClick.AddListener(() => {

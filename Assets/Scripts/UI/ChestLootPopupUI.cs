@@ -262,11 +262,12 @@ public class ChestLootPopupUI : MonoBehaviour
 
         var tmp = txtObj.AddComponent<TextMeshProUGUI>();
         tmp.text = text;
-        tmp.fontSize = 15;
+        tmp.fontSize = 24;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = new Color(0.96f, 0.88f, 0.65f);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, Color.black);
 
         SoulslikeHUDStyler.StyleButton(btn, text);
 
@@ -379,12 +380,12 @@ public class ChestLootPopupUI : MonoBehaviour
         rowObj.transform.SetParent(contentContainer, false);
 
         RectTransform rt = rowObj.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(570f, 74f);
+        rt.sizeDelta = new Vector2(570f, 88f);
 
         var le = rowObj.GetComponent<LayoutElement>();
         le.preferredWidth = 570f;
-        le.preferredHeight = 74f;
-        le.minHeight = 74f;
+        le.preferredHeight = 88f;
+        le.minHeight = 88f;
 
         Image bg = rowObj.GetComponent<Image>();
         bg.color = new Color(0.06f, 0.08f, 0.13f, 0.95f);
@@ -392,7 +393,7 @@ public class ChestLootPopupUI : MonoBehaviour
         Color rarityCol = GetRarityColor(item.rarity);
         WhiteIconLoader.ApplyGothicFrame(rowObj, rarityCol, 0.65f);
 
-        // Icon Box
+        // Icon Box (60x60px)
         GameObject ibObj = new GameObject("IconBox", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         ibObj.layer = 5;
         ibObj.transform.SetParent(rowObj.transform, false);
@@ -400,8 +401,8 @@ public class ChestLootPopupUI : MonoBehaviour
         ibRt.anchorMin = new Vector2(0f, 0.5f);
         ibRt.anchorMax = new Vector2(0f, 0.5f);
         ibRt.pivot = new Vector2(0f, 0.5f);
-        ibRt.anchoredPosition = new Vector2(12f, 0f);
-        ibRt.sizeDelta = new Vector2(50f, 50f);
+        ibRt.anchoredPosition = new Vector2(14f, 0f);
+        ibRt.sizeDelta = new Vector2(60f, 60f);
 
         Image ibImg = ibObj.GetComponent<Image>();
         ibImg.color = new Color(0.18f, 0.20f, 0.30f, 1f);
@@ -458,52 +459,54 @@ public class ChestLootPopupUI : MonoBehaviour
         infoRt.anchorMin = new Vector2(0f, 0.5f);
         infoRt.anchorMax = new Vector2(1f, 0.5f);
         infoRt.pivot = new Vector2(0f, 0.5f);
-        infoRt.anchoredPosition = new Vector2(72f, 0f);
-        infoRt.sizeDelta = new Vector2(-195f, 50f);
+        infoRt.anchoredPosition = new Vector2(88f, 0f);
+        infoRt.sizeDelta = new Vector2(-240f, 64f);
 
         var vlg = infoObj.GetComponent<VerticalLayoutGroup>();
         vlg.childAlignment = TextAnchor.MiddleLeft;
-        vlg.spacing = 3f;
+        vlg.spacing = 4f;
         vlg.childControlWidth = true;
         vlg.childControlHeight = true;
         vlg.childForceExpandWidth = true;
         vlg.childForceExpandHeight = false;
         vlg.padding = new RectOffset(0, 0, 0, 0);
 
-        // Item Name
+        // Item Name (Phóng to 22pt Bold rõ nét)
         GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(CanvasRenderer), typeof(LayoutElement));
         nameObj.layer = 5;
         nameObj.transform.SetParent(infoObj.transform, false);
         var nLe = nameObj.GetComponent<LayoutElement>();
-        nLe.preferredHeight = 24f;
-        nLe.minHeight = 24f;
+        nLe.preferredHeight = 30f;
+        nLe.minHeight = 30f;
         var nTmp = nameObj.AddComponent<TextMeshProUGUI>();
         nTmp.text = LocalizationManager.IsVietnamese ? item.nameVi : item.nameEn;
-        nTmp.fontSize = 16f;
+        nTmp.fontSize = 22f;
         nTmp.fontStyle = FontStyles.Bold;
         nTmp.color = Color.white;
         nTmp.alignment = TextAlignmentOptions.Left;
         nTmp.overflowMode = TextOverflowModes.Ellipsis;
         nTmp.enableWordWrapping = false;
+        SoulslikeHUDStyler.SetSafeOutline(nTmp, 0.3f, Color.black);
 
-        // Rarity + Quantity Tag
+        // Rarity + Quantity Tag (Thay dấu [ ] bằng ◆ ◆ để tuyệt đối không bị chữ z)
         GameObject tagObj = new GameObject("Tag", typeof(RectTransform), typeof(CanvasRenderer), typeof(LayoutElement));
         tagObj.layer = 5;
         tagObj.transform.SetParent(infoObj.transform, false);
         var tLe = tagObj.GetComponent<LayoutElement>();
-        tLe.preferredHeight = 20f;
-        tLe.minHeight = 20f;
+        tLe.preferredHeight = 26f;
+        tLe.minHeight = 26f;
         var tTmp = tagObj.AddComponent<TextMeshProUGUI>();
         string qtyStr = item.quantity > 1 ? $" x{item.quantity}" : "";
         if (item.id == "shards") qtyStr = $" +{item.quantity:N0} {LocalizationManager.T("Linh Hồn", "Shards")}";
-        tTmp.text = $"<color=#{ColorUtility.ToHtmlStringRGB(rarityCol)}>[ {GetRarityLabel(item.rarity)} ]</color>{qtyStr}";
-        tTmp.fontSize = 13.5f;
+        tTmp.text = $"<color=#{ColorUtility.ToHtmlStringRGB(rarityCol)}>◆ {GetRarityLabel(item.rarity)} ◆</color>{qtyStr}";
+        tTmp.fontSize = 18f;
         tTmp.fontStyle = FontStyles.Bold;
         tTmp.color = new Color(0.85f, 0.88f, 0.95f);
         tTmp.alignment = TextAlignmentOptions.Left;
         tTmp.enableWordWrapping = false;
+        SoulslikeHUDStyler.SetSafeOutline(tTmp, 0.25f, Color.black);
 
-        // "NHẬN" / "LOOT" Button
+        // "NHẬN" / "LOOT" Button (Phóng to 22pt Bold)
         GameObject btnObj = new GameObject("Btn_Take", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         btnObj.layer = 5;
         btnObj.transform.SetParent(rowObj.transform, false);
@@ -511,8 +514,8 @@ public class ChestLootPopupUI : MonoBehaviour
         bRt.anchorMin = new Vector2(1f, 0.5f);
         bRt.anchorMax = new Vector2(1f, 0.5f);
         bRt.pivot = new Vector2(1f, 0.5f);
-        bRt.anchoredPosition = new Vector2(-10f, 0f);
-        bRt.sizeDelta = new Vector2(135f, 54f);
+        bRt.anchoredPosition = new Vector2(-12f, 0f);
+        bRt.sizeDelta = new Vector2(145f, 62f);
 
         Image bImg = btnObj.GetComponent<Image>();
         bImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);
@@ -530,11 +533,12 @@ public class ChestLootPopupUI : MonoBehaviour
 
         var bTmp = bTxtObj.AddComponent<TextMeshProUGUI>();
         bTmp.text = LocalizationManager.T("NHẬN", "LOOT");
-        bTmp.fontSize = 19f;
+        bTmp.fontSize = 22f;
         bTmp.fontStyle = FontStyles.Bold;
         bTmp.color = Color.white;
         bTmp.alignment = TextAlignmentOptions.Center;
         bTmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(bTmp, 0.35f, Color.black);
 
         btn.targetGraphic = bImg;
         btn.onClick.AddListener(() => TakeSingleItem(item, rowObj));

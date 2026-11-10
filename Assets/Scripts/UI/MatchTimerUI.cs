@@ -35,6 +35,23 @@ public class MatchTimerUI : MonoBehaviour
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
         if (timerText == null) timerText = GetComponentInChildren<TextMeshProUGUI>();
+        
+        // Quét và tối ưu toàn bộ TextMeshPro con để chữ TIME và số giờ phút luôn to rõ ràng
+        var allTmps = GetComponentsInChildren<TextMeshProUGUI>(true);
+        foreach (var t in allTmps)
+        {
+            t.fontStyle = FontStyles.Bold;
+            SoulslikeHUDStyler.SetSafeOutline(t, 0.35f, Color.black);
+            if (t.name.ToLower().Contains("val") || t.name.ToLower().Contains("time") || t == timerText)
+            {
+                t.fontSize = Mathf.Max(t.fontSize, 26f);
+            }
+            else
+            {
+                t.fontSize = Mathf.Max(t.fontSize, 20f);
+            }
+        }
+
         UpdateTimerText();
     }
 
@@ -89,7 +106,7 @@ public class MatchTimerUI : MonoBehaviour
         {
             string label = LocalizationManager.T("THỜI GIAN", "TIME");
             timerText.text = $"<color=#FFA502><b>{label}:</b></color> <color=#FFFFFF><b>{FormatTime(totalRunElapsedTime)}</b></color>";
-            timerText.fontSize = 24f;
+            timerText.fontSize = 26f;
             timerText.fontStyle = FontStyles.Bold;
             timerText.alignment = TextAlignmentOptions.Center;
             SoulslikeHUDStyler.SetSafeOutline(timerText, 0.35f, Color.black);
@@ -185,7 +202,7 @@ public class MatchTimerUI : MonoBehaviour
             if (exRt != null)
             {
                 exRt.anchoredPosition = new Vector2(0f, -8f);
-                exRt.sizeDelta = new Vector2(230f, 44f);
+                exRt.sizeDelta = new Vector2(280f, 52f);
             }
             Instance = existing.GetComponent<MatchTimerUI>();
             if (Instance != null)
@@ -205,7 +222,7 @@ public class MatchTimerUI : MonoBehaviour
         rt.anchorMax = new Vector2(0.5f, 1f);
         rt.pivot = new Vector2(0.5f, 1f);
         rt.anchoredPosition = new Vector2(0f, -8f);
-        rt.sizeDelta = new Vector2(230f, 44f);
+        rt.sizeDelta = new Vector2(280f, 52f);
 
         Image bgImg = rootObj.GetComponent<Image>();
         bgImg.color = new Color(0.05f, 0.07f, 0.12f, 0.92f);

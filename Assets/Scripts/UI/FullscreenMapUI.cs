@@ -129,8 +129,17 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
     public void OpenMap()
     {
         isOpen = true;
+        GameAutoBootstrap.SetGameplayHUDVisible(false); // Ẩn hoàn toàn Avatar HUD & HealthBar để Bản Đồ Toàn Cảnh độc tôn, không bị che tiêu đề
         FindPlayer();
         EnsureUIConstructed();
+
+        // Nâng sorting layer lên mức ưu tiên cao nhất
+        var c = GetComponent<Canvas>();
+        if (c == null) c = gameObject.AddComponent<Canvas>();
+        c.overrideSorting = true;
+        c.sortingOrder = 9999;
+        var ray = GetComponent<GraphicRaycaster>();
+        if (ray == null) gameObject.AddComponent<GraphicRaycaster>();
 
         gameObject.SetActive(true);
         transform.SetAsLastSibling();
@@ -183,6 +192,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
             canvasGroup.blocksRaycasts = false;
         }
         gameObject.SetActive(false);
+
+        // Khôi phục hiển thị đầy đủ Gameplay HUD (Avatar, HealthBar, Minimap, JoyStick)
+        GameAutoBootstrap.SetGameplayHUDVisible(true);
 
         // Khôi phục tốc độ game
         Time.timeScale = 1.0f;
@@ -835,7 +847,7 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         pMarkerOutline.effectColor = new Color(1f, 0.88f, 0.35f, 0.95f);
         pMarkerOutline.effectDistance = new Vector2(2f, 2f);
 
-        // Nhãn [BẠN] nhỏ trên đầu Avatar Player
+        // Nhãn ◆ BẠN ◆ trên đầu Avatar Player (thay [ ] bằng ◆ để không bao giờ bị chữ z)
         GameObject pLblObj = new GameObject("PlayerLabel", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         pLblObj.layer = 5;
         pLblObj.transform.SetParent(pMarkerObj.transform, false);
@@ -844,11 +856,13 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         plRt.anchorMax = new Vector2(0.5f, 1f);
         plRt.pivot = new Vector2(0.5f, 0f);
         plRt.anchoredPosition = new Vector2(0f, 4f);
-        plRt.sizeDelta = new Vector2(100f, 20f);
+        plRt.sizeDelta = new Vector2(120f, 24f);
         var pLblTmp = pLblObj.GetComponent<TextMeshProUGUI>();
-        pLblTmp.text = "<b><color=#55EFC4>[BẠN]</color></b>";
-        pLblTmp.fontSize = 14f;
+        pLblTmp.text = "<b><color=#55EFC4>◆ BẠN ◆</color></b>";
+        pLblTmp.fontSize = 17f;
+        pLblTmp.fontStyle = FontStyles.Bold;
         pLblTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(pLblTmp, 0.40f, Color.black);
 
         // 6. Bảng Thống Kê Dưới Góc Trái (Dungeon Stats Panel) - Phóng to hiển thị rõ
         GameObject statsPanel = new GameObject("StatsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));

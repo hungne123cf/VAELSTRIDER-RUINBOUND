@@ -5063,7 +5063,7 @@ public class MainMenuManager : MonoBehaviour
         fdImg.color = new Color(0.85f, 0.72f, 0.35f, 0.8f);
         fdImg.raycastTarget = false;
 
-        // Counter Subtitle (- 1/6 -) Phóng to nổi bật
+        // Counter Subtitle (◆ 1 / 6 ◆) Phóng to nổi bật
         GameObject cntObj = new GameObject("CounterSubtitle", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         cntObj.transform.SetParent(topBar.transform, false);
         RectTransform cntRt = cntObj.GetComponent<RectTransform>();
@@ -5071,9 +5071,9 @@ public class MainMenuManager : MonoBehaviour
         cntRt.anchorMax = new Vector2(0.5f, 0.5f);
         cntRt.pivot = new Vector2(0.5f, 0.5f);
         cntRt.anchoredPosition = new Vector2(0f, -28f);
-        cntRt.sizeDelta = new Vector2(300f, 32f);
+        cntRt.sizeDelta = new Vector2(340f, 38f);
         carouselCounterText = cntObj.GetComponent<TextMeshProUGUI>();
-        carouselCounterText.fontSize = 24f;
+        carouselCounterText.fontSize = 32f;
         carouselCounterText.fontStyle = FontStyles.Bold;
         carouselCounterText.alignment = TextAlignmentOptions.Center;
         carouselCounterText.color = new Color(1f, 0.90f, 0.45f, 1f);
@@ -5087,7 +5087,7 @@ public class MainMenuManager : MonoBehaviour
         curRt.anchorMax = new Vector2(1f, 0.5f);
         curRt.pivot = new Vector2(1f, 0.5f);
         curRt.anchoredPosition = new Vector2(-35f, 0f);
-        curRt.sizeDelta = new Vector2(320f, 52f);
+        curRt.sizeDelta = new Vector2(360f, 60f);
         Image curImg = curObj.GetComponent<Image>();
         Sprite plaqueBg = Resources.Load<Sprite>("UI/Soulslike/Runic_Plaque_Bg");
         if (plaqueBg != null) { curImg.sprite = plaqueBg; curImg.type = Image.Type.Sliced; }
@@ -5098,7 +5098,7 @@ public class MainMenuManager : MonoBehaviour
         RectTransform ctxtRt = curTxtObj.GetComponent<RectTransform>();
         ctxtRt.anchorMin = Vector2.zero; ctxtRt.anchorMax = Vector2.one; ctxtRt.sizeDelta = Vector2.zero;
         carouselTopCurrencyText = curTxtObj.GetComponent<TextMeshProUGUI>();
-        carouselTopCurrencyText.fontSize = 24f;
+        carouselTopCurrencyText.fontSize = 30f;
         carouselTopCurrencyText.fontStyle = FontStyles.Bold;
         carouselTopCurrencyText.alignment = TextAlignmentOptions.Center;
         carouselTopCurrencyText.color = new Color(1f, 0.95f, 0.70f, 1f);
@@ -5476,7 +5476,7 @@ public class MainMenuManager : MonoBehaviour
         lrt.sizeDelta = new Vector2(175f, 26f);
         var lTxt = lObj.GetComponent<TextMeshProUGUI>();
         lTxt.text = labelText;
-        lTxt.fontSize = 23f;
+        lTxt.fontSize = 25f;
         lTxt.fontStyle = FontStyles.Bold;
         lTxt.color = labelColor;
         SoulslikeHUDStyler.SetSafeOutline(lTxt, 0.25f, Color.black);
@@ -5490,7 +5490,7 @@ public class MainMenuManager : MonoBehaviour
         trt.anchorMax = new Vector2(0f, 0.5f);
         trt.pivot = new Vector2(0f, 0.5f);
         trt.anchoredPosition = new Vector2(195f, 0f);
-        trt.sizeDelta = new Vector2(300f, 20f);
+        trt.sizeDelta = new Vector2(300f, 22f);
         Image trImg = trObj.GetComponent<Image>();
         if (troughSp != null) { trImg.sprite = troughSp; trImg.type = Image.Type.Sliced; }
         else trImg.color = new Color(0.04f, 0.05f, 0.08f, 0.9f);
@@ -5517,9 +5517,9 @@ public class MainMenuManager : MonoBehaviour
         vrt.anchorMax = new Vector2(0f, 0.5f);
         vrt.pivot = new Vector2(0f, 0.5f);
         vrt.anchoredPosition = new Vector2(505f, 0f);
-        vrt.sizeDelta = new Vector2(130f, 28f);
+        vrt.sizeDelta = new Vector2(130f, 30f);
         valTxt = vObj.GetComponent<TextMeshProUGUI>();
-        valTxt.fontSize = 25f;
+        valTxt.fontSize = 28f;
         valTxt.fontStyle = FontStyles.Bold;
         valTxt.color = Color.white;
         valTxt.alignment = TextAlignmentOptions.MidlineLeft;
@@ -5697,7 +5697,7 @@ public class MainMenuManager : MonoBehaviour
         // 1. Counter Subtitle
         if (carouselCounterText != null)
         {
-            carouselCounterText.text = $"<  {currentCarouselIdx + 1} / {carouselHeroIds.Length}  >";
+            carouselCounterText.text = $"◆  {currentCarouselIdx + 1} / {carouselHeroIds.Length}  ◆";
         }
 
         // 2. Top Currency Shards

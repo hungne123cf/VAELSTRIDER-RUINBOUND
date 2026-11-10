@@ -125,7 +125,7 @@ public class BossHealthBarUI : MonoBehaviour
         rootRt.anchorMax = new Vector2(0.5f, 1f);
         rootRt.pivot = new Vector2(0.5f, 1f);
         rootRt.anchoredPosition = new Vector2(0f, -44f);
-        rootRt.sizeDelta = new Vector2(780f, 95f);
+        rootRt.sizeDelta = new Vector2(860f, 105f);
 
         CanvasGroup cg = root.AddComponent<CanvasGroup>();
         cg.alpha = 0f;
@@ -142,12 +142,12 @@ public class BossHealthBarUI : MonoBehaviour
         nameRt.anchorMax = new Vector2(0.5f, 1f);
         nameRt.pivot = new Vector2(0.5f, 1f);
         nameRt.anchoredPosition = new Vector2(0f, 0f);
-        nameRt.sizeDelta = new Vector2(760f, 32f);
+        nameRt.sizeDelta = new Vector2(840f, 34f);
 
         var nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
         nameTmp.font = GameFontManager.HeaderFont;
         nameTmp.text = LocalizationManager.T("PHÁO ĐÀI BÁNH XE CỔ ĐẠI", "THE ANCIENT TITAN WHEEL");
-        nameTmp.fontSize = 20;
+        nameTmp.fontSize = 24;
         nameTmp.fontStyle = FontStyles.Bold;
         nameTmp.color = new Color(1f, 0.88f, 0.45f);
         nameTmp.alignment = TextAlignmentOptions.Center;
@@ -160,8 +160,8 @@ public class BossHealthBarUI : MonoBehaviour
         frameRt.anchorMin = new Vector2(0.5f, 0f);
         frameRt.anchorMax = new Vector2(0.5f, 0f);
         frameRt.pivot = new Vector2(0.5f, 0f);
-        frameRt.anchoredPosition = new Vector2(0f, 26f);
-        frameRt.sizeDelta = new Vector2(740f, 26f);
+        frameRt.anchoredPosition = new Vector2(0f, 30f);
+        frameRt.sizeDelta = new Vector2(820f, 28f);
 
         Image frameImg = frameObj.AddComponent<Image>();
         frameImg.color = new Color(0.06f, 0.07f, 0.10f, 0.95f);
@@ -231,7 +231,7 @@ public class BossHealthBarUI : MonoBehaviour
         hpTmp.alignment = TextAlignmentOptions.Center;
         ui.hpPercentText = hpTmp;
 
-        // 6. Phase Indicators
+        // 6. Phase Indicators (Dòng Giáp & Kháng dưới thanh máu Boss)
         GameObject phaseObj = new GameObject("PhaseIndicator");
         phaseObj.transform.SetParent(root.transform, false);
         RectTransform phaseRt = phaseObj.AddComponent<RectTransform>();
@@ -239,14 +239,15 @@ public class BossHealthBarUI : MonoBehaviour
         phaseRt.anchorMax = new Vector2(0.5f, 0f);
         phaseRt.pivot = new Vector2(0.5f, 0f);
         phaseRt.anchoredPosition = new Vector2(0f, 2f);
-        phaseRt.sizeDelta = new Vector2(740f, 20f);
+        phaseRt.sizeDelta = new Vector2(820f, 26f);
 
         var pTmp = phaseObj.AddComponent<TextMeshProUGUI>();
         pTmp.text = "";
-        pTmp.fontSize = 13;
+        pTmp.fontSize = 19;
         pTmp.fontStyle = FontStyles.Bold;
         pTmp.color = new Color(0.5f, 0.85f, 1f);
         pTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(pTmp, 0.35f, Color.black);
         phaseObj.SetActive(false);
         ui.phaseText = pTmp;
 
@@ -417,7 +418,7 @@ public class BossHealthBarUI : MonoBehaviour
             {
                 string armLabel = LocalizationManager.T("GIÁP", "ARM");
                 string resLabel = LocalizationManager.T("KHÁNG", "RES");
-                armorInfo = $"<size=11><color=#F97316>[{armLabel}: {armor.CurrentPhysicalArmor}]</color>  <color=#A855F7>[{resLabel}: {armor.CurrentMagicArmor}]</color></size>";
+                armorInfo = $"<size=19><color=#F97316><b>◆ {armLabel}: {armor.CurrentPhysicalArmor} ◆</b></color>   <color=#C084FC><b>◆ {resLabel}: {armor.CurrentMagicArmor} ◆</b></color></size>";
             }
 
             if (!string.IsNullOrEmpty(armorInfo))

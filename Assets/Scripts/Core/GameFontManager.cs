@@ -164,6 +164,22 @@ public static class GameFontManager
         }
     }
 
+    /// <summary>
+    /// Chuẩn hóa chuỗi văn bản:
+    /// 1. Khử hoàn toàn dấu mở ngoặc vuông '[' và đóng ']' biến thành '◆' hoặc ký tự an toàn
+    ///    để khắc phục triệt để lỗi font Dreams Unwound SDF ánh xạ mã ASCII 91 sang chữ 'z'.
+    /// 2. Thay thế ký tự em-dash/en-dash dài (—, –) thành dấu gạch nối ngắn '-' tránh lỗi ô vuông.
+    /// </summary>
+    public static string SanitizeText(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        if (text.Contains("\u2014") || text.Contains("\u2013"))
+            text = text.Replace('\u2014', '-').Replace('\u2013', '-');
+        if (text.Contains("[") || text.Contains("]"))
+            text = text.Replace("[", "◆ ").Replace("]", " ◆");
+        return text;
+    }
+
     public static void ApplyFontToText(TextMeshProUGUI txt, bool isHeader = false)
     {
         if (txt == null) return;
@@ -180,14 +196,11 @@ public static class GameFontManager
                 txt.fontSharedMaterial = targetFont.material;
             }
 
-            // TỰ ĐỘNG THAY THẾ KÝ TỰ EM-DASH / EN-DASH (—, –) BẰNG DẤU GẠCH NỐI CHUẨN (-)
-            // Tránh hoàn toàn lỗi thiếu ký tự glyph ô vuông / gạch đứt nét
+            // TỰ ĐỘNG KHỬ DẤU NGOẶC VUÔNG [ ] VÀ EM-DASH (—, –)
+            // Tránh hoàn toàn lỗi mã ASCII 91 của dấu [ bị font Dreams Unwound SDF vẽ nhầm thành chữ 'z'
             if (!string.IsNullOrEmpty(txt.text))
             {
-                if (txt.text.Contains("\u2014") || txt.text.Contains("\u2013"))
-                {
-                    txt.text = txt.text.Replace('\u2014', '-').Replace('\u2013', '-');
-                }
+                txt.text = SanitizeText(txt.text);
             }
 
             // PHÓNG TO CHỮ CHO ĐIỆN THOẠI (Mobile Accessibility) - CHỈ SCALE 1 LẦN DUY NHẤT
