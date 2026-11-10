@@ -224,7 +224,7 @@ public class HealthBarUI : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
 
         tmpHpText = textObj.AddComponent<TextMeshProUGUI>();
-        tmpHpText.fontSize = 18f;
+        tmpHpText.fontSize = 24f;
         tmpHpText.fontStyle = FontStyles.Bold;
         tmpHpText.color = Color.white;
         tmpHpText.alignment = TextAlignmentOptions.MidlineRight;
@@ -245,11 +245,11 @@ public class HealthBarUI : MonoBehaviour
         {
             txtRt.anchorMin = Vector2.zero;
             txtRt.anchorMax = Vector2.one;
-            txtRt.offsetMin = new Vector2(12f, 0f);
+            txtRt.offsetMin = new Vector2(10f, 0f);
             txtRt.offsetMax = new Vector2(-10f, 0f);
         }
         tmp.alignment = TextAlignmentOptions.MidlineRight;
-        tmp.fontSize = 18f;
+        tmp.fontSize = 24f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
         SoulslikeHUDStyler.SetSafeOutline(tmp, 0.45f, Color.black);
@@ -290,31 +290,24 @@ public class HealthBarUI : MonoBehaviour
             }
 
             tmpHpText.transform.SetAsLastSibling();
-            tmpHpText.fontSize = 18f;
+            tmpHpText.fontSize = 24f;
             tmpHpText.fontStyle = FontStyles.Bold;
 
-            if (shield > 0)
-            {
-                // Khi có Giáp Ảo trắng tinh khiết: Chữ đen đậm nét + viền trắng sắc nét giúp nổi bật trên cả nền trắng lẫn nền máu đỏ
-                string vHpStr = (virtualHp > 0) ? $" <color=#9A3412><b>[+{virtualHp}]</b></color>" : "";
-                tmpHpText.text = $"<color=#000000><b>{current}</b></color> <color=#B45309><b>(+{shield})</b></color>{vHpStr} <color=#0F172A><b>/</b></color> <color=#000000><b>{max}</b></color>";
-                SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.24f, new Color(1f, 1f, 1f, 0.96f));
-                ApplyExtraBoldDilate(tmpHpText, 0.20f);
-            }
-            else
-            {
-                // Khi không có Giáp Ảo: Chữ trắng in đậm + viền đen dày sắc nét trên nền máu đỏ thẫm
-                string vHpStr = (virtualHp > 0) ? $" <color=#FBBF24><b>[+{virtualHp}]</b></color>" : "";
-                tmpHpText.text = $"<color=#FFFFFF><b>{current}</b></color>{vHpStr} <color=#CBD5E1><b>/</b></color> <color=#FFFFFF><b>{max}</b></color>";
-                SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.45f, Color.black);
-                ApplyExtraBoldDilate(tmpHpText, 0.18f);
-            }
+            // Xếp số máu hiện tại/tối đa trước, giáp và HP ảo ở cuối thanh theo đúng yêu cầu người chơi
+            string shieldStr = (shield > 0) ? $" <color=#F59E0B><b>(+{shield})</b></color>" : "";
+            string vHpStr = (virtualHp > 0) ? $" <color=#FCD34D><b>(+{virtualHp} Ảo)</b></color>" : "";
+
+            tmpHpText.text = $"<color=#FFFFFF><b>{current}</b></color> <color=#CBD5E1><b>/</b></color> <color=#FFFFFF><b>{max}</b></color>{shieldStr}{vHpStr}";
+            SoulslikeHUDStyler.SetSafeOutline(tmpHpText, 0.45f, Color.black);
+            ApplyExtraBoldDilate(tmpHpText, 0.18f);
         }
         else if (hpText != null)
         {
             hpText.transform.SetAsLastSibling();
-            string vHpStr = (virtualHp > 0) ? $" [+{virtualHp}]" : "";
-            hpText.text = (shield > 0) ? $"{current} (+{shield}){vHpStr} / {max}" : $"{current}{vHpStr} / {max}";
+            string shieldStr = (shield > 0) ? $" (+{shield})" : "";
+            string vHpStr = (virtualHp > 0) ? $" (+{virtualHp} Ảo)" : "";
+            hpText.text = $"{current} / {max}{shieldStr}{vHpStr}";
         }
+    }
     }
 }

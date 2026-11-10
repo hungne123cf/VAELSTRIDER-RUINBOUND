@@ -243,12 +243,12 @@ public class PlayerExpBarUI : MonoBehaviour
         textRt.offsetMax = new Vector2(-10f, 0f);
 
         _expLabelText = textObj.AddComponent<TextMeshProUGUI>();
-        _expLabelText.fontSize = 15.5f;
+        _expLabelText.fontSize = 20f;
         _expLabelText.fontStyle = FontStyles.Bold;
         _expLabelText.color = new Color(0.98f, 0.94f, 1f, 1f);
         _expLabelText.alignment = TextAlignmentOptions.MidlineRight;
         _expLabelText.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(_expLabelText, 0.40f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(_expLabelText, 0.45f, Color.black);
 
         // Initialize state
         _cachedLevel = PlayerLevelSystem.Instance != null ? PlayerLevelSystem.Instance.CurrentLevel : 1;

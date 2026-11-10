@@ -136,36 +136,38 @@ public static class LoginSceneBuilder
         headerRt.anchorMin = new Vector2(0.5f, 0.5f);
         headerRt.anchorMax = new Vector2(0.5f, 0.5f);
         headerRt.pivot = new Vector2(0.5f, 0.5f);
-        headerRt.anchoredPosition = new Vector2(0f, 325f);
-        headerRt.sizeDelta = new Vector2(1100f, 190f);
+        headerRt.anchoredPosition = new Vector2(0f, 220f);
+        headerRt.sizeDelta = new Vector2(1400f, 220f);
 
-        // Title "VAELSTRIDER"
+        // Title "VAELSTRIDER: RUINBOUND"
         GameObject titleObj = new GameObject("GameTitle");
         titleObj.transform.SetParent(headerObj.transform, false);
         RectTransform titleRt = titleObj.AddComponent<RectTransform>();
         titleRt.anchoredPosition = new Vector2(0f, 35f);
-        titleRt.sizeDelta = new Vector2(1000f, 110f);
+        titleRt.sizeDelta = new Vector2(1300f, 120f);
         var titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = "VAELSTRIDER:\nRUINBOUND";
-        titleTmp.fontSize = 54;
+        titleTmp.text = "VAELSTRIDER: RUINBOUND";
+        titleTmp.fontSize = 86;
         titleTmp.fontStyle = FontStyles.Bold;
-        titleTmp.color = new Color(1f, 0.85f, 0.25f);
+        titleTmp.color = new Color(0.98f, 0.88f, 0.50f, 1f);
         titleTmp.alignment = TextAlignmentOptions.Center;
         titleTmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.35f, Color.black);
 
         // Subtitle
         GameObject subObj = new GameObject("Subtitle");
         subObj.transform.SetParent(headerObj.transform, false);
         RectTransform subRt = subObj.AddComponent<RectTransform>();
-        subRt.anchoredPosition = new Vector2(0f, -50f);
-        subRt.sizeDelta = new Vector2(1000f, 35f);
+        subRt.anchoredPosition = new Vector2(0f, -45f);
+        subRt.sizeDelta = new Vector2(1200f, 45f);
         var subTmp = subObj.AddComponent<TextMeshProUGUI>();
         subTmp.text = "— JOURNEY TO THE ANCIENT RUINS —";
-        subTmp.fontSize = 18;
+        subTmp.fontSize = 28;
         subTmp.fontStyle = FontStyles.Bold;
-        subTmp.color = new Color(0.92f, 0.45f, 0.45f);
+        subTmp.color = new Color(0.94f, 0.92f, 0.88f, 0.95f);
         subTmp.alignment = TextAlignmentOptions.Center;
         subTmp.raycastTarget = false;
+        SoulslikeHUDStyler.SetSafeOutline(subTmp, 0.25f, Color.black);
 
         // Divider under header
         if (dividerGold != null)

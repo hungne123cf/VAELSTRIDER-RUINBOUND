@@ -98,7 +98,22 @@ public class LoginManager : MonoBehaviour
         if (tapToStartPanel != null) tapToStartPanel.SetActive(true);
         if (switchAccountBtn != null) switchAccountBtn.gameObject.SetActive(false); // Ẩn nút đổi tài khoản vì là game offline
 
-        // Đảm bảo LoadingProgressPanel (chứa GameTitle & thanh slider trắng thừa) bị ẩn hoàn toàn khi ở màn hình Tap To Start
+        // Đảm bảo Tiêu Đề Game "VAELSTRIDER: RUINBOUND" luôn hiển thị tráng lệ ở nửa trên màn hình
+        if (titleText != null)
+        {
+            titleText.gameObject.SetActive(true);
+            if (titleText.transform.parent != null)
+            {
+                titleText.transform.parent.gameObject.SetActive(true);
+            }
+        }
+        else
+        {
+            var header = GameObject.Find("Header");
+            if (header != null) header.SetActive(true);
+        }
+
+        // Đảm bảo LoadingProgressPanel (chứa thanh slider trắng thừa) bị ẩn hoàn toàn khi ở màn hình Tap To Start
         var lpp = GameObject.Find("LoadingProgressPanel");
         if (lpp != null) lpp.SetActive(false);
 
@@ -137,35 +152,56 @@ public class LoginManager : MonoBehaviour
 
         if (titleText != null)
         {
+            titleText.gameObject.SetActive(true);
+            if (titleText.transform.parent != null) titleText.transform.parent.gameObject.SetActive(true);
+
             SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
             titleText.fontSize = 86f;
             titleText.color = new Color(0.98f, 0.88f, 0.50f, 1f);
             titleText.overflowMode = TextOverflowModes.Overflow;
-            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.0f, Color.black);
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.35f, Color.black);
             RectTransform titleRt = titleText.GetComponent<RectTransform>();
             if (titleRt != null)
             {
-                titleRt.anchorMin = new Vector2(0.5f, 0.5f);
-                titleRt.anchorMax = new Vector2(0.5f, 0.5f);
-                titleRt.pivot = new Vector2(0.5f, 0.5f);
-                titleRt.anchoredPosition = new Vector2(0f, 350f);
-                titleRt.sizeDelta = new Vector2(1300f, 100f);
+                if (titleText.transform.parent != null && titleText.transform.parent.name == "Header")
+                {
+                    RectTransform headerRt = titleText.transform.parent.GetComponent<RectTransform>();
+                    if (headerRt != null)
+                    {
+                        headerRt.anchorMin = new Vector2(0.5f, 0.5f);
+                        headerRt.anchorMax = new Vector2(0.5f, 0.5f);
+                        headerRt.pivot = new Vector2(0.5f, 0.5f);
+                        headerRt.anchoredPosition = new Vector2(0f, 220f);
+                        headerRt.sizeDelta = new Vector2(1400f, 220f);
+                    }
+                    titleRt.anchoredPosition = new Vector2(0f, 35f);
+                    titleRt.sizeDelta = new Vector2(1400f, 110f);
+                }
+                else
+                {
+                    titleRt.anchorMin = new Vector2(0.5f, 0.5f);
+                    titleRt.anchorMax = new Vector2(0.5f, 0.5f);
+                    titleRt.pivot = new Vector2(0.5f, 0.5f);
+                    titleRt.anchoredPosition = new Vector2(0f, 220f);
+                    titleRt.sizeDelta = new Vector2(1400f, 110f);
+                }
             }
 
             if (subtitleText != null)
             {
+                subtitleText.gameObject.SetActive(true);
                 subtitleText.fontSize = 32f;
                 subtitleText.color = new Color(0.94f, 0.92f, 0.88f, 0.95f);
                 subtitleText.overflowMode = TextOverflowModes.Overflow;
-                SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.0f, Color.black);
+                SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.25f, Color.black);
                 RectTransform subRt = subtitleText.GetComponent<RectTransform>();
                 if (subRt != null)
                 {
                     subRt.anchorMin = new Vector2(0.5f, 0.5f);
                     subRt.anchorMax = new Vector2(0.5f, 0.5f);
                     subRt.pivot = new Vector2(0.5f, 0.5f);
-                    subRt.anchoredPosition = new Vector2(0f, 260f);
-                    subRt.sizeDelta = new Vector2(1100f, 50f);
+                    subRt.anchoredPosition = new Vector2(0f, -45f);
+                    subRt.sizeDelta = new Vector2(1200f, 50f);
                 }
             }
         }
@@ -430,31 +466,56 @@ public class LoginManager : MonoBehaviour
     {
         if (titleText != null)
         {
+            titleText.gameObject.SetActive(true);
+            if (titleText.transform.parent != null) titleText.transform.parent.gameObject.SetActive(true);
+
             titleText.text = LocalizationManager.Get("APP_TITLE");
-            titleText.fontSize = 76f;
-            titleText.fontStyle = FontStyles.Normal;
-            titleText.characterSpacing = 6f;
+            titleText.fontSize = 86f;
+            titleText.fontStyle = FontStyles.Bold;
+            titleText.characterSpacing = 4f;
             titleText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(titleText, true);
-            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.28f, Color.black);
+            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.35f, Color.black);
             RectTransform titleRt = titleText.GetComponent<RectTransform>();
             if (titleRt != null)
             {
-                titleRt.anchoredPosition = new Vector2(0f, 350f);
-                titleRt.sizeDelta = new Vector2(1400f, 110f);
+                if (titleText.transform.parent != null && titleText.transform.parent.name == "Header")
+                {
+                    RectTransform headerRt = titleText.transform.parent.GetComponent<RectTransform>();
+                    if (headerRt != null)
+                    {
+                        headerRt.anchorMin = new Vector2(0.5f, 0.5f);
+                        headerRt.anchorMax = new Vector2(0.5f, 0.5f);
+                        headerRt.pivot = new Vector2(0.5f, 0.5f);
+                        headerRt.anchoredPosition = new Vector2(0f, 220f);
+                        headerRt.sizeDelta = new Vector2(1400f, 220f);
+                    }
+                    titleRt.anchoredPosition = new Vector2(0f, 35f);
+                    titleRt.sizeDelta = new Vector2(1400f, 110f);
+                }
+                else
+                {
+                    titleRt.anchorMin = new Vector2(0.5f, 0.5f);
+                    titleRt.anchorMax = new Vector2(0.5f, 0.5f);
+                    titleRt.pivot = new Vector2(0.5f, 0.5f);
+                    titleRt.anchoredPosition = new Vector2(0f, 220f);
+                    titleRt.sizeDelta = new Vector2(1400f, 110f);
+                }
             }
         }
         if (subtitleText != null)
         {
+            subtitleText.gameObject.SetActive(true);
             subtitleText.text = LocalizationManager.Get("LOGIN_SUBTITLE");
-            subtitleText.fontSize = 28f;
+            subtitleText.fontSize = 32f;
+            subtitleText.fontStyle = FontStyles.Bold;
             subtitleText.overflowMode = TextOverflowModes.Overflow;
             GameFontManager.ApplyFontToText(subtitleText);
-            SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.22f, Color.black);
+            SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.25f, Color.black);
             RectTransform subRt = subtitleText.GetComponent<RectTransform>();
             if (subRt != null)
             {
-                subRt.anchoredPosition = new Vector2(0f, 260f);
+                subRt.anchoredPosition = new Vector2(0f, -45f);
                 subRt.sizeDelta = new Vector2(1200f, 50f);
             }
         }

@@ -5263,7 +5263,7 @@ public class MainMenuManager : MonoBehaviour
         nameRt.anchoredPosition = new Vector2(0f, -16f);
         nameRt.sizeDelta = new Vector2(680f, 38f);
         carouselHeroNameText = nameObj.GetComponent<TextMeshProUGUI>();
-        carouselHeroNameText.fontSize = 28f;
+        carouselHeroNameText.fontSize = 32f;
         carouselHeroNameText.fontStyle = FontStyles.Bold;
         carouselHeroNameText.alignment = TextAlignmentOptions.Center;
         carouselHeroNameText.color = new Color(1f, 0.88f, 0.45f, 1f);
@@ -5276,9 +5276,9 @@ public class MainMenuManager : MonoBehaviour
         roleRt.anchorMax = new Vector2(0.5f, 1f);
         roleRt.pivot = new Vector2(0.5f, 1f);
         roleRt.anchoredPosition = new Vector2(0f, -54f);
-        roleRt.sizeDelta = new Vector2(680f, 24f);
+        roleRt.sizeDelta = new Vector2(680f, 26f);
         carouselHeroRoleText = roleObj.GetComponent<TextMeshProUGUI>();
-        carouselHeroRoleText.fontSize = 14.5f;
+        carouselHeroRoleText.fontSize = 19f;
         carouselHeroRoleText.fontStyle = FontStyles.Italic;
         carouselHeroRoleText.alignment = TextAlignmentOptions.Center;
         carouselHeroRoleText.color = new Color(0.68f, 0.84f, 0.98f, 1f);
@@ -5318,10 +5318,10 @@ public class MainMenuManager : MonoBehaviour
         CreateStatRow(statsBox.transform, "Row_DEF", new Vector2(0f, -15f), "GIÁP (ARMOR)", new Color(0.38f, 0.85f, 1f, 1f), troughSp, sapphireSp, out carouselDefBarFill, out carouselDefValText, out carouselDefLabelText);
         CreateStatRow(statsBox.transform, "Row_SPD", new Vector2(0f, -44f), "TỐC ĐỘ (SPD)", new Color(0.35f, 0.92f, 0.65f, 1f), troughSp, sapphireSp, out carouselSpdBarFill, out carouselSpdValText, out _);
 
-        // 3 Combat Arsenal Breakdown Cards (Phóng to khung & chữ cho Mobile)
-        CreateSkillCard(dosObj.transform, "SkillCard_Normal", new Vector2(0f, 102f), new Vector2(660f, 104f), out carouselSkillNormalTitle, out carouselSkillNormalDesc);
-        CreateSkillCard(dosObj.transform, "SkillCard_Guard", new Vector2(0f, -10f), new Vector2(660f, 104f), out carouselSkillGuardTitle, out carouselSkillGuardDesc);
-        CreateSkillCard(dosObj.transform, "SkillCard_Ulti", new Vector2(0f, -122f), new Vector2(660f, 104f), out carouselSkillUltiTitle, out carouselSkillUltiDesc);
+        // 3 Combat Arsenal Breakdown Cards (Phóng to tối đa chữ và khung cho Mobile không lem)
+        CreateSkillCard(dosObj.transform, "SkillCard_Normal", new Vector2(0f, 110f), new Vector2(660f, 115f), out carouselSkillNormalTitle, out carouselSkillNormalDesc);
+        CreateSkillCard(dosObj.transform, "SkillCard_Guard", new Vector2(0f, -12f), new Vector2(660f, 115f), out carouselSkillGuardTitle, out carouselSkillGuardDesc);
+        CreateSkillCard(dosObj.transform, "SkillCard_Ulti", new Vector2(0f, -134f), new Vector2(660f, 115f), out carouselSkillUltiTitle, out carouselSkillUltiDesc);
 
         // 5. Bottom Strip: Horizontal Deck & Enter Battle Button
         GameObject btmBar = new GameObject("BottomBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -5381,7 +5381,7 @@ public class MainMenuManager : MonoBehaviour
 
         carouselConfirmBtnText = cfbTxtObj.GetComponent<TextMeshProUGUI>();
         carouselConfirmBtnText.text = LocalizationManager.T("XUẤT TRẬN", "ENTER BATTLE");
-        carouselConfirmBtnText.fontSize = 22f;
+        carouselConfirmBtnText.fontSize = 26f;
         carouselConfirmBtnText.fontStyle = FontStyles.Bold;
         carouselConfirmBtnText.alignment = TextAlignmentOptions.Center;
         carouselConfirmBtnText.color = new Color(1f, 0.92f, 0.65f, 1f);
@@ -5399,9 +5399,9 @@ public class MainMenuManager : MonoBehaviour
 
         var subTxt = cfbSubObj.GetComponent<TextMeshProUGUI>();
         subTxt.text = LocalizationManager.T("TIẾN VÀO HẦM NGỤC", "ENTER RUINS");
-        subTxt.fontSize = 11.5f;
+        subTxt.fontSize = 14f;
         subTxt.alignment = TextAlignmentOptions.Center;
-        subTxt.color = new Color(0.82f, 0.85f, 0.90f, 0.85f);
+        subTxt.color = new Color(0.85f, 0.90f, 0.95f, 0.90f);
         subTxt.raycastTarget = false;
         carouselConfirmBtnSubText = subTxt;
 
@@ -5474,7 +5474,7 @@ public class MainMenuManager : MonoBehaviour
         lrt.sizeDelta = new Vector2(175f, 26f);
         var lTxt = lObj.GetComponent<TextMeshProUGUI>();
         lTxt.text = labelText;
-        lTxt.fontSize = 17f;
+        lTxt.fontSize = 21f;
         lTxt.fontStyle = FontStyles.Bold;
         lTxt.color = labelColor;
         SoulslikeHUDStyler.SetSafeOutline(lTxt, 0.25f, Color.black);
@@ -5517,7 +5517,7 @@ public class MainMenuManager : MonoBehaviour
         vrt.anchoredPosition = new Vector2(510f, 0f);
         vrt.sizeDelta = new Vector2(120f, 26f);
         valTxt = vObj.GetComponent<TextMeshProUGUI>();
-        valTxt.fontSize = 17f;
+        valTxt.fontSize = 22f;
         valTxt.fontStyle = FontStyles.Bold;
         valTxt.color = Color.white;
         valTxt.alignment = TextAlignmentOptions.MidlineLeft;
@@ -5557,7 +5557,7 @@ public class MainMenuManager : MonoBehaviour
         trt.sizeDelta = new Vector2(-28f, 28f);
 
         titleTxt = tObj.GetComponent<TextMeshProUGUI>();
-        titleTxt.fontSize = 20f;
+        titleTxt.fontSize = 24f;
         titleTxt.fontStyle = FontStyles.Bold;
         titleTxt.color = new Color(1f, 0.88f, 0.45f, 1f);
         SoulslikeHUDStyler.SetSafeOutline(titleTxt, 0.25f, Color.black);
@@ -5569,14 +5569,14 @@ public class MainMenuManager : MonoBehaviour
         drt.anchorMin = new Vector2(0f, 0f);
         drt.anchorMax = new Vector2(1f, 1f);
         drt.pivot = new Vector2(0.5f, 0.5f);
-        drt.offsetMin = new Vector2(14f, 8f);
-        drt.offsetMax = new Vector2(-14f, -34f);
+        drt.offsetMin = new Vector2(14f, 6f);
+        drt.offsetMax = new Vector2(-14f, -36f);
 
         descTxt = dObj.GetComponent<TextMeshProUGUI>();
-        descTxt.fontSize = 16f;
+        descTxt.fontSize = 20f;
         descTxt.color = new Color(0.85f, 0.88f, 0.92f, 0.95f);
         descTxt.enableWordWrapping = true;
-        descTxt.lineSpacing = 2f;
+        descTxt.lineSpacing = 1f;
     }
 
     private void BuildBottomRosterDeck(Transform parent)

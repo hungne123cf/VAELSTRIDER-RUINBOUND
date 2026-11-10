@@ -169,7 +169,7 @@ public class PlayerEnergyUI : MonoBehaviour
             tRt.offsetMax = new Vector2(-10f, 0f);
         }
         tmp.alignment = TextAlignmentOptions.MidlineRight;
-        tmp.fontSize = 16f;
+        tmp.fontSize = 22f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = new Color(0.85f, 0.96f, 1f, 1f); // Lam ngọc ánh sáng
         SoulslikeHUDStyler.SetSafeOutline(tmp, 0.40f, Color.black);
@@ -493,7 +493,7 @@ public class PlayerEnergyUI : MonoBehaviour
         textRt.offsetMax = new Vector2(-8f, 0f);
 
         labelText = textObj.AddComponent<TextMeshProUGUI>();
-        labelText.fontSize = 9.5f;
+        labelText.fontSize = 22f;
         labelText.fontStyle = FontStyles.Bold;
         labelText.color = new Color(0.80f, 0.93f, 1f, 1f);
         labelText.alignment = TextAlignmentOptions.MidlineRight;
