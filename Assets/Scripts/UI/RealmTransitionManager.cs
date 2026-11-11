@@ -345,117 +345,133 @@ public class RealmTransitionManager : MonoBehaviour
         if (_isTransitioning) yield break;
         _isTransitioning = true;
 
-        Time.timeScale = 1f;
-
-        // Xác định Theme nếu để Auto
-        if (theme == TransitionTheme.Auto)
+        try
         {
-            if (CorruptedCycleManager.IsCorruptedActive) theme = TransitionTheme.CalamityRealm;
-            else if (targetSceneName.Contains("Map1")) theme = TransitionTheme.DeployBattle;
-            else if (targetSceneName.Contains("Map2") || targetSceneName.Contains("Valley")) theme = TransitionTheme.PortalWarpMap2;
-            else if (targetSceneName.Contains("Map3") || targetSceneName.Contains("Forgotten")) theme = TransitionTheme.PortalWarpMap3;
-            else if (targetSceneName.Contains("Login")) theme = TransitionTheme.LoginIntro;
-            else if (targetSceneName.Contains("Menu")) theme = TransitionTheme.ReturnSanctuary;
-            else theme = TransitionTheme.DeployBattle;
-        }
+            Time.timeScale = 1f;
 
-        ApplyThemeVisuals(theme, targetSceneName);
-
-        // Đảm bảo Canvas và Container được bật lên và ĐẶT LÊN LỚP CAO NHẤT (SortingOrder = 32767)
-        if (_canvas != null)
-        {
-            _canvas.enabled = true;
-            _canvas.sortingOrder = 32767;
-        }
-        if (_containerRt != null)
-        {
-            _containerRt.gameObject.SetActive(true);
-            _containerRt.SetAsLastSibling();
-        }
-
-        if (_loadingSlider != null) _loadingSlider.value = 0f;
-        if (_progressText != null) _progressText.text = "0%";
-
-        // 1. CHE PHỦ 100% NGAY LẬP TỨC (Alpha = 1.0)
-        // Lập tức hiển thị màn hình chuyển cảnh full màn hình, chặn toàn bộ raycast, không để lộ 1 frame màn cũ
-        _canvasGroup.blocksRaycasts = true;
-        _canvasGroup.interactable = true;
-        _canvasGroup.alpha = 1f;
-
-        // 2. Bắt đầu Nạp Scene Bất Đồng Bộ
-        AsyncOperation asyncOp = SceneManager.LoadSceneAsync(targetSceneName);
-        asyncOp.allowSceneActivation = false;
-
-        float displayProgress = 0f;
-        float kenBurnsElapsed = 0f;
-
-        while (displayProgress < 1f)
-        {
-            kenBurnsElapsed += Time.unscaledDeltaTime;
-            if (_backgroundImage != null)
+            // Xác định Theme nếu để Auto
+            if (theme == TransitionTheme.Auto)
             {
-                float scale = 1.10f + Mathf.PingPong(kenBurnsElapsed * 0.02f, 0.04f);
-                _backgroundImage.rectTransform.localScale = new Vector3(scale, scale, 1f);
+                if (CorruptedCycleManager.IsCorruptedActive) theme = TransitionTheme.CalamityRealm;
+                else if (targetSceneName.Contains("Map1")) theme = TransitionTheme.DeployBattle;
+                else if (targetSceneName.Contains("Map2") || targetSceneName.Contains("Valley")) theme = TransitionTheme.PortalWarpMap2;
+                else if (targetSceneName.Contains("Map3") || targetSceneName.Contains("Forgotten")) theme = TransitionTheme.PortalWarpMap3;
+                else if (targetSceneName.Contains("Login")) theme = TransitionTheme.LoginIntro;
+                else if (targetSceneName.Contains("Menu")) theme = TransitionTheme.ReturnSanctuary;
+                else theme = TransitionTheme.DeployBattle;
             }
 
-            float targetProgress = Mathf.Clamp01(asyncOp.progress / 0.9f);
-            displayProgress = Mathf.MoveTowards(displayProgress, targetProgress, Time.unscaledDeltaTime * 1.0f);
+            ApplyThemeVisuals(theme, targetSceneName);
 
-            if (_loadingSlider != null) _loadingSlider.value = displayProgress;
-            if (_progressText != null) _progressText.text = $"{(int)(displayProgress * 100f)}%";
-
-            if (displayProgress >= 0.999f && asyncOp.progress >= 0.9f)
+            // Đảm bảo Canvas và Container được bật lên và ĐẶT LÊN LỚP CAO NHẤT (SortingOrder = 32767)
+            if (_canvas != null)
             {
-                if (_loadingSlider != null) _loadingSlider.value = 1f;
-                if (_progressText != null) _progressText.text = "100%";
-                yield return new WaitForSecondsRealtime(0.20f);
-                break;
+                _canvas.enabled = true;
+                _canvas.sortingOrder = 32767;
+            }
+            if (_containerRt != null)
+            {
+                _containerRt.gameObject.SetActive(true);
+                _containerRt.SetAsLastSibling();
             }
 
+            if (_loadingSlider != null) _loadingSlider.value = 0f;
+            if (_progressText != null) _progressText.text = "0%";
+
+            // 1. CHE PHỦ 100% NGAY LẬP TỨC (Alpha = 1.0)
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.blocksRaycasts = true;
+                _canvasGroup.interactable = true;
+                _canvasGroup.alpha = 1f;
+            }
+
+            // 2. Bắt đầu Nạp Scene Bất Đồng Bộ
+            AsyncOperation asyncOp = SceneManager.LoadSceneAsync(targetSceneName);
+            if (asyncOp == null)
+            {
+                Debug.LogError($"[RealmTransitionManager] Không tìm thấy scene: {targetSceneName}");
+                yield break;
+            }
+
+            asyncOp.allowSceneActivation = false;
+
+            float displayProgress = 0f;
+            float kenBurnsElapsed = 0f;
+            float maxLoadWait = 4.0f; // Fail-safe timeout 4s tránh kẹt vô hạn trên mobile
+
+            while (displayProgress < 1f && maxLoadWait > 0f)
+            {
+                float dt = Mathf.Min(Time.unscaledDeltaTime, 0.1f);
+                maxLoadWait -= dt;
+                kenBurnsElapsed += dt;
+
+                if (_backgroundImage != null)
+                {
+                    float scale = 1.10f + Mathf.PingPong(kenBurnsElapsed * 0.02f, 0.04f);
+                    _backgroundImage.rectTransform.localScale = new Vector3(scale, scale, 1f);
+                }
+
+                float targetProgress = Mathf.Clamp01(asyncOp.progress / 0.9f);
+                displayProgress = Mathf.MoveTowards(displayProgress, targetProgress, dt * 1.5f);
+
+                if (_loadingSlider != null) _loadingSlider.value = displayProgress;
+                if (_progressText != null) _progressText.text = $"{(int)(displayProgress * 100f)}%";
+
+                if ((displayProgress >= 0.99f && asyncOp.progress >= 0.89f) || maxLoadWait <= 0f)
+                {
+                    if (_loadingSlider != null) _loadingSlider.value = 1f;
+                    if (_progressText != null) _progressText.text = "100%";
+                    yield return new WaitForSecondsRealtime(0.15f);
+                    break;
+                }
+
+                yield return null;
+            }
+
+            // 3. KÍCH HOẠT SCENE MỚI
+            asyncOp.allowSceneActivation = true;
+
+            // Chờ đến khi Unity hoàn tất nạp scene mới với Fail-safe Timeout 4.0s
+            float activationTimeout = 4.0f;
+            while (!asyncOp.isDone && activationTimeout > 0f)
+            {
+                activationTimeout -= Mathf.Min(Time.unscaledDeltaTime, 0.1f);
+                yield return null;
+            }
+
+            // Đợi 2 frame an toàn để Camera, Terrain, Spawner và UI của Scene mới thức tỉnh
             yield return null;
+            yield return new WaitForEndOfFrame();
+
+            // 4. Fade Out Màn Chuyển Cảnh để hé lộ Scene mới
+            float fadeDuration = 0.25f;
+            float elapsed = 0f;
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Mathf.Min(Time.unscaledDeltaTime, 0.1f);
+                if (_canvasGroup != null)
+                {
+                    _canvasGroup.alpha = Mathf.Clamp01(1f - (elapsed / fadeDuration));
+                }
+                yield return null;
+            }
         }
-
-        // 3. KÍCH HOẠT SCENE MỚI TRONG KHI MÀN HÌNH CHUYỂN CẢNH VẪN GIỮ NGUYÊN 100% OPAQUE (alpha = 1.0)
-        // Tuyệt đối không fade out ở đây để triệt tiêu 100% lỗi lộ lại màn hình cũ
-        asyncOp.allowSceneActivation = true;
-
-        // Chờ đến khi Unity hoàn tất nạp scene mới
-        while (!asyncOp.isDone)
+        finally
         {
-            yield return null;
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = 0f;
+                _canvasGroup.blocksRaycasts = false;
+                _canvasGroup.interactable = false;
+            }
+
+            // Tắt hoàn toàn Container và Canvas để không bao giờ chắn raycast hoặc bị kẹt
+            if (_containerRt != null) _containerRt.gameObject.SetActive(false);
+            if (_canvas != null) _canvas.enabled = false;
+
+            _isTransitioning = false;
         }
-
-        // Chờ đến khi Scene mới đã thực sự là Active Scene trong Unity
-        while (SceneManager.GetActiveScene().name != targetSceneName)
-        {
-            yield return null;
-        }
-
-        // Đợi 3 frame liên tiếp để Camera, Terrain, Spawner, Fog/Lighting và UI của Scene mới thức tỉnh và render xong 100%
-        for (int i = 0; i < 3; i++)
-        {
-            yield return null;
-        }
-        yield return new WaitForEndOfFrame();
-
-        // 4. BÂY GIỜ SCENE MỚI ĐÃ SẴN SÀNG HOÀN TOÀN PHÍA SAU -> Fade Out Màn Chuyển Cảnh để hé lộ Scene mới
-        float fadeDuration = 0.25f;
-        float elapsed = 0f;
-        while (elapsed < fadeDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            _canvasGroup.alpha = 1f - (elapsed / fadeDuration);
-            yield return null;
-        }
-        _canvasGroup.alpha = 0f;
-        _canvasGroup.blocksRaycasts = false;
-        _canvasGroup.interactable = false;
-
-        // Tắt hoàn toàn Container và Canvas để không bao giờ chắn raycast hoặc bị nhầm lẫn
-        if (_containerRt != null) _containerRt.gameObject.SetActive(false);
-        if (_canvas != null) _canvas.enabled = false;
-
-        _isTransitioning = false;
     }
 
     private void ApplyThemeVisuals(TransitionTheme theme, string targetSceneName)

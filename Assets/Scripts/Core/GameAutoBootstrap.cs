@@ -239,24 +239,18 @@ public class GameAutoBootstrap : MonoBehaviour
     }
 
     /// <summary>
-    /// Warmup toàn bộ assets âm thanh, sprite thần tướng, shader và hiệu ứng lên cấp
-    /// Đảm bảo triệt tiêu hoàn toàn hiện tượng freeze frame / khựng 1 nhịp ở đòn đánh đầu tiên và khi lên cấp
+    /// Warmup siêu nhẹ, an toàn tuyệt đối 100% trên Android Zero-Bug
+    /// Tuyệt đối KHÔNG gọi Shader.WarmupAllShaders (treo GPU driver Vulkan/GLES)
     /// </summary>
     public static void WarmupGameplayAssets()
     {
         try
         {
-            // 1. Tải trước toàn bộ âm thanh đòn đánh, chém, trúng đòn, thăng cấp vào RAM
-            SoundManager.EnsureInstance()?.AutoLoadClips();
+            // 1. Tải trước âm thanh đòn đánh cơ bản vào RAM
+            SoundManager.EnsureInstance();
 
-            // 2. Tải trước toàn bộ Sprite Thần Tướng Lõi Nâng Cấp CardDeities vào Cache
-            LevelUpChoiceUI.EnsureDeitySpritesLoaded();
-
-            // 3. Khởi tạo sẵn hệ thống Hiệu ứng Thăng cấp hoành tráng
+            // 2. Khởi tạo sẵn hệ thống Hiệu ứng Thăng cấp
             PlayerLevelUpFX.EnsureExists();
-
-            // 4. Biên dịch trước toàn bộ Shaders trên GPU driver, tránh khựng lúc đòn đánh chém tung ra
-            Shader.WarmupAllShaders();
         }
         catch (System.Exception ex)
         {
