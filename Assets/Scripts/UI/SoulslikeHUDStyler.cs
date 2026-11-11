@@ -412,7 +412,7 @@ public static class SoulslikeHUDStyler
             RectTransform fRt = frame.GetComponent<RectTransform>();
             if (fRt != null)
             {
-                fRt.sizeDelta = new Vector2(860f, 26f);
+                fRt.sizeDelta = new Vector2(880f, 36f);
             }
 
             Image frameImg = frame.GetComponent<Image>();
@@ -441,22 +441,26 @@ public static class SoulslikeHUDStyler
                 hpfImg.color = Color.white;
             }
 
-            // HP Percent Text
+            // HP Percent Text (Phóng to 26pt Bold canh giữa rõ ràng trên Mobile)
             var hpTmp = frame.Find("HpPercent")?.GetComponent<TextMeshProUGUI>();
             if (hpTmp != null)
             {
                 RectTransform tRt = hpTmp.GetComponent<RectTransform>();
                 tRt.anchorMin = Vector2.zero;
                 tRt.anchorMax = Vector2.one;
-                tRt.offsetMin = new Vector2(10f, 0f);
-                tRt.offsetMax = new Vector2(-18f, 0f);
+                tRt.offsetMin = Vector2.zero;
+                tRt.offsetMax = Vector2.zero;
 
-                hpTmp.alignment = TextAlignmentOptions.MidlineRight;
-                hpTmp.fontSize = 22f;
+                hpTmp.alignment = TextAlignmentOptions.Center;
+                hpTmp.fontSize = 26f;
                 hpTmp.fontStyle = FontStyles.Bold;
-                hpTmp.color = new Color(0.96f, 0.92f, 0.82f, 0.95f);
-                SetSafeOutline(hpTmp, 0.0f, Color.black);
+                hpTmp.color = Color.white;
+                SetSafeOutline(hpTmp, 0.45f, Color.black);
             }
+
+            // Tắt dòng chữ giáp/kháng dưới thanh máu Boss
+            Transform phaseInd = bossPanel.Find("PhaseIndicator");
+            if (phaseInd != null) phaseInd.gameObject.SetActive(false);
         }
 
         // Boss Name Text

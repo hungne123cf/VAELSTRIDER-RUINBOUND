@@ -160,8 +160,8 @@ public class BossHealthBarUI : MonoBehaviour
         frameRt.anchorMin = new Vector2(0.5f, 0f);
         frameRt.anchorMax = new Vector2(0.5f, 0f);
         frameRt.pivot = new Vector2(0.5f, 0f);
-        frameRt.anchoredPosition = new Vector2(0f, 30f);
-        frameRt.sizeDelta = new Vector2(820f, 28f);
+        frameRt.anchoredPosition = new Vector2(0f, 26f);
+        frameRt.sizeDelta = new Vector2(880f, 36f);
 
         Image frameImg = frameObj.AddComponent<Image>();
         frameImg.color = new Color(0.06f, 0.07f, 0.10f, 0.95f);
@@ -225,31 +225,17 @@ public class BossHealthBarUI : MonoBehaviour
         var hpTmp = hpTxtObj.AddComponent<TextMeshProUGUI>();
         hpTmp.font = GameFontManager.BodyFont;
         hpTmp.text = "100%";
-        hpTmp.fontSize = 14;
+        hpTmp.fontSize = 26f;
         hpTmp.fontStyle = FontStyles.Bold;
         hpTmp.color = Color.white;
         hpTmp.alignment = TextAlignmentOptions.Center;
+        SoulslikeHUDStyler.SetSafeOutline(hpTmp, 0.45f, Color.black);
         ui.hpPercentText = hpTmp;
 
-        // 6. Phase Indicators (Dòng Giáp & Kháng dưới thanh máu Boss)
+        // 6. Phase Indicators (Dòng chữ dưới thanh boss - đã tắt theo yêu cầu)
         GameObject phaseObj = new GameObject("PhaseIndicator");
         phaseObj.transform.SetParent(root.transform, false);
-        RectTransform phaseRt = phaseObj.AddComponent<RectTransform>();
-        phaseRt.anchorMin = new Vector2(0.5f, 0f);
-        phaseRt.anchorMax = new Vector2(0.5f, 0f);
-        phaseRt.pivot = new Vector2(0.5f, 0f);
-        phaseRt.anchoredPosition = new Vector2(0f, 2f);
-        phaseRt.sizeDelta = new Vector2(820f, 26f);
-
-        var pTmp = phaseObj.AddComponent<TextMeshProUGUI>();
-        pTmp.text = "";
-        pTmp.fontSize = 19;
-        pTmp.fontStyle = FontStyles.Bold;
-        pTmp.color = new Color(0.5f, 0.85f, 1f);
-        pTmp.alignment = TextAlignmentOptions.Center;
-        SoulslikeHUDStyler.SetSafeOutline(pTmp, 0.35f, Color.black);
         phaseObj.SetActive(false);
-        ui.phaseText = pTmp;
 
         Instance = ui;
         return ui;
@@ -357,7 +343,12 @@ public class BossHealthBarUI : MonoBehaviour
         float norm = Mathf.Clamp01((float)currentHp / maxHp);
 
         if (healthSlider != null) healthSlider.value = norm;
-        if (hpPercentText != null) hpPercentText.text = $"{Mathf.CeilToInt(norm * 100f)}%";
+        if (hpPercentText != null)
+        {
+            hpPercentText.text = $"{Mathf.CeilToInt(norm * 100f)}%";
+            hpPercentText.fontSize = 26f;
+            hpPercentText.alignment = TextAlignmentOptions.Center;
+        }
 
         UpdatePhaseDisplay(phase);
 
@@ -399,38 +390,8 @@ public class BossHealthBarUI : MonoBehaviour
 
         if (phaseText != null)
         {
-            string armorInfo = "";
-            EnemyArmor armor = null;
-            if (trackedBossObject != null)
-            {
-                armor = trackedBossObject.GetComponent<EnemyArmor>() ?? trackedBossObject.GetComponentInParent<EnemyArmor>();
-            }
-            if (armor == null && currentBoss != null)
-            {
-                armor = currentBoss.GetComponent<EnemyArmor>() ?? currentBoss.GetComponentInParent<EnemyArmor>();
-            }
-            if (armor == null)
-            {
-                armor = Object.FindAnyObjectByType<EnemyArmor>();
-            }
-
-            if (armor != null && (armor.CurrentPhysicalArmor > 0 || armor.CurrentMagicArmor > 0))
-            {
-                string armLabel = LocalizationManager.T("GIÁP", "ARM");
-                string resLabel = LocalizationManager.T("KHÁNG", "RES");
-                armorInfo = $"<size=24><color=#F97316><b>{armLabel}: {armor.CurrentPhysicalArmor}</b></color>   <color=#C084FC><b>{resLabel}: {armor.CurrentMagicArmor}</b></color></size>";
-            }
-
-            if (!string.IsNullOrEmpty(armorInfo))
-            {
-                phaseText.text = armorInfo;
-                phaseText.gameObject.SetActive(true);
-            }
-            else
-            {
-                phaseText.text = "";
-                phaseText.gameObject.SetActive(false);
-            }
+            phaseText.text = "";
+            phaseText.gameObject.SetActive(false);
         }
     }
 
