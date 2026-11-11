@@ -617,7 +617,9 @@ public class AbyssalMechSkill : MonoBehaviour
                 if (damageable == null || damageable is PlayerHealth) continue;
 
                 GameObject rootObj = (damageable as Component)?.gameObject ?? c.gameObject;
-                EnemyChronoSlowEffect.ApplySlow(rootObj, 0.40f, 0.6f);
+                var debuff = rootObj.GetComponent<EnemySlowDebuff>();
+                if (debuff == null) debuff = rootObj.AddComponent<EnemySlowDebuff>();
+                if (debuff != null) debuff.ApplySlow(0.40f, 0.6f);
             }
             yield return new WaitForSeconds(0.2f);
         }
