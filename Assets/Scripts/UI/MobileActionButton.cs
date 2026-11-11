@@ -108,11 +108,12 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             defaultY = 290f;
         }
 
-        if (posXKey != null && PlayerPrefs.HasKey(posXKey))
+        if (posXKey != null)
         {
             RectTransform rt = GetComponent<RectTransform>();
             if (rt != null)
             {
+                // Luôn áp dụng tọa độ chuẩn công thái học mặc định cho người chơi mới tải game, hoặc tọa độ đã lưu nếu người chơi đã tự chỉnh
                 float px = PlayerPrefs.GetFloat(posXKey, defaultX);
                 float py = PlayerPrefs.GetFloat(posYKey, defaultY);
                 rt.anchoredPosition = new Vector2(px, py);

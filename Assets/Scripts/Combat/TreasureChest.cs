@@ -148,7 +148,7 @@ public class TreasureChest : MonoBehaviour, IDamageable
         arrowIndicatorObj.transform.localPosition = new Vector3(0f, 1.15f, 0f);
 
         arrowTextMesh = arrowIndicatorObj.AddComponent<TextMeshPro>();
-        arrowTextMesh.text = "▼";
+        arrowTextMesh.text = "V";
         arrowTextMesh.fontSize = 4.2f;
         arrowTextMesh.fontStyle = FontStyles.Bold;
         arrowTextMesh.alignment = TextAlignmentOptions.Center;

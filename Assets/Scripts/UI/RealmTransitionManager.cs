@@ -472,8 +472,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« Đang tiến vào Tàn Tích cổ đại... »" 
-                        : "« Entering the ancient Realm... »";
+                        ? "" Đang tiến vào Tàn Tích cổ đại... "" 
+                        : "" Entering the ancient Realm... "";
                 }
                 break;
 
@@ -482,8 +482,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« Tích Nộ Khí để tung Tuyệt Kỹ »" 
-                        : "« Build Fury for your Ultimate »";
+                        ? "" Tích Nộ Khí để tung Tuyệt Kỹ "" 
+                        : "" Build Fury for your Ultimate "";
                 }
                 break;
 
@@ -492,8 +492,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« Cẩn thận Bọ Cạp độc và bẫy axit »" 
-                        : "« Beware toxic Scorpions and acid »";
+                        ? "" Cẩn thận Bọ Cạp độc và bẫy axit "" 
+                        : "" Beware toxic Scorpions and acid "";
                 }
                 break;
 
@@ -502,8 +502,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« Tà khí Hư Không trỗi dậy »" 
-                        : "« Void aether stirs within »";
+                        ? "" Tà khí Hư Không trỗi dậy "" 
+                        : "" Void aether stirs within "";
                 }
                 break;
 
@@ -517,28 +517,28 @@ public class RealmTransitionManager : MonoBehaviour
                     {
                         case CalamityRealm.VoidNightmare:
                             _loreTipText.text = isVi 
-                                ? "« Cõi Ác Mộng Hư Không »" 
-                                : "« Void Nightmare Realm »";
+                                ? "" Cõi Ác Mộng Hư Không "" 
+                                : "" Void Nightmare Realm "";
                             break;
                         case CalamityRealm.AcidDownpour:
                             _loreTipText.text = isVi 
-                                ? "« Cõi Mưa Axit Ăn Mòn »" 
-                                : "« Acid Downpour Realm »";
+                                ? "" Cõi Mưa Axit Ăn Mòn "" 
+                                : "" Acid Downpour Realm "";
                             break;
                         case CalamityRealm.MagmaCalamity:
                             _loreTipText.text = isVi 
-                                ? "« Cõi Dung Nham Rực Lửa »" 
-                                : "« Magma Calamity Realm »";
+                                ? "" Cõi Dung Nham Rực Lửa "" 
+                                : "" Magma Calamity Realm "";
                             break;
                         case CalamityRealm.FrostfallBlizzard:
                             _loreTipText.text = isVi 
-                                ? "« Cõi Bão Tuyết Băng Giá »" 
-                                : "« Frostfall Blizzard Realm »";
+                                ? "" Cõi Bão Tuyết Băng Giá "" 
+                                : "" Frostfall Blizzard Realm "";
                             break;
                         default:
                             _loreTipText.text = isVi 
-                                ? $"« TIẾN VÀO {realmName.ToUpper()}: Tai ương ập tới, thử thách tối thượng bắt đầu! »" 
-                                : $"« ENTERING {realmName.ToUpper()}: Calamity strikes, the ultimate trial begins! »";
+                                ? $"" TIẾN VÀO {realmName.ToUpper()}: Tai ương ập tới, thử thách tối thượng bắt đầu! "" 
+                                : $"" ENTERING {realmName.ToUpper()}: Calamity strikes, the ultimate trial begins! "";
                             break;
                     }
                 }
@@ -550,8 +550,8 @@ public class RealmTransitionManager : MonoBehaviour
                 if (_loreTipText != null)
                 {
                     _loreTipText.text = isVi 
-                        ? "« CHIẾN TÍCH BẤT DIỆT: Ánh sáng thần thánh bao bọc lấy linh hồn bạn, giải thoát vạn vật khỏi bóng đêm. »" 
-                        : "« IMMORTAL TRIUMPH: The divine light cradles your soul, delivering the realm from darkness. »";
+                        ? "" CHIẾN TÍCH BẤT DIỆT: Ánh sáng thần thánh bao bọc lấy linh hồn bạn, giải thoát vạn vật khỏi bóng đêm. "" 
+                        : "" IMMORTAL TRIUMPH: The divine light cradles your soul, delivering the realm from darkness. "";
                 }
                 break;
         }

@@ -88,11 +88,11 @@ public class PlayerStatPanelUI : MonoBehaviour
         // Cột trái
         hpTxt   = CreateRow(font, 0, top - rowH * 0, new Color(0.45f, 0.95f, 0.35f), "♥");
         atkTxt  = CreateRow(font, 0, top - rowH * 1, new Color(1f, 0.55f, 0.20f), "⚔");
-        aspdTxt = CreateRow(font, 0, top - rowH * 2, new Color(1f, 0.85f, 0.25f), "»");
+        aspdTxt = CreateRow(font, 0, top - rowH * 2, new Color(1f, 0.85f, 0.25f), ">");
         critTxt = CreateRow(font, 0, top - rowH * 3, new Color(1f, 0.30f, 0.30f), "◎");
         moveTxt = CreateRow(font, 0, top - rowH * 4, new Color(0.90f, 0.92f, 0.95f), "➤");
         // Cột phải
-        defTxt  = CreateRow(font, 1, top - rowH * 0, new Color(0.88f, 0.90f, 0.95f), "■");
+        defTxt  = CreateRow(font, 1, top - rowH * 0, new Color(0.88f, 0.90f, 0.95f), "#");
         magTxt  = CreateRow(font, 1, top - rowH * 1, new Color(0.35f, 0.75f, 1f), "✦");
         cdrTxt  = CreateRow(font, 1, top - rowH * 2, new Color(0.70f, 0.75f, 0.95f), "⌛");
         lsTxt   = CreateRow(font, 1, top - rowH * 3, new Color(1f, 0.45f, 0.15f), "♦");
@@ -175,7 +175,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         { "⚔", new[] { // Tấn công - thanh kiếm
             "..........ww", ".........w##", "........w##.", ".......w##..", "......w##...",
             ".....w##....", ".#..w##.....", ".#####......", "..###.......", ".####.......", "##..#.......", "#..........." } },
-        { "»", new[] { // Tốc đánh - tia sét
+        { ">", new[] { // Tốc đánh - tia sét
             "......####..", ".....###w...", "....####....", "...####.....", "..########..",
             ".....####...", "....####....", "...###......", "..###.......", ".##.........", ".#.........." } },
         { "◎", new[] { // Chí mạng - tâm ngắm
@@ -184,7 +184,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         { "➤", new[] { // Di chuyển - chiếc giày
             "...####.....", "...#w##.....", "...#w##.....", "...####.....", "...####.....",
             "...#####....", "..#######...", "..########..", ".##########.", ".###########", ".www########" } },
-        { "■", new[] { // Giáp - khiên
+        { "#", new[] { // Giáp - khiên
             ".##########.", "############", "#ww#########", "#w##########", "############",
             "############", ".##########.", ".##########.", "..########..", "...######...", "....####....", ".....##....." } },
         { "✦", new[] { // Phép - ngôi sao

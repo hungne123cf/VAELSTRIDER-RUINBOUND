@@ -425,7 +425,7 @@ public class DailyLoginUI : MonoBehaviour
 
             var thTmp = topObj.AddComponent<TextMeshProUGUI>();
             string dayLabel = isVi ? DAY_NAMES_VI[i] : DAY_NAMES_EN[i];
-            thTmp.text = $"<b>{dayLabel} (N{i + 1})</b>";
+            thTmp.text = $"<b>{dayLabel}</b>";
             thTmp.fontSize = isDay7 ? 30f : 27f;
             thTmp.fontStyle = FontStyles.Bold;
             thTmp.alignment = TextAlignmentOptions.Center;
@@ -542,7 +542,7 @@ public class DailyLoginUI : MonoBehaviour
             if (isClaimed)
             {
                 stImg.color = new Color(0.12f, 0.28f, 0.18f, 0.90f);
-                stTmp.text = isVi ? "<color=#2ECC71><b>✔ ĐÃ NHẬN</b></color>" : "<color=#2ECC71><b>✔ CLAIMED</b></color>";
+                stTmp.text = isVi ? "<color=#2ECC71><b>ĐÃ NHẬN</b></color>" : "<color=#2ECC71><b>CLAIMED</b></color>";
             }
             else if (isMissed)
             {

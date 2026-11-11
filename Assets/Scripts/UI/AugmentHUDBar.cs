@@ -657,12 +657,18 @@ public class AugmentHUDBar : MonoBehaviour
         _tooltipObj.SetActive(false);
     }
 
+    private float _updateThrottleTimer = 0f;
+
     void Update()
     {
         if (AugmentManager.Instance == null) return;
 
         var selected = AugmentManager.Instance.GetSelectedAugments();
         if (selected == null) return;
+
+        _updateThrottleTimer += Time.deltaTime;
+        if (_updateThrottleTimer < 0.05f) return;
+        _updateThrottleTimer = 0f;
 
         RefreshBadges();
 
@@ -1267,15 +1273,16 @@ public class AugmentHUDBar : MonoBehaviour
         var panelObj = new GameObject("WindowPanel", typeof(RectTransform), typeof(Image));
         panelObj.transform.SetParent(backdropObj.transform, false);
         var pRt = panelObj.GetComponent<RectTransform>();
-        pRt.anchorMin = new Vector2(0.5f, 0.5f);
-        pRt.anchorMax = new Vector2(0.5f, 0.5f);
+        pRt.anchorMin = new Vector2(0.025f, 0.025f);
+        pRt.anchorMax = new Vector2(0.975f, 0.975f);
         pRt.pivot = new Vector2(0.5f, 0.5f);
-        pRt.sizeDelta = new Vector2(740f, 520f);
+        pRt.offsetMin = Vector2.zero;
+        pRt.offsetMax = Vector2.zero;
 
         var pImg = panelObj.GetComponent<Image>();
         pImg.sprite = GetPanelBg();
         pImg.type = Image.Type.Sliced;
-        pImg.color = new Color(0.05f, 0.065f, 0.095f, 0.98f);
+        pImg.color = new Color(0.04f, 0.055f, 0.08f, 0.98f);
         pImg.raycastTarget = true;
 
         var borderObj = new GameObject("Border", typeof(RectTransform), typeof(Image));
@@ -1298,13 +1305,13 @@ public class AugmentHUDBar : MonoBehaviour
         var titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
         titleObj.transform.SetParent(panelObj.transform, false);
         var tRt = titleObj.GetComponent<RectTransform>();
-        tRt.anchorMin = new Vector2(0.06f, 0.89f);
-        tRt.anchorMax = new Vector2(0.85f, 0.98f);
+        tRt.anchorMin = new Vector2(0.04f, 0.91f);
+        tRt.anchorMax = new Vector2(0.88f, 0.985f);
         tRt.offsetMin = tRt.offsetMax = Vector2.zero;
 
         var titleTmp = titleObj.GetComponent<TextMeshProUGUI>();
         titleTmp.text = isVi ? "TẤT CẢ LÕI NÂNG CẤP ĐÃ CHỌN" : "ALL ACQUIRED AUGMENTS";
-        titleTmp.fontSize = 20f;
+        titleTmp.fontSize = 32f;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
         titleTmp.color = new Color(1f, 0.90f, 0.50f, 1f);
@@ -1313,8 +1320,8 @@ public class AugmentHUDBar : MonoBehaviour
         var closeXObj = new GameObject("CloseXBtn", typeof(RectTransform), typeof(Image), typeof(Button));
         closeXObj.transform.SetParent(panelObj.transform, false);
         var cxRt = closeXObj.GetComponent<RectTransform>();
-        cxRt.anchorMin = new Vector2(0.91f, 0.89f);
-        cxRt.anchorMax = new Vector2(0.96f, 0.97f);
+        cxRt.anchorMin = new Vector2(0.93f, 0.91f);
+        cxRt.anchorMax = new Vector2(0.98f, 0.98f);
         cxRt.offsetMin = cxRt.offsetMax = Vector2.zero;
 
         var cxImg = closeXObj.GetComponent<Image>();
@@ -1333,7 +1340,7 @@ public class AugmentHUDBar : MonoBehaviour
         cxTextRt.offsetMin = cxTextRt.offsetMax = Vector2.zero;
         var cxTmp = cxTextObj.GetComponent<TextMeshProUGUI>();
         cxTmp.text = "X";
-        cxTmp.fontSize = 18f;
+        cxTmp.fontSize = 28f;
         cxTmp.fontStyle = FontStyles.Bold;
         cxTmp.alignment = TextAlignmentOptions.Center;
         cxTmp.color = new Color(0.95f, 0.35f, 0.35f, 1f);
@@ -1342,8 +1349,8 @@ public class AugmentHUDBar : MonoBehaviour
         var divObj = new GameObject("Divider", typeof(RectTransform), typeof(Image));
         divObj.transform.SetParent(panelObj.transform, false);
         var divRt = divObj.GetComponent<RectTransform>();
-        divRt.anchorMin = new Vector2(0.04f, 0.87f);
-        divRt.anchorMax = new Vector2(0.96f, 0.885f);
+        divRt.anchorMin = new Vector2(0.02f, 0.895f);
+        divRt.anchorMax = new Vector2(0.98f, 0.905f);
         divRt.offsetMin = divRt.offsetMax = Vector2.zero;
 
         var divImg = divObj.GetComponent<Image>();
@@ -1354,8 +1361,8 @@ public class AugmentHUDBar : MonoBehaviour
         var scrollObj = new GameObject("ScrollView", typeof(RectTransform), typeof(ScrollRect), typeof(RectMask2D));
         scrollObj.transform.SetParent(panelObj.transform, false);
         var scRt = scrollObj.GetComponent<RectTransform>();
-        scRt.anchorMin = new Vector2(0.04f, 0.12f);
-        scRt.anchorMax = new Vector2(0.96f, 0.86f);
+        scRt.anchorMin = new Vector2(0.02f, 0.11f);
+        scRt.anchorMax = new Vector2(0.98f, 0.885f);
         scRt.offsetMin = scRt.offsetMax = Vector2.zero;
 
         var scrollRect = scrollObj.GetComponent<ScrollRect>();
@@ -1372,8 +1379,8 @@ public class AugmentHUDBar : MonoBehaviour
         cRt.sizeDelta = new Vector2(0f, 0f);
 
         var vlg = contentObj.GetComponent<VerticalLayoutGroup>();
-        vlg.spacing = 8f;
-        vlg.padding = new RectOffset(4, 4, 6, 6);
+        vlg.spacing = 10f;
+        vlg.padding = new RectOffset(6, 6, 8, 8);
         vlg.childControlWidth = true;
         vlg.childControlHeight = false;
         vlg.childForceExpandWidth = true;
@@ -1388,8 +1395,8 @@ public class AugmentHUDBar : MonoBehaviour
         var bottomBtnObj = new GameObject("BottomCloseBtn", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
         bottomBtnObj.transform.SetParent(panelObj.transform, false);
         var bbRt = bottomBtnObj.GetComponent<RectTransform>();
-        bbRt.anchorMin = new Vector2(0.40f, 0.025f);
-        bbRt.anchorMax = new Vector2(0.60f, 0.095f);
+        bbRt.anchorMin = new Vector2(0.38f, 0.015f);
+        bbRt.anchorMax = new Vector2(0.62f, 0.095f);
         bbRt.offsetMin = bbRt.offsetMax = Vector2.zero;
 
         var bbImg = bottomBtnObj.GetComponent<Image>();
@@ -1413,7 +1420,7 @@ public class AugmentHUDBar : MonoBehaviour
 
         var bbTmp = bbTextObj.GetComponent<TextMeshProUGUI>();
         bbTmp.text = isVi ? "ĐÓNG" : "CLOSE";
-        bbTmp.fontSize = 16f;
+        bbTmp.fontSize = 26f;
         bbTmp.fontStyle = FontStyles.Bold;
         bbTmp.alignment = TextAlignmentOptions.Center;
         bbTmp.color = Color.white;
@@ -1474,8 +1481,8 @@ public class AugmentHUDBar : MonoBehaviour
             cardObj.transform.SetParent(_popupContentContainer, false);
 
             var le = cardObj.GetComponent<LayoutElement>();
-            le.preferredHeight = 94f;
-            le.minHeight = 94f;
+            le.preferredHeight = 148f;
+            le.minHeight = 148f;
 
             var cardImg = cardObj.GetComponent<Image>();
             cardImg.sprite = GetPanelBg();
@@ -1484,7 +1491,7 @@ public class AugmentHUDBar : MonoBehaviour
 
             var outl = cardObj.GetComponent<Outline>();
             outl.effectColor = tierColor * 0.70f;
-            outl.effectDistance = new Vector2(1f, -1f);
+            outl.effectDistance = new Vector2(1.5f, -1.5f);
 
             var medalObj = new GameObject("Medallion", typeof(RectTransform), typeof(Image));
             medalObj.transform.SetParent(cardObj.transform, false);
@@ -1492,8 +1499,8 @@ public class AugmentHUDBar : MonoBehaviour
             medalRt.anchorMin = new Vector2(0f, 0.5f);
             medalRt.anchorMax = new Vector2(0f, 0.5f);
             medalRt.pivot = new Vector2(0f, 0.5f);
-            medalRt.anchoredPosition = new Vector2(12f, 0f);
-            medalRt.sizeDelta = new Vector2(52f, 52f);
+            medalRt.anchoredPosition = new Vector2(18f, 0f);
+            medalRt.sizeDelta = new Vector2(88f, 88f);
 
             var medalImg = medalObj.GetComponent<Image>();
             medalImg.sprite = GetObsidianCore();
@@ -1536,7 +1543,7 @@ public class AugmentHUDBar : MonoBehaviour
                 fbRt.offsetMin = fbRt.offsetMax = Vector2.zero;
                 var fbTmp = fbTxtObj.GetComponent<TextMeshProUGUI>();
                 fbTmp.text = AugmentIconHelper.GetAugmentShortCode(type);
-                fbTmp.fontSize = 12f;
+                fbTmp.fontSize = 20f;
                 fbTmp.fontStyle = FontStyles.Bold;
                 fbTmp.alignment = TextAlignmentOptions.Center;
                 fbTmp.color = Color.white;
@@ -1552,7 +1559,7 @@ public class AugmentHUDBar : MonoBehaviour
                 rkRt.offsetMin = rkRt.offsetMax = Vector2.zero;
                 var rkTmp = rkObj.GetComponent<TextMeshProUGUI>();
                 rkTmp.text = $"Lv.{rank}";
-                rkTmp.fontSize = 11f;
+                rkTmp.fontSize = 18f;
                 rkTmp.fontStyle = FontStyles.Bold;
                 rkTmp.color = new Color(1f, 0.88f, 0.25f, 1f);
                 SoulslikeHUDStyler.SetSafeOutline(rkTmp, 0.35f, Color.black);
@@ -1563,12 +1570,12 @@ public class AugmentHUDBar : MonoBehaviour
             var textRt = textObj.GetComponent<RectTransform>();
             textRt.anchorMin = new Vector2(0f, 0f);
             textRt.anchorMax = new Vector2(1f, 1f);
-            textRt.offsetMin = new Vector2(68f, 4f);
-            textRt.offsetMax = new Vector2(-155f, -4f);
+            textRt.offsetMin = new Vector2(120f, 8f);
+            textRt.offsetMax = new Vector2(-190f, -8f);
 
             var textTmp = textObj.GetComponent<TextMeshProUGUI>();
             string rankStr = rank > 1 ? $" <color=#FBBF24>Lv.{rank}</color>" : "";
-            textTmp.text = $"<size=16.5><b><color=#{tierHex}>{tierName} - {typeName}</color>  <color=#FFFFFF>{title}</color>{rankStr}</b></size>\n<size=13.5><color=#CBD5E1>{desc}</color></size>";
+            textTmp.text = $"<size=28><b><color=#{tierHex}>{tierName} - {typeName}</color>  <color=#FFFFFF>{title}</color>{rankStr}</b></size>\n<size=22><color=#CBD5E1>{desc}</color></size>";
             textTmp.enableWordWrapping = true;
             SoulslikeHUDStyler.SetSafeOutline(textTmp, 0.25f, Color.black);
 
@@ -1578,8 +1585,8 @@ public class AugmentHUDBar : MonoBehaviour
             statusRt.anchorMin = new Vector2(1f, 0f);
             statusRt.anchorMax = new Vector2(1f, 1f);
             statusRt.pivot = new Vector2(1f, 0.5f);
-            statusRt.anchoredPosition = new Vector2(-10f, 0f);
-            statusRt.sizeDelta = new Vector2(125f, 65f);
+            statusRt.anchoredPosition = new Vector2(-15f, 0f);
+            statusRt.sizeDelta = new Vector2(165f, 90f);
 
             var statusTmp = statusObj.GetComponent<TextMeshProUGUI>();
             statusTmp.alignment = TextAlignmentOptions.Right;
@@ -1589,11 +1596,11 @@ public class AugmentHUDBar : MonoBehaviour
                 float rem = AugmentManager.Instance != null ? AugmentManager.Instance.GetRemainingDurationByType(type) : aug.duration;
                 if (rem <= 0f) rem = aug.duration;
                 string remStr = rem >= 10f ? $"{Mathf.CeilToInt(rem)}s" : $"{rem:0.#}s";
-                statusTmp.text = $"<size=11><color=#94A3B8>{(isVi ? "Thời gian" : "Duration")}</color></size>\n<size=14><b><color=#55EFC4>{remStr}</color></b></size>";
+                statusTmp.text = $"<size=18><color=#94A3B8>{(isVi ? "Thời gian" : "Duration")}</color></size>\n<size=24><b><color=#55EFC4>{remStr}</color></b></size>";
             }
             else
             {
-                statusTmp.text = $"<size=11><color=#94A3B8>{(isVi ? "Hiệu lực" : "Effect")}</color></size>\n<size=13><b><color=#86EFAC>{(isVi ? "Vĩnh viễn" : "Permanent")}</color></b></size>";
+                statusTmp.text = $"<size=18><color=#94A3B8>{(isVi ? "Hiệu lực" : "Effect")}</color></size>\n<size=22><b><color=#86EFAC>{(isVi ? "Vĩnh viễn" : "Permanent")}</color></b></size>";
             }
             SoulslikeHUDStyler.SetSafeOutline(statusTmp, 0.25f, Color.black);
         }

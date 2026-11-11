@@ -200,6 +200,10 @@ public static class GameFontManager
         if (text.Contains("▲")) text = text.Replace("▲", "^");
         if (text.Contains("★")) text = text.Replace("★", "*");
         if (text.Contains("✔")) text = text.Replace("✔", "V");
+            if (text.Contains("«")) text = text.Replace("«", "\"");
+            if (text.Contains("»")) text = text.Replace("»", "\"");
+            if (text.Contains("▼")) text = text.Replace("▼", "V");
+            if (text.Contains("▲")) text = text.Replace("▲", "^");
         if (text.Contains("✖")) text = text.Replace("✖", "X");
 
         return text;

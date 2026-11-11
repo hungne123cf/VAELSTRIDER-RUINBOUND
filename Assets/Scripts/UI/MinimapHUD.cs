@@ -55,6 +55,9 @@ public class MinimapHUD : MonoBehaviour
     private Queue<Image> blipPool = new Queue<Image>();
 
     private float updateTimer = 0f;
+    private float compassSearchTimer = 0f;
+    private Transform cachedPriorityTarget = null;
+    private string cachedTargetLabel = "";
 
     void Awake()
     {
@@ -137,9 +140,9 @@ public class MinimapHUD : MonoBehaviour
         // Cập nhật La Bàn Dẫn Đường (Compass Needle)
         UpdateObjectiveCompass();
 
-        // Cập nhật các chấm Blip trên Radar định kỳ mỗi 0.04s (25 FPS) để siêu mượt & nhẹ máy
+        // Cập nhật các chấm Blip trên Radar định kỳ mỗi 0.08s (~12 FPS) cực kỳ mượt mà không hao CPU
         updateTimer += Time.deltaTime;
-        if (updateTimer >= 0.04f)
+        if (updateTimer >= 0.08f)
         {
             updateTimer = 0f;
             UpdateRadarBlips();
@@ -419,6 +422,47 @@ public class MinimapHUD : MonoBehaviour
 
     private void UpdateObjectiveCompass()
     {
+        // Throttle việc tìm mục tiêu trong Scene mỗi 0.25s để tối ưu FPS hoàn hảo trên Mobile
+        compassSearchTimer += Time.deltaTime;
+        if (compassSearchTimer >= 0.25f || (cachedPriorityTarget == null && compassSearchTimer >= 0.1f))
+        {
+            compassSearchTimer = 0f;
+            RefreshPriorityTarget();
+        }
+
+        // Cập nhật hướng mũi kim La Bàn và cự ly theo cachedPriorityTarget
+        if (cachedPriorityTarget != null && cachedPriorityTarget.gameObject.activeInHierarchy)
+        {
+            Vector2 dir = (cachedPriorityTarget.position - playerTransform.position);
+            float dist = dir.magnitude;
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+            if (compassNeedleRt != null)
+            {
+                compassNeedleRt.gameObject.SetActive(true);
+                compassNeedleRt.localRotation = Quaternion.Euler(0f, 0f, angle - 90f);
+                compassNeedleRt.anchoredPosition = dir.normalized * (mapUiRadius + 2f);
+            }
+
+            if (compassDistanceText != null)
+            {
+                compassDistanceText.gameObject.SetActive(true);
+                compassDistanceText.text = $"<color=#FFD700>{cachedTargetLabel}</color> <b>{(int)dist}m</b>";
+            }
+        }
+        else
+        {
+            cachedPriorityTarget = null;
+            if (compassNeedleRt != null) compassNeedleRt.gameObject.SetActive(false);
+            if (compassDistanceText != null)
+            {
+                compassDistanceText.text = $"<color=#2ED573>{LocalizationManager.T("AN TOÀN", "SECURE")}</color>";
+            }
+        }
+    }
+
+    private void RefreshPriorityTarget()
+    {
         Transform priorityTarget = null;
         string targetLabel = "";
 
@@ -533,34 +577,8 @@ public class MinimapHUD : MonoBehaviour
             }
         }
 
-        // Cập nhật hướng mũi kim La Bàn
-        if (priorityTarget != null)
-        {
-            Vector2 dir = (priorityTarget.position - playerTransform.position);
-            float dist = dir.magnitude;
-            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-
-            if (compassNeedleRt != null)
-            {
-                compassNeedleRt.gameObject.SetActive(true);
-                compassNeedleRt.localRotation = Quaternion.Euler(0f, 0f, angle - 90f);
-                compassNeedleRt.anchoredPosition = dir.normalized * (mapUiRadius + 2f);
-            }
-
-            if (compassDistanceText != null)
-            {
-                compassDistanceText.gameObject.SetActive(true);
-                compassDistanceText.text = $"<color=#FFD700>{targetLabel}</color> <b>{(int)dist}m</b>";
-            }
-        }
-        else
-        {
-            if (compassNeedleRt != null) compassNeedleRt.gameObject.SetActive(false);
-            if (compassDistanceText != null)
-            {
-                compassDistanceText.text = $"<color=#2ED573>{LocalizationManager.T("AN TOÀN", "SECURE")}</color>";
-            }
-        }
+        cachedPriorityTarget = priorityTarget;
+        cachedTargetLabel = targetLabel;
     }
 
     private void UpdateRadarBlips()

@@ -50,15 +50,12 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
         transform.localScale = baseScale * scaleMod;
 
-        if (PlayerPrefs.HasKey("Game_Controls_Joy_PosX"))
+        RectTransform rt = GetComponent<RectTransform>();
+        if (rt != null)
         {
-            RectTransform rt = GetComponent<RectTransform>();
-            if (rt != null)
-            {
-                float posX = PlayerPrefs.GetFloat("Game_Controls_Joy_PosX", 250f);
-                float posY = PlayerPrefs.GetFloat("Game_Controls_Joy_PosY", 250f);
-                rt.anchoredPosition = new Vector2(posX, posY);
-            }
+            float posX = PlayerPrefs.GetFloat("Game_Controls_Joy_PosX", 250f);
+            float posY = PlayerPrefs.GetFloat("Game_Controls_Joy_PosY", 250f);
+            rt.anchoredPosition = new Vector2(posX, posY);
         }
 
         if (canvasGroup == null)
