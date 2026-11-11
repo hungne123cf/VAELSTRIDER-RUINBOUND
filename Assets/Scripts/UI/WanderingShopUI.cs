@@ -601,8 +601,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Lưỡi Kiếm Hắc Thiết", titleEN = "Dark Iron Blade",
             descVN = "Tăng vĩnh viễn <color=#FFEAA7><b>+22 Sát Thương Vật Lý</b></color> trên mọi chiêu thức và đòn đánh căn bản.",
             descEN = "Permanently adds <color=#FFEAA7><b>+22 Base Physical Damage</b></color> across all abilities and attacks.",
-            flavorVN = ""Thanh gươm rèn từ tàn tích của một vương triều đã sụp đổ."",
-            flavorEN = ""A heavy blade forged from the obsidian embers of a fallen realm."",
+            flavorVN = "\"Thanh gươm rèn từ tàn tích của một vương triều đã sụp đổ.\"",
+            flavorEN = "\"A heavy blade forged from the obsidian embers of a fallen realm.\"",
             cost = 260,
             onPurchase = () =>
             {
@@ -630,8 +630,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Lôi Đình Trảm", titleEN = "Chain Lightning",
             descVN = "Đòn đánh phóng tia sét lan truyền gây <color=#B854FF><b>55 Sát Thương Phép</b></color> lên tối đa 3 kẻ địch lân cận.",
             descEN = "Attacks unleash chain lightning dealing <color=#B854FF><b>55 Magic Damage</b></color> arcing up to 3 nearby foes.",
-            flavorVN = ""Sấm sét cổ xưa cuộn trào trên lưỡi kiếm rít gào."",
-            flavorEN = ""Ancient thunderbolts surging through whistling blade edges."",
+            flavorVN = "\"Sấm sét cổ xưa cuộn trào trên lưỡi kiếm rít gào.\"",
+            flavorEN = "\"Ancient thunderbolts surging through whistling blade edges.\"",
             cost = 320,
             onPurchase = () =>
             {
@@ -659,8 +659,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Lưỡi Kiếm Hư Không", titleEN = "Void Piercer",
             descVN = "Đòn đánh xuyên phá tuyệt đối <color=#55EFC4><b>35% Giáp</b></color>, chuyển hóa thành Sát Thương Chuẩn bỏ qua mọi phòng ngự.",
             descEN = "Attacks pierce <color=#55EFC4><b>35% Armor</b></color>, converting into irresistible True Damage.",
-            flavorVN = ""Không tấm khiên nào có thể đứng vững trước vết rách hư không."",
-            flavorEN = ""No shield withstands the severing tears of the void."",
+            flavorVN = "\"Không tấm khiên nào có thể đứng vững trước vết rách hư không.\"",
+            flavorEN = "\"No shield withstands the severing tears of the void.\"",
             cost = 290,
             onPurchase = () =>
             {
@@ -688,8 +688,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Mắt Ưng Cuồng Bạo", titleEN = "Hawkeye Fury",
             descVN = "Tăng <color=#FBBF24><b>+12% Tỉ Lệ Bạo Kích</b></color> và nhận thêm <color=#F59E0B><b>+35% Sát Thương Bạo Kích</b></color>.",
             descEN = "Gain <color=#FBBF24><b>+12% Critical Chance</b></color> and <color=#F59E0B><b>+35% Critical Damage</b></color>.",
-            flavorVN = ""Ánh nhìn săn mồi nhìn thấu mọi khe hở tử huyệt."",
-            flavorEN = ""Predatory focus perceiving every fatal fracture."",
+            flavorVN = "\"Ánh nhìn săn mồi nhìn thấu mọi khe hở tử huyệt.\"",
+            flavorEN = "\"Predatory focus perceiving every fatal fracture.\"",
             cost = 280,
             onPurchase = () =>
             {
@@ -726,8 +726,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Huyết Nguyệt Trảo", titleEN = "Bloodmoon Claws",
             descVN = "Nhận <color=#F42640><b>+6% Hút Máu Vật Lý</b></color> trên mọi đòn đánh. Hồi phục sinh lực liên tục trong giao tranh.",
             descEN = "Gain <color=#F42640><b>+6% Physical Lifesteal</b></color> on all hits. Continuously restores health in combat.",
-            flavorVN = ""Từng vết chém uống cạn sinh khí của con mồi tàn tích."",
-            flavorEN = ""Every slash siphons the vitality of falling foes."",
+            flavorVN = "\"Từng vết chém uống cạn sinh khí của con mồi tàn tích.\"",
+            flavorEN = "\"Every slash siphons the vitality of falling foes.\"",
             cost = 250,
             onPurchase = () =>
             {
@@ -755,8 +755,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Thần Dược Trường Sinh", titleEN = "Vitality Elixir",
             descVN = "Hồi ngay <color=#55EFC4><b>150 HP</b></color> và gia tăng vĩnh viễn <color=#55EFC4><b>+75 Máu Tối Đa</b></color> cho toàn bộ màn chơi.",
             descEN = "Instantly heals <color=#55EFC4><b>150 HP</b></color> and permanently grants <color=#55EFC4><b>+75 Max HP</b></color> for the run.",
-            flavorVN = ""Chưng cất từ giọt sương thiêng của đại thụ tàn tích cổ đại."",
-            flavorEN = ""Distilled from sacred drops of the ancient ruin arbor."",
+            flavorVN = "\"Chưng cất từ giọt sương thiêng của đại thụ tàn tích cổ đại.\"",
+            flavorEN = "\"Distilled from sacred drops of the ancient ruin arbor.\"",
             cost = 180,
             onPurchase = () =>
             {
@@ -786,8 +786,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Bão Táp Tốc Đánh", titleEN = "Tempest Swiftness",
             descVN = "Tăng <color=#38BDF8><b>+20% Tốc Độ Đánh</b></color> & giảm <color=#38BDF8><b>-20% Thời Gian Hồi Chiêu</b></color> căn bản.",
             descEN = "Gain <color=#38BDF8><b>+20% Attack Speed</b></color> and reduce <color=#38BDF8><b>-20% Attack Cooldown</b></color>.",
-            flavorVN = ""Vút nhanh như cơn cuồng phong rít qua đỉnh tháp đổ nát."",
-            flavorEN = ""Swift as storm winds whistling across broken spires."",
+            flavorVN = "\"Vút nhanh như cơn cuồng phong rít qua đỉnh tháp đổ nát.\"",
+            flavorEN = "\"Swift as storm winds whistling across broken spires.\"",
             cost = 210,
             onPurchase = () =>
             {
@@ -824,8 +824,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Khiên Hộ Thần Cổ", titleEN = "Aegis of the Fallen",
             descVN = "Nhận <color=#60A5FA><b>+18 Giáp Cố Định</b></color> và tạo lớp Giáp Ảo <color=#38BDF8><b>120 Shield</b></color> bảo vệ cơ thể.",
             descEN = "Gain <color=#60A5FA><b>+18 Armor</b></color> and gain a <color=#38BDF8><b>120 Virtual Shield barrier</b></color>.",
-            flavorVN = ""Tấm khiên rèn từ hợp kim thép đen kiên cố ngàn năm."",
-            flavorEN = ""Tempered from millennial black iron, unyielding to blows."",
+            flavorVN = "\"Tấm khiên rèn từ hợp kim thép đen kiên cố ngàn năm.\"",
+            flavorEN = "\"Tempered from millennial black iron, unyielding to blows.\"",
             cost = 240,
             onPurchase = () =>
             {
@@ -856,8 +856,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Trảm Sát Trảm Kích", titleEN = "Guillotine Execute",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Đòn đánh gây thêm sát thương bằng <color=#FFEAA7><b>50% Máu Hiện Tại</b></color> của kẻ địch.\n<color=#FDCB6E><b>[HẠN CHẾ]</b></color> Sát thương lên Boss tối đa <color=#FDCB6E><b>15% Max HP</b></color> (trần 1200 dmg).",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Attacks deal bonus damage equal to <color=#FFEAA7><b>50% Target Current HP</b></color>.\n<color=#FDCB6E><b>[LIMIT]</b></color> Capped at <color=#FDCB6E><b>15% Max HP</b></color> on Bosses (max 1200 dmg).",
-            flavorVN = ""Một trảm đoạn tuyệt sinh cơ, vạn vật quy về cát bụi."",
-            flavorEN = ""A single cleave that severs life itself, regardless of armor."",
+            flavorVN = "\"Một trảm đoạn tuyệt sinh cơ, vạn vật quy về cát bụi.\"",
+            flavorEN = "\"A single cleave that severs life itself, regardless of armor.\"",
             cost = 380,
             onPurchase = () =>
             {
@@ -877,8 +877,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Kim Thân Bất Hoại", titleEN = "Golden Sanctuary",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Mỗi <color=#FFEAA7><b>10 Giây</b></color> ban Hào Quang Vàng bọc thân, <color=#55EFC4><b>Miễn Nhiễm 100% Khống Chế</b></color> (Choáng, Băng, Nhện).\n<color=#FDCB6E><b>[CƠ CHẾ]</b></color> Tự động kích hoạt khi trúng đòn khống chế, sau đó đếm ngược 10s hồi lại.",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Every <color=#FFEAA7><b>10s</b></color> grants Golden Aura, <color=#55EFC4><b>100% Immunity to CC</b></color> (Stun, Freeze, Web).\n<color=#FDCB6E><b>[MECHANIC]</b></color> Consumed on trigger, recharges after 10s cooldown.",
-            flavorVN = ""Thân như kim cương bất hoại, vạn tà bất xâm."",
-            flavorEN = ""Body forged in diamond brilliance, impervious to all afflictions."",
+            flavorVN = "\"Thân như kim cương bất hoại, vạn tà bất xâm.\"",
+            flavorEN = "\"Body forged in diamond brilliance, impervious to all afflictions.\"",
             cost = 350,
             onPurchase = () =>
             {
@@ -898,8 +898,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Khế Ước Cuồng Nộ", titleEN = "Cursed Might",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận vĩnh viễn <color=#FFEAA7><b>+100 Sát Thương Đòn Đánh (ATK)</b></color>.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Toàn bộ Quái vật & Boss tăng thêm <color=#FF7675><b>+50% Máu Tối Đa & Hiện Tại</b></color>.",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Permanently gain <color=#FFEAA7><b>+100 Attack Damage (ATK)</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> All Enemies & Bosses permanently gain <color=#FF7675><b>+50% Max HP</b></color>.",
-            flavorVN = ""Sức mạnh hủy diệt đổi lấy sự thức tỉnh của bầy quái hung bạo."",
-            flavorEN = ""Catastrophic power granted at the cost of awakening monstrosities."",
+            flavorVN = "\"Sức mạnh hủy diệt đổi lấy sự thức tỉnh của bầy quái hung bạo.\"",
+            flavorEN = "\"Catastrophic power granted at the cost of awakening monstrosities.\"",
             cost = 320,
             onPurchase = () =>
             {
@@ -919,8 +919,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Minh Ước Hắc Thiết", titleEN = "Ironclad Pact",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận thêm <color=#74B9FF><b>+50 Giáp Phòng Thủ</b></color>.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Quái & Lính nhận thêm <color=#FF7675><b>5% Miễn Thương</b></color> vĩnh viễn.",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#74B9FF><b>+50 Armor Defense</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> All Minions & Monsters gain <color=#FF7675><b>+5% Damage Reduction</b></color>.",
-            flavorVN = ""Lớp giáp dày như thành lũy rèn từ quặng hắc thiết bị nguyền rủa."",
-            flavorEN = ""Impenetrable fortress armor forged with cursed black iron."",
+            flavorVN = "\"Lớp giáp dày như thành lũy rèn từ quặng hắc thiết bị nguyền rủa.\"",
+            flavorEN = "\"Impenetrable fortress armor forged with cursed black iron.\"",
             cost = 240,
             onPurchase = () =>
             {
@@ -940,8 +940,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Đầm Lầy Thời Không", titleEN = "Chrono Stasis",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Trong <color=#FFEAA7><b>60 Giây</b></color>, toàn bộ quái vật bị <color=#00CEC9><b>Làm Chậm 35%</b></color> tốc đánh, đạn bay và di chuyển.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Bản thân bị <color=#FF7675><b>Giảm 50% Tốc Chạy</b></color> trong thời gian hiệu lực.",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> For <color=#FFEAA7><b>60s</b></color>, all enemies suffer <color=#00CEC9><b>-35% Attack & Projectile Speed & Move Speed</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Hero's Move Speed is <color=#FF7675><b>Reduced by 50%</b></color> for the duration.",
-            flavorVN = ""Dòng chảy thời gian bị bóp méo, từng bước chân như chìm trong đầm lầy hắc ám."",
-            flavorEN = ""Time itself turns viscous, drowning footsteps in the eternal mire."",
+            flavorVN = "\"Dòng chảy thời gian bị bóp méo, từng bước chân như chìm trong đầm lầy hắc ám.\"",
+            flavorEN = "\"Time itself turns viscous, drowning footsteps in the eternal mire.\"",
             cost = 250,
             onPurchase = () =>
             {
@@ -961,8 +961,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Ma Kiếm Huyết Tế", titleEN = "Blood Tithe Blade",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận <color=#FFEAA7><b>+40 ATK</b></color> và <color=#55EFC4><b>+40% Hút Máu Toàn Phần</b></color>.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Ma kiếm ăn mòn sinh lực, <color=#FF7675><b>Mất 1% Máu mỗi giây</b></color> (tối thiểu 1 HP).",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#FFEAA7><b>+40 ATK</b></color> and <color=#55EFC4><b>+40% Omnivamp</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Drains <color=#FF7675><b>1% Max HP per second</b></color> (caps at 1 HP).",
-            flavorVN = ""Lưỡi kiếm uống máu của kẻ thù lẫn sinh lực của chủ nhân."",
-            flavorEN = ""A thirsting blade that feeds equally upon its foes and bearer."",
+            flavorVN = "\"Lưỡi kiếm uống máu của kẻ thù lẫn sinh lực của chủ nhân.\"",
+            flavorEN = "\"A thirsting blade that feeds equally upon its foes and bearer.\"",
             cost = 260,
             onPurchase = () =>
             {
@@ -982,8 +982,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Bản Thể Thủy Tinh", titleEN = "Glass Cannon Titan",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận <color=#FFEAA7><b>+75% Tỉ Lệ Crit</b></color> và <color=#FFEAA7><b>+80% Sát Thương Crit</b></color>.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Thân thể pha lê: <color=#FF7675><b>Nhận Thêm +30% Sát Thương</b></color> từ kẻ địch.",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#FFEAA7><b>+75% Crit</b></color> and <color=#FFEAA7><b>+80% Crit DMG</b></color>.\n<color=#FF7675><b>[CURSE]</b></color> Fragile body takes <color=#FF7675><b>+30% More Damage</b></color> from enemies.",
-            flavorVN = ""Sắc bén khôn cùng nhưng mỏng manh tựa pha lê trước đòn thù."",
-            flavorEN = ""Unmatched lethality encased in fragile crystalline glass."",
+            flavorVN = "\"Sắc bén khôn cùng nhưng mỏng manh tựa pha lê trước đòn thù.\"",
+            flavorEN = "\"Unmatched lethality encased in fragile crystalline glass.\"",
             cost = 330,
             onPurchase = () =>
             {
@@ -1003,8 +1003,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Bóng Ma Cuồng Nộ", titleEN = "Phantom Rush",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận thêm <color=#74B9FF><b>+50% Hồi Chiêu (CDR)</b></color> mọi kỹ năng.\n<color=#FF7675><b>[BẤT LỢI]</b></color> Hy sinh vĩnh viễn <color=#FF7675><b>25% Máu Tối Đa</b></color>.",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#74B9FF><b>+50% Cooldown Reduction</b></color> across all abilities.\n<color=#FF7675><b>[CURSE]</b></color> Permanently sacrifice <color=#FF7675><b>25% Max HP</b></color>.",
-            flavorVN = ""Tốc biến xuất quỷ nhập thần đổi lấy sinh mệnh hao gầy."",
-            flavorEN = ""Ghostly haste achieved by shaving away mortal vitality."",
+            flavorVN = "\"Tốc biến xuất quỷ nhập thần đổi lấy sinh mệnh hao gầy.\"",
+            flavorEN = "\"Ghostly haste achieved by shaving away mortal vitality.\"",
             cost = 270,
             onPurchase = () =>
             {
@@ -1024,8 +1024,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Linh Hồn Bội Thu", titleEN = "Soul Abundance",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Nhận thêm <color=#00FFFF><b>+50% Linh Hồn (x1.5 Lần)</b></color> từ mọi nguồn thu thập trong trận đấu.",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Gain <color=#00FFFF><b>+50% More Shards (x1.5 Multiplier)</b></color> from all soul drops in battle.",
-            flavorVN = ""Linh khí đất trời hội tụ, mỗi tàn hồn tiêu tán đều kết tinh thành bảo vật."",
-            flavorEN = ""Spiritual aether converges, condensing every fallen essence into crystal bounty."",
+            flavorVN = "\"Linh khí đất trời hội tụ, mỗi tàn hồn tiêu tán đều kết tinh thành bảo vật.\"",
+            flavorEN = "\"Spiritual aether converges, condensing every fallen essence into crystal bounty.\"",
             cost = 280,
             onPurchase = () =>
             {
@@ -1045,8 +1045,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Khai Hoa Linh Hồn", titleEN = "Skill Soul Surge",
             descVN = "<color=#55EFC4><b>[LỢI ÍCH]</b></color> Mỗi khi thi triển <color=#FFEAA7><b>Tuyệt Kỹ / Kỹ Năng</b></color>, có <color=#A29BFE><b>50% Tỉ Lệ</b></color> khai mở bộc phát rơi ra <color=#00FFFF><b>3 đến 6 Mảnh Linh Hồn</b></color>.",
             descEN = "<color=#55EFC4><b>[BENEFIT]</b></color> Whenever casting a <color=#FFEAA7><b>Special Skill</b></color>, have a <color=#A29BFE><b>50% Chance</b></color> to surge and burst forth <color=#00FFFF><b>3-6 Aethel Shards</b></color>.",
-            flavorVN = ""Tuyệt kỹ xé rách ranh giới hư vô, giải phóng nguồn linh hồn ẩn sâu trong vạn vật."",
-            flavorEN = ""Supreme prowess sunders the veil, releasing boundless dormant souls into the realm."",
+            flavorVN = "\"Tuyệt kỹ xé rách ranh giới hư vô, giải phóng nguồn linh hồn ẩn sâu trong vạn vật.\"",
+            flavorEN = "\"Supreme prowess sunders the veil, releasing boundless dormant souls into the realm.\"",
             cost = 360,
             onPurchase = () =>
             {
@@ -1068,8 +1068,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Khế Ước Vực Thẳm", titleEN = "Abyssal Covenant",
             descVN = "Tăng <color=#FFEAA7><b>+30 Sát Thương</b></color>, <color=#38BDF8><b>+15% Tốc Chạy</b></color> và <color=#F42640><b>+8% Hút Máu</b></color> toàn năng.",
             descEN = "Grants <color=#FFEAA7><b>+30 Attack</b></color>, <color=#38BDF8><b>+15% Move Speed</b></color> and <color=#F42640><b>+8% Omnivamp</b></color>.",
-            flavorVN = ""Dấu ấn huyết thệ cổ xưa khai mở sức mạnh tột đỉnh tàn tích."",
-            flavorEN = ""Bloodbound pact unraveling unbound ancient destruction."",
+            flavorVN = "\"Dấu ấn huyết thệ cổ xưa khai mở sức mạnh tột đỉnh tàn tích.\"",
+            flavorEN = "\"Bloodbound pact unraveling unbound ancient destruction.\"",
             cost = 360,
             onPurchase = () =>
             {
@@ -1121,8 +1121,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Thích Ứng Hỏa Ma", titleEN = "Flame Adaptation",
             descVN = "Kháng hoàn toàn trạng thái Thiêu Đốt. Khi trúng lửa, lập tức phóng Cầu Lửa Dung Nham phản kích gây 140 Sát Thương!",
             descEN = "Immune to Burn. When struck by fire, counter-fires a 140 DMG Magma Fireball!",
-            flavorVN = ""Cơ thể hòa quyện cùng dung nham, biến lửa dữ thành sức mạnh."",
-            flavorEN = ""Merging with the magma, transmuting scorching flames into fury."",
+            flavorVN = "\"Cơ thể hòa quyện cùng dung nham, biến lửa dữ thành sức mạnh.\"",
+            flavorEN = "\"Merging with the magma, transmuting scorching flames into fury.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.FlameAdaptation);
@@ -1143,8 +1143,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Hỏa Diệm Thiêu Đốt", titleEN = "Blazing Inferno",
             descVN = "Đòn đánh và Lướt phóng Ngọn Lửa Thiêu Đốt bám chặt lên cơ thể quái và Boss, gây cháy 35 Sát Thương mỗi 0.5s suốt 4.5s.",
             descEN = "Attacks and Dash ignite enemies and Bosses with clinging flames, dealing 35 DMG per 0.5s over 4.5s.",
-            flavorVN = ""Ngọn lửa bất diệt bám chặt lấy con mồi, thiêu rụi đến tàn tro cuối cùng."",
-            flavorEN = ""Undying flames cling to their prey, burning until nothing but ash remains."",
+            flavorVN = "\"Ngọn lửa bất diệt bám chặt lấy con mồi, thiêu rụi đến tàn tro cuối cùng.\"",
+            flavorEN = "\"Undying flames cling to their prey, burning until nothing but ash remains.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.MagmaEruption);
@@ -1166,8 +1166,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Màng Sinh Học Axit", titleEN = "Acid Membrane",
             descVN = "Giảm 60% sát thương Axit/Độc. Khi dính axit, hồi 6% Máu tối đa và phát nổ Bào Tử Độc gây choáng kẻ địch xung quanh!",
             descEN = "Reduces Acid/Poison DMG by 60%. When struck, heals 6% Max HP and detonates Toxic Spores!",
-            flavorVN = ""Lớp vỏ chitin bài tiết độc tố, biến độc dược thành thần dược hồi sinh."",
-            flavorEN = ""Chitinous membrane siphoning toxicity into pure regenerative vitality."",
+            flavorVN = "\"Lớp vỏ chitin bài tiết độc tố, biến độc dược thành thần dược hồi sinh.\"",
+            flavorEN = "\"Chitinous membrane siphoning toxicity into pure regenerative vitality.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.AcidMembrane);
@@ -1188,8 +1188,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Kịch Độc Nở Rộ", titleEN = "Virulent Bloom",
             descVN = "Đòn đánh găm Độc Axit Ăn Mòn; khi địch tử trận sẽ phát nổ lây lan sang các mục tiêu khác.",
             descEN = "Attacks afflict Corrosive Acid; dying targets detonate and spread poison spores.",
-            flavorVN = ""Mầm bệnh tàn tích ký sinh trên sinh mệnh mục nát."",
-            flavorEN = ""Ruin spores metastasizing upon decaying vitality."",
+            flavorVN = "\"Mầm bệnh tàn tích ký sinh trên sinh mệnh mục nát.\"",
+            flavorEN = "\"Ruin spores metastasizing upon decaying vitality.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.VirulentBloom);
@@ -1211,8 +1211,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Linh Hồn Băng Tuyết", titleEN = "Glacial Soul",
             descVN = "Miễn nhiễm làm chậm và đóng băng từ bão tuyết. Nhận Khiên Băng +220 Shield; khi vỡ làm đóng băng kẻ địch xung quanh!",
             descEN = "Immune to Blizzard slow/freeze. Grants +220 Frost Shield that freezes nearby foes upon shattering!",
-            flavorVN = ""Trái tim băng giá không bao giờ khuất phục trước cái lạnh vĩnh cửu."",
-            flavorEN = ""A frozen soul that never yields to the eternal blizzard."",
+            flavorVN = "\"Trái tim băng giá không bao giờ khuất phục trước cái lạnh vĩnh cửu.\"",
+            flavorEN = "\"A frozen soul that never yields to the eternal blizzard.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.GlacialSoul);
@@ -1233,8 +1233,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Sương Hàn Tuyệt Đối", titleEN = "Absolute Zero Nova",
             descVN = "Đòn đánh có 30% tỉ lệ phát nổ Tinh Thể Băng gây 95 Sát Thương và đóng băng kẻ địch trong 1.2s.",
             descEN = "Attacks have 30% chance to detonate Ice Crystals dealing 95 DMG and freezing foes for 1.2s.",
-            flavorVN = ""Một nhát kiếm đưa kẻ thù vào giấc ngủ ngàn năm trong băng giá."",
-            flavorEN = ""A single strike entombing foes into millennial slumber."",
+            flavorVN = "\"Một nhát kiếm đưa kẻ thù vào giấc ngủ ngàn năm trong băng giá.\"",
+            flavorEN = "\"A single strike entombing foes into millennial slumber.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.AbsoluteZeroNova);
@@ -1256,8 +1256,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Hư Không Siêu Việt", titleEN = "Void Transcendence",
             descVN = "Tăng +40 Sát Thương, +25% Hút Máu. Chuyển hóa 25% sát thương nhận vào từ Hư Không thành lượng Hồi Máu!",
             descEN = "Grants +40 ATK, +25% Lifesteal. Transmutes 25% Void DMG taken into healing!",
-            flavorVN = ""Nuốt chửng bóng đêm tăm tối nhất để trở thành chúa tể hư vô."",
-            flavorEN = ""Devouring the deepest darkness to reign as master of the void."",
+            flavorVN = "\"Nuốt chửng bóng đêm tăm tối nhất để trở thành chúa tể hư vô.\"",
+            flavorEN = "\"Devouring the deepest darkness to reign as master of the void.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.VoidTranscendence);
@@ -1278,8 +1278,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Bản Sao Bóng Đêm", titleEN = "Shadow Mirroring",
             descVN = "Mỗi khi Lướt (Dash), triệu hồi một Phân Thân Hư Không tung nhát chém quét gây 120 Sát Thương diện rộng!",
             descEN = "Dashing summons a Void Clone executing a sweep slash dealing 120 AoE Damage!",
-            flavorVN = ""Ảo ảnh sinh đôi chém nát kẻ bám đuổi trong chớp mắt."",
-            flavorEN = ""Twin mirages severing pursuers in the blink of an eye."",
+            flavorVN = "\"Ảo ảnh sinh đôi chém nát kẻ bám đuổi trong chớp mắt.\"",
+            flavorEN = "\"Twin mirages severing pursuers in the blink of an eye.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.ShadowMirroring);
@@ -1305,8 +1305,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Tam Sa Cuồng Phong", titleEN = "Triple Mirage Tornado",
             descVN = "Chiêu gồng tích tụ bão cát khi phóng ra sẽ giải phóng đồng thời <color=#FBBF24><b>3 Cơn Lốc Xoáy Bão Sa</b></color> (tiêu tốn máu x3) bủa vây quét sạch toàn bộ chiến trường!",
             descEN = "Charged sandstorm defense unleashes <color=#FBBF24><b>3 Mirage Tornadoes</b></color> (costs 3x HP) sweeping across the entire battlefield!",
-            flavorVN = ""Cơn cuồng phong sa mạc cổ đại xé toạc mọi kẻ thù dám cản bước sát thủ."",
-            flavorEN = ""Ancient desert tempest tearing asunder all who dare impede the assassin."",
+            flavorVN = "\"Cơn cuồng phong sa mạc cổ đại xé toạc mọi kẻ thù dám cản bước sát thủ.\"",
+            flavorEN = "\"Ancient desert tempest tearing asunder all who dare impede the assassin.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.TripleMirageTornado);
@@ -1328,8 +1328,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Siêu Cụm Thiên Thạch", titleEN = "Meteor Supercluster",
             descVN = "Chiêu Thiên Thạch triệu hồi thêm 4 mảnh thiên thạch phụ oanh tạc liên hoàn, tăng 100% diện tích nổ và gây choáng 1.5s!",
             descEN = "Meteor skill bombards with 4 additional fragment strikes, +100% explosion area and 1.5s stun!",
-            flavorVN = ""Ngàn sao trên bầu trời rơi xuống hủy diệt tàn tích."",
-            flavorEN = ""A multitude of stars falling from the firmament to obliterate ruins."",
+            flavorVN = "\"Ngàn sao trên bầu trời rơi xuống hủy diệt tàn tích.\"",
+            flavorEN = "\"A multitude of stars falling from the firmament to obliterate ruins.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.MeteorSupercluster);
@@ -1351,8 +1351,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Tam Trảm Tàn Tích", titleEN = "Triple Ruin Gale",
             descVN = "Đòn đánh và chiêu thức phóng ra chùm 3 luồng Kiếm Khí Tàn Tích rẽ quạt gây 75 Sát Thương mỗi luồng!",
             descEN = "Attacks and skills loose a 3-way fan of Ruin Sword Waves dealing 75 DMG each!",
-            flavorVN = ""Đường kiếm tung hoành mở lối giữa biển quái vật."",
-            flavorEN = ""Unchecked blade path parting seas of ravenous abominations."",
+            flavorVN = "\"Đường kiếm tung hoành mở lối giữa biển quái vật.\"",
+            flavorEN = "\"Unchecked blade path parting seas of ravenous abominations.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.TripleRuinGale);
@@ -1374,8 +1374,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Bát Hướng Cuồng Phong", titleEN = "Eight-Way Tempest",
             descVN = "Mỗi khi Lướt (Dash), lập tức phát động 8 luồng Kiếm Khí Tật Phong quét 360 độ xé nát mọi kẻ thù vây quanh!",
             descEN = "Dashing immediately fires 8 Gale Crescent Blades in a 360-degree radius!",
-            flavorVN = ""Rút kiếm trong chớp mắt, phong trảm tám hướng tuyệt diệt kẻ thù."",
-            flavorEN = ""Iaido strike unleashed, eight winds severing all adversaries."",
+            flavorVN = "\"Rút kiếm trong chớp mắt, phong trảm tám hướng tuyệt diệt kẻ thù.\"",
+            flavorEN = "\"Iaido strike unleashed, eight winds severing all adversaries.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.EightWayTempest);
@@ -1397,8 +1397,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Song Băng Trụ Trảm", titleEN = "Twin Frost Nova",
             descVN = "Chiêu kiếm triệu hồi thêm 2 Cột Băng Cực Đại gây 110 Sát Thương Băng và đóng băng tuyệt đối 2.5s!",
             descEN = "Blade skills summon 2 additional Giant Frost Pillars dealing 110 DMG and freezing for 2.5s!",
-            flavorVN = ""Hàn khí ngưng kết hóa thành song trụ băng vĩnh cửu."",
-            flavorEN = ""Frost essence crystallizing into twin eternal ice pillars."",
+            flavorVN = "\"Hàn khí ngưng kết hóa thành song trụ băng vĩnh cửu.\"",
+            flavorEN = "\"Frost essence crystallizing into twin eternal ice pillars.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.TwinFrostNova);
@@ -1420,8 +1420,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Địa Chấn Cuồng Loạn", titleEN = "Cataclysmic Quake",
             descVN = "Mọi đòn nện và dậm đất tạo Sóng Xung Kích Địa Chấn gây 90 Sát Thương và làm choáng 1.5s toàn bộ diện rộng!",
             descEN = "Slams and ground stomps create Cataclysmic Shockwaves dealing 90 DMG and 1.5s AoE stun!",
-            flavorVN = ""Một cú dậm chân làm rung chuyển cả đại lục tàn tích."",
-            flavorEN = ""A single earth stomp shaking the foundations of the ancient continent."",
+            flavorVN = "\"Một cú dậm chân làm rung chuyển cả đại lục tàn tích.\"",
+            flavorEN = "\"A single earth stomp shaking the foundations of the ancient continent.\"",
             onPurchase = () =>
             {
                 var aug = AugmentDatabase.GetData(AugmentDatabase.AugmentType.CataclysmicQuake);
@@ -1446,8 +1446,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Tiên Đan Trường Sinh", titleEN = "Endless Vitality Draught",
             descVN = "Hồi phục <color=#55EFC4><b>100% Máu</b></color> ngay lập tức và tăng thêm vĩnh viễn <color=#55EFC4><b>+80 Máu Tối Đa</b></color>. Có thể mua vô hạn lần!",
             descEN = "Instantly heals <color=#55EFC4><b>100% Health</b></color> and permanently grants <color=#55EFC4><b>+80 Max HP</b></color>. Can be purchased infinitely!",
-            flavorVN = ""Tinh hoa linh dược cô đọng từ ngàn hoa tàn tích."",
-            flavorEN = ""Condensed essence distilled from a myriad of ruin blooms."",
+            flavorVN = "\"Tinh hoa linh dược cô đọng từ ngàn hoa tàn tích.\"",
+            flavorEN = "\"Condensed essence distilled from a myriad of ruin blooms.\"",
             cost = 180,
             onPurchase = () =>
             {
@@ -1478,8 +1478,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Tiên Đan Bá Lực", titleEN = "Endless Might Draught",
             descVN = "Tăng vĩnh viễn <color=#FFEAA7><b>+14 Sát Thương</b></color> và <color=#38BDF8><b>+5% Tốc Đánh</b></color>. Có thể mua vô hạn lần!",
             descEN = "Permanently grants <color=#FFEAA7><b>+14 Attack</b></color> and <color=#38BDF8><b>+5% Attack Speed</b></color>. Can be purchased infinitely!",
-            flavorVN = ""Ngọn lửa chiến cuồng bất tận rực cháy trong huyết quản."",
-            flavorEN = ""Unending flame of berserk might surging through veins."",
+            flavorVN = "\"Ngọn lửa chiến cuồng bất tận rực cháy trong huyết quản.\"",
+            flavorEN = "\"Unending flame of berserk might surging through veins.\"",
             cost = 220,
             onPurchase = () =>
             {
@@ -1517,8 +1517,8 @@ public class WanderingShopUI : MonoBehaviour
             titleVN = "Tiên Đan Kim Thân", titleEN = "Endless Aegis Draught",
             descVN = "Tăng vĩnh viễn <color=#60A5FA><b>+10 Giáp</b></color> và tạo Khiên Ảo <color=#38BDF8><b>200 Shield</b></color>. Có thể mua vô hạn lần!",
             descEN = "Permanently grants <color=#60A5FA><b>+10 Armor</b></color> and creates a <color=#38BDF8><b>200 Virtual Shield</b></color>. Can be purchased infinitely!",
-            flavorVN = ""Khí giáp hộ thể kim cang bất hoại che chở sinh mệnh."",
-            flavorEN = ""Indestructible golden barrier safeguarding mortal soul."",
+            flavorVN = "\"Khí giáp hộ thể kim cang bất hoại che chở sinh mệnh.\"",
+            flavorEN = "\"Indestructible golden barrier safeguarding mortal soul.\"",
             cost = 240,
             onPurchase = () =>
             {
@@ -2071,7 +2071,7 @@ public class WanderingShopUI : MonoBehaviour
             string fullDesc = descText;
             if (!string.IsNullOrEmpty(flavorText))
             {
-                fullDesc += $"\n<size=82%><color=#94A3B8><i>"{flavorText}"</i></color></size>";
+                fullDesc += $"\n<size=82%><color=#94A3B8><i>\"{flavorText}\"</i></color></size>";
             }
 
             var descObj = new GameObject("ItemDesc", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -2448,7 +2448,7 @@ public class WanderingShopUI : MonoBehaviour
                 string fullDesc = descText;
                 if (!string.IsNullOrEmpty(flavorText))
                 {
-                    fullDesc += $"\n<size=82%><color=#94A3B8><i>"{flavorText}"</i></color></size>";
+                    fullDesc += $"\n<size=82%><color=#94A3B8><i>\"{flavorText}\"</i></color></size>";
                 }
                 desc.text = fullDesc;
             }
