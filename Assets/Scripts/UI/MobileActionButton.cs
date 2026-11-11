@@ -319,6 +319,29 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                     }
                 }
             }
+            else if (playerCombat != null && playerCombat.GetComponent<AbyssalMechSkill>() != null && playerCombat.GetComponent<AbyssalMechSkill>().enabled)
+            {
+                // Player 7: Abyssal Mech (Cắm Mỏ Neo Xoáy Nước Thu Hút & Nện Địa Chấn Nước)
+                var mech = playerCombat.GetComponent<AbyssalMechSkill>();
+                if (isPointerDown)
+                {
+                    float holdDur = Time.time - pointerDownTime;
+                    Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
+
+                    if (holdDur >= 0.18f || currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        if (!mech.IsChargingVortex && mech.IsAttackReady)
+                        {
+                            mech.StartVortexCharge(aimDir);
+                        }
+                        mech.UpdateVortexCharge(aimDir, holdDur);
+
+                        Vector2 playerPos = (Vector2)playerCombat.transform.position;
+                        SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, 3.5f, new Color(0.2f, 0.85f, 1f, 0.80f));
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                    }
+                }
+            }
             else
             {
                 // Player 1: Vaelstrider (Thế Thủ Kiếm Thuẫn & Sóng Kiếm Hoàng Kim)
@@ -1934,6 +1957,8 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 if (azureBlade != null) azureBlade.CancelAim();
                 var mageSkill = playerCombat.GetComponent<CelestialMageSkill>();
                 if (mageSkill != null && mageSkill.IsChargingBarrier) mageSkill.ReleaseBarrierCharge(Vector2.zero, 0);
+                var mechSkill = playerCombat.GetComponent<AbyssalMechSkill>();
+                if (mechSkill != null && mechSkill.IsChargingVortex) mechSkill.CancelVortexCharge();
             }
             return;
         }
@@ -1986,6 +2011,11 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             {
                 mageSkillCancel.ReleaseBarrierCharge(Vector2.zero, 0);
             }
+            var mechSkillCancel = (playerCombat != null) ? playerCombat.GetComponent<AbyssalMechSkill>() : null;
+            if (mechSkillCancel != null && mechSkillCancel.IsChargingVortex)
+            {
+                mechSkillCancel.CancelVortexCharge();
+            }
 
             if (playerCombat != null) playerCombat.CancelAttackHold();
             SoundManager.EnsureInstance()?.PlayMenuHover();
@@ -2007,6 +2037,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
             var roninSkill = (playerCombat != null) ? playerCombat.GetComponent<GaleRoninSkill>() : null;
             var duneSkill = (playerCombat != null) ? playerCombat.GetComponent<DuneAssassinSkill>() : null;
             var mageSkill = (playerCombat != null) ? playerCombat.GetComponent<CelestialMageSkill>() : null;
+            var mechSkill = (playerCombat != null) ? playerCombat.GetComponent<AbyssalMechSkill>() : null;
             int bonusAtk = (playerCombat != null) ? playerCombat.BonusAttackDamage : 0;
 
             if (mageSkill != null && mageSkill.enabled)
@@ -2067,6 +2098,21 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 if (roninSkill.CanUseIaidoCharge && roninSkill.IsChargingIaido)
                 {
                     roninSkill.ReleaseIaidoCharge(aimDir, bonusAtk);
+                }
+                else
+                {
+                    if (currentDragAimDir.sqrMagnitude > 0.01f && playerController != null)
+                    {
+                        playerController.SetFacingDirection(currentDragAimDir);
+                    }
+                    playerCombat.PerformAttack();
+                }
+            }
+            else if (mechSkill != null && mechSkill.enabled)
+            {
+                if (mechSkill.IsChargingVortex)
+                {
+                    mechSkill.ReleaseVortexCharge(aimDir, bonusAtk);
                 }
                 else
                 {

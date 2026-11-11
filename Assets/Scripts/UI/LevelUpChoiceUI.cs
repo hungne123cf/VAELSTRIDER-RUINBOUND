@@ -2230,6 +2230,26 @@ public class LevelUpChoiceUI : MonoBehaviour
             _root = null;
         }
 
+        // HUỶ TRIỆT ĐỂ MỌI TRẠNG THÁI GỒNG CỦA NHÂN VẬT KHI VỪA CHỌN XONG LÕI (Zero-Bug)
+        var playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null)
+        {
+            var pCombat = playerObj.GetComponent<PlayerCombat>();
+            if (pCombat != null) pCombat.CancelAttackHold();
+
+            var mech = playerObj.GetComponent<AbyssalMechSkill>();
+            if (mech != null) mech.CancelVortexCharge();
+
+            var titan = playerObj.GetComponent<TitanBerserkerSkill>();
+            if (titan != null) titan.CancelEarthshakerCharge();
+
+            var ronin = playerObj.GetComponent<GaleRoninSkill>();
+            if (ronin != null) ronin.CancelIaidoCharge();
+
+            var dune = playerObj.GetComponent<DuneAssassinSkill>();
+            if (dune != null) dune.CancelTornadoAim();
+        }
+
         if (_pendingLevelUps.Count == 0)
         {
             GameAutoBootstrap.SetGameplayHUDVisible(true);

@@ -531,6 +531,27 @@ public class PlayerCombat : MonoBehaviour
     {
         isAttackHolding = false;
         attackHoldDuration = 0f;
+
+        var titan = GetComponent<TitanBerserkerSkill>();
+        if (titan != null && titan.IsChargingEarthshaker) titan.CancelEarthshakerCharge();
+
+        var azure = GetComponent<AzureBladeSkill>();
+        if (azure != null) azure.CancelAim();
+
+        var ronin = GetComponent<GaleRoninSkill>();
+        if (ronin != null) ronin.CancelIaidoCharge();
+
+        var dune = GetComponent<DuneAssassinSkill>();
+        if (dune != null && (dune.IsDefending || dune.IsAimingTornado)) dune.CancelTornadoAim();
+
+        var mage = GetComponent<CelestialMageSkill>();
+        if (mage != null && mage.IsChargingBarrier) mage.ReleaseBarrierCharge(Vector2.zero, 0);
+
+        var mech = GetComponent<AbyssalMechSkill>();
+        if (mech != null && mech.IsChargingVortex) mech.CancelVortexCharge();
+
+        if (isParrying) CancelParryStance();
+        if (SkillAimIndicator.Instance != null) SkillAimIndicator.Instance.Hide();
     }
 
     void Update()
@@ -566,14 +587,22 @@ public class PlayerCombat : MonoBehaviour
             if (animator != null) animator.SetInteger(ComboStepHash, 0);
         }
 
-        // Tuyet ky Ruin Whirlwind (Phim F tren PC)
+        // Phím F trên PC kích hoạt Tuyệt kỹ
         if (Input.GetKeyDown(KeyCode.F))
         {
             PerformSpecialSkill();
         }
 
-        // Danh thuong & Tu luc ngam ban (Chuot trai hoac phim J)
-        if (Time.frameCount != lastSpecialSkillFrame && !isUltiActive)
+        // TỰ ĐỘNG HỦY TRẠNG THÁI GỒNG NẾU ĐANG MỞ MENU / CHỌN LÕI / TẠM DỪNG GAME (Zero-Bug)
+        if (Time.timeScale <= 0.001f || LevelUpChoiceUI.IsShowing || (playerHealth != null && playerHealth.IsDead))
+        {
+            if (isAttackHolding) CancelAttackHold();
+            return;
+        }
+
+        // Đòn đánh thường & Tụ lực trên PC (Chỉ dùng phím J trên Editor/PC, TUYỆT ĐỐI KHÔNG DÙNG CHUỘT/CLICK MÀN HÌNH NGOÀI ĐỂ GỒNG TRÊN MOBILE)
+        bool isPCInput = Application.isEditor || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.OSXPlayer;
+        if (isPCInput && Time.frameCount != lastSpecialSkillFrame && !isUltiActive)
         {
             var titan = GetComponent<TitanBerserkerSkill>();
             var azureBlade = GetComponent<AzureBladeSkill>();
@@ -582,7 +611,8 @@ public class PlayerCombat : MonoBehaviour
             var mageSkill = GetComponent<CelestialMageSkill>();
             var mechSkill = GetComponent<AbyssalMechSkill>();
 
-            if (Input.GetKeyDown(KeyCode.J) || (Input.GetMouseButtonDown(0) && !IsPointerOverUI()))
+            // Chỉ nhận phím J trên bàn phím máy tính để test (không nhận click/đè chuột bậy bạ ngoài màn hình)
+            if (Input.GetKeyDown(KeyCode.J))
             {
                 bool canAttack = (titan == null || titan.IsAttackReady) &&
                                  (azureBlade == null || azureBlade.IsAttackReady) &&
@@ -708,7 +738,7 @@ public class PlayerCombat : MonoBehaviour
                 }
             }
 
-            if (isAttackHolding && (Input.GetKeyUp(KeyCode.J) || Input.GetMouseButtonUp(0)))
+            if (isAttackHolding && Input.GetKeyUp(KeyCode.J))
             {
                 if (SkillAimIndicator.Instance != null) SkillAimIndicator.Instance.Hide();
                 Vector2 aimDir = GetAimDirectionFromInput();

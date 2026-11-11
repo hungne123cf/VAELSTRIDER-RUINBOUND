@@ -1,0 +1,1508 @@
+fileFormatVersion: 2
+guid: 69b8a03b081f04d46802b7e72b0923e1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6722438036869486826
+    second: goldfish_mech_08_ultimate_shark_0
+  - first:
+      213: -3816414287256598950
+    second: goldfish_mech_08_ultimate_shark_1
+  - first:
+      213: 6701778380557382591
+    second: goldfish_mech_08_ultimate_shark_2
+  - first:
+      213: -7165597301630620684
+    second: goldfish_mech_08_ultimate_shark_3
+  - first:
+      213: -5033145106351753050
+    second: goldfish_mech_08_ultimate_shark_4
+  - first:
+      213: 1130811293939354235
+    second: goldfish_mech_08_ultimate_shark_5
+  - first:
+      213: -7085806041016416598
+    second: goldfish_mech_08_ultimate_shark_6
+  - first:
+      213: -2450639390993145261
+    second: goldfish_mech_08_ultimate_shark_7
+  - first:
+      213: -933148556340832430
+    second: goldfish_mech_08_ultimate_shark_8
+  - first:
+      213: -6506479338303072570
+    second: goldfish_mech_08_ultimate_shark_9
+  - first:
+      213: 3278143783077412937
+    second: goldfish_mech_08_ultimate_shark_10
+  - first:
+      213: -4090418221339443552
+    second: goldfish_mech_08_ultimate_shark_11
+  - first:
+      213: 8039394218952809646
+    second: goldfish_mech_08_ultimate_shark_12
+  - first:
+      213: -966030351680709889
+    second: goldfish_mech_08_ultimate_shark_13
+  - first:
+      213: -3071828176449212751
+    second: goldfish_mech_08_ultimate_shark_14
+  - first:
+      213: 5194023984471898983
+    second: goldfish_mech_08_ultimate_shark_15
+  - first:
+      213: 7034148910971523302
+    second: goldfish_mech_08_ultimate_shark_16
+  - first:
+      213: -1838503764684652077
+    second: goldfish_mech_08_ultimate_shark_17
+  - first:
+      213: -4983690888518535751
+    second: goldfish_mech_08_ultimate_shark_18
+  - first:
+      213: -3377572183451643273
+    second: goldfish_mech_08_ultimate_shark_19
+  - first:
+      213: 7434366100398210012
+    second: goldfish_mech_08_ultimate_shark_20
+  - first:
+      213: 6616753619198001110
+    second: goldfish_mech_08_ultimate_shark_21
+  - first:
+      213: -5678373117598476005
+    second: goldfish_mech_08_ultimate_shark_22
+  - first:
+      213: 2019868488412514206
+    second: goldfish_mech_08_ultimate_shark_23
+  - first:
+      213: 2900712082064868801
+    second: goldfish_mech_08_ultimate_shark_24
+  - first:
+      213: -1367523790521562149
+    second: goldfish_mech_08_ultimate_shark_25
+  - first:
+      213: 6909984568087665561
+    second: goldfish_mech_08_ultimate_shark_26
+  - first:
+      213: 8682903403079498892
+    second: goldfish_mech_08_ultimate_shark_27
+  - first:
+      213: 8874972758451153294
+    second: goldfish_mech_08_ultimate_shark_28
+  - first:
+      213: -8252049335804013480
+    second: goldfish_mech_08_ultimate_shark_29
+  - first:
+      213: 9114902538897321675
+    second: goldfish_mech_08_ultimate_shark_30
+  - first:
+      213: -2940517539071806820
+    second: goldfish_mech_08_ultimate_shark_31
+  - first:
+      213: -7744330553881187773
+    second: goldfish_mech_08_ultimate_shark_32
+  - first:
+      213: 2678336521260952417
+    second: goldfish_mech_08_ultimate_shark_33
+  - first:
+      213: 5595217569253352618
+    second: goldfish_mech_08_ultimate_shark_34
+  - first:
+      213: 3029480704405365901
+    second: goldfish_mech_08_ultimate_shark_35
+  - first:
+      213: 9156932978459733343
+    second: goldfish_mech_08_ultimate_shark_36
+  - first:
+      213: -3421608240193999268
+    second: goldfish_mech_08_ultimate_shark_37
+  - first:
+      213: 2183976758826010371
+    second: goldfish_mech_08_ultimate_shark_38
+  - first:
+      213: 213448497559314521
+    second: goldfish_mech_08_ultimate_shark_39
+  - first:
+      213: 6205512205066107760
+    second: goldfish_mech_08_ultimate_shark_40
+  - first:
+      213: -1503384981418065507
+    second: goldfish_mech_08_ultimate_shark_41
+  - first:
+      213: -7856287387218001807
+    second: goldfish_mech_08_ultimate_shark_42
+  - first:
+      213: -1591069812589714236
+    second: goldfish_mech_08_ultimate_shark_43
+  - first:
+      213: 9180615704233090521
+    second: goldfish_mech_08_ultimate_shark_44
+  - first:
+      213: 6739450554439491164
+    second: goldfish_mech_08_ultimate_shark_45
+  - first:
+      213: -849731265037504552
+    second: goldfish_mech_08_ultimate_shark_46
+  - first:
+      213: 1098587276036630824
+    second: goldfish_mech_08_ultimate_shark_47
+  - first:
+      213: -7379710094042300931
+    second: goldfish_mech_08_ultimate_shark_48
+  - first:
+      213: 6772235735395064252
+    second: goldfish_mech_08_ultimate_shark_49
+  - first:
+      213: -3075854701540286683
+    second: goldfish_mech_08_ultimate_shark_50
+  - first:
+      213: 1354866979875744870
+    second: goldfish_mech_08_ultimate_shark_51
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_0
+      rect:
+        serializedVersion: 2
+        x: 1177
+        y: 30
+        width: 81
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 617e1d3f83a15b2a0800000000000000
+      internalID: -6722438036869486826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_1
+      rect:
+        serializedVersion: 2
+        x: 1297
+        y: 24
+        width: 92
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a56485c0d6f590bc0800000000000000
+      internalID: -3816414287256598950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_2
+      rect:
+        serializedVersion: 2
+        x: 1421
+        y: 21
+        width: 96
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb3f388fdef710d50800000000000000
+      internalID: 6701778380557382591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_3
+      rect:
+        serializedVersion: 2
+        x: 1444
+        y: 92
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fb2fc8183fae8c90800000000000000
+      internalID: -7165597301630620684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_4
+      rect:
+        serializedVersion: 2
+        x: 1459
+        y: 97
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a878e8413da62ab0800000000000000
+      internalID: -5033145106351753050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_5
+      rect:
+        serializedVersion: 2
+        x: 1475
+        y: 96
+        width: 18
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7a414b61e271bf00800000000000000
+      internalID: 1130811293939354235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_6
+      rect:
+        serializedVersion: 2
+        x: 1548
+        y: 14
+        width: 102
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa646e9a2f82aad90800000000000000
+      internalID: -7085806041016416598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_7
+      rect:
+        serializedVersion: 2
+        x: 1693
+        y: 37
+        width: 65
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 352264b35749dfdd0800000000000000
+      internalID: -2450639390993145261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_8
+      rect:
+        serializedVersion: 2
+        x: 1810
+        y: 33
+        width: 97
+        height: 80
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 257d2a0055acc03f0800000000000000
+      internalID: -933148556340832430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_9
+      rect:
+        serializedVersion: 2
+        x: 1937
+        y: 11
+        width: 97
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c6d60eb38754b5a0800000000000000
+      internalID: -6506479338303072570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_10
+      rect:
+        serializedVersion: 2
+        x: 2063
+        y: 11
+        width: 97
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9400cf0076e4e7d20800000000000000
+      internalID: 3278143783077412937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_11
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0aef646bc4aeb37c0800000000000000
+      internalID: -4090418221339443552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_12
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 37
+        width: 74
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eacd206927aa19f60800000000000000
+      internalID: 8039394218952809646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_13
+      rect:
+        serializedVersion: 2
+        x: 266
+        y: 37
+        width: 76
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffa53dd6388f792f0800000000000000
+      internalID: -966030351680709889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_14
+      rect:
+        serializedVersion: 2
+        x: 413
+        y: 37
+        width: 57
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1be65bb7c8cae55d0800000000000000
+      internalID: -3071828176449212751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_15
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 37
+        width: 78
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76b7e457b41e41840800000000000000
+      internalID: 5194023984471898983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_16
+      rect:
+        serializedVersion: 2
+        x: 651
+        y: 37
+        width: 75
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e098af7a215e9160800000000000000
+      internalID: 7034148910971523302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_17
+      rect:
+        serializedVersion: 2
+        x: 797
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d1c0cb11925c76e0800000000000000
+      internalID: -1838503764684652077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_18
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 37
+        width: 65
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b57087aa8f56dab0800000000000000
+      internalID: -4983690888518535751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_19
+      rect:
+        serializedVersion: 2
+        x: 1053
+        y: 36
+        width: 65
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 772df1a8ef37021d0800000000000000
+      internalID: -3377572183451643273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_20
+      rect:
+        serializedVersion: 2
+        x: 1173
+        y: 86
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdbf070549c2c2760800000000000000
+      internalID: 7434366100398210012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_21
+      rect:
+        serializedVersion: 2
+        x: 1297
+        y: 89
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6dfb39e0c5e63db50800000000000000
+      internalID: 6616753619198001110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_22
+      rect:
+        serializedVersion: 2
+        x: 1507
+        y: 84
+        width: 11
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b195a6f1cbd5231b0800000000000000
+      internalID: -5678373117598476005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_23
+      rect:
+        serializedVersion: 2
+        x: 1811
+        y: 84
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9745d040b3080c10800000000000000
+      internalID: 2019868488412514206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_24
+      rect:
+        serializedVersion: 2
+        x: 1424
+        y: 70
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c5092f1546614820800000000000000
+      internalID: 2900712082064868801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_25
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 48
+        width: 19
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdb0114ab54950de0800000000000000
+      internalID: -1367523790521562149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_26
+      rect:
+        serializedVersion: 2
+        x: 1173
+        y: 55
+        width: 12
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99bdb40aa5235ef50800000000000000
+      internalID: 6909984568087665561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_27
+      rect:
+        serializedVersion: 2
+        x: 1379
+        y: 58
+        width: 11
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8c759f14aedf7870800000000000000
+      internalID: 8682903403079498892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_28
+      rect:
+        serializedVersion: 2
+        x: 1436
+        y: 54
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e89efb2c3bc3a2b70800000000000000
+      internalID: 8874972758451153294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_29
+      rect:
+        serializedVersion: 2
+        x: 1514
+        y: 57
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 854576ea9d4da7d80800000000000000
+      internalID: -8252049335804013480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_30
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 37
+        width: 21
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcee749f093ae7e70800000000000000
+      internalID: 9114902538897321675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_31
+      rect:
+        serializedVersion: 2
+        x: 1387
+        y: 33
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c92b1d3b0ee2137d0800000000000000
+      internalID: -2940517539071806820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_32
+      rect:
+        serializedVersion: 2
+        x: 1517
+        y: 37
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34a25b8746c968490800000000000000
+      internalID: -7744330553881187773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_33
+      rect:
+        serializedVersion: 2
+        x: 1639
+        y: 32
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16be6ba20ec5b2520800000000000000
+      internalID: 2678336521260952417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_34
+      rect:
+        serializedVersion: 2
+        x: 1649
+        y: 36
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa4ee580cb436ad40800000000000000
+      internalID: 5595217569253352618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_35
+      rect:
+        serializedVersion: 2
+        x: 1887
+        y: 30
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d846bf756a0ea0a20800000000000000
+      internalID: 3029480704405365901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_36
+      rect:
+        serializedVersion: 2
+        x: 1898
+        y: 31
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5de6254706f31f70800000000000000
+      internalID: 9156932978459733343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_37
+      rect:
+        serializedVersion: 2
+        x: 2029
+        y: 37
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5eefaa1f610480d0800000000000000
+      internalID: -3421608240193999268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_38
+      rect:
+        serializedVersion: 2
+        x: 2031
+        y: 29
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 307888b7a4b0f4e10800000000000000
+      internalID: 2183976758826010371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_39
+      rect:
+        serializedVersion: 2
+        x: 1475
+        y: 19
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9502dd2174256f200800000000000000
+      internalID: 213448497559314521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_40
+      rect:
+        serializedVersion: 2
+        x: 1622
+        y: 28
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07bf058e8786e1650800000000000000
+      internalID: 6205512205066107760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_41
+      rect:
+        serializedVersion: 2
+        x: 1622
+        y: 14
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d914bed1357e22be0800000000000000
+      internalID: -1503384981418065507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_42
+      rect:
+        serializedVersion: 2
+        x: 1638
+        y: 21
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1704d77ee3cd8f290800000000000000
+      internalID: -7856287387218001807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_43
+      rect:
+        serializedVersion: 2
+        x: 1861
+        y: 18
+        width: 29
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c42ebf6f626be9e0800000000000000
+      internalID: -1591069812589714236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_44
+      rect:
+        serializedVersion: 2
+        x: 1894
+        y: 19
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9dd9f2e8759186f70800000000000000
+      internalID: 9180615704233090521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_45
+      rect:
+        serializedVersion: 2
+        x: 1999
+        y: 12
+        width: 23
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5edca67296578d50800000000000000
+      internalID: 6739450554439491164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_46
+      rect:
+        serializedVersion: 2
+        x: 2025
+        y: 17
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8df65e0aae52534f0800000000000000
+      internalID: -849731265037504552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_47
+      rect:
+        serializedVersion: 2
+        x: 1833
+        y: 15
+        width: 19
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8296de69e47fe3f00800000000000000
+      internalID: 1098587276036630824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_48
+      rect:
+        serializedVersion: 2
+        x: 2135
+        y: 15
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dfd7e33d4c0069990800000000000000
+      internalID: -7379710094042300931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_49
+      rect:
+        serializedVersion: 2
+        x: 2142
+        y: 20
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb9dd6f3580dbfd50800000000000000
+      internalID: 6772235735395064252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_50
+      rect:
+        serializedVersion: 2
+        x: 2157
+        y: 17
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52fd9fd027e5055d0800000000000000
+      internalID: -3075854701540286683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_08_ultimate_shark_51
+      rect:
+        serializedVersion: 2
+        x: 2142
+        y: 10
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66c666df6547dc210800000000000000
+      internalID: 1354866979875744870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      goldfish_mech_08_ultimate_shark_0: -6722438036869486826
+      goldfish_mech_08_ultimate_shark_1: -3816414287256598950
+      goldfish_mech_08_ultimate_shark_10: 3278143783077412937
+      goldfish_mech_08_ultimate_shark_11: -4090418221339443552
+      goldfish_mech_08_ultimate_shark_12: 8039394218952809646
+      goldfish_mech_08_ultimate_shark_13: -966030351680709889
+      goldfish_mech_08_ultimate_shark_14: -3071828176449212751
+      goldfish_mech_08_ultimate_shark_15: 5194023984471898983
+      goldfish_mech_08_ultimate_shark_16: 7034148910971523302
+      goldfish_mech_08_ultimate_shark_17: -1838503764684652077
+      goldfish_mech_08_ultimate_shark_18: -4983690888518535751
+      goldfish_mech_08_ultimate_shark_19: -3377572183451643273
+      goldfish_mech_08_ultimate_shark_2: 6701778380557382591
+      goldfish_mech_08_ultimate_shark_20: 7434366100398210012
+      goldfish_mech_08_ultimate_shark_21: 6616753619198001110
+      goldfish_mech_08_ultimate_shark_22: -5678373117598476005
+      goldfish_mech_08_ultimate_shark_23: 2019868488412514206
+      goldfish_mech_08_ultimate_shark_24: 2900712082064868801
+      goldfish_mech_08_ultimate_shark_25: -1367523790521562149
+      goldfish_mech_08_ultimate_shark_26: 6909984568087665561
+      goldfish_mech_08_ultimate_shark_27: 8682903403079498892
+      goldfish_mech_08_ultimate_shark_28: 8874972758451153294
+      goldfish_mech_08_ultimate_shark_29: -8252049335804013480
+      goldfish_mech_08_ultimate_shark_3: -7165597301630620684
+      goldfish_mech_08_ultimate_shark_30: 9114902538897321675
+      goldfish_mech_08_ultimate_shark_31: -2940517539071806820
+      goldfish_mech_08_ultimate_shark_32: -7744330553881187773
+      goldfish_mech_08_ultimate_shark_33: 2678336521260952417
+      goldfish_mech_08_ultimate_shark_34: 5595217569253352618
+      goldfish_mech_08_ultimate_shark_35: 3029480704405365901
+      goldfish_mech_08_ultimate_shark_36: 9156932978459733343
+      goldfish_mech_08_ultimate_shark_37: -3421608240193999268
+      goldfish_mech_08_ultimate_shark_38: 2183976758826010371
+      goldfish_mech_08_ultimate_shark_39: 213448497559314521
+      goldfish_mech_08_ultimate_shark_4: -5033145106351753050
+      goldfish_mech_08_ultimate_shark_40: 6205512205066107760
+      goldfish_mech_08_ultimate_shark_41: -1503384981418065507
+      goldfish_mech_08_ultimate_shark_42: -7856287387218001807
+      goldfish_mech_08_ultimate_shark_43: -1591069812589714236
+      goldfish_mech_08_ultimate_shark_44: 9180615704233090521
+      goldfish_mech_08_ultimate_shark_45: 6739450554439491164
+      goldfish_mech_08_ultimate_shark_46: -849731265037504552
+      goldfish_mech_08_ultimate_shark_47: 1098587276036630824
+      goldfish_mech_08_ultimate_shark_48: -7379710094042300931
+      goldfish_mech_08_ultimate_shark_49: 6772235735395064252
+      goldfish_mech_08_ultimate_shark_5: 1130811293939354235
+      goldfish_mech_08_ultimate_shark_50: -3075854701540286683
+      goldfish_mech_08_ultimate_shark_51: 1354866979875744870
+      goldfish_mech_08_ultimate_shark_6: -7085806041016416598
+      goldfish_mech_08_ultimate_shark_7: -2450639390993145261
+      goldfish_mech_08_ultimate_shark_8: -933148556340832430
+      goldfish_mech_08_ultimate_shark_9: -6506479338303072570
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

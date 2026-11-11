@@ -1,0 +1,3848 @@
+fileFormatVersion: 2
+guid: 7064b8756de8e7546b266b02970e1420
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8199089252399134920
+    second: goldfish_mech_0
+  - first:
+      213: 8102377868183601944
+    second: goldfish_mech_1
+  - first:
+      213: 8192902404248380925
+    second: goldfish_mech_2
+  - first:
+      213: 7299832700503960190
+    second: goldfish_mech_3
+  - first:
+      213: 5286623213452134290
+    second: goldfish_mech_4
+  - first:
+      213: 1592417523746850024
+    second: goldfish_mech_5
+  - first:
+      213: 5727373803664035019
+    second: goldfish_mech_6
+  - first:
+      213: -4633239978215157215
+    second: goldfish_mech_7
+  - first:
+      213: 6851468916096641746
+    second: goldfish_mech_8
+  - first:
+      213: -2248923498331111452
+    second: goldfish_mech_9
+  - first:
+      213: -1355364428405009744
+    second: goldfish_mech_10
+  - first:
+      213: -2734048801030618102
+    second: goldfish_mech_11
+  - first:
+      213: -4309023276092257625
+    second: goldfish_mech_12
+  - first:
+      213: -3275049073776379777
+    second: goldfish_mech_13
+  - first:
+      213: 1912103582311964399
+    second: goldfish_mech_14
+  - first:
+      213: -6378060990969876761
+    second: goldfish_mech_15
+  - first:
+      213: -4164687383439902921
+    second: goldfish_mech_16
+  - first:
+      213: 2813495441535846062
+    second: goldfish_mech_17
+  - first:
+      213: 7221023775870087999
+    second: goldfish_mech_18
+  - first:
+      213: 8772986476393510322
+    second: goldfish_mech_19
+  - first:
+      213: 6177486422725355338
+    second: goldfish_mech_20
+  - first:
+      213: -1720581282773512757
+    second: goldfish_mech_21
+  - first:
+      213: 1986378952750544399
+    second: goldfish_mech_22
+  - first:
+      213: -4902530040596680048
+    second: goldfish_mech_23
+  - first:
+      213: 1678611000997212055
+    second: goldfish_mech_24
+  - first:
+      213: 1408776462429576087
+    second: goldfish_mech_25
+  - first:
+      213: -1524605989198978066
+    second: goldfish_mech_26
+  - first:
+      213: -8789079278897583751
+    second: goldfish_mech_27
+  - first:
+      213: -6665728619451541900
+    second: goldfish_mech_28
+  - first:
+      213: -2958463277162577462
+    second: goldfish_mech_29
+  - first:
+      213: 9216347502288055444
+    second: goldfish_mech_30
+  - first:
+      213: 1981855727555972697
+    second: goldfish_mech_31
+  - first:
+      213: 2767764733449030890
+    second: goldfish_mech_32
+  - first:
+      213: -6598228917687012836
+    second: goldfish_mech_33
+  - first:
+      213: -1049610335295676456
+    second: goldfish_mech_34
+  - first:
+      213: 5020529379603100064
+    second: goldfish_mech_35
+  - first:
+      213: -8539344368246532255
+    second: goldfish_mech_36
+  - first:
+      213: -8687623000054235873
+    second: goldfish_mech_37
+  - first:
+      213: 4885583066036727297
+    second: goldfish_mech_38
+  - first:
+      213: -3061178927413011122
+    second: goldfish_mech_39
+  - first:
+      213: -8678832932137352024
+    second: goldfish_mech_40
+  - first:
+      213: -3911232642234201607
+    second: goldfish_mech_41
+  - first:
+      213: -6553200381460261836
+    second: goldfish_mech_42
+  - first:
+      213: 1175501090775150470
+    second: goldfish_mech_43
+  - first:
+      213: 3039771160456095377
+    second: goldfish_mech_44
+  - first:
+      213: 5233173579994933733
+    second: goldfish_mech_45
+  - first:
+      213: -7168479171733477237
+    second: goldfish_mech_46
+  - first:
+      213: -7222076358778144881
+    second: goldfish_mech_47
+  - first:
+      213: 5412027434580807987
+    second: goldfish_mech_48
+  - first:
+      213: -7937629865343291917
+    second: goldfish_mech_49
+  - first:
+      213: -8916822973349650121
+    second: goldfish_mech_50
+  - first:
+      213: 931068270769558462
+    second: goldfish_mech_51
+  - first:
+      213: 3673677161725527070
+    second: goldfish_mech_52
+  - first:
+      213: 718608772763165773
+    second: goldfish_mech_53
+  - first:
+      213: 2379709076123815061
+    second: goldfish_mech_54
+  - first:
+      213: 1315051401129055544
+    second: goldfish_mech_55
+  - first:
+      213: 5307644437461191412
+    second: goldfish_mech_56
+  - first:
+      213: 3535785101155882214
+    second: goldfish_mech_57
+  - first:
+      213: -4926967698255015428
+    second: goldfish_mech_58
+  - first:
+      213: -7952151481119562895
+    second: goldfish_mech_59
+  - first:
+      213: -24073704216362071
+    second: goldfish_mech_60
+  - first:
+      213: 5906127223904674218
+    second: goldfish_mech_61
+  - first:
+      213: -5161269747654124030
+    second: goldfish_mech_62
+  - first:
+      213: -1107020892007089905
+    second: goldfish_mech_63
+  - first:
+      213: -7218585502482618894
+    second: goldfish_mech_64
+  - first:
+      213: 5485705890944489318
+    second: goldfish_mech_65
+  - first:
+      213: 6291587597902926222
+    second: goldfish_mech_66
+  - first:
+      213: 3475941483528771881
+    second: goldfish_mech_67
+  - first:
+      213: 465819732991000249
+    second: goldfish_mech_68
+  - first:
+      213: 5109825606362301574
+    second: goldfish_mech_69
+  - first:
+      213: -4505340174802874380
+    second: goldfish_mech_70
+  - first:
+      213: -5025887993259498178
+    second: goldfish_mech_71
+  - first:
+      213: 7212907715900247032
+    second: goldfish_mech_72
+  - first:
+      213: 855322825969952115
+    second: goldfish_mech_73
+  - first:
+      213: -5440061400403444403
+    second: goldfish_mech_74
+  - first:
+      213: 5631169998052021156
+    second: goldfish_mech_75
+  - first:
+      213: -7167355429386779869
+    second: goldfish_mech_76
+  - first:
+      213: 1133565120171264396
+    second: goldfish_mech_77
+  - first:
+      213: -2857493380317024630
+    second: goldfish_mech_78
+  - first:
+      213: 4410966851639490717
+    second: goldfish_mech_79
+  - first:
+      213: -4347597524180096918
+    second: goldfish_mech_80
+  - first:
+      213: 7351268530630344873
+    second: goldfish_mech_81
+  - first:
+      213: 4579930178438213176
+    second: goldfish_mech_82
+  - first:
+      213: 985935679396946496
+    second: goldfish_mech_83
+  - first:
+      213: -4917029446017701201
+    second: goldfish_mech_84
+  - first:
+      213: -7625491319560231665
+    second: goldfish_mech_85
+  - first:
+      213: -6719336579594124527
+    second: goldfish_mech_86
+  - first:
+      213: 1374656452659135238
+    second: goldfish_mech_87
+  - first:
+      213: 2449046184908442658
+    second: goldfish_mech_88
+  - first:
+      213: 8595077574947763768
+    second: goldfish_mech_89
+  - first:
+      213: -8458000142882118124
+    second: goldfish_mech_90
+  - first:
+      213: 1092268652528685563
+    second: goldfish_mech_91
+  - first:
+      213: -2239990676742735696
+    second: goldfish_mech_92
+  - first:
+      213: -8418786120931944961
+    second: goldfish_mech_93
+  - first:
+      213: 923450632539846235
+    second: goldfish_mech_94
+  - first:
+      213: 7156840619207053464
+    second: goldfish_mech_95
+  - first:
+      213: -2334068329986774056
+    second: goldfish_mech_96
+  - first:
+      213: 8440442197483761594
+    second: goldfish_mech_97
+  - first:
+      213: -6496060209210563917
+    second: goldfish_mech_98
+  - first:
+      213: -897585976189472903
+    second: goldfish_mech_99
+  - first:
+      213: -6650091211242421658
+    second: goldfish_mech_100
+  - first:
+      213: 5138453269301322168
+    second: goldfish_mech_101
+  - first:
+      213: 5637468958677587471
+    second: goldfish_mech_102
+  - first:
+      213: 1623349456705456512
+    second: goldfish_mech_103
+  - first:
+      213: 3401711251610669985
+    second: goldfish_mech_104
+  - first:
+      213: -181338173141592434
+    second: goldfish_mech_105
+  - first:
+      213: -422308551654391287
+    second: goldfish_mech_106
+  - first:
+      213: -7146724222356687903
+    second: goldfish_mech_107
+  - first:
+      213: -959563808735396103
+    second: goldfish_mech_108
+  - first:
+      213: -1236725553764996718
+    second: goldfish_mech_109
+  - first:
+      213: 4919037221010413956
+    second: goldfish_mech_110
+  - first:
+      213: -4765104605074437204
+    second: goldfish_mech_111
+  - first:
+      213: 257371235491319761
+    second: goldfish_mech_112
+  - first:
+      213: 3144516557701208779
+    second: goldfish_mech_113
+  - first:
+      213: 459940571268861079
+    second: goldfish_mech_114
+  - first:
+      213: 6498903829942067587
+    second: goldfish_mech_115
+  - first:
+      213: -8353022331721269266
+    second: goldfish_mech_116
+  - first:
+      213: -5593415535826670489
+    second: goldfish_mech_117
+  - first:
+      213: 3590138457067418004
+    second: goldfish_mech_118
+  - first:
+      213: 4753218497187630600
+    second: goldfish_mech_119
+  - first:
+      213: -7991164496829924896
+    second: goldfish_mech_120
+  - first:
+      213: -1231222164890926786
+    second: goldfish_mech_121
+  - first:
+      213: 7057764606026084011
+    second: goldfish_mech_122
+  - first:
+      213: 2752951176033003974
+    second: goldfish_mech_123
+  - first:
+      213: -1996919023694961723
+    second: goldfish_mech_124
+  - first:
+      213: -5529702511072483382
+    second: goldfish_mech_125
+  - first:
+      213: -3028269977307352882
+    second: goldfish_mech_126
+  - first:
+      213: 4138844443904292638
+    second: goldfish_mech_127
+  - first:
+      213: -6970931475956411935
+    second: goldfish_mech_128
+  - first:
+      213: -6627652367257639106
+    second: goldfish_mech_129
+  - first:
+      213: 676626644694426102
+    second: goldfish_mech_130
+  - first:
+      213: 3316019695721969025
+    second: goldfish_mech_131
+  - first:
+      213: -7414643746848058424
+    second: goldfish_mech_132
+  - first:
+      213: 5190644814293179822
+    second: goldfish_mech_133
+  - first:
+      213: 5181897250214919511
+    second: goldfish_mech_134
+  - first:
+      213: -2021987170075791191
+    second: goldfish_mech_135
+  - first:
+      213: 8974357811005659901
+    second: goldfish_mech_136
+  - first:
+      213: -7571413843356617556
+    second: goldfish_mech_137
+  - first:
+      213: 668427915559254235
+    second: goldfish_mech_138
+  - first:
+      213: 8085463441655364842
+    second: goldfish_mech_139
+  - first:
+      213: -2862034676136205352
+    second: goldfish_mech_140
+  - first:
+      213: 8145224423799997088
+    second: goldfish_mech_141
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: goldfish_mech_0
+      rect:
+        serializedVersion: 2
+        x: 2600
+        y: 30
+        width: 65
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 837c60df3cbf63e80800000000000000
+      internalID: -8199089252399134920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_1
+      rect:
+        serializedVersion: 2
+        x: 2729
+        y: 31
+        width: 64
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 813021d2ebd617070800000000000000
+      internalID: 8102377868183601944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_2
+      rect:
+        serializedVersion: 2
+        x: 2857
+        y: 22
+        width: 66
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df52bac245903b170800000000000000
+      internalID: 8192902404248380925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_3
+      rect:
+        serializedVersion: 2
+        x: 2984
+        y: 26
+        width: 68
+        height: 81
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7aa1593a273e4560800000000000000
+      internalID: 7299832700503960190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_4
+      rect:
+        serializedVersion: 2
+        x: 3730
+        y: 37
+        width: 76
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 297062b8dcbdd5940800000000000000
+      internalID: 5286623213452134290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_5
+      rect:
+        serializedVersion: 2
+        x: 3902
+        y: 88
+        width: 16
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e4c9050d47691610800000000000000
+      internalID: 1592417523746850024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_6
+      rect:
+        serializedVersion: 2
+        x: 3989
+        y: 37
+        width: 86
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bccc5472128bb7f40800000000000000
+      internalID: 5727373803664035019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_7
+      rect:
+        serializedVersion: 2
+        x: 4243
+        y: 37
+        width: 68
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 122d85ba9cc63bfb0800000000000000
+      internalID: -4633239978215157215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_8
+      rect:
+        serializedVersion: 2
+        x: 4400
+        y: 93
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2da2295bdae451f50800000000000000
+      internalID: 6851468916096641746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_9
+      rect:
+        serializedVersion: 2
+        x: 4409
+        y: 91
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4eff1fa5ef73ac0e0800000000000000
+      internalID: -2248923498331111452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_10
+      rect:
+        serializedVersion: 2
+        x: 4424
+        y: 91
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b218bfbb37c03de0800000000000000
+      internalID: -1355364428405009744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_11
+      rect:
+        serializedVersion: 2
+        x: 4497
+        y: 37
+        width: 68
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a04ccffd915be0ad0800000000000000
+      internalID: -2734048801030618102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_12
+      rect:
+        serializedVersion: 2
+        x: 4527
+        y: 95
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7aa81ab19264334c0800000000000000
+      internalID: -4309023276092257625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_13
+      rect:
+        serializedVersion: 2
+        x: 4625
+        y: 37
+        width: 70
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7836972830bc82d0800000000000000
+      internalID: -3275049073776379777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_14
+      rect:
+        serializedVersion: 2
+        x: 5036
+        y: 37
+        width: 50
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: feed47dc318298a10800000000000000
+      internalID: 1912103582311964399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_15
+      rect:
+        serializedVersion: 2
+        x: 7961
+        y: 30
+        width: 81
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eee67532539c77a0800000000000000
+      internalID: -6378060990969876761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_16
+      rect:
+        serializedVersion: 2
+        x: 8081
+        y: 24
+        width: 92
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7377385e3ee0436c0800000000000000
+      internalID: -4164687383439902921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_17
+      rect:
+        serializedVersion: 2
+        x: 8205
+        y: 21
+        width: 96
+        height: 77
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea6cce1923b8b0720800000000000000
+      internalID: 2813495441535846062
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_18
+      rect:
+        serializedVersion: 2
+        x: 8228
+        y: 92
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f33f2639dda363460800000000000000
+      internalID: 7221023775870087999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_19
+      rect:
+        serializedVersion: 2
+        x: 8243
+        y: 97
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b5bdb018b8efb970800000000000000
+      internalID: 8772986476393510322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_20
+      rect:
+        serializedVersion: 2
+        x: 8259
+        y: 96
+        width: 18
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a47e757fb27dab550800000000000000
+      internalID: 6177486422725355338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_21
+      rect:
+        serializedVersion: 2
+        x: 8332
+        y: 14
+        width: 102
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcd491970744f18e0800000000000000
+      internalID: -1720581282773512757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_22
+      rect:
+        serializedVersion: 2
+        x: 8477
+        y: 37
+        width: 65
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f06320c1229019b10800000000000000
+      internalID: 1986378952750544399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_23
+      rect:
+        serializedVersion: 2
+        x: 8594
+        y: 33
+        width: 97
+        height: 80
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 092bd8d17e6b6fbb0800000000000000
+      internalID: -4902530040596680048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_24
+      rect:
+        serializedVersion: 2
+        x: 8721
+        y: 11
+        width: 97
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79f608ecfcf9b4710800000000000000
+      internalID: 1678611000997212055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_25
+      rect:
+        serializedVersion: 2
+        x: 8847
+        y: 11
+        width: 97
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79bdb038abafc8310800000000000000
+      internalID: 1408776462429576087
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_26
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee3ac573ee287dae0800000000000000
+      internalID: -1524605989198978066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_27
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 979209e56fae60680800000000000000
+      internalID: -8789079278897583751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_28
+      rect:
+        serializedVersion: 2
+        x: 274
+        y: 37
+        width: 68
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4769f6c13239e73a0800000000000000
+      internalID: -6665728619451541900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_29
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 37
+        width: 67
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac1cfa3f25d61f6d0800000000000000
+      internalID: -2958463277162577462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_30
+      rect:
+        serializedVersion: 2
+        x: 529
+        y: 37
+        width: 69
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49c2078193b07ef70800000000000000
+      internalID: 9216347502288055444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_31
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 37
+        width: 68
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95e0c0da847f08b10800000000000000
+      internalID: 1981855727555972697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_32
+      rect:
+        serializedVersion: 2
+        x: 785
+        y: 37
+        width: 70
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aec451f5c53196620800000000000000
+      internalID: 2767764733449030890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_33
+      rect:
+        serializedVersion: 2
+        x: 915
+        y: 37
+        width: 75
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c123e8e12c16e64a0800000000000000
+      internalID: -6598228917687012836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_34
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 37
+        width: 80
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8df5f1c06f80f61f0800000000000000
+      internalID: -1049610335295676456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_35
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 37
+        width: 70
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a1b7afeed08ca540800000000000000
+      internalID: 5020529379603100064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_36
+      rect:
+        serializedVersion: 2
+        x: 1301
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 167deeb5a872e7980800000000000000
+      internalID: -8539344368246532255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_37
+      rect:
+        serializedVersion: 2
+        x: 1433
+        y: 37
+        width: 60
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1df04319ec5f6780800000000000000
+      internalID: -8687623000054235873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_38
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 37
+        width: 51
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10e68c3e9e31dc340800000000000000
+      internalID: 4885583066036727297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_39
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 37
+        width: 67
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4dd2adfbf18485d0800000000000000
+      internalID: -3061178927413011122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_40
+      rect:
+        serializedVersion: 2
+        x: 1816
+        y: 37
+        width: 60
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a4cdfe3e679e8780800000000000000
+      internalID: -8678832932137352024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_41
+      rect:
+        serializedVersion: 2
+        x: 1941
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f9c7bd62a288b9c0800000000000000
+      internalID: -3911232642234201607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_42
+      rect:
+        serializedVersion: 2
+        x: 2068
+        y: 37
+        width: 67
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4345b1139fa5e05a0800000000000000
+      internalID: -6553200381460261836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_43
+      rect:
+        serializedVersion: 2
+        x: 2194
+        y: 37
+        width: 72
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68facb49308305010800000000000000
+      internalID: 1175501090775150470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_44
+      rect:
+        serializedVersion: 2
+        x: 2341
+        y: 37
+        width: 45
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1966679d3cf6f2a20800000000000000
+      internalID: 3039771160456095377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_45
+      rect:
+        serializedVersion: 2
+        x: 2472
+        y: 27
+        width: 64
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e9ae8bf4a7ff9840800000000000000
+      internalID: 5233173579994933733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_46
+      rect:
+        serializedVersion: 2
+        x: 3093
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b882a0d6c22748c90800000000000000
+      internalID: -7168479171733477237
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_47
+      rect:
+        serializedVersion: 2
+        x: 3221
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f87384ed0d706cb90800000000000000
+      internalID: -7222076358778144881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_48
+      rect:
+        serializedVersion: 2
+        x: 3347
+        y: 37
+        width: 64
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3319bd017426b1b40800000000000000
+      internalID: 5412027434580807987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_49
+      rect:
+        serializedVersion: 2
+        x: 3479
+        y: 37
+        width: 66
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fd6ead51bfd7d190800000000000000
+      internalID: -7937629865343291917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_50
+      rect:
+        serializedVersion: 2
+        x: 3619
+        y: 37
+        width: 68
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 731a374cfb4114480800000000000000
+      internalID: -8916822973349650121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_51
+      rect:
+        serializedVersion: 2
+        x: 3884
+        y: 37
+        width: 63
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb35bd4c8a1dbec00800000000000000
+      internalID: 931068270769558462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_52
+      rect:
+        serializedVersion: 2
+        x: 4117
+        y: 37
+        width: 66
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e148d142ae58bf230800000000000000
+      internalID: 3673677161725527070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_53
+      rect:
+        serializedVersion: 2
+        x: 4370
+        y: 37
+        width: 68
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4427091fd209f900800000000000000
+      internalID: 718608772763165773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_54
+      rect:
+        serializedVersion: 2
+        x: 4404
+        y: 88
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59c0227ebcc660120800000000000000
+      internalID: 2379709076123815061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_55
+      rect:
+        serializedVersion: 2
+        x: 4752
+        y: 37
+        width: 85
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8355da92840004210800000000000000
+      internalID: 1315051401129055544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_56
+      rect:
+        serializedVersion: 2
+        x: 4907
+        y: 37
+        width: 61
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fac3f8ae7a88a940800000000000000
+      internalID: 5307644437461191412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_57
+      rect:
+        serializedVersion: 2
+        x: 5138
+        y: 37
+        width: 72
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e4d38ce0d1a11130800000000000000
+      internalID: 3535785101155882214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_58
+      rect:
+        serializedVersion: 2
+        x: 5270
+        y: 37
+        width: 83
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf19fad8bf4ef9bb0800000000000000
+      internalID: -4926967698255015428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_59
+      rect:
+        serializedVersion: 2
+        x: 5326
+        y: 88
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 173a5c73c5844a190800000000000000
+      internalID: -7952151481119562895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_60
+      rect:
+        serializedVersion: 2
+        x: 5404
+        y: 37
+        width: 69
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a381c3f7197aaff0800000000000000
+      internalID: -24073704216362071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_61
+      rect:
+        serializedVersion: 2
+        x: 5442
+        y: 82
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa12a1b0b67c6f150800000000000000
+      internalID: 5906127223904674218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_62
+      rect:
+        serializedVersion: 2
+        x: 5460
+        y: 89
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20e1b15928c7f58b0800000000000000
+      internalID: -5161269747654124030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_63
+      rect:
+        serializedVersion: 2
+        x: 5466
+        y: 80
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f093bfc2d5213a0f0800000000000000
+      internalID: -1107020892007089905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_64
+      rect:
+        serializedVersion: 2
+        x: 5532
+        y: 37
+        width: 66
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f52dbf2bbe62db90800000000000000
+      internalID: -7218585502482618894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_65
+      rect:
+        serializedVersion: 2
+        x: 5580
+        y: 76
+        width: 17
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 667930c7174212c40800000000000000
+      internalID: 5485705890944489318
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_66
+      rect:
+        serializedVersion: 2
+        x: 5653
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e81d1460695305750800000000000000
+      internalID: 6291587597902926222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_67
+      rect:
+        serializedVersion: 2
+        x: 5775
+        y: 37
+        width: 69
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 929d6c9ec560d3030800000000000000
+      internalID: 3475941483528771881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_68
+      rect:
+        serializedVersion: 2
+        x: 5899
+        y: 37
+        width: 74
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9bebb42449ce67600800000000000000
+      internalID: 465819732991000249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_69
+      rect:
+        serializedVersion: 2
+        x: 6036
+        y: 37
+        width: 73
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6848b63e05fb9e640800000000000000
+      internalID: 5109825606362301574
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_70
+      rect:
+        serializedVersion: 2
+        x: 6164
+        y: 37
+        width: 74
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ff04983bf0d971c0800000000000000
+      internalID: -4505340174802874380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_71
+      rect:
+        serializedVersion: 2
+        x: 6292
+        y: 37
+        width: 78
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e35edd89f75704ab0800000000000000
+      internalID: -5025887993259498178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_72
+      rect:
+        serializedVersion: 2
+        x: 6805
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fb88eb1a55691460800000000000000
+      internalID: 7212907715900247032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_73
+      rect:
+        serializedVersion: 2
+        x: 6924
+        y: 37
+        width: 74
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 375e83a1497bedb00800000000000000
+      internalID: 855322825969952115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_74
+      rect:
+        serializedVersion: 2
+        x: 7050
+        y: 37
+        width: 76
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4d73a0aaf40184b0800000000000000
+      internalID: -5440061400403444403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_75
+      rect:
+        serializedVersion: 2
+        x: 7197
+        y: 37
+        width: 57
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a35abb274fe52e40800000000000000
+      internalID: 5631169998052021156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_76
+      rect:
+        serializedVersion: 2
+        x: 7304
+        y: 37
+        width: 78
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3230f641630788c90800000000000000
+      internalID: -7167355429386779869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_77
+      rect:
+        serializedVersion: 2
+        x: 7435
+        y: 37
+        width: 75
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c89c49d887b3bbf00800000000000000
+      internalID: 1133565120171264396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_78
+      rect:
+        serializedVersion: 2
+        x: 7581
+        y: 37
+        width: 65
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8e6c2609e42858d0800000000000000
+      internalID: -2857493380317024630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_79
+      rect:
+        serializedVersion: 2
+        x: 7709
+        y: 37
+        width: 65
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d98bef33bf6e63d30800000000000000
+      internalID: 4410966851639490717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_80
+      rect:
+        serializedVersion: 2
+        x: 7837
+        y: 36
+        width: 65
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a68a0e8161b3aa3c0800000000000000
+      internalID: -4347597524180096918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_81
+      rect:
+        serializedVersion: 2
+        x: 7957
+        y: 86
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a0cab8a7c3f40660800000000000000
+      internalID: 7351268530630344873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_82
+      rect:
+        serializedVersion: 2
+        x: 8081
+        y: 89
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83ea6e55b3e2f8f30800000000000000
+      internalID: 4579930178438213176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_83
+      rect:
+        serializedVersion: 2
+        x: 8291
+        y: 84
+        width: 11
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 042a6d5d64fbead00800000000000000
+      internalID: 985935679396946496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_84
+      rect:
+        serializedVersion: 2
+        x: 8595
+        y: 84
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: faaaaf735c333cbb0800000000000000
+      internalID: -4917029446017701201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_85
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 72
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f05a9c3eb00dc2690800000000000000
+      internalID: -7625491319560231665
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_86
+      rect:
+        serializedVersion: 2
+        x: 854
+        y: 75
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 113010f3bfe10c2a0800000000000000
+      internalID: -6719336579594124527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_87
+      rect:
+        serializedVersion: 2
+        x: 5469
+        y: 67
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60342fca2c2c31310800000000000000
+      internalID: 1374656452659135238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_88
+      rect:
+        serializedVersion: 2
+        x: 5474
+        y: 71
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22c4ef19782ccf120800000000000000
+      internalID: 2449046184908442658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_89
+      rect:
+        serializedVersion: 2
+        x: 5598
+        y: 74
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 836ffa70489d74770800000000000000
+      internalID: 8595077574947763768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_90
+      rect:
+        serializedVersion: 2
+        x: 5606
+        y: 64
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 416ee45bea52f9a80800000000000000
+      internalID: -8458000142882118124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_91
+      rect:
+        serializedVersion: 2
+        x: 6490
+        y: 65
+        width: 16
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf154496d84882f00800000000000000
+      internalID: 1092268652528685563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_92
+      rect:
+        serializedVersion: 2
+        x: 8208
+        y: 70
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b8ff84f854f9e0e0800000000000000
+      internalID: -2239990676742735696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_93
+      rect:
+        serializedVersion: 2
+        x: 3807
+        y: 56
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff5dcdda0a67a2b80800000000000000
+      internalID: -8418786120931944961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_94
+      rect:
+        serializedVersion: 2
+        x: 5087
+        y: 62
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b56b5282571c0dc00800000000000000
+      internalID: 923450632539846235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_95
+      rect:
+        serializedVersion: 2
+        x: 5475
+        y: 56
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8905ce5ef94325360800000000000000
+      internalID: 7156840619207053464
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_96
+      rect:
+        serializedVersion: 2
+        x: 5590
+        y: 50
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8db26a56839bb9fd0800000000000000
+      internalID: -2334068329986774056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_97
+      rect:
+        serializedVersion: 2
+        x: 5597
+        y: 49
+        width: 14
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abfac309579722570800000000000000
+      internalID: 8440442197483761594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_98
+      rect:
+        serializedVersion: 2
+        x: 6420
+        y: 37
+        width: 86
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b2647648ab59d5a0800000000000000
+      internalID: -6496060209210563917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_99
+      rect:
+        serializedVersion: 2
+        x: 6548
+        y: 37
+        width: 86
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97faadd6f422b83f0800000000000000
+      internalID: -897585976189472903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_100
+      rect:
+        serializedVersion: 2
+        x: 6676
+        y: 37
+        width: 86
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 662c2fde64126b3a0800000000000000
+      internalID: -6650091211242421658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_101
+      rect:
+        serializedVersion: 2
+        x: 8163
+        y: 58
+        width: 11
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b166a316047f4740800000000000000
+      internalID: 5138453269301322168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_102
+      rect:
+        serializedVersion: 2
+        x: 8298
+        y: 57
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f06d44a36205c3e40800000000000000
+      internalID: 5637468958677587471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_103
+      rect:
+        serializedVersion: 2
+        x: 2321
+        y: 37
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0898041eabb478610800000000000000
+      internalID: 1623349456705456512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_104
+      rect:
+        serializedVersion: 2
+        x: 3803
+        y: 40
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a314bc3c5e453f20800000000000000
+      internalID: 3401711251610669985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_105
+      rect:
+        serializedVersion: 2
+        x: 3940
+        y: 50
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e865dad64e1cb7df0800000000000000
+      internalID: -181338173141592434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_106
+      rect:
+        serializedVersion: 2
+        x: 5084
+        y: 39
+        width: 14
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 902c7091c98a32af0800000000000000
+      internalID: -422308551654391287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_107
+      rect:
+        serializedVersion: 2
+        x: 5469
+        y: 44
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e3ffba4f2cb1dc90800000000000000
+      internalID: -7146724222356687903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_108
+      rect:
+        serializedVersion: 2
+        x: 7178
+        y: 48
+        width: 19
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fe7109ccc1fea2f0800000000000000
+      internalID: -959563808735396103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_109
+      rect:
+        serializedVersion: 2
+        x: 7957
+        y: 55
+        width: 12
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 299603b49a446dee0800000000000000
+      internalID: -1236725553764996718
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_110
+      rect:
+        serializedVersion: 2
+        x: 8220
+        y: 54
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48910435a4ee34440800000000000000
+      internalID: 4919037221010413956
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_111
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 37
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cabc5f8bb92feddb0800000000000000
+      internalID: -4765104605074437204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_112
+      rect:
+        serializedVersion: 2
+        x: 1554
+        y: 37
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1df0dda66cd529300800000000000000
+      internalID: 257371235491319761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_113
+      rect:
+        serializedVersion: 2
+        x: 2336
+        y: 37
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bca5d1c162193ab20800000000000000
+      internalID: 3144516557701208779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_114
+      rect:
+        serializedVersion: 2
+        x: 3474
+        y: 37
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79c45404389026600800000000000000
+      internalID: 459940571268861079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_115
+      rect:
+        serializedVersion: 2
+        x: 3600
+        y: 37
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3816f15c99eb03a50800000000000000
+      internalID: 6498903829942067587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_116
+      rect:
+        serializedVersion: 2
+        x: 4626
+        y: 44
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eef39dc027a141c80800000000000000
+      internalID: -8353022331721269266
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_117
+      rect:
+        serializedVersion: 2
+        x: 5262
+        y: 37
+        width: 20
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76c66e194323062b0800000000000000
+      internalID: -5593415535826670489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_118
+      rect:
+        serializedVersion: 2
+        x: 5595
+        y: 37
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 491f8f3c7ebb2d130800000000000000
+      internalID: 3590138457067418004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_119
+      rect:
+        serializedVersion: 2
+        x: 7176
+        y: 37
+        width: 21
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80e4fa02a03d6f140800000000000000
+      internalID: 4753218497187630600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_120
+      rect:
+        serializedVersion: 2
+        x: 8171
+        y: 33
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e93db8aa3ea91190800000000000000
+      internalID: -7991164496829924896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_121
+      rect:
+        serializedVersion: 2
+        x: 8301
+        y: 37
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e31c61ed6f1d9eee0800000000000000
+      internalID: -1231222164890926786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_122
+      rect:
+        serializedVersion: 2
+        x: 8423
+        y: 32
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bae628af38732f160800000000000000
+      internalID: 7057764606026084011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_123
+      rect:
+        serializedVersion: 2
+        x: 8433
+        y: 36
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c9e0734282743620800000000000000
+      internalID: 2752951176033003974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_124
+      rect:
+        serializedVersion: 2
+        x: 8671
+        y: 30
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c321736ab48944e0800000000000000
+      internalID: -1996919023694961723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_125
+      rect:
+        serializedVersion: 2
+        x: 8682
+        y: 31
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac760f12ddc8243b0800000000000000
+      internalID: -5529702511072483382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_126
+      rect:
+        serializedVersion: 2
+        x: 8813
+        y: 37
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec07d96008c69f5d0800000000000000
+      internalID: -3028269977307352882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_127
+      rect:
+        serializedVersion: 2
+        x: 8815
+        y: 29
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e17b38bd711207930800000000000000
+      internalID: 4138844443904292638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_128
+      rect:
+        serializedVersion: 2
+        x: 2635
+        y: 26
+        width: 21
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e1570691c6424f90800000000000000
+      internalID: -6970931475956411935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_129
+      rect:
+        serializedVersion: 2
+        x: 8259
+        y: 19
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e37e4da6949d504a0800000000000000
+      internalID: -6627652367257639106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_130
+      rect:
+        serializedVersion: 2
+        x: 8406
+        y: 28
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f16392395cd36900800000000000000
+      internalID: 676626644694426102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_131
+      rect:
+        serializedVersion: 2
+        x: 8406
+        y: 14
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 185f4bf185ed40e20800000000000000
+      internalID: 3316019695721969025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_132
+      rect:
+        serializedVersion: 2
+        x: 8422
+        y: 21
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c3dc05fbc4e91990800000000000000
+      internalID: -7414643746848058424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_133
+      rect:
+        serializedVersion: 2
+        x: 8645
+        y: 18
+        width: 29
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ead1b2715ffd80840800000000000000
+      internalID: 5190644814293179822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_134
+      rect:
+        serializedVersion: 2
+        x: 8678
+        y: 19
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75d32ad181cc9e740800000000000000
+      internalID: 5181897250214919511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_135
+      rect:
+        serializedVersion: 2
+        x: 8783
+        y: 12
+        width: 23
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a03c3bb16570f3e0800000000000000
+      internalID: -2021987170075791191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_136
+      rect:
+        serializedVersion: 2
+        x: 8809
+        y: 17
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dfa9e3481e25b8c70800000000000000
+      internalID: 8974357811005659901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_137
+      rect:
+        serializedVersion: 2
+        x: 8617
+        y: 15
+        width: 19
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca4f04b793fece690800000000000000
+      internalID: -7571413843356617556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_138
+      rect:
+        serializedVersion: 2
+        x: 8919
+        y: 15
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd83dd0d5abb64900800000000000000
+      internalID: 668427915559254235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_139
+      rect:
+        serializedVersion: 2
+        x: 8926
+        y: 20
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aec764c5926553070800000000000000
+      internalID: 8085463441655364842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_140
+      rect:
+        serializedVersion: 2
+        x: 8941
+        y: 17
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d32d0230a20848d0800000000000000
+      internalID: -2862034676136205352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_141
+      rect:
+        serializedVersion: 2
+        x: 8926
+        y: 10
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a24f6c4576a90170800000000000000
+      internalID: 8145224423799997088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      goldfish_mech_0: -8199089252399134920
+      goldfish_mech_1: 8102377868183601944
+      goldfish_mech_10: -1355364428405009744
+      goldfish_mech_100: -6650091211242421658
+      goldfish_mech_101: 5138453269301322168
+      goldfish_mech_102: 5637468958677587471
+      goldfish_mech_103: 1623349456705456512
+      goldfish_mech_104: 3401711251610669985
+      goldfish_mech_105: -181338173141592434
+      goldfish_mech_106: -422308551654391287
+      goldfish_mech_107: -7146724222356687903
+      goldfish_mech_108: -959563808735396103
+      goldfish_mech_109: -1236725553764996718
+      goldfish_mech_11: -2734048801030618102
+      goldfish_mech_110: 4919037221010413956
+      goldfish_mech_111: -4765104605074437204
+      goldfish_mech_112: 257371235491319761
+      goldfish_mech_113: 3144516557701208779
+      goldfish_mech_114: 459940571268861079
+      goldfish_mech_115: 6498903829942067587
+      goldfish_mech_116: -8353022331721269266
+      goldfish_mech_117: -5593415535826670489
+      goldfish_mech_118: 3590138457067418004
+      goldfish_mech_119: 4753218497187630600
+      goldfish_mech_12: -4309023276092257625
+      goldfish_mech_120: -7991164496829924896
+      goldfish_mech_121: -1231222164890926786
+      goldfish_mech_122: 7057764606026084011
+      goldfish_mech_123: 2752951176033003974
+      goldfish_mech_124: -1996919023694961723
+      goldfish_mech_125: -5529702511072483382
+      goldfish_mech_126: -3028269977307352882
+      goldfish_mech_127: 4138844443904292638
+      goldfish_mech_128: -6970931475956411935
+      goldfish_mech_129: -6627652367257639106
+      goldfish_mech_13: -3275049073776379777
+      goldfish_mech_130: 676626644694426102
+      goldfish_mech_131: 3316019695721969025
+      goldfish_mech_132: -7414643746848058424
+      goldfish_mech_133: 5190644814293179822
+      goldfish_mech_134: 5181897250214919511
+      goldfish_mech_135: -2021987170075791191
+      goldfish_mech_136: 8974357811005659901
+      goldfish_mech_137: -7571413843356617556
+      goldfish_mech_138: 668427915559254235
+      goldfish_mech_139: 8085463441655364842
+      goldfish_mech_14: 1912103582311964399
+      goldfish_mech_140: -2862034676136205352
+      goldfish_mech_141: 8145224423799997088
+      goldfish_mech_15: -6378060990969876761
+      goldfish_mech_16: -4164687383439902921
+      goldfish_mech_17: 2813495441535846062
+      goldfish_mech_18: 7221023775870087999
+      goldfish_mech_19: 8772986476393510322
+      goldfish_mech_2: 8192902404248380925
+      goldfish_mech_20: 6177486422725355338
+      goldfish_mech_21: -1720581282773512757
+      goldfish_mech_22: 1986378952750544399
+      goldfish_mech_23: -4902530040596680048
+      goldfish_mech_24: 1678611000997212055
+      goldfish_mech_25: 1408776462429576087
+      goldfish_mech_26: -1524605989198978066
+      goldfish_mech_27: -8789079278897583751
+      goldfish_mech_28: -6665728619451541900
+      goldfish_mech_29: -2958463277162577462
+      goldfish_mech_3: 7299832700503960190
+      goldfish_mech_30: 9216347502288055444
+      goldfish_mech_31: 1981855727555972697
+      goldfish_mech_32: 2767764733449030890
+      goldfish_mech_33: -6598228917687012836
+      goldfish_mech_34: -1049610335295676456
+      goldfish_mech_35: 5020529379603100064
+      goldfish_mech_36: -8539344368246532255
+      goldfish_mech_37: -8687623000054235873
+      goldfish_mech_38: 4885583066036727297
+      goldfish_mech_39: -3061178927413011122
+      goldfish_mech_4: 5286623213452134290
+      goldfish_mech_40: -8678832932137352024
+      goldfish_mech_41: -3911232642234201607
+      goldfish_mech_42: -6553200381460261836
+      goldfish_mech_43: 1175501090775150470
+      goldfish_mech_44: 3039771160456095377
+      goldfish_mech_45: 5233173579994933733
+      goldfish_mech_46: -7168479171733477237
+      goldfish_mech_47: -7222076358778144881
+      goldfish_mech_48: 5412027434580807987
+      goldfish_mech_49: -7937629865343291917
+      goldfish_mech_5: 1592417523746850024
+      goldfish_mech_50: -8916822973349650121
+      goldfish_mech_51: 931068270769558462
+      goldfish_mech_52: 3673677161725527070
+      goldfish_mech_53: 718608772763165773
+      goldfish_mech_54: 2379709076123815061
+      goldfish_mech_55: 1315051401129055544
+      goldfish_mech_56: 5307644437461191412
+      goldfish_mech_57: 3535785101155882214
+      goldfish_mech_58: -4926967698255015428
+      goldfish_mech_59: -7952151481119562895
+      goldfish_mech_6: 5727373803664035019
+      goldfish_mech_60: -24073704216362071
+      goldfish_mech_61: 5906127223904674218
+      goldfish_mech_62: -5161269747654124030
+      goldfish_mech_63: -1107020892007089905
+      goldfish_mech_64: -7218585502482618894
+      goldfish_mech_65: 5485705890944489318
+      goldfish_mech_66: 6291587597902926222
+      goldfish_mech_67: 3475941483528771881
+      goldfish_mech_68: 465819732991000249
+      goldfish_mech_69: 5109825606362301574
+      goldfish_mech_7: -4633239978215157215
+      goldfish_mech_70: -4505340174802874380
+      goldfish_mech_71: -5025887993259498178
+      goldfish_mech_72: 7212907715900247032
+      goldfish_mech_73: 855322825969952115
+      goldfish_mech_74: -5440061400403444403
+      goldfish_mech_75: 5631169998052021156
+      goldfish_mech_76: -7167355429386779869
+      goldfish_mech_77: 1133565120171264396
+      goldfish_mech_78: -2857493380317024630
+      goldfish_mech_79: 4410966851639490717
+      goldfish_mech_8: 6851468916096641746
+      goldfish_mech_80: -4347597524180096918
+      goldfish_mech_81: 7351268530630344873
+      goldfish_mech_82: 4579930178438213176
+      goldfish_mech_83: 985935679396946496
+      goldfish_mech_84: -4917029446017701201
+      goldfish_mech_85: -7625491319560231665
+      goldfish_mech_86: -6719336579594124527
+      goldfish_mech_87: 1374656452659135238
+      goldfish_mech_88: 2449046184908442658
+      goldfish_mech_89: 8595077574947763768
+      goldfish_mech_9: -2248923498331111452
+      goldfish_mech_90: -8458000142882118124
+      goldfish_mech_91: 1092268652528685563
+      goldfish_mech_92: -2239990676742735696
+      goldfish_mech_93: -8418786120931944961
+      goldfish_mech_94: 923450632539846235
+      goldfish_mech_95: 7156840619207053464
+      goldfish_mech_96: -2334068329986774056
+      goldfish_mech_97: 8440442197483761594
+      goldfish_mech_98: -6496060209210563917
+      goldfish_mech_99: -897585976189472903
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

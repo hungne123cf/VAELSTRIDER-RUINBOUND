@@ -1,0 +1,702 @@
+fileFormatVersion: 2
+guid: 5f5afb2fecebb5344b781289c6005092
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2464326023405210641
+    second: goldfish_mech_04_attack_2_whirl_0
+  - first:
+      213: -1317971762075027056
+    second: goldfish_mech_04_attack_2_whirl_1
+  - first:
+      213: -3864229411549754573
+    second: goldfish_mech_04_attack_2_whirl_2
+  - first:
+      213: -2463409552873189541
+    second: goldfish_mech_04_attack_2_whirl_3
+  - first:
+      213: -4411054253773799296
+    second: goldfish_mech_04_attack_2_whirl_4
+  - first:
+      213: 4886050041530802295
+    second: goldfish_mech_04_attack_2_whirl_5
+  - first:
+      213: -119819266910165253
+    second: goldfish_mech_04_attack_2_whirl_6
+  - first:
+      213: -1792762647257313755
+    second: goldfish_mech_04_attack_2_whirl_7
+  - first:
+      213: 8341878097608755611
+    second: goldfish_mech_04_attack_2_whirl_8
+  - first:
+      213: -123179922377488765
+    second: goldfish_mech_04_attack_2_whirl_9
+  - first:
+      213: -3595457731795184773
+    second: goldfish_mech_04_attack_2_whirl_10
+  - first:
+      213: 1754682278202770556
+    second: goldfish_mech_04_attack_2_whirl_11
+  - first:
+      213: 786744788303757155
+    second: goldfish_mech_04_attack_2_whirl_12
+  - first:
+      213: -7248663123393299653
+    second: goldfish_mech_04_attack_2_whirl_13
+  - first:
+      213: -8984659001875301903
+    second: goldfish_mech_04_attack_2_whirl_14
+  - first:
+      213: -2194278951531721005
+    second: goldfish_mech_04_attack_2_whirl_15
+  - first:
+      213: -8730948619890488034
+    second: goldfish_mech_04_attack_2_whirl_16
+  - first:
+      213: -6784151685525661364
+    second: goldfish_mech_04_attack_2_whirl_17
+  - first:
+      213: -8317497783250455269
+    second: goldfish_mech_04_attack_2_whirl_18
+  - first:
+      213: 2407643653629858659
+    second: goldfish_mech_04_attack_2_whirl_19
+  - first:
+      213: -7918566286398017183
+    second: goldfish_mech_04_attack_2_whirl_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_0
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 37
+        width: 76
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11c81d3367b033220800000000000000
+      internalID: 2464326023405210641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_1
+      rect:
+        serializedVersion: 2
+        x: 574
+        y: 88
+        width: 16
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 099b5815aaf95bde0800000000000000
+      internalID: -1317971762075027056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_2
+      rect:
+        serializedVersion: 2
+        x: 661
+        y: 37
+        width: 86
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33bc5f1e2df7f5ac0800000000000000
+      internalID: -3864229411549754573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_3
+      rect:
+        serializedVersion: 2
+        x: 789
+        y: 37
+        width: 66
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5f80b8301630ddd0800000000000000
+      internalID: -2463409552873189541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_4
+      rect:
+        serializedVersion: 2
+        x: 915
+        y: 37
+        width: 68
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08046d6e689c8c2c0800000000000000
+      internalID: -4411054253773799296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_5
+      rect:
+        serializedVersion: 2
+        x: 1072
+        y: 93
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 770e93810acbec340800000000000000
+      internalID: 4886050041530802295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_6
+      rect:
+        serializedVersion: 2
+        x: 1081
+        y: 91
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf66296f201565ef0800000000000000
+      internalID: -119819266910165253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_7
+      rect:
+        serializedVersion: 2
+        x: 1096
+        y: 91
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52e83abeed3de17e0800000000000000
+      internalID: -1792762647257313755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_8
+      rect:
+        serializedVersion: 2
+        x: 1169
+        y: 37
+        width: 68
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b99c49fbeed44c370800000000000000
+      internalID: 8341878097608755611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_9
+      rect:
+        serializedVersion: 2
+        x: 1199
+        y: 95
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 386ca3363806a4ef0800000000000000
+      internalID: -123179922377488765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_10
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 37
+        width: 64
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b739a631e3e5a1ec0800000000000000
+      internalID: -3595457731795184773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_11
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 37
+        width: 66
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7403fd3c32e95810800000000000000
+      internalID: 1754682278202770556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_12
+      rect:
+        serializedVersion: 2
+        x: 291
+        y: 37
+        width: 68
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36f3cb377341bea00800000000000000
+      internalID: 786744788303757155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_13
+      rect:
+        serializedVersion: 2
+        x: 556
+        y: 37
+        width: 63
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3b3ba95b43976b90800000000000000
+      internalID: -7248663123393299653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_14
+      rect:
+        serializedVersion: 2
+        x: 1042
+        y: 37
+        width: 68
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f9f4359d34105380800000000000000
+      internalID: -8984659001875301903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_15
+      rect:
+        serializedVersion: 2
+        x: 1076
+        y: 88
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3dec5db5bea5c81e0800000000000000
+      internalID: -2194278951531721005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_16
+      rect:
+        serializedVersion: 2
+        x: 475
+        y: 40
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1d8d3f1d7075d680800000000000000
+      internalID: -8730948619890488034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_17
+      rect:
+        serializedVersion: 2
+        x: 479
+        y: 56
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4910e96cf9d9d1a0800000000000000
+      internalID: -6784151685525661364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_18
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 50
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b15f14985df429c80800000000000000
+      internalID: -8317497783250455269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_19
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 37
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 363d450952ba96120800000000000000
+      internalID: 2407643653629858659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: goldfish_mech_04_attack_2_whirl_20
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 37
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 161bcd8bae99b1290800000000000000
+      internalID: -7918566286398017183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      goldfish_mech_04_attack_2_whirl_0: 2464326023405210641
+      goldfish_mech_04_attack_2_whirl_1: -1317971762075027056
+      goldfish_mech_04_attack_2_whirl_10: -3595457731795184773
+      goldfish_mech_04_attack_2_whirl_11: 1754682278202770556
+      goldfish_mech_04_attack_2_whirl_12: 786744788303757155
+      goldfish_mech_04_attack_2_whirl_13: -7248663123393299653
+      goldfish_mech_04_attack_2_whirl_14: -8984659001875301903
+      goldfish_mech_04_attack_2_whirl_15: -2194278951531721005
+      goldfish_mech_04_attack_2_whirl_16: -8730948619890488034
+      goldfish_mech_04_attack_2_whirl_17: -6784151685525661364
+      goldfish_mech_04_attack_2_whirl_18: -8317497783250455269
+      goldfish_mech_04_attack_2_whirl_19: 2407643653629858659
+      goldfish_mech_04_attack_2_whirl_2: -3864229411549754573
+      goldfish_mech_04_attack_2_whirl_20: -7918566286398017183
+      goldfish_mech_04_attack_2_whirl_3: -2463409552873189541
+      goldfish_mech_04_attack_2_whirl_4: -4411054253773799296
+      goldfish_mech_04_attack_2_whirl_5: 4886050041530802295
+      goldfish_mech_04_attack_2_whirl_6: -119819266910165253
+      goldfish_mech_04_attack_2_whirl_7: -1792762647257313755
+      goldfish_mech_04_attack_2_whirl_8: 8341878097608755611
+      goldfish_mech_04_attack_2_whirl_9: -123179922377488765
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
