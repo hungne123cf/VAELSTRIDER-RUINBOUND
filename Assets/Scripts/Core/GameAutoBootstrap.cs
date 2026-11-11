@@ -102,6 +102,9 @@ public class GameAutoBootstrap : MonoBehaviour
             var allCanvasesM2 = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var c in allCanvasesM2) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
 
+            // Preload & Warmup assets chống khựng lag
+            WarmupGameplayAssets();
+
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 2 (Valley Ruin)! Đã khởi tạo Hệ thống Level Farm & Lõi TFT cùng hiệu ứng nguyên tố.");
             return;
         }
@@ -229,7 +232,36 @@ public class GameAutoBootstrap : MonoBehaviour
         var allCanvasesM1 = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var c in allCanvasesM1) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
 
+        // Preload & Warmup assets chống khựng lag
+        WarmupGameplayAssets();
+
         Debug.Log("<color=cyan>[VAELSTRIDER BOOTSTRAP]</color> Tất cả hệ thống (Bàn thờ, Ánh sáng 2D, Rương, 3 Wave quái, Boss, Bình máu, Tuyệt kỹ Whirlwind, UI) đã sẵn sàng 100%!");
+    }
+
+    /// <summary>
+    /// Warmup toàn bộ assets âm thanh, sprite thần tướng, shader và hiệu ứng lên cấp
+    /// Đảm bảo triệt tiêu hoàn toàn hiện tượng freeze frame / khựng 1 nhịp ở đòn đánh đầu tiên và khi lên cấp
+    /// </summary>
+    public static void WarmupGameplayAssets()
+    {
+        try
+        {
+            // 1. Tải trước toàn bộ âm thanh đòn đánh, chém, trúng đòn, thăng cấp vào RAM
+            SoundManager.EnsureInstance()?.AutoLoadClips();
+
+            // 2. Tải trước toàn bộ Sprite Thần Tướng Lõi Nâng Cấp CardDeities vào Cache
+            LevelUpChoiceUI.EnsureDeitySpritesLoaded();
+
+            // 3. Khởi tạo sẵn hệ thống Hiệu ứng Thăng cấp hoành tráng
+            PlayerLevelUpFX.EnsureExists();
+
+            // 4. Biên dịch trước toàn bộ Shaders trên GPU driver, tránh khựng lúc đòn đánh chém tung ra
+            Shader.WarmupAllShaders();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[WarmupGameplayAssets] Exception: {ex.Message}");
+        }
     }
 
     public static void SetGameplayHUDVisible(bool visible)

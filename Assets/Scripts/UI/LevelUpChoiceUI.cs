@@ -980,7 +980,7 @@ public class LevelUpChoiceUI : MonoBehaviour
     private static Sprite _spriteVoidTranscendence;
     private static Sprite _spriteShadowMirroring;
 
-    private static void EnsureDeitySpritesLoaded()
+    public static void EnsureDeitySpritesLoaded()
     {
         if (_spriteDeityBloodBeast == null) _spriteDeityBloodBeast = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BloodBeast");
         if (_spriteDeityBerserkerWarlord == null) _spriteDeityBerserkerWarlord = Resources.Load<Sprite>("UI/CardDeities/CardDeity_BerserkerWarlord");

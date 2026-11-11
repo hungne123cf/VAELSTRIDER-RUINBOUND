@@ -74,6 +74,13 @@ public class AugmentHUDBar : MonoBehaviour
     private float _prevOverviewTimeScale = 1f;
     private int _lastSelectedCount = -1;
 
+    // Localized text elements
+    private TextMeshProUGUI _headerTmp;
+    private TextMeshProUGUI _detailsTmp;
+    private TextMeshProUGUI _emptyTmp;
+    private TextMeshProUGUI _overviewTitleTmp;
+    private TextMeshProUGUI _overviewCloseTmp;
+
     void Awake()
     {
         instance = this;
@@ -83,12 +90,34 @@ public class AugmentHUDBar : MonoBehaviour
     {
         EnsureCollapsiblePanelBuilt();
         RefreshBadges(true);
+        UpdateLocalizedTexts();
     }
 
     void OnEnable()
     {
+        LocalizationManager.OnLanguageChanged += UpdateLocalizedTexts;
         EnsureCollapsiblePanelBuilt();
         RefreshBadges(true);
+        UpdateLocalizedTexts();
+    }
+
+    void OnDisable()
+    {
+        LocalizationManager.OnLanguageChanged -= UpdateLocalizedTexts;
+    }
+
+    public void UpdateLocalizedTexts()
+    {
+        bool isVi = LocalizationManager.IsVietnamese;
+        if (_headerTmp != null) _headerTmp.text = isVi ? "LÕI NÂNG CẤP ĐÃ CHỌN" : "ACTIVE AUGMENTS";
+        if (_detailsTmp != null) _detailsTmp.text = isVi ? "CHI TIẾT" : "DETAILS";
+        if (_emptyTmp != null) _emptyTmp.text = isVi ? "Chưa sở hữu Lõi Nâng Cấp nào" : "No Augments acquired yet";
+        if (_overviewTitleTmp != null) _overviewTitleTmp.text = isVi ? "TẤT CẢ LÕI NÂNG CẤP ĐÃ CHỌN" : "ALL ACQUIRED AUGMENTS";
+        if (_overviewCloseTmp != null) _overviewCloseTmp.text = isVi ? "ĐÓNG" : "CLOSE";
+        if (_fullOverviewPopupObj != null && _fullOverviewPopupObj.activeSelf)
+        {
+            PopulateOverviewContent();
+        }
     }
 
     // ─── Procedural Augment Core Toggle Icon (Đồng bộ phong cách với Stat Icon) ─
@@ -260,6 +289,7 @@ public class AugmentHUDBar : MonoBehaviour
         hTmp.alignment = TextAlignmentOptions.MidlineLeft;
         hTmp.raycastTarget = false;
         SoulslikeHUDStyler.SetSafeOutline(hTmp, 0.30f, Color.black);
+        _headerTmp = hTmp;
 
         // Nút "CHI TIẾT" trên thanh tiêu đề để mở bảng mô tả đầy đủ nếu muốn đọc chữ
         var detailBtnObj = new GameObject("DetailBtn", typeof(RectTransform), typeof(Image), typeof(Button), typeof(Outline));
@@ -297,6 +327,7 @@ public class AugmentHUDBar : MonoBehaviour
         dbTmp.alignment = TextAlignmentOptions.Center;
         dbTmp.color = new Color(1f, 0.90f, 0.50f, 1f);
         dbTmp.raycastTarget = false;
+        _detailsTmp = dbTmp;
 
         // Grid chứa các Icon Lõi Nâng Cấp (Phóng to 54x54 rõ nét trên điện thoại)
         var gridObj = new GameObject("BadgesGrid", typeof(RectTransform), typeof(GridLayoutGroup));
@@ -333,6 +364,7 @@ public class AugmentHUDBar : MonoBehaviour
         empTmp.alignment = TextAlignmentOptions.Center;
         empTmp.color = new Color(0.65f, 0.70f, 0.78f, 0.90f);
         empTmp.raycastTarget = false;
+        _emptyTmp = empTmp;
 
         // ── 2. Nút Toggle Icon Tròn (64x64 - Phóng to đồng bộ với nút Thống Kê Chỉ Số) ────
         var btnObj = new GameObject("ToggleBtn", typeof(RectTransform), typeof(Image), typeof(Button));
@@ -1312,6 +1344,7 @@ public class AugmentHUDBar : MonoBehaviour
         titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
         titleTmp.color = new Color(1f, 0.90f, 0.50f, 1f);
         SoulslikeHUDStyler.SetSafeOutline(titleTmp, 0.40f, Color.black);
+        _overviewTitleTmp = titleTmp;
 
         var closeXObj = new GameObject("CloseXBtn", typeof(RectTransform), typeof(Image), typeof(Button));
         closeXObj.transform.SetParent(panelObj.transform, false);
@@ -1421,6 +1454,7 @@ public class AugmentHUDBar : MonoBehaviour
         bbTmp.alignment = TextAlignmentOptions.Center;
         bbTmp.color = Color.white;
         SoulslikeHUDStyler.SetSafeOutline(bbTmp, 0.35f, Color.black);
+        _overviewCloseTmp = bbTmp;
     }
 
     private void PopulateOverviewContent(
@@ -1477,8 +1511,8 @@ public class AugmentHUDBar : MonoBehaviour
             cardObj.transform.SetParent(_popupContentContainer, false);
 
             var le = cardObj.GetComponent<LayoutElement>();
-            le.preferredHeight = 148f;
-            le.minHeight = 148f;
+            le.preferredHeight = 175f;
+            le.minHeight = 175f;
 
             var cardImg = cardObj.GetComponent<Image>();
             cardImg.sprite = GetPanelBg();
@@ -1567,7 +1601,7 @@ public class AugmentHUDBar : MonoBehaviour
 
             var textTmp = textObj.GetComponent<TextMeshProUGUI>();
             string rankStr = rank > 1 ? $" <color=#FBBF24>Lv.{rank}</color>" : "";
-            textTmp.text = $"<size=28><b><color=#{tierHex}>{tierName} - {typeName}</color>  <color=#FFFFFF>{title}</color>{rankStr}</b></size>\n<size=22><color=#CBD5E1>{desc}</color></size>";
+            textTmp.text = $"<size=34><b><color=#{tierHex}>{tierName} - {typeName}</color>  <color=#FFFFFF>{title}</color>{rankStr}</b></size>\n<size=26><color=#CBD5E1>{desc}</color></size>";
             textTmp.enableWordWrapping = true;
             SoulslikeHUDStyler.SetSafeOutline(textTmp, 0.25f, Color.black);
 
@@ -1588,11 +1622,11 @@ public class AugmentHUDBar : MonoBehaviour
                 float rem = AugmentManager.Instance != null ? AugmentManager.Instance.GetRemainingDurationByType(type) : aug.duration;
                 if (rem <= 0f) rem = aug.duration;
                 string remStr = rem >= 10f ? $"{Mathf.CeilToInt(rem)}s" : $"{rem:0.#}s";
-                statusTmp.text = $"<size=18><color=#94A3B8>{(isVi ? "Thời gian" : "Duration")}</color></size>\n<size=24><b><color=#55EFC4>{remStr}</color></b></size>";
+                statusTmp.text = $"<size=20><color=#94A3B8>{(isVi ? "Thời gian" : "Duration")}</color></size>\n<size=26><b><color=#55EFC4>{remStr}</color></b></size>";
             }
             else
             {
-                statusTmp.text = $"<size=18><color=#94A3B8>{(isVi ? "Hiệu lực" : "Effect")}</color></size>\n<size=22><b><color=#86EFAC>{(isVi ? "Vĩnh viễn" : "Permanent")}</color></b></size>";
+                statusTmp.text = $"<size=20><color=#94A3B8>{(isVi ? "Hiệu lực" : "Effect")}</color></size>\n<size=24><b><color=#86EFAC>{(isVi ? "Vĩnh viễn" : "Permanent")}</color></b></size>";
             }
             SoulslikeHUDStyler.SetSafeOutline(statusTmp, 0.25f, Color.black);
         }

@@ -229,6 +229,7 @@ public class MainMenuManager : MonoBehaviour
     private TextMeshProUGUI carouselTopCurrencyText;
     private Image carouselHpBarFill;
     private TextMeshProUGUI carouselHpValText;
+    private TextMeshProUGUI carouselHpLabelText;
     private Image carouselAtkBarFill;
     private TextMeshProUGUI carouselAtkValText;
     private TextMeshProUGUI carouselAtkLabelText;
@@ -237,6 +238,7 @@ public class MainMenuManager : MonoBehaviour
     private TextMeshProUGUI carouselDefLabelText;
     private Image carouselSpdBarFill;
     private TextMeshProUGUI carouselSpdValText;
+    private TextMeshProUGUI carouselSpdLabelText;
     private TextMeshProUGUI carouselSkillNormalTitle;
     private TextMeshProUGUI carouselSkillNormalDesc;
     private TextMeshProUGUI carouselSkillGuardTitle;
@@ -5315,10 +5317,10 @@ public class MainMenuManager : MonoBehaviour
         Sprite amberSp = Resources.Load<Sprite>("UI/Soulslike/Bar_Amber_Fill");
         Sprite sapphireSp = Resources.Load<Sprite>("UI/Soulslike/Bar_Sapphire_Fill");
 
-        CreateStatRow(statsBox.transform, "Row_HP", new Vector2(0f, 44f), "SINH LỰC (HP)", new Color(1f, 0.4f, 0.4f, 1f), troughSp, rubySp, out carouselHpBarFill, out carouselHpValText, out _);
+        CreateStatRow(statsBox.transform, "Row_HP", new Vector2(0f, 44f), "SINH LỰC (HP)", new Color(1f, 0.4f, 0.4f, 1f), troughSp, rubySp, out carouselHpBarFill, out carouselHpValText, out carouselHpLabelText);
         CreateStatRow(statsBox.transform, "Row_ATK", new Vector2(0f, 15f), "TẤN CÔNG (ATK)", new Color(1f, 0.65f, 0.25f, 1f), troughSp, amberSp, out carouselAtkBarFill, out carouselAtkValText, out carouselAtkLabelText);
         CreateStatRow(statsBox.transform, "Row_DEF", new Vector2(0f, -15f), "GIÁP (ARMOR)", new Color(0.38f, 0.85f, 1f, 1f), troughSp, sapphireSp, out carouselDefBarFill, out carouselDefValText, out carouselDefLabelText);
-        CreateStatRow(statsBox.transform, "Row_SPD", new Vector2(0f, -44f), "TỐC ĐỘ (SPD)", new Color(0.35f, 0.92f, 0.65f, 1f), troughSp, sapphireSp, out carouselSpdBarFill, out carouselSpdValText, out _);
+        CreateStatRow(statsBox.transform, "Row_SPD", new Vector2(0f, -44f), "TỐC ĐỘ (SPD)", new Color(0.35f, 0.92f, 0.65f, 1f), troughSp, sapphireSp, out carouselSpdBarFill, out carouselSpdValText, out carouselSpdLabelText);
 
         // 3 Combat Arsenal Breakdown Cards (Phóng to tối đa chữ và khung cho Mobile không lem)
         CreateSkillCard(dosObj.transform, "SkillCard_Normal", new Vector2(0f, 114f), new Vector2(660f, 122f), out carouselSkillNormalTitle, out carouselSkillNormalDesc);
@@ -5357,8 +5359,8 @@ public class MainMenuManager : MonoBehaviour
         cfbRt.anchorMin = new Vector2(1f, 0.5f);
         cfbRt.anchorMax = new Vector2(1f, 0.5f);
         cfbRt.pivot = new Vector2(1f, 0.5f);
-        cfbRt.anchoredPosition = new Vector2(-45f, 0f);
-        cfbRt.sizeDelta = new Vector2(330f, 86f);
+        cfbRt.anchoredPosition = new Vector2(-35f, 0f);
+        cfbRt.sizeDelta = new Vector2(360f, 96f);
 
         Image cfbImg = confirmBtnObj.GetComponent<Image>();
         cfbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -5378,12 +5380,12 @@ public class MainMenuManager : MonoBehaviour
         cfbtRt.anchorMin = new Vector2(0f, 0.5f);
         cfbtRt.anchorMax = new Vector2(1f, 0.5f);
         cfbtRt.pivot = new Vector2(0.5f, 0.5f);
-        cfbtRt.anchoredPosition = new Vector2(0f, 8f);
-        cfbtRt.sizeDelta = new Vector2(0f, 30f);
+        cfbtRt.anchoredPosition = new Vector2(0f, 10f);
+        cfbtRt.sizeDelta = new Vector2(0f, 36f);
 
         carouselConfirmBtnText = cfbTxtObj.GetComponent<TextMeshProUGUI>();
         carouselConfirmBtnText.text = LocalizationManager.T("XUẤT TRẬN", "ENTER BATTLE");
-        carouselConfirmBtnText.fontSize = 26f;
+        carouselConfirmBtnText.fontSize = 32f;
         carouselConfirmBtnText.fontStyle = FontStyles.Bold;
         carouselConfirmBtnText.alignment = TextAlignmentOptions.Center;
         carouselConfirmBtnText.color = new Color(1f, 0.92f, 0.65f, 1f);
@@ -5396,12 +5398,13 @@ public class MainMenuManager : MonoBehaviour
         cfbSubRt.anchorMin = new Vector2(0f, 0.5f);
         cfbSubRt.anchorMax = new Vector2(1f, 0.5f);
         cfbSubRt.pivot = new Vector2(0.5f, 0.5f);
-        cfbSubRt.anchoredPosition = new Vector2(0f, -14f);
-        cfbSubRt.sizeDelta = new Vector2(0f, 18f);
+        cfbSubRt.anchoredPosition = new Vector2(0f, -16f);
+        cfbSubRt.sizeDelta = new Vector2(0f, 26f);
 
         var subTxt = cfbSubObj.GetComponent<TextMeshProUGUI>();
         subTxt.text = LocalizationManager.T("TIẾN VÀO HẦM NGỤC", "ENTER RUINS");
-        subTxt.fontSize = 14f;
+        subTxt.fontSize = 18f;
+        subTxt.fontStyle = FontStyles.Bold;
         subTxt.alignment = TextAlignmentOptions.Center;
         subTxt.color = new Color(0.85f, 0.90f, 0.95f, 0.90f);
         subTxt.raycastTarget = false;
@@ -5739,6 +5742,11 @@ public class MainMenuManager : MonoBehaviour
             bool isApHero = CharacterManager.IsAbilityPowerHero(heroId);
 
             // 4a. Sinh Lực (HP)
+            if (carouselHpLabelText != null)
+            {
+                carouselHpLabelText.text = isVN ? "SINH LỰC (HP)" : "HEALTH (HP)";
+                carouselHpLabelText.color = new Color(1f, 0.4f, 0.4f, 1f);
+            }
             if (carouselHpValText != null) carouselHpValText.text = $"{cData.baseHealth} / 250";
             if (carouselHpBarFill != null) carouselHpBarFill.fillAmount = Mathf.Clamp01(cData.baseHealth / 250f);
 
@@ -5797,6 +5805,11 @@ public class MainMenuManager : MonoBehaviour
             }
 
             // 4d. Tốc Độ (SPD)
+            if (carouselSpdLabelText != null)
+            {
+                carouselSpdLabelText.text = isVN ? "TỐC ĐỘ (SPD)" : "SPEED (SPD)";
+                carouselSpdLabelText.color = new Color(0.35f, 0.92f, 0.65f, 1f);
+            }
             if (carouselSpdValText != null) carouselSpdValText.text = $"{cData.baseSpeed:F1} / 6.0";
             if (carouselSpdBarFill != null)
             {
@@ -5846,12 +5859,12 @@ public class MainMenuManager : MonoBehaviour
             if (isUnlocked)
             {
                 carouselConfirmBtnText.text = LocalizationManager.T("XUẤT TRẬN", "ENTER BATTLE");
-                carouselConfirmBtnText.fontSize = 30f;
+                carouselConfirmBtnText.fontSize = 32f;
                 carouselConfirmBtnText.color = new Color(1f, 0.92f, 0.65f, 1f);
                 if (carouselConfirmBtnSubText != null)
                 {
                     carouselConfirmBtnSubText.text = LocalizationManager.T("TIẾN VÀO HẦM NGỤC", "ENTER RUINS");
-                    carouselConfirmBtnSubText.fontSize = 18f;
+                    carouselConfirmBtnSubText.fontSize = 20f;
                     carouselConfirmBtnSubText.color = new Color(0.85f, 0.90f, 0.95f, 0.95f);
                 }
                 if (carouselConfirmBtnOutline != null)
@@ -5866,14 +5879,14 @@ public class MainMenuManager : MonoBehaviour
             else
             {
                 carouselConfirmBtnText.text = LocalizationManager.T("MỞ KHÓA TƯỚNG", "UNLOCK WARRIOR");
-                carouselConfirmBtnText.fontSize = 28f;
+                carouselConfirmBtnText.fontSize = 30f;
                 if (currentShards >= price)
                 {
                     carouselConfirmBtnText.color = new Color(0.35f, 1f, 0.65f, 1f);
                     if (carouselConfirmBtnSubText != null)
                     {
                         carouselConfirmBtnSubText.text = $"<color=#FFE066><b>{price:N0}</b></color> <color=#FFFFFF>{LocalizationManager.T("LINH HỒN", "SOULS")}</color>";
-                        carouselConfirmBtnSubText.fontSize = 20f;
+                        carouselConfirmBtnSubText.fontSize = 24f;
                         carouselConfirmBtnSubText.color = new Color(1f, 0.95f, 0.65f, 1f);
                     }
                     if (carouselConfirmBtnOutline != null)
@@ -5892,7 +5905,7 @@ public class MainMenuManager : MonoBehaviour
                     if (carouselConfirmBtnSubText != null)
                     {
                         carouselConfirmBtnSubText.text = $"<color=#FFE066><b>{price:N0}</b></color> <color=#FFFFFF>{LocalizationManager.T("LINH HỒN", "SOULS")}</color> (<color=#FF7777>{LocalizationManager.T("THIẾU", "NEED")} {missing:N0}</color>)";
-                        carouselConfirmBtnSubText.fontSize = 18f;
+                        carouselConfirmBtnSubText.fontSize = 22f;
                     }
                     if (carouselConfirmBtnOutline != null)
                     {

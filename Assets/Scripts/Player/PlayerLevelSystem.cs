@@ -204,9 +204,9 @@ public class PlayerLevelSystem : MonoBehaviour
         OnLevelUp?.Invoke(currentLevel);
         OnExpChanged?.Invoke(currentExp, expRequired);
 
-        SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+        PlayerLevelUpFX.EnsureExists()?.TriggerLevelUpFX(currentLevel);
 
-        StartCoroutine(ShowAugmentUIDelayed(0.2f));
+        StartCoroutine(ShowAugmentUIDelayed(0.55f));
     }
 
     private System.Collections.IEnumerator ShowAugmentUIDelayed(float delay)

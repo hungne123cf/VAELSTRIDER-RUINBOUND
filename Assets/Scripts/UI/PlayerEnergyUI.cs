@@ -184,8 +184,11 @@ public class PlayerEnergyUI : MonoBehaviour
         }
         if (cachedShardsRt != null)
         {
-            cachedShardsRt.anchoredPosition = new Vector2(206f, -138f);
-            cachedShardsRt.sizeDelta = new Vector2(156f, 36f);
+            cachedShardsRt.anchorMin = new Vector2(0f, 1f);
+            cachedShardsRt.anchorMax = new Vector2(0f, 1f);
+            cachedShardsRt.pivot = new Vector2(0f, 0.5f);
+            cachedShardsRt.anchoredPosition = new Vector2(210f, -145f);
+            cachedShardsRt.sizeDelta = new Vector2(185f, 44f);
         }
     }
 

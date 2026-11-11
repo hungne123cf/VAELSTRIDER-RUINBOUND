@@ -331,9 +331,9 @@ public static class SoulslikeHUDStyler
         {
             scRt.anchorMin = new Vector2(0f, 1f);
             scRt.anchorMax = new Vector2(0f, 1f);
-            scRt.pivot = new Vector2(0.5f, 0.5f);
-            // Căn lùi sang phải ngay dưới thanh EXP, phóng to to rõ trên Mobile
-            scRt.anchoredPosition = new Vector2(220f, -145f);
+            scRt.pivot = new Vector2(0f, 0.5f);
+            // Căn lùi sang phải hẳn ra ngoài cụm Avatar & Huy hiệu Level (kết thúc ở x ~ 140px), nằm ngay ngắn dưới thanh EXP
+            scRt.anchoredPosition = new Vector2(210f, -145f);
             scRt.sizeDelta = new Vector2(185f, 44f);
             scRt.localScale = Vector3.one;
         }

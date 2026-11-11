@@ -148,8 +148,11 @@ public class PlayerExpBarUI : MonoBehaviour
             RectTransform scRt = shardsUI.GetComponent<RectTransform>();
             if (scRt != null)
             {
-                scRt.anchoredPosition = new Vector2(206f, -138f);
-                scRt.sizeDelta = new Vector2(156f, 36f);
+                scRt.anchorMin = new Vector2(0f, 1f);
+                scRt.anchorMax = new Vector2(0f, 1f);
+                scRt.pivot = new Vector2(0f, 0.5f);
+                scRt.anchoredPosition = new Vector2(210f, -145f);
+                scRt.sizeDelta = new Vector2(185f, 44f);
             }
         }
     }

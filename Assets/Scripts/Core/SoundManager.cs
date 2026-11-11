@@ -331,6 +331,27 @@ public class SoundManager : MonoBehaviour
         if (ultiVoiceClip == null) ultiVoiceClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(voicePath + "ulti_voice.wav");
         if (ultiVoiceClip == null) ultiVoiceClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(voicePath + "ulti_voice.ogg");
 #endif
+
+        // Buộc Unity load sẵn toàn bộ sóng âm vào RAM, triệt tiêu hoàn toàn độ trễ / khựng nhịp đầu tiên
+        PreloadClipData(swordSlashClip);
+        PreloadClipData(swordSlashHeavyClip);
+        PreloadClipData(katanaSheatheClip);
+        PreloadClipData(hitImpactClip);
+        PreloadClipData(hitCritClip);
+        PreloadClipData(titanSlamClip);
+        PreloadClipData(dashWindClip);
+        PreloadClipData(thunderStrikeClip);
+        PreloadClipData(uiStoneClickClip);
+        PreloadClipData(heavenlyAscensionClip);
+        PreloadClipData(playerHurtClip);
+    }
+
+    private void PreloadClipData(AudioClip clip)
+    {
+        if (clip != null && clip.loadState != AudioDataLoadState.Loaded)
+        {
+            clip.LoadAudioData();
+        }
     }
 
     public void PlayAmbience()

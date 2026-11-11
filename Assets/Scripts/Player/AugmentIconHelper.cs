@@ -310,7 +310,13 @@ public static class AugmentIconHelper
         }
 #endif
 
-        // 6. Fallback đồ họa procedurally sinh huy hiệu ma pháp theo màu sát thương (Tuyệt đối không bao giờ trả về null hay dấu cộng)
+        // 6. Thẻ Thần Tướng Fallback (Đảm bảo 100% tất cả 60+ Lõi đều có icon ảnh thật sắc nét từ CardDeities)
+        if (spr == null)
+        {
+            spr = Resources.Load<Sprite>("UI/CardDeities/CardDeity_" + type.ToString());
+        }
+
+        // 7. Fallback đồ họa procedurally sinh huy hiệu ma pháp theo màu sát thương
         if (spr == null)
         {
             spr = CreateProceduralEmblem(type);
