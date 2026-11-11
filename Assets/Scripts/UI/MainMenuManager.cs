@@ -5672,11 +5672,11 @@ public class MainMenuManager : MonoBehaviour
 
             var nTxt = nObj.GetComponent<TextMeshProUGUI>();
             nTxt.text = i < shortNames.Length ? shortNames[i] : heroId;
-            nTxt.fontSize = 12.5f;
+            nTxt.fontSize = 18f; // Phóng to tên tướng dưới đáy từ 12.5 -> 18
             nTxt.fontStyle = FontStyles.Bold;
             nTxt.alignment = TextAlignmentOptions.Center;
-            nTxt.color = new Color(0.9f, 0.9f, 0.92f, 1f);
-            SoulslikeHUDStyler.SetSafeOutline(nTxt, 0.25f, Color.black);
+            nTxt.color = new Color(0.95f, 0.95f, 0.98f, 1f);
+            SoulslikeHUDStyler.SetSafeOutline(nTxt, 0.30f, Color.black);
             nTxt.raycastTarget = false;
 
             carouselRosterCardObjs.Add(card);
@@ -5823,14 +5823,14 @@ public class MainMenuManager : MonoBehaviour
             carouselStageHaloGlow.color = combatInfo.elementColor;
         }
 
-        if (carouselSkillNormalTitle != null) carouselSkillNormalTitle.text = combatInfo.attackTitle;
-        if (carouselSkillNormalDesc != null) carouselSkillNormalDesc.text = combatInfo.attackDesc;
+        if (carouselSkillNormalTitle != null) { carouselSkillNormalTitle.fontSize = 28f; carouselSkillNormalTitle.text = combatInfo.attackTitle; }
+        if (carouselSkillNormalDesc != null) { carouselSkillNormalDesc.fontSize = 25f; carouselSkillNormalDesc.text = combatInfo.attackDesc; }
 
-        if (carouselSkillGuardTitle != null) carouselSkillGuardTitle.text = combatInfo.guardTitle;
-        if (carouselSkillGuardDesc != null) carouselSkillGuardDesc.text = combatInfo.guardDesc;
+        if (carouselSkillGuardTitle != null) { carouselSkillGuardTitle.fontSize = 28f; carouselSkillGuardTitle.text = combatInfo.guardTitle; }
+        if (carouselSkillGuardDesc != null) { carouselSkillGuardDesc.fontSize = 25f; carouselSkillGuardDesc.text = combatInfo.guardDesc; }
 
-        if (carouselSkillUltiTitle != null) carouselSkillUltiTitle.text = combatInfo.ultiTitle;
-        if (carouselSkillUltiDesc != null) carouselSkillUltiDesc.text = combatInfo.ultiDesc;
+        if (carouselSkillUltiTitle != null) { carouselSkillUltiTitle.fontSize = 28f; carouselSkillUltiTitle.text = combatInfo.ultiTitle; }
+        if (carouselSkillUltiDesc != null) { carouselSkillUltiDesc.fontSize = 25f; carouselSkillUltiDesc.text = combatInfo.ultiDesc; }
 
         // Backward compatibility
         if (carouselHeroSkillText != null && cData != null)
@@ -5846,11 +5846,13 @@ public class MainMenuManager : MonoBehaviour
             if (isUnlocked)
             {
                 carouselConfirmBtnText.text = LocalizationManager.T("XUẤT TRẬN", "ENTER BATTLE");
+                carouselConfirmBtnText.fontSize = 30f;
                 carouselConfirmBtnText.color = new Color(1f, 0.92f, 0.65f, 1f);
                 if (carouselConfirmBtnSubText != null)
                 {
                     carouselConfirmBtnSubText.text = LocalizationManager.T("TIẾN VÀO HẦM NGỤC", "ENTER RUINS");
-                    carouselConfirmBtnSubText.color = new Color(0.82f, 0.85f, 0.90f, 0.85f);
+                    carouselConfirmBtnSubText.fontSize = 18f;
+                    carouselConfirmBtnSubText.color = new Color(0.85f, 0.90f, 0.95f, 0.95f);
                 }
                 if (carouselConfirmBtnOutline != null)
                 {
@@ -5864,12 +5866,14 @@ public class MainMenuManager : MonoBehaviour
             else
             {
                 carouselConfirmBtnText.text = LocalizationManager.T("MỞ KHÓA TƯỚNG", "UNLOCK WARRIOR");
+                carouselConfirmBtnText.fontSize = 28f;
                 if (currentShards >= price)
                 {
                     carouselConfirmBtnText.color = new Color(0.35f, 1f, 0.65f, 1f);
                     if (carouselConfirmBtnSubText != null)
                     {
-                        carouselConfirmBtnSubText.text = $"{price:N0} {LocalizationManager.T("LINH HỒN", "SOULS")}";
+                        carouselConfirmBtnSubText.text = $"<color=#FFE066><b>{price:N0}</b></color> <color=#FFFFFF>{LocalizationManager.T("LINH HỒN", "SOULS")}</color>";
+                        carouselConfirmBtnSubText.fontSize = 20f;
                         carouselConfirmBtnSubText.color = new Color(1f, 0.95f, 0.65f, 1f);
                     }
                     if (carouselConfirmBtnOutline != null)
@@ -5887,7 +5891,8 @@ public class MainMenuManager : MonoBehaviour
                     carouselConfirmBtnText.color = new Color(1f, 0.45f, 0.45f, 1f);
                     if (carouselConfirmBtnSubText != null)
                     {
-                        carouselConfirmBtnSubText.text = $"<color=#FF8888>{price:N0} {LocalizationManager.T("LINH HỒN", "SOULS")} ({LocalizationManager.T("THIẾU", "NEED")} {missing:N0})</color>";
+                        carouselConfirmBtnSubText.text = $"<color=#FFE066><b>{price:N0}</b></color> <color=#FFFFFF>{LocalizationManager.T("LINH HỒN", "SOULS")}</color> (<color=#FF7777>{LocalizationManager.T("THIẾU", "NEED")} {missing:N0}</color>)";
+                        carouselConfirmBtnSubText.fontSize = 18f;
                     }
                     if (carouselConfirmBtnOutline != null)
                     {

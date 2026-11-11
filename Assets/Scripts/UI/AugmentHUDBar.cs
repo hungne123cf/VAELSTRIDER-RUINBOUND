@@ -844,13 +844,9 @@ public class AugmentHUDBar : MonoBehaviour
         iconImg.color = Color.white;
         iconImg.preserveAspect = true;
         iconImg.raycastTarget = false;
-        if (iconImg.sprite != null)
+        iconImg.enabled = true;
+        if (iconImg.sprite == null)
         {
-            iconImg.enabled = true;
-        }
-        else
-        {
-            iconImg.enabled = false;
             var fbTxtObj = new GameObject("IconFallbackTxt", typeof(RectTransform), typeof(TextMeshProUGUI));
             fbTxtObj.transform.SetParent(badgeObj.transform, false);
             var fbRt = fbTxtObj.GetComponent<RectTransform>();
@@ -1528,13 +1524,9 @@ public class AugmentHUDBar : MonoBehaviour
             iconImg.sprite = AugmentIconHelper.GetAugmentSprite(type);
             iconImg.color = Color.white;
             iconImg.preserveAspect = true;
-            if (iconImg.sprite != null)
+            iconImg.enabled = true;
+            if (iconImg.sprite == null)
             {
-                iconImg.enabled = true;
-            }
-            else
-            {
-                iconImg.enabled = false;
                 var fbTxtObj = new GameObject("IconFallbackTxt", typeof(RectTransform), typeof(TextMeshProUGUI));
                 fbTxtObj.transform.SetParent(medalObj.transform, false);
                 var fbRt = fbTxtObj.GetComponent<RectTransform>();

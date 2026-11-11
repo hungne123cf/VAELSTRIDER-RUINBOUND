@@ -258,6 +258,8 @@ public static class AugmentIconHelper
             Texture2D rTex = Resources.Load<Texture2D>("UI/Augments/" + nameNoExt);
             if (rTex != null)
             {
+                rTex.filterMode = FilterMode.Bilinear;
+                rTex.wrapMode = TextureWrapMode.Clamp;
                 spr = Sprite.Create(rTex, new Rect(0, 0, rTex.width, rTex.height), new Vector2(0.5f, 0.5f), 100f);
             }
         }
@@ -289,6 +291,7 @@ public static class AugmentIconHelper
                         if (diskTex.LoadImage(fileBytes))
                         {
                             diskTex.filterMode = FilterMode.Bilinear;
+                            diskTex.wrapMode = TextureWrapMode.Clamp;
                             spr = Sprite.Create(diskTex, new Rect(0, 0, diskTex.width, diskTex.height), new Vector2(0.5f, 0.5f), 100f);
                             break;
                         }
@@ -307,7 +310,7 @@ public static class AugmentIconHelper
         }
 #endif
 
-        // 6. Fallback đồ họa procedurally sinh huy hiệu ma pháp theo màu sát thương (Tuyệt đối không hiển thị hình ngôi sao!)
+        // 6. Fallback đồ họa procedurally sinh huy hiệu ma pháp theo màu sát thương (Tuyệt đối không bao giờ trả về null hay dấu cộng)
         if (spr == null)
         {
             spr = CreateProceduralEmblem(type);
@@ -359,15 +362,20 @@ public static class AugmentIconHelper
             }
         }
 
-        // Vẽ chữ thập cổ ngữ hoặc khối thoi ở trung tâm
-        for (int i = -8; i <= 8; i++)
+        // Vẽ biểu tượng hình thoi tinh thể cổ ngữ (Runic Diamond Gem) thay vì chữ thập/dấu cộng
+        for (int y = 0; y < sz; y++)
         {
-            int cx = Mathf.RoundToInt(center);
-            int cy = Mathf.RoundToInt(center);
-            if (cx + i >= 0 && cx + i < sz && cy >= 0 && cy < sz)
-                px[cy * sz + (cx + i)] = Color.white;
-            if (cx >= 0 && cx < sz && cy + i >= 0 && cy + i < sz)
-                px[(cy + i) * sz + cx] = Color.white;
+            for (int x = 0; x < sz; x++)
+            {
+                float dx = Mathf.Abs(x - center);
+                float dy = Mathf.Abs(y - center);
+                if (dx + dy <= 12f)
+                {
+                    // Lõi phát sáng theo màu nguyên tố của lõi
+                    float factor = 1f - (dx + dy) / 12f;
+                    px[y * sz + x] = Color.Lerp(typeCol, Color.white, factor * 0.85f);
+                }
+            }
         }
 
         tex.SetPixels(px);

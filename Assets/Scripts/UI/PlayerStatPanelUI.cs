@@ -69,7 +69,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         panelRt.anchorMin = panelRt.anchorMax = new Vector2(0f, 1f);
         panelRt.pivot = new Vector2(0f, 1f);
         panelRt.anchoredPosition = new Vector2(24f, -234f); // Dưới cụm Avatar/Thanh máu/Lõi Nâng Cấp
-        panelRt.sizeDelta = new Vector2(580f, 280f);
+        panelRt.sizeDelta = new Vector2(456f, 320f); // Chiều ngang 456f khớp 100% với khung Lõi Nâng Cấp đã chọn (456f)
 
         // Nội dung (nền + 2 cột)
         contentObj = new GameObject("Content", typeof(RectTransform), typeof(Image));
@@ -84,7 +84,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         outline.effectColor = new Color(0.62f, 0.55f, 0.40f, 0.85f);
         outline.effectDistance = new Vector2(2f, -2f);
 
-        float rowH = 50f, top = -16f;
+        float rowH = 56f, top = -16f;
         // Cột trái
         hpTxt   = CreateRow(font, 0, top - rowH * 0, new Color(0.45f, 0.95f, 0.35f), "♥");
         atkTxt  = CreateRow(font, 0, top - rowH * 1, new Color(1f, 0.55f, 0.20f), "⚔");
@@ -129,7 +129,8 @@ public class PlayerStatPanelUI : MonoBehaviour
 
     private TextMeshProUGUI CreateRow(TMP_FontAsset font, int col, float y, Color iconColor, string glyph)
     {
-        float x = col == 0 ? 20f : 300f;
+        // 2 cột phân bố đều trong khung 456f: cột 0 (x=16f), cột 1 (x=236f)
+        float x = col == 0 ? 16f : 236f;
 
         GameObject icon = new GameObject("Icon", typeof(RectTransform), typeof(Image));
         icon.transform.SetParent(contentObj.transform, false);
@@ -137,7 +138,7 @@ public class PlayerStatPanelUI : MonoBehaviour
         iRt.anchorMin = iRt.anchorMax = new Vector2(0f, 1f);
         iRt.pivot = new Vector2(0f, 1f);
         iRt.anchoredPosition = new Vector2(x, y);
-        iRt.sizeDelta = new Vector2(40f, 40f);
+        iRt.sizeDelta = new Vector2(46f, 46f); // Phóng to Icon từ 40 -> 46
         var img = icon.GetComponent<Image>();
         img.sprite = GetPixelIcon(glyph, iconColor);
         img.color = Color.white;
@@ -149,18 +150,18 @@ public class PlayerStatPanelUI : MonoBehaviour
         var tRt = t.GetComponent<RectTransform>();
         tRt.anchorMin = tRt.anchorMax = new Vector2(0f, 1f);
         tRt.pivot = new Vector2(0f, 1f);
-        tRt.anchoredPosition = new Vector2(x + 50f, y + 4f);
-        tRt.sizeDelta = new Vector2(215f, 40f);
+        tRt.anchoredPosition = new Vector2(x + 52f, y + 2f);
+        tRt.sizeDelta = new Vector2(155f, 46f);
         var tmp = t.AddComponent<TextMeshProUGUI>();
         if (font != null) tmp.font = font;
-        tmp.fontSize = 28f;
+        tmp.fontSize = 32f; // Phóng to chỉ số từ 28 -> 32
         tmp.fontStyle = FontStyles.Bold;
-        tmp.color = new Color(0.95f, 0.92f, 0.85f);
-        tmp.alignment = TextAlignmentOptions.Left;
+        tmp.color = new Color(0.98f, 0.95f, 0.88f);
+        tmp.alignment = TextAlignmentOptions.MidlineLeft;
         tmp.enableWordWrapping = false;
         tmp.overflowMode = TextOverflowModes.Ellipsis;
         tmp.raycastTarget = false;
-        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.30f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, Color.black);
         return tmp;
     }
 

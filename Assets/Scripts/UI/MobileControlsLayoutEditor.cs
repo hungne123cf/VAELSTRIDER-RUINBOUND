@@ -36,12 +36,12 @@ public class MobileControlsLayoutEditor : MonoBehaviour
 
     private const float DEFAULT_JOY_X = 250f;
     private const float DEFAULT_JOY_Y = 250f;
-    private const float DEFAULT_ATK_X = -220f;
-    private const float DEFAULT_ATK_Y = 220f;
-    private const float DEFAULT_DASH_X = -380f;
-    private const float DEFAULT_DASH_Y = 160f;
-    private const float DEFAULT_SKILL_X = -350f;
-    private const float DEFAULT_SKILL_Y = 290f;
+    private const float DEFAULT_ATK_X = -180f;
+    private const float DEFAULT_ATK_Y = 175f;
+    private const float DEFAULT_DASH_X = -325f;
+    private const float DEFAULT_DASH_Y = 145f;
+    private const float DEFAULT_SKILL_X = -275f;
+    private const float DEFAULT_SKILL_Y = 295f;
     private const float DEFAULT_CANCEL_X = -230f;
     private const float DEFAULT_CANCEL_Y = 420f;
 

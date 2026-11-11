@@ -175,6 +175,7 @@ public class VictoryUI : MonoBehaviour
         isEnded = true;
 
         string currentScene = SceneManager.GetActiveScene().name;
+        MatchTimerUI.RecordMapClearTime(currentScene);
         if (currentScene == "SampleScene" || currentScene.Contains("Map1"))
         {
             PlayerPrefs.SetInt("Map1_Completed", 1);

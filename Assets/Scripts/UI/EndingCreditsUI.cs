@@ -200,22 +200,38 @@ public class EndingCreditsUI : MonoBehaviour
         if (inv != null) shards = inv.GetShards();
         string formattedShards = MainMenuManager.FormatCompactNumber(shards);
 
+        float m1Time = MatchTimerUI.Map1ClearTime;
+        float m2Time = MatchTimerUI.Map2ClearTime;
+        float m3Time = MatchTimerUI.Map3ClearTime;
+        float totalTime = MatchTimerUI.CurrentElapsedTime;
+
+        string m1Str = m1Time > 0f ? MatchTimerUI.FormatTime(m1Time) : "--:--";
+        string m2Str = m2Time > 0f ? MatchTimerUI.FormatTime(m2Time) : "--:--";
+        string m3Str = m3Time > 0f ? MatchTimerUI.FormatTime(m3Time) : "--:--";
+        string totalStr = MatchTimerUI.FormatTime(totalTime);
+
+        int totalAugments = AugmentManager.Instance != null ? AugmentManager.Instance.GetSelectedAugments().Count : 0;
+
         if (statsText != null)
         {
             bool isVi = LocalizationManager.IsVietnamese;
+            statsText.fontSize = 18;
+            statsText.lineSpacing = 6f;
             statsText.text = isVi
-                ? $"<color=#FFE066>ẢI ĐÃ HOÀN THÀNH: 2 / 2</color>\n" +
-                  $"<color=#E0E6ED>Chương 1:</color> Tàn Tích Thung Lũng  <color=#52F0FF>[VƯỢT QUA]</color>\n" +
-                  $"<color=#E0E6ED>Chương 2:</color> Ngục Tối Rực Lửa  <color=#52F0FF>[THANH TẨY]</color>\n\n" +
-                  $"<color=#FFE066>TỔNG LINH HỒN:</color> {formattedShards}\n" +
-                  $"<color=#FFE066>XẾP HẠNG TỔNG KẾT:</color> <color=#FF5577>S+ ĐẠI CHIẾN TƯỚNG</color>\n\n" +
-                  $"<i>\"Vòng lặp diệt vong đã bị phá vỡ. Vương quốc Vaelstrider đã tìm lại thái bình.\"</i>"
-                : $"<color=#FFE066>REALMS PURIFIED: 2 / 2</color>\n" +
-                  $"<color=#E0E6ED>Chapter 1:</color> Sunken Sepulcher  <color=#52F0FF>[CLEARED]</color>\n" +
-                  $"<color=#E0E6ED>Chapter 2:</color> Valley Ruin of Ancients  <color=#52F0FF>[PURIFIED]</color>\n\n" +
-                  $"<color=#FFE066>TOTAL AETHEL SHARDS:</color> {formattedShards}\n" +
-                  $"<color=#FFE066>CLEAR RANK:</color> <color=#FF5577>S+ GRAND CHAMPION</color>\n\n" +
-                  $"<i>\"The cycle of decay is broken. The world of Vaelstrider is at peace.\"</i>";
+                ? $"<color=#FFE066><b>HÀNH TRÌNH HOÀN THÀNH TOÀN DIỆN</b></color>\n" +
+                  $"<color=#E0E6ED>Map 1 (Vực Thẳm Khởi Đầu):</color> <color=#52F0FF>{m1Str}</color>  |  <color=#55FFAA>VƯỢT QUA</color>\n" +
+                  $"<color=#E0E6ED>Map 2 (Tàn Tích Thung Lũng):</color> <color=#52F0FF>{m2Str}</color>  |  <color=#55FFAA>THANH TẨY</color>\n" +
+                  $"<color=#E0E6ED>Map 3 (Ký Ức Lãng Quên):</color> <color=#52F0FF>{m3Str}</color>  |  <color=#FFD700>ĐẠI THẮNG</color>\n\n" +
+                  $"<color=#FFE066>TỔNG THỜI GIAN:</color> <color=#FFFFFF><b>{totalStr}</b></color>   |   <color=#FFE066>LÕI SỞ HỮU:</color> <color=#55EFC4><b>{totalAugments}</b></color>   |   <color=#FFE066>LINH HỒN:</color> <color=#FFD700><b>{formattedShards}</b></color>\n" +
+                  $"<color=#FFE066>XẾP HẠNG HÀNH TRÌNH:</color> <color=#FF5577><b>S+ ĐẠI CHIẾN THẦN</b></color>\n\n" +
+                  $"<color=#CBD5E1><i>\"Chân thành cảm ơn bạn đã đồng hành và đóng góp trải nghiệm quý báu cho Vaelstrider: Ruinbound!\"</i></color>"
+                : $"<color=#FFE066><b>COMPLETE JOURNEY CHRONICLE</b></color>\n" +
+                  $"<color=#E0E6ED>Realm 1 (Sunken Sepulcher):</color> <color=#52F0FF>{m1Str}</color>  |  <color=#55FFAA>CLEARED</color>\n" +
+                  $"<color=#E0E6ED>Realm 2 (Valley of Ancients):</color> <color=#52F0FF>{m2Str}</color>  |  <color=#55FFAA>PURIFIED</color>\n" +
+                  $"<color=#E0E6ED>Realm 3 (Forgotten Memories):</color> <color=#52F0FF>{m3Str}</color>  |  <color=#FFD700>CONQUERED</color>\n\n" +
+                  $"<color=#FFE066>TOTAL TIME:</color> <color=#FFFFFF><b>{totalStr}</b></color>   |   <color=#FFE066>AUGMENTS:</color> <color=#55EFC4><b>{totalAugments}</b></color>   |   <color=#FFE066>AETHEL SHARDS:</color> <color=#FFD700><b>{formattedShards}</b></color>\n" +
+                  $"<color=#FFE066>CLEAR RANK:</color> <color=#FF5577><b>S+ GRAND CHAMPION</b></color>\n\n" +
+                  $"<color=#CBD5E1><i>\"Thank you sincerely for your courage and invaluable feedback in forging Vaelstrider: Ruinbound!\"</i></color>";
         }
     }
 
@@ -354,7 +370,7 @@ public class EndingCreditsUI : MonoBehaviour
         sRt.anchorMin = new Vector2(0.5f, 0.5f);
         sRt.anchorMax = new Vector2(0.5f, 0.5f);
         sRt.pivot = new Vector2(0.5f, 0.5f);
-        sRt.sizeDelta = new Vector2(760f, 490f);
+        sRt.sizeDelta = new Vector2(860f, 530f); // Mở rộng khung thống kê kết game từ 760x490 -> 860x530
         sRt.anchoredPosition = Vector2.zero;
 
         Image sBg = statsObj.AddComponent<Image>();
@@ -366,8 +382,8 @@ public class EndingCreditsUI : MonoBehaviour
         GameObject sTitleObj = new GameObject("Title");
         sTitleObj.transform.SetParent(statsObj.transform, false);
         RectTransform sTitleRt = sTitleObj.AddComponent<RectTransform>();
-        sTitleRt.anchoredPosition = new Vector2(0f, 185f);
-        sTitleRt.sizeDelta = new Vector2(650f, 50f);
+        sTitleRt.anchoredPosition = new Vector2(0f, 215f);
+        sTitleRt.sizeDelta = new Vector2(750f, 50f);
         var sTitleTmp = sTitleObj.AddComponent<TextMeshProUGUI>();
         var sTitleLoc = sTitleObj.AddComponent<LocalizedText>();
         sTitleLoc.SetTexts("HOÀN THÀNH HÀNH TRÌNH", "JOURNEY COMPLETED");
@@ -380,8 +396,8 @@ public class EndingCreditsUI : MonoBehaviour
         GameObject sBodyObj = new GameObject("Body");
         sBodyObj.transform.SetParent(statsObj.transform, false);
         RectTransform sBodyRt = sBodyObj.AddComponent<RectTransform>();
-        sBodyRt.anchoredPosition = new Vector2(0f, 25f);
-        sBodyRt.sizeDelta = new Vector2(680f, 220f);
+        sBodyRt.anchoredPosition = new Vector2(0f, 35f);
+        sBodyRt.sizeDelta = new Vector2(780f, 290f);
         var sBodyTmp = sBodyObj.AddComponent<TextMeshProUGUI>();
         sBodyTmp.fontSize = 20;
         sBodyTmp.lineSpacing = 12f;
@@ -392,8 +408,8 @@ public class EndingCreditsUI : MonoBehaviour
         GameObject sBtnContainer = new GameObject("ButtonsContainer");
         sBtnContainer.transform.SetParent(statsObj.transform, false);
         RectTransform sBtnRt = sBtnContainer.AddComponent<RectTransform>();
-        sBtnRt.anchoredPosition = new Vector2(0f, -170f);
-        sBtnRt.sizeDelta = new Vector2(720f, 60f);
+        sBtnRt.anchoredPosition = new Vector2(0f, -195f);
+        sBtnRt.sizeDelta = new Vector2(760f, 60f);
 
         CreateActionButton(sBtnContainer.transform, new Vector2(-240f, 0f), LocalizationManager.T("CHƠI LẠI (RESET)", "PLAY AGAIN"), new Color(0.2f, 0.38f, 0.72f, 1f), ui.OnClickPlayAgain);
         CreateActionButton(sBtnContainer.transform, new Vector2(0f, 0f), LocalizationManager.T("CỔNG THA HÓA (CYCLE II)", "CORRUPTED RIFT (CYCLE II)"), new Color(0.58f, 0.16f, 0.88f, 1f), ui.OnClickEnterCorruptedCycle);
@@ -413,6 +429,9 @@ public class EndingCreditsUI : MonoBehaviour
             "---------------------------------\n\n" +
             "<color=#94A3B8><size=80%>PRODUCED & DIRECTED BY</size></color>\n" +
             "<size=120%><color=#FFFFFF><b>Trương Hùng</b></color></size>\n\n\n" +
+            "<color=#94A3B8><size=80%>GAME AVATAR & CREATIVE CONTRIBUTOR</size></color>\n" +
+            "<size=120%><color=#FFE066><b>Quốc Ánh</b></color></size>\n" +
+            "<size=85%><color=#CBD5E1>Đóng góp ý tưởng & Avatar Chiến Tướng độc quyền</color></size>\n\n\n" +
             "<color=#94A3B8><size=80%>SYSTEM ARCHITECT & AI PAIR PROGRAMMER</size></color>\n" +
             "<size=120%><color=#52F0FF><b>Antigravity</b></color></size>\n" +
             "<size=85%><color=#CBD5E1>Google DeepMind Advanced Agentic Coding</color></size>\n\n\n" +
@@ -435,9 +454,9 @@ public class EndingCreditsUI : MonoBehaviour
             "<color=#FFFFFF><b>Realm 1: Sunken Sepulcher</b></color>\n" +
             "<color=#FFFFFF><b>Realm 2: Valley Ruin of the Ancients</b></color>\n\n\n" +
             "---------------------------------\n\n" +
-            "<color=#94A3B8><size=80%>SPECIAL DEDICATION</size></color>\n" +
-            "<color=#E2E8F0>To every warrior who walked through the darkness,</color>\n" +
-            "<color=#E2E8F0>and held fast until the first light of dawn.</color>\n\n" +
+            "<color=#94A3B8><size=80%>SPECIAL DEDICATION & GRATITUDE</size></color>\n" +
+            "<color=#E2E8F0>Chân thành cảm ơn bạn đã kiên cường vượt qua muôn vàn thử thách,</color>\n" +
+            "<color=#E2E8F0>đã đóng góp những phản hồi quý giá để hoàn thiện thế giới Vaelstrider!</color>\n\n" +
             "<size=130%><color=#FFE066><b>THANK YOU FOR PLAYING!</b></color></size>\n";
     }
 

@@ -19,6 +19,32 @@ public class MatchTimerUI : MonoBehaviour
     private static bool isTimerRunning = false;
     private static float lastFinalTime = 0f;
 
+    // Bộ ghi nhận chi tiết thời gian hoàn thành từng Map riêng biệt trong cả Run
+    private static float map1ClearTime = 0f;
+    private static float map2ClearTime = 0f;
+    private static float map3ClearTime = 0f;
+
+    public static float Map1ClearTime => map1ClearTime;
+    public static float Map2ClearTime => map2ClearTime;
+    public static float Map3ClearTime => map3ClearTime;
+
+    public static void RecordMapClearTime(string mapSceneName)
+    {
+        float current = totalRunElapsedTime;
+        if (mapSceneName.Contains("Map1") || mapSceneName == "SampleScene")
+        {
+            map1ClearTime = current;
+        }
+        else if (mapSceneName.Contains("Map2") || mapSceneName.Contains("Valley"))
+        {
+            map2ClearTime = Mathf.Max(0f, current - map1ClearTime);
+        }
+        else if (mapSceneName.Contains("Map3") || mapSceneName.Contains("Forgotten"))
+        {
+            map3ClearTime = Mathf.Max(0f, current - (map1ClearTime + map2ClearTime));
+        }
+    }
+
     [Header("UI Elements")]
     private TextMeshProUGUI timerText;
     private Image timerBackground;
@@ -131,6 +157,9 @@ public class MatchTimerUI : MonoBehaviour
     {
         totalRunElapsedTime = 0f;
         lastFinalTime = 0f;
+        map1ClearTime = 0f;
+        map2ClearTime = 0f;
+        map3ClearTime = 0f;
         isTimerRunning = true;
         if (Instance != null) Instance.UpdateTimerText();
     }

@@ -90,22 +90,22 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         {
             posXKey = "Game_Controls_Atk_PosX";
             posYKey = "Game_Controls_Atk_PosY";
-            defaultX = -220f;
-            defaultY = 220f;
+            defaultX = -180f;
+            defaultY = 175f;
         }
         else if (buttonType == ButtonType.Dash || gameObject.name == "Btn_Dash")
         {
             posXKey = "Game_Controls_Dash_PosX";
             posYKey = "Game_Controls_Dash_PosY";
-            defaultX = -380f;
-            defaultY = 160f;
+            defaultX = -325f;
+            defaultY = 145f;
         }
         else if (buttonType == ButtonType.Skill || gameObject.name == "Btn_Special" || gameObject.name == "Btn_Skill")
         {
             posXKey = "Game_Controls_Skill_PosX";
             posYKey = "Game_Controls_Skill_PosY";
-            defaultX = -350f;
-            defaultY = 290f;
+            defaultX = -275f;
+            defaultY = 295f;
         }
 
         if (posXKey != null)
