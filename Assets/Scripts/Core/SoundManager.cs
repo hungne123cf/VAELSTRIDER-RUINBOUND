@@ -264,7 +264,7 @@ public class SoundManager : MonoBehaviour
 
     private bool clipsLoaded = false;
 
-    private void AutoLoadClips()
+    public void AutoLoadClips()
     {
         if (clipsLoaded && swordSlashClip != null) return;
         clipsLoaded = true;

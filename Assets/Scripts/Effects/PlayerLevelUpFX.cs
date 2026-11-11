@@ -265,3 +265,4 @@ public class PlayerLevelUpFX : MonoBehaviour
         return _pillarSprite;
     }
 }
+

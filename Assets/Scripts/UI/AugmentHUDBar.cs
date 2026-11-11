@@ -114,10 +114,7 @@ public class AugmentHUDBar : MonoBehaviour
         if (_emptyTmp != null) _emptyTmp.text = isVi ? "Chưa sở hữu Lõi Nâng Cấp nào" : "No Augments acquired yet";
         if (_overviewTitleTmp != null) _overviewTitleTmp.text = isVi ? "TẤT CẢ LÕI NÂNG CẤP ĐÃ CHỌN" : "ALL ACQUIRED AUGMENTS";
         if (_overviewCloseTmp != null) _overviewCloseTmp.text = isVi ? "ĐÓNG" : "CLOSE";
-        if (_fullOverviewPopupObj != null && _fullOverviewPopupObj.activeSelf)
-        {
-            PopulateOverviewContent();
-        }
+        RefreshBadges(true);
     }
 
     // ─── Procedural Augment Core Toggle Icon (Đồng bộ phong cách với Stat Icon) ─
