@@ -104,6 +104,28 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
             AdjustZoom(scroll * 1.5f);
         }
 
+        // Cử chỉ chạm 2 ngón tay Pinch-to-zoom mượt mà trên Mobile:
+        // Mở 2 ngón từ trong ra ngoài -> Phóng to (Zoom In)
+        // Chụm 2 ngón từ ngoài vào trong -> Thu nhỏ (Zoom Out)
+        if (Input.touchCount == 2)
+        {
+            Touch touchZero = Input.GetTouch(0);
+            Touch touchOne = Input.GetTouch(1);
+
+            Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
+            Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
+
+            float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
+            float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
+
+            float deltaMagnitudeDiff = touchDeltaMag - prevTouchDeltaMag;
+
+            if (Mathf.Abs(deltaMagnitudeDiff) > 0.05f)
+            {
+                AdjustZoom(deltaMagnitudeDiff * 0.004f);
+            }
+        }
+
         // Cập nhật vị trí các chấm thực thể thời gian thực
         updateTimer += Time.unscaledDeltaTime;
         if (updateTimer >= 0.04f)
@@ -617,9 +639,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
 
         if (statsText != null)
         {
-            statsText.text = $"{LocalizationManager.T("[THANH] PHÒNG ĐÃ DỌN", "[THANH] CLEARED")}: <color=#2ED573><b>{clearedRooms}/{totalRooms}</b></color>\n" +
+            statsText.text = $"{LocalizationManager.T("PHÒNG ĐÃ DỌN", "ROOMS CLEARED")}: <color=#2ED573><b>{clearedRooms}/{totalRooms}</b></color>\n" +
                              $"{LocalizationManager.T("KẺ THÙ", "ENEMIES")}: <color=#FF4757><b>{enemyCount} {LocalizationManager.T("Quái", "Foes")}</b></color>\n" +
-                             $"{LocalizationManager.T("[NGOC] LINH HỒN", "[NGOC] SHARDS")}: <color=#00D2D3><b>{shards}</b></color>";
+                             $"{LocalizationManager.T("LINH HỒN", "SHARDS")}: <color=#00D2D3><b>{shards:N0}</b></color>";
         }
 
         // 3. Gợi ý Nâng Cấp Thông Minh (Smart Tactical Hints)
@@ -858,8 +880,8 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         plRt.anchoredPosition = new Vector2(0f, 4f);
         plRt.sizeDelta = new Vector2(120f, 24f);
         var pLblTmp = pLblObj.GetComponent<TextMeshProUGUI>();
-        pLblTmp.text = "<b><color=#55EFC4>◆ BẠN ◆</color></b>";
-        pLblTmp.fontSize = 17f;
+        pLblTmp.text = "<b><color=#55EFC4>BẠN</color></b>";
+        pLblTmp.fontSize = 20f;
         pLblTmp.fontStyle = FontStyles.Bold;
         pLblTmp.alignment = TextAlignmentOptions.Center;
         SoulslikeHUDStyler.SetSafeOutline(pLblTmp, 0.40f, Color.black);
@@ -919,20 +941,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         hintText.fontSize = 24f;
         hintText.color = Color.white;
 
-        // 8. Cụm Nút Điều Khiển Bản Đồ (Zoom In, Zoom Out, Focus Player) - To rõ cảm ứng
-        GameObject ctrlPanel = new GameObject("MapControls", typeof(RectTransform));
-        ctrlPanel.layer = 5;
-        ctrlPanel.transform.SetParent(frameObj.transform, false);
-        RectTransform cpRt = ctrlPanel.GetComponent<RectTransform>();
-        cpRt.anchorMin = new Vector2(1f, 0.5f);
-        cpRt.anchorMax = new Vector2(1f, 0.5f);
-        cpRt.pivot = new Vector2(1f, 0.5f);
-        cpRt.anchoredPosition = new Vector2(-25f, 30f);
-        cpRt.sizeDelta = new Vector2(65f, 210f);
-
-        CreateControlButton(ctrlPanel.transform, "+", new Vector2(0f, 70f), () => AdjustZoom(0.25f));
-        CreateControlButton(ctrlPanel.transform, "-", new Vector2(0f, 0f), () => AdjustZoom(-0.25f));
-        CreateControlButton(ctrlPanel.transform, "TARGET", new Vector2(0f, -70f), FocusOnPlayer);
+        // 8. Đã thay thế hoàn toàn cụm nút bấm cũ (+, -, TARGET) bằng:
+        // Cử chỉ chạm 2 ngón tay (Pinch-to-zoom) siêu mượt trên Mobile & Cuộn chuột trên PC!
+        // Giúp bản đồ toàn cảnh rộng rãi, thanh thoát chuẩn Dark Fantasy.
     }
 
     private void CreateControlButton(Transform parent, string label, Vector2 pos, UnityEngine.Events.UnityAction onClick)

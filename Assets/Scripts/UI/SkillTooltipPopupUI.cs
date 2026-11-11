@@ -168,7 +168,7 @@ public class SkillTooltipPopupUI : MonoBehaviour
         categoryText.fontStyle = FontStyles.Bold;
         categoryText.color = new Color(0.4f, 0.85f, 1f);
         categoryText.alignment = TextAlignmentOptions.Left;
-        categoryText.text = "◆ KÍCH HOẠT ◆  •  Tiêu hao: 0  •  Hồi chiêu: 0s";
+        categoryText.text = "(KÍCH HOẠT)  -  Tiêu hao: 0  -  Hồi chiêu: 0s";
         SoulslikeHUDStyler.SetSafeOutline(categoryText, 0.2f, Color.black);
 
         // 3. Đường kẻ ngang phân cách tinh tế
@@ -263,7 +263,7 @@ public class SkillTooltipPopupUI : MonoBehaviour
         if (categoryText != null)
         {
             string catClean = info.skillCategory != null ? info.skillCategory.Replace("[", "").Replace("]", "") : "";
-            categoryText.text = $"<color=#38BDF8>◆ {catClean.ToUpper()} ◆</color>  •  {info.energyCostText}  •  {info.cooldownText}";
+            categoryText.text = $"<color=#38BDF8>({catClean.ToUpper()})</color>  -  {info.energyCostText}  -  {info.cooldownText}";
         }
 
         if (descText != null)

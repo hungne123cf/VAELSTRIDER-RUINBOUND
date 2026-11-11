@@ -179,8 +179,8 @@ public class MailboxUI : MonoBehaviour
         _notices.Add(new MailItemData
         {
             id = "notice_rules",
-            titleVi = "◆ QUY TẮC ◆ BẢO VỆ TÀI KHOẢN VÀ CHỐNG GIAN LẬN",
-            titleEn = "◆ RULES ◆ ACCOUNT SAFETY & FAIR PLAY",
+            titleVi = "[QUY TẮC] BẢO VỆ TÀI KHOẢN VÀ CHỐNG GIAN LẬN",
+            titleEn = "[RULES] ACCOUNT SAFETY & FAIR PLAY",
             senderVi = "Hệ Thống Giám Sát",
             senderEn = "Security System",
             contentVi = "Nhằm xây dựng một môi trường đối kháng công bằng, minh bạch và lành mạnh cho toàn thể game thủ:\n\n1. Nghiêm cấm sử dụng các phần mềm can thiệp bộ nhớ hoặc mod trái phép.\n2. Mọi hành vi gian lận dữ liệu linh hồn sẽ dẫn đến khóa tài khoản vĩnh viễn.\n3. Luôn đăng nhập trên thiết bị an toàn và không chia sẻ tài khoản.\n\nCảm ơn bạn đã đồng hành giữ gìn danh dự chiến binh!",
@@ -194,8 +194,8 @@ public class MailboxUI : MonoBehaviour
         _notices.Add(new MailItemData
         {
             id = "notice_schedule",
-            titleVi = "◆ LỊCH TRÌNH ◆ BẢO TRÌ & LÀM MỚI MỖI 07:00 SÁNG",
-            titleEn = "◆ SCHEDULE ◆ DAILY RESET AT 07:00 AM",
+            titleVi = "[LỊCH TRÌNH] BẢO TRÌ & LÀM MỚI MỖI 07:00 SÁNG",
+            titleEn = "[SCHEDULE] DAILY RESET AT 07:00 AM",
             senderVi = "Ban Quản Trị Vương Quốc",
             senderEn = "Realm Administration",
             contentVi = "Thông báo đến toàn thể dũng sĩ:\n\n- Chu kỳ Điểm danh 7 ngày và Phần thưởng đăng nhập được làm mới chính xác vào 07:00 AM mỗi ngày.\n- Thư có đính kèm phần thưởng sẽ được lưu giữ tối đa 30 ngày kể từ ngày gửi.\n- Vui lòng kiểm tra và nhận thưởng trước khi hết hạn để tránh mất vật phẩm quý giá.\n\nChúc hiệp sĩ một ngày chiến đấu thắng lợi!",
@@ -1123,7 +1123,7 @@ public class MailboxUI : MonoBehaviour
         rsttRt.anchorMax = Vector2.one;
         rsttRt.sizeDelta = Vector2.zero;
         var rsttTmp = rsttObj.AddComponent<TextMeshProUGUI>();
-        rsttTmp.text = isVi ? "<b>◆ KHÔI PHỤC THƯ MẪU ◆</b>" : "<b>◆ RESTORE MAILS ◆</b>";
+        rsttTmp.text = isVi ? "<b>KHÔI PHỤC THƯ MẪU</b>" : "<b>RESTORE MAILS</b>";
         rsttTmp.fontSize = 32f;
         rsttTmp.fontStyle = FontStyles.Bold;
         rsttTmp.alignment = TextAlignmentOptions.Center;

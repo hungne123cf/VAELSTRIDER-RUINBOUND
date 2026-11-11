@@ -89,16 +89,16 @@ public class PlayerExpBarUI : MonoBehaviour
         if (hbRt != null && rootRt != null)
         {
             float startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
-            float startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 3f;
-            float expOffsetY = startY - 46f;
-            float barWidth = Mathf.Max(300f, hbRt.sizeDelta.x - 30f);
+            float startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 4f;
+            float expOffsetY = startY - 48f;
+            float barWidth = Mathf.Max(320f, hbRt.sizeDelta.x - 20f);
             if (Mathf.Abs(rootRt.anchoredPosition.x - startX) > 0.5f || 
                 Mathf.Abs(rootRt.anchoredPosition.y - expOffsetY) > 0.5f ||
                 Mathf.Abs(rootRt.sizeDelta.x - barWidth) > 0.5f ||
-                Mathf.Abs(rootRt.sizeDelta.y - 20f) > 0.5f)
+                Mathf.Abs(rootRt.sizeDelta.y - 26f) > 0.5f)
             {
                 rootRt.anchoredPosition = new Vector2(startX, expOffsetY);
-                rootRt.sizeDelta = new Vector2(barWidth, 20f);
+                rootRt.sizeDelta = new Vector2(barWidth, 26f);
             }
         }
     }
@@ -243,7 +243,7 @@ public class PlayerExpBarUI : MonoBehaviour
         textRt.offsetMax = new Vector2(-12f, 0f);
 
         _expLabelText = textObj.AddComponent<TextMeshProUGUI>();
-        _expLabelText.fontSize = 22f;
+        _expLabelText.fontSize = 26f;
         _expLabelText.fontStyle = FontStyles.Bold;
         _expLabelText.color = new Color(0.98f, 0.94f, 1f, 1f);
         _expLabelText.alignment = TextAlignmentOptions.MidlineRight;

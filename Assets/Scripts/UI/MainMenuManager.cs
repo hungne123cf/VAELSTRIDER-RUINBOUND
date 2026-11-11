@@ -800,7 +800,7 @@ public class MainMenuManager : MonoBehaviour
         btnTxt = txtObj.GetComponent<TextMeshProUGUI>();
         if (btnTxt == null) btnTxt = txtObj.AddComponent<TextMeshProUGUI>();
         if (string.IsNullOrEmpty(btnTxt.text)) btnTxt.text = defaultText;
-        btnTxt.fontSize = (name == "Btn_Play") ? 27f : 18f;
+        btnTxt.fontSize = (name == "Btn_Play") ? 40f : 30f;
         btnTxt.fontStyle = FontStyles.Bold;
         btnTxt.alignment = TextAlignmentOptions.Center;
         btnTxt.color = new Color(0.96f, 0.88f, 0.65f, 1f); // Vàng kim cổ Soulslike
@@ -5697,7 +5697,7 @@ public class MainMenuManager : MonoBehaviour
         // 1. Counter Subtitle
         if (carouselCounterText != null)
         {
-            carouselCounterText.text = $"◆  {currentCarouselIdx + 1} / {carouselHeroIds.Length}  ◆";
+            carouselCounterText.text = $"{currentCarouselIdx + 1} / {carouselHeroIds.Length}";
         }
 
         // 2. Top Currency Shards
@@ -5723,13 +5723,13 @@ public class MainMenuManager : MonoBehaviour
             if (isUnlocked)
             {
                 string ownedStr = LocalizationManager.T("ĐÃ SỞ HỮU", "OWNED");
-                carouselHeroRoleText.text = $"{heroRole}  |  <color=#55FFAA><b>◆ {ownedStr} ◆</b></color>";
+                carouselHeroRoleText.text = $"{heroRole}  |  <color=#55FFAA><b>({ownedStr})</b></color>";
             }
             else
             {
                 string lockedStr = LocalizationManager.T("KHÓA", "LOCKED");
                 string soulsStr = LocalizationManager.T("LINH HỒN", "SOULS");
-                carouselHeroRoleText.text = $"{heroRole}  |  <color=#FFD700><b>◆ {lockedStr} ({price:N0} {soulsStr}) ◆</b></color>";
+                carouselHeroRoleText.text = $"{heroRole}  |  <color=#FFD700><b>({lockedStr} - {price:N0} {soulsStr})</b></color>";
             }
         }
 

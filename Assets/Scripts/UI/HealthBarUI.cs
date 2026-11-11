@@ -224,7 +224,7 @@ public class HealthBarUI : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
 
         tmpHpText = textObj.AddComponent<TextMeshProUGUI>();
-        tmpHpText.fontSize = 24f;
+        tmpHpText.fontSize = 28f;
         tmpHpText.fontStyle = FontStyles.Bold;
         tmpHpText.color = Color.white;
         tmpHpText.alignment = TextAlignmentOptions.MidlineRight;
@@ -249,7 +249,7 @@ public class HealthBarUI : MonoBehaviour
             txtRt.offsetMax = new Vector2(-10f, 0f);
         }
         tmp.alignment = TextAlignmentOptions.MidlineRight;
-        tmp.fontSize = 24f;
+        tmp.fontSize = 28f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = Color.white;
         SoulslikeHUDStyler.SetSafeOutline(tmp, 0.45f, Color.black);
@@ -290,7 +290,7 @@ public class HealthBarUI : MonoBehaviour
             }
 
             tmpHpText.transform.SetAsLastSibling();
-            tmpHpText.fontSize = 24f;
+            tmpHpText.fontSize = 28f;
             tmpHpText.fontStyle = FontStyles.Bold;
 
             // Xếp số máu hiện tại/tối đa trước, giáp và HP ảo ở cuối thanh dạng số thuần túy (bỏ hoàn toàn chữ Ảo)

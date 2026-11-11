@@ -332,9 +332,9 @@ public static class SoulslikeHUDStyler
             scRt.anchorMin = new Vector2(0f, 1f);
             scRt.anchorMax = new Vector2(0f, 1f);
             scRt.pivot = new Vector2(0.5f, 0.5f);
-            // Căn lùi sang phải (X = 206f) ngay dưới thanh EXP, tránh hoàn toàn avatar 110px
-            scRt.anchoredPosition = new Vector2(206f, -138f);
-            scRt.sizeDelta = new Vector2(156f, 36f);
+            // Căn lùi sang phải ngay dưới thanh EXP, phóng to to rõ trên Mobile
+            scRt.anchoredPosition = new Vector2(220f, -145f);
+            scRt.sizeDelta = new Vector2(185f, 44f);
             scRt.localScale = Vector3.one;
         }
 
@@ -366,23 +366,23 @@ public static class SoulslikeHUDStyler
                 iRt.anchorMin = new Vector2(0f, 0.5f);
                 iRt.anchorMax = new Vector2(0f, 0.5f);
                 iRt.pivot = new Vector2(0.5f, 0.5f);
-                iRt.anchoredPosition = new Vector2(22f, 0f);
-                iRt.sizeDelta = new Vector2(28f, 28f);
+                iRt.anchoredPosition = new Vector2(24f, 0f);
+                iRt.sizeDelta = new Vector2(34f, 34f);
             }
         }
 
-        // Chữ số Shard hiển thị bên phải viên ngọc màu vàng kim đồng
+        // Chữ số Shard hiển thị bên phải viên ngọc màu vàng kim đồng (Phóng to 32pt Bold)
         var tmp = sc.GetComponentInChildren<TextMeshProUGUI>();
         if (tmp != null)
         {
             RectTransform tRt = tmp.GetComponent<RectTransform>();
             tRt.anchorMin = new Vector2(0f, 0f);
             tRt.anchorMax = new Vector2(1f, 1f);
-            tRt.offsetMin = new Vector2(42f, 0f);
+            tRt.offsetMin = new Vector2(48f, 0f);
             tRt.offsetMax = new Vector2(-8f, 0f);
 
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            tmp.fontSize = 26f;
+            tmp.fontSize = 32f;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = new Color(0.98f, 0.88f, 0.55f, 1f); // Vàng kim cổ điển Soulslike
             SetSafeOutline(tmp, 0.0f, Color.black);

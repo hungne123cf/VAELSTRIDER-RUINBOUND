@@ -217,8 +217,8 @@ public class AugmentHUDBar : MonoBehaviour
         _rootRt.anchorMin = new Vector2(0f, 1f);
         _rootRt.anchorMax = new Vector2(0f, 1f);
         _rootRt.pivot = new Vector2(0f, 1f);
-        // Nằm ngay phía dưới cụm Avatar/Shards và phía trên Bảng Thống Kê Chỉ Số (x = 24, y = -162)
-        _rootRt.anchoredPosition = new Vector2(24f, -162f);
+        // Nằm ngay phía dưới cụm Avatar/Shards và phía trên Bảng Thống Kê Chỉ Số (x = 24, y = -178)
+        _rootRt.anchoredPosition = new Vector2(24f, -178f);
         _rootRt.sizeDelta = new Vector2(456f, 122f);
 
         TMP_FontAsset font = GameFontManager.BodyFont;
@@ -388,7 +388,7 @@ public class AugmentHUDBar : MonoBehaviour
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null) SetupTooltip(canvas.transform);
 
-        _collapsed = PlayerPrefs.GetInt(PREF_COLLAPSED, 1) == 1;
+        _collapsed = PlayerPrefs.GetInt(PREF_COLLAPSED, 0) == 1;
         ApplyCollapsedState();
     }
 
@@ -438,13 +438,13 @@ public class AugmentHUDBar : MonoBehaviour
 
         if (_collapsed)
         {
-            // Khi hộp Lõi thu gọn (cao 64px tại y = -162), bảng Chỉ Số nằm ngay dưới tại y = -234
-            PlayerStatPanelUI.Instance.SetTopYOffset(-234f);
+            // Khi hộp Lõi thu gọn (cao 64px tại y = -178), bảng Chỉ Số nằm ngay dưới tại y = -250
+            PlayerStatPanelUI.Instance.SetTopYOffset(-250f);
         }
         else
         {
             float h = _rootRt != null ? _rootRt.sizeDelta.y : 122f;
-            PlayerStatPanelUI.Instance.SetTopYOffset(-162f - h - 12f);
+            PlayerStatPanelUI.Instance.SetTopYOffset(-178f - h - 12f);
         }
     }
 
@@ -570,6 +570,11 @@ public class AugmentHUDBar : MonoBehaviour
     public void OnAugmentAcquired(AugmentDatabase.AugmentData aug)
     {
         if (aug == null) return;
+        // Tự động mở rộng hiển thị các Icon Lõi đã chọn trên HUD
+        _collapsed = false;
+        PlayerPrefs.SetInt(PREF_COLLAPSED, 0);
+        PlayerPrefs.Save();
+        ApplyCollapsedState();
         RefreshBadges(true);
     }
 

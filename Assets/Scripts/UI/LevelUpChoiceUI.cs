@@ -1658,8 +1658,8 @@ public class LevelUpChoiceUI : MonoBehaviour
         }
 
         string headerTagText = isHeroSignature
-            ? (isVN ? $"◆ ĐẶC QUYỀN: {heroNameHeader.ToUpper()} ◆" : $"◆ SIGNATURE: {heroNameHeader.ToUpper()} ◆")
-            : (isVN ? $"◆ {typeName.ToUpper()} ◆" : $"◆ {typeName.ToUpper()} ◆");
+            ? (isVN ? $"(ĐẶC QUYỀN: {heroNameHeader.ToUpper()})" : $"(SIGNATURE: {heroNameHeader.ToUpper()})")
+            : $"({typeName.ToUpper()})";
 
         var tagTxtObj = new GameObject("CategoryTagText", typeof(RectTransform), typeof(TextMeshProUGUI));
         tagTxtObj.transform.SetParent(descBoxObj.transform, false);

@@ -118,7 +118,7 @@ public class ChestLootPopupUI : MonoBehaviour
         boxObj.transform.SetParent(root, false);
 
         RectTransform boxRt = boxObj.GetComponent<RectTransform>();
-        boxRt.sizeDelta = new Vector2(800f, 580f);
+        boxRt.sizeDelta = new Vector2(920f, 640f);
         boxRt.anchoredPosition = Vector2.zero;
 
         Image boxImg = boxObj.GetComponent<Image>();
@@ -132,8 +132,8 @@ public class ChestLootPopupUI : MonoBehaviour
         iconObj.layer = 5;
         iconObj.transform.SetParent(boxObj.transform, false);
         RectTransform iconRt = iconObj.GetComponent<RectTransform>();
-        iconRt.anchoredPosition = new Vector2(0f, 195f);
-        iconRt.sizeDelta = new Vector2(56f, 56f);
+        iconRt.anchoredPosition = new Vector2(0f, 225f);
+        iconRt.sizeDelta = new Vector2(68f, 68f);
 
         chestHeaderIcon = iconObj.GetComponent<Image>();
         chestHeaderIcon.preserveAspect = true;
@@ -148,12 +148,12 @@ public class ChestLootPopupUI : MonoBehaviour
         titleObj.layer = 5;
         titleObj.transform.SetParent(boxObj.transform, false);
         RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-        titleRt.anchoredPosition = new Vector2(0f, 150f);
-        titleRt.sizeDelta = new Vector2(580f, 30f);
+        titleRt.anchoredPosition = new Vector2(0f, 172f);
+        titleRt.sizeDelta = new Vector2(700f, 40f);
 
         titleText = titleObj.AddComponent<TextMeshProUGUI>();
         titleText.text = LocalizationManager.T("RƯƠNG BÁU TÀN TÍCH", "ANCIENT RUIN CHEST");
-        titleText.fontSize = 24;
+        titleText.fontSize = 32;
         titleText.fontStyle = FontStyles.Bold;
         titleText.color = new Color(0.98f, 0.88f, 0.55f);
         titleText.alignment = TextAlignmentOptions.Center;
@@ -163,15 +163,15 @@ public class ChestLootPopupUI : MonoBehaviour
         subObj.layer = 5;
         subObj.transform.SetParent(boxObj.transform, false);
         RectTransform subRt = subObj.GetComponent<RectTransform>();
-        subRt.anchoredPosition = new Vector2(0f, 122f);
-        subRt.sizeDelta = new Vector2(580f, 22f);
+        subRt.anchoredPosition = new Vector2(0f, 136f);
+        subRt.sizeDelta = new Vector2(700f, 28f);
 
         subtitleText = subObj.AddComponent<TextMeshProUGUI>();
         subtitleText.text = LocalizationManager.T("Chọn vật phẩm muốn nhặt hoặc nhấn Lấy Tất Cả:", "Select items to take or tap Claim All:");
-        subtitleText.fontSize = 14.5f;
-        subtitleText.color = new Color(0.80f, 0.85f, 0.95f, 0.85f);
+        subtitleText.fontSize = 20f;
+        subtitleText.color = new Color(0.85f, 0.90f, 0.98f, 0.95f);
         SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
-        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 106f), new Vector2(460f, 12f));
+        SoulslikeHUDStyler.AddFiligreeDivider(boxObj.transform, new Vector2(0f, 118f), new Vector2(580f, 14f));
         subtitleText.alignment = TextAlignmentOptions.Center;
 
         // 5. Scroll View (Anti-Overflow, Mobile Touch Swipe)
@@ -180,7 +180,7 @@ public class ChestLootPopupUI : MonoBehaviour
         scrollObj.transform.SetParent(boxObj.transform, false);
         RectTransform scrollRt = scrollObj.GetComponent<RectTransform>();
         scrollRt.anchoredPosition = new Vector2(0f, -5f);
-        scrollRt.sizeDelta = new Vector2(600f, 240f);
+        scrollRt.sizeDelta = new Vector2(760f, 260f);
 
         ScrollRect scrollRect = scrollObj.GetComponent<ScrollRect>();
         scrollRect.horizontal = false;
@@ -303,9 +303,11 @@ public class ChestLootPopupUI : MonoBehaviour
         }
 
         Time.timeScale = 0f;
+        GameAutoBootstrap.SetGameplayHUDVisible(false);
         SoundManager.EnsureInstance()?.PlayChestOpen();
 
         RefreshLootItems();
+        GameFontManager.ApplyFontsGlobally(gameObject);
     }
 
     public void Close()
@@ -314,6 +316,7 @@ public class ChestLootPopupUI : MonoBehaviour
         isOpen = false;
 
         Time.timeScale = 1f;
+        GameAutoBootstrap.SetGameplayHUDVisible(true);
 
         if (canvasGroup != null)
         {
@@ -459,8 +462,8 @@ public class ChestLootPopupUI : MonoBehaviour
         infoRt.anchorMin = new Vector2(0f, 0.5f);
         infoRt.anchorMax = new Vector2(1f, 0.5f);
         infoRt.pivot = new Vector2(0f, 0.5f);
-        infoRt.anchoredPosition = new Vector2(88f, 0f);
-        infoRt.sizeDelta = new Vector2(-240f, 64f);
+        infoRt.anchoredPosition = new Vector2(96f, 0f);
+        infoRt.sizeDelta = new Vector2(-270f, 72f);
 
         var vlg = infoObj.GetComponent<VerticalLayoutGroup>();
         vlg.childAlignment = TextAnchor.MiddleLeft;
@@ -471,42 +474,42 @@ public class ChestLootPopupUI : MonoBehaviour
         vlg.childForceExpandHeight = false;
         vlg.padding = new RectOffset(0, 0, 0, 0);
 
-        // Item Name (Phóng to 22pt Bold rõ nét)
+        // Item Name (Phóng to 26pt Bold to rõ)
         GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(CanvasRenderer), typeof(LayoutElement));
         nameObj.layer = 5;
         nameObj.transform.SetParent(infoObj.transform, false);
         var nLe = nameObj.GetComponent<LayoutElement>();
-        nLe.preferredHeight = 30f;
-        nLe.minHeight = 30f;
+        nLe.preferredHeight = 36f;
+        nLe.minHeight = 36f;
         var nTmp = nameObj.AddComponent<TextMeshProUGUI>();
         nTmp.text = LocalizationManager.IsVietnamese ? item.nameVi : item.nameEn;
-        nTmp.fontSize = 22f;
+        nTmp.fontSize = 26f;
         nTmp.fontStyle = FontStyles.Bold;
         nTmp.color = Color.white;
         nTmp.alignment = TextAlignmentOptions.Left;
         nTmp.overflowMode = TextOverflowModes.Ellipsis;
         nTmp.enableWordWrapping = false;
-        SoulslikeHUDStyler.SetSafeOutline(nTmp, 0.3f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(nTmp, 0.35f, Color.black);
 
-        // Rarity + Quantity Tag (Thay dấu [ ] bằng ◆ ◆ để tuyệt đối không bị chữ z)
+        // Rarity + Quantity Tag (Không dùng [ ] hay ◆ tránh triệt để lỗi chữ z và ô vuông)
         GameObject tagObj = new GameObject("Tag", typeof(RectTransform), typeof(CanvasRenderer), typeof(LayoutElement));
         tagObj.layer = 5;
         tagObj.transform.SetParent(infoObj.transform, false);
         var tLe = tagObj.GetComponent<LayoutElement>();
-        tLe.preferredHeight = 26f;
-        tLe.minHeight = 26f;
+        tLe.preferredHeight = 30f;
+        tLe.minHeight = 30f;
         var tTmp = tagObj.AddComponent<TextMeshProUGUI>();
         string qtyStr = item.quantity > 1 ? $" x{item.quantity}" : "";
         if (item.id == "shards") qtyStr = $" +{item.quantity:N0} {LocalizationManager.T("Linh Hồn", "Shards")}";
-        tTmp.text = $"<color=#{ColorUtility.ToHtmlStringRGB(rarityCol)}>◆ {GetRarityLabel(item.rarity)} ◆</color>{qtyStr}";
-        tTmp.fontSize = 18f;
+        tTmp.text = $"<color=#{ColorUtility.ToHtmlStringRGB(rarityCol)}><b>{GetRarityLabel(item.rarity)}</b></color>  {qtyStr}";
+        tTmp.fontSize = 22f;
         tTmp.fontStyle = FontStyles.Bold;
-        tTmp.color = new Color(0.85f, 0.88f, 0.95f);
+        tTmp.color = new Color(0.88f, 0.92f, 1f);
         tTmp.alignment = TextAlignmentOptions.Left;
         tTmp.enableWordWrapping = false;
-        SoulslikeHUDStyler.SetSafeOutline(tTmp, 0.25f, Color.black);
+        SoulslikeHUDStyler.SetSafeOutline(tTmp, 0.30f, Color.black);
 
-        // "NHẬN" / "LOOT" Button (Phóng to 22pt Bold)
+        // "NHẬN" / "LOOT" Button (Phóng to 24pt Bold)
         GameObject btnObj = new GameObject("Btn_Take", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         btnObj.layer = 5;
         btnObj.transform.SetParent(rowObj.transform, false);
@@ -515,7 +518,7 @@ public class ChestLootPopupUI : MonoBehaviour
         bRt.anchorMax = new Vector2(1f, 0.5f);
         bRt.pivot = new Vector2(1f, 0.5f);
         bRt.anchoredPosition = new Vector2(-12f, 0f);
-        bRt.sizeDelta = new Vector2(145f, 62f);
+        bRt.sizeDelta = new Vector2(160f, 68f);
 
         Image bImg = btnObj.GetComponent<Image>();
         bImg.color = new Color(0.18f, 0.65f, 0.38f, 1f);
@@ -533,7 +536,7 @@ public class ChestLootPopupUI : MonoBehaviour
 
         var bTmp = bTxtObj.AddComponent<TextMeshProUGUI>();
         bTmp.text = LocalizationManager.T("NHẬN", "LOOT");
-        bTmp.fontSize = 22f;
+        bTmp.fontSize = 24f;
         bTmp.fontStyle = FontStyles.Bold;
         bTmp.color = Color.white;
         bTmp.alignment = TextAlignmentOptions.Center;

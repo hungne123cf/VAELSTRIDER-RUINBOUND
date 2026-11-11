@@ -77,14 +77,14 @@ public class PlayerEnergyUI : MonoBehaviour
         {
             float startX = hbRt.anchoredPosition.x - (hbRt.sizeDelta.x * hbRt.pivot.x);
             float startY = hbRt.anchoredPosition.y - (hbRt.sizeDelta.y * (1f - hbRt.pivot.y)) - 3f;
-            float barWidth = Mathf.Max(320f, hbRt.sizeDelta.x - 10f);
+            float barWidth = Mathf.Max(340f, hbRt.sizeDelta.x - 10f);
             if (Mathf.Abs(rootRt.anchoredPosition.x - startX) > 0.5f || 
                 Mathf.Abs(rootRt.anchoredPosition.y - startY) > 0.5f ||
                 Mathf.Abs(rootRt.sizeDelta.x - barWidth) > 0.5f ||
-                Mathf.Abs(rootRt.sizeDelta.y - 46f) > 0.5f)
+                Mathf.Abs(rootRt.sizeDelta.y - 50f) > 0.5f)
             {
                 rootRt.anchoredPosition = new Vector2(startX, startY);
-                rootRt.sizeDelta = new Vector2(barWidth, 46f);
+                rootRt.sizeDelta = new Vector2(barWidth, 50f);
 
                 if (energySlider != null)
                 {
@@ -92,7 +92,7 @@ public class PlayerEnergyUI : MonoBehaviour
                     if (cachedEnergySliderRt != null)
                     {
                         cachedEnergySliderRt.anchoredPosition = new Vector2(0f, 0f);
-                        cachedEnergySliderRt.sizeDelta = new Vector2(barWidth, 24f);
+                        cachedEnergySliderRt.sizeDelta = new Vector2(barWidth, 30f);
                     }
                 }
                 if (innerEnergySlider != null)
@@ -169,7 +169,7 @@ public class PlayerEnergyUI : MonoBehaviour
             tRt.offsetMax = new Vector2(-10f, 0f);
         }
         tmp.alignment = TextAlignmentOptions.MidlineRight;
-        tmp.fontSize = 22f;
+        tmp.fontSize = 26f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.color = new Color(0.85f, 0.96f, 1f, 1f); // Lam ngọc ánh sáng
         SoulslikeHUDStyler.SetSafeOutline(tmp, 0.40f, Color.black);
@@ -493,7 +493,7 @@ public class PlayerEnergyUI : MonoBehaviour
         textRt.offsetMax = new Vector2(-8f, 0f);
 
         labelText = textObj.AddComponent<TextMeshProUGUI>();
-        labelText.fontSize = 22f;
+        labelText.fontSize = 26f;
         labelText.fontStyle = FontStyles.Bold;
         labelText.color = new Color(0.80f, 0.93f, 1f, 1f);
         labelText.alignment = TextAlignmentOptions.MidlineRight;

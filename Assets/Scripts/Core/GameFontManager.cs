@@ -166,17 +166,42 @@ public static class GameFontManager
 
     /// <summary>
     /// Chuẩn hóa chuỗi văn bản:
-    /// 1. Khử hoàn toàn dấu mở ngoặc vuông '[' và đóng ']' biến thành '◆' hoặc ký tự an toàn
+    /// 1. Khử hoàn toàn dấu mở ngoặc vuông '[' và đóng ']' biến thành '(' và ')'
     ///    để khắc phục triệt để lỗi font Dreams Unwound SDF ánh xạ mã ASCII 91 sang chữ 'z'.
-    /// 2. Thay thế ký tự em-dash/en-dash dài (—, –) thành dấu gạch nối ngắn '-' tránh lỗi ô vuông.
+    /// 2. Khử triệt để các ký tự Unicode ngoài ASCII chuẩn (◆, ■, ▲, ★, ✔, ✖...) biến thành ký tự an toàn
+    ///    để tránh hoàn toàn lỗi ô vuông '□' (missing glyph) trên Android.
+    /// 3. Thay thế ký tự em-dash/en-dash dài (—, –) thành dấu gạch nối ngắn '-' tránh lỗi ô vuông.
     /// </summary>
     public static string SanitizeText(string text)
     {
         if (string.IsNullOrEmpty(text)) return text;
         if (text.Contains("\u2014") || text.Contains("\u2013"))
             text = text.Replace('\u2014', '-').Replace('\u2013', '-');
+        
+        // Khử các tag thừa vô nghĩa
+        if (text.Contains("[THANH]") || text.Contains("zTHANH]"))
+            text = text.Replace("[THANH]", "").Replace("zTHANH]", "");
+        if (text.Contains("[NGOC]") || text.Contains("zNGOC]"))
+            text = text.Replace("[NGOC]", "").Replace("zNGOC]", "");
+        if (text.Contains("[TIỀN TỆ]") || text.Contains("z TIỀN TỆ]") || text.Contains("zTIỀN TỆ]"))
+            text = text.Replace("[TIỀN TỆ]", "(Tiền tệ)").Replace("z TIỀN TỆ]", "(Tiền tệ)").Replace("zTIỀN TỆ]", "(Tiền tệ)");
+        if (text.Contains("[HIẾM]") || text.Contains("z HIẾM]") || text.Contains("zHIẾM]"))
+            text = text.Replace("[HIẾM]", "(Hiếm)").Replace("z HIẾM]", "(Hiếm)").Replace("zHIẾM]", "(Hiếm)");
+        if (text.Contains("[BẠN]") || text.Contains("zBẠN]") || text.Contains("z BẠN]"))
+            text = text.Replace("[BẠN]", "BẠN").Replace("zBẠN]", "BẠN").Replace("z BẠN]", "BẠN");
+
+        // Thay dấu ngoặc vuông bằng ngoặc đơn an toàn ASCII
         if (text.Contains("[") || text.Contains("]"))
-            text = text.Replace("[", "◆ ").Replace("]", " ◆");
+            text = text.Replace("[", "(").Replace("]", ")");
+
+        // Khử toàn bộ ký tự biểu tượng Unicode lạ gây ô vuông □
+        if (text.Contains("◆")) text = text.Replace("◆", "");
+        if (text.Contains("■")) text = text.Replace("■", "-");
+        if (text.Contains("▲")) text = text.Replace("▲", "^");
+        if (text.Contains("★")) text = text.Replace("★", "*");
+        if (text.Contains("✔")) text = text.Replace("✔", "V");
+        if (text.Contains("✖")) text = text.Replace("✖", "X");
+
         return text;
     }
 
@@ -212,22 +237,22 @@ public static class GameFontManager
 
                 if (txt.enableAutoSizing)
                 {
-                    if (txt.fontSizeMin < 22f) txt.fontSizeMin = 22f;
-                    if (txt.fontSizeMax < 40f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.35f, 40f);
+                    if (txt.fontSizeMin < 26f) txt.fontSizeMin = 26f;
+                    if (txt.fontSizeMax < 46f) txt.fontSizeMax = Mathf.Max(txt.fontSizeMax * 1.5f, 48f);
                 }
                 else
                 {
-                    if (txt.fontSize < 18f)
+                    if (txt.fontSize < 20f)
                     {
-                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.55f, 22f, 28f);
+                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.75f, 28f, 34f);
                     }
-                    else if (txt.fontSize < 28f)
+                    else if (txt.fontSize < 30f)
                     {
-                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.35f, 28f, 36f);
+                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.45f, 34f, 42f);
                     }
-                    else if (txt.fontSize < 44f)
+                    else if (txt.fontSize < 46f)
                     {
-                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.25f, 38f, 48f);
+                        txt.fontSize = Mathf.Clamp(txt.fontSize * 1.30f, 44f, 54f);
                     }
                 }
             }

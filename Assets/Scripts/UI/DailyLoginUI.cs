@@ -547,17 +547,17 @@ public class DailyLoginUI : MonoBehaviour
             else if (isMissed)
             {
                 stImg.color = new Color(0.24f, 0.10f, 0.12f, 0.80f);
-                stTmp.text = isVi ? "<color=#E74C3C><b>✖ BỎ LỠ</b></color>" : "<color=#E74C3C><b>✖ MISSED</b></color>";
+                stTmp.text = isVi ? "<color=#E74C3C><b>BỎ LỠ</b></color>" : "<color=#E74C3C><b>MISSED</b></color>";
             }
             else if (isAvailableToday)
             {
                 stImg.color = new Color(0.12f, 0.40f, 0.35f, 0.95f);
-                stTmp.text = isVi ? "<color=#55EFC4><b>◆ NHẬN NGAY ◆</b></color>" : "<color=#55EFC4><b>◆ CLAIM NOW ◆</b></color>";
+                stTmp.text = isVi ? "<color=#55EFC4><b>NHẬN NGAY</b></color>" : "<color=#55EFC4><b>CLAIM NOW</b></color>";
             }
             else
             {
                 stImg.color = new Color(0.10f, 0.12f, 0.16f, 0.85f);
-                stTmp.text = isVi ? "<color=#ECEFF1><b>◆ CHƯA ĐẾN ◆</b></color>" : "<color=#ECEFF1><b>◆ LOCKED ◆</b></color>";
+                stTmp.text = isVi ? "<color=#ECEFF1><b>CHƯA ĐẾN</b></color>" : "<color=#ECEFF1><b>LOCKED</b></color>";
             }
         }
 

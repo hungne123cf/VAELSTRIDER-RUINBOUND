@@ -418,7 +418,7 @@ public class BossHealthBarUI : MonoBehaviour
             {
                 string armLabel = LocalizationManager.T("GIÁP", "ARM");
                 string resLabel = LocalizationManager.T("KHÁNG", "RES");
-                armorInfo = $"<size=19><color=#F97316><b>◆ {armLabel}: {armor.CurrentPhysicalArmor} ◆</b></color>   <color=#C084FC><b>◆ {resLabel}: {armor.CurrentMagicArmor} ◆</b></color></size>";
+                armorInfo = $"<size=24><color=#F97316><b>{armLabel}: {armor.CurrentPhysicalArmor}</b></color>   <color=#C084FC><b>{resLabel}: {armor.CurrentMagicArmor}</b></color></size>";
             }
 
             if (!string.IsNullOrEmpty(armorInfo))
