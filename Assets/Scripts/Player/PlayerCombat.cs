@@ -580,6 +580,7 @@ public class PlayerCombat : MonoBehaviour
             var roninSkill = GetComponent<GaleRoninSkill>();
             var duneSkill = GetComponent<DuneAssassinSkill>();
             var mageSkill = GetComponent<CelestialMageSkill>();
+            var mechSkill = GetComponent<AbyssalMechSkill>();
 
             if (Input.GetKeyDown(KeyCode.J) || (Input.GetMouseButtonDown(0) && !IsPointerOverUI()))
             {
@@ -587,7 +588,8 @@ public class PlayerCombat : MonoBehaviour
                                  (azureBlade == null || azureBlade.IsAttackReady) &&
                                  (roninSkill == null || roninSkill.IsAttackReady) &&
                                  (duneSkill == null || duneSkill.IsAttackReady) &&
-                                 (mageSkill == null || mageSkill.IsAttackReady);
+                                 (mageSkill == null || mageSkill.IsAttackReady) &&
+                                 (mechSkill == null || mechSkill.IsAttackReady);
 
                 if (canAttack)
                 {
@@ -610,6 +612,10 @@ public class PlayerCombat : MonoBehaviour
                     {
                         mageSkill.StartBarrierCharge(initialAim);
                     }
+                    else if (mechSkill != null && mechSkill.enabled)
+                    {
+                        mechSkill.StartVortexCharge(initialAim);
+                    }
                 }
             }
 
@@ -621,6 +627,10 @@ public class PlayerCombat : MonoBehaviour
                 if (mageSkill != null && mageSkill.enabled)
                 {
                     mageSkill.UpdateBarrierCharge(aimDir, attackHoldDuration);
+                }
+                else if (mechSkill != null && mechSkill.enabled)
+                {
+                    mechSkill.UpdateVortexCharge(aimDir, attackHoldDuration);
                 }
                 else if (duneSkill != null && duneSkill.enabled)
                 {
@@ -717,6 +727,22 @@ public class PlayerCombat : MonoBehaviour
                     else
                     {
                         if (mageSkill.IsChargingBarrier) mageSkill.ReleaseBarrierCharge(aimDir, 0);
+                        if (aimDir.sqrMagnitude > 0.01f && playerController != null)
+                        {
+                            playerController.SetFacingDirection(aimDir);
+                        }
+                        PerformAttack();
+                    }
+                }
+                else if (mechSkill != null && mechSkill.enabled)
+                {
+                    if (mechSkill.IsChargingVortex && cachedHoldDur >= 0.20f)
+                    {
+                        mechSkill.ReleaseVortexCharge(aimDir, bonusAttackDamage);
+                    }
+                    else
+                    {
+                        if (mechSkill.IsChargingVortex) mechSkill.CancelVortexCharge();
                         if (aimDir.sqrMagnitude > 0.01f && playerController != null)
                         {
                             playerController.SetFacingDirection(aimDir);

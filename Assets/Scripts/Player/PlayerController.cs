@@ -160,6 +160,9 @@ public class PlayerController : MonoBehaviour
         var titan = GetComponent<TitanBerserkerSkill>();
         if (titan != null && titan.IsChargingEarthshaker) return;
 
+        var mech = GetComponent<AbyssalMechSkill>();
+        if (mech != null && mech.IsChargingVortex) return; // Miễn nhiễm choáng khi cơ giáp đang cắm neo gồng bọt nước
+
         var combat = GetComponent<PlayerCombat>();
         if (combat != null && combat.IsParrying) return;
 
@@ -740,6 +743,13 @@ public class PlayerController : MonoBehaviour
             if (titan != null && titan.enabled)
             {
                 titan.TriggerDashSpin();
+            }
+
+            // Kích hoạt Lướt Sóng Thâm Hải & Vệt Nước Trơn Trượt cho Hải Thần Cơ Giáp (Player 7)
+            var mechSkill = GetComponent<AbyssalMechSkill>();
+            if (mechSkill != null && mechSkill.enabled)
+            {
+                mechSkill.OnPerformHydroDash(lastFacingDirection);
             }
 
             // Kích hoạt Thánh Thuẫn Phản Đòn cho Hiệp Sĩ Vaelstrider (Player 1)

@@ -15,10 +15,21 @@ public class AbyssalMechSkill : MonoBehaviour
     public float attackCooldown = 0.34f;
     private float attackCooldownTimer = 0f;
 
-    [Header("--- NỘI TẠI: GIÁP LẶN THÂM HẢI (ABYSSAL ARMOR) ---")]
-    [Range(0f, 0.5f)]
-    public float innateDamageReduction = 0.18f; // Giảm 18% sát thương nhận vào
-    private float bubbleShieldTimer = 0f;
+    [Header("--- CHIÊU GỒNG: XOÁY THỦY TRIỀU & ĐỊA CHẤN MỎ NEO (HOLD CHARGE) ---")]
+    public float minChargeDuration = 0.20f;
+    public float maxChargeDuration = 1.0f;
+    private bool isChargingVortex = false;
+    private float currentChargeDuration = 0f;
+    private Vector2 currentAimDir = Vector2.right;
+    private GameObject vortexPullAuraObj = null;
+
+    public bool IsChargingVortex => isChargingVortex;
+    public float CurrentChargeRatio => Mathf.Clamp01(currentChargeDuration / maxChargeDuration);
+
+    [Header("--- CHIÊU LƯỚT: LƯỚT SÓNG THÂM HẢI (HYDRO-THRUST SURGE) ---")]
+    public float dashSpeedBoost = 1.30f; // Tăng 30% tốc chạy trên vệt nước
+    private static readonly List<Vector3> activeWaterTrailPoints = new List<Vector3>();
+
     public bool HasBubbleShield => bubbleShieldTimer > 0f;
 
     [Header("--- HỆ THỐNG NỘ ĐẠI DƯƠNG (TIDAL RAGE) ---")]
@@ -79,7 +90,7 @@ public class AbyssalMechSkill : MonoBehaviour
 
     public bool IsAttacking => isAttacking;
     public bool IsExecutingSkill => isExecutingSkill;
-    public bool IsAttackReady => attackCooldownTimer <= 0f && !isAttacking && !isExecutingSkill;
+    public bool IsAttackReady => attackCooldownTimer <= 0f && !isAttacking && !isExecutingSkill && !isChargingVortex;
     public bool IsMaelstromReady => maelstromCooldownTimer <= 0f && !isExecutingSkill;
     public float MaelstromCooldownRemaining => Mathf.Max(0f, maelstromCooldownTimer);
     public float MaelstromCooldownRatio => maelstromCooldown > 0f ? Mathf.Clamp01(maelstromCooldownTimer / maelstromCooldown) : 0f;
@@ -300,7 +311,7 @@ public class AbyssalMechSkill : MonoBehaviour
     void LateUpdate()
     {
         if (playerHealth != null && playerHealth.IsDead) return;
-        if (isAttacking || isExecutingSkill || isPlayingHurt || activeActionRoutine != null) return;
+        if (isAttacking || isExecutingSkill || isPlayingHurt || isChargingVortex || activeActionRoutine != null) return;
 
         if (animator != null && animator.enabled)
         {
@@ -393,6 +404,221 @@ public class AbyssalMechSkill : MonoBehaviour
             yield return new WaitForSeconds(0.055f);
         }
         isPlayingHurt = false;
+    }
+
+    // =========================================================================
+    // 1.5. CHIÊU GỒNG: XOÁY THỦY TRIỀU & ĐỊA CHẤN MỎ NEO (HOLD CHARGE)
+    // =========================================================================
+    public void StartVortexCharge(Vector2 aimDir)
+    {
+        if (playerHealth != null && playerHealth.IsDead) return;
+        EnsureAllSpritesLoaded();
+
+        isChargingVortex = true;
+        currentChargeDuration = 0f;
+        currentAimDir = (aimDir.sqrMagnitude > 0.01f) ? aimDir.normalized : GetFacingDirection();
+        UpdateFacingFlip(currentAimDir);
+
+        if (atk1Frames != null && atk1Frames.Length > 2 && spriteRenderer != null)
+        {
+            spriteRenderer.sprite = atk1Frames[2]; // Pose cắm neo gồng bọt nước
+        }
+
+        CreateVortexPullAura();
+        SoundManager.EnsureInstance()?.PlaySwordSlash();
+    }
+
+    public void UpdateVortexCharge(Vector2 aimDir, float duration)
+    {
+        if (!isChargingVortex) return;
+        currentChargeDuration = Mathf.Clamp(duration, 0f, maxChargeDuration);
+        if (aimDir.sqrMagnitude > 0.01f)
+        {
+            currentAimDir = aimDir.normalized;
+            UpdateFacingFlip(currentAimDir);
+        }
+
+        // Tạo vòng xoáy kéo hút quái vật trong bán kính 3.5m vào chân cơ giáp
+        Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, 3.5f);
+        foreach (var c in cols)
+        {
+            if (c == null || c.gameObject == gameObject || c.transform.IsChildOf(transform)) continue;
+            var damageable = c.GetComponent<IDamageable>() ?? c.GetComponentInParent<IDamageable>();
+            if (damageable == null || damageable is PlayerHealth) continue;
+
+            var rb = c.GetComponent<Rigidbody2D>() ?? c.GetComponentInParent<Rigidbody2D>();
+            if (rb != null)
+            {
+                Vector2 pull = ((Vector2)transform.position - (Vector2)c.transform.position);
+                if (pull.magnitude > 0.4f)
+                {
+                    rb.linearVelocity = pull.normalized * 2.8f;
+                }
+            }
+        }
+
+        if (vortexPullAuraObj != null)
+        {
+            vortexPullAuraObj.transform.Rotate(0f, 0f, -360f * Time.deltaTime);
+            float scale = Mathf.Lerp(1.2f, 2.2f, CurrentChargeRatio);
+            vortexPullAuraObj.transform.localScale = new Vector3(scale, scale, 1f);
+        }
+    }
+
+    public void CancelVortexCharge()
+    {
+        isChargingVortex = false;
+        currentChargeDuration = 0f;
+        if (vortexPullAuraObj != null) Destroy(vortexPullAuraObj);
+    }
+
+    public void ReleaseVortexCharge(Vector2 aimDir, int bonusAtk)
+    {
+        if (!isChargingVortex) return;
+        float ratio = CurrentChargeRatio;
+        isChargingVortex = false;
+        if (vortexPullAuraObj != null) Destroy(vortexPullAuraObj);
+
+        if (aimDir.sqrMagnitude < 0.01f) aimDir = currentAimDir;
+        else aimDir.Normalize();
+
+        if (activeActionRoutine != null) StopCoroutine(activeActionRoutine);
+        activeActionRoutine = StartCoroutine(ReleaseTitanicSmashRoutine(aimDir, ratio, bonusAtk));
+    }
+
+    private IEnumerator ReleaseTitanicSmashRoutine(Vector2 aimDir, float ratio, int bonusAtk)
+    {
+        isAttacking = true;
+        UpdateFacingFlip(aimDir);
+
+        // Chạy frame quất và bổ mỏ neo chấn địa
+        if (atk2Frames != null && atk2Frames.Length > 0)
+        {
+            for (int i = 0; i < Mathf.Min(5, atk2Frames.Length); i++)
+            {
+                if (spriteRenderer != null) spriteRenderer.sprite = atk2Frames[i];
+                yield return new WaitForSeconds(0.04f);
+            }
+        }
+
+        // Kích hoạt nện bộc phá địa chấn nước
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.18f + ratio * 0.15f, 0.22f);
+
+        Vector3 smashCenter = transform.position + (Vector3)(aimDir * 1.5f);
+        float smashRadius = Mathf.Lerp(2.2f, 3.4f, ratio);
+        int damage = Mathf.RoundToInt((GetEffectiveAttackDamage() + bonusAtk) * Mathf.Lerp(1.6f, 2.8f, ratio));
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(smashCenter, smashRadius);
+        HashSet<GameObject> hitRoots = new HashSet<GameObject>();
+        int hitCount = 0;
+
+        foreach (var col in hits)
+        {
+            if (col == null || col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
+            var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
+            if (damageable == null || damageable is PlayerHealth) continue;
+
+            GameObject rootObj = (damageable as Component)?.gameObject ?? col.gameObject;
+            if (hitRoots.Contains(rootObj)) continue;
+            hitRoots.Add(rootObj);
+
+            int finalDmg = AugmentManager.ProcessOutgoingDamage(gameObject, rootObj, damage);
+            damageable.TakeDamage(finalDmg);
+            DamagePopup.Create(rootObj.transform.position, finalDmg, DamageType.TrueDamage, isCritical: (ratio >= 0.7f));
+            AugmentManager.TriggerOnHitAugments(gameObject, rootObj, finalDmg, damageable);
+            playerCombat?.ApplyLifesteal(finalDmg, DamageType.TrueDamage);
+
+            // Hất tung kẻ địch lên cao
+            var rb = col.GetComponent<Rigidbody2D>() ?? col.GetComponentInParent<Rigidbody2D>();
+            if (rb != null)
+            {
+                Vector2 push = ((Vector2)col.transform.position - (Vector2)transform.position).normalized;
+                rb.AddForce((push + Vector2.up * 1.5f).normalized * (8f + ratio * 6f), ForceMode2D.Impulse);
+            }
+
+            hitCount++;
+        }
+
+        // Hồi 8% lượng máu đã mất nếu trúng từ 2 kẻ địch trở lên
+        if (hitCount >= 2 && playerHealth != null && !playerHealth.IsDead)
+        {
+            int lostHp = Mathf.Max(0, playerHealth.MaxHealth - playerHealth.CurrentHealth);
+            if (lostHp > 0) playerHealth.Heal(Mathf.Max(3, Mathf.RoundToInt(lostHp * 0.08f)));
+            ActivateBubbleShield(3.0f);
+        }
+
+        AddRage(20f + hitCount * 6f);
+        attackCooldownTimer = attackCooldown;
+        isAttacking = false;
+        activeActionRoutine = null;
+    }
+
+    private void CreateVortexPullAura()
+    {
+        if (vortexPullAuraObj != null) Destroy(vortexPullAuraObj);
+        vortexPullAuraObj = new GameObject("AbyssalVortexPullAura");
+        vortexPullAuraObj.transform.SetParent(transform, false);
+        vortexPullAuraObj.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+
+        var sr = vortexPullAuraObj.AddComponent<SpriteRenderer>();
+        if (whirlpoolFrames != null && whirlpoolFrames.Length > 0)
+        {
+            sr.sprite = whirlpoolFrames[0];
+        }
+        sr.color = new Color(0.2f, 0.85f, 1f, 0.65f);
+        sr.sortingOrder = 8;
+    }
+
+    // =========================================================================
+    // 1.6. CHIÊU LƯỚT: LƯỚT SÓNG THÂM HẢI & VỆT NƯỚC TRƠN TRƯỢT (DASH)
+    // =========================================================================
+    public void OnPerformHydroDash(Vector2 dashDir)
+    {
+        if (dashDir.sqrMagnitude < 0.01f) dashDir = GetFacingDirection();
+        dashDir.Normalize();
+
+        ActivateBubbleShield(1.8f);
+        AddRage(15f);
+
+        // Tạo vệt nước trơn trượt tại vị trí lướt
+        StartCoroutine(SpawnWaterTrailRoutine(transform.position, dashDir));
+    }
+
+    private IEnumerator SpawnWaterTrailRoutine(Vector3 startPos, Vector2 dir)
+    {
+        GameObject trailObj = new GameObject("AbyssalWaterTrail");
+        trailObj.transform.position = startPos;
+        var sr = trailObj.AddComponent<SpriteRenderer>();
+        if (whirlpoolFrames != null && whirlpoolFrames.Length > 0)
+        {
+            sr.sprite = whirlpoolFrames[1];
+        }
+        sr.color = new Color(0.3f, 0.9f, 1f, 0.55f);
+        sr.sortingOrder = 3; // Nằm sát sàn
+        trailObj.transform.localScale = new Vector3(2.2f, 1.1f, 1f);
+
+        float dur = 2.5f;
+        float el = 0f;
+        while (el < dur)
+        {
+            el += Time.deltaTime;
+            // Làm chậm 40% quái vật dẫm lên vệt nước
+            Collider2D[] cols = Physics2D.OverlapCircleAll(trailObj.transform.position, 1.8f);
+            foreach (var c in cols)
+            {
+                if (c == null || c.gameObject == gameObject) continue;
+                var enemyController = c.GetComponent<EnemyController>() ?? c.GetComponentInParent<EnemyController>();
+                if (enemyController != null)
+                {
+                    enemyController.ApplySlow(0.40f, 0.5f);
+                }
+            }
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        if (trailObj != null) Destroy(trailObj);
     }
 
     // =========================================================================

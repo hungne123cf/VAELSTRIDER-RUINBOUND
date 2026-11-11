@@ -664,7 +664,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (mech != null && mech.enabled)
         {
             float red = mech.innateDamageReduction + (mech.HasBubbleShield ? 0.32f : 0f);
-            damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - Mathf.Clamp(red, 0f, 0.70f))));
+            if (mech.IsChargingVortex) red += 0.40f; // Giảm thêm 40% sát thương khi đang cắm neo gồng bọt nước
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - Mathf.Clamp(red, 0f, 0.85f))));
             mech.PlayHurtVisual();
         }
 
