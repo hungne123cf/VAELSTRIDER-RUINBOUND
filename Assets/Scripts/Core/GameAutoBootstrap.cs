@@ -1117,9 +1117,6 @@ public class GameAutoBootstrap : MonoBehaviour
             if (mage != null) Object.Destroy(mage);
 
             var mech = player.GetComponent<AbyssalMechSkill>();
-            if (mech != null) Object.Destroy(mech);
-
-            var mech = player.GetComponent<AbyssalMechSkill>();
             if (mech == null)
             {
                 mech = player.gameObject.AddComponent<AbyssalMechSkill>();

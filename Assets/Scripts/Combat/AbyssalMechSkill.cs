@@ -262,7 +262,7 @@ public class AbyssalMechSkill : MonoBehaviour
         currentRage = Mathf.Clamp(currentRage + amount, 0f, maxRage);
         if (!wasFull && IsRageFull)
         {
-            SoundManager.EnsureInstance()?.PlayLevelUp();
+            SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
             var cam = FindAnyObjectByType<CameraFollow>();
             if (cam != null) cam.Shake(0.12f, 0.16f);
         }
@@ -704,7 +704,7 @@ public class AbyssalMechSkill : MonoBehaviour
 
         // Bật khiên bong bóng bảo vệ trong suốt quá trình tung Ultimate
         ActivateBubbleShield(3.5f);
-        SoundManager.EnsureInstance()?.PlayLevelUp();
+        SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
 
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.25f, 0.22f);
