@@ -930,6 +930,19 @@ public class PlayerCombat : MonoBehaviour
             return;
         }
 
+        // Kich hoat Hai Than Co Giap cho Nhan vat 7 (Abyssal Mech)
+        if (selectedHero == CharacterManager.CHAR_ABYSSAL_MECH || GetComponent<AbyssalMechSkill>() != null)
+        {
+            var mech = GetComponent<AbyssalMechSkill>();
+            if (mech == null) mech = gameObject.AddComponent<AbyssalMechSkill>();
+            mech.enabled = true;
+            if (!mech.IsAttackReady) return;
+
+            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.right;
+            mech.TryExecuteAnchorAttack(facing);
+            return;
+        }
+
         // Đòn đánh mặc định (Vaelstrider)
         float minInterval = 0.22f / AttackSpeedMultiplier;
         if (Time.time - lastAttackTime < minInterval) return; // Khoảng cách giữa 2 đòn thu ngắn lại theo Tốc Độ Đánh
@@ -1143,6 +1156,18 @@ public class PlayerCombat : MonoBehaviour
             bool mRes = mage.TriggerSpecialSkill(); if (mRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return mRes;
         }
 
+        // Kích hoạt Tuyệt kỹ Đại Hồng Thủy Cá Mập của Hải Thần Cơ Giáp (Player 7)
+        if (selectedHero == CharacterManager.CHAR_ABYSSAL_MECH || GetComponent<AbyssalMechSkill>() != null)
+        {
+            var mech = GetComponent<AbyssalMechSkill>();
+            if (mech == null) mech = gameObject.AddComponent<AbyssalMechSkill>();
+            mech.enabled = true;
+            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : mech.GetFacingDirection();
+            bool amRes = mech.TryExecuteSharkTsunami(facing);
+            if (amRes) AugmentManager.Instance?.OnSkillCasted(transform.position);
+            return amRes;
+        }
+
         // Kích hoạt Tuyệt kỹ Sweep The Weak nếu là Maid
         var sweepSkill = GetComponent<SweepTheWeakSkill>();
         if (sweepSkill != null && sweepSkill.enabled)
@@ -1353,6 +1378,9 @@ public class PlayerCombat : MonoBehaviour
         var mage = GetComponent<CelestialMageSkill>();
         if (mage != null && mage.enabled) return mage.SpecialCooldownRatio;
 
+        var mech = GetComponent<AbyssalMechSkill>();
+        if (mech != null && mech.enabled) return mech.SpecialCooldownRatio;
+
         return (skillCooldown > 0f) ? Mathf.Clamp01(skillCooldownTimer / skillCooldown) : 0f;
     }
 
@@ -1373,6 +1401,9 @@ public class PlayerCombat : MonoBehaviour
         var mage = GetComponent<CelestialMageSkill>();
         if (mage != null && mage.enabled) return mage.SpecialCooldownRemaining;
 
+        var mech = GetComponent<AbyssalMechSkill>();
+        if (mech != null && mech.enabled) return mech.SpecialCooldownRemaining;
+
         return Mathf.Max(0f, skillCooldownTimer);
     }
 
@@ -1392,6 +1423,9 @@ public class PlayerCombat : MonoBehaviour
 
         var mage = GetComponent<CelestialMageSkill>();
         if (mage != null && mage.enabled) return mage.IsSpecialReady;
+
+        var mech = GetComponent<AbyssalMechSkill>();
+        if (mech != null && mech.enabled) return mech.IsSpecialReady;
 
         return skillCooldownTimer <= 0f && !isUltiActive;
     }

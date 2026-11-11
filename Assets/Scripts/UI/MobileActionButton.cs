@@ -380,8 +380,13 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         var azure = playerCombat.GetComponent<AzureBladeSkill>();
                         var dune = playerCombat.GetComponent<DuneAssassinSkill>();
                         var mage = playerCombat.GetComponent<CelestialMageSkill>();
+                        var mech = playerCombat.GetComponent<AbyssalMechSkill>();
 
-                        if (mage != null && mage.enabled)
+                        if (mech != null && mech.enabled)
+                        {
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimLine(playerPos, aimDir, 9.5f, new Color(0.2f, 0.8f, 1f, 0.9f), 1.6f);
+                        }
+                        else if (mage != null && mage.enabled)
                         {
                             SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, 5.0f, new Color(0.85f, 0.35f, 1f, 0.85f));
                         }
@@ -958,10 +963,16 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         bool isAzure = (lowerHero.Contains("azure") || lowerHero.Contains("player3"));
         bool isDune = (lowerHero.Contains("dune") || lowerHero.Contains("player5") || lowerHero.Contains("assassin"));
         bool isMage = (lowerHero.Contains("mage") || lowerHero.Contains("player6") || lowerHero.Contains("celestial"));
+        bool isMech = (lowerHero.Contains("mech") || lowerHero.Contains("abyss") || lowerHero.Contains("goldfish") || lowerHero.Contains("player7") || lowerHero.Contains("player8"));
 
         Sprite result = null;
 
-        if (isMage)
+        if (isMech)
+        {
+            // Player 7: Abyssal Leviathan (Mỏ Neo Thủy Triều, Lướt Sóng, Đại Hồng Thủy Cá Mập)
+            result = AbyssalMechSkill.GetActionIcon(btnType);
+        }
+        else if (isMage)
         {
             // Player 6: Celestial Mage (Cầu Ma Pháp, Tốc Biến Hư Không, Mưa Thiên Thạch)
             result = LoadPlayer6CustomIcon(btnType);

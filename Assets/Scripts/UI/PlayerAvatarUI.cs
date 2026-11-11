@@ -538,6 +538,7 @@ public class PlayerAvatarUI : MonoBehaviour
         else if (norm == CharacterManager.CHAR_GALE_RONIN) alias = "ronin";
         else if (norm == CharacterManager.CHAR_DUNE_ASSASSIN) alias = "dune";
         else if (norm == CharacterManager.CHAR_CELESTIAL_MAGE) alias = "mage";
+        else if (norm == CharacterManager.CHAR_ABYSSAL_MECH) alias = "mech";
 
         avatar = Resources.Load<Sprite>($"UI/Avatars/avatar_{alias}");
         if (avatar != null) return avatar;

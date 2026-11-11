@@ -725,6 +725,9 @@ public class GameAutoBootstrap : MonoBehaviour
             var mage = player.GetComponent<CelestialMageSkill>();
             if (mage != null) Object.Destroy(mage);
 
+            var mech = player.GetComponent<AbyssalMechSkill>();
+            if (mech != null) Object.Destroy(mech);
+
             var titan = player.GetComponent<TitanBerserkerSkill>();
             if (titan == null)
             {
@@ -835,6 +838,9 @@ public class GameAutoBootstrap : MonoBehaviour
             var mage = player.GetComponent<CelestialMageSkill>();
             if (mage != null) Object.Destroy(mage);
 
+            var mech = player.GetComponent<AbyssalMechSkill>();
+            if (mech != null) Object.Destroy(mech);
+
             var azure = player.GetComponent<AzureBladeSkill>();
             if (azure == null)
             {
@@ -917,6 +923,9 @@ public class GameAutoBootstrap : MonoBehaviour
 
             var mage = player.GetComponent<CelestialMageSkill>();
             if (mage != null) Object.Destroy(mage);
+
+            var mech = player.GetComponent<AbyssalMechSkill>();
+            if (mech != null) Object.Destroy(mech);
 
             var ronin = player.GetComponent<GaleRoninSkill>();
             if (ronin == null)
@@ -1017,6 +1026,9 @@ public class GameAutoBootstrap : MonoBehaviour
             var mage = player.GetComponent<CelestialMageSkill>();
             if (mage != null) Object.Destroy(mage);
 
+            var mech = player.GetComponent<AbyssalMechSkill>();
+            if (mech != null) Object.Destroy(mech);
+
             Debug.Log("<color=yellow>[CHARACTER]</color> Đã áp dụng nhân vật SA MẠC THÍCH KHÁCH (DUNE ASSASSIN) với Tuyệt kỹ Cuồng Bão Sa Ảnh!");
         }
         else if (selectedChar == CharacterManager.CHAR_CELESTIAL_MAGE)
@@ -1077,6 +1089,61 @@ public class GameAutoBootstrap : MonoBehaviour
 
             Debug.Log("<color=magenta>[CHARACTER]</color> Đã áp dụng nhân vật PHÁP SƯ TINH TÚ (CELESTIAL MAGE) với Tuyệt kỹ Thiên Thạch Ma Trận!");
         }
+        else if (selectedChar == CharacterManager.CHAR_ABYSSAL_MECH)
+        {
+            player.transform.localScale = Vector3.one;
+            var sr = player.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.material = new Material(Shader.Find("Sprites/Default"));
+                var mechFrames = AbyssalMechSkill.GetIdleFrames();
+                if (mechFrames != null && mechFrames.Length > 0) sr.sprite = mechFrames[0];
+            }
+
+            var anim = player.GetComponent<Animator>();
+            if (anim != null) anim.enabled = false;
+
+            var titan = player.GetComponent<TitanBerserkerSkill>();
+            if (titan != null) Object.Destroy(titan);
+            var sweep = player.GetComponent<SweepTheWeakSkill>();
+            if (sweep != null) Object.Destroy(sweep);
+            var ronin = player.GetComponent<GaleRoninSkill>();
+            if (ronin != null) Object.Destroy(ronin);
+            var azure = player.GetComponent<AzureBladeSkill>();
+            if (azure != null) Object.Destroy(azure);
+            var dune = player.GetComponent<DuneAssassinSkill>();
+            if (dune != null) Object.Destroy(dune);
+            var mage = player.GetComponent<CelestialMageSkill>();
+            if (mage != null) Object.Destroy(mage);
+
+            var mech = player.GetComponent<AbyssalMechSkill>();
+            if (mech != null) Object.Destroy(mech);
+
+            var mech = player.GetComponent<AbyssalMechSkill>();
+            if (mech == null)
+            {
+                mech = player.gameObject.AddComponent<AbyssalMechSkill>();
+            }
+
+            var btnSpecial = GameObject.Find("Btn_Special");
+            if (btnSpecial != null)
+            {
+                var txt = btnSpecial.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = "SHARK TSUNAMI";
+
+                var btn = btnSpecial.GetComponent<UnityEngine.UI.Button>();
+                if (btn != null)
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => {
+                        var am = player.GetComponent<AbyssalMechSkill>();
+                        if (am != null) am.TryExecuteSharkTsunami(am.GetFacingDirection());
+                    });
+                }
+            }
+
+            Debug.Log("<color=cyan>[CHARACTER]</color> Đã áp dụng nhân vật HẢI THẦN CƠ GIÁP (ABYSSAL LEVIATHAN) với Tuyệt kỹ Đại Hồng Thủy Cá Mập!");
+        }
         else
         {
             player.transform.localScale = Vector3.one;
@@ -1115,6 +1182,9 @@ public class GameAutoBootstrap : MonoBehaviour
 
             var mage = player.GetComponent<CelestialMageSkill>();
             if (mage != null) Object.Destroy(mage);
+
+            var mech = player.GetComponent<AbyssalMechSkill>();
+            if (mech != null) Object.Destroy(mech);
 
             var pCombat = player.GetComponent<PlayerCombat>();
             if (pCombat != null)
@@ -1248,6 +1318,19 @@ public class GameAutoBootstrap : MonoBehaviour
             if (tPoint != null)
             {
                 tPoint.localPosition = new Vector3(0f, 0.1f, 0f);
+            }
+        }
+        else if (selectedChar == CharacterManager.CHAR_ABYSSAL_MECH)
+        {
+            // Abyssal Mech (Player 7): 128x128 pixel art, pivot (0.5, 0.44), PPU 36
+            if (cap != null)
+            {
+                cap.offset = new Vector2(0f, 0.08f);
+                cap.size = new Vector2(0.68f, 1.05f);
+            }
+            if (tPoint != null)
+            {
+                tPoint.localPosition = new Vector3(0f, 0.15f, 0f);
             }
         }
         else if (selectedChar == CharacterManager.CHAR_GALE_RONIN || selectedChar == CharacterManager.CHAR_MAID)

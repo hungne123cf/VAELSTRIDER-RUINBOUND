@@ -543,6 +543,23 @@ public class HeroCostumeManager : MonoBehaviour
             auraType = AuraEffectType.GoldenLightning
         });
 
+        AddCostume(new HeroCostumeData
+        {
+            id = "mech_default",
+            heroId = CharacterManager.CHAR_ABYSSAL_MECH,
+            nameVN = "Giáp Lặn Đồng Thau Mặc Định",
+            nameEN = "Brass Abyssal Suit",
+            descVN = "Bộ giáp lặn đồng thau nguyên bản của Hải Thần Cơ Giáp cùng bình thủy tinh cá vàng và mỏ neo cổ đại.",
+            descEN = "Original brass deep-sea mech suit with goldfish helm and ancient tidal anchor.",
+            rarity = CostumeRarity.Common,
+            priceShards = 0,
+            primaryColor = Color.white,
+            secondaryColor = new Color(0.85f, 0.70f, 0.35f, 1f),
+            trimColor = new Color(0.25f, 0.85f, 1.0f, 1f),
+            glowColor = new Color(0.20f, 0.80f, 1.0f, 1f),
+            auraType = AuraEffectType.None
+        });
+
         isInitialized = true;
     }
 
@@ -586,6 +603,7 @@ public class HeroCostumeManager : MonoBehaviour
         if (lower.Contains("ronin") || lower.Contains("gale") || lower.Contains("maid") || lower.Contains("player2")) return CharacterManager.CHAR_GALE_RONIN;
         if (lower.Contains("dune") || lower.Contains("player5")) return CharacterManager.CHAR_DUNE_ASSASSIN;
         if (lower.Contains("mage") || lower.Contains("celestial") || lower.Contains("player6")) return CharacterManager.CHAR_CELESTIAL_MAGE;
+        if (lower.Contains("mech") || lower.Contains("abyss") || lower.Contains("goldfish") || lower.Contains("player7") || lower.Contains("player8")) return CharacterManager.CHAR_ABYSSAL_MECH;
         return CharacterManager.CHAR_VAELSTRIDER;
     }
 
@@ -605,6 +623,7 @@ public class HeroCostumeManager : MonoBehaviour
         if (norm == CharacterManager.CHAR_GALE_RONIN) return "ronin_default";
         if (norm == CharacterManager.CHAR_DUNE_ASSASSIN) return "dune_default";
         if (norm == CharacterManager.CHAR_CELESTIAL_MAGE) return "mage_default";
+        if (norm == CharacterManager.CHAR_ABYSSAL_MECH) return "mech_default";
         return "vael_default";
     }
 

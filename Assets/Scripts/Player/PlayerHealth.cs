@@ -659,6 +659,15 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - mage.barrierDamageReduction)));
         }
 
+        // Kiểm tra Giáp Lặn Thâm Hải & Khiên Bong Bóng Nước của Hải Thần Cơ Giáp (Abyssal Mech)
+        var mech = GetComponent<AbyssalMechSkill>();
+        if (mech != null && mech.enabled)
+        {
+            float red = mech.innateDamageReduction + (mech.HasBubbleShield ? 0.32f : 0f);
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - Mathf.Clamp(red, 0f, 0.70f))));
+            mech.PlayHurtVisual();
+        }
+
         // Giảm sát thương theo Giáp căn bản của Tướng + Trang bị đang mặc + Khảm ngọc + Trang phục + Lõi Nâng Cấp (No limit, tính theo công thức giảm sát thương thực: Reduction = Def / (Def + 100))
         string curCharId = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         var cData = CharacterManager.EnsureInstance()?.GetCharacter(curCharId);
@@ -1195,6 +1204,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
             var resMage = Resources.LoadAll<Sprite>("Player6/Sprites/death");
             if (resMage != null && resMage.Length > 0) return resMage;
+        }
+        else if (curHero.Contains("mech") || curHero.Contains("abyss") || curHero.Contains("goldfish") || curHero.Contains("player7") || GetComponent<AbyssalMechSkill>() != null)
+        {
+            var mechDeathFrames = AbyssalMechSkill.GetDeathFrames();
+            if (mechDeathFrames != null && mechDeathFrames.Length > 0) return mechDeathFrames;
         }
 
         // Default: Player 1 (Vaelstrider)

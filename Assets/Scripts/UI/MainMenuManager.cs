@@ -264,7 +264,8 @@ public class MainMenuManager : MonoBehaviour
         CharacterManager.CHAR_AZURE_BLADE,
         CharacterManager.CHAR_TITAN_BERSERKER,
         CharacterManager.CHAR_DUNE_ASSASSIN,
-        CharacterManager.CHAR_CELESTIAL_MAGE
+        CharacterManager.CHAR_CELESTIAL_MAGE,
+        CharacterManager.CHAR_ABYSSAL_MECH
     };
 
     public static MainMenuManager EnsureInstance()
@@ -4787,6 +4788,7 @@ public class MainMenuManager : MonoBehaviour
         if (normHeroId == CharacterManager.CHAR_GALE_RONIN) return "ronin";
         if (normHeroId == CharacterManager.CHAR_DUNE_ASSASSIN) return "dune";
         if (normHeroId == CharacterManager.CHAR_CELESTIAL_MAGE) return "mage";
+        if (normHeroId == CharacterManager.CHAR_ABYSSAL_MECH) return "mech";
         return "vael";
     }
 
@@ -4829,6 +4831,7 @@ public class MainMenuManager : MonoBehaviour
         if (heroId == CharacterManager.CHAR_GALE_RONIN) return (roninIdleFrames != null && roninIdleFrames.Length > 0) ? roninIdleFrames : maidIdleFrames;
         if (heroId == CharacterManager.CHAR_DUNE_ASSASSIN) return duneIdleFrames;
         if (heroId == CharacterManager.CHAR_CELESTIAL_MAGE) return mageIdleFrames;
+        if (heroId == CharacterManager.CHAR_ABYSSAL_MECH) return AbyssalMechSkill.GetIdleFrames();
         return vaelIdleFrames;
     }
 
@@ -4926,6 +4929,22 @@ public class MainMenuManager : MonoBehaviour
             info.ultiDesc = isVN
                 ? "Triệu hồi cơn mưa thiên thạch từ không gian rơi xuống hủy diệt toàn bộ kẻ địch trên màn hình."
                 : "Calls down a catastrophic storm of cosmic meteors obliterating the entire battlefield.";
+        }
+        else if (heroId == CharacterManager.CHAR_ABYSSAL_MECH)
+        {
+            info.elementColor = new Color(0.20f, 0.85f, 1f, 0.40f);
+            info.attackTitle = isVN ? "Mỏ Neo Thủy Triều (Combo 3 Thức)" : "Tidal Anchor Combo";
+            info.attackDesc = isVN
+                ? "Quất mỏ neo bộc phá sóng xung kích, đòn 3 giáng sấm sét đại dương và hồi 4% máu đã mất."
+                : "Swings the heavy tidal anchor creating water waves; the 3rd cleave restores 4% lost HP.";
+            info.guardTitle = isVN ? "Xoáy Nước Biển Sâu & Khiên Nước" : "Abyssal Maelstrom & Bubble Shield";
+            info.guardDesc = isVN
+                ? "Kích hoạt Xoáy Nước hút quái vật vào tâm chấn, đồng thời tạo Khiên Bong Bóng giảm 50% sát thương."
+                : "Summons a maelstrom drawing all enemies inwards while cloaking the mech in a 50% DMG Bubble Shield.";
+            info.ultiTitle = isVN ? "Đại Hồng Thủy Cá Mập" : "Shark Tsunami Apocalypse";
+            info.ultiDesc = isVN
+                ? "Triệu hồi ngọn Sóng Thần Pixel khổng lồ kèm Đàn Cá Mập Đại Dương bơi cưỡi trên đỉnh sóng cuốn phăng và cắn xé toàn bộ quái vật!"
+                : "Summons an epic Pixel Tsunami with Giant Ocean Sharks surfing on the wave crest, devastating everything in its path!";
         }
         else // Vaelstrider
         {
