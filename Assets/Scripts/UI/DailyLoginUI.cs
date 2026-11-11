@@ -596,8 +596,9 @@ public class DailyLoginUI : MonoBehaviour
         int todayIndex = GetTodayDayIndex();
         int reward = REWARDS[todayIndex];
 
-        // 1. Add Shards to account
+        // 1. Add Shards to account and persist immediately
         AccountDatabase.AddAethelShards(reward);
+        AccountDatabase.SaveActiveSessionToDatabase();
 
         // 2. Mark today as claimed
         string todayKey = "DailyClaimed_" + GetTodayKey();

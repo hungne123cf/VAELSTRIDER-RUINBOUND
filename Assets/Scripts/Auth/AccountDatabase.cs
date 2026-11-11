@@ -374,6 +374,20 @@ public static class AccountDatabase
             {
                 if (string.Equals(acc.username, activeUser, StringComparison.OrdinalIgnoreCase))
                 {
+                    // Bảo toàn số shards và potions lớn nhất giữa PlayerPrefs và Database
+                    long prefsShards = GetAethelShards();
+                    if (prefsShards > acc.aethelShards)
+                    {
+                        acc.aethelShards = prefsShards;
+                        SaveDatabase();
+                    }
+                    int prefsPotions = PlayerPrefs.GetInt("Save_HealthPotions", PlayerPrefs.GetInt("Saved_HealthPotions", 0));
+                    if (prefsPotions > acc.healthPotions)
+                    {
+                        acc.healthPotions = prefsPotions;
+                        SaveDatabase();
+                    }
+
                     ApplyAccountToGameSession(acc, false);
                     return;
                 }
@@ -403,18 +417,36 @@ public static class AccountDatabase
     {
         if (acc == null) return;
 
+        string previousUser = PlayerPrefs.GetString(PREF_CURRENT_USER, "");
+        bool isDifferentUser = !string.IsNullOrEmpty(previousUser) && !string.Equals(previousUser, acc.username, StringComparison.OrdinalIgnoreCase);
+
         // 1. Lưu lại tài khoản trước đó nếu là đổi tài khoản khác
-        if (savePrevious)
+        if (savePrevious && isDifferentUser)
         {
-            string previousUser = PlayerPrefs.GetString(PREF_CURRENT_USER, "");
-            if (!string.IsNullOrEmpty(previousUser) && !string.Equals(previousUser, acc.username, StringComparison.OrdinalIgnoreCase))
-            {
-                SaveActiveSessionToDatabase();
-            }
+            SaveActiveSessionToDatabase();
         }
 
-        // 2. Xóa sạch các key gameplay cũ trong PlayerPrefs để tránh nhiễm dữ liệu từ tài khoản trước
-        ClearTransientGameplayPlayerPrefs();
+        // 2. Chỉ xóa sạch các key gameplay cũ trong PlayerPrefs NẾU THỰC SỰ ĐỔI SANG USER KHÁC
+        // Nếu là cùng 1 user (load lại session hoặc mở game), KHÔNG XÓA để tránh làm mất Shards/Potions vừa nhận
+        if (isDifferentUser)
+        {
+            ClearTransientGameplayPlayerPrefs();
+        }
+        else
+        {
+            // Cùng một user: Bảo toàn số Shards và Potions lớn nhất giữa PlayerPrefs và Database
+            long currentInPrefs = GetAethelShards();
+            if (currentInPrefs > acc.aethelShards)
+            {
+                acc.aethelShards = currentInPrefs;
+            }
+            int currentPotionsInPrefs = PlayerPrefs.GetInt("Save_HealthPotions", PlayerPrefs.GetInt("Saved_HealthPotions", 0));
+            if (currentPotionsInPrefs > acc.healthPotions)
+            {
+                acc.healthPotions = currentPotionsInPrefs;
+            }
+            SaveDatabase();
+        }
 
         // 3. Nạp dữ liệu mới của tài khoản này
         PlayerPrefs.SetString(PREF_CURRENT_USER, acc.username);
@@ -614,6 +646,37 @@ public static class AccountDatabase
         PlayerPrefs.SetInt("Saved_AethelShards", clamped);
         PlayerPrefs.SetInt("AethelShards", clamped);
         PlayerPrefs.Save();
+
+        // Đồng bộ tức thời vào Database cache & file JSON trên đĩa để đảm bảo không mất dữ liệu kể cả khi tắt game đột ngột
+        try
+        {
+            EnsureDatabaseLoaded();
+            if (dbCache != null && dbCache.accounts != null && dbCache.accounts.Count > 0)
+            {
+                string activeUser = PlayerPrefs.GetString(PREF_CURRENT_USER, "");
+                if (string.IsNullOrEmpty(activeUser)) activeUser = PlayerPrefs.GetString("Player_Name", "");
+                
+                AccountData targetAcc = null;
+                if (!string.IsNullOrEmpty(activeUser))
+                {
+                    targetAcc = dbCache.accounts.Find(a => string.Equals(a.username, activeUser, StringComparison.OrdinalIgnoreCase));
+                }
+                if (targetAcc == null && dbCache.accounts.Count > 0)
+                {
+                    targetAcc = dbCache.accounts[0];
+                }
+
+                if (targetAcc != null)
+                {
+                    targetAcc.aethelShards = amount;
+                    SaveDatabase();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[AccountDB] SetAethelShards sync warning: {ex.Message}");
+        }
     }
 
     public static void AddAethelShards(long delta)
@@ -666,60 +729,76 @@ public static class AccountDatabase
     public static void SaveActiveSessionToDatabase()
     {
         EnsureDatabaseLoaded();
+        if (dbCache == null || dbCache.accounts == null || dbCache.accounts.Count == 0) return;
+
         string activeUser = PlayerPrefs.GetString(PREF_CURRENT_USER, "");
-        if (string.IsNullOrEmpty(activeUser)) return;
-
-        foreach (var acc in dbCache.accounts)
+        if (string.IsNullOrEmpty(activeUser))
         {
-            if (string.Equals(acc.username, activeUser, StringComparison.OrdinalIgnoreCase))
+            activeUser = PlayerPrefs.GetString("Player_Name", "");
+        }
+
+        AccountData targetAcc = null;
+        if (!string.IsNullOrEmpty(activeUser))
+        {
+            targetAcc = dbCache.accounts.Find(a => string.Equals(a.username, activeUser, StringComparison.OrdinalIgnoreCase));
+        }
+        if (targetAcc == null && dbCache.accounts.Count > 0)
+        {
+            targetAcc = dbCache.accounts[0];
+        }
+
+        if (targetAcc != null)
+        {
+            targetAcc.aethelShards = GetAethelShards();
+            targetAcc.healthPotions = PlayerPrefs.GetInt("Save_HealthPotions", PlayerPrefs.GetInt("Saved_HealthPotions", targetAcc.healthPotions));
+            targetAcc.upgradeAttack = PlayerPrefs.GetInt("Upgrade_Attack_Level", targetAcc.upgradeAttack);
+            targetAcc.upgradeHealth = PlayerPrefs.GetInt("Upgrade_Health_Level", targetAcc.upgradeHealth);
+            targetAcc.upgradeAgility = PlayerPrefs.GetInt("Upgrade_Agility_Level", targetAcc.upgradeAgility);
+            targetAcc.upgradeUltimate = PlayerPrefs.GetInt("Upgrade_Ultimate_Level", targetAcc.upgradeUltimate);
+            targetAcc.map1Completed = PlayerPrefs.GetInt("Map1_Completed", targetAcc.map1Completed ? 1 : 0) == 1;
+            targetAcc.map2Completed = PlayerPrefs.GetInt("Map2_Completed", targetAcc.map2Completed ? 1 : 0) == 1;
+            targetAcc.map3Completed = PlayerPrefs.GetInt("Map3_Completed", targetAcc.map3Completed ? 1 : 0) == 1;
+            targetAcc.unlockedMaid = PlayerPrefs.GetInt("Char_Unlocked_Maid", targetAcc.unlockedMaid ? 1 : 0) == 1;
+
+            var cm = CharacterManager.EnsureInstance();
+            string activeChar = cm != null ? cm.GetSelectedCharacterId() : "";
+            if (!string.IsNullOrEmpty(activeChar))
             {
-                acc.aethelShards = GetAethelShards();
-                acc.healthPotions = PlayerPrefs.GetInt("Save_HealthPotions", PlayerPrefs.GetInt("Saved_HealthPotions", acc.healthPotions));
-                acc.upgradeAttack = PlayerPrefs.GetInt("Upgrade_Attack_Level", 0);
-                acc.upgradeHealth = PlayerPrefs.GetInt("Upgrade_Health_Level", 0);
-                acc.upgradeAgility = PlayerPrefs.GetInt("Upgrade_Agility_Level", 0);
-                acc.upgradeUltimate = PlayerPrefs.GetInt("Upgrade_Ultimate_Level", 0);
-                acc.map1Completed = PlayerPrefs.GetInt("Map1_Completed", 0) == 1;
-                acc.map2Completed = PlayerPrefs.GetInt("Map2_Completed", 0) == 1;
-                acc.map3Completed = PlayerPrefs.GetInt("Map3_Completed", 0) == 1;
-                acc.unlockedMaid = PlayerPrefs.GetInt("Char_Unlocked_Maid", 0) == 1;
-                string activeChar = CharacterManager.EnsureInstance().GetSelectedCharacterId();
-                acc.selectedHero = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? "ronin" : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? "dune" : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? "mage" : "vael"))));
-                acc.selectedHeroIndex = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? 2 : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? 1 : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? 4 : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? 5 : 0))));
-                acc.equippedArmorId = PlayerPrefs.GetInt("EquippedArmorId", 0);
-                acc.equippedHelmetId = PlayerPrefs.GetInt("Equipped_Slot_Helmet", 0);
-                acc.equippedPantsId = PlayerPrefs.GetInt("Equipped_Slot_Pants", 0);
-                acc.equippedGlovesId = PlayerPrefs.GetInt("Equipped_Slot_Gloves", 0);
-                acc.equippedBootsId = PlayerPrefs.GetInt("Equipped_Slot_Boots", 0);
-                acc.equippedCloakId = PlayerPrefs.GetInt("Equipped_Slot_Cloak", 0);
-                acc.equippedBagId = PlayerPrefs.GetInt("Equipped_Slot_Bag", 0);
-                acc.unlockedCostumes = HeroCostumeManager.GetUnlockedCostumeIds();
+                targetAcc.selectedHero = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? "ronin" : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? "dune" : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? "mage" : "vael"))));
+                targetAcc.selectedHeroIndex = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? 2 : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? 1 : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? 4 : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? 5 : 0))));
+            }
 
-                // Lưu danh sách tướng đã mở khóa
-                if (acc.unlockedHeroes == null) acc.unlockedHeroes = new List<string>();
-                acc.unlockedHeroes.Clear();
-                acc.unlockedHeroes.Add("vael");
+            targetAcc.equippedArmorId = PlayerPrefs.GetInt("EquippedArmorId", targetAcc.equippedArmorId);
+            targetAcc.equippedHelmetId = PlayerPrefs.GetInt("Equipped_Slot_Helmet", targetAcc.equippedHelmetId);
+            targetAcc.equippedPantsId = PlayerPrefs.GetInt("Equipped_Slot_Pants", targetAcc.equippedPantsId);
+            targetAcc.equippedGlovesId = PlayerPrefs.GetInt("Equipped_Slot_Gloves", targetAcc.equippedGlovesId);
+            targetAcc.equippedBootsId = PlayerPrefs.GetInt("Equipped_Slot_Boots", targetAcc.equippedBootsId);
+            targetAcc.equippedCloakId = PlayerPrefs.GetInt("Equipped_Slot_Cloak", targetAcc.equippedCloakId);
+            targetAcc.equippedBagId = PlayerPrefs.GetInt("Equipped_Slot_Bag", targetAcc.equippedBagId);
+            targetAcc.unlockedCostumes = HeroCostumeManager.GetUnlockedCostumeIds();
 
-                var cm = CharacterManager.EnsureInstance();
-                if (cm != null)
-                {
-                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_GALE_RONIN)) acc.unlockedHeroes.Add("ronin");
-                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_AZURE_BLADE)) acc.unlockedHeroes.Add("azure");
-                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_TITAN_BERSERKER)) acc.unlockedHeroes.Add("titan");
-                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_DUNE_ASSASSIN)) acc.unlockedHeroes.Add("dune");
-                    if (cm.IsCharacterPurchased(CharacterManager.CHAR_CELESTIAL_MAGE)) acc.unlockedHeroes.Add("mage");
-                }
+            // Lưu danh sách tướng đã mở khóa
+            if (targetAcc.unlockedHeroes == null) targetAcc.unlockedHeroes = new List<string>();
+            targetAcc.unlockedHeroes.Clear();
+            targetAcc.unlockedHeroes.Add("vael");
 
-                acc.lastLoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            if (cm != null)
+            {
+                if (cm.IsCharacterPurchased(CharacterManager.CHAR_GALE_RONIN)) targetAcc.unlockedHeroes.Add("ronin");
+                if (cm.IsCharacterPurchased(CharacterManager.CHAR_AZURE_BLADE)) targetAcc.unlockedHeroes.Add("azure");
+                if (cm.IsCharacterPurchased(CharacterManager.CHAR_TITAN_BERSERKER)) targetAcc.unlockedHeroes.Add("titan");
+                if (cm.IsCharacterPurchased(CharacterManager.CHAR_DUNE_ASSASSIN)) targetAcc.unlockedHeroes.Add("dune");
+                if (cm.IsCharacterPurchased(CharacterManager.CHAR_CELESTIAL_MAGE)) targetAcc.unlockedHeroes.Add("mage");
+            }
 
-                SaveDatabase();
+            targetAcc.lastLoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-                // Đồng bộ lên Cloud Server
-                if (CloudAccountService.Instance != null)
-                {
-                    CloudAccountService.Instance.SyncProgressToCloud(acc.username, acc.aethelShards, acc.healthPotions, acc.equippedArmor, acc.equippedWeapon);
-                }
-                return;
+            SaveDatabase();
+
+            // Đồng bộ lên Cloud Server
+            if (CloudAccountService.Instance != null)
+            {
+                CloudAccountService.Instance.SyncProgressToCloud(targetAcc.username, targetAcc.aethelShards, targetAcc.healthPotions, targetAcc.equippedArmor, targetAcc.equippedWeapon);
             }
         }
     }
@@ -957,5 +1036,48 @@ public static class AccountDatabase
 
         var existing = acc.inventoryItems.Find(i => i.itemId == itemId);
         return existing != null ? existing.quantity : 0;
+    }
+}
+
+/// <summary>
+/// Component chạy ngầm tự động bảo toàn 100% dữ liệu tài khoản khi chuyển app, bấm Home, hoặc tắt game trên Android
+/// </summary>
+public class AccountLifecycleSaver : MonoBehaviour
+{
+    private static AccountLifecycleSaver _instance;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void AutoInit()
+    {
+        if (_instance != null) return;
+        var go = new GameObject("[AccountLifecycleSaver]");
+        DontDestroyOnLoad(go);
+        _instance = go.AddComponent<AccountLifecycleSaver>();
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            AccountDatabase.SaveActiveSessionToDatabase();
+            PlayerPrefs.Save();
+            Debug.Log("<color=green>[SaveSystem]</color> Đã tự động lưu session khi tạm dừng game (OnApplicationPause).");
+        }
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            AccountDatabase.SaveActiveSessionToDatabase();
+            PlayerPrefs.Save();
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        AccountDatabase.SaveActiveSessionToDatabase();
+        PlayerPrefs.Save();
+        Debug.Log("<color=green>[SaveSystem]</color> Đã tự động lưu session khi đóng game (OnApplicationQuit).");
     }
 }

@@ -1394,6 +1394,7 @@ public class MailboxUI : MonoBehaviour
         if (PlayerPrefs.GetInt(claimKey, 0) == 1) return;
 
         AccountDatabase.AddAethelShards(selectedMail.rewardShards);
+        AccountDatabase.SaveActiveSessionToDatabase();
         PlayerPrefs.SetInt(claimKey, 1);
         PlayerPrefs.Save();
 
@@ -1426,6 +1427,7 @@ public class MailboxUI : MonoBehaviour
         if (totalShards > 0)
         {
             AccountDatabase.AddAethelShards(totalShards);
+            AccountDatabase.SaveActiveSessionToDatabase();
             PlayerPrefs.Save();
 
             if (SoundManager.Instance != null) SoundManager.Instance.PlayUpgradeSuccess();
@@ -2325,6 +2327,7 @@ public class MailboxUI : MonoBehaviour
         }
 
         AccountDatabase.AddAethelShards(reward);
+        AccountDatabase.SaveActiveSessionToDatabase();
         PlayerPrefs.SetInt(usedKey, 1);
         PlayerPrefs.Save();
 
