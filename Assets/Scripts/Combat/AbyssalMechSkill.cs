@@ -15,6 +15,12 @@ public class AbyssalMechSkill : MonoBehaviour
     public float attackCooldown = 0.34f;
     private float attackCooldownTimer = 0f;
 
+    [Header("--- NỘI TẠI: GIÁP LẶN THÂM HẢI (ABYSSAL ARMOR) ---")]
+    [Range(0f, 0.5f)]
+    public float innateDamageReduction = 0.18f; // Giảm 18% sát thương nhận vào
+    private float bubbleShieldTimer = 0f;
+    public bool HasBubbleShield => bubbleShieldTimer > 0f;
+
     [Header("--- CHIÊU GỒNG: XOÁY THỦY TRIỀU & ĐỊA CHẤN MỎ NEO (HOLD CHARGE) ---")]
     public float minChargeDuration = 0.20f;
     public float maxChargeDuration = 1.0f;
@@ -29,8 +35,6 @@ public class AbyssalMechSkill : MonoBehaviour
     [Header("--- CHIÊU LƯỚT: LƯỚT SÓNG THÂM HẢI (HYDRO-THRUST SURGE) ---")]
     public float dashSpeedBoost = 1.30f; // Tăng 30% tốc chạy trên vệt nước
     private static readonly List<Vector3> activeWaterTrailPoints = new List<Vector3>();
-
-    public bool HasBubbleShield => bubbleShieldTimer > 0f;
 
     [Header("--- HỆ THỐNG NỘ ĐẠI DƯƠNG (TIDAL RAGE) ---")]
     [SerializeField] private float maxRage = 100f;
@@ -609,11 +613,11 @@ public class AbyssalMechSkill : MonoBehaviour
             foreach (var c in cols)
             {
                 if (c == null || c.gameObject == gameObject) continue;
-                var enemyController = c.GetComponent<EnemyController>() ?? c.GetComponentInParent<EnemyController>();
-                if (enemyController != null)
-                {
-                    enemyController.ApplySlow(0.40f, 0.5f);
-                }
+                var damageable = c.GetComponent<IDamageable>() ?? c.GetComponentInParent<IDamageable>();
+                if (damageable == null || damageable is PlayerHealth) continue;
+
+                GameObject rootObj = (damageable as Component)?.gameObject ?? c.gameObject;
+                EnemyChronoSlowEffect.ApplySlow(rootObj, 0.40f, 0.6f);
             }
             yield return new WaitForSeconds(0.2f);
         }
