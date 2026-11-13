@@ -58,8 +58,10 @@ public class AbyssalMechSkill : MonoBehaviour
     public float maelstromDuration = 2.8f;
 
     [Header("--- TUYỆT KỸ: ĐẠI HỒNG THỦY CÁ MẬP (SHARK TSUNAMI) ---")]
-    public float specialCooldown = 12.0f;
+    public float baseSpecialCooldown = 24.0f;
+    public float specialCooldown = 24.0f;
     private float specialCooldownTimer = 0f;
+    public float specialEnergyCost = 55f;
     public int baseTsunamiDamage = 42;
     public int baseSharkFinisherDamage = 125;
 
@@ -426,6 +428,16 @@ public class AbyssalMechSkill : MonoBehaviour
         if (playerCombat == null) playerCombat = GetComponent<PlayerCombat>();
         int bonus = playerCombat != null ? playerCombat.BonusAttackDamage : 0;
         return baseAnchorDamage + bonus;
+    }
+
+    /// <summary>
+    /// Đồng bộ chỉ số Giảm Hồi Chiêu (CDR) từ Lõi nâng cấp (Augments), Ngọc Khảm và Nâng Cấp Tướng
+    /// </summary>
+    public void RefreshCooldownStats()
+    {
+        if (playerCombat == null) playerCombat = GetComponent<PlayerCombat>();
+        float cdrPercent = (playerCombat != null) ? (playerCombat.TotalCDRPercent * 0.01f) : 0f;
+        specialCooldown = Mathf.Max(6.0f, baseSpecialCooldown * (1f - Mathf.Clamp(cdrPercent, 0f, 0.75f)));
     }
 
     void Update()
@@ -1115,21 +1127,13 @@ public class AbyssalMechSkill : MonoBehaviour
 
     private void ActivateBubbleShield(float duration)
     {
+        // Kích hoạt buff giảm sát thương nội tại (HasBubbleShield), không sinh sprite vệt nước xoay quanh người
         bubbleShieldTimer = duration;
-        if (bubbleShieldVisualObj != null) Destroy(bubbleShieldVisualObj);
-
-        bubbleShieldVisualObj = new GameObject("AbyssalBubbleShield");
-        bubbleShieldVisualObj.transform.SetParent(transform, false);
-        bubbleShieldVisualObj.transform.localPosition = new Vector3(0f, 0.1f, 0f);
-        bubbleShieldVisualObj.transform.localScale = new Vector3(1.15f, 1.15f, 1f);
-
-        var sr = bubbleShieldVisualObj.AddComponent<SpriteRenderer>();
-        if (whirlpoolFrames != null && whirlpoolFrames.Length > 0)
+        if (bubbleShieldVisualObj != null)
         {
-            sr.sprite = whirlpoolFrames[0];
+            Destroy(bubbleShieldVisualObj);
+            bubbleShieldVisualObj = null;
         }
-        sr.color = new Color(0.35f, 0.88f, 1f, 0.45f);
-        sr.sortingOrder = (spriteRenderer != null ? spriteRenderer.sortingOrder : 10) + 1;
     }
 
     private IEnumerator SpawnWhirlpoolZoneRoutine(Vector3 centerPos)
@@ -1211,6 +1215,14 @@ public class AbyssalMechSkill : MonoBehaviour
     {
         if (!IsSpecialReady) return false;
         if (playerHealth != null && playerHealth.IsDead) return false;
+
+        // Tiêu hao 55 Năng Lượng (Energy / Mana) như bảng mô tả
+        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+        if (energySys != null && !energySys.TryConsumeEnergy(specialEnergyCost))
+        {
+            SoundManager.EnsureInstance()?.PlayMenuHover();
+            return false;
+        }
 
         EnsureAllSpritesLoaded();
         ConsumeRage();

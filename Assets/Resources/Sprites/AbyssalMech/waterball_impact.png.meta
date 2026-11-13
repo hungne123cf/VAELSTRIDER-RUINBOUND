@@ -1,0 +1,1534 @@
+fileFormatVersion: 2
+guid: 54277e80624534d4c9614539f1a7f5c2
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6207717562254808489
+    second: waterball_impact_0
+  - first:
+      213: -8792625827938551041
+    second: waterball_impact_1
+  - first:
+      213: 2942711898462554204
+    second: waterball_impact_2
+  - first:
+      213: 932491814319842549
+    second: waterball_impact_3
+  - first:
+      213: 7652449052772158498
+    second: waterball_impact_4
+  - first:
+      213: 7957436347130929629
+    second: waterball_impact_5
+  - first:
+      213: 1728606868377122625
+    second: waterball_impact_6
+  - first:
+      213: -8005554182248623189
+    second: waterball_impact_7
+  - first:
+      213: -8216174193866498996
+    second: waterball_impact_8
+  - first:
+      213: 5441597987875381715
+    second: waterball_impact_9
+  - first:
+      213: 3114437522600364324
+    second: waterball_impact_10
+  - first:
+      213: -4872968069025432611
+    second: waterball_impact_11
+  - first:
+      213: 3053471932973339443
+    second: waterball_impact_12
+  - first:
+      213: 1491307588475762419
+    second: waterball_impact_13
+  - first:
+      213: 710366458576787077
+    second: waterball_impact_14
+  - first:
+      213: -5665076863528939471
+    second: waterball_impact_15
+  - first:
+      213: -3108845769857735687
+    second: waterball_impact_16
+  - first:
+      213: 7066101145376748277
+    second: waterball_impact_17
+  - first:
+      213: -684712489731176765
+    second: waterball_impact_18
+  - first:
+      213: 8323257339200658624
+    second: waterball_impact_19
+  - first:
+      213: -5240486180841846813
+    second: waterball_impact_20
+  - first:
+      213: 4856247365569172363
+    second: waterball_impact_21
+  - first:
+      213: -1948658110681750103
+    second: waterball_impact_22
+  - first:
+      213: 9156877592596278862
+    second: waterball_impact_23
+  - first:
+      213: 1256086926401060979
+    second: waterball_impact_24
+  - first:
+      213: 4930618775240207424
+    second: waterball_impact_25
+  - first:
+      213: -7213421153189308162
+    second: waterball_impact_26
+  - first:
+      213: 5411463715565627866
+    second: waterball_impact_27
+  - first:
+      213: -3863163117099186407
+    second: waterball_impact_28
+  - first:
+      213: -6965755724868028351
+    second: waterball_impact_29
+  - first:
+      213: 5210076439576229864
+    second: waterball_impact_30
+  - first:
+      213: -3082773414322883429
+    second: waterball_impact_31
+  - first:
+      213: 6713465524072812626
+    second: waterball_impact_32
+  - first:
+      213: -6587564403750364094
+    second: waterball_impact_33
+  - first:
+      213: 2472299398496076189
+    second: waterball_impact_34
+  - first:
+      213: -9063610253973391208
+    second: waterball_impact_35
+  - first:
+      213: 1068572796745662034
+    second: waterball_impact_36
+  - first:
+      213: -4666649029197965817
+    second: waterball_impact_37
+  - first:
+      213: -4988507632414572762
+    second: waterball_impact_38
+  - first:
+      213: 1144424810729459680
+    second: waterball_impact_39
+  - first:
+      213: -8359638588937098816
+    second: waterball_impact_40
+  - first:
+      213: 4710802985709580300
+    second: waterball_impact_41
+  - first:
+      213: 7387167438961324986
+    second: waterball_impact_42
+  - first:
+      213: -1471648306853666521
+    second: waterball_impact_43
+  - first:
+      213: 5178221932222421662
+    second: waterball_impact_44
+  - first:
+      213: 2702708551271155161
+    second: waterball_impact_45
+  - first:
+      213: 110575818371127114
+    second: waterball_impact_46
+  - first:
+      213: 6619708146105590079
+    second: waterball_impact_47
+  - first:
+      213: 3341504108013098988
+    second: waterball_impact_48
+  - first:
+      213: 3792121915401977077
+    second: waterball_impact_49
+  - first:
+      213: -4600506015990798892
+    second: waterball_impact_50
+  - first:
+      213: -7456936448430725731
+    second: waterball_impact_51
+  - first:
+      213: -5930921097241043077
+    second: waterball_impact_52
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: waterball_impact_0
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 198
+        width: 58
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a5d624ab3e362650800000000000000
+      internalID: 6207717562254808489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_1
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 231
+        width: 26
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffa3cc215615af580800000000000000
+      internalID: -8792625827938551041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 193
+        width: 46
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c580d2861ec96d820800000000000000
+      internalID: 2942711898462554204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_3
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 240
+        width: 6
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f46e745d50e0fc00800000000000000
+      internalID: 932491814319842549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_4
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 240
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22c424c7ed5f23a60800000000000000
+      internalID: 7652449052772158498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_5
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 205
+        width: 28
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd16589823e7e6e60800000000000000
+      internalID: 7957436347130929629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_6
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 244
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1473be9c9ce3df710800000000000000
+      internalID: 1728606868377122625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_7
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 245
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba39de0f2ee86e090800000000000000
+      internalID: -8005554182248623189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_8
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 214
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4c1bd11a194afd80800000000000000
+      internalID: -8216174193866498996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_9
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 225
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d1eac50a80748b40800000000000000
+      internalID: 5441597987875381715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_10
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 211
+        width: 21
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4290eb10d64b83b20800000000000000
+      internalID: 3114437522600364324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_11
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 188
+        width: 31
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddbfaebfb5dbf5cb0800000000000000
+      internalID: -4872968069025432611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_12
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 225
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33350888b8c106a20800000000000000
+      internalID: 3053471932973339443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_13
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 231
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f631f5b95032b410800000000000000
+      internalID: 1491307588475762419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_14
+      rect:
+        serializedVersion: 2
+        x: 227
+        y: 210
+        width: 27
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58652d7c78abbd900800000000000000
+      internalID: 710366458576787077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_15
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 219
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 130d2148b9a9161b0800000000000000
+      internalID: -5665076863528939471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_16
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 214
+        width: 8
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f367226e392bd4d0800000000000000
+      internalID: -3108845769857735687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_17
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 202
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f2792dcd85df0260800000000000000
+      internalID: 7066101145376748277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_18
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 191
+        width: 6
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c6cc4c4e996f76f0800000000000000
+      internalID: -684712489731176765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_19
+      rect:
+        serializedVersion: 2
+        x: 237
+        y: 199
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ccd7359376228370800000000000000
+      internalID: 8323257339200658624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_20
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 184
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e70494759d0647b0800000000000000
+      internalID: -5240486180841846813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_21
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 185
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b835d2edf3bd46340800000000000000
+      internalID: 4856247365569172363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_22
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 186
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a56124d5c9f4f4e0800000000000000
+      internalID: -1948658110681750103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_23
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 138
+        width: 34
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4e6f6eb7a3c31f70800000000000000
+      internalID: 9156877592596278862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_24
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 150
+        width: 9
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 370c52f87648e6110800000000000000
+      internalID: 1256086926401060979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_25
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 146
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04c601d07a31d6440800000000000000
+      internalID: 4930618775240207424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_26
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 158
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef8dcd4fda7c4eb90800000000000000
+      internalID: -7213421153189308162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_27
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 127
+        width: 37
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad964310491691b40800000000000000
+      internalID: 5411463715565627866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_28
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 150
+        width: 32
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91789e7ec99436ac0800000000000000
+      internalID: -3863163117099186407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_29
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 127
+        width: 38
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 148f81b031aa45f90800000000000000
+      internalID: -6965755724868028351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_30
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 150
+        width: 9
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e7b299eae8ed4840800000000000000
+      internalID: 5210076439576229864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_31
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 130
+        width: 45
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b943444b9e9c735d0800000000000000
+      internalID: -3082773414322883429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_32
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 149
+        width: 9
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 250113e13550b2d50800000000000000
+      internalID: 6713465524072812626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_33
+      rect:
+        serializedVersion: 2
+        x: 113
+        y: 146
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24c9373c3154494a0800000000000000
+      internalID: -6587564403750364094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_34
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 127
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9145c1443f5f4220800000000000000
+      internalID: 2472299398496076189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_35
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 133
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 898f35dbe76973280800000000000000
+      internalID: -9063610253973391208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_36
+      rect:
+        serializedVersion: 2
+        x: 119
+        y: 130
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25ebbae0c4554de00800000000000000
+      internalID: 1068572796745662034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_37
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 74
+        width: 31
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 706db33de6bbc3fb0800000000000000
+      internalID: -4666649029197965817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_38
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 98
+        width: 27
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62fba921db245cab0800000000000000
+      internalID: -4988507632414572762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_39
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 22
+        width: 70
+        height: 104
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ef4cab4d40d1ef00800000000000000
+      internalID: 1144424810729459680
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_40
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 97
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c9a1cf9ef89cfb80800000000000000
+      internalID: -8359638588937098816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_41
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 108
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c00b11a4b52206140800000000000000
+      internalID: 4710802985709580300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_42
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 85
+        width: 10
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab33f9795ad748660800000000000000
+      internalID: 7387167438961324986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_43
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 96
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 721aeab79a7a39be0800000000000000
+      internalID: -1471648306853666521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_44
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 76
+        width: 27
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9a1146796dbcd740800000000000000
+      internalID: 5178221932222421662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_45
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 85
+        width: 10
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d58de99b13f18520800000000000000
+      internalID: 2702708551271155161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_46
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 85
+        width: 9
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4752c6fe18d88100800000000000000
+      internalID: 110575818371127114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_47
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 78
+        width: 11
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3122657c7deddb50800000000000000
+      internalID: 6619708146105590079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_48
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 91
+        width: 13
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce711ad38486f5e20800000000000000
+      internalID: 3341504108013098988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_49
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 86
+        width: 9
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fc32806ac250a430800000000000000
+      internalID: 3792121915401977077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_50
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 18
+        width: 13
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d522d92728b720c0800000000000000
+      internalID: -4600506015990798892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_51
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 22
+        width: 7
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d95af960fc3a38890800000000000000
+      internalID: -7456936448430725731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_impact_52
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 29
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7fd3187fa221bda0800000000000000
+      internalID: -5930921097241043077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      waterball_impact_0: 6207717562254808489
+      waterball_impact_1: -8792625827938551041
+      waterball_impact_10: 3114437522600364324
+      waterball_impact_11: -4872968069025432611
+      waterball_impact_12: 3053471932973339443
+      waterball_impact_13: 1491307588475762419
+      waterball_impact_14: 710366458576787077
+      waterball_impact_15: -5665076863528939471
+      waterball_impact_16: -3108845769857735687
+      waterball_impact_17: 7066101145376748277
+      waterball_impact_18: -684712489731176765
+      waterball_impact_19: 8323257339200658624
+      waterball_impact_2: 2942711898462554204
+      waterball_impact_20: -5240486180841846813
+      waterball_impact_21: 4856247365569172363
+      waterball_impact_22: -1948658110681750103
+      waterball_impact_23: 9156877592596278862
+      waterball_impact_24: 1256086926401060979
+      waterball_impact_25: 4930618775240207424
+      waterball_impact_26: -7213421153189308162
+      waterball_impact_27: 5411463715565627866
+      waterball_impact_28: -3863163117099186407
+      waterball_impact_29: -6965755724868028351
+      waterball_impact_3: 932491814319842549
+      waterball_impact_30: 5210076439576229864
+      waterball_impact_31: -3082773414322883429
+      waterball_impact_32: 6713465524072812626
+      waterball_impact_33: -6587564403750364094
+      waterball_impact_34: 2472299398496076189
+      waterball_impact_35: -9063610253973391208
+      waterball_impact_36: 1068572796745662034
+      waterball_impact_37: -4666649029197965817
+      waterball_impact_38: -4988507632414572762
+      waterball_impact_39: 1144424810729459680
+      waterball_impact_4: 7652449052772158498
+      waterball_impact_40: -8359638588937098816
+      waterball_impact_41: 4710802985709580300
+      waterball_impact_42: 7387167438961324986
+      waterball_impact_43: -1471648306853666521
+      waterball_impact_44: 5178221932222421662
+      waterball_impact_45: 2702708551271155161
+      waterball_impact_46: 110575818371127114
+      waterball_impact_47: 6619708146105590079
+      waterball_impact_48: 3341504108013098988
+      waterball_impact_49: 3792121915401977077
+      waterball_impact_5: 7957436347130929629
+      waterball_impact_50: -4600506015990798892
+      waterball_impact_51: -7456936448430725731
+      waterball_impact_52: -5930921097241043077
+      waterball_impact_6: 1728606868377122625
+      waterball_impact_7: -8005554182248623189
+      waterball_impact_8: -8216174193866498996
+      waterball_impact_9: 5441597987875381715
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

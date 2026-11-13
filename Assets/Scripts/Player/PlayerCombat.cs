@@ -468,6 +468,12 @@ public class PlayerCombat : MonoBehaviour
         {
             mage.RefreshCooldownStats();
         }
+
+        var mech = GetComponent<AbyssalMechSkill>();
+        if (mech != null)
+        {
+            mech.RefreshCooldownStats();
+        }
     }
 
     public void PerformAttackInDirection(Vector2 direction)

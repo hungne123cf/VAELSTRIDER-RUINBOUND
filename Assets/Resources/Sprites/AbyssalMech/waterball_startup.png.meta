@@ -1,0 +1,1352 @@
+fileFormatVersion: 2
+guid: e231175b33872044ab4929da023eeefa
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7157433931436502035
+    second: waterball_startup_0
+  - first:
+      213: 5516375921787161637
+    second: waterball_startup_1
+  - first:
+      213: -6812197313008446615
+    second: waterball_startup_2
+  - first:
+      213: -8900678276287611406
+    second: waterball_startup_3
+  - first:
+      213: -603067534700740028
+    second: waterball_startup_4
+  - first:
+      213: -7475949042403036419
+    second: waterball_startup_5
+  - first:
+      213: 1311480680158848799
+    second: waterball_startup_6
+  - first:
+      213: 2490825875963198970
+    second: waterball_startup_7
+  - first:
+      213: 4063829412597950985
+    second: waterball_startup_8
+  - first:
+      213: 8473034937698831659
+    second: waterball_startup_9
+  - first:
+      213: 4217342632642903743
+    second: waterball_startup_10
+  - first:
+      213: 344623383996984346
+    second: waterball_startup_11
+  - first:
+      213: -2821354459537017510
+    second: waterball_startup_12
+  - first:
+      213: -4962586247443024090
+    second: waterball_startup_13
+  - first:
+      213: 8394955855711017638
+    second: waterball_startup_14
+  - first:
+      213: 1203194603555254918
+    second: waterball_startup_15
+  - first:
+      213: -5847961620534595901
+    second: waterball_startup_16
+  - first:
+      213: 7863076999898405457
+    second: waterball_startup_17
+  - first:
+      213: -191696342625781529
+    second: waterball_startup_18
+  - first:
+      213: 460417429415205876
+    second: waterball_startup_19
+  - first:
+      213: -3442827801283485191
+    second: waterball_startup_20
+  - first:
+      213: 5543939027315691825
+    second: waterball_startup_21
+  - first:
+      213: 3925503261754255003
+    second: waterball_startup_22
+  - first:
+      213: -7757994055920535415
+    second: waterball_startup_23
+  - first:
+      213: 6510469779672245848
+    second: waterball_startup_24
+  - first:
+      213: -4257078708669441787
+    second: waterball_startup_25
+  - first:
+      213: -8923212429170281325
+    second: waterball_startup_26
+  - first:
+      213: -3321328276476591648
+    second: waterball_startup_27
+  - first:
+      213: 9208579278479186207
+    second: waterball_startup_28
+  - first:
+      213: -2082507701995965967
+    second: waterball_startup_29
+  - first:
+      213: 3580616865918205312
+    second: waterball_startup_30
+  - first:
+      213: 6632032483259210045
+    second: waterball_startup_31
+  - first:
+      213: -8922138265998220246
+    second: waterball_startup_32
+  - first:
+      213: 291699518319746302
+    second: waterball_startup_33
+  - first:
+      213: 2703368651922956845
+    second: waterball_startup_34
+  - first:
+      213: 6975822226624245123
+    second: waterball_startup_35
+  - first:
+      213: -8360748711419969799
+    second: waterball_startup_36
+  - first:
+      213: -7080074255715745161
+    second: waterball_startup_37
+  - first:
+      213: -8005142075377122415
+    second: waterball_startup_38
+  - first:
+      213: -3137070780953338538
+    second: waterball_startup_39
+  - first:
+      213: -4669120712145849252
+    second: waterball_startup_40
+  - first:
+      213: -4778045379957122556
+    second: waterball_startup_41
+  - first:
+      213: 8593414923622874
+    second: waterball_startup_42
+  - first:
+      213: -4693672778189895090
+    second: waterball_startup_43
+  - first:
+      213: -1002214683243684308
+    second: waterball_startup_44
+  - first:
+      213: -7982382551787506242
+    second: waterball_startup_45
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: waterball_startup_0
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 284
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31ca99a2d30545360800000000000000
+      internalID: 7157433931436502035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_1
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 280
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52c44a18caa1e8c40800000000000000
+      internalID: 5516375921787161637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_2
+      rect:
+        serializedVersion: 2
+        x: 169
+        y: 279
+        width: 16
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 963d24ae2a63671a0800000000000000
+      internalID: -6812197313008446615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_3
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 273
+        width: 34
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fd37d9f3407a7480800000000000000
+      internalID: -8900678276287611406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_4
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 274
+        width: 52
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 442879ab54971a7f0800000000000000
+      internalID: -603067534700740028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_5
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 210
+        width: 55
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df235a884f7104890800000000000000
+      internalID: -7475949042403036419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_6
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 210
+        width: 55
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f17e7a6eab0533210800000000000000
+      internalID: 1311480680158848799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_7
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 209
+        width: 55
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afd332eefe0319220800000000000000
+      internalID: 2490825875963198970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_8
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 236
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90a6fa5d15f956830800000000000000
+      internalID: 4063829412597950985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_9
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 230
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2d430f3264469570800000000000000
+      internalID: 8473034937698831659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_10
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 236
+        width: 12
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fbe7acaa7c2078a30800000000000000
+      internalID: 4217342632642903743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_11
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 230
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1cee60542958c400800000000000000
+      internalID: 344623383996984346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_12
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 238
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a55f4d5311988d8d0800000000000000
+      internalID: -2821354459537017510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_13
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 237
+        width: 11
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6277be1d91a512bb0800000000000000
+      internalID: -4962586247443024090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_14
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 210
+        width: 53
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6aa9db45fdfd08470800000000000000
+      internalID: 8394955855711017638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_15
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 206
+        width: 12
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 682f39cfd1b92b010800000000000000
+      internalID: 1203194603555254918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_16
+      rect:
+        serializedVersion: 2
+        x: 258
+        y: 209
+        width: 55
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ceeae3d3edd7dea0800000000000000
+      internalID: -5847961620534595901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_17
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 206
+        width: 11
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15a1d7cfed24f1d60800000000000000
+      internalID: 7863076999898405457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_18
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 166
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e87c092135f65df0800000000000000
+      internalID: -191696342625781529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_19
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 175
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fb11b0763bb36600800000000000000
+      internalID: 460417429415205876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_20
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 142
+        width: 47
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f1a8a90b5e9830d0800000000000000
+      internalID: -3442827801283485191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_21
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 174
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 131939b1c2700fc40800000000000000
+      internalID: 5543939027315691825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_22
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 166
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b96ef791b603a7630800000000000000
+      internalID: 3925503261754255003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_23
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 146
+        width: 47
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 988b34f7281165490800000000000000
+      internalID: -7757994055920535415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_24
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 175
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 856a74a45c5d95a50800000000000000
+      internalID: 6510469779672245848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_25
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 166
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50911ec2871dbe4c0800000000000000
+      internalID: -4257078708669441787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_26
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 142
+        width: 53
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39474f7a2916a2480800000000000000
+      internalID: -8923212429170281325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_27
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 175
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e1072a978548e1d0800000000000000
+      internalID: -3321328276476591648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_28
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 147
+        width: 54
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1956cb80127bcf70800000000000000
+      internalID: 9208579278479186207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_29
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 149
+        width: 49
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f1f38457427913e0800000000000000
+      internalID: -2082507701995965967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 151
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08db3d19118e0b130800000000000000
+      internalID: 3580616865918205312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_31
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 151
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d39548fc766b90c50800000000000000
+      internalID: 6632032483259210045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_32
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 149
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a24a142c4823e2480800000000000000
+      internalID: -8922138265998220246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_33
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 149
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efcd99a9a235c0400800000000000000
+      internalID: 291699518319746302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_34
+      rect:
+        serializedVersion: 2
+        x: 267
+        y: 146
+        width: 13
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d226bc2477b448520800000000000000
+      internalID: 2703368651922956845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_35
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 142
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38d663a0b591fc060800000000000000
+      internalID: 6975822226624245123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_36
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 83
+        width: 16
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fef1871857a8fb80800000000000000
+      internalID: -8360748711419969799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_37
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 85
+        width: 52
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 772ccace9f58ebd90800000000000000
+      internalID: -7080074255715745161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_38
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 98
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1930d9c02b508e090800000000000000
+      internalID: -8005142075377122415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_39
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 82
+        width: 12
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65dd402eeb2e674d0800000000000000
+      internalID: -3137070780953338538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_40
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 84
+        width: 55
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c54b02b4373f33fb0800000000000000
+      internalID: -4669120712145849252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_41
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 84
+        width: 58
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40a95f6ca09f0bdb0800000000000000
+      internalID: -4778045379957122556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_42
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 91
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad91ee35aa78e1000800000000000000
+      internalID: 8593414923622874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_43
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 84
+        width: 58
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4a0214f979bcdeb0800000000000000
+      internalID: -4693672778189895090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_44
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 84
+        width: 58
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2e54983e0b6712f0800000000000000
+      internalID: -1002214683243684308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waterball_startup_45
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 21
+        width: 56
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb5fd639c51e83190800000000000000
+      internalID: -7982382551787506242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      waterball_startup_0: 7157433931436502035
+      waterball_startup_1: 5516375921787161637
+      waterball_startup_10: 4217342632642903743
+      waterball_startup_11: 344623383996984346
+      waterball_startup_12: -2821354459537017510
+      waterball_startup_13: -4962586247443024090
+      waterball_startup_14: 8394955855711017638
+      waterball_startup_15: 1203194603555254918
+      waterball_startup_16: -5847961620534595901
+      waterball_startup_17: 7863076999898405457
+      waterball_startup_18: -191696342625781529
+      waterball_startup_19: 460417429415205876
+      waterball_startup_2: -6812197313008446615
+      waterball_startup_20: -3442827801283485191
+      waterball_startup_21: 5543939027315691825
+      waterball_startup_22: 3925503261754255003
+      waterball_startup_23: -7757994055920535415
+      waterball_startup_24: 6510469779672245848
+      waterball_startup_25: -4257078708669441787
+      waterball_startup_26: -8923212429170281325
+      waterball_startup_27: -3321328276476591648
+      waterball_startup_28: 9208579278479186207
+      waterball_startup_29: -2082507701995965967
+      waterball_startup_3: -8900678276287611406
+      waterball_startup_30: 3580616865918205312
+      waterball_startup_31: 6632032483259210045
+      waterball_startup_32: -8922138265998220246
+      waterball_startup_33: 291699518319746302
+      waterball_startup_34: 2703368651922956845
+      waterball_startup_35: 6975822226624245123
+      waterball_startup_36: -8360748711419969799
+      waterball_startup_37: -7080074255715745161
+      waterball_startup_38: -8005142075377122415
+      waterball_startup_39: -3137070780953338538
+      waterball_startup_4: -603067534700740028
+      waterball_startup_40: -4669120712145849252
+      waterball_startup_41: -4778045379957122556
+      waterball_startup_42: 8593414923622874
+      waterball_startup_43: -4693672778189895090
+      waterball_startup_44: -1002214683243684308
+      waterball_startup_45: -7982382551787506242
+      waterball_startup_5: -7475949042403036419
+      waterball_startup_6: 1311480680158848799
+      waterball_startup_7: 2490825875963198970
+      waterball_startup_8: 4063829412597950985
+      waterball_startup_9: 8473034937698831659
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
