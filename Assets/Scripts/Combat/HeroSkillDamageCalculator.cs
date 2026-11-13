@@ -147,11 +147,11 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = Mathf.Max(1, info.fromAtk + info.fromAP);
                 info.description = LocalizationManager.T(
-                    $"• <b>Nhấp đánh:</b> Chuỗi 3 thức Mỏ Neo Thủy Triều quét và giáng búa nước (Thức 1-2 gây ST Vật Lý, Thức 3 nổ sóng thủy áp gây ST Phép).\n" +
-                    $"• <b>Đè giữ (Gồng nút đánh):</b> Cắm mỏ neo xuống đất triệu hồi <b>Vòng Xoáy Thâm Hải</b> (bán kính 3.5m) liên tục gom hút quái vật và làm chậm 40%. Nhả nút: Nện mỏ neo giáng sét thủy chấn gây <b>SÁT THƯƠNG CHUẨN (True Damage)</b> xuyên 100% giáp và hất tung toàn bộ kẻ địch!\n\n" +
+                    $"• <b>Nhấp đánh:</b> Bắn đạn Water Ball liên tục theo đường thẳng (Đòn 1-2 gây ST Vật Lý <color=#FFA500>cam</color>, Đòn 3 nổ lan diện rộng gây ST Phép <color=#C084FC>tím</color>).\n" +
+                    $"• <b>Đè giữ (Gồng nút đánh):</b> Cắm mỏ neo xuống đất triệu hồi <b>Vòng Xoáy Thâm Hải</b> (bán kính 3.5m) liên tục gom hút quái vật. Nhả nút: Nện mỏ neo giáng sét thủy chấn gây <b>SÁT THƯƠNG CHUẨN (True Damage - số trắng)</b> xuyên 100% giáp và hất tung toàn bộ kẻ địch!\n\n" +
                     $"<color=#D0D5DD>Sát Thương Đánh Thường: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (40% <sprite name=\"ap\">)",
-                    $"• <b>Tap:</b> 3-stage Tidal Anchor combo (Hits 1-2 deal Physical, Hit 3 bursts Magic water wave).\n" +
-                    $"• <b>Hold (Charge):</b> Implants anchor creating an <b>Abyssal Vortex</b> (3.5m radius) pulling foes and slowing by 40%. Release: Slams anchor for <b>TRUE DAMAGE</b> bypassing all armor and knocking up all foes!\n\n" +
+                    $"• <b>Tap:</b> Fires Water Ball projectiles in a straight line (Hits 1-2 deal Physical <color=#FFA500>orange</color>, Hit 3 bursts AoE Magic <color=#C084FC>purple</color>).\n" +
+                    $"• <b>Hold (Charge):</b> Implants anchor creating an <b>Abyssal Vortex</b> (3.5m radius) pulling foes. Release: Slams anchor for <b>TRUE DAMAGE (white text)</b> bypassing all armor and knocking up all foes!\n\n" +
                     $"<color=#D0D5DD>Attack Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = <color=#FFA500>{info.fromAtk}</color> (100% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (40% <sprite name=\"ap\">)");
                 break;
 
@@ -280,13 +280,21 @@ public static class HeroSkillDamageCalculator
                 info.energyCostText = LocalizationManager.T("<sprite name=\"mana\"> Tiêu hao: 55 Năng lượng", "<sprite name=\"mana\"> Cost: 55 Energy");
                 info.atkRatio = 1.60f;
                 info.apRatio = 0.90f;
-                info.damageType = DamageType.Physical;
+                info.damageType = DamageType.Magic; // Sóng thần là ma thuật đại dương (Màu tím)
                 info.fromAtk = Mathf.RoundToInt(totalAtk * info.atkRatio);
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = 60 + info.fromAtk + info.fromAP;
+                
+                // Đòn cắn kết liễu của Cá Mập Đại Dương (Sát thương chuẩn)
+                int sharkFinisherDmg = 125 + Mathf.RoundToInt(totalAtk * 2.20f);
+
                 info.description = LocalizationManager.T(
-                    $"Giải phóng cơn đại hồng thủy càn quét toàn màn hình (9.5m). Sóng triều cuốn phăng quái vật và triệu hồi Đàn Cá Mập cưỡi sóng tung cú đớp kết liễu gây <b>SÁT THƯƠNG CHUẨN (True Damage)</b> cực lớn!\n\n<color=#D0D5DD>Sát Thương Sóng Thần: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 60 + <color=#FFA500>{info.fromAtk}</color> (160% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (90% <sprite name=\"ap\">)",
-                    $"Unleashes a sweeping tidal tsunami wave (9.5m). Sweeps foes and summons Great Sharks surfing to deliver lethal bite finishing strikes with massive <b>TRUE DAMAGE</b>!\n\n<color=#D0D5DD>Tsunami Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 60 + <color=#FFA500>{info.fromAtk}</color> (160% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (90% <sprite name=\"ap\">)");
+                    $"Giải phóng cơn đại hồng thủy càn quét toàn màn hình (9.5m). Sóng triều cuốn phăng quái vật gây sát thương phép và triệu hồi Đàn Cá Mập cưỡi sóng tung cú đớp kết liễu gây sát thương chuẩn (bỏ qua mọi giáp kháng)!\n\n" +
+                    $"<color=#D0D5DD>• Sát Thương Sóng Cuốn (Phép): </color><color=#C084FC><b>{info.totalDamage}</b></color> = 60 + <color=#FFA500>{info.fromAtk}</color> (160% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (90% <sprite name=\"ap\">)\n" +
+                    $"<color=#D0D5DD>• Cú Đớp Cá Mập (ST Chuẩn): </color><color=#FFFFFF><b>{sharkFinisherDmg}</b></color> = 125 + <color=#FFA500>{Mathf.RoundToInt(totalAtk * 2.2f)}</color> (220% <sprite name=\"atk\">)",
+                    $"Unleashes a sweeping tidal tsunami wave (9.5m). Sweeps foes dealing magic damage and summons Great Sharks surfing to deliver lethal bite strikes with pure true damage!\n\n" +
+                    $"<color=#D0D5DD>• Tsunami Wave (Magic): </color><color=#C084FC><b>{info.totalDamage}</b></color> = 60 + <color=#FFA500>{info.fromAtk}</color> (160% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (90% <sprite name=\"ap\">)\n" +
+                    $"<color=#D0D5DD>• Shark Bite (True Damage): </color><color=#FFFFFF><b>{sharkFinisherDmg}</b></color> = 125 + <color=#FFA500>{Mathf.RoundToInt(totalAtk * 2.2f)}</color> (220% <sprite name=\"atk\">)");
                 break;
 
             default: // Vaelstrider (Player 1)
@@ -393,7 +401,7 @@ public static class HeroSkillDamageCalculator
                 break;
 
             case CharacterManager.CHAR_ABYSSAL_MECH: // Hải Thần Cơ Giáp (Player 7)
-                info.skillName = LocalizationManager.T("Lướt Sóng Thâm Hải & Vệt Nước", "Hydro-Thrust Surge & Water Trail");
+                info.skillName = LocalizationManager.T("Lướt Phản Lực Thủy Áp", "Hydro-Thrust Surge");
                 info.cooldownText = $"{LocalizationManager.T("Hồi chiêu", "Cooldown")}: 4.5s";
                 info.energyCostText = LocalizationManager.T("<sprite name=\"mana\"> Tiêu hao: 20 Năng lượng", "<sprite name=\"mana\"> Cost: 20 Energy");
                 info.hasDamage = true;
@@ -404,8 +412,8 @@ public static class HeroSkillDamageCalculator
                 info.fromAP = Mathf.RoundToInt(totalAP * info.apRatio);
                 info.totalDamage = 20 + info.fromAtk + info.fromAP;
                 info.description = LocalizationManager.T(
-                    $"Phun phản lực thủy áp cực mạnh lướt nhanh tới trước, để lại <b>Vệt Nước Biển</b> tồn tại 5s giúp tăng 30% Tốc Chạy cho Cơ Giáp. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương và hất văng quái cản đường.\n\n<color=#D0D5DD>Sát Thương Lướt: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 20 + <color=#FFA500>{info.fromAtk}</color> (50% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (50% <sprite name=\"ap\">)",
-                    $"Hydro-thrust forward surge leaving a 5-sec <b>Water Trail</b> boosting Mech speed by 30%. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) damage and knocks away foes.\n\n<color=#D0D5DD>Surge Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 20 + <color=#FFA500>{info.fromAtk}</color> (50% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (50% <sprite name=\"ap\">)");
+                    $"Phun phản lực thủy áp cực mạnh lướt nhanh tới trước, tăng 30% tốc độ và tích 15 Nộ. Nó gây <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) sát thương vật lý và hất văng quái cản đường.\n\n<color=#D0D5DD>Sát Thương Lướt: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 20 + <color=#FFA500>{info.fromAtk}</color> (50% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (50% <sprite name=\"ap\">)",
+                    $"Hydro-thrust forward surge boosting speed and adding 15 Rage. Deals <color=#FFA500><b>{info.totalDamage}</b></color> (<sprite name=\"atk\"> <color=#FFA500>{info.fromAtk}</color> + <sprite name=\"ap\"> <color=#4DEEEA>{info.fromAP}</color>) physical damage and knocks away foes.\n\n<color=#D0D5DD>Surge Damage: </color><color=#FFA500><b>{info.totalDamage}</b></color> = 20 + <color=#FFA500>{info.fromAtk}</color> (50% <sprite name=\"atk\">) + <color=#4DEEEA>{info.fromAP}</color> (50% <sprite name=\"ap\">)");
                 break;
 
             default: // Vaelstrider (Player 1)
