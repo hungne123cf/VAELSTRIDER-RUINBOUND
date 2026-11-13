@@ -37,6 +37,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     private Vector2 pointerDownPos = Vector2.zero;
     private Vector2 currentDragAimDir = Vector2.zero;
     private bool wasTooltipShown = false;
+    private bool isCooldownTooltipPress = false; // Ấn giữ khi đang hồi chiêu: chỉ xem mô tả
 
     void Awake()
     {
@@ -167,7 +168,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
 
         // Bắt sự kiện Ấn Giữ Lâu (Long-Press >= 0.38s) để hiện Popup Thẻ Kỹ Năng phong cách TFT / LMHT
-        if (isPointerDown && !wasTooltipShown && currentDragAimDir.sqrMagnitude < 0.01f)
+        if ((isPointerDown || isCooldownTooltipPress) && !wasTooltipShown && currentDragAimDir.sqrMagnitude < 0.01f)
         {
             if (Time.time - pointerDownTime >= 0.38f)
             {
@@ -1849,30 +1850,28 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
 
         // Kiểm tra điều kiện hồi chiêu trước khi cho phép giữ/bấm
+        bool isOnCooldown = false;
         if (buttonType == ButtonType.Attack)
         {
             var azureBlade = (playerCombat != null) ? playerCombat.GetComponent<AzureBladeSkill>() : null;
-            if (azureBlade != null && !azureBlade.IsAttackReady)
-            {
-                StartCoroutine(ShakeButtonRoutine());
-                return;
-            }
+            if (azureBlade != null && !azureBlade.IsAttackReady) isOnCooldown = true;
         }
         else if (buttonType == ButtonType.Dash)
         {
-            if (playerController != null && !playerController.IsDashReady())
-            {
-                StartCoroutine(ShakeButtonRoutine());
-                return;
-            }
+            if (playerController != null && !playerController.IsDashReady()) isOnCooldown = true;
         }
         else if (buttonType == ButtonType.Skill)
         {
-            if (playerCombat != null && !playerCombat.IsSkillReady())
-            {
-                StartCoroutine(ShakeButtonRoutine());
-                return;
-            }
+            if (playerCombat != null && !playerCombat.IsSkillReady()) isOnCooldown = true;
+        }
+
+        if (isOnCooldown)
+        {
+            // Đang hồi chiêu: không cho tung chiêu nhưng VẪN cho ấn giữ để xem mô tả kỹ năng
+            StartCoroutine(ShakeButtonRoutine());
+            isCooldownTooltipPress = true;
+            pointerDownTime = Time.time;
+            return;
         }
 
         isPointerDown = true;
@@ -1939,6 +1938,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        isCooldownTooltipPress = false;
         if (wasTooltipShown)
         {
             wasTooltipShown = false;
@@ -1949,6 +1949,18 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
     public void OnPointerUp(PointerEventData eventData)
     {
         transform.localScale = originalScale;
+
+        // Nhả tay sau khi ấn giữ xem mô tả lúc đang hồi chiêu: chỉ ẩn tooltip, không tung chiêu
+        if (isCooldownTooltipPress)
+        {
+            isCooldownTooltipPress = false;
+            if (wasTooltipShown)
+            {
+                wasTooltipShown = false;
+                SkillTooltipPopupUI.Instance?.HideTooltip();
+            }
+            return;
+        }
 
         if (!isPointerDown) return;
         isPointerDown = false;
