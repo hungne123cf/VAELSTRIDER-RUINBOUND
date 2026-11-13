@@ -352,6 +352,13 @@ public class PlayerController : MonoBehaviour
         dashCooldown = 5.0f;
         baseDashCooldown = 5.0f;
         if (GetComponent<DashGhostTrail>() == null) gameObject.AddComponent<DashGhostTrail>();
+        // Tắt DashGhostTrail cho Abyssal Mech (vệt nước dính người xấu)
+        var mechGhost = GetComponent<AbyssalMechSkill>();
+        if (mechGhost != null && mechGhost.enabled)
+        {
+            var ghostTrail = GetComponent<DashGhostTrail>();
+            if (ghostTrail != null) ghostTrail.enabled = false;
+        }
         if (GetComponent<AutoDepthSort>() == null) gameObject.AddComponent<AutoDepthSort>();
         PlayerEquipmentVisual.EnsureExists(gameObject);
         AutoAlignCollider();

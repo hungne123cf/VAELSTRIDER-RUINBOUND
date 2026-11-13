@@ -328,7 +328,18 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                     float holdDur = Time.time - pointerDownTime;
                     Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) ? currentDragAimDir : ((playerController != null) ? playerController.GetFacingDirection() : Vector2.down);
 
-                    if (holdDur >= 0.18f || currentDragAimDir.sqrMagnitude > 0.01f)
+                    Vector2 playerPos = (Vector2)playerCombat.transform.position;
+
+                    // 1. Kéo định hướng: đường thẳng bắn Water Ball (giống tướng bắn xa)
+                    if (currentDragAimDir.sqrMagnitude > 0.01f)
+                    {
+                        if (playerController != null) playerController.SetFacingDirection(aimDir);
+                        if (mech.IsChargingVortex) mech.CancelVortexCharge();
+                        SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimLine(playerPos, aimDir, mech.waterBallRange, new Color(0.2f, 0.85f, 1f, 0.85f), 0.22f);
+                        SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
+                    }
+                    // 2. Giữ tại chỗ >= 0.35s: Gồng Xoáy Thủy Triều
+                    else if (holdDur >= 0.35f)
                     {
                         if (!mech.IsChargingVortex && mech.IsAttackReady)
                         {
@@ -336,7 +347,6 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         }
                         mech.UpdateVortexCharge(aimDir, holdDur);
 
-                        Vector2 playerPos = (Vector2)playerCombat.transform.position;
                         Vector2 aimCenter = playerPos + aimDir * 1.35f;
                         SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(aimCenter, 3.2f, new Color(0.2f, 0.85f, 1f, 0.80f));
                         SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();

@@ -16,6 +16,12 @@ public class AbyssalMechSkill : MonoBehaviour
     public float attackCooldown = 0.40f;
     private float attackCooldownTimer = 0f;
 
+    [Header("--- ĐẠN WATER BALL (ĐÒN ĐÁNH THƯỜNG BẮN XA) ---")]
+    public float waterBallRange = 6.5f;
+    public float waterBallSpeed = 9.0f;
+    public float waterBallHitRadius = 0.45f;
+    public float waterBallSplashRadius = 1.4f; // Đòn 3 nổ lan
+
     [Header("--- NỘI TẠI: GIÁP LẶN THÂM HẢI (ABYSSAL ARMOR) ---")]
     [Range(0f, 0.5f)]
     public float innateDamageReduction = 0.18f; // Giảm 18% sát thương nhận vào
@@ -94,6 +100,10 @@ public class AbyssalMechSkill : MonoBehaviour
     public static Sprite[] waterSplashFrames;   // 21 frames: Sóng nước bộc phá khi vung đòn 1 & 2
     public static Sprite[] waterSpikeFrames;    // 76 frames: Gai nước / Cột nước phun trào cho đòn 3 & giáng búa gồng
     public static Sprite[] waterStartUpFrames;  // 23 frames: Luồng nước sôi trào bọt nổi lên quanh mỏ neo khi gồng chiêu
+
+    // Pixel Art Water Ball Projectile (đòn đánh thường bắn Water Ball ra)
+    public static Sprite[] waterBallStartupFrames;  // 21 frames (5x5 grid 64x64): Water Ball hình thành & bay
+    public static Sprite[] waterBallImpactFrames;    // 16 frames (4x4 grid 64x64): Water Ball nổ khi va chạm
 
     private float animTimer = 0f;
     private int animIndex = 0;
@@ -266,6 +276,69 @@ public class AbyssalMechSkill : MonoBehaviour
                 var edAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player8/robot/individual_sheets/Water Effect 01/Water Effect 01/Start Up/Water StartUp 1 SpriteSheet.png");
                 if (edAssets != null && edAssets.Length > 0)
                     waterStartUpFrames = SortSpritesByNumericSuffix(edAssets.OfType<Sprite>().ToArray());
+            }
+#endif
+        }
+
+        // 6. Nạp Water Ball Spritesheet (Startup & Infinite: 5x5 grid = 21 frames, Impact: 4x4 grid)
+        if (waterBallStartupFrames == null || waterBallStartupFrames.Length == 0)
+        {
+            Texture2D wbStartTex = Resources.Load<Texture2D>("Sprites/AbyssalMech/waterball_startup");
+            if (wbStartTex != null)
+            {
+                wbStartTex.filterMode = FilterMode.Point;
+                int cell = 64;
+                int cols = 5;
+                int rows = 5;
+                int totalFrames = 21; // 5x5 grid nhưng chỉ có 21 frames hợp lệ
+                waterBallStartupFrames = new Sprite[totalFrames];
+                for (int i = 0; i < totalFrames; i++)
+                {
+                    int r = i / cols;
+                    int c = i % cols;
+                    int y = (rows - 1 - r) * cell;
+                    int x = c * cell;
+                    waterBallStartupFrames[i] = Sprite.Create(wbStartTex, new Rect(x, y, cell, cell), new Vector2(0.5f, 0.5f), 32f);
+                    waterBallStartupFrames[i].name = $"WaterBall_Startup_{i}";
+                }
+            }
+#if UNITY_EDITOR
+            if (waterBallStartupFrames == null || waterBallStartupFrames.Length == 0)
+            {
+                var edAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player8/robot/individual_sheets/Water Effect 2/Water Ball - Spritesheet/WaterBall - Startup and Infinite.png");
+                if (edAssets != null && edAssets.Length > 0)
+                    waterBallStartupFrames = SortSpritesByNumericSuffix(edAssets.OfType<Sprite>().ToArray());
+            }
+#endif
+        }
+
+        if (waterBallImpactFrames == null || waterBallImpactFrames.Length == 0)
+        {
+            Texture2D wbImpTex = Resources.Load<Texture2D>("Sprites/AbyssalMech/waterball_impact");
+            if (wbImpTex != null)
+            {
+                wbImpTex.filterMode = FilterMode.Point;
+                int cell = 64;
+                int cols = 4;
+                int rows = 4;
+                int totalFrames = 16;
+                waterBallImpactFrames = new Sprite[totalFrames];
+                for (int i = 0; i < totalFrames; i++)
+                {
+                    int r = i / cols;
+                    int c = i % cols;
+                    int y = (rows - 1 - r) * cell;
+                    int x = c * cell;
+                    waterBallImpactFrames[i] = Sprite.Create(wbImpTex, new Rect(x, y, cell, cell), new Vector2(0.5f, 0.5f), 32f);
+                    waterBallImpactFrames[i].name = $"WaterBall_Impact_{i}";
+                }
+            }
+#if UNITY_EDITOR
+            if (waterBallImpactFrames == null || waterBallImpactFrames.Length == 0)
+            {
+                var edAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player8/robot/individual_sheets/Water Effect 2/Water Ball - Spritesheet/WaterBall - Impact.png");
+                if (edAssets != null && edAssets.Length > 0)
+                    waterBallImpactFrames = SortSpritesByNumericSuffix(edAssets.OfType<Sprite>().ToArray());
             }
 #endif
         }
@@ -652,7 +725,7 @@ public class AbyssalMechSkill : MonoBehaviour
         if (dashDir.sqrMagnitude < 0.01f) dashDir = GetFacingDirection();
         dashDir.Normalize();
 
-        ActivateBubbleShield(1.8f);
+        // Chỉ hồi Rage, KHÔNG kích hoạt BubbleShield hay hiệu ứng nước xấu khi lướt
         AddRage(15f);
 
         // Âm thanh lướt phản lực thủy áp (TUYỆT ĐỐI KHÔNG SINH RA VŨNG NƯỚC XẤU TRÊN SÀN)
@@ -689,6 +762,162 @@ public class AbyssalMechSkill : MonoBehaviour
         }
 
         if (vfx != null) Destroy(vfx);
+    }
+
+    /// <summary>Bắn Water Ball từ tay cơ giáp theo đường thẳng aimDir.</summary>
+    private void FireWaterBall(Vector2 aimDir, float dmgMult, bool isHeavy)
+    {
+        if (aimDir.sqrMagnitude < 0.01f) aimDir = GetFacingDirection();
+        aimDir.Normalize();
+        Vector3 spawnPos = transform.position + (Vector3)(aimDir * 0.85f) + new Vector3(0f, 0.05f, 0f);
+        float speed = isHeavy ? waterBallSpeed * 1.15f : waterBallSpeed;
+        float scale = isHeavy ? 1.8f : 1.35f;
+        int rawDmg = Mathf.RoundToInt(GetEffectiveAttackDamage() * dmgMult);
+        StartCoroutine(WaterBallProjectileRoutine(spawnPos, aimDir, speed, scale, isHeavy, rawDmg));
+    }
+
+    private bool TryGetEnemyDamageable(Collider2D col, out IDamageable damageable, out GameObject rootObj)
+    {
+        damageable = null; rootObj = null;
+        if (col == null || col.gameObject == gameObject || col.transform.IsChildOf(transform)) return false;
+        damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
+        if (damageable == null || damageable is PlayerHealth) return false;
+        rootObj = (damageable as Component)?.gameObject ?? col.gameObject;
+        return true;
+    }
+
+    private void ApplyWaterBallDamage(IDamageable damageable, GameObject rootObj, int rawDmg, bool isHeavy, Vector2 dir)
+    {
+        int finalDmg = AugmentManager.ProcessOutgoingDamage(gameObject, rootObj, rawDmg);
+        damageable.TakeDamage(finalDmg);
+        DamageType type = isHeavy ? DamageType.Magic : DamageType.Physical;
+        DamagePopup.Create(rootObj.transform.position, finalDmg, type, isCritical: isHeavy);
+        AugmentManager.TriggerOnHitAugments(gameObject, rootObj, finalDmg, damageable);
+        playerCombat?.ApplyLifesteal(finalDmg, type);
+
+        var rb = rootObj.GetComponent<Rigidbody2D>() ?? rootObj.GetComponentInParent<Rigidbody2D>();
+        if (rb != null) rb.AddForce(dir * (isHeavy ? 6.5f : 3.5f), ForceMode2D.Impulse);
+    }
+
+    private void OnWaterBallHits(int hitCount, bool isHeavy)
+    {
+        if (hitCount <= 0) return;
+        AddRage(12f + hitCount * 4f);
+        var energySys = GetComponent<PlayerEnergySystem>() ?? PlayerEnergySystem.Instance;
+        if (energySys != null)
+        {
+            energySys.RestoreEnergy(hitCount * 6f);
+            energySys.AddInnerEnergy(hitCount * 8f);
+        }
+        // Đòn 3 hồi 4% máu đã mất khi trúng
+        if (isHeavy && playerHealth != null && !playerHealth.IsDead)
+        {
+            int lostHp = Mathf.Max(0, playerHealth.MaxHealth - playerHealth.CurrentHealth);
+            if (lostHp > 0) playerHealth.Heal(Mathf.Max(2, Mathf.RoundToInt(lostHp * 0.04f)));
+        }
+        SoundManager.EnsureInstance()?.PlayHitImpact();
+        var cam = FindAnyObjectByType<CameraFollow>();
+        if (cam != null) cam.Shake(0.06f, isHeavy ? 0.12f : 0.06f);
+    }
+
+    /// <summary>
+    /// Đạn Water Ball bay thẳng, trúng kẻ địch đầu tiên thì gây sát thương & nổ (đòn 3 nổ lan AoE).
+    /// Chạm tường (collider rắn không phải trigger) thì nổ. Hết tầm thì nổ tại chỗ.
+    /// </summary>
+    private IEnumerator WaterBallProjectileRoutine(Vector3 spawnPos, Vector2 dir, float speed, float scale, bool isHeavy, int rawDmg)
+    {
+        GameObject ball = new GameObject("AbyssalWaterBall");
+        ball.transform.position = spawnPos;
+        float rotZ = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        ball.transform.rotation = Quaternion.Euler(0f, 0f, rotZ);
+        ball.transform.localScale = new Vector3(scale, scale, 1f);
+
+        var sr = ball.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = (spriteRenderer != null ? spriteRenderer.sortingOrder : 10) + 6;
+        sr.flipY = dir.x < 0f; // tránh đạn bị lộn ngược khi bắn sang trái
+        bool hasFrames = waterBallStartupFrames != null && waterBallStartupFrames.Length > 0;
+        if (hasFrames) sr.sprite = waterBallStartupFrames[0];
+
+        int wallMask = LayerMask.GetMask("Obstacle", "Wall");
+        float traveled = 0f;
+        float animTick = 0f;
+        int fIdx = 0;
+        const float frameInterval = 1f / 24f;
+        bool exploded = false;
+        int hitCount = 0;
+
+        while (traveled < waterBallRange && ball != null)
+        {
+            float dt = Time.deltaTime;
+            float step = speed * dt;
+            ball.transform.position += (Vector3)(dir * step);
+            traveled += step;
+
+            animTick += dt;
+            if (hasFrames && animTick >= frameInterval)
+            {
+                animTick = 0f;
+                // Frames 0-4 hình thành, sau đó loop 5..20 (Infinite)
+                fIdx++;
+                int idx = fIdx < 5 ? fIdx : 5 + ((fIdx - 5) % Mathf.Max(1, waterBallStartupFrames.Length - 5));
+                sr.sprite = waterBallStartupFrames[Mathf.Clamp(idx, 0, waterBallStartupFrames.Length - 1)];
+            }
+
+            Vector2 pos = ball.transform.position;
+
+            // Va chạm kẻ địch
+            Collider2D[] cols = Physics2D.OverlapCircleAll(pos, waterBallHitRadius * scale);
+            foreach (var col in cols)
+            {
+                if (TryGetEnemyDamageable(col, out var dmg, out var root))
+                {
+                    exploded = true;
+                    break;
+                }
+            }
+
+            // Va chạm tường
+            if (!exploded && wallMask != 0)
+            {
+                var wall = Physics2D.OverlapCircle(pos, 0.15f, wallMask);
+                if (wall != null && !wall.isTrigger) exploded = true;
+            }
+
+            if (exploded) break;
+            yield return null;
+        }
+
+        if (ball == null) yield break;
+
+        // Gây sát thương tại điểm nổ
+        Vector2 hitPos = ball.transform.position;
+        float radius = isHeavy ? waterBallSplashRadius : waterBallHitRadius * scale + 0.1f;
+        HashSet<GameObject> hitRoots = new HashSet<GameObject>();
+        Collider2D[] hits = Physics2D.OverlapCircleAll(hitPos, radius);
+        foreach (var col in hits)
+        {
+            if (!TryGetEnemyDamageable(col, out var damageable, out var rootObj)) continue;
+            if (hitRoots.Contains(rootObj)) continue;
+            hitRoots.Add(rootObj);
+            ApplyWaterBallDamage(damageable, rootObj, rawDmg, isHeavy, dir);
+            hitCount++;
+            if (!isHeavy) break; // đòn 1-2: đơn mục tiêu
+        }
+        OnWaterBallHits(hitCount, isHeavy);
+
+        // Hoạt ảnh nổ
+        if (waterBallImpactFrames != null && waterBallImpactFrames.Length > 0)
+        {
+            float impactScale = scale * (isHeavy ? 1.7f : 1.3f);
+            ball.transform.localScale = new Vector3(impactScale, impactScale, 1f);
+            for (int i = 0; i < waterBallImpactFrames.Length; i++)
+            {
+                if (sr != null && waterBallImpactFrames[i] != null) sr.sprite = waterBallImpactFrames[i];
+                yield return new WaitForSeconds(0.03f);
+            }
+        }
+
+        if (ball != null) Destroy(ball);
     }
 
     // =========================================================================
@@ -745,29 +974,7 @@ public class AbyssalMechSkill : MonoBehaviour
                 if (!hasDealtDamage && i >= hitFrame)
                 {
                     hasDealtDamage = true;
-                    PerformAnchorHitboxDamage(aimDir, dmgMult, is360Sweep: (step == 1), isHeavyCleave: (step == 2));
-
-                    // Phát hiệu ứng Water Effect 01 (Thay thế hoàn toàn mọi vết nước cũ)
-                    if (step == 0 || step == 1)
-                    {
-                        if (waterSplashFrames != null && waterSplashFrames.Length > 0)
-                        {
-                            Vector3 splashPos = transform.position + (Vector3)(aimDir * 1.15f) + new Vector3(0f, -0.05f, 0f);
-                            float rotZ = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
-                            Quaternion rot = Quaternion.Euler(0f, 0f, rotZ);
-                            Vector3 vfxScale = new Vector3(1.75f, (aimDir.x < 0f) ? -1.75f : 1.75f, 1f);
-                            StartCoroutine(PlayWaterVfxRoutine(waterSplashFrames, splashPos, vfxScale, rot, 30f, false, 6));
-                        }
-                    }
-                    else if (step == 2)
-                    {
-                        if (waterSpikeFrames != null && waterSpikeFrames.Length > 0)
-                        {
-                            Vector3 spikePos = transform.position + (Vector3)(aimDir * 1.35f) + new Vector3(0f, -0.15f, 0f);
-                            Vector3 vfxScale = new Vector3(2.0f, 2.0f, 1f);
-                            StartCoroutine(PlayWaterVfxRoutine(waterSpikeFrames, spikePos, vfxScale, Quaternion.identity, 32f, false, 7));
-                        }
-                    }
+                    FireWaterBall(aimDir, dmgMult, step == 2);
                 }
 
                 yield return new WaitForSeconds(frameTime);
@@ -775,7 +982,7 @@ public class AbyssalMechSkill : MonoBehaviour
         }
         else
         {
-            PerformAnchorHitboxDamage(aimDir, dmgMult, is360Sweep: (step == 1), isHeavyCleave: (step == 2));
+            FireWaterBall(aimDir, dmgMult, step == 2);
             yield return new WaitForSeconds(0.25f);
         }
 
