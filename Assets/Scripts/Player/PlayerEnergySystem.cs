@@ -147,7 +147,7 @@ public class PlayerEnergySystem : MonoBehaviour
         string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
         bool hasOtherHeroSkill = (GetComponent<GaleRoninSkill>() != null || GetComponent<AzureBladeSkill>() != null ||
                                   GetComponent<TitanBerserkerSkill>() != null || GetComponent<DuneAssassinSkill>() != null ||
-                                  GetComponent<CelestialMageSkill>() != null);
+                                  GetComponent<CelestialMageSkill>() != null || GetComponent<AbyssalMechSkill>() != null);
         return (curHero == CharacterManager.CHAR_VAELSTRIDER || string.IsNullOrEmpty(curHero)) && !hasOtherHeroSkill;
     }
 
@@ -155,6 +155,10 @@ public class PlayerEnergySystem : MonoBehaviour
     {
         // Riêng Player 1 (Vaelstrider): Đã có Giáp Ảo 3-hit màu trắng và Máu Ảo từ Lõi, BỎ HOÀN TOÀN giáp nội năng vàng
         if (IsPlayer1()) return;
+
+        // Riêng Player 7 (Abyssal Mech): Không bật lá chắn vàng nội năng (đã có nội tại Giáp Lặn Thâm Hải giảm 18% và Khiên Bong Bóng)
+        var mech = GetComponent<AbyssalMechSkill>() ?? FindAnyObjectByType<AbyssalMechSkill>();
+        if (mech != null && mech.enabled) return;
 
         // Riêng Player 6 (Celestial Mage): Không bật khiên vàng, dùng để kích hoạt trạng thái Hồi Siêu Tốc Chiêu Cuối (Overdrive)
         var mage = GetComponent<CelestialMageSkill>() 

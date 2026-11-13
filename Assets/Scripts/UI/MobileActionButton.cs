@@ -337,7 +337,8 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                         mech.UpdateVortexCharge(aimDir, holdDur);
 
                         Vector2 playerPos = (Vector2)playerCombat.transform.position;
-                        SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(playerPos, 3.5f, new Color(0.2f, 0.85f, 1f, 0.80f));
+                        Vector2 aimCenter = playerPos + aimDir * 1.35f;
+                        SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimCircle(aimCenter, 3.2f, new Color(0.2f, 0.85f, 1f, 0.80f));
                         SkillCancelZoneUI.EnsureExists(GetComponentInParent<Canvas>())?.Show();
                     }
                 }
@@ -407,7 +408,7 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
                         if (mech != null && mech.enabled)
                         {
-                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimLine(playerPos, aimDir, 9.5f, new Color(0.2f, 0.8f, 1f, 0.9f), 1.6f);
+                            SkillAimIndicator.EnsureExists(playerCombat.gameObject)?.ShowAimLine(playerPos, aimDir, 9.0f, new Color(0.2f, 0.85f, 1f, 0.9f), 1.6f, startOffset: 1.35f);
                         }
                         else if (mage != null && mage.enabled)
                         {

@@ -1582,8 +1582,16 @@ public class PlayerCombat : MonoBehaviour
         bool isRonin = (curChar == CharacterManager.CHAR_GALE_RONIN || GetComponent<GaleRoninSkill>() != null);
         bool isAzure = (curChar == CharacterManager.CHAR_AZURE_BLADE || GetComponent<AzureBladeSkill>() != null);
         bool isDune = (curChar == CharacterManager.CHAR_DUNE_ASSASSIN || GetComponent<DuneAssassinSkill>() != null);
+        bool isMech = (curChar == CharacterManager.CHAR_ABYSSAL_MECH || GetComponent<AbyssalMechSkill>() != null);
 
-        if (isTitan)
+        if (isMech)
+        {
+            bodyCenterOffset = new Vector2(0f, -0.05f);
+            attackOffsetDistance = 1.15f;
+            attackRadius = 1.65f;
+            skillRadius = 4.2f;
+        }
+        else if (isTitan)
         {
             bodyCenterOffset = new Vector2(0f, 0.65f);
             attackOffsetDistance = 0.85f;

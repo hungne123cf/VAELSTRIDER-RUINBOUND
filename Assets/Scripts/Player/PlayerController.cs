@@ -398,6 +398,10 @@ public class PlayerController : MonoBehaviour
         var mage = GetComponent<CelestialMageSkill>();
         if (mage != null && (mage.IsChargingBarrier || mage.IsExecutingSkill)) return true;
 
+        // Riêng Hải Thần Cơ Giáp (Player 7): Khi đang gồng cắm mỏ neo hoặc đang vung mỏ neo thì đứng tấn bất động, không được di chuyển
+        var mech = GetComponent<AbyssalMechSkill>();
+        if (mech != null && mech.enabled && (mech.IsChargingVortex || mech.IsAttacking)) return true;
+
         return false;
     }
 
@@ -752,9 +756,9 @@ public class PlayerController : MonoBehaviour
                 mechSkill.OnPerformHydroDash(lastFacingDirection);
             }
 
-            // Kích hoạt Thánh Thuẫn Phản Đòn cho Hiệp Sĩ Vaelstrider (Player 1)
+            // Kích hoạt Thánh Thuẫn Phản Đòn CHỈ RIÊNG cho Hiệp Sĩ Vaelstrider (Player 1)
             var combat = GetComponent<PlayerCombat>();
-            if (combat != null && combat.enabled && (titan == null || !titan.enabled) && (azureBlade == null || !azureBlade.enabled) && !IsDuneAssassin)
+            if (combat != null && combat.enabled && (titan == null || !titan.enabled) && (azureBlade == null || !azureBlade.enabled) && (mechSkill == null || !mechSkill.enabled) && !IsDuneAssassin && (mage == null || !mage.enabled))
             {
                 combat.TriggerRadiantRiposteDash(lastFacingDirection);
             }

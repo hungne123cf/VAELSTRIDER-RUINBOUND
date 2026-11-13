@@ -9,10 +9,10 @@ using System.Collections.Generic;
 public class AbyssalMechSkill : MonoBehaviour
 {
     [Header("--- THÔNG SỐ ĐÒN ĐÁNH MỎ NEO ĐẠI DƯƠNG ---")]
-    public int baseAnchorDamage = 26;
-    public float attackRange = 2.35f;
-    public float attackAngle = 155f;
-    public float attackCooldown = 0.34f;
+    public int baseAnchorDamage = 28;
+    public float attackRange = 1.65f;
+    public float attackAngle = 145f;
+    public float attackCooldown = 0.40f;
     private float attackCooldownTimer = 0f;
 
     [Header("--- NỘI TẠI: GIÁP LẶN THÂM HẢI (ABYSSAL ARMOR) ---")]
@@ -28,13 +28,13 @@ public class AbyssalMechSkill : MonoBehaviour
     private float currentChargeDuration = 0f;
     private Vector2 currentAimDir = Vector2.right;
     private GameObject vortexPullAuraObj = null;
+    private SpriteRenderer vortexAuraRenderer = null;
 
     public bool IsChargingVortex => isChargingVortex;
     public float CurrentChargeRatio => Mathf.Clamp01(currentChargeDuration / maxChargeDuration);
 
     [Header("--- CHIÊU LƯỚT: LƯỚT SÓNG THÂM HẢI (HYDRO-THRUST SURGE) ---")]
-    public float dashSpeedBoost = 1.30f; // Tăng 30% tốc chạy trên vệt nước
-    private static readonly List<Vector3> activeWaterTrailPoints = new List<Vector3>();
+    public float dashSpeedBoost = 1.30f;
 
     [Header("--- HỆ THỐNG NỘ ĐẠI DƯƠNG (TIDAL RAGE) ---")]
     [SerializeField] private float maxRage = 100f;
@@ -88,6 +88,11 @@ public class AbyssalMechSkill : MonoBehaviour
     private static Sprite[] sharkTsunamiFrames; // 8 frames (160x128) Sóng Thần + Cá Mập cưỡi đỉnh sóng
     private static Sprite[] sharkOnlyFrames;    // 6 frames (96x64) Cá Mập Đại Dương bơi lướt
     private static Sprite[] whirlpoolFrames;    // 8 frames (128x128) Xoáy Nước Biển Sâu
+
+    // Pixel Art Water Effect 01 (Thay thế hoàn toàn hiệu ứng vũng nước cũ)
+    public static Sprite[] waterSplashFrames;   // 21 frames: Sóng nước bộc phá khi vung đòn 1 & 2
+    public static Sprite[] waterSpikeFrames;    // 76 frames: Gai nước / Cột nước phun trào cho đòn 3 & giáng búa gồng
+    public static Sprite[] waterStartUpFrames;  // 23 frames: Luồng nước sôi trào bọt nổi lên quanh mỏ neo khi gồng chiêu
 
     private float animTimer = 0f;
     private int animIndex = 0;
@@ -223,6 +228,60 @@ public class AbyssalMechSkill : MonoBehaviour
                 whirlpoolFrames[i].name = $"AbyssalWhirlpool_{i}";
             }
         }
+
+        // 5. Nạp Spritesheet Water Effect 01 (Splash, Spike, StartUp)
+        if (waterSplashFrames == null || waterSplashFrames.Length == 0)
+        {
+            waterSplashFrames = SortSpritesByNumericSuffix(Resources.LoadAll<Sprite>("Sprites/AbyssalMech/water_splash_sheet"));
+#if UNITY_EDITOR
+            if (waterSplashFrames == null || waterSplashFrames.Length == 0)
+            {
+                var edAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player8/robot/individual_sheets/Water Effect 01/Water Effect 01/Water Effect SpriteSheet/Water Splash 01 - Spritesheet.png");
+                if (edAssets != null && edAssets.Length > 0)
+                    waterSplashFrames = SortSpritesByNumericSuffix(edAssets.OfType<Sprite>().ToArray());
+            }
+#endif
+        }
+
+        if (waterSpikeFrames == null || waterSpikeFrames.Length == 0)
+        {
+            waterSpikeFrames = SortSpritesByNumericSuffix(Resources.LoadAll<Sprite>("Sprites/AbyssalMech/water_spike_sheet"));
+#if UNITY_EDITOR
+            if (waterSpikeFrames == null || waterSpikeFrames.Length == 0)
+            {
+                var edAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player8/robot/individual_sheets/Water Effect 01/Water Effect 01/Water Effect SpriteSheet/Water Spike 01 - SpriteSheet.png");
+                if (edAssets != null && edAssets.Length > 0)
+                    waterSpikeFrames = SortSpritesByNumericSuffix(edAssets.OfType<Sprite>().ToArray());
+            }
+#endif
+        }
+
+        if (waterStartUpFrames == null || waterStartUpFrames.Length == 0)
+        {
+            waterStartUpFrames = SortSpritesByNumericSuffix(Resources.LoadAll<Sprite>("Sprites/AbyssalMech/water_startup_sheet"));
+#if UNITY_EDITOR
+            if (waterStartUpFrames == null || waterStartUpFrames.Length == 0)
+            {
+                var edAssets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/ART/Player8/robot/individual_sheets/Water Effect 01/Water Effect 01/Start Up/Water StartUp 1 SpriteSheet.png");
+                if (edAssets != null && edAssets.Length > 0)
+                    waterStartUpFrames = SortSpritesByNumericSuffix(edAssets.OfType<Sprite>().ToArray());
+            }
+#endif
+        }
+    }
+
+    private static Sprite[] SortSpritesByNumericSuffix(Sprite[] list)
+    {
+        if (list == null || list.Length <= 1) return list;
+        return list.OrderBy(s => {
+            if (s == null) return -1;
+            int lastUnderscore = s.name.LastIndexOf('_');
+            if (lastUnderscore >= 0 && int.TryParse(s.name.Substring(lastUnderscore + 1), out int num))
+            {
+                return num;
+            }
+            return 0;
+        }).ToArray();
     }
 
     private static Sprite[] SliceRange(Sprite[] src, int startInclusive, int endInclusive)
@@ -461,10 +520,11 @@ public class AbyssalMechSkill : MonoBehaviour
             }
         }
 
-        if (vortexPullAuraObj != null)
+        if (vortexPullAuraObj != null && vortexAuraRenderer != null && waterStartUpFrames != null && waterStartUpFrames.Length > 0)
         {
-            vortexPullAuraObj.transform.Rotate(0f, 0f, -360f * Time.deltaTime);
-            float scale = Mathf.Lerp(1.2f, 2.2f, CurrentChargeRatio);
+            int fIdx = ((int)(currentChargeDuration * 22f)) % waterStartUpFrames.Length;
+            vortexAuraRenderer.sprite = waterStartUpFrames[fIdx];
+            float scale = Mathf.Lerp(2.2f, 3.2f, CurrentChargeRatio);
             vortexPullAuraObj.transform.localScale = new Vector3(scale, scale, 1f);
         }
     }
@@ -510,9 +570,17 @@ public class AbyssalMechSkill : MonoBehaviour
         var cam = FindAnyObjectByType<CameraFollow>();
         if (cam != null) cam.Shake(0.18f + ratio * 0.15f, 0.22f);
 
-        Vector3 smashCenter = transform.position + (Vector3)(aimDir * 1.5f);
+        Vector3 smashCenter = transform.position + (Vector3)(aimDir * 1.35f);
         float smashRadius = Mathf.Lerp(2.2f, 3.4f, ratio);
         int damage = Mathf.RoundToInt((GetEffectiveAttackDamage() + bonusAtk) * Mathf.Lerp(1.6f, 2.8f, ratio));
+
+        // Phun trào cột gai nước Water Spike khổng lồ từ lòng đất (thay thế vũng nước cũ)
+        if (waterSpikeFrames != null && waterSpikeFrames.Length > 0)
+        {
+            Vector3 spikePos = smashCenter + new Vector3(0f, -0.2f, 0f);
+            Vector3 vfxScale = new Vector3(2.6f + ratio * 0.8f, 2.6f + ratio * 0.8f, 1f);
+            StartCoroutine(PlayWaterVfxRoutine(waterSpikeFrames, spikePos, vfxScale, Quaternion.identity, 34f, false, 8));
+        }
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(smashCenter, smashRadius);
         HashSet<GameObject> hitRoots = new HashSet<GameObject>();
@@ -564,19 +632,19 @@ public class AbyssalMechSkill : MonoBehaviour
         if (vortexPullAuraObj != null) Destroy(vortexPullAuraObj);
         vortexPullAuraObj = new GameObject("AbyssalVortexPullAura");
         vortexPullAuraObj.transform.SetParent(transform, false);
-        vortexPullAuraObj.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+        vortexPullAuraObj.transform.localPosition = new Vector3(0f, -0.15f, 0f);
 
-        var sr = vortexPullAuraObj.AddComponent<SpriteRenderer>();
-        if (whirlpoolFrames != null && whirlpoolFrames.Length > 0)
+        vortexAuraRenderer = vortexPullAuraObj.AddComponent<SpriteRenderer>();
+        if (waterStartUpFrames != null && waterStartUpFrames.Length > 0)
         {
-            sr.sprite = whirlpoolFrames[0];
+            vortexAuraRenderer.sprite = waterStartUpFrames[0];
         }
-        sr.color = new Color(0.2f, 0.85f, 1f, 0.65f);
-        sr.sortingOrder = 8;
+        vortexAuraRenderer.sortingOrder = (spriteRenderer != null ? spriteRenderer.sortingOrder : 10) - 1;
+        vortexPullAuraObj.transform.localScale = new Vector3(2.4f, 2.4f, 1f);
     }
 
     // =========================================================================
-    // 1.6. CHIÊU LƯỚT: LƯỚT SÓNG THÂM HẢI & VỆT NƯỚC TRƠN TRƯỢT (DASH)
+    // 1.6. CHIÊU LƯỚT: LƯỚT SÓNG THÂM HẢI (HYDRO-THRUST SURGE)
     // =========================================================================
     public void OnPerformHydroDash(Vector2 dashDir)
     {
@@ -586,45 +654,40 @@ public class AbyssalMechSkill : MonoBehaviour
         ActivateBubbleShield(1.8f);
         AddRage(15f);
 
-        // Tạo vệt nước trơn trượt tại vị trí lướt
-        StartCoroutine(SpawnWaterTrailRoutine(transform.position, dashDir));
+        // Âm thanh lướt phản lực thủy áp (TUYỆT ĐỐI KHÔNG SINH RA VŨNG NƯỚC XẤU TRÊN SÀN)
+        SoundManager.EnsureInstance()?.PlayDash();
     }
 
-    private IEnumerator SpawnWaterTrailRoutine(Vector3 startPos, Vector2 dir)
+    public Coroutine PlayWaterVfx(Sprite[] frames, Vector3 spawnPos, Vector3 scale, Quaternion rotation, float fps, bool flipY = false, int sortingOrderOffset = 5)
     {
-        GameObject trailObj = new GameObject("AbyssalWaterTrail");
-        trailObj.transform.position = startPos;
-        var sr = trailObj.AddComponent<SpriteRenderer>();
-        if (whirlpoolFrames != null && whirlpoolFrames.Length > 0)
-        {
-            sr.sprite = whirlpoolFrames[1];
-        }
-        sr.color = new Color(0.3f, 0.9f, 1f, 0.55f);
-        sr.sortingOrder = 3; // Nằm sát sàn
-        trailObj.transform.localScale = new Vector3(2.2f, 1.1f, 1f);
+        if (frames == null || frames.Length == 0) return null;
+        return StartCoroutine(PlayWaterVfxRoutine(frames, spawnPos, scale, rotation, fps, flipY, sortingOrderOffset));
+    }
 
-        float dur = 2.5f;
-        float el = 0f;
-        while (el < dur)
+    private IEnumerator PlayWaterVfxRoutine(Sprite[] frames, Vector3 spawnPos, Vector3 scale, Quaternion rotation, float fps, bool flipY, int sortingOrderOffset)
+    {
+        if (frames == null || frames.Length == 0) yield break;
+
+        GameObject vfx = new GameObject("AbyssalWaterVfx");
+        vfx.transform.position = spawnPos;
+        vfx.transform.rotation = rotation;
+        vfx.transform.localScale = scale;
+
+        var sr = vfx.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = (spriteRenderer != null ? spriteRenderer.sortingOrder : 10) + sortingOrderOffset;
+        sr.flipY = flipY;
+
+        float delay = 1f / Mathf.Max(1f, fps);
+        for (int i = 0; i < frames.Length; i++)
         {
-            el += Time.deltaTime;
-            // Làm chậm 40% quái vật dẫm lên vệt nước
-            Collider2D[] cols = Physics2D.OverlapCircleAll(trailObj.transform.position, 1.8f);
-            foreach (var c in cols)
+            if (frames[i] != null && sr != null)
             {
-                if (c == null || c.gameObject == gameObject) continue;
-                var damageable = c.GetComponent<IDamageable>() ?? c.GetComponentInParent<IDamageable>();
-                if (damageable == null || damageable is PlayerHealth) continue;
-
-                GameObject rootObj = (damageable as Component)?.gameObject ?? c.gameObject;
-                var debuff = rootObj.GetComponent<EnemySlowDebuff>();
-                if (debuff == null) debuff = rootObj.AddComponent<EnemySlowDebuff>();
-                if (debuff != null) debuff.ApplySlow(0.40f, 0.6f);
+                sr.sprite = frames[i];
             }
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(delay);
         }
 
-        if (trailObj != null) Destroy(trailObj);
+        if (vfx != null) Destroy(vfx);
     }
 
     // =========================================================================
@@ -661,9 +724,9 @@ public class AbyssalMechSkill : MonoBehaviour
         UpdateFacingFlip(aimDir);
 
         Sprite[] frames = (step == 0) ? atk1Frames : ((step == 1) ? atk2Frames : atk3Frames);
-        float dmgMult = (step == 0) ? 1.0f : ((step == 1) ? 1.25f : 1.55f);
-        int hitFrame = (step == 0) ? 3 : ((step == 1) ? 4 : 1);
-        float frameTime = (step == 2) ? 0.055f : 0.042f;
+        float dmgMult = (step == 0) ? 1.0f : ((step == 1) ? 1.25f : 1.60f);
+        int hitFrame = (step == 0) ? 4 : ((step == 1) ? 4 : 2);
+        float frameTime = (step == 2) ? 0.065f : 0.052f;
 
         SoundManager.EnsureInstance()?.PlaySwordSlash();
 
@@ -682,6 +745,28 @@ public class AbyssalMechSkill : MonoBehaviour
                 {
                     hasDealtDamage = true;
                     PerformAnchorHitboxDamage(aimDir, dmgMult, is360Sweep: (step == 1), isHeavyCleave: (step == 2));
+
+                    // Phát hiệu ứng Water Effect 01 (Thay thế hoàn toàn mọi vết nước cũ)
+                    if (step == 0 || step == 1)
+                    {
+                        if (waterSplashFrames != null && waterSplashFrames.Length > 0)
+                        {
+                            Vector3 splashPos = transform.position + (Vector3)(aimDir * 1.15f) + new Vector3(0f, -0.05f, 0f);
+                            float rotZ = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
+                            Quaternion rot = Quaternion.Euler(0f, 0f, rotZ);
+                            Vector3 vfxScale = new Vector3(1.75f, (aimDir.x < 0f) ? -1.75f : 1.75f, 1f);
+                            StartCoroutine(PlayWaterVfxRoutine(waterSplashFrames, splashPos, vfxScale, rot, 30f, false, 6));
+                        }
+                    }
+                    else if (step == 2)
+                    {
+                        if (waterSpikeFrames != null && waterSpikeFrames.Length > 0)
+                        {
+                            Vector3 spikePos = transform.position + (Vector3)(aimDir * 1.35f) + new Vector3(0f, -0.15f, 0f);
+                            Vector3 vfxScale = new Vector3(2.0f, 2.0f, 1f);
+                            StartCoroutine(PlayWaterVfxRoutine(waterSpikeFrames, spikePos, vfxScale, Quaternion.identity, 32f, false, 7));
+                        }
+                    }
                 }
 
                 yield return new WaitForSeconds(frameTime);
@@ -702,7 +787,7 @@ public class AbyssalMechSkill : MonoBehaviour
     {
         int rawDmg = Mathf.RoundToInt(GetEffectiveAttackDamage() * dmgMultiplier);
         float range = is360Sweep ? (attackRange * 1.15f) : attackRange;
-        Vector3 center = transform.position + (Vector3)(aimDir * (is360Sweep ? 0.2f : 0.55f));
+        Vector3 center = transform.position + (Vector3)(aimDir * (is360Sweep ? 0.35f : 1.15f)) + new Vector3(0f, -0.05f, 0f);
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(center, range);
         HashSet<GameObject> hitRoots = new HashSet<GameObject>();
@@ -863,14 +948,18 @@ public class AbyssalMechSkill : MonoBehaviour
             tickTimer += dt;
             frameTimer += dt;
 
-            if (whirlpoolFrames != null && whirlpoolFrames.Length > 0 && frameTimer >= 0.055f)
+            if (waterStartUpFrames != null && waterStartUpFrames.Length > 0 && frameTimer >= 0.050f)
+            {
+                frameTimer = 0f;
+                fIdx = (fIdx + 1) % waterStartUpFrames.Length;
+                sr.sprite = waterStartUpFrames[fIdx];
+            }
+            else if (whirlpoolFrames != null && whirlpoolFrames.Length > 0 && frameTimer >= 0.055f)
             {
                 frameTimer = 0f;
                 fIdx = (fIdx + 1) % whirlpoolFrames.Length;
                 sr.sprite = whirlpoolFrames[fIdx];
             }
-
-            whirlObj.transform.Rotate(0f, 0f, -260f * dt);
 
             if (tickTimer >= 0.35f)
             {
@@ -994,7 +1083,7 @@ public class AbyssalMechSkill : MonoBehaviour
 
         // 1. Tạo Object Chính: ĐẠI HỒNG THỦY + CÁ MẬP CƯỠI ĐỈNH SÓNG (sharkTsunamiFrames)
         GameObject tsunamiRoot = new GameObject("PixelSharkTsunamiWave");
-        tsunamiRoot.transform.position = originPos + (Vector3)(waveDir * 0.8f);
+        tsunamiRoot.transform.position = originPos + (Vector3)(waveDir * 1.35f);
         tsunamiRoot.transform.rotation = Quaternion.Euler(0f, 0f, rotAngle);
         tsunamiRoot.transform.localScale = new Vector3(1.55f, 1.55f, 1f);
 
