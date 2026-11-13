@@ -239,14 +239,13 @@ public class CharacterManager : MonoBehaviour
             baseDefense = 18,
             baseSpeed = 4.6f,
             baseLifesteal = 0.04f,
-            unlockPrice = 0, // Mở khóa sẵn để trải nghiệm ngay nhân vật mới!
+            unlockPrice = 50000, // Tier S+: Đấu Sĩ Hải Thần, Mỏ Neo Thủy Triều & Sóng Thần Cá Mập (50.000 Linh Hồn)
             controllerPath = "",
             spriteSheetPath = "Assets/Resources/Sprites/AbyssalMech/goldfish_mech.png"
         };
 
-        // Mặc định ban đầu: Mở khóa Vaelstrider và Hải Thần Cơ Giáp (nhân vật mới)
+        // Mặc định ban đầu: Chỉ mở khóa miễn phí Hiệp Sĩ Vaelstrider (các tướng khác mở bằng Linh Hồn)
         PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_VAELSTRIDER, 1);
-        PlayerPrefs.SetInt(UNLOCKED_PREFIX + CHAR_ABYSSAL_MECH, 1);
         PlayerPrefs.Save();
     }
 
@@ -321,8 +320,8 @@ public class CharacterManager : MonoBehaviour
     public bool IsCharacterUnlocked(string id)
     {
         string normId = NormalizeHeroId(id);
-        // Tướng mặc định Vaelstrider và tướng mới Hải Thần Cơ Giáp luôn mở khóa trên mọi nền tảng
-        if (normId == CHAR_VAELSTRIDER || normId == CHAR_ABYSSAL_MECH) return true;
+        // Tướng mặc định Vaelstrider luôn mở khóa miễn phí ban đầu
+        if (normId == CHAR_VAELSTRIDER) return true;
 
         // TRÊN PC & UNITY EDITOR: Mở khóa toàn bộ 100% tướng để trải nghiệm và thử nghiệm tự do
         if (Application.isEditor || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.LinuxPlayer)
@@ -337,7 +336,7 @@ public class CharacterManager : MonoBehaviour
     public bool IsCharacterPurchased(string id)
     {
         string normId = NormalizeHeroId(id);
-        if (normId == CHAR_VAELSTRIDER || normId == CHAR_ABYSSAL_MECH) return true;
+        if (normId == CHAR_VAELSTRIDER) return true;
         return PlayerPrefs.GetInt(UNLOCKED_PREFIX + normId, 0) == 1;
     }
 
