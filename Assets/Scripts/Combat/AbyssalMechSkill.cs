@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Kỹ năng Chiến đấu của Player 7 - Hải Thần Cơ Giáp (Abyssal Leviathan / Goldfish Mech)
