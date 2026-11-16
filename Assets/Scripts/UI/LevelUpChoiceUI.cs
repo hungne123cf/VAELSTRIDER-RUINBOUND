@@ -357,7 +357,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         int w = 96, h = 144;
         Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-        tex.filterMode = FilterMode.Bilinear;
+        tex.filterMode = FilterMode.Point;
         tex.wrapMode = TextureWrapMode.Clamp;
 
         Color[] px = new Color[w * h];
@@ -408,7 +408,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         int w = 96, h = 144;
         Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-        tex.filterMode = FilterMode.Bilinear;
+        tex.filterMode = FilterMode.Point;
         tex.wrapMode = TextureWrapMode.Clamp;
 
         Color[] px = new Color[w * h];
@@ -483,7 +483,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         int sz = 96;
         Texture2D tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
-        tex.filterMode = FilterMode.Bilinear;
+        tex.filterMode = FilterMode.Point;
         tex.wrapMode = TextureWrapMode.Clamp;
 
         Color[] px = new Color[sz * sz];
@@ -510,7 +510,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         int w = 64, h = 32;
         Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-        tex.filterMode = FilterMode.Bilinear;
+        tex.filterMode = FilterMode.Point;
         tex.wrapMode = TextureWrapMode.Clamp;
 
         Color[] px = new Color[w * h];
@@ -551,7 +551,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         int sz = 32;
         Texture2D tex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
-        tex.filterMode = FilterMode.Bilinear;
+        tex.filterMode = FilterMode.Point;
         tex.wrapMode = TextureWrapMode.Clamp;
 
         Color[] px = new Color[sz * sz];
@@ -726,6 +726,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         // ── 5. Nút "ĐỂ SAU (X)" để người chơi có thể đóng lại và chọn sau khi rảnh tay ──
         BuildPostponeButton(overlay.transform, isVietnamese, level);
+        RuinboundVisualLanguage.ApplyToCanvas(canvas);
     }
 
     private void CreateGemIcon(Transform parent, string name, Vector2 anchorPos, float size, Color color)

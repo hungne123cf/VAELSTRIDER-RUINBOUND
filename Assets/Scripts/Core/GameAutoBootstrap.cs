@@ -51,6 +51,7 @@ public class GameAutoBootstrap : MonoBehaviour
             SoundManager.EnsureInstance();
             LoginManager.EnsureInstance();
             GameFontManager.ApplyFontsToAllCanvases();
+            RuinboundVisualLanguage.ApplyToAllCanvases();
             Debug.Log("<color=cyan>[BOOTSTRAP]</color> Dang o LoginScene. Khoi tao Sound va Login UI.");
             return;
         }
@@ -59,6 +60,7 @@ public class GameAutoBootstrap : MonoBehaviour
             SoundManager.EnsureInstance();
             MainMenuManager.EnsureInstance();
             GameFontManager.ApplyFontsToAllCanvases();
+            RuinboundVisualLanguage.ApplyToAllCanvases();
             Debug.Log("<color=cyan>[BOOTSTRAP]</color> Dang o MainMenuScene. Khoi tao Sound va MainMenu UI.");
             return;
         }
@@ -106,6 +108,8 @@ public class GameAutoBootstrap : MonoBehaviour
             GameFontManager.EnsureInitialized();
             var allCanvasesM2 = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var c in allCanvasesM2) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
+            SoulslikeHUDStyler.ApplySoulslikeThemeToAll();
+            RuinboundVisualLanguage.ApplyToAllCanvases();
 
             // Preload & Warmup assets chống khựng lag
             WarmupGameplayAssets();
@@ -157,6 +161,8 @@ public class GameAutoBootstrap : MonoBehaviour
             GameFontManager.EnsureInitialized();
             var allCanvasesM3 = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var c in allCanvasesM3) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
+            SoulslikeHUDStyler.ApplySoulslikeThemeToAll();
+            RuinboundVisualLanguage.ApplyToAllCanvases();
 
             // Map 3 hoan toan do Map3WaveSpawner quan ly (Goblin, Skeleton, Slime, Skeleton King Boss)
             Debug.Log("<color=green>[BOOTSTRAP]</color> Đang ở Map 3 (Forgotten Memories)! Tải toàn diện hệ thống Map 3.");
@@ -179,6 +185,8 @@ public class GameAutoBootstrap : MonoBehaviour
                 GameFontManager.EnsureInitialized();
                 var allCanvasesPvP = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
                 foreach (var c in allCanvasesPvP) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
+                SoulslikeHUDStyler.ApplySoulslikeThemeToAll();
+                RuinboundVisualLanguage.ApplyToAllCanvases();
                 WarmupGameplayAssets();
                 Debug.Log("<color=cyan>[VAELSTRIDER PVP]</color> Đã khởi tạo Bản Đồ Đấu Trường Cổ Đại PvP 1v1 thành công!");
                 return;
@@ -264,6 +272,8 @@ public class GameAutoBootstrap : MonoBehaviour
         GameFontManager.EnsureInitialized();
         var allCanvasesM1 = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var c in allCanvasesM1) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
+        SoulslikeHUDStyler.ApplySoulslikeThemeToAll();
+        RuinboundVisualLanguage.ApplyToAllCanvases();
 
         // Preload & Warmup assets chống khựng lag
         WarmupGameplayAssets();

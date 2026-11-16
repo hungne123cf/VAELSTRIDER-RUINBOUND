@@ -37,6 +37,7 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
     private float _targetSpeed;
     private string _targetSpriteName = "";
     private bool _hasReceivedFirstState = false;
+    private float _timeSinceLastNetworkState = 0f;
 
     private static readonly int MoveXHash = Animator.StringToHash("MoveX");
     private static readonly int MoveYHash = Animator.StringToHash("MoveY");
@@ -410,15 +411,33 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         _maxHealth = Mathf.Max(1, maxHp);
         _currentHealth = Mathf.Clamp(curHp, 0, _maxHealth);
         _targetSpriteName = spriteName;
+        _timeSinceLastNetworkState = 0f;
 
-        // Bù độ trễ mạng thực tế (RTT) vào vị trí dự đoán (Chỉ giới hạn sàn đấu khi ở chế độ Đấu Trường PvP)
-        float rtt = (PvPNetworkManager.Instance != null) ? PvPNetworkManager.Instance.GetEstimatedLatencySeconds() : 0.05f;
-        _predictedPos = ClampPositionIfPvP(pos + vel * rtt);
+        // Bù độ trễ mạng thực tế (RTT) có giới hạn ngưỡng chống nhiễu
+        float rawRtt = (PvPNetworkManager.Instance != null) ? PvPNetworkManager.Instance.GetEstimatedLatencySeconds() : 0.04f;
+        float rtt = Mathf.Clamp(rawRtt, 0.015f, 0.080f);
+        Vector2 targetProjected = ClampPositionIfPvP(pos + vel * rtt);
 
         if (!_hasReceivedFirstState)
         {
             _hasReceivedFirstState = true;
+            _predictedPos = targetProjected;
             transform.position = new Vector3(_predictedPos.x, _predictedPos.y, 0f);
+        }
+        else
+        {
+            float err = Vector2.Distance(_predictedPos, targetProjected);
+            if (err > 2.5f)
+            {
+                // Lệch quá xa (Tốc biến / Hồi sinh / Lag spike lớn) -> Snap ngay lập tức
+                _predictedPos = targetProjected;
+                transform.position = new Vector3(_predictedPos.x, _predictedPos.y, 0f);
+            }
+            else
+            {
+                // Triệt tiêu micro-jerk lùi lại: nội suy mượt vị trí đích tới điểm dự đoán mới
+                _predictedPos = Vector2.Lerp(_predictedPos, targetProjected, 0.70f);
+            }
         }
     }
 
@@ -439,6 +458,13 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
             return;
         }
 
+        _timeSinceLastNetworkState += Time.deltaTime;
+        if (_timeSinceLastNetworkState > 0.18f)
+        {
+            // Quá 180ms không có gói tin (rớt gói hoặc đứng yên) -> Giảm dần vận tốc về 0 mượt mà (Damping), chống trượt xuyên tường
+            _targetVel = Vector2.MoveTowards(_targetVel, Vector2.zero, Time.deltaTime * 24f);
+        }
+
         // THUẬT TOÁN DEAD RECKONING 60 FPS:
         // Tích phân vận tốc liên tục từng khung hình để nhân vật di chuyển mượt mà,
         // triệt tiêu 100% cảm giác giật cục, trễ nhịp hoặc đứng hình chờ gói tin!
@@ -449,14 +475,15 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         }
 
         float dist = Vector2.Distance(transform.position, _predictedPos);
-        if (dist > 1.25f)
+        if (dist > 2.5f)
         {
             // Lệch vị trí quá xa (Tốc biến / Lag spike) -> Snap ngay lập tức
             transform.position = new Vector3(_predictedPos.x, _predictedPos.y, 0f);
         }
         else
         {
-            float lerpSpeed = (_targetVel.sqrMagnitude > 0.01f) ? 36f : 48f;
+            float lerpSpeed = (_targetVel.sqrMagnitude > 0.01f) ? 32f : 45f;
+            if (dist > 0.75f) lerpSpeed *= (1f + (dist - 0.75f) * 1.5f);
             Vector2 smoothPos = Vector2.Lerp(transform.position, _predictedPos, Time.deltaTime * lerpSpeed);
             transform.position = new Vector3(smoothPos.x, smoothPos.y, 0f);
         }

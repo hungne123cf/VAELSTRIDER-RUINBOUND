@@ -25,7 +25,7 @@ public class PvPMatchManager : MonoBehaviour
 
     private float _matchTimer = MATCH_DURATION_SECONDS;
     private float _networkSyncTimer = 0f;
-    private const float NETWORK_SYNC_INTERVAL = 0.033f; // 30 Hz thời gian thực (33ms/gói) triệt tiêu độ trễ mạng tối đa
+    private const float NETWORK_SYNC_INTERVAL = 0.030f; // ~33 Hz thời gian thực nhị phân siêu nhẹ (30ms/gói) triệt tiêu độ trễ mạng tối đa
     private Vector2 _lastSentPos = Vector2.zero;
     private int _lastSentHp = -1;
     private string _lastSentSpr = "";

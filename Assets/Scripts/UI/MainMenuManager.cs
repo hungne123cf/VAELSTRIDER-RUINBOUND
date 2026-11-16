@@ -379,6 +379,7 @@ public class MainMenuManager : MonoBehaviour
             if (mmCanvas != null)
             {
                 GameFontManager.ApplyFontsGlobally(mmCanvas.gameObject);
+                RuinboundVisualLanguage.ApplyToCanvas(mmCanvas);
             }
         }
         catch (System.Exception ex)

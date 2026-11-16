@@ -675,10 +675,59 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         _packetSeq = 0;
     }
 
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
+    private struct FloatUnion
+    {
+        [System.Runtime.InteropServices.FieldOffset(0)] public float f;
+        [System.Runtime.InteropServices.FieldOffset(0)] public int i;
+    }
+
+    private static int FloatToInt(float val)
+    {
+        FloatUnion u = default;
+        u.f = val;
+        return u.i;
+    }
+
+    private static float IntToFloat(int val)
+    {
+        FloatUnion u = default;
+        u.i = val;
+        return u.f;
+    }
+
+    private static byte GetHeroCode(string heroId)
+    {
+        string norm = CharacterManager.NormalizeHeroId(heroId);
+        if (norm == CharacterManager.CHAR_VAELSTRIDER) return 0;
+        if (norm == CharacterManager.CHAR_GALE_RONIN) return 1;
+        if (norm == CharacterManager.CHAR_AZURE_BLADE) return 2;
+        if (norm == CharacterManager.CHAR_TITAN_BERSERKER) return 3;
+        if (norm == CharacterManager.CHAR_DUNE_ASSASSIN) return 4;
+        if (norm == CharacterManager.CHAR_CELESTIAL_MAGE) return 5;
+        if (norm == CharacterManager.CHAR_ABYSSAL_MECH) return 6;
+        return 0;
+    }
+
+    private static string GetHeroIdFromCode(byte code)
+    {
+        switch (code)
+        {
+            case 0: return CharacterManager.CHAR_VAELSTRIDER;
+            case 1: return CharacterManager.CHAR_GALE_RONIN;
+            case 2: return CharacterManager.CHAR_AZURE_BLADE;
+            case 3: return CharacterManager.CHAR_TITAN_BERSERKER;
+            case 4: return CharacterManager.CHAR_DUNE_ASSASSIN;
+            case 5: return CharacterManager.CHAR_CELESTIAL_MAGE;
+            case 6: return CharacterManager.CHAR_ABYSSAL_MECH;
+            default: return CharacterManager.CHAR_VAELSTRIDER;
+        }
+    }
+
     // =========================================================================
-    // TRUYỀN NHẬN GÓI TIN ĐỒNG BỘ PVP REAL-TIME
+    // TRUYỀN NHẬN GÓI TIN ĐỒNG BỘ PVP REAL-TIME (TỐI ƯU ZERO-GC BINARY STREAM)
     // =========================================================================
-    private void SendRawPacket(string payload, int channelId = 1)
+    public void SendRawBytes(byte[] bytes, int channelId = 1)
     {
         if (IsBotPracticeMode || _runner == null || !_runner.IsRunning) return;
         // Chỉ gửi gói tin khi đã có đủ 2 người chơi trong phòng để tránh gửi vào phiên rỗng
@@ -686,9 +735,8 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         try
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(payload);
-            // Xoay vòng ReliableKey (16 slot cho kênh State) tránh nghẽn hàng đợi ReliableData trên Android
-            int subKey = (channelId == 2) ? (int)((++_packetSeq) % 16) : (int)((++_packetSeq) & 0x7FFFFFFF);
+            // Kênh 2 (State di chuyển): Xoay vòng 1024 slot chống nghẽn hàng đợi ReliableData trên Android/PC
+            int subKey = (channelId == 2) ? (int)((++_packetSeq) & 0x3FF) : (int)((++_packetSeq) & 0x7FFFFFFF);
             ReliableKey key = ReliableKey.FromInts(channelId, subKey, 0, 0);
 
             if (_runner.IsServer)
@@ -724,6 +772,20 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         catch (Exception ex)
         {
             // Bọc an toàn tuyệt đối, không bao giờ để AssertException của Fusion làm gián đoạn game loop
+            Debug.LogWarning("[PVP NETWORK] Safe SendRawBytes catch: " + ex.Message);
+        }
+    }
+
+    private void SendRawPacket(string payload, int channelId = 1)
+    {
+        if (IsBotPracticeMode || _runner == null || !_runner.IsRunning) return;
+        try
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(payload);
+            SendRawBytes(bytes, channelId);
+        }
+        catch (Exception ex)
+        {
             Debug.LogWarning("[PVP NETWORK] Safe SendRawPacket catch: " + ex.Message);
         }
     }
@@ -854,19 +916,86 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         return -1;
     }
 
+    private readonly byte[] _stateBuffer = new byte[80];
+
     public void SendPlayerStatePacket(
         Vector2 pos, Vector2 vel, bool flipX, Vector2 scale,
         float moveX, float moveY, float speed,
         int curHp, int maxHp, string spriteName, string heroId)
     {
-        string safeSprite = string.IsNullOrEmpty(spriteName) ? "" : spriteName.Replace("|", "");
         uint seq = ++_localStateSeq;
-        // GÓI TIN COMPACT ĐỒNG BỘ CAO CẤP: Truyền cả curHp, maxHp, sprite, heroId
-        string pkt = string.Format(
-            CultureInfo.InvariantCulture,
-            "S|{0}|{1:F2}|{2:F2}|{3:F2}|{4:F2}|{5}|{6}|{7}|{8}|{9}",
-            seq, pos.x, pos.y, vel.x, vel.y, flipX ? 1 : 0, curHp, maxHp, safeSprite, heroId);
-        SendRawPacket(pkt, 2);
+
+        // GÓI TIN NHỊ PHÂN SIÊU GỌN (Zero-GC Binary Stream):
+        // [0]: Magic byte 0xFE
+        // [1]: Type 0x01 (State)
+        // [2..5]: uint seq
+        // [6..9]: float posX
+        // [10..13]: float posY
+        // [14..17]: float velX
+        // [18..21]: float velY
+        // [22]: flags (bit 0 = flipX)
+        // [23..24]: ushort curHp
+        // [25..26]: ushort maxHp
+        // [27]: byte heroCode
+        // [28]: byte spriteLen
+        // [29..]: sprite bytes (tối đa 32 bytes)
+
+        _stateBuffer[0] = 0xFE;
+        _stateBuffer[1] = 0x01;
+
+        _stateBuffer[2] = (byte)(seq);
+        _stateBuffer[3] = (byte)(seq >> 8);
+        _stateBuffer[4] = (byte)(seq >> 16);
+        _stateBuffer[5] = (byte)(seq >> 24);
+
+        int pxBits = FloatToInt(pos.x);
+        _stateBuffer[6] = (byte)(pxBits);
+        _stateBuffer[7] = (byte)(pxBits >> 8);
+        _stateBuffer[8] = (byte)(pxBits >> 16);
+        _stateBuffer[9] = (byte)(pxBits >> 24);
+
+        int pyBits = FloatToInt(pos.y);
+        _stateBuffer[10] = (byte)(pyBits);
+        _stateBuffer[11] = (byte)(pyBits >> 8);
+        _stateBuffer[12] = (byte)(pyBits >> 16);
+        _stateBuffer[13] = (byte)(pyBits >> 24);
+
+        int vxBits = FloatToInt(vel.x);
+        _stateBuffer[14] = (byte)(vxBits);
+        _stateBuffer[15] = (byte)(vxBits >> 8);
+        _stateBuffer[16] = (byte)(vxBits >> 16);
+        _stateBuffer[17] = (byte)(vxBits >> 24);
+
+        int vyBits = FloatToInt(vel.y);
+        _stateBuffer[18] = (byte)(vyBits);
+        _stateBuffer[19] = (byte)(vyBits >> 8);
+        _stateBuffer[20] = (byte)(vyBits >> 16);
+        _stateBuffer[21] = (byte)(vyBits >> 24);
+
+        _stateBuffer[22] = (byte)(flipX ? 1 : 0);
+
+        ushort safeCurHp = (ushort)Mathf.Clamp(curHp, 0, 65535);
+        _stateBuffer[23] = (byte)(safeCurHp);
+        _stateBuffer[24] = (byte)(safeCurHp >> 8);
+
+        ushort safeMaxHp = (ushort)Mathf.Clamp(maxHp, 1, 65535);
+        _stateBuffer[25] = (byte)(safeMaxHp);
+        _stateBuffer[26] = (byte)(safeMaxHp >> 8);
+
+        _stateBuffer[27] = GetHeroCode(heroId);
+
+        int sprLen = 0;
+        if (!string.IsNullOrEmpty(spriteName))
+        {
+            sprLen = Encoding.ASCII.GetBytes(spriteName, 0, Mathf.Min(spriteName.Length, 32), _stateBuffer, 29);
+        }
+        _stateBuffer[28] = (byte)sprLen;
+
+        int totalLen = 29 + sprLen;
+        byte[] toSend = new byte[totalLen];
+        Buffer.BlockCopy(_stateBuffer, 0, toSend, 0, totalLen);
+
+        SendRawBytes(toSend, 2);
     }
 
     public void SendActionVfxPacket(string actionType, Vector2 dir, Vector2 pos)
@@ -941,7 +1070,8 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             if (uint.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out uint seq))
             {
-                if (_lastReceivedStateSeq > 0 && seq < _lastReceivedStateSeq && (_lastReceivedStateSeq - seq < 30) && seq >= 5)
+                // Chống giật lùi (Rubberbanding): Drop bỏ gói tin đến muộn / cũ hơn gói tin mới nhất đã nhận
+                if (_lastReceivedStateSeq > 0 && seq <= _lastReceivedStateSeq && (_lastReceivedStateSeq - seq < 500))
                 {
                     return; // Drop packet cũ lập tức
                 }
@@ -1371,8 +1501,85 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data)
     {
         if (data.Array == null || data.Count <= 0) return;
+
+        // Xử lý gói tin nhị phân siêu tốc (Zero-GC Binary Stream)
+        if (data.Array[data.Offset] == 0xFE && data.Count >= 28)
+        {
+            ParseBinaryPacket(data.Array, data.Offset, data.Count);
+            return;
+        }
+
         string raw = Encoding.UTF8.GetString(data.Array, data.Offset, data.Count);
         ParseIncomingPacket(raw);
+    }
+
+    private void ParseBinaryPacket(byte[] buffer, int offset, int count)
+    {
+        byte type = buffer[offset + 1];
+        if (type == 0x01 && count >= 28) // State Packet
+        {
+            uint seq = (uint)(buffer[offset + 2] 
+                           | (buffer[offset + 3] << 8) 
+                           | (buffer[offset + 4] << 16) 
+                           | (buffer[offset + 5] << 24));
+
+            // CHỐNG TRIỆT ĐỂ DÂY CAO SU (RUBBERBANDING):
+            // Luôn drop bỏ gói tin đến muộn / cũ hơn gói tin mới nhất đã nhận
+            if (_lastReceivedStateSeq > 0)
+            {
+                if (seq <= _lastReceivedStateSeq)
+                {
+                    if (_lastReceivedStateSeq - seq < 500)
+                    {
+                        return; // Gói tin cũ -> bỏ qua ngay lập tức!
+                    }
+                }
+            }
+            _lastReceivedStateSeq = seq;
+
+            int pxBits = buffer[offset + 6] | (buffer[offset + 7] << 8) | (buffer[offset + 8] << 16) | (buffer[offset + 9] << 24);
+            int pyBits = buffer[offset + 10] | (buffer[offset + 11] << 8) | (buffer[offset + 12] << 16) | (buffer[offset + 13] << 24);
+            int vxBits = buffer[offset + 14] | (buffer[offset + 15] << 8) | (buffer[offset + 16] << 16) | (buffer[offset + 17] << 24);
+            int vyBits = buffer[offset + 18] | (buffer[offset + 19] << 8) | (buffer[offset + 20] << 16) | (buffer[offset + 21] << 24);
+
+            float px = IntToFloat(pxBits);
+            float py = IntToFloat(pyBits);
+            float vx = IntToFloat(vxBits);
+            float vy = IntToFloat(vyBits);
+
+            bool flipX = (buffer[offset + 22] & 0x01) != 0;
+            int curHp = (ushort)(buffer[offset + 23] | (buffer[offset + 24] << 8));
+            int maxHp = (ushort)(buffer[offset + 25] | (buffer[offset + 26] << 8));
+            byte heroCode = buffer[offset + 27];
+            string heroId = GetHeroIdFromCode(heroCode);
+
+            string spriteName = "";
+            int sprLen = buffer[offset + 28];
+            if (sprLen > 0 && offset + 29 + sprLen <= offset + count)
+            {
+                spriteName = Encoding.ASCII.GetString(buffer, offset + 29, sprLen);
+            }
+
+            if (maxHp > 0) OpponentMaxHp = maxHp;
+            OpponentCurrentHp = Mathf.Clamp(curHp, 0, OpponentMaxHp);
+            if (!string.IsNullOrEmpty(heroId)) OpponentHeroId = heroId;
+
+            Vector2 syncScale = (OpponentHeroId == CharacterManager.CHAR_CELESTIAL_MAGE) ? new Vector2(0.62f, 0.62f) : Vector2.one;
+
+            if (PvPRemoteOpponent.Instance == null && (PvPMatchManager.IsPvPModeActive || PvPMatchManager.IsCoopModeActive || IsRunning))
+            {
+                var localPl = GameObject.FindWithTag("Player");
+                Vector3 spawnPos = localPl != null ? localPl.transform.position + new Vector3(1.5f, 0f, 0f) : Vector3.zero;
+                PvPRemoteOpponent.SpawnOpponent(spawnPos, OpponentName, OpponentHeroId, OpponentMaxHp);
+            }
+            if (PvPRemoteOpponent.Instance != null)
+            {
+                float spd = Mathf.Sqrt(vx * vx + vy * vy);
+                PvPRemoteOpponent.Instance.OnReceiveNetworkState(
+                    new Vector2(px, py), new Vector2(vx, vy), flipX, syncScale,
+                    vx, vy, spd, OpponentCurrentHp, OpponentMaxHp, spriteName, OpponentHeroId);
+            }
+        }
     }
 
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
