@@ -67,6 +67,12 @@ public class WaveSpawner : MonoBehaviour
 
     void Start()
     {
+        if (PvPMatchManager.IsPvPModeActive)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         // Neu co DungeonRoomManager thi khong tu dong khoi dong Wave ngay tai cho ma cho nguoi choi buoc vao phong
         var roomMgr = FindAnyObjectByType<DungeonRoomManager>();
         if (roomMgr != null)
@@ -83,11 +89,17 @@ public class WaveSpawner : MonoBehaviour
     private IEnumerator StartFirstWaveRoutine()
     {
         yield return new WaitForSeconds(1.5f);
+        if (PvPMatchManager.IsPvPModeActive || !isActiveAndEnabled || !gameObject.activeInHierarchy) yield break;
         StartNextWave();
     }
 
     public void SpawnRoomWave(int waveNumber, int totalWaveCount, string waveTitle, List<Vector3> spawnPositions, bool isBoss, System.Action onCleared)
     {
+        if (PvPMatchManager.IsPvPModeActive || !isActiveAndEnabled || !gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
         currentWave = waveNumber;
         totalWaves = totalWaveCount;
         currentRoomClearedCallback = onCleared;

@@ -174,7 +174,9 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         }
 
         // Tạm dừng/Làm chậm nhẹ để người chơi quan sát an toàn
-        Time.timeScale = 0.05f;
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        if (!isMulti) Time.timeScale = 0.05f;
+        else Time.timeScale = 1.0f;
 
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         if (titleText != null)

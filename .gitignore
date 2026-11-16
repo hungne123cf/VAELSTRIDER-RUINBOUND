@@ -13,6 +13,12 @@
 # Recommended: add any editor/OS/tool-specific ignore rules from the Global/ templates as needed.
 # See: https://github.com/github/gitignore/tree/main/Global
 #
+# Secrets and credentials
+oauth_config.json
+**/oauth_config.json
+*.secret
+credentials.json
+
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/

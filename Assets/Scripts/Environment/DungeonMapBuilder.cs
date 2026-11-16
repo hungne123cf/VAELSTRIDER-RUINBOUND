@@ -8,6 +8,12 @@ public class DungeonMapBuilder : MonoBehaviour
     [ContextMenu("Build Full Multi-Room Dungeon")]
     public static void BuildDungeon()
     {
+        if (PvPMatchManager.IsPvPModeActive)
+        {
+            BuildPvPColosseumArena();
+            return;
+        }
+
         Debug.Log("<color=cyan>[MAP BUILDER]</color> Bắt đầu kiến thiết Bản Đồ Đa Phòng (Realm 1: Sunken Sepulcher)...");
 
         // 1. Tìm Tilemaps Ground & Walls
@@ -289,11 +295,13 @@ public class DungeonMapBuilder : MonoBehaviour
 
     private static void PositionGameEntities()
     {
-        // 1. Đặt người chơi tại Phòng 1
+        // 1. Đặt người chơi tại Phòng 1 (Căn chỉnh chân nhân vật chính xác tâm sàn xuất phát)
         var player = Object.FindAnyObjectByType<PlayerController>();
         if (player != null)
         {
-            player.transform.position = new Vector3(-9f, 0f, 0f);
+            string curHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? "";
+            float footOffset = PvPMatchManager.GetHeroFootOffsetY(curHero);
+            player.transform.position = new Vector3(-9f, -footOffset, 0f);
         }
 
         // 2. Bàn Thờ Cổ tại hốc phía Tây Phòng 1
@@ -348,5 +356,303 @@ public class DungeonMapBuilder : MonoBehaviour
         {
             Object.DestroyImmediate(parent.GetChild(i).gameObject);
         }
+    }
+
+    // =========================================================================
+    // KIẾN TẠO BẢN ĐỒ VÕ ĐÀI ĐỐI KHÁNG ĐỘC LẬP (PVP COLOSSEUM ARENA MAP)
+    // =========================================================================
+    private static Sprite _cachedColosseumCrestSprite;
+    private static Sprite _cachedPedestalRingSprite;
+
+    public static void BuildPvPColosseumArena()
+    {
+        Debug.Log("<color=orange>[PVP ARENA BUILDER]</color> Khởi tạo Bản Đồ Đấu Trường Cổ Đại (Grand Colosseum Arena) độc lập cho chế độ PvP 1v1...");
+
+        // 1. Dọn sạch toàn bộ các cụm phòng, cửa chắn, rương, bàn thờ của chế độ đi ải cũ
+        string[] pveRoots = new string[] { "DungeonBarriers", "DungeonRooms", "DungeonTorches", "DungeonBreakables", "PvP_Arena_Border" };
+        foreach (var rName in pveRoots)
+        {
+            var obj = GameObject.Find(rName);
+            if (obj != null) Object.DestroyImmediate(obj);
+        }
+
+        var roomMgrs = Object.FindObjectsByType<DungeonRoomManager>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var rm in roomMgrs) if (rm != null) Object.DestroyImmediate(rm.gameObject);
+
+        var spawners = Object.FindObjectsByType<WaveSpawner>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var sp in spawners) if (sp != null) sp.gameObject.SetActive(false);
+
+        var chests = Object.FindObjectsByType<TreasureChest>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var c in chests) if (c != null) Object.DestroyImmediate(c.gameObject);
+
+        var shrines = Object.FindObjectsByType<AncientShrine>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var s in shrines) if (s != null) Object.DestroyImmediate(s.gameObject);
+
+        // 2. Tìm Tilemap Ground & Walls để xây dựng Võ Đài Đá Mới Hoàn Toàn
+        Tilemap groundTm = null;
+        Tilemap wallsTm = null;
+
+        var tilemaps = Object.FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
+        foreach (var tm in tilemaps)
+        {
+            string n = tm.gameObject.name.ToLower();
+            if (n.Contains("ground") || n.Contains("floor")) groundTm = tm;
+            else if (n.Contains("wall")) wallsTm = tm;
+        }
+
+        if (groundTm != null && wallsTm != null)
+        {
+            TileBase floorTile = ExtractAnyTile(groundTm, new Vector3Int(-9, 0, 0));
+            TileBase wallTile = ExtractAnyTile(wallsTm, new Vector3Int(-14, 7, 0));
+
+#if UNITY_EDITOR
+            if (floorTile == null)
+                floorTile = UnityEditor.AssetDatabase.LoadAssetAtPath<TileBase>("Assets/Palettes/TX Tileset Stone Ground_24.asset");
+            if (wallTile == null)
+                wallTile = UnityEditor.AssetDatabase.LoadAssetAtPath<TileBase>("Assets/Palettes/TX Tileset Stone Ground_43.asset");
+#endif
+
+            if (floorTile != null && wallTile != null)
+            {
+                groundTm.ClearAllTiles();
+                wallsTm.ClearAllTiles();
+
+                HashSet<Vector2Int> arenaFloor = new HashSet<Vector2Int>();
+
+                // Thiết kế Võ Đài Bát Giác Cổ Đại đối xứng hoàn hảo:
+                // Rộng từ x = -11 đến +11 (23 ô), Cao từ y = -6 đến +6 (13 ô), vát 4 góc hoàng gia (|x| + |y| <= 15)
+                for (int x = -11; x <= 11; x++)
+                {
+                    for (int y = -6; y <= 6; y++)
+                    {
+                        if (Mathf.Abs(x) + Mathf.Abs(y) <= 15)
+                        {
+                            arenaFloor.Add(new Vector2Int(x, y));
+                        }
+                    }
+                }
+
+                foreach (var p in arenaFloor)
+                {
+                    groundTm.SetTile(new Vector3Int(p.x, p.y, 0), floorTile);
+                }
+
+                // Tường đá kiên cố dày 3 lớp bao quanh toàn bộ Võ Đài Bát Giác
+                HashSet<Vector2Int> arenaWalls = new HashSet<Vector2Int>();
+                foreach (var p in arenaFloor)
+                {
+                    for (int dx = -3; dx <= 3; dx++)
+                    {
+                        for (int dy = -3; dy <= 3; dy++)
+                        {
+                            Vector2Int nb = new Vector2Int(p.x + dx, p.y + dy);
+                            if (!arenaFloor.Contains(nb))
+                            {
+                                arenaWalls.Add(nb);
+                            }
+                        }
+                    }
+                }
+
+                foreach (var w in arenaWalls)
+                {
+                    wallsTm.SetTile(new Vector3Int(w.x, w.y, 0), wallTile);
+                }
+
+                groundTm.RefreshAllTiles();
+                wallsTm.RefreshAllTiles();
+
+                var wallCol = wallsTm.GetComponent<TilemapCollider2D>();
+                if (wallCol == null) wallCol = wallsTm.gameObject.AddComponent<TilemapCollider2D>();
+                wallCol.compositeOperation = Collider2D.CompositeOperation.None;
+                wallCol.ProcessTilemapChanges();
+            }
+        }
+
+        // 3. Kiến tạo Kiến Trúc Đấu Trường Hoàng Gia (Ấn Quyết Đấu Trung Tâm, Đài Xuất Chiến Đông-Tây, 8 Trụ Lửa Lôi Đài)
+        Transform archRoot = GetOrCreateRoot("PvP_Colosseum_Architecture");
+        ClearChildren(archRoot);
+
+        Shader sprShader = Shader.Find("Sprites/Default");
+
+        // 3a. Ấn Quyết Đấu Hoàng Kim ở chính giữa Võ Đài (0, 0)
+        GameObject crestObj = new GameObject("Center_Colosseum_Crest");
+        crestObj.transform.SetParent(archRoot, false);
+        crestObj.transform.position = new Vector3(0f, 0.2f, 0f);
+        crestObj.transform.localScale = new Vector3(4.2f, 4.2f, 1f);
+        var crestSr = crestObj.AddComponent<SpriteRenderer>();
+        if (sprShader != null) crestSr.material = new Material(sprShader);
+        crestSr.sprite = GetColosseumCrestSprite();
+        crestSr.color = new Color(0.35f, 0.32f, 0.25f, 0.14f); // Khắc chìm âm sàn tinh tế, không làm rối mắt người chơi
+        crestSr.sortingOrder = -8;
+
+        // 3b. Đài Xuất Chiến Tây (Người Chơi 1 - Lam Ngọc) & Đông (Đối Thủ - Huyết Tinh)
+        CreateChampionPedestal(archRoot, "West_Champion_Pedestal", new Vector3(-3.8f, 0.2f, 0f), new Color(0.22f, 0.75f, 0.85f, 0.18f), sprShader);
+        CreateChampionPedestal(archRoot, "East_Champion_Pedestal", new Vector3(3.8f, 0.2f, 0f), new Color(0.85f, 0.30f, 0.25f, 0.18f), sprShader);
+
+        // 3c. Viền Khảm Vàng Bát Giác chạy dọc mép trong sàn đấu
+        GameObject inlayObj = new GameObject("Colosseum_GoldInlay_Border");
+        inlayObj.transform.SetParent(archRoot, false);
+        LineRenderer lr = inlayObj.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true;
+        lr.loop = true;
+        lr.startWidth = 0.08f;
+        lr.endWidth = 0.08f;
+        if (sprShader != null) lr.material = new Material(sprShader);
+        Color inlayCol = new Color(0.75f, 0.60f, 0.25f, 0.25f);
+        lr.startColor = inlayCol;
+        lr.endColor = inlayCol;
+        lr.sortingOrder = -7;
+
+        Vector3[] octagonPts = new Vector3[]
+        {
+            new Vector3(-9.0f,  5.6f, 0f),
+            new Vector3( 9.0f,  5.6f, 0f),
+            new Vector3(11.0f,  3.6f, 0f),
+            new Vector3(11.0f, -3.2f, 0f),
+            new Vector3( 9.0f, -5.2f, 0f),
+            new Vector3(-9.0f, -5.2f, 0f),
+            new Vector3(-11.0f, -3.2f, 0f),
+            new Vector3(-11.0f,  3.6f, 0f)
+        };
+        lr.positionCount = octagonPts.Length;
+        lr.SetPositions(octagonPts);
+
+        // 3d. 8 Đài Lửa Cổ Đại (Colosseum Flaming Braziers) thắp sáng toàn bộ Võ Đài
+        Vector3[] brazierPositions = new Vector3[]
+        {
+            new Vector3(-8.2f,  5.3f, 0f),
+            new Vector3( 0.0f,  5.5f, 0f),
+            new Vector3( 8.2f,  5.3f, 0f),
+            new Vector3(-8.2f, -4.9f, 0f),
+            new Vector3( 0.0f, -5.1f, 0f),
+            new Vector3( 8.2f, -4.9f, 0f),
+            new Vector3(-10.5f, 0.2f, 0f),
+            new Vector3( 10.5f, 0.2f, 0f)
+        };
+        foreach (var bPos in brazierPositions)
+        {
+            SpawnColosseumBrazier(bPos, archRoot, sprShader);
+        }
+    }
+
+    private static TileBase ExtractAnyTile(Tilemap tm, Vector3Int preferredPos)
+    {
+        if (tm == null) return null;
+        TileBase t = tm.GetTile(preferredPos);
+        if (t != null) return t;
+
+        BoundsInt bounds = tm.cellBounds;
+        foreach (var pos in bounds.allPositionsWithin)
+        {
+            t = tm.GetTile(pos);
+            if (t != null) return t;
+        }
+        return null;
+    }
+
+    private static void CreateChampionPedestal(Transform parent, string name, Vector3 pos, Color glowColor, Shader sh)
+    {
+        GameObject ped = new GameObject(name);
+        ped.transform.SetParent(parent, false);
+        ped.transform.position = pos;
+        ped.transform.localScale = new Vector3(2.2f, 2.2f, 1f);
+        var sr = ped.AddComponent<SpriteRenderer>();
+        if (sh != null) sr.material = new Material(sh);
+        sr.sprite = GetPedestalRingSprite();
+        sr.color = glowColor;
+        sr.sortingOrder = -7;
+
+        var light = ped.AddComponent<Light2D>();
+        light.lightType = Light2D.LightType.Point;
+        light.color = new Color(glowColor.r, glowColor.g, glowColor.b, 1f);
+        light.intensity = 1.15f;
+        light.pointLightInnerRadius = 0.5f;
+        light.pointLightOuterRadius = 3.5f;
+    }
+
+    private static void SpawnColosseumBrazier(Vector3 pos, Transform parent, Shader sh)
+    {
+        GameObject brazier = new GameObject("Colosseum_Brazier");
+        brazier.transform.SetParent(parent, false);
+        brazier.transform.position = pos;
+
+        var sr = brazier.AddComponent<SpriteRenderer>();
+        if (sh != null) sr.material = new Material(sh);
+        sr.sprite = GetPedestalRingSprite();
+        sr.color = new Color(1f, 0.55f, 0.15f, 0.85f);
+        brazier.transform.localScale = new Vector3(0.75f, 0.75f, 1f);
+        sr.sortingOrder = -5;
+
+        var light = brazier.AddComponent<Light2D>();
+        light.lightType = Light2D.LightType.Point;
+        light.color = new Color(1f, 0.74f, 0.36f, 1f);
+        light.intensity = 1.45f;
+        light.pointLightInnerRadius = 0.8f;
+        light.pointLightOuterRadius = 5.2f;
+
+        brazier.AddComponent<TorchFlicker>();
+    }
+
+    private static Sprite GetColosseumCrestSprite()
+    {
+        if (_cachedColosseumCrestSprite != null) return _cachedColosseumCrestSprite;
+        int size = 128;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Point;
+        tex.wrapMode = TextureWrapMode.Clamp;
+
+        float c = (size - 1) * 0.5f;
+        Color[] cols = new Color[size * size];
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x - c;
+                float dy = y - c;
+                float r = Mathf.Sqrt(dx * dx + dy * dy);
+                float a = 0f;
+
+                // Vòng cổ ngữ ngoài & trong
+                if ((r >= 56f && r <= 60f) || (r >= 44f && r <= 47f) || (r >= 20f && r <= 23f))
+                    a = 1f;
+                // Chữ thập kiếm quyết đấu
+                else if (r <= 58f && (Mathf.Abs(dx) <= 1.6f || Mathf.Abs(dy) <= 1.6f || Mathf.Abs(Mathf.Abs(dx) - Mathf.Abs(dy)) <= 1.5f))
+                    a = 0.65f;
+
+                cols[y * size + x] = new Color(1f, 1f, 1f, a);
+            }
+        }
+        tex.SetPixels(cols);
+        tex.Apply();
+        _cachedColosseumCrestSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 64f);
+        return _cachedColosseumCrestSprite;
+    }
+
+    private static Sprite GetPedestalRingSprite()
+    {
+        if (_cachedPedestalRingSprite != null) return _cachedPedestalRingSprite;
+        int size = 64;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Point;
+        tex.wrapMode = TextureWrapMode.Clamp;
+
+        float c = (size - 1) * 0.5f;
+        Color[] cols = new Color[size * size];
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float r = Vector2.Distance(new Vector2(x, y), new Vector2(c, c));
+                float a = 0f;
+                if ((r >= 26f && r <= 30f) || (r >= 18f && r <= 20f)) a = 1f;
+                else if (r < 18f) a = 0.22f;
+                cols[y * size + x] = new Color(1f, 1f, 1f, a);
+            }
+        }
+        tex.SetPixels(cols);
+        tex.Apply();
+        _cachedPedestalRingSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 64f);
+        return _cachedPedestalRingSprite;
     }
 }

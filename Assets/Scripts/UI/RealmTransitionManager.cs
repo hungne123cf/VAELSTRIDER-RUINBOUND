@@ -497,9 +497,18 @@ public class RealmTransitionManager : MonoBehaviour
                 chosenBg = LoadSprite("Backgrounds/transition_map1_deploy") ?? LoadSprite("Backgrounds/mainmenu_bg_epic");
                 if (_loreTipText != null)
                 {
-                    _loreTipText.text = isVi 
-                        ? "\" Tích Nộ Khí để tung Tuyệt Kỹ \"" 
-                        : "\" Build Fury for your Ultimate \"";
+                    if (PvPMatchManager.IsPvPModeActive)
+                    {
+                        _loreTipText.text = isVi 
+                            ? "\" Tiến vào Võ Đài Quyết Đấu... Chuẩn bị vũ khí và khai chiến! \"" 
+                            : "\" Entering the Combat Arena... Prepare your weapons and strike! \"";
+                    }
+                    else
+                    {
+                        _loreTipText.text = isVi 
+                            ? "\" Tích Nộ Khí để tung Tuyệt Kỹ \"" 
+                            : "\" Build Fury for your Ultimate \"";
+                    }
                 }
                 break;
 

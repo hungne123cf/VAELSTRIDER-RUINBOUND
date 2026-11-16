@@ -179,9 +179,15 @@ public class GameOverUI : MonoBehaviour
         {
             long shards = PlayerInventory.GetCurrentRunShards();
 
+            // Tích lũy EXP Tướng an ủi sau run chiến đấu
+            string currentHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? CharacterManager.CHAR_VAELSTRIDER;
+            AccountDatabase.AddHeroExp(currentHero, 200, out int newHeroLv, out bool heroLvlUp);
+            int expReq = AccountDatabase.GetExpRequiredForNextLevel(newHeroLv);
+            int curExp = AccountDatabase.GetHeroExp(currentHero);
+
             respawnStatusText.text = isVi 
-                ? $"<color=#00FFFF><b>LINH HỒN THU ĐƯỢC: {shards:N0}</b></color>"
-                : $"<color=#00FFFF><b>AETHEL SHARDS COLLECTED: {shards:N0}</b></color>";
+                ? $"<color=#00FFFF><b>LINH HỒN: +{shards:N0}   •   EXP TƯỚNG (LV. {newHeroLv}): +200</b></color>"
+                : $"<color=#00FFFF><b>SHARDS: +{shards:N0}   •   HERO EXP (LV. {newHeroLv}): +200</b></color>";
             respawnStatusText.color = Color.white;
             respawnStatusText.enableWordWrapping = false;
             var stRt = respawnStatusText.rectTransform;

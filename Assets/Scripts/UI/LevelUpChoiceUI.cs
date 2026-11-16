@@ -48,6 +48,13 @@ public class LevelUpChoiceUI : MonoBehaviour
 
     // Queue lên cấp liên tiếp (khi giết Boss nhận nhiều EXP)
     private static readonly Queue<int> _pendingLevelUps = new Queue<int>();
+    public static int PendingLevelUpsCount => _pendingLevelUps.Count;
+
+    // ─── Nút Huy Hiệu Lõi Chờ trên HUD (Chủ Động Chọn Lõi, Không Ngắt Quãng Trận Đấu) ───
+    private static GameObject _pendingBadgeObj;
+    private static RectTransform _pendingBadgeRt;
+    private static TextMeshProUGUI _pendingBadgeCountText;
+    private static TextMeshProUGUI _pendingBadgeLabelText;
 
     // ─── Procedural & Loaded Sprite Cache ──────────────────────────────────────
     private static Sprite _cardBodySprite;
@@ -60,9 +67,45 @@ public class LevelUpChoiceUI : MonoBehaviour
     private static Sprite _obsidianCoreSprite;
     private static Sprite _cachedAttackIcon;
 
+    void OnEnable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        string s = scene.name;
+        if (s == "MainMenuScene" || s == "LoginScene")
+        {
+            ResetUI();
+        }
+        else if (_pendingLevelUps.Count > 0)
+        {
+            UpdatePendingBadgeUI();
+        }
+    }
+
+    void Update()
+    {
+        // Giữ nút đứng yên vững vàng, không rung lắc
+        if (_pendingBadgeRt != null && _pendingBadgeRt.localScale != Vector3.one)
+        {
+            _pendingBadgeRt.localScale = Vector3.one;
+        }
+    }
+
     public static void ResetUI()
     {
         _pendingLevelUps.Clear();
+        if (_pendingBadgeObj != null)
+        {
+            _pendingBadgeObj.SetActive(false);
+        }
         if (_instance != null)
         {
             _instance.StopAllCoroutines();
@@ -89,9 +132,133 @@ public class LevelUpChoiceUI : MonoBehaviour
         {
             GameObject go = new GameObject("LevelUpChoiceUI");
             _instance = go.AddComponent<LevelUpChoiceUI>();
+            if (Application.isPlaying) DontDestroyOnLoad(go);
         }
         _pendingLevelUps.Enqueue(newLevel);
-        _instance.ProcessQueue();
+
+        // Phát âm thanh lên cấp nhẹ nhàng
+        SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
+
+        // Không tự động đóng băng màn hình, hiện nút chọn lõi chủ động trên HUD
+        _instance.UpdatePendingBadgeUI();
+    }
+
+    /// <summary>
+    /// Người chơi chủ động bấm vào nút Nâng Cấp trên HUD để mở bảng chọn 3 Lõi
+    /// </summary>
+    public static void OpenNextPendingChoice()
+    {
+        if (_instance == null || _instance._isShowing || _pendingLevelUps.Count == 0) return;
+        SoundManager.EnsureInstance()?.PlayMenuHover();
+        int level = _pendingLevelUps.Dequeue();
+        _instance.UpdatePendingBadgeUI();
+        _instance.StartCoroutine(_instance.ShowRoutine(level));
+    }
+
+    public void UpdatePendingBadgeUI()
+    {
+        int count = _pendingLevelUps.Count;
+        if (count <= 0)
+        {
+            if (_pendingBadgeObj != null) _pendingBadgeObj.SetActive(false);
+            return;
+        }
+
+        Canvas gameplayCanvas = GameAutoBootstrap.GetMainGameplayCanvas() ?? FindAnyObjectByType<Canvas>();
+        if (gameplayCanvas == null) return;
+
+        if (_pendingBadgeObj != null && _pendingBadgeObj.transform.parent != gameplayCanvas.transform)
+        {
+            _pendingBadgeObj.transform.SetParent(gameplayCanvas.transform, false);
+        }
+
+        if (_pendingBadgeObj == null)
+        {
+            _pendingBadgeObj = new GameObject("PendingLevelUpBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            _pendingBadgeObj.layer = 5;
+            _pendingBadgeObj.transform.SetParent(gameplayCanvas.transform, false);
+
+            _pendingBadgeRt = _pendingBadgeObj.GetComponent<RectTransform>();
+            _pendingBadgeRt.anchorMin = new Vector2(1f, 1f);
+            _pendingBadgeRt.anchorMax = new Vector2(1f, 1f);
+            _pendingBadgeRt.pivot = new Vector2(1f, 1f);
+            _pendingBadgeRt.anchoredPosition = new Vector2(-20f, -365f); // Neo bên phải, dưới chân Minimap, không đè lên bất kỳ UI nào
+            _pendingBadgeRt.sizeDelta = new Vector2(165f, 42f);
+
+            Image bg = _pendingBadgeObj.GetComponent<Image>();
+            bg.color = new Color(0.12f, 0.10f, 0.05f, 0.95f);
+            bg.sprite = GetCardBodySprite();
+
+            var outline = _pendingBadgeObj.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 0.82f, 0.25f, 0.95f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            Button btn = _pendingBadgeObj.GetComponent<Button>();
+            btn.targetGraphic = bg;
+            btn.onClick.AddListener(() =>
+            {
+                OpenNextPendingChoice();
+            });
+
+            // Label text
+            GameObject labelObj = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+            labelObj.transform.SetParent(_pendingBadgeObj.transform, false);
+            RectTransform labelRt = labelObj.GetComponent<RectTransform>();
+            labelRt.anchorMin = new Vector2(0f, 0f);
+            labelRt.anchorMax = new Vector2(1f, 1f);
+            labelRt.pivot = new Vector2(0f, 0.5f);
+            labelRt.anchoredPosition = new Vector2(12f, 0f);
+            labelRt.sizeDelta = new Vector2(-42f, 0f);
+
+            _pendingBadgeLabelText = labelObj.GetComponent<TextMeshProUGUI>();
+            _pendingBadgeLabelText.font = GameFontManager.HeaderFont;
+            _pendingBadgeLabelText.fontSize = 12.5f;
+            _pendingBadgeLabelText.fontStyle = FontStyles.Bold;
+            _pendingBadgeLabelText.color = new Color(1f, 0.88f, 0.45f, 1f);
+            _pendingBadgeLabelText.alignment = TextAlignmentOptions.MidlineLeft;
+            _pendingBadgeLabelText.text = LocalizationManager.T("CHỌN LÕI", "CHOOSE AUGMENT");
+
+            // Counter Badge Circle
+            GameObject badgeCountObj = new GameObject("CountBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            badgeCountObj.transform.SetParent(_pendingBadgeObj.transform, false);
+            RectTransform bcRt = badgeCountObj.GetComponent<RectTransform>();
+            bcRt.anchorMin = new Vector2(1f, 0.5f);
+            bcRt.anchorMax = new Vector2(1f, 0.5f);
+            bcRt.pivot = new Vector2(1f, 0.5f);
+            bcRt.anchoredPosition = new Vector2(-8f, 0f);
+            bcRt.sizeDelta = new Vector2(26f, 26f);
+
+            Image bcImg = badgeCountObj.GetComponent<Image>();
+            bcImg.color = new Color(0.92f, 0.24f, 0.18f, 1f);
+            bcImg.sprite = GetRadialGlowSprite() ?? GetCardBodySprite();
+
+            GameObject countTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            countTxtObj.transform.SetParent(badgeCountObj.transform, false);
+            RectTransform ctRt = countTxtObj.GetComponent<RectTransform>();
+            ctRt.anchorMin = Vector2.zero;
+            ctRt.anchorMax = Vector2.one;
+            ctRt.sizeDelta = Vector2.zero;
+
+            _pendingBadgeCountText = countTxtObj.GetComponent<TextMeshProUGUI>();
+            _pendingBadgeCountText.font = GameFontManager.HeaderFont;
+            _pendingBadgeCountText.fontSize = 13f;
+            _pendingBadgeCountText.fontStyle = FontStyles.Bold;
+            _pendingBadgeCountText.color = Color.white;
+            _pendingBadgeCountText.alignment = TextAlignmentOptions.Center;
+
+            GameFontManager.ApplyFontsGlobally(_pendingBadgeObj);
+        }
+
+        _pendingBadgeObj.SetActive(true);
+        _pendingBadgeObj.transform.SetAsLastSibling();
+        if (_pendingBadgeCountText != null)
+        {
+            _pendingBadgeCountText.text = count.ToString();
+        }
+        if (_pendingBadgeLabelText != null)
+        {
+            _pendingBadgeLabelText.text = LocalizationManager.T("CHỌN LÕI", "CHOOSE AUGMENT");
+        }
     }
 
     private void ProcessQueue()
@@ -131,9 +298,17 @@ public class LevelUpChoiceUI : MonoBehaviour
         // Ẩn toàn bộ Gameplay HUD để không chồng lấn
         GameAutoBootstrap.SetGameplayHUDVisible(false);
 
-        // Pause game time
+        // Pause game time (Chỉ pause trong chế độ Chơi Đơn / Story, trong Co-op luôn giữ 1.0f realtime)
         float prevTimeScale = Time.timeScale;
-        Time.timeScale = 0f;
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            Time.timeScale = 1.0f;
+        }
 
         // Build UI
         BuildUI(level);
@@ -166,14 +341,13 @@ public class LevelUpChoiceUI : MonoBehaviour
         if (ph != null) ph.isInvulnerable = prevInvul;
         if (pc != null) pc.SetCanMove(true);
 
-        // Nếu không còn lượt lên cấp chờ nào, hiện lại Gameplay HUD
-        if (_pendingLevelUps.Count == 0)
-        {
-            GameAutoBootstrap.SetGameplayHUDVisible(true);
-        }
+        // Khôi phục Gameplay HUD ngay khi bảng chọn đóng lại
+        GameAutoBootstrap.SetGameplayHUDVisible(true);
+        UpdatePendingBadgeUI();
 
         yield return new WaitForSecondsRealtime(0.15f);
-        ProcessQueue();
+        // Cập nhật lại số lượng lõi chờ trên HUD thay vì tự động mở ép buộc
+        UpdatePendingBadgeUI();
     }
 
     // ─── Procedural High-Contrast UI Sprites ───────────────────────────────────
@@ -549,6 +723,9 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         // ── 4. Sculpted Crystal Reroll Button ─────────────────────────────────
         BuildRerollButton(overlay.transform, isVietnamese);
+
+        // ── 5. Nút "ĐỂ SAU (X)" để người chơi có thể đóng lại và chọn sau khi rảnh tay ──
+        BuildPostponeButton(overlay.transform, isVietnamese, level);
     }
 
     private void CreateGemIcon(Transform parent, string name, Vector2 anchorPos, float size, Color color)
@@ -710,6 +887,63 @@ public class LevelUpChoiceUI : MonoBehaviour
         );
 
         BuildCards(isVN);
+    }
+
+    private void BuildPostponeButton(Transform parent, bool isVN, int currentLvl)
+    {
+        var btnObj = new GameObject("Btn_PostponeChoice", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        btnObj.transform.SetParent(parent, false);
+        var rt = btnObj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(1f, 1f);
+        rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(1f, 1f);
+        rt.anchoredPosition = new Vector2(-28f, -24f);
+        rt.sizeDelta = new Vector2(140f, 44f);
+
+        var img = btnObj.GetComponent<Image>();
+        img.color = new Color(0.18f, 0.08f, 0.10f, 0.95f);
+        img.sprite = GetPillBadgeSprite();
+
+        var outline = btnObj.AddComponent<Outline>();
+        outline.effectColor = new Color(0.95f, 0.45f, 0.45f, 0.85f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        var btn = btnObj.GetComponent<Button>();
+        btn.targetGraphic = img;
+        btn.onClick.AddListener(() =>
+        {
+            SoundManager.EnsureInstance()?.PlayMenuHover();
+            _pendingLevelUps.Enqueue(currentLvl);
+            _isShowing = false;
+            _isPicking = false;
+            if (_root != null)
+            {
+                Destroy(_root);
+                _root = null;
+            }
+            Time.timeScale = 1.0f;
+            var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+            if (ph != null) ph.isInvulnerable = false;
+            var pc = FindAnyObjectByType<PlayerController>();
+            if (pc != null) pc.SetCanMove(true);
+            GameAutoBootstrap.SetGameplayHUDVisible(true);
+            UpdatePendingBadgeUI();
+        });
+
+        var txtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+        txtObj.transform.SetParent(btnObj.transform, false);
+        var trt = txtObj.GetComponent<RectTransform>();
+        trt.anchorMin = Vector2.zero;
+        trt.anchorMax = Vector2.one;
+        trt.sizeDelta = Vector2.zero;
+
+        var tmp = txtObj.GetComponent<TextMeshProUGUI>();
+        tmp.font = GameFontManager.HeaderFont;
+        tmp.fontSize = 13f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = new Color(1f, 0.8f, 0.8f, 1f);
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.text = isVN ? "ĐỂ SAU (X)" : "LATER (X)";
     }
 
     // ─── Stat Color & Naming Helpers ───────────────────────────────────────────
@@ -2230,7 +2464,8 @@ public class LevelUpChoiceUI : MonoBehaviour
             _root = null;
         }
 
-        // HUỶ TRIỆT ĐỂ MỌI TRẠNG THÁI GỒNG CỦA NHÂN VẬT KHI VỪA CHỌN XONG LÕI (Zero-Bug)
+        // HUỶ TRIỆT ĐỂ MỌI TRẠNG THÁI GỒNG & RESET PHÍM CẢM ỨNG KHI VỪA CHỌN XONG LÕI (Zero-Bug)
+        MobileActionButton.ResetAllButtonStates();
         var playerObj = GameObject.FindWithTag("Player");
         if (playerObj != null)
         {
@@ -2250,10 +2485,8 @@ public class LevelUpChoiceUI : MonoBehaviour
             if (dune != null) dune.CancelTornadoAim();
         }
 
-        if (_pendingLevelUps.Count == 0)
-        {
-            GameAutoBootstrap.SetGameplayHUDVisible(true);
-        }
+        GameAutoBootstrap.SetGameplayHUDVisible(true);
+        UpdatePendingBadgeUI();
     }
 
     // ─── Visual Helpers ────────────────────────────────────────────────────────

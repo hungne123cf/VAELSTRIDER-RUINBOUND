@@ -43,7 +43,11 @@ public static class AccountDatabase
         public bool unlockedMaid = false;
         public List<int> ownedArmorIds = new List<int>();
         public List<string> unlockedCostumes = new List<string>();
+        public List<string> heroMasteryData = new List<string>(); // Danh sách cấp độ và EXP từng tướng ("heroId:level:exp")
         public List<InventoryItemEntry> inventoryItems = new List<InventoryItemEntry>();
+        public int pvpRating = 1000;
+        public int pvpWins = 0;
+        public int pvpLosses = 0;
         public string createdDate;
         public string lastLoginDate;
     }
@@ -449,6 +453,15 @@ public static class AccountDatabase
         }
 
         // 3. Nạp dữ liệu mới của tài khoản này
+        string existingCustomName = PlayerPrefs.GetString("Player_Name", "");
+        if (!string.IsNullOrEmpty(existingCustomName) && existingCustomName != "Player" && existingCustomName != "Wanderer" && existingCustomName != "Chiến Binh")
+        {
+            if (string.IsNullOrEmpty(acc.displayName) || acc.displayName == "Player" || acc.displayName == "Wanderer" || acc.displayName == "Chiến Binh")
+            {
+                acc.displayName = existingCustomName;
+            }
+        }
+
         PlayerPrefs.SetString(PREF_CURRENT_USER, acc.username);
         PlayerPrefs.SetString("Player_Name", acc.displayName);
 
@@ -470,39 +483,77 @@ public static class AccountDatabase
         PlayerPrefs.SetInt("Map2_Completed", acc.map2Completed ? 1 : 0);
         PlayerPrefs.SetInt("Map3_Completed", acc.map3Completed ? 1 : 0);
 
-        // Nhân vật đã chọn & Tướng đã mở khóa: Chỉ mở Vaelstrider cho tân thủ, các tướng khác theo acc.unlockedHeroes
+        // Nhân vật đã chọn & Tướng đã mở khóa: Chỉ mở Vaelstrider cho tân thủ, các tướng khác chỉ mở khi đã mua
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_VAELSTRIDER, 1);
 
-        bool hasRonin = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("ronin") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_GALE_RONIN));
-        bool hasAzure = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("azure") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_AZURE_BLADE));
-        bool hasTitan = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("titan") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_TITAN_BERSERKER));
-        bool hasDune  = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("dune")  || acc.unlockedHeroes.Contains(CharacterManager.CHAR_DUNE_ASSASSIN));
-        bool hasMage  = acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("mage")  || acc.unlockedHeroes.Contains(CharacterManager.CHAR_CELESTIAL_MAGE));
+        bool hasRonin = (acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("ronin") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_GALE_RONIN))) || PlayerPrefs.GetInt("Char_Unlocked_" + CharacterManager.CHAR_GALE_RONIN, 0) == 1;
+        bool hasAzure = (acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("azure") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_AZURE_BLADE))) || PlayerPrefs.GetInt("Char_Unlocked_" + CharacterManager.CHAR_AZURE_BLADE, 0) == 1;
+        bool hasTitan = (acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("titan") || acc.unlockedHeroes.Contains(CharacterManager.CHAR_TITAN_BERSERKER))) || PlayerPrefs.GetInt("Char_Unlocked_" + CharacterManager.CHAR_TITAN_BERSERKER, 0) == 1;
+        bool hasDune  = (acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("dune")  || acc.unlockedHeroes.Contains(CharacterManager.CHAR_DUNE_ASSASSIN))) || PlayerPrefs.GetInt("Char_Unlocked_" + CharacterManager.CHAR_DUNE_ASSASSIN, 0) == 1;
+        bool hasMage  = (acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("mage")  || acc.unlockedHeroes.Contains(CharacterManager.CHAR_CELESTIAL_MAGE))) || PlayerPrefs.GetInt("Char_Unlocked_" + CharacterManager.CHAR_CELESTIAL_MAGE, 0) == 1;
+        bool hasMech  = (acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains("mech")  || acc.unlockedHeroes.Contains(CharacterManager.CHAR_ABYSSAL_MECH))) || PlayerPrefs.GetInt("Char_Unlocked_" + CharacterManager.CHAR_ABYSSAL_MECH, 0) == 1;
 
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_GALE_RONIN, hasRonin ? 1 : 0);
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_AZURE_BLADE, hasAzure ? 1 : 0);
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_TITAN_BERSERKER, hasTitan ? 1 : 0);
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_DUNE_ASSASSIN, hasDune ? 1 : 0);
         PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_CELESTIAL_MAGE, hasMage ? 1 : 0);
+        PlayerPrefs.SetInt("Char_Unlocked_" + CharacterManager.CHAR_ABYSSAL_MECH, hasMech ? 1 : 0);
 
-        // Bảo tồn nhân vật đã chọn: Không bao giờ ghi đè lựa chọn của người chơi nếu đã chọn tướng khác Vaelstrider
+        if (acc.unlockedHeroes == null) acc.unlockedHeroes = new List<string>();
+        if (!acc.unlockedHeroes.Contains("vael")) acc.unlockedHeroes.Add("vael");
+        if (hasRonin && !acc.unlockedHeroes.Contains("ronin")) acc.unlockedHeroes.Add("ronin");
+        if (hasAzure && !acc.unlockedHeroes.Contains("azure")) acc.unlockedHeroes.Add("azure");
+        if (hasTitan && !acc.unlockedHeroes.Contains("titan")) acc.unlockedHeroes.Add("titan");
+        if (hasDune && !acc.unlockedHeroes.Contains("dune")) acc.unlockedHeroes.Add("dune");
+        if (hasMage && !acc.unlockedHeroes.Contains("mage")) acc.unlockedHeroes.Add("mage");
+        if (hasMech && !acc.unlockedHeroes.Contains("mech")) acc.unlockedHeroes.Add("mech");
+
+        // Tuyệt đối bảo tồn nhân vật người chơi đã chọn nếu tướng đó đã được sở hữu hợp lệ
         string existingSelection = PlayerPrefs.GetString("Selected_Character_ID", "");
         if (string.IsNullOrEmpty(existingSelection)) existingSelection = PlayerPrefs.GetString("SelectedHero", "");
-        string charId = CharacterManager.CHAR_VAELSTRIDER;
+        if (string.IsNullOrEmpty(existingSelection)) existingSelection = acc.selectedHero;
 
-        if (!string.IsNullOrEmpty(existingSelection) && !existingSelection.Equals("vael", StringComparison.OrdinalIgnoreCase) && !existingSelection.Equals(CharacterManager.CHAR_VAELSTRIDER, StringComparison.OrdinalIgnoreCase))
+        string charId = CharacterManager.CHAR_VAELSTRIDER;
+        if (!string.IsNullOrEmpty(existingSelection))
         {
-            charId = CharacterManager.NormalizeHeroId(existingSelection);
+            string candidateNorm = CharacterManager.NormalizeHeroId(existingSelection);
+            bool isOwned = (candidateNorm == CharacterManager.CHAR_VAELSTRIDER) ||
+                           (acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains(candidateNorm) || acc.unlockedHeroes.Contains(CharacterManager.GetHeroAliasStatic(candidateNorm)))) ||
+                           (PlayerPrefs.GetInt("Char_Unlocked_" + candidateNorm, 0) == 1);
+            if (isOwned)
+            {
+                charId = candidateNorm;
+            }
         }
         else if (!string.IsNullOrEmpty(acc.selectedHero))
         {
-            charId = CharacterManager.NormalizeHeroId(acc.selectedHero);
+            string candidateNorm = CharacterManager.NormalizeHeroId(acc.selectedHero);
+            bool isOwned = (candidateNorm == CharacterManager.CHAR_VAELSTRIDER) ||
+                           (acc.unlockedHeroes != null && (acc.unlockedHeroes.Contains(candidateNorm) || acc.unlockedHeroes.Contains(CharacterManager.GetHeroAliasStatic(candidateNorm)))) ||
+                           (PlayerPrefs.GetInt("Char_Unlocked_" + candidateNorm, 0) == 1);
+            if (isOwned)
+            {
+                charId = candidateNorm;
+            }
         }
 
         string heroAlias = CharacterManager.GetHeroAliasStatic(charId);
         PlayerPrefs.SetString("SelectedHero", heroAlias);
         PlayerPrefs.SetString("Selected_Character_ID", charId);
         acc.selectedHero = heroAlias;
+
+        if (acc.unlockedHeroes == null) acc.unlockedHeroes = new List<string>();
+        if (!acc.unlockedHeroes.Contains(heroAlias)) acc.unlockedHeroes.Add(heroAlias);
+        if (!acc.unlockedHeroes.Contains(charId)) acc.unlockedHeroes.Add(charId);
+
+        acc.selectedHeroIndex = (charId == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 
+            : ((charId == CharacterManager.CHAR_AZURE_BLADE) ? 2 
+            : ((charId == CharacterManager.CHAR_GALE_RONIN || charId == CharacterManager.CHAR_MAID) ? 1 
+            : (charId == CharacterManager.CHAR_DUNE_ASSASSIN ? 4 
+            : (charId == CharacterManager.CHAR_CELESTIAL_MAGE ? 5 
+            : (charId == CharacterManager.CHAR_ABYSSAL_MECH ? 6 : 0)))));
+
         PlayerPrefs.SetInt("Save_SelectedHeroIndex", acc.selectedHeroIndex);
 
         // Trang bị giáp & phụ kiện
@@ -533,6 +584,59 @@ public static class AccountDatabase
             foreach (var costumeId in acc.unlockedCostumes)
             {
                 PlayerPrefs.SetInt("Costume_Unlocked_" + costumeId, 1);
+            }
+        }
+
+        // Khởi tạo cấp độ và EXP sạch sẽ cho tất cả các tướng (Mặc định Cấp 1, EXP 0)
+        string[] allHeroIds = new string[] {
+            CharacterManager.CHAR_VAELSTRIDER,
+            CharacterManager.CHAR_GALE_RONIN,
+            CharacterManager.CHAR_AZURE_BLADE,
+            CharacterManager.CHAR_TITAN_BERSERKER,
+            CharacterManager.CHAR_DUNE_ASSASSIN,
+            CharacterManager.CHAR_CELESTIAL_MAGE,
+            CharacterManager.CHAR_ABYSSAL_MECH
+        };
+        string[] allAliases = new string[] { "vael", "ronin", "azure", "titan", "dune", "mage", "mech" };
+
+        foreach (var h in allHeroIds)
+        {
+            PlayerPrefs.SetInt("HeroLevel_" + h, 1);
+            PlayerPrefs.SetInt("HeroExp_" + h, 0);
+        }
+        foreach (var a in allAliases)
+        {
+            PlayerPrefs.SetInt("HeroLevel_" + a, 1);
+            PlayerPrefs.SetInt("HeroExp_" + a, 0);
+        }
+
+        // Nạp cấp độ và EXP thật của từng tướng từ tài khoản này
+        if (acc.heroMasteryData != null && acc.heroMasteryData.Count > 0)
+        {
+            foreach (var entry in acc.heroMasteryData)
+            {
+                if (string.IsNullOrEmpty(entry)) continue;
+                string[] parts = entry.Split(':');
+                if (parts.Length >= 3)
+                {
+                    string hId = parts[0];
+                    string normH = CharacterManager.NormalizeHeroId(hId);
+                    string aliasH = CharacterManager.GetHeroAliasStatic(normH);
+                    if (int.TryParse(parts[1], out int lv))
+                    {
+                        int cleanLv = Mathf.Max(1, lv);
+                        PlayerPrefs.SetInt("HeroLevel_" + hId, cleanLv);
+                        PlayerPrefs.SetInt("HeroLevel_" + normH, cleanLv);
+                        PlayerPrefs.SetInt("HeroLevel_" + aliasH, cleanLv);
+                    }
+                    if (int.TryParse(parts[2], out int exp))
+                    {
+                        int cleanExp = Mathf.Max(0, exp);
+                        PlayerPrefs.SetInt("HeroExp_" + hId, cleanExp);
+                        PlayerPrefs.SetInt("HeroExp_" + normH, cleanExp);
+                        PlayerPrefs.SetInt("HeroExp_" + aliasH, cleanExp);
+                    }
+                }
             }
         }
 
@@ -575,8 +679,25 @@ public static class AccountDatabase
         PlayerPrefs.DeleteKey("Map2_Completed");
         PlayerPrefs.DeleteKey("Map3_Completed");
 
-        // Heroes
-        PlayerPrefs.DeleteKey("Char_Unlocked_Maid");
+        // Heroes & Mastery: Xóa toàn bộ khóa mở khóa và cấp độ/exp tướng để không rò rỉ sang tài khoản khác
+        string[] allHeroesToClean = new string[] {
+            CharacterManager.CHAR_VAELSTRIDER,
+            CharacterManager.CHAR_GALE_RONIN,
+            CharacterManager.CHAR_AZURE_BLADE,
+            CharacterManager.CHAR_TITAN_BERSERKER,
+            CharacterManager.CHAR_DUNE_ASSASSIN,
+            CharacterManager.CHAR_CELESTIAL_MAGE,
+            CharacterManager.CHAR_ABYSSAL_MECH,
+            "Maid", "vael", "ronin", "azure", "titan", "dune", "mage", "mech",
+            "player1", "player2", "player3", "player4", "player5", "player6", "player7"
+        };
+        foreach (var h in allHeroesToClean)
+        {
+            PlayerPrefs.DeleteKey("Char_Unlocked_" + h);
+            PlayerPrefs.DeleteKey("HeroLevel_" + h);
+            PlayerPrefs.DeleteKey("HeroExp_" + h);
+        }
+
         PlayerPrefs.DeleteKey("SelectedHero");
         PlayerPrefs.DeleteKey("Selected_Character_ID");
         PlayerPrefs.DeleteKey("Save_SelectedHeroIndex");
@@ -702,8 +823,48 @@ public static class AccountDatabase
     {
         EnsureDatabaseLoaded();
         string activeUser = PlayerPrefs.GetString(PREF_CURRENT_USER, "");
-        if (string.IsNullOrEmpty(activeUser) || dbCache == null || dbCache.accounts == null) return null;
-        return dbCache.accounts.Find(a => string.Equals(a.username, activeUser, StringComparison.OrdinalIgnoreCase));
+        if (dbCache == null || dbCache.accounts == null || dbCache.accounts.Count == 0) return null;
+
+        if (!string.IsNullOrEmpty(activeUser))
+        {
+            var acc = dbCache.accounts.Find(a => string.Equals(a.username, activeUser, StringComparison.OrdinalIgnoreCase));
+            if (acc != null) return acc;
+        }
+
+        string pName = PlayerPrefs.GetString("Player_Name", "");
+        if (!string.IsNullOrEmpty(pName) && pName != "Player" && pName != "Wanderer" && pName != "Chiến Binh")
+        {
+            var acc = dbCache.accounts.Find(a => string.Equals(a.displayName, pName, StringComparison.OrdinalIgnoreCase));
+            if (acc != null)
+            {
+                PlayerPrefs.SetString(PREF_CURRENT_USER, acc.username);
+                return acc;
+            }
+        }
+
+        if (dbCache.accounts.Count > 0)
+        {
+            return dbCache.accounts[0];
+        }
+
+        return null;
+    }
+
+    public static AccountData FindAccountByName(string name)
+    {
+        EnsureDatabaseLoaded();
+        if (dbCache == null || dbCache.accounts == null || string.IsNullOrEmpty(name)) return null;
+        return dbCache.accounts.Find(a =>
+            string.Equals(a.username, name, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(a.displayName, name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public static void Logout()
+    {
+        SaveActiveSessionToDatabase();
+        PlayerPrefs.DeleteKey(PREF_CURRENT_USER);
+        PlayerPrefs.Save();
+        Debug.Log("<color=yellow>[AccountDB]</color> Đã lưu tiến trình và đăng xuất session người chơi.");
     }
 
     public static void SyncHeroUnlock(string normHeroId)
@@ -749,6 +910,12 @@ public static class AccountDatabase
 
         if (targetAcc != null)
         {
+            string savedDispName = PlayerPrefs.GetString("Player_Name", "");
+            if (!string.IsNullOrEmpty(savedDispName) && savedDispName != "Player" && savedDispName != "Wanderer" && savedDispName != "Chiến Binh")
+            {
+                targetAcc.displayName = savedDispName;
+            }
+
             targetAcc.aethelShards = GetAethelShards();
             targetAcc.healthPotions = PlayerPrefs.GetInt("Save_HealthPotions", PlayerPrefs.GetInt("Saved_HealthPotions", targetAcc.healthPotions));
             targetAcc.upgradeAttack = PlayerPrefs.GetInt("Upgrade_Attack_Level", targetAcc.upgradeAttack);
@@ -764,8 +931,19 @@ public static class AccountDatabase
             string activeChar = cm != null ? cm.GetSelectedCharacterId() : "";
             if (!string.IsNullOrEmpty(activeChar))
             {
-                targetAcc.selectedHero = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? "ronin" : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? "dune" : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? "mage" : "vael"))));
-                targetAcc.selectedHeroIndex = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? 2 : (activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID ? 1 : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? 4 : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? 5 : 0))));
+                targetAcc.selectedHero = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? "titan" 
+                    : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? "azure" 
+                    : ((activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID) ? "ronin" 
+                    : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? "dune" 
+                    : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? "mage" 
+                    : (activeChar == CharacterManager.CHAR_ABYSSAL_MECH ? "mech" : "vael")))));
+
+                targetAcc.selectedHeroIndex = (activeChar == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 
+                    : ((activeChar == CharacterManager.CHAR_AZURE_BLADE) ? 2 
+                    : ((activeChar == CharacterManager.CHAR_GALE_RONIN || activeChar == CharacterManager.CHAR_MAID) ? 1 
+                    : (activeChar == CharacterManager.CHAR_DUNE_ASSASSIN ? 4 
+                    : (activeChar == CharacterManager.CHAR_CELESTIAL_MAGE ? 5 
+                    : (activeChar == CharacterManager.CHAR_ABYSSAL_MECH ? 6 : 0)))));
             }
 
             targetAcc.equippedArmorId = PlayerPrefs.GetInt("EquippedArmorId", targetAcc.equippedArmorId);
@@ -789,17 +967,72 @@ public static class AccountDatabase
                 if (cm.IsCharacterPurchased(CharacterManager.CHAR_TITAN_BERSERKER)) targetAcc.unlockedHeroes.Add("titan");
                 if (cm.IsCharacterPurchased(CharacterManager.CHAR_DUNE_ASSASSIN)) targetAcc.unlockedHeroes.Add("dune");
                 if (cm.IsCharacterPurchased(CharacterManager.CHAR_CELESTIAL_MAGE)) targetAcc.unlockedHeroes.Add("mage");
+                if (cm.IsCharacterPurchased(CharacterManager.CHAR_ABYSSAL_MECH)) targetAcc.unlockedHeroes.Add("mech");
+            }
+
+            // Lưu trữ cấp độ và điểm EXP thật sự của tất cả 7 vị tướng
+            if (targetAcc.heroMasteryData == null) targetAcc.heroMasteryData = new List<string>();
+            targetAcc.heroMasteryData.Clear();
+            string[] allHeroesForMastery = new string[]
+            {
+                CharacterManager.CHAR_VAELSTRIDER,
+                CharacterManager.CHAR_GALE_RONIN,
+                CharacterManager.CHAR_AZURE_BLADE,
+                CharacterManager.CHAR_TITAN_BERSERKER,
+                CharacterManager.CHAR_DUNE_ASSASSIN,
+                CharacterManager.CHAR_CELESTIAL_MAGE,
+                CharacterManager.CHAR_ABYSSAL_MECH
+            };
+            foreach (var hId in allHeroesForMastery)
+            {
+                int hLv = Mathf.Max(1, PlayerPrefs.GetInt("HeroLevel_" + hId, 1));
+                int hExp = Mathf.Max(0, PlayerPrefs.GetInt("HeroExp_" + hId, 0));
+                targetAcc.heroMasteryData.Add($"{hId}:{hLv}:{hExp}");
             }
 
             targetAcc.lastLoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
             SaveDatabase();
 
-            // Đồng bộ lên Cloud Server
+            // Đồng bộ lên Cloud Server (PlayFab + CloudAccountService)
+            if (PlayFabClientService.Instance != null && PlayFabClientService.Instance.IsLoggedIn)
+            {
+                PlayFabClientService.Instance.UploadAccountDataToPlayFab(targetAcc);
+            }
             if (CloudAccountService.Instance != null)
             {
                 CloudAccountService.Instance.SyncProgressToCloud(targetAcc.username, targetAcc.aethelShards, targetAcc.healthPotions, targetAcc.equippedArmor, targetAcc.equippedWeapon);
             }
+        }
+    }
+
+    /// <summary>
+    /// Ghi nhận và lưu chính xác nhân vật người chơi đã chọn vào phiên đăng nhập và Database
+    /// Đảm bảo không bị ghi đè hay mất tướng khi chuyển scene hoặc vào trận Co-op / Đấu trường!
+    /// </summary>
+    public static void SetSelectedHero(string heroId)
+    {
+        string norm = CharacterManager.NormalizeHeroId(heroId);
+        string alias = CharacterManager.GetHeroAliasStatic(norm);
+
+        PlayerPrefs.SetString("Selected_Character_ID", norm);
+        PlayerPrefs.SetString("SelectedHero", alias);
+        PlayerPrefs.Save();
+
+        var acc = GetOrCreateActiveAccount();
+        if (acc != null)
+        {
+            acc.selectedHero = alias;
+            acc.selectedHeroIndex = (norm == CharacterManager.CHAR_TITAN_BERSERKER) ? 3 
+                : ((norm == CharacterManager.CHAR_AZURE_BLADE) ? 2 
+                : ((norm == CharacterManager.CHAR_GALE_RONIN || norm == CharacterManager.CHAR_MAID) ? 1 
+                : (norm == CharacterManager.CHAR_DUNE_ASSASSIN ? 4 
+                : (norm == CharacterManager.CHAR_CELESTIAL_MAGE ? 5 
+                : (norm == CharacterManager.CHAR_ABYSSAL_MECH ? 6 : 0)))));
+            if (acc.unlockedHeroes == null) acc.unlockedHeroes = new List<string>();
+            if (!acc.unlockedHeroes.Contains(alias)) acc.unlockedHeroes.Add(alias);
+            if (!acc.unlockedHeroes.Contains(norm)) acc.unlockedHeroes.Add(norm);
+            SaveDatabase();
         }
     }
 
@@ -1036,6 +1269,77 @@ public static class AccountDatabase
 
         var existing = acc.inventoryItems.Find(i => i.itemId == itemId);
         return existing != null ? existing.quantity : 0;
+    }
+
+    // =========================================================================
+    // HỆ THỐNG CẤP ĐỘ VÀ EXP TÍCH LŨY CỦA TỪNG VỊ TƯỚNG (HERO MASTERY SYSTEM)
+    // =========================================================================
+    public static int GetHeroLevel(string heroId)
+    {
+        string normId = CharacterManager.NormalizeHeroId(heroId);
+        return Mathf.Max(1, PlayerPrefs.GetInt("HeroLevel_" + normId, 1));
+    }
+
+    public static int GetHeroExp(string heroId)
+    {
+        string normId = CharacterManager.NormalizeHeroId(heroId);
+        return Mathf.Max(0, PlayerPrefs.GetInt("HeroExp_" + normId, 0));
+    }
+
+    public static int GetExpRequiredForNextLevel(int currentLevel)
+    {
+        if (currentLevel < 1) currentLevel = 1;
+        // Mỗi cấp yêu cầu cấp độ hiện tại * 800 EXP (Lv 1: 800 EXP, Lv 2: 1,600 EXP, Lv 3: 2,400 EXP...)
+        return currentLevel * 800;
+    }
+
+    public static void AddHeroExp(string heroId, int expGained, out int newLevel, out bool leveledUp)
+    {
+        string normId = CharacterManager.NormalizeHeroId(heroId);
+        int curLv = GetHeroLevel(normId);
+        int curExp = GetHeroExp(normId);
+        leveledUp = false;
+
+        if (expGained > 0)
+        {
+            curExp += expGained;
+            while (curLv < 50 && curExp >= GetExpRequiredForNextLevel(curLv))
+            {
+                curExp -= GetExpRequiredForNextLevel(curLv);
+                curLv++;
+                leveledUp = true;
+            }
+        }
+
+        newLevel = curLv;
+        PlayerPrefs.SetInt("HeroLevel_" + normId, curLv);
+        PlayerPrefs.SetInt("HeroExp_" + normId, curExp);
+        PlayerPrefs.Save();
+        SaveActiveSessionToDatabase();
+        Debug.Log($"<color=cyan>[HERO MASTERY]</color> Tướng {normId} nhận +{expGained} EXP! Cấp hiện tại: Lv. {newLevel} ({curExp}/{GetExpRequiredForNextLevel(newLevel)} EXP)");
+    }
+
+    // =========================================================================
+    // KIỂM TRA TRÙNG TÊN HIỂN THỊ (UNIQUE DISPLAY NAME)
+    // =========================================================================
+    public static bool IsDisplayNameTaken(string newDisplayName, string currentUsername)
+    {
+        if (string.IsNullOrWhiteSpace(newDisplayName)) return false;
+        EnsureDatabaseLoaded();
+        string clean = newDisplayName.Trim();
+        foreach (var acc in dbCache.accounts)
+        {
+            if (acc == null) continue;
+            // Bỏ qua tài khoản hiện tại của chính người chơi
+            if (!string.IsNullOrEmpty(currentUsername) && acc.username != null && acc.username.Equals(currentUsername, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (!string.IsNullOrEmpty(acc.displayName) && acc.displayName.Equals(clean, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

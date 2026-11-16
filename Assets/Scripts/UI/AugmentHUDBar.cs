@@ -1250,7 +1250,9 @@ public class AugmentHUDBar : MonoBehaviour
 
         _fullOverviewPopupObj.SetActive(true);
         _prevOverviewTimeScale = Time.timeScale;
-        Time.timeScale = 0f;
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        if (!isMulti) Time.timeScale = 0f;
+        else Time.timeScale = 1.0f;
         SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
     }
 

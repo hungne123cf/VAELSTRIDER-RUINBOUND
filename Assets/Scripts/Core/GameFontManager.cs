@@ -178,21 +178,27 @@ public static class GameFontManager
         if (text.Contains("\u2014") || text.Contains("\u2013"))
             text = text.Replace('\u2014', '-').Replace('\u2013', '-');
         
-        // Khử các tag thừa vô nghĩa
+        // Khử các tag thừa vô nghĩa và lỗi chữ z do font Dreams Unwound SDF
         if (text.Contains("[THANH]") || text.Contains("zTHANH]"))
             text = text.Replace("[THANH]", "").Replace("zTHANH]", "");
         if (text.Contains("[NGOC]") || text.Contains("zNGOC]"))
             text = text.Replace("[NGOC]", "").Replace("zNGOC]", "");
         if (text.Contains("[TIỀN TỆ]") || text.Contains("z TIỀN TỆ]") || text.Contains("zTIỀN TỆ]"))
-            text = text.Replace("[TIỀN TỆ]", "(Tiền tệ)").Replace("z TIỀN TỆ]", "(Tiền tệ)").Replace("zTIỀN TỆ]", "(Tiền tệ)");
+            text = text.Replace("[TIỀN TỆ]", "Tiền tệ").Replace("z TIỀN TỆ]", "Tiền tệ").Replace("zTIỀN TỆ]", "Tiền tệ");
         if (text.Contains("[HIẾM]") || text.Contains("z HIẾM]") || text.Contains("zHIẾM]"))
-            text = text.Replace("[HIẾM]", "(Hiếm)").Replace("z HIẾM]", "(Hiếm)").Replace("zHIẾM]", "(Hiếm)");
+            text = text.Replace("[HIẾM]", "Hiếm").Replace("z HIẾM]", "Hiếm").Replace("zHIẾM]", "Hiếm");
         if (text.Contains("[BẠN]") || text.Contains("zBẠN]") || text.Contains("z BẠN]"))
             text = text.Replace("[BẠN]", "BẠN").Replace("zBẠN]", "BẠN").Replace("z BẠN]", "BẠN");
 
-        // Thay dấu ngoặc vuông bằng ngoặc đơn an toàn ASCII
+        // Khử triệt để lỗi chữ z từ font Dreams Unwound (ASCII 91 ánh xạ sang 'z')
+        if (text.Contains("zsẮP RA MẮT") || text.Contains("zSẮP RA MẮT") || text.Contains("zsẮP") || text.Contains("zSẮP"))
+            text = text.Replace("zsẮP RA MẮT", "SẮP RA MẮT").Replace("zSẮP RA MẮT", "SẮP RA MẮT").Replace("zsẮP", "SẮP").Replace("zSẮP", "SẮP");
+        if (text.Contains("zgỢI Ý PHÁT TRIỂN") || text.Contains("zGỢI Ý PHÁT TRIỂN") || text.Contains("zgỢI Ý") || text.Contains("zGỢI Ý"))
+            text = text.Replace("zgỢI Ý PHÁT TRIỂN", "GỢI Ý PHÁT TRIỂN").Replace("zGỢI Ý PHÁT TRIỂN", "GỢI Ý PHÁT TRIỂN").Replace("zgỢI Ý", "GỢI Ý").Replace("zGỢI Ý", "GỢI Ý");
+
+        // Loại bỏ hoàn toàn dấu ngoặc vuông để font không bao giờ vẽ thành chữ z
         if (text.Contains("[") || text.Contains("]"))
-            text = text.Replace("[", "(").Replace("]", ")");
+            text = text.Replace("[", "").Replace("]", "");
 
         // Khử toàn bộ ký tự biểu tượng Unicode lạ gây ô vuông □
         if (text.Contains("◆")) text = text.Replace("◆", "");

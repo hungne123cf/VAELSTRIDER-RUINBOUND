@@ -96,19 +96,20 @@ public class EnemyProjectile : MonoBehaviour
             sr.color = mainColor;
         }
 
-        // Tạo TrailRenderer vệt bay cho đạn
+        // Tạo TrailRenderer vệt bay cho đạn (Hỗ trợ chuẩn URP 2D Unlit hiển thị 100% trên Android APK)
         var trail = GetComponent<TrailRenderer>();
         if (trail == null)
         {
             trail = gameObject.AddComponent<TrailRenderer>();
         }
-        trail.material = new Material(Shader.Find("Sprites/Default"));
+        Shader trailShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") ?? Shader.Find("Sprites/Default");
+        if (trailShader != null) trail.material = new Material(trailShader);
         trail.startColor = trailStartColor;
         trail.endColor = trailEndColor;
         trail.startWidth = 0.35f;
         trail.endWidth = 0.02f;
         trail.time = 0.24f;
-        trail.sortingOrder = (sr != null) ? (sr.sortingOrder - 1) : 5400;
+        trail.sortingOrder = 5500;
     }
 
     void Awake()
@@ -157,8 +158,10 @@ public class EnemyProjectile : MonoBehaviour
         p.transform.position = transform.position + (Vector3)(-direction * 0.15f);
 
         var pSr = p.AddComponent<SpriteRenderer>();
+        Shader partShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") ?? Shader.Find("Sprites/Default");
+        if (partShader != null) pSr.material = new Material(partShader);
         pSr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
-        pSr.sortingOrder = 5350;
+        pSr.sortingOrder = 5550;
 
         switch (realm)
         {

@@ -317,19 +317,20 @@ public class CharacterManager : MonoBehaviour
         return null;
     }
 
+    public static int GetBaseHealth(string id)
+    {
+        var inst = EnsureInstance();
+        var c = inst != null ? inst.GetCharacter(id) : null;
+        return c != null ? c.baseHealth : 100;
+    }
+
     public bool IsCharacterUnlocked(string id)
     {
         string normId = NormalizeHeroId(id);
-        // Tướng mặc định Vaelstrider luôn mở khóa miễn phí ban đầu
+        // Tướng mặc định Vaelstrider luôn mở khóa miễn phí ban đầu cho mọi người chơi
         if (normId == CHAR_VAELSTRIDER) return true;
 
-        // TRÊN PC & UNITY EDITOR: Mở khóa toàn bộ 100% tướng để trải nghiệm và thử nghiệm tự do
-        if (Application.isEditor || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.LinuxPlayer)
-        {
-            return true;
-        }
-
-        // ĐỐI VỚI BẢN APK TẢI VỀ (Android Device): Khóa toàn bộ tướng, người chơi phải dùng Linh Hồn để mở khóa
+        // Chỉ khi người chơi đã mua/mở khóa bằng Linh Hồn thì mới có thể sử dụng
         return IsCharacterPurchased(normId);
     }
 
@@ -352,9 +353,14 @@ public class CharacterManager : MonoBehaviour
 
     public void SelectCharacter(string id)
     {
+        SelectCharacter(id, false);
+    }
+
+    public void SelectCharacter(string id, bool force)
+    {
         string normId = NormalizeHeroId(id);
-        // Chỉ cho phép chọn vào trận nếu tướng đã được mở khóa hợp lệ
-        if (!IsCharacterUnlocked(normId))
+        // Chỉ cho phép chọn vào trận nếu tướng đã được mở khóa hợp lệ hoặc được ép chọn (ví dụ trong Đấu Tập AI)
+        if (!force && !IsCharacterUnlocked(normId))
         {
             Debug.LogWarning($"[CHARACTER] Tướng {normId} chưa được mở khóa, không thể chọn!");
             return;
@@ -363,6 +369,6 @@ public class CharacterManager : MonoBehaviour
         PlayerPrefs.SetString(SELECTED_CHAR_KEY, normId);
         PlayerPrefs.SetString("SelectedHero", GetHeroAliasStatic(normId));
         PlayerPrefs.Save();
-        Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {normId}");
+        Debug.Log($"<color=cyan>[CHARACTER]</color> Đã chọn nhân vật: {normId} (Force={force})");
     }
 }

@@ -12,6 +12,21 @@ public class OAuthAuthenticator : MonoBehaviour
 {
     public static OAuthAuthenticator Instance { get; private set; }
 
+    public static OAuthAuthenticator EnsureInstance()
+    {
+        if (Instance != null) return Instance;
+        var existing = FindAnyObjectByType<OAuthAuthenticator>();
+        if (existing != null)
+        {
+            Instance = existing;
+            return Instance;
+        }
+        GameObject go = new GameObject("OAuthAuthenticator");
+        DontDestroyOnLoad(go);
+        Instance = go.AddComponent<OAuthAuthenticator>();
+        return Instance;
+    }
+
     [System.Serializable]
     public class UserProfile
     {
@@ -22,17 +37,99 @@ public class OAuthAuthenticator : MonoBehaviour
         public string provider; // "Google" or "Facebook"
     }
 
-    [Header("OAuth Config (Điền từ Google Cloud Console / Meta Dev)")]
-    public string googleClientId = ""; // Để trống hoặc điền Client ID thật từ Google Console
+    [Header("Google OAuth 2.0 Client ID (Google Cloud Console)")]
+    public string googleClientId = "";
     public string googleClientSecret = "";
-    public string facebookAppId = ""; // Để trống hoặc điền App ID từ Meta Developer
+
+    public static string LastGoogleUserName { get; set; } = "";
+    public static string LastGooglePhotoUrl { get; set; } = "";
+    public static Sprite CachedGoogleAvatarSprite { get; private set; } = null;
+
+    public static Sprite GetSavedAvatarSprite()
+    {
+        if (CachedGoogleAvatarSprite != null) return CachedGoogleAvatarSprite;
+
+        try
+        {
+            string path = Path.Combine(Application.persistentDataPath, "google_avatar.png");
+            if (File.Exists(path))
+            {
+                byte[] bytes = File.ReadAllBytes(path);
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                if (tex.LoadImage(bytes))
+                {
+                    CachedGoogleAvatarSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                    return CachedGoogleAvatarSprite;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[OAuthAuthenticator] Lỗi tải avatar đã lưu: {ex.Message}");
+        }
+        return null;
+    }
+
+    public static void SaveAndDownloadAvatar(string photoUrl, Action<Sprite> onComplete = null)
+    {
+        if (string.IsNullOrEmpty(photoUrl)) return;
+        LastGooglePhotoUrl = photoUrl;
+        PlayerPrefs.SetString("OAuth_LastGooglePhotoUrl", photoUrl);
+        PlayerPrefs.Save();
+
+        var instance = EnsureInstance();
+        if (instance != null)
+        {
+            instance.StartCoroutine(instance.DownloadAvatarRoutine(photoUrl, onComplete));
+        }
+    }
+
+    private IEnumerator DownloadAvatarRoutine(string photoUrl, Action<Sprite> onComplete)
+    {
+        using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(photoUrl))
+        {
+            yield return uwr.SendWebRequest();
+
+            if (uwr.result == UnityWebRequest.Result.Success)
+            {
+                try
+                {
+                    Texture2D tex = DownloadHandlerTexture.GetContent(uwr);
+                    if (tex != null)
+                    {
+                        byte[] pngBytes = tex.EncodeToPNG();
+                        string path = Path.Combine(Application.persistentDataPath, "google_avatar.png");
+                        File.WriteAllBytes(path, pngBytes);
+
+                        CachedGoogleAvatarSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                        Debug.Log($"<color=green>[OAuthAuthenticator]</color> Đã lưu và nạp Avatar Google thành công!");
+                        onComplete?.Invoke(CachedGoogleAvatarSprite);
+
+                        if (MainMenuManager.Instance != null)
+                        {
+                            MainMenuManager.Instance.RefreshTopLeftPlayerProfileBadge();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[OAuthAuthenticator] Lỗi lưu avatar: {ex.Message}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[OAuthAuthenticator] Không thể tải avatar Google từ URL: {uwr.error}");
+            }
+        }
+    }
 
     private const int REDIRECT_PORT = 52140;
     private static readonly string REDIRECT_URI = $"http://localhost:{REDIRECT_PORT}/callback/";
-    private static readonly string LOCAL_AUTH_URL = $"http://localhost:{REDIRECT_PORT}/auth/";
 
     private HttpListener httpListener;
     private bool isListening = false;
+    private string currentCodeVerifier = "";
+
     private Action<UserProfile> onAuthSuccessCallback;
     private Action<string> onAuthFailedCallback;
     private Action<string> onStatusUpdateCallback;
@@ -41,15 +138,76 @@ public class OAuthAuthenticator : MonoBehaviour
 
     private void Awake()
     {
+        Application.runInBackground = true;
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            LoadSavedOAuthAppIds();
         }
         else if (Instance != this)
         {
             Destroy(gameObject);
         }
+    }
+
+    public void LoadSavedOAuthAppIds()
+    {
+        // 1. Thử nạp từ file cấu hình ngoài (không commit lên Git)
+        try
+        {
+            string cfgPath = Path.Combine(Application.dataPath, "..", "oauth_config.json");
+            if (File.Exists(cfgPath))
+            {
+                string json = File.ReadAllText(cfgPath);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var data = JsonUtility.FromJson<OAuthConfigContainer>(json);
+                    if (data != null)
+                    {
+                        if (!string.IsNullOrEmpty(data.googleClientId)) googleClientId = data.googleClientId;
+                        if (!string.IsNullOrEmpty(data.googleClientSecret)) googleClientSecret = data.googleClientSecret;
+                    }
+                }
+            }
+        }
+        catch { }
+
+        // 2. Thử nạp từ PlayerPrefs
+        string savedId = PlayerPrefs.GetString("OAuth_GoogleClientId", "").Trim();
+        if (!string.IsNullOrEmpty(savedId))
+        {
+            googleClientId = savedId;
+        }
+        else if (!string.IsNullOrEmpty(googleClientId))
+        {
+            PlayerPrefs.SetString("OAuth_GoogleClientId", googleClientId);
+        }
+
+        string savedSecret = PlayerPrefs.GetString("OAuth_GoogleClientSecret", "").Trim();
+        if (!string.IsNullOrEmpty(savedSecret))
+        {
+            googleClientSecret = savedSecret;
+        }
+        else if (!string.IsNullOrEmpty(googleClientSecret))
+        {
+            PlayerPrefs.SetString("OAuth_GoogleClientSecret", googleClientSecret);
+        }
+        PlayerPrefs.Save();
+    }
+
+    [System.Serializable]
+    private class OAuthConfigContainer
+    {
+        public string googleClientId;
+        public string googleClientSecret;
+    }
+
+    public bool HasLiveBrowserOAuthConfigured(string provider = "Google")
+    {
+        LoadSavedOAuthAppIds();
+        return !string.IsNullOrEmpty(googleClientId) &&
+               googleClientId.Contains(".apps.googleusercontent.com");
     }
 
     private void Update()
@@ -72,7 +230,8 @@ public class OAuthAuthenticator : MonoBehaviour
     }
 
     /// <summary>
-    /// Bắt đầu quy trình đăng nhập Google OAuth 2.0
+    /// Bắt đầu quy trình đăng nhập Google OAuth 2.0 chính thức (mở accounts.google.com)
+    /// Sử dụng giao thức RFC 7636 PKCE (Proof Key for Code Exchange) chuẩn Google
     /// </summary>
     public void StartGoogleLogin(Action<UserProfile> onSuccess, Action<string> onFailed, Action<string> onStatus)
     {
@@ -80,39 +239,35 @@ public class OAuthAuthenticator : MonoBehaviour
         onAuthFailedCallback = onFailed;
         onStatusUpdateCallback = onStatus;
 
-        onStatusUpdateCallback?.Invoke("Đang chuẩn bị xác thực Google...");
+        LoadSavedOAuthAppIds();
+        if (string.IsNullOrEmpty(googleClientId))
+        {
+            onFailed?.Invoke("Chưa cấu hình Google Client ID. Vui lòng kiểm tra oauth_config.json hoặc Cài đặt.");
+            return;
+        }
+
+        onStatusUpdateCallback?.Invoke("Đang mở Google OAuth 2.0 (accounts.google.com)...");
 
         try
         {
+            currentCodeVerifier = GenerateCodeVerifier();
+            string codeChallenge = GenerateCodeChallenge(currentCodeVerifier);
+
             StartLocalListener("Google");
+            string state = Guid.NewGuid().ToString("N");
+            string googleAuthUrl = $"https://accounts.google.com/o/oauth2/v2/auth" +
+                                   $"?client_id={UnityWebRequest.EscapeURL(googleClientId)}" +
+                                   $"&redirect_uri={UnityWebRequest.EscapeURL(REDIRECT_URI)}" +
+                                   $"&response_type=code" +
+                                   $"&scope={UnityWebRequest.EscapeURL("openid profile email")}" +
+                                   $"&code_challenge={UnityWebRequest.EscapeURL(codeChallenge)}" +
+                                   $"&code_challenge_method=S256" +
+                                   $"&state={state}" +
+                                   $"&access_type=offline" +
+                                   $"&prompt=select_account";
 
-            bool hasRealClientId = !string.IsNullOrEmpty(googleClientId) && 
-                                   !googleClientId.StartsWith("YOUR_") && 
-                                   googleClientId.Contains(".apps.googleusercontent.com");
-
-            if (hasRealClientId)
-            {
-                // Live Google Cloud Console OAuth
-                string state = Guid.NewGuid().ToString("N");
-                string googleAuthUrl = $"https://accounts.google.com/o/oauth2/v2/auth" +
-                                       $"?client_id={UnityWebRequest.EscapeURL(googleClientId)}" +
-                                       $"&redirect_uri={UnityWebRequest.EscapeURL(REDIRECT_URI)}" +
-                                       $"&response_type=code" +
-                                       $"&scope={UnityWebRequest.EscapeURL("openid profile email")}" +
-                                       $"&state={state}" +
-                                       $"&access_type=offline" +
-                                       $"&prompt=select_account";
-
-                onStatusUpdateCallback?.Invoke("Đang mở trình duyệt Google để xác thực...");
-                Debug.Log($"<color=cyan>[OAuth Google]</color> Mở URL Google Live: {googleAuthUrl}");
-                Application.OpenURL(googleAuthUrl);
-            }
-            else
-            {
-                // Cổng xác thực Web Browser trung gian trực tiếp trên máy
-                onStatusUpdateCallback?.Invoke("Đang mở trình duyệt để xác thực tài khoản Google...");
-                Application.OpenURL(LOCAL_AUTH_URL + "?provider=Google");
-            }
+            Debug.Log($"<color=cyan>[OAuth Google]</color> Mở URL Google Live: {googleAuthUrl}");
+            Application.OpenURL(googleAuthUrl);
         }
         catch (Exception ex)
         {
@@ -122,51 +277,36 @@ public class OAuthAuthenticator : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Bắt đầu quy trình đăng nhập Facebook OAuth 2.0
-    /// </summary>
-    public void StartFacebookLogin(Action<UserProfile> onSuccess, Action<string> onFailed, Action<string> onStatus)
+    public void StartSocialLogin(string provider, Action<UserProfile> onSuccess, Action<string> onFailed, Action<string> onStatus)
     {
-        onAuthSuccessCallback = onSuccess;
-        onAuthFailedCallback = onFailed;
-        onStatusUpdateCallback = onStatus;
+        StartGoogleLogin(onSuccess, onFailed, onStatus);
+    }
 
-        onStatusUpdateCallback?.Invoke("Đang chuẩn bị xác thực Facebook...");
-
-        try
+    private static string GenerateCodeVerifier()
+    {
+        byte[] randomBytes = new byte[32];
+        using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
         {
-            StartLocalListener("Facebook");
-
-            bool hasRealFbId = !string.IsNullOrEmpty(facebookAppId) && 
-                               !facebookAppId.StartsWith("YOUR_") && 
-                               long.TryParse(facebookAppId, out _);
-
-            if (hasRealFbId)
-            {
-                string state = Guid.NewGuid().ToString("N");
-                string fbAuthUrl = $"https://www.facebook.com/v19.0/dialog/oauth" +
-                                   $"?client_id={UnityWebRequest.EscapeURL(facebookAppId)}" +
-                                   $"&redirect_uri={UnityWebRequest.EscapeURL(REDIRECT_URI)}" +
-                                   $"&response_type=token,granted_scopes" +
-                                   $"&scope={UnityWebRequest.EscapeURL("public_profile,email")}" +
-                                   $"&state={state}";
-
-                onStatusUpdateCallback?.Invoke("Đang mở trình duyệt Facebook để xác thực...");
-                Debug.Log($"<color=cyan>[OAuth Facebook]</color> Mở URL Facebook Live: {fbAuthUrl}");
-                Application.OpenURL(fbAuthUrl);
-            }
-            else
-            {
-                onStatusUpdateCallback?.Invoke("Đang mở trình duyệt để xác thực tài khoản Facebook...");
-                Application.OpenURL(LOCAL_AUTH_URL + "?provider=Facebook");
-            }
+            rng.GetBytes(randomBytes);
         }
-        catch (Exception ex)
+        return Base64UrlEncode(randomBytes);
+    }
+
+    private static string GenerateCodeChallenge(string codeVerifier)
+    {
+        using (var sha256 = System.Security.Cryptography.SHA256.Create())
         {
-            Debug.LogError($"[OAuth Facebook] Lỗi khởi động: {ex.Message}");
-            onAuthFailedCallback?.Invoke("Lỗi khởi động xác thực: " + ex.Message);
-            StopLocalListener();
+            byte[] challengeBytes = sha256.ComputeHash(Encoding.ASCII.GetBytes(codeVerifier));
+            return Base64UrlEncode(challengeBytes);
         }
+    }
+
+    private static string Base64UrlEncode(byte[] bytes)
+    {
+        return Convert.ToBase64String(bytes)
+            .TrimEnd('=')
+            .Replace('+', '-')
+            .Replace('/', '_');
     }
 
     private void StartLocalListener(string provider)
@@ -177,7 +317,6 @@ public class OAuthAuthenticator : MonoBehaviour
         {
             httpListener = new HttpListener();
             httpListener.Prefixes.Add($"http://localhost:{REDIRECT_PORT}/callback/");
-            httpListener.Prefixes.Add($"http://localhost:{REDIRECT_PORT}/auth/");
             httpListener.Start();
             isListening = true;
         }
@@ -197,67 +336,74 @@ public class OAuthAuthenticator : MonoBehaviour
                     var request = context.Request;
                     var response = context.Response;
 
-                    string path = request.Url.AbsolutePath;
                     string query = request.Url.Query;
                     var queryParams = ParseQueryString(query);
 
-                    if (path.Contains("/auth"))
-                    {
-                        // Serve the interactive Login Page in the user's browser
-                        string reqProvider = queryParams.ContainsKey("provider") ? queryParams["provider"] : provider;
-                        string authHtml = GetInteractiveAuthHtml(reqProvider);
-                        byte[] authBuf = Encoding.UTF8.GetBytes(authHtml);
-                        response.ContentLength64 = authBuf.Length;
-                        response.ContentType = "text/html; charset=utf-8";
-                        using (var output = response.OutputStream)
-                        {
-                            await output.WriteAsync(authBuf, 0, authBuf.Length);
-                        }
-                        continue;
-                    }
-
-                    // Callback path
-                    string email = queryParams.ContainsKey("email") ? queryParams["email"] : "";
-                    string name = queryParams.ContainsKey("name") ? queryParams["name"] : "";
                     string code = queryParams.ContainsKey("code") ? queryParams["code"] : null;
                     string error = queryParams.ContainsKey("error") ? queryParams["error"] : null;
                     string errorDesc = queryParams.ContainsKey("error_description") ? queryParams["error_description"] : null;
 
-                    string responseHtml = GetBrowserResponseHtml(provider, string.IsNullOrEmpty(error), name, email);
-                    byte[] buffer = Encoding.UTF8.GetBytes(responseHtml);
-                    response.ContentLength64 = buffer.Length;
-                    response.ContentType = "text/html; charset=utf-8";
-                    using (var output = response.OutputStream)
-                    {
-                        await output.WriteAsync(buffer, 0, buffer.Length);
-                    }
-
                     if (!string.IsNullOrEmpty(error))
                     {
+                        string responseHtml = GetBrowserResponseHtml(false, "", "", errorDesc ?? error);
+                        byte[] buffer = Encoding.UTF8.GetBytes(responseHtml);
+                        response.ContentLength64 = buffer.Length;
+                        response.ContentType = "text/html; charset=utf-8";
+                        using (var output = response.OutputStream)
+                        {
+                            await output.WriteAsync(buffer, 0, buffer.Length);
+                        }
+
                         RunOnMainThread(() =>
                         {
-                            onAuthFailedCallback?.Invoke($"Đăng nhập bị hủy hoặc lỗi: {errorDesc ?? error}");
+                            onAuthFailedCallback?.Invoke($"Đăng nhập Google bị hủy hoặc lỗi: {errorDesc ?? error}");
                         });
                         break;
                     }
 
-                    string resolvedName = !string.IsNullOrWhiteSpace(name) ? name : (provider == "Google" ? "Google Champion" : "Facebook Warrior");
-                    string resolvedEmail = !string.IsNullOrWhiteSpace(email) ? email : (provider == "Google" ? "champion@gmail.com" : "warrior@facebook.com");
-                    string resolvedId = (provider == "Google" ? "G_" : "FB_") + Guid.NewGuid().ToString("N").Substring(0, 10);
-
-                    RunOnMainThread(() =>
+                    if (!string.IsNullOrEmpty(code))
                     {
-                        var profile = new UserProfile
+                        // Trao đổi mã code với Google Token endpoint
+                        UserProfile profile = await ExchangeGoogleCodeForProfileAsync(code, currentCodeVerifier);
+                        if (profile == null || string.IsNullOrEmpty(profile.email))
                         {
-                            id = resolvedId,
-                            name = resolvedName,
-                            email = resolvedEmail,
-                            provider = provider
-                        };
-                        onStatusUpdateCallback?.Invoke($"Đăng nhập {provider} thành công: {resolvedName} ({resolvedEmail})");
-                        onAuthSuccessCallback?.Invoke(profile);
-                    });
-                    break;
+                            string errHtml = GetBrowserResponseHtml(false, "", "", "Không thể giải mã hồ sơ Google. Vui lòng thử lại!");
+                            byte[] errBuf = Encoding.UTF8.GetBytes(errHtml);
+                            response.ContentLength64 = errBuf.Length;
+                            response.ContentType = "text/html; charset=utf-8";
+                            using (var output = response.OutputStream)
+                            {
+                                await output.WriteAsync(errBuf, 0, errBuf.Length);
+                            }
+
+                            RunOnMainThread(() =>
+                            {
+                                onAuthFailedCallback?.Invoke("Không thể xác thực danh tính Google! Vui lòng thử lại.");
+                            });
+                            break;
+                        }
+
+                        string responseHtml = GetBrowserResponseHtml(true, profile.name, profile.email, null);
+                        byte[] buffer = Encoding.UTF8.GetBytes(responseHtml);
+                        response.ContentLength64 = buffer.Length;
+                        response.ContentType = "text/html; charset=utf-8";
+                        using (var output = response.OutputStream)
+                        {
+                            await output.WriteAsync(buffer, 0, buffer.Length);
+                        }
+
+                        LastGoogleUserName = profile.name;
+                        if (!string.IsNullOrEmpty(profile.pictureUrl))
+                        {
+                            SaveAndDownloadAvatar(profile.pictureUrl);
+                        }
+                        RunOnMainThread(() =>
+                        {
+                            onStatusUpdateCallback?.Invoke($"Đăng nhập Google thành công: {profile.name} ({profile.email})");
+                            onAuthSuccessCallback?.Invoke(profile);
+                        });
+                        break;
+                    }
                 }
             }
             catch (HttpListenerException) { }
@@ -274,6 +420,139 @@ public class OAuthAuthenticator : MonoBehaviour
                 StopLocalListener();
             }
         });
+    }
+
+    private async Task<UserProfile> ExchangeGoogleCodeForProfileAsync(string code, string codeVerifier)
+    {
+        try
+        {
+            using (var client = new System.Net.Http.HttpClient())
+            {
+                var pairs = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("code", code),
+                    new KeyValuePair<string, string>("client_id", googleClientId),
+                    new KeyValuePair<string, string>("redirect_uri", REDIRECT_URI),
+                    new KeyValuePair<string, string>("grant_type", "authorization_code")
+                };
+                if (!string.IsNullOrEmpty(codeVerifier))
+                {
+                    pairs.Add(new KeyValuePair<string, string>("code_verifier", codeVerifier));
+                }
+                if (!string.IsNullOrEmpty(googleClientSecret))
+                {
+                    pairs.Add(new KeyValuePair<string, string>("client_secret", googleClientSecret));
+                }
+
+                var content = new System.Net.Http.FormUrlEncodedContent(pairs);
+                var tokenResp = await client.PostAsync("https://oauth2.googleapis.com/token", content);
+                string tokenJson = await tokenResp.Content.ReadAsStringAsync();
+                Debug.Log($"<color=cyan>[OAuth Google Response {(int)tokenResp.StatusCode}]</color> {tokenJson}");
+
+                string idToken = ExtractJsonField(tokenJson, "id_token");
+                string accessToken = ExtractJsonField(tokenJson, "access_token");
+
+                if (!string.IsNullOrEmpty(idToken))
+                {
+                    var p = DecodeGoogleIdToken(idToken);
+                    if (p != null) return p;
+                }
+
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    var userReq = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, "https://www.googleapis.com/oauth2/v3/userinfo");
+                    userReq.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+                    var userResp = await client.SendAsync(userReq);
+                    string userJson = await userResp.Content.ReadAsStringAsync();
+                    Debug.Log($"<color=cyan>[OAuth Google UserInfo]</color> {userJson}");
+
+                    return new UserProfile
+                    {
+                        id = ExtractJsonField(userJson, "sub"),
+                        name = ExtractJsonField(userJson, "name"),
+                        email = ExtractJsonField(userJson, "email"),
+                        pictureUrl = ExtractJsonField(userJson, "picture"),
+                        provider = "Google"
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[OAuth Google] Lỗi trao đổi Token: {ex.Message}");
+        }
+        return null;
+    }
+
+    private static UserProfile DecodeGoogleIdToken(string idToken)
+    {
+        try
+        {
+            string[] parts = idToken.Split('.');
+            if (parts.Length < 2) return null;
+            string payload = parts[1].Replace('-', '+').Replace('_', '/');
+            while (payload.Length % 4 != 0) payload += "=";
+            byte[] bytes = Convert.FromBase64String(payload);
+            string json = Encoding.UTF8.GetString(bytes);
+            Debug.Log($"<color=cyan>[OAuth Google ID Token Payload]</color> {json}");
+
+            string email = ExtractJsonField(json, "email");
+            string name = ExtractJsonField(json, "name");
+            string sub = ExtractJsonField(json, "sub");
+            string pic = ExtractJsonField(json, "picture");
+
+            if (!string.IsNullOrEmpty(email) || !string.IsNullOrEmpty(sub))
+            {
+                return new UserProfile
+                {
+                    id = sub,
+                    name = !string.IsNullOrEmpty(name) ? name : "Google Fighter",
+                    email = email,
+                    pictureUrl = pic,
+                    provider = "Google"
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[OAuth Google] Lỗi giải mã ID Token: {ex.Message}");
+        }
+        return null;
+    }
+
+    private static string ExtractJsonField(string json, string key)
+    {
+        if (string.IsNullOrEmpty(json) || string.IsNullOrEmpty(key)) return "";
+        try
+        {
+            // Bắt chuẩn JSON có hoặc không có dấu cách: "key"\s*:\s*"value"
+            var match = System.Text.RegularExpressions.Regex.Match(
+                json,
+                $"\"{System.Text.RegularExpressions.Regex.Escape(key)}\"\\s*:\\s*\"((?:\\\\\"|[^\"])*)\"",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            if (match.Success && match.Groups.Count > 1)
+            {
+                return match.Groups[1].Value.Replace("\\\"", "\"").Replace("\\\\", "\\");
+            }
+        }
+        catch (Exception) { }
+
+        // Fallback linh hoạt cho khoảng trắng giữa key và value
+        int keyPos = json.IndexOf($"\"{key}\"", StringComparison.OrdinalIgnoreCase);
+        if (keyPos < 0) return "";
+        int colonPos = json.IndexOf(':', keyPos + key.Length + 2);
+        if (colonPos < 0) return "";
+        int firstQuote = json.IndexOf('"', colonPos + 1);
+        if (firstQuote < 0) return "";
+        int endQuote = firstQuote + 1;
+        while (endQuote < json.Length)
+        {
+            if (json[endQuote] == '"' && json[endQuote - 1] != '\\') break;
+            endQuote++;
+        }
+        if (endQuote <= firstQuote) return "";
+        return json.Substring(firstQuote + 1, endQuote - firstQuote - 1).Replace("\\\"", "\"").Replace("\\\\", "\\");
     }
 
     private Dictionary<string, string> ParseQueryString(string query)
@@ -314,143 +593,13 @@ public class OAuthAuthenticator : MonoBehaviour
         StopLocalListener();
     }
 
-    private string GetInteractiveAuthHtml(string provider)
+    private string GetBrowserResponseHtml(bool isSuccess, string name, string email, string errorMessage = null)
     {
-        string color = provider == "Google" ? "#4285F4" : "#1877F2";
-        string icon = provider == "Google" ? "Google" : "Facebook";
-        string defaultName = PlayerPrefs.GetString("Player_Name", "Wanderer");
-        string defaultEmail = provider == "Google" ? "player.vaelstrider@gmail.com" : "player.vaelstrider@fb.com";
-
-        return $@"<!DOCTYPE html>
-<html lang=""vi"">
-<head>
-    <meta charset=""UTF-8"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-    <title>Xác Thực {provider} - Vaelstrider</title>
-    <style>
-        body {{
-            background: radial-gradient(circle at center, #141926 0%, #080b12 100%);
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-        }}
-        .card {{
-            background: rgba(22, 28, 42, 0.98);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 12px 48px rgba(0,0,0,0.85);
-            border-radius: 16px;
-            padding: 36px 44px;
-            max-width: 480px;
-            width: 90%;
-            text-align: center;
-        }}
-        h2 {{
-            color: #ffd700;
-            font-size: 20px;
-            letter-spacing: 2px;
-            margin-top: 0;
-            margin-bottom: 8px;
-        }}
-        h1 {{
-            color: {color};
-            font-size: 24px;
-            margin-bottom: 18px;
-        }}
-        p {{
-            color: #c0c6d8;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }}
-        .form-group {{
-            text-align: left;
-            margin-bottom: 16px;
-        }}
-        label {{
-            font-size: 13px;
-            color: #a4b0be;
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }}
-        input {{
-            width: 100%;
-            box-sizing: border-box;
-            padding: 12px 16px;
-            background: #0f131c;
-            border: 1px solid #2f3640;
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 15px;
-            outline: none;
-            transition: 0.2s;
-        }}
-        input:focus {{
-            border-color: {color};
-            box-shadow: 0 0 8px {color}66;
-        }}
-        .btn {{
-            width: 100%;
-            padding: 14px;
-            background: {color};
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.1s, opacity 0.2s;
-        }}
-        .btn:hover {{
-            opacity: 0.9;
-            transform: scale(1.01);
-        }}
-        .badge {{
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #00d2d3;
-            margin-bottom: 15px;
-        }}
-    </style>
-</head>
-<body>
-    <div class=""card"">
-        <h2>️ VAELSTRIDER: RUINBOUND ️</h2>
-        <div class=""badge"">CỔNG XÁC THỰC WEB OAUTH 2.0</div>
-        <h1>Đăng nhập bằng {icon}</h1>
-        <p>Xác nhận thông tin tài khoản của bạn để liên kết dữ liệu nhân vật vào hệ thống máy chủ trò chơi.</p>
-        
-        <form action=""/callback/"" method=""GET"">
-            <div class=""form-group"">
-                <label>Tên hiển thị / Chiến Binh:</label>
-                <input type=""text"" name=""name"" value=""{defaultName}"" required />
-            </div>
-            <div class=""form-group"">
-                <label>Email tài khoản ({provider}):</label>
-                <input type=""email"" name=""email"" value=""{defaultEmail}"" required />
-            </div>
-            <button type=""submit"" class=""btn"">Xác Nhận & Đăng Nhập Vào Game</button>
-        </form>
-    </div>
-</body>
-</html>";
-    }
-
-    private string GetBrowserResponseHtml(string provider, bool isSuccess, string name, string email)
-    {
-        string title = isSuccess ? "Đăng Nhập Thành Công!" : "Xác Thực Không Thành Công";
+        string title = isSuccess ? "Đăng Nhập Google Thành Công!" : "Xác Thực Không Thành Công";
         string color = isSuccess ? "#2ecc71" : "#e74c3c";
         string sub = isSuccess 
-            ? $"Xin chào <b>{name}</b> ({email})!<br>Tài khoản {provider} của bạn đã được kết nối với <b>VAELSTRIDER: RUINBOUND</b>.<br><br><span style='color: #00d2d3; font-weight: bold;'>Bạn có thể đóng tab này và quay lại trò chơi để trải nghiệm ngay!</span>"
-            : $"Đăng nhập bằng {provider} đã bị hủy hoặc gặp sự cố. Bạn có thể đóng tab này và thử lại trong game.";
+            ? $"Xin chào <b>{name}</b> ({email})!<br>Tài khoản Google của bạn đã được kết nối với <b>VAELSTRIDER: RUINBOUND</b>.<br><br><span style='color: #00d2d3; font-weight: bold;'>Bạn có thể đóng tab này và quay lại trò chơi để trải nghiệm ngay!</span>"
+            : $"Đăng nhập bằng Google đã bị hủy hoặc gặp sự cố: {errorMessage}<br>Bạn có thể đóng tab này và thử lại trong game.";
 
         return $@"<!DOCTYPE html>
 <html lang=""vi"">
@@ -502,7 +651,7 @@ public class OAuthAuthenticator : MonoBehaviour
         <h2>️ VAELSTRIDER: RUINBOUND ️</h2>
         <h1>{title}</h1>
         <p>{sub}</p>
-        <p style=""font-size: 13px; color: #7f8fa6; margin-top: 20px;"">Hệ thống xác thực OAuth 2.0 Web Authentication</p>
+        <p style=""font-size: 13px; color: #7f8fa6; margin-top: 20px;"">Hệ thống xác thực Google OAuth 2.0 PKCE</p>
     </div>
 </body>
 </html>";

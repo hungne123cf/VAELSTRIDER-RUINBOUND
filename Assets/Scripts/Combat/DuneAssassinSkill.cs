@@ -334,6 +334,42 @@ public class DuneAssassinSkill : MonoBehaviour
         deathFrames = LoadFramesFromDirectory("Assets/ART/Player5/PNG/death", "death");
     }
 
+    public static Sprite[] GetIdleFrames()
+    {
+        LoadAllPlayer5Sprites();
+        return idleFrames;
+    }
+
+    public static Sprite[] GetRunFrames()
+    {
+        LoadAllPlayer5Sprites();
+        return runFrames;
+    }
+
+    public static Sprite[] GetAtk1Frames()
+    {
+        LoadAllPlayer5Sprites();
+        return atk1Frames;
+    }
+
+    public static Sprite[] GetAtk2Frames()
+    {
+        LoadAllPlayer5Sprites();
+        return atk2Frames;
+    }
+
+    public static Sprite[] GetAtk3Frames()
+    {
+        LoadAllPlayer5Sprites();
+        return atk3Frames;
+    }
+
+    public static Sprite[] GetSpAtkFrames()
+    {
+        LoadAllPlayer5Sprites();
+        return spAtkFrames;
+    }
+
     private static Sprite[] LoadFramesFromDirectory(string dirPath, string prefix)
     {
         var list = new List<Sprite>();
@@ -1018,11 +1054,13 @@ public class DuneAssassinSkill : MonoBehaviour
         if (playerController != null) playerController.SetCanMove(false);
 
         var cam = Object.FindAnyObjectByType<CameraFollow>();
-        if (cam != null) cam.SetCinematicZoom(6.8f); // Zoom out bao quát toàn bộ đấu trường bão cát
-        Time.timeScale = 0.15f; // Slow-mo cinematic
-
-        yield return new WaitForSecondsRealtime(0.25f);
-        Time.timeScale = 1.0f;
+        if (!PvPMatchManager.IsPvPModeActive)
+        {
+            if (cam != null) cam.SetCinematicZoom(6.8f); // Zoom out bao quát toàn bộ đấu trường bão cát
+            Time.timeScale = 0.15f; // Slow-mo cinematic (Chỉ trong PvE)
+            yield return new WaitForSecondsRealtime(0.25f);
+            Time.timeScale = 1.0f;
+        }
 
         // 1. HÚT QUÁI VẬT VÀO TÂM CƠN BÃO CÁT (Sand Vortex Pull)
         Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, ultimateRadius);

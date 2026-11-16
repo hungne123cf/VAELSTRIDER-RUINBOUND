@@ -26,6 +26,28 @@ public class MainMenuManager : MonoBehaviour
     [Header("Main Panel Controls")]
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private Button playButton;
+    private Button pvpButton;
+    private TextMeshProUGUI pvpBtnText;
+    private bool _returnToPvPLobbyAfterHeroSelect = false;
+    private bool _returnToProfileAfterHeroSelect = false;
+
+    // 5 Nút Chế Độ Chiến Đấu Trực Tiếp Trên Main Menu
+    private Button _btnModeStory;
+    private Button _btnModeQuickMatch;
+    private Button _btnModeCreateRoom;
+    private Button _btnModeJoinRoom;
+    private Button _btnModeBotPractice;
+
+    private TextMeshProUGUI _txtModeStory;
+    private TextMeshProUGUI _txtModeQuickMatch;
+    private TextMeshProUGUI _txtModeCreateRoom;
+    private TextMeshProUGUI _txtModeJoinRoom;
+    private TextMeshProUGUI _txtModeBotPractice;
+    private Button _btnRankLeaderboard;
+    private TextMeshProUGUI _txtRankLeaderboard;
+    private Button _btnFriendsLobby;
+    private TextMeshProUGUI _txtFriendsLobby;
+    private GameObject _friendsRedDot;
     [SerializeField] private Button mapSelectButton;
     [SerializeField] private Button rosterButton;
     [SerializeField] private Button skillButton;
@@ -309,6 +331,13 @@ public class MainMenuManager : MonoBehaviour
     {
         try
         {
+            PvPMatchManager.IsCoopModeActive = false;
+            PvPMatchManager.IsPvPModeActive = false;
+            if (PvPNetworkManager.Instance != null)
+            {
+                PvPNetworkManager.Instance.ResetReadyStates();
+            }
+
             CorruptedCycleManager.ResetToNormalCycle();
             AccountDatabase.EnsureActiveSessionLoaded();
             EnsureHeroSprites();
@@ -325,6 +354,16 @@ public class MainMenuManager : MonoBehaviour
             MailboxUI.InitializeDefaultMails();
             UpdateMailboxBadge();
             UpdateDailyLoginBadge();
+            UpdateFriendsBadge();
+
+            StartCoroutine(PollIncomingInvitesRoutine());
+
+            if (FriendManager.EnsureInstance() != null)
+            {
+                FriendManager.Instance.OnFriendsUpdated += UpdateFriendsBadge;
+                FriendManager.Instance.OnFriendRequestsUpdated += UpdateFriendsBadge;
+                FriendManager.Instance.OnRoomInvitesUpdated += UpdateFriendsBadge;
+            }
 
             if (!_hasCheckedDailyPopup && DailyLoginUI.CanClaimToday())
             {
@@ -351,6 +390,12 @@ public class MainMenuManager : MonoBehaviour
     private void OnDestroy()
     {
         LocalizationManager.OnLanguageChanged -= UpdateAllTexts;
+        if (FriendManager.Instance != null)
+        {
+            FriendManager.Instance.OnFriendsUpdated -= UpdateFriendsBadge;
+            FriendManager.Instance.OnFriendRequestsUpdated -= UpdateFriendsBadge;
+            FriendManager.Instance.OnRoomInvitesUpdated -= UpdateFriendsBadge;
+        }
     }
 
     private void Update()
@@ -589,26 +634,82 @@ public class MainMenuManager : MonoBehaviour
 
         if (navParent == null) return;
 
-        // 2. Play Button (Xuất Trận) - Centered at bottom (Phóng to chuẩn di động)
-        float playWidth = 330f;
-        float playHeight = 82f;
-        float playPosY = 68f;
+        Canvas rootCanvas = GetMainMenuCanvas();
+        Transform modeParent = rootCanvas != null ? rootCanvas.transform : (mainPanel != null ? mainPanel.transform : navParent);
 
-        playButton = EnsureNavButton(navParent, playButton, "Btn_Play", LocalizationManager.Get("BTN_PLAY"), new Vector2(0f, playPosY), new Vector2(playWidth, playHeight), new Color(0.85f, 0.55f, 0.15f, 1f), out playBtnText);
-        if (playButton != null)
+        // Ẩn 2 nút cũ playButton (Xuất Trận) & pvpButton (PvP Online)
+        if (playButton != null) playButton.gameObject.SetActive(false);
+        if (pvpButton != null) pvpButton.gameObject.SetActive(false);
+
+        // HIỂN THỊ 3 CHẾ ĐỘ CHIẾN ĐẤU THÀNH 1 HÀNG DỌC CÂN ĐỐI BÊN TRÁI MÀN HÌNH (RỘNG RÃI, THOÁNG ĐÃNG)
+        float modeLeftX = 180f;
+
+        // 1. CỐT TRUYỆN / CHƠI ĐƠN - Nút trên (Phóng to cân bằng với Co-op)
+        _btnModeStory = EnsureNavButton(modeParent, _btnModeStory, "Btn_Mode_Story",
+            LocalizationManager.T("CHƠI ĐƠN", "SOLO STORY"),
+            new Vector2(modeLeftX, 60f), new Vector2(380f, 100f), new Color(0.78f, 0.52f, 0.16f, 1f), out _txtModeStory);
+        if (_btnModeStory != null)
         {
-            playButton.gameObject.SetActive(true);
-            RectTransform pRt = playButton.GetComponent<RectTransform>();
-            pRt.anchorMin = new Vector2(0.5f, 0f);
-            pRt.anchorMax = new Vector2(0.5f, 0f);
-            pRt.pivot = new Vector2(0.5f, 0f);
-            pRt.anchoredPosition = new Vector2(0f, playPosY);
-            pRt.sizeDelta = new Vector2(playWidth, playHeight);
-
-            playButton.onClick.RemoveAllListeners();
-            playButton.onClick.AddListener(OnPlayClicked);
-            AttachPointerClick(playButton.gameObject, OnPlayClicked);
+            _btnModeStory.transform.SetParent(modeParent, false);
+            _btnModeStory.transform.SetAsLastSibling();
+            RectTransform rt = _btnModeStory.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                rt.anchorMin = new Vector2(0f, 0.5f);
+                rt.anchorMax = new Vector2(0f, 0.5f);
+                rt.pivot = new Vector2(0f, 0.5f);
+                rt.anchoredPosition = new Vector2(modeLeftX, 60f);
+                rt.sizeDelta = new Vector2(380f, 100f);
+            }
+            _btnModeStory.gameObject.SetActive(true);
+            _btnModeStory.onClick.RemoveAllListeners();
+            _btnModeStory.onClick.AddListener(OnPlayClicked);
         }
+        if (_txtModeStory != null)
+        {
+            _txtModeStory.text = LocalizationManager.T("CHƠI ĐƠN", "SOLO STORY");
+            _txtModeStory.fontSize = 32f;
+        }
+
+        // 2. TỔ ĐỘI CO-OP (1-4 NGƯỜI) - Nút dưới (Phóng to bằng kích cỡ Chơi Đơn)
+        _btnModeQuickMatch = EnsureNavButton(modeParent, _btnModeQuickMatch, "Btn_Mode_QuickMatch",
+            LocalizationManager.T("TỔ ĐỘI CO-OP", "CO-OP SQUAD"),
+            new Vector2(modeLeftX, -60f), new Vector2(380f, 100f), new Color(0.92f, 0.48f, 0.12f, 1f), out _txtModeQuickMatch);
+        if (_btnModeQuickMatch != null)
+        {
+            _btnModeQuickMatch.transform.SetParent(modeParent, false);
+            _btnModeQuickMatch.transform.SetAsLastSibling();
+            RectTransform rt = _btnModeQuickMatch.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                rt.anchorMin = new Vector2(0f, 0.5f);
+                rt.anchorMax = new Vector2(0f, 0.5f);
+                rt.pivot = new Vector2(0f, 0.5f);
+                rt.anchoredPosition = new Vector2(modeLeftX, -60f);
+                rt.sizeDelta = new Vector2(380f, 100f);
+            }
+            _btnModeQuickMatch.gameObject.SetActive(true);
+            _btnModeQuickMatch.onClick.RemoveAllListeners();
+            _btnModeQuickMatch.onClick.AddListener(() =>
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                PvPLobbyUI.OpenCoopLobbyFromMainMenu();
+            });
+        }
+        if (_txtModeQuickMatch != null)
+        {
+            _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP", "CO-OP SQUAD");
+            _txtModeQuickMatch.fontSize = 32f;
+        }
+
+        // Ẩn Tạo Phòng & Tìm Phòng PIN riêng lẻ trên Main Menu (Đã tích hợp trọn vẹn vào 1 Trang Sảnh Chờ Co-op duy nhất)
+        if (_btnModeCreateRoom != null) _btnModeCreateRoom.gameObject.SetActive(false);
+        if (_btnModeJoinRoom != null) _btnModeJoinRoom.gameObject.SetActive(false);
+
+        // 3. Xóa / Ẩn hoàn toàn nút ĐẤU TẬP AI theo yêu cầu người dùng
+        if (_btnModeBotPractice != null) _btnModeBotPractice.gameObject.SetActive(false);
+
+        RefreshPvPModeLockState();
 
         // Hide Hero, Inventory, Shop, Skills buttons as requested
         if (rosterButton != null) rosterButton.gameObject.SetActive(false);
@@ -629,7 +730,6 @@ public class MainMenuManager : MonoBehaviour
         }
 
         // Move Settings Button to Top-Right Corner of MainMenuCanvas
-        Canvas rootCanvas = GetMainMenuCanvas();
         Transform topParent = rootCanvas != null ? rootCanvas.transform : (mainPanel != null ? mainPanel.transform : navParent);
 
         // Nút Cài Đặt (Gear) - Huy Hiệu Cổ Điển Soulslike Runic Ring
@@ -694,8 +794,78 @@ public class MainMenuManager : MonoBehaviour
             AttachPointerClick(dailyLoginButton.gameObject, OnDailyLoginClicked);
         }
 
+        // 3. Nút RANK / BXH: Người dùng yêu cầu xóa bỏ hoàn toàn mục BXH ngoài sảnh chính
+        var oldRankObj = GameObject.Find("Btn_RankLeaderboard");
+        if (oldRankObj != null) Destroy(oldRankObj);
+        if (topParent != null)
+        {
+            var rChild = topParent.Find("Btn_RankLeaderboard");
+            if (rChild != null) Destroy(rChild.gameObject);
+        }
+        if (_btnRankLeaderboard != null)
+        {
+            _btnRankLeaderboard.gameObject.SetActive(false);
+            Destroy(_btnRankLeaderboard.gameObject);
+            _btnRankLeaderboard = null;
+        }
+
+        // 3.5. Nút BẠN BÈ NGOÀI SẢNH (Friend System Lobby Button) - Thay thế vị trí cân đối cạnh các icon
+        _btnFriendsLobby = EnsureNavButton(topParent, _btnFriendsLobby, "Btn_FriendsLobby", LocalizationManager.T("BẠN BÈ", "FRIENDS"), Vector2.zero, new Vector2(150f, 66f), new Color(0.18f, 0.35f, 0.65f, 0.96f), out _txtFriendsLobby);
+        if (_btnFriendsLobby != null)
+        {
+            _btnFriendsLobby.transform.SetParent(topParent, false);
+            _btnFriendsLobby.transform.SetAsLastSibling();
+            RectTransform frRt = _btnFriendsLobby.GetComponent<RectTransform>();
+            frRt.anchorMin = new Vector2(1f, 1f);
+            frRt.anchorMax = new Vector2(1f, 1f);
+            frRt.pivot = new Vector2(1f, 1f);
+            frRt.anchoredPosition = new Vector2(-258f, -28f);
+            frRt.sizeDelta = new Vector2(150f, 66f);
+            _btnFriendsLobby.gameObject.SetActive(true);
+
+            if (_txtFriendsLobby != null)
+            {
+                _txtFriendsLobby.text = LocalizationManager.T("BẠN BÈ", "FRIENDS");
+                _txtFriendsLobby.fontSize = 17f;
+                _txtFriendsLobby.color = new Color(0.85f, 0.92f, 1f);
+            }
+
+            // Chấm đỏ thông báo lời mời kết bạn
+            if (_friendsRedDot == null)
+            {
+                _friendsRedDot = new GameObject("FriendsRedDot", typeof(RectTransform), typeof(Image));
+                _friendsRedDot.transform.SetParent(_btnFriendsLobby.transform, false);
+                RectTransform dotRt = _friendsRedDot.GetComponent<RectTransform>();
+                dotRt.anchorMin = new Vector2(1f, 1f);
+                dotRt.anchorMax = new Vector2(1f, 1f);
+                dotRt.pivot = new Vector2(0.5f, 0.5f);
+                dotRt.anchoredPosition = new Vector2(-8f, -8f);
+                dotRt.sizeDelta = new Vector2(18f, 18f);
+
+                Image dotImg = _friendsRedDot.GetComponent<Image>();
+                dotImg.color = new Color(1f, 0.2f, 0.2f, 1f);
+                dotImg.raycastTarget = false;
+            }
+
+            _btnFriendsLobby.onClick.RemoveAllListeners();
+            _btnFriendsLobby.onClick.AddListener(() =>
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                PvPLobbyUI.OpenFriendsModalFromMainMenu();
+            });
+            AttachPointerClick(_btnFriendsLobby.gameObject, () =>
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                PvPLobbyUI.OpenFriendsModalFromMainMenu();
+            });
+        }
+
+        // 4. Bước 5 (5. Vào Game): Khung Hồ Sơ Người Chơi Góc Trên Trái (Avatar + Lv. X + Tên Tài Khoản)
+        EnsureTopLeftPlayerProfileBadge(topParent);
+
         UpdateMailboxBadge();
         UpdateDailyLoginBadge();
+        UpdateFriendsBadge();
 
         HookButtons();
         UpdateAllTexts();
@@ -707,19 +877,34 @@ public class MainMenuManager : MonoBehaviour
         if (existingBtn != null)
         {
             btnObj = existingBtn.gameObject;
+            if (btnObj.transform.parent != parent)
+            {
+                btnObj.transform.SetParent(parent, false);
+            }
         }
         else
         {
-            Transform existing = parent.Find(name);
+            Transform existing = parent != null ? parent.Find(name) : null;
+            if (existing == null)
+            {
+                // Tìm kiếm trên toàn Scene nếu nút từng bị gắn sai vào BottomNavBar hoặc cha khác
+                GameObject foundInScene = GameObject.Find(name);
+                if (foundInScene != null) existing = foundInScene.transform;
+            }
+
             if (existing != null)
             {
                 btnObj = existing.gameObject;
+                if (parent != null && btnObj.transform.parent != parent)
+                {
+                    btnObj.transform.SetParent(parent, false);
+                }
             }
             else
             {
                 btnObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
                 btnObj.layer = 5;
-                btnObj.transform.SetParent(parent, false);
+                if (parent != null) btnObj.transform.SetParent(parent, false);
             }
         }
 
@@ -751,6 +936,15 @@ public class MainMenuManager : MonoBehaviour
             rt.pivot = new Vector2(1f, 1f);
             rt.anchoredPosition = new Vector2(-200f, -28f);
             rt.sizeDelta = size;
+        }
+        else if (name.StartsWith("Btn_Mode_"))
+        {
+            rt.anchorMin = new Vector2(0f, 0.5f);
+            rt.anchorMax = new Vector2(0f, 0.5f);
+            rt.pivot = new Vector2(0f, 0.5f);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
+            btnObj.transform.SetAsLastSibling();
         }
         else
         {
@@ -3056,6 +3250,7 @@ public class MainMenuManager : MonoBehaviour
             else if (norm == CharacterManager.CHAR_GALE_RONIN) alias = "ronin";
             else if (norm == CharacterManager.CHAR_DUNE_ASSASSIN) alias = "dune";
             else if (norm == CharacterManager.CHAR_CELESTIAL_MAGE) alias = "mage";
+            else if (norm == CharacterManager.CHAR_ABYSSAL_MECH) alias = "mech";
             av = Resources.Load<Sprite>($"UI/Avatars/avatar_{alias}");
         }
         if (av != null) return av;
@@ -3223,6 +3418,11 @@ public class MainMenuManager : MonoBehaviour
             playBtnText.text = LocalizationManager.Get("BTN_PLAY");
             if (playButton != null) WhiteIconLoader.SetButtonIconAndText(playButton, "Play", playBtnText.text, Color.white, Color.white, true);
         }
+        if (pvpBtnText != null)
+        {
+            pvpBtnText.text = LocalizationManager.T("PVP ONLINE", "PVP ONLINE");
+            if (pvpButton != null) WhiteIconLoader.SetButtonIconAndText(pvpButton, "TwoPlayer", pvpBtnText.text, new Color(1f, 0.85f, 0.45f), new Color(1f, 0.92f, 0.72f), true);
+        }
         if (mapSelectBtnText != null) mapSelectBtnText.text = LocalizationManager.Get("BTN_MAP_SELECT");
         if (rosterButton != null) rosterButton.gameObject.SetActive(false);
         if (inventoryButton != null) inventoryButton.gameObject.SetActive(false);
@@ -3348,6 +3548,7 @@ public class MainMenuManager : MonoBehaviour
         UpdateHeroDetails();
         InspectHero(inspectedHeroId);
         UpdateMapCardsLockState();
+        RefreshPvPModeLockState();
     }
 
     private void UpdateHeroDetails()
@@ -4408,34 +4609,8 @@ public class MainMenuManager : MonoBehaviour
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
 
-        string targetChar = CharacterManager.CHAR_VAELSTRIDER;
-        string heroPref = "vael";
-
-        if (inspectedHeroId == "titan" || inspectedHeroId == "titanberserker" || inspectedHeroId == "player4")
-        {
-            targetChar = CharacterManager.CHAR_TITAN_BERSERKER;
-            heroPref = "titan";
-        }
-        else if (inspectedHeroId == "azure" || inspectedHeroId == "azureblade")
-        {
-            targetChar = CharacterManager.CHAR_AZURE_BLADE;
-            heroPref = "azure";
-        }
-        else if (inspectedHeroId == "ronin" || inspectedHeroId == "galeronin" || inspectedHeroId == "player2" || inspectedHeroId == "maid")
-        {
-            targetChar = CharacterManager.CHAR_GALE_RONIN;
-            heroPref = "ronin";
-        }
-        else if (inspectedHeroId == "dune" || inspectedHeroId == "duneassassin" || inspectedHeroId == "player5")
-        {
-            targetChar = CharacterManager.CHAR_DUNE_ASSASSIN;
-            heroPref = "dune";
-        }
-        else if (inspectedHeroId == "mage" || inspectedHeroId == "celestialmage" || inspectedHeroId == "player6")
-        {
-            targetChar = CharacterManager.CHAR_CELESTIAL_MAGE;
-            heroPref = "mage";
-        }
+        string targetChar = CharacterManager.NormalizeHeroId(inspectedHeroId);
+        string heroPref = CharacterManager.GetHeroAliasStatic(targetChar);
 
         var cm = CharacterManager.EnsureInstance();
         if (cm != null && !cm.IsCharacterUnlocked(targetChar))
@@ -4503,40 +4678,196 @@ public class MainMenuManager : MonoBehaviour
             aethelShardsDisplay.enableWordWrapping = false;
             aethelShardsDisplay.overflowMode = TextOverflowModes.Overflow;
         }
+        RefreshTopLeftPlayerProfileBadge();
+    }
+
+    private Image _topLeftProfileAvatarImg;
+    private TextMeshProUGUI _topLeftProfileNameLvText;
+
+    private void EnsureTopLeftPlayerProfileBadge(Transform topParent)
+    {
+        if (topParent == null) return;
+        Transform existing = topParent.Find("TopLeftPlayerProfileBadge");
+        GameObject badgeObj;
+        if (existing != null)
+        {
+            badgeObj = existing.gameObject;
+        }
+        else
+        {
+            badgeObj = new GameObject("TopLeftPlayerProfileBadge", typeof(RectTransform), typeof(Image), typeof(Button));
+            badgeObj.transform.SetParent(topParent, false);
+            RectTransform rt = badgeObj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(0f, 1f);
+            rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = new Vector2(28f, -24f);
+            rt.sizeDelta = new Vector2(310f, 74f);
+
+            Image bg = badgeObj.GetComponent<Image>();
+            bg.color = new Color(0.08f, 0.11f, 0.18f, 0.96f);
+
+            // Khung Avatar bên trái
+            GameObject avFrame = new GameObject("AvatarFrame", typeof(RectTransform), typeof(Image));
+            avFrame.transform.SetParent(badgeObj.transform, false);
+            RectTransform avRt = avFrame.GetComponent<RectTransform>();
+            avRt.anchorMin = new Vector2(0f, 0.5f);
+            avRt.anchorMax = new Vector2(0f, 0.5f);
+            avRt.pivot = new Vector2(0f, 0.5f);
+            avRt.anchoredPosition = new Vector2(8f, 0f);
+            avRt.sizeDelta = new Vector2(58f, 58f);
+            avFrame.GetComponent<Image>().color = new Color(0.18f, 0.34f, 0.62f, 1f);
+
+            GameObject avIcon = new GameObject("AvatarIcon", typeof(RectTransform), typeof(Image));
+            avIcon.transform.SetParent(avFrame.transform, false);
+            RectTransform icRt = avIcon.GetComponent<RectTransform>();
+            icRt.anchorMin = Vector2.zero;
+            icRt.anchorMax = Vector2.one;
+            icRt.offsetMin = new Vector2(3f, 3f);
+            icRt.offsetMax = new Vector2(-3f, -3f);
+            _topLeftProfileAvatarImg = avIcon.GetComponent<Image>();
+            _topLeftProfileAvatarImg.preserveAspect = true;
+
+            // Dòng chữ Lv. X + Tên Tài Khoản bên phải Avatar
+            GameObject txtObj = new GameObject("ProfileNameLvText", typeof(RectTransform));
+            txtObj.transform.SetParent(badgeObj.transform, false);
+            RectTransform txtRt = txtObj.GetComponent<RectTransform>();
+            txtRt.anchorMin = new Vector2(0f, 0f);
+            txtRt.anchorMax = new Vector2(1f, 1f);
+            txtRt.offsetMin = new Vector2(76f, 6f);
+            txtRt.offsetMax = new Vector2(-10f, -6f);
+
+            _topLeftProfileNameLvText = txtObj.AddComponent<TextMeshProUGUI>();
+            _topLeftProfileNameLvText.fontSize = 18f;
+            _topLeftProfileNameLvText.fontStyle = FontStyles.Bold;
+            _topLeftProfileNameLvText.alignment = TextAlignmentOptions.Left;
+            _topLeftProfileNameLvText.enableAutoSizing = true;
+            _topLeftProfileNameLvText.fontSizeMin = 12f;
+            _topLeftProfileNameLvText.fontSizeMax = 18f;
+            _topLeftProfileNameLvText.raycastTarget = false;
+            SoulslikeHUDStyler.SetSafeOutline(_topLeftProfileNameLvText, 0.28f, Color.black);
+            GameFontManager.ApplyFontToText(_topLeftProfileNameLvText, true);
+
+            Button b = badgeObj.GetComponent<Button>();
+            b.onClick.AddListener(() =>
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                PlayFabAuthLoginUI.OpenProfileModal();
+            });
+        }
+        badgeObj.transform.SetAsLastSibling();
+        RefreshTopLeftPlayerProfileBadge();
+    }
+
+    public void RefreshTopLeftPlayerProfileBadge()
+    {
+        if (_topLeftProfileNameLvText == null) return;
+        var acc = AccountDatabase.GetActiveAccount();
+        bool isOffline = PlayFabClientService.IsOfflineMode;
+
+        string playerName = acc != null && !string.IsNullOrEmpty(acc.displayName) ? acc.displayName : "Chiến Binh";
+        if (playerName == "Player" || playerName == "Wanderer")
+        {
+            string savedName = PlayerPrefs.GetString("Player_Name", "");
+            if (!string.IsNullOrEmpty(savedName) && savedName != "Player" && savedName != "Wanderer")
+            {
+                playerName = savedName;
+                if (acc != null) acc.displayName = savedName;
+            }
+            else
+            {
+                playerName = isOffline ? "Hiệp Sĩ Offline" : "Chiến Binh";
+            }
+        }
+
+        string selectedHero = CharacterManager.EnsureInstance().GetSelectedCharacterId();
+        int heroLv = AccountDatabase.GetHeroLevel(selectedHero);
+
+        int rating = acc != null && acc.pvpRating > 0 ? acc.pvpRating : 1000;
+
+        string statusTag = isOffline ? "<size=13><color=#FFAA55> (OFFLINE)</color></size>" : "<size=13><color=#55FF88> (ONLINE)</color></size>";
+        _topLeftProfileNameLvText.text = $"<color=#FFE066>Lv. {heroLv}</color>{statusTag}\n<color=#FFFFFF>{playerName}</color>";
+
+        if (_topLeftProfileAvatarImg != null)
+        {
+            Sprite customAv = OAuthAuthenticator.GetSavedAvatarSprite();
+            if (customAv != null)
+            {
+                _topLeftProfileAvatarImg.sprite = customAv;
+            }
+            else
+            {
+                Sprite sp = PvPRemoteOpponent.GetHeroPortraitSprite(selectedHero);
+                if (sp != null) _topLeftProfileAvatarImg.sprite = sp;
+            }
+        }
+
+        RefreshPvPModeLockState();
+    }
+
+    public void RefreshPvPModeLockState()
+    {
+        bool isOffline = PlayFabClientService.IsOfflineMode;
+
+        // Tự động tìm lại component text nếu null
+        if (_txtModeStory == null && _btnModeStory != null) _txtModeStory = _btnModeStory.GetComponentInChildren<TextMeshProUGUI>();
+        if (_txtModeQuickMatch == null && _btnModeQuickMatch != null) _txtModeQuickMatch = _btnModeQuickMatch.GetComponentInChildren<TextMeshProUGUI>();
+        if (_txtModeCreateRoom == null && _btnModeCreateRoom != null) _txtModeCreateRoom = _btnModeCreateRoom.GetComponentInChildren<TextMeshProUGUI>();
+        if (_txtModeJoinRoom == null && _btnModeJoinRoom != null) _txtModeJoinRoom = _btnModeJoinRoom.GetComponentInChildren<TextMeshProUGUI>();
+        if (_txtModeBotPractice == null && _btnModeBotPractice != null) _txtModeBotPractice = _btnModeBotPractice.GetComponentInChildren<TextMeshProUGUI>();
+
+        // 1. CỐT TRUYỆN / CHƠI ĐƠN - Luôn mở, song ngữ linh hoạt
+        if (_txtModeStory != null)
+        {
+            _txtModeStory.text = LocalizationManager.T("CHƠI ĐƠN", "SOLO STORY");
+            _txtModeStory.fontSize = 28f;
+        }
+
+        // 2. TỔ ĐỘI CO-OP (1-4 NGƯỜI) - Khóa khi offline
+        if (_btnModeQuickMatch != null && _txtModeQuickMatch != null)
+        {
+            Image img = _btnModeQuickMatch.GetComponent<Image>();
+            if (isOffline)
+            {
+                if (img != null) img.color = new Color(0.24f, 0.26f, 0.32f, 0.92f);
+                _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP\n<size=12><color=#FF6666>(KHÓA ONLINE)</color></size>", "CO-OP SQUAD\n<size=12><color=#FF6666>(ONLINE LOCKED)</color></size>");
+            }
+            else
+            {
+                if (img != null) img.color = new Color(0.92f, 0.48f, 0.12f, 1f);
+                _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP", "CO-OP SQUAD");
+            }
+            _txtModeQuickMatch.fontSize = 32f;
+        }
+
+        // Ẩn 2 nút Tạo Phòng & Tìm Phòng PIN riêng lẻ trên Main Menu
+        if (_btnModeCreateRoom != null) _btnModeCreateRoom.gameObject.SetActive(false);
+        if (_btnModeJoinRoom != null) _btnModeJoinRoom.gameObject.SetActive(false);
+
+        // 5. ĐẤU TẬP AI - Luôn mở, song ngữ linh hoạt
+        if (_txtModeBotPractice != null)
+        {
+            _txtModeBotPractice.text = LocalizationManager.T("ĐẤU TẬP AI", "AI PRACTICE");
+            _txtModeBotPractice.fontSize = 28f;
+        }
+
+        // 6. RANK / BXH: Người dùng yêu cầu xóa bỏ hoàn toàn
+        var oldRankObj2 = GameObject.Find("Btn_RankLeaderboard");
+        if (oldRankObj2 != null) Destroy(oldRankObj2);
+        if (_btnRankLeaderboard != null)
+        {
+            _btnRankLeaderboard.gameObject.SetActive(false);
+            Destroy(_btnRankLeaderboard.gameObject);
+            _btnRankLeaderboard = null;
+        }
     }
 
     public void SelectCharacter(string heroId)
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
 
-        string target = CharacterManager.CHAR_VAELSTRIDER;
-        string heroPref = "vael";
-
-        if (heroId.ToLower() == "titan" || heroId.ToLower() == "titanberserker" || heroId.ToLower() == "player4")
-        {
-            target = CharacterManager.CHAR_TITAN_BERSERKER;
-            heroPref = "titan";
-        }
-        else if (heroId.ToLower() == "azure" || heroId.ToLower() == "azureblade")
-        {
-            target = CharacterManager.CHAR_AZURE_BLADE;
-            heroPref = "azure";
-        }
-        else if (heroId.ToLower() == "ronin" || heroId.ToLower() == "galeronin" || heroId.ToLower() == "player2" || heroId.ToLower() == "maid")
-        {
-            target = CharacterManager.CHAR_GALE_RONIN;
-            heroPref = "ronin";
-        }
-        else if (heroId.ToLower() == "dune" || heroId.ToLower() == "duneassassin" || heroId.ToLower() == "player5")
-        {
-            target = CharacterManager.CHAR_DUNE_ASSASSIN;
-            heroPref = "dune";
-        }
-        else if (heroId.ToLower() == "mage" || heroId.ToLower() == "celestialmage" || heroId.ToLower() == "player6")
-        {
-            target = CharacterManager.CHAR_CELESTIAL_MAGE;
-            heroPref = "mage";
-        }
+        string target = CharacterManager.NormalizeHeroId(heroId);
+        string heroPref = CharacterManager.GetHeroAliasStatic(target);
 
         CharacterManager.EnsureInstance().SelectCharacter(target);
         PlayerPrefs.SetString("SelectedHero", heroPref);
@@ -4645,7 +4976,29 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnPlayClicked()
     {
+        _returnToPvPLobbyAfterHeroSelect = false;
+        PvPMatchManager.IsPvPModeActive = false;
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        OpenHeroSelectModal();
+    }
+
+    public void OnPvPClicked()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+        PvPLobbyUI.OpenLobby();
+    }
+
+    public void OpenHeroSelectForPvP()
+    {
+        _returnToPvPLobbyAfterHeroSelect = true;
+        _returnToProfileAfterHeroSelect = false;
+        OpenHeroSelectModal();
+    }
+
+    public void OpenHeroSelectForProfile()
+    {
+        _returnToPvPLobbyAfterHeroSelect = false;
+        _returnToProfileAfterHeroSelect = true;
         OpenHeroSelectModal();
     }
 
@@ -4678,6 +5031,12 @@ public class MainMenuManager : MonoBehaviour
             carouselHeroAnimCoroutine = null;
         }
         if (heroSelectCarouselModal != null) heroSelectCarouselModal.SetActive(false);
+
+        if (_returnToProfileAfterHeroSelect)
+        {
+            _returnToProfileAfterHeroSelect = false;
+            PlayFabAuthLoginUI.OpenProfileModal();
+        }
     }
 
     public void SelectHeroByIndex(int idx)
@@ -4774,6 +5133,22 @@ public class MainMenuManager : MonoBehaviour
         AccountDatabase.SaveActiveSessionToDatabase();
 
         if (heroSelectCarouselModal != null) heroSelectCarouselModal.SetActive(false);
+
+        if (_returnToProfileAfterHeroSelect)
+        {
+            _returnToProfileAfterHeroSelect = false;
+            PlayFabAuthLoginUI.OpenProfileModal();
+            return;
+        }
+
+        if (_returnToPvPLobbyAfterHeroSelect)
+        {
+            _returnToPvPLobbyAfterHeroSelect = false;
+            PvPLobbyUI.OpenLobby();
+            return;
+        }
+
+        PvPMatchManager.IsPvPModeActive = false;
         CorruptedCycleManager.ResetToNormalCycle();
         PlayerHealth.ResetRunPreservedHealth();
         MatchTimerUI.ResetRunTimer();
@@ -5877,14 +6252,29 @@ public class MainMenuManager : MonoBehaviour
         {
             if (isUnlocked)
             {
-                carouselConfirmBtnText.text = LocalizationManager.T("XUẤT TRẬN", "ENTER BATTLE");
-                carouselConfirmBtnText.fontSize = 32f;
-                carouselConfirmBtnText.color = new Color(1f, 0.92f, 0.65f, 1f);
-                if (carouselConfirmBtnSubText != null)
+                if (_returnToProfileAfterHeroSelect)
                 {
-                    carouselConfirmBtnSubText.text = LocalizationManager.T("TIẾN VÀO HẦM NGỤC", "ENTER RUINS");
-                    carouselConfirmBtnSubText.fontSize = 20f;
-                    carouselConfirmBtnSubText.color = new Color(0.85f, 0.90f, 0.95f, 0.95f);
+                    carouselConfirmBtnText.text = LocalizationManager.T("CHỌN TƯỚNG", "SELECT HERO");
+                    carouselConfirmBtnText.fontSize = 32f;
+                    carouselConfirmBtnText.color = new Color(1f, 0.92f, 0.65f, 1f);
+                    if (carouselConfirmBtnSubText != null)
+                    {
+                        carouselConfirmBtnSubText.text = LocalizationManager.T("XÁC NHẬN VÀO HỒ SƠ", "CONFIRM TO PROFILE");
+                        carouselConfirmBtnSubText.fontSize = 20f;
+                        carouselConfirmBtnSubText.color = new Color(0.85f, 0.90f, 0.95f, 0.95f);
+                    }
+                }
+                else
+                {
+                    carouselConfirmBtnText.text = LocalizationManager.T("XUẤT TRẬN", "ENTER BATTLE");
+                    carouselConfirmBtnText.fontSize = 32f;
+                    carouselConfirmBtnText.color = new Color(1f, 0.92f, 0.65f, 1f);
+                    if (carouselConfirmBtnSubText != null)
+                    {
+                        carouselConfirmBtnSubText.text = LocalizationManager.T("TIẾN VÀO HẦM NGỤC", "ENTER RUINS");
+                        carouselConfirmBtnSubText.fontSize = 20f;
+                        carouselConfirmBtnSubText.color = new Color(0.85f, 0.90f, 0.95f, 0.95f);
+                    }
                 }
                 if (carouselConfirmBtnOutline != null)
                 {
@@ -6191,7 +6581,10 @@ public class MainMenuManager : MonoBehaviour
             }
         }
         if (settingsPanel != null) settingsPanel.SetActive(false);
-        InspectHero("vael");
+        ApplyHeroRoleFilter(HeroRoleType.All);
+        string curChar = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? CharacterManager.CHAR_VAELSTRIDER;
+        string curAlias = CharacterManager.GetHeroAliasStatic(curChar);
+        InspectHero(curAlias);
         UpdateAllTexts();
     }
 
@@ -6226,11 +6619,83 @@ public class MainMenuManager : MonoBehaviour
         });
     }
 
+    public static void UpdateBadgeDisplay(GameObject badgeObj, int count)
+    {
+        if (badgeObj == null) return;
+        if (count <= 0)
+        {
+            badgeObj.SetActive(false);
+            return;
+        }
+
+        badgeObj.SetActive(true);
+        RectTransform rt = badgeObj.GetComponent<RectTransform>();
+        TextMeshProUGUI tmp = badgeObj.GetComponentInChildren<TextMeshProUGUI>();
+
+        if (tmp == null)
+        {
+            GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            txtObj.transform.SetParent(badgeObj.transform, false);
+            RectTransform trt = txtObj.GetComponent<RectTransform>();
+            trt.anchorMin = Vector2.zero;
+            trt.anchorMax = Vector2.one;
+            trt.sizeDelta = Vector2.zero;
+
+            tmp = txtObj.GetComponent<TextMeshProUGUI>();
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = Color.white;
+            tmp.raycastTarget = false;
+
+            var outl = badgeObj.GetComponent<Outline>();
+            if (outl == null)
+            {
+                outl = badgeObj.AddComponent<Outline>();
+                outl.effectColor = new Color(1f, 0.85f, 0.40f, 0.95f);
+                outl.effectDistance = new Vector2(1f, -1f);
+            }
+        }
+
+        // Định dạng số hiển thị: 1..9 (20x20 tròn), 10..99 (24x20 pill), >99 (30x20 pill '99+')
+        if (count > 99)
+        {
+            tmp.text = "<b>99+</b>";
+            tmp.fontSize = 10f;
+            if (rt != null) rt.sizeDelta = new Vector2(30f, 20f);
+        }
+        else if (count >= 10)
+        {
+            tmp.text = $"<b>{count}</b>";
+            tmp.fontSize = 11f;
+            if (rt != null) rt.sizeDelta = new Vector2(24f, 20f);
+        }
+        else
+        {
+            tmp.text = $"<b>{count}</b>";
+            tmp.fontSize = 12f;
+            if (rt != null) rt.sizeDelta = new Vector2(20f, 20f);
+        }
+    }
+
     public void UpdateMailboxBadge()
     {
         if (mailboxRedDot != null)
         {
-            mailboxRedDot.SetActive(MailboxUI.HasUnclaimedMail());
+            int unclaimed = MailboxUI.GetUnclaimedMailCount();
+            int pendingFrReqs = FriendManager.EnsureInstance()?.GetPendingRequestCount() ?? 0;
+            int total = unclaimed + pendingFrReqs;
+            UpdateBadgeDisplay(mailboxRedDot, total);
+        }
+    }
+
+    public void UpdateFriendsBadge()
+    {
+        if (_friendsRedDot != null)
+        {
+            int pendingFrReqs = FriendManager.EnsureInstance()?.GetPendingRequestCount() ?? 0;
+            int pendingInvites = FriendManager.EnsureInstance()?.GetPendingRoomInviteCount() ?? 0;
+            int total = pendingFrReqs + pendingInvites;
+            UpdateBadgeDisplay(_friendsRedDot, total);
         }
     }
 
@@ -6238,7 +6703,40 @@ public class MainMenuManager : MonoBehaviour
     {
         if (dailyLoginRedDot != null)
         {
-            dailyLoginRedDot.SetActive(DailyLoginUI.CanClaimToday());
+            int claimCount = DailyLoginUI.CanClaimToday() ? 1 : 0;
+            UpdateBadgeDisplay(dailyLoginRedDot, claimCount);
+        }
+    }
+
+    private System.Collections.IEnumerator PollIncomingInvitesRoutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(2.5f);
+
+            var acc = AccountDatabase.GetActiveAccount();
+            string myName = acc != null
+                ? (!string.IsNullOrEmpty(acc.displayName) ? acc.displayName : acc.username)
+                : PlayerPrefs.GetString("SAVED_LOGIN_USERNAME", "");
+
+            if (!string.IsNullOrEmpty(myName))
+            {
+                PlayFabClientService.Instance?.CheckAndConsumeIncomingRoomInvites(myName, (sender, roomPin) =>
+                {
+                    FriendManager.EnsureInstance()?.AddPendingRoomInvite(sender, roomPin);
+                    InGameTeamChatUI.ShowInteractiveInviteToast(sender, roomPin);
+                    UpdateFriendsBadge();
+
+                    if (PvPLobbyUI.Instance != null && PvPLobbyUI.Instance.gameObject.activeInHierarchy)
+                    {
+                        PvPLobbyUI.ShowRoomInviteDialog(sender, roomPin);
+                    }
+                });
+            }
+
+            UpdateFriendsBadge();
+            UpdateMailboxBadge();
+            UpdateDailyLoginBadge();
         }
     }
 

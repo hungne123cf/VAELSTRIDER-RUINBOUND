@@ -1155,7 +1155,15 @@ public class SettingsUI : MonoBehaviour
 
         if (resetConfirmModal != null) resetConfirmModal.SetActive(false);
 
-        Time.timeScale = 0f;
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            Time.timeScale = 1.0f; // Trong chế độ Co-op: Trận đấu tiếp diễn realtime chuẩn Soulslike, không pause!
+        }
         InitializeSliders();
         HookListeners();
         SwitchTab(currentTab);
@@ -1203,7 +1211,19 @@ public class SettingsUI : MonoBehaviour
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         Time.timeScale = 1.0f;
         CloseSettings();
-        RealmTransitionManager.LoadSceneWithTransition("MainMenuScene", RealmTransitionManager.TransitionTheme.ReturnSanctuary);
+
+        if (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning)
+        {
+            if (PvPNetworkManager.Instance.IsHost)
+            {
+                PvPNetworkManager.Instance.BroadcastRoomClosed();
+            }
+            PvPNetworkManager.Instance.LeaveMatchAndReturnToMenu();
+        }
+        else
+        {
+            RealmTransitionManager.LoadSceneWithTransition("MainMenuScene", RealmTransitionManager.TransitionTheme.ReturnSanctuary);
+        }
     }
 
     private void OnResetDataClicked()

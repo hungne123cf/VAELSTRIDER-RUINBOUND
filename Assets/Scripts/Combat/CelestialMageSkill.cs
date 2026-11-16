@@ -1125,6 +1125,42 @@ public class CelestialMageSkill : MonoBehaviour
         return deathFrames;
     }
 
+    public static Sprite[] GetNovaBurstFrames()
+    {
+        LoadAllPlayer6Sprites();
+        return vfxNovaBurstFrames;
+    }
+
+    public static Sprite[] GetAstralAegisFrames()
+    {
+        LoadAllPlayer6Sprites();
+        return vfxAstralAegisFrames;
+    }
+
+    public static Sprite[] GetIdleFrames()
+    {
+        LoadAllPlayer6Sprites();
+        return idleFrames;
+    }
+
+    public static Sprite[] GetWalkFrames()
+    {
+        LoadAllPlayer6Sprites();
+        return walkFrames;
+    }
+
+    public static Sprite[] GetAttackFrames()
+    {
+        LoadAllPlayer6Sprites();
+        return attackFrames;
+    }
+
+    public static Sprite[] GetUltiFrames()
+    {
+        LoadAllPlayer6Sprites();
+        return ultiFrames;
+    }
+
     public static void LoadAllPlayer6Sprites()
     {
         if (idleFrames == null || idleFrames.Length == 0)

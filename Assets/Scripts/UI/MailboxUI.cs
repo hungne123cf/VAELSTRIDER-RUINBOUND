@@ -88,6 +88,9 @@ public class MailboxUI : MonoBehaviour
     private TextMeshProUGUI noticeDetailMetaText;
     private TextMeshProUGUI noticeDetailBodyText;
     private MailItemData selectedNotice;
+    private GameObject noticeActionContainer;
+    private Button noticeAcceptBtn;
+    private Button noticeDeclineBtn;
 
     // Tab 3: Giftcode Hub UI
     private TMP_InputField giftcodeInput;
@@ -119,8 +122,8 @@ public class MailboxUI : MonoBehaviour
         _mails.Add(new MailItemData
         {
             id = "mail_welcome_5000",
-            titleVi = "[QUÀ TÂN THỦ] LỜI HIỆU TRIỆU TỪ VỰC THẲM",
-            titleEn = "[NEWBIE GIFT] CALL OF THE RUINS",
+            titleVi = "(QUÀ TÂN THỦ) LỜI HIỆU TRIỆU TỪ VỰC THẲM",
+            titleEn = "(NEWBIE GIFT) CALL OF THE RUINS",
             senderVi = "Hội Đồng Vaelstrider",
             senderEn = "Council of Vaelstrider",
             contentVi = "Chào mừng dũng sĩ đã đặt chân đến thế giới Vaelstrider: Ruinbound!\n\nĐể tiếp thêm sinh lực và khai mở sức mạnh ban đầu, Hội Đồng xin gửi tặng bạn 5,000 Mảnh Linh Hồn. Hãy dùng chúng để chiêu mộ chiến binh, mở khóa kỹ năng và sẵn sàng cho những trận chiến sinh tử nơi Vực Thẳm.\n\nChúc hiệp sĩ bách chiến bách thắng!",
@@ -134,8 +137,8 @@ public class MailboxUI : MonoBehaviour
         _mails.Add(new MailItemData
         {
             id = "mail_patch_1_3",
-            titleVi = "[CẬP NHẬT v1.3] ĐIỀU KHIỂN & HÒM THƯ HOÀNG GIA",
-            titleEn = "[UPDATE v1.3] CONTROLS & ROYAL MAILBOX",
+            titleVi = "(CẬP NHẬT v1.3) ĐIỀU KHIỂN & HÒM THƯ HOÀNG GIA",
+            titleEn = "(UPDATE v1.3) CONTROLS & ROYAL MAILBOX",
             senderVi = "Đội Ngũ Phát Triển",
             senderEn = "Dev Team",
             contentVi = "Bản cập nhật v1.3 chính thức ra mắt:\n- Giao diện Hòm Thư & Thông Báo chuẩn phong cách Liên Quân Mobile.\n- Hệ thống Tùy chỉnh vị trí nút cảm ứng trực tiếp trong trận đấu.\n- Vòng quay và Điểm danh nhận quà mỗi 07:00 sáng hàng ngày.\n- Tối ưu hóa hiệu năng và hiệu ứng chuyển cảnh Zero-Bug.\n\nXin gửi tặng bạn 1,000 Linh Hồn tri ân!",
@@ -149,8 +152,8 @@ public class MailboxUI : MonoBehaviour
         _mails.Add(new MailItemData
         {
             id = "mail_arena_open",
-            titleVi = "[SỰ KIỆN] KHAI MỞ ĐẤU TRƯỜNG VỰC THẲM",
-            titleEn = "[EVENT] ABYSSAL ARENA OPENING",
+            titleVi = "(SỰ KIỆN) KHAI MỞ ĐẤU TRƯỜNG VỰC THẲM",
+            titleEn = "(EVENT) ABYSSAL ARENA OPENING",
             senderVi = "Đại Tướng Quân Vực Thẳm",
             senderEn = "Abyssal Commander",
             contentVi = "Hỡi các hiệp sĩ, Đấu Trường Sinh Tử chính thức mở cửa nghênh chiến!\n\nTham gia các trận huyết chiến, tích lũy điểm chiến công để đổi lấy trang bị và danh hiệu truyền thuyết. Mọi chiến binh vượt qua thử thách đều được khắc tên vào Bảng Vàng Danh Dự.\n\nHãy chuẩn bị lưỡi kiếm sắc bén nhất!",
@@ -164,8 +167,8 @@ public class MailboxUI : MonoBehaviour
         _mails.Add(new MailItemData
         {
             id = "mail_vanguard_hero",
-            titleVi = "[TRI ÂN] GÓI QUÀ CHIẾN BINH TIÊN PHONG",
-            titleEn = "[TRIBUTE] VANGUARD WARRIOR BUNDLE",
+            titleVi = "(TRI ÂN) GÓI QUÀ CHIẾN BINH TIÊN PHONG",
+            titleEn = "(TRIBUTE) VANGUARD WARRIOR BUNDLE",
             senderVi = "Hội Đồng Vaelstrider",
             senderEn = "Council of Vaelstrider",
             contentVi = "Hội Đồng Vaelstrider xin gửi lời cảm ơn sâu sắc nhất tới toàn thể người chơi đã nhiệt tình trải nghiệm, thử thách kỹ năng và gửi phản hồi quý giá giúp hoàn thiện tựa game.\n\nPhần thưởng 2,000 Linh Hồn Aethel được trao tặng đến bạn kèm bức thư này.",
@@ -179,8 +182,8 @@ public class MailboxUI : MonoBehaviour
         _notices.Add(new MailItemData
         {
             id = "notice_rules",
-            titleVi = "[QUY TẮC] BẢO VỆ TÀI KHOẢN VÀ CHỐNG GIAN LẬN",
-            titleEn = "[RULES] ACCOUNT SAFETY & FAIR PLAY",
+            titleVi = "(QUY TẮC) BẢO VỆ TÀI KHOẢN VÀ CHỐNG GIAN LẬN",
+            titleEn = "(RULES) ACCOUNT SAFETY & FAIR PLAY",
             senderVi = "Hệ Thống Giám Sát",
             senderEn = "Security System",
             contentVi = "Nhằm xây dựng một môi trường đối kháng công bằng, minh bạch và lành mạnh cho toàn thể game thủ:\n\n1. Nghiêm cấm sử dụng các phần mềm can thiệp bộ nhớ hoặc mod trái phép.\n2. Mọi hành vi gian lận dữ liệu linh hồn sẽ dẫn đến khóa tài khoản vĩnh viễn.\n3. Luôn đăng nhập trên thiết bị an toàn và không chia sẻ tài khoản.\n\nCảm ơn bạn đã đồng hành giữ gìn danh dự chiến binh!",
@@ -194,8 +197,8 @@ public class MailboxUI : MonoBehaviour
         _notices.Add(new MailItemData
         {
             id = "notice_schedule",
-            titleVi = "[LỊCH TRÌNH] BẢO TRÌ & LÀM MỚI MỖI 07:00 SÁNG",
-            titleEn = "[SCHEDULE] DAILY RESET AT 07:00 AM",
+            titleVi = "(LỊCH TRÌNH) BẢO TRÌ & LÀM MỚI MỖI 07:00 SÁNG",
+            titleEn = "(SCHEDULE) DAILY RESET AT 07:00 AM",
             senderVi = "Ban Quản Trị Vương Quốc",
             senderEn = "Realm Administration",
             contentVi = "Thông báo đến toàn thể dũng sĩ:\n\n- Chu kỳ Điểm danh 7 ngày và Phần thưởng đăng nhập được làm mới chính xác vào 07:00 AM mỗi ngày.\n- Thư có đính kèm phần thưởng sẽ được lưu giữ tối đa 30 ngày kể từ ngày gửi.\n- Vui lòng kiểm tra và nhận thưởng trước khi hết hạn để tránh mất vật phẩm quý giá.\n\nChúc hiệp sĩ một ngày chiến đấu thắng lợi!",
@@ -214,17 +217,60 @@ public class MailboxUI : MonoBehaviour
 
     public static bool HasUnclaimedMail()
     {
+        return GetUnclaimedMailCount() > 0;
+    }
+
+    public static int GetUnclaimedMailCount()
+    {
         if (_mails.Count == 0) InitializeDefaultMails();
+
+        int count = 0;
+        int pendingFrReqs = FriendManager.EnsureInstance()?.GetPendingRequestCount() ?? 0;
+        count += pendingFrReqs;
 
         foreach (var m in _mails)
         {
             if (IsMailDeleted(m.id)) continue;
             if (m.rewardShards > 0 && PlayerPrefs.GetInt("Mail_Claimed_" + m.id, 0) == 0)
             {
-                return true;
+                count++;
             }
         }
-        return false;
+        return count;
+    }
+
+    public static string SanitizeBrackets(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        return text.Replace("[", "(").Replace("]", ")");
+    }
+
+    public static void SyncPendingFriendRequestsToNotices()
+    {
+        if (_notices == null) _notices = new List<MailItemData>();
+        _notices.RemoveAll(n => n.id != null && n.id.StartsWith("FRIEND_REQ_"));
+
+        var pending = FriendManager.EnsureInstance()?.GetPendingRequests();
+        if (pending != null)
+        {
+            for (int i = pending.Count - 1; i >= 0; i--)
+            {
+                var req = pending[i];
+                _notices.Insert(0, new MailItemData
+                {
+                    id = "FRIEND_REQ_" + req.senderName,
+                    titleVi = $"(LỜI MỜI KẾT BẠN) TỪ {req.senderName}",
+                    titleEn = $"(FRIEND REQUEST) FROM {req.senderName}",
+                    senderVi = req.senderName,
+                    senderEn = req.senderName,
+                    categoryTag = LocalizationManager.IsVietnamese ? "KẾT BẠN" : "FRIEND",
+                    date = req.timestamp,
+                    contentVi = $"Hiệp sĩ <color=#FFD54F><b>{req.senderName}</b></color> đã gửi lời mời kết bạn đến bạn!\n\nNhân vật: <b>{req.senderHeroId}</b> (Cấp {req.senderLevel})\nThời gian: {req.timestamp}\n\nNhấn nút <b>(CHẤP NHẬN)</b> bên dưới để trở thành bạn bè và cùng tham gia thám hiểm hầm ngục Co-op, hoặc nhấn <b>(TỪ CHỐI)</b> để hủy bỏ yêu cầu này.",
+                    contentEn = $"Knight <color=#FFD54F><b>{req.senderName}</b></color> sent you a friend request!\n\nHero: <b>{req.senderHeroId}</b> (Level {req.senderLevel})\nTime: {req.timestamp}\n\nClick <b>(ACCEPT)</b> below to become friends, or <b>(DECLINE)</b> to dismiss this request.",
+                    isSystemNotice = true
+                });
+            }
+        }
     }
 
     public static void RestoreDefaultMails()
@@ -356,8 +402,8 @@ public class MailboxUI : MonoBehaviour
         // Set Default Tab
         SwitchTab(MailTab.MailsAndGifts);
 
-        // Build Phone Virtual Keyboard
-        BuildVirtualKeyboard(transform);
+        // Bỏ bàn phím ảo tự chế để người chơi dùng bàn phím hệ thống tự nhiên
+        // BuildVirtualKeyboard(transform);
     }
 
     // =========================================================================
@@ -1229,7 +1275,7 @@ public class MailboxUI : MonoBehaviour
             tRt.offsetMax = new Vector2(-16f, -10f);
 
             var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
-            tTmp.text = isVi ? mail.titleVi : mail.titleEn;
+            tTmp.text = SanitizeBrackets(isVi ? mail.titleVi : mail.titleEn);
             tTmp.fontSize = 26f;
             tTmp.fontStyle = FontStyles.Bold;
             tTmp.color = isClaimed ? new Color(0.65f, 0.72f, 0.82f) : new Color(1f, 0.90f, 0.50f);
@@ -1248,7 +1294,7 @@ public class MailboxUI : MonoBehaviour
             var sTmp = subObj.AddComponent<TextMeshProUGUI>();
             string sender = isVi ? mail.senderVi : mail.senderEn;
             string statusStr = isClaimed 
-                ? (isVi ? "<color=#718096>[Đã nhận]</color>" : "<color=#718096>[Claimed]</color>") 
+                ? (isVi ? "<color=#718096>(Đã nhận)</color>" : "<color=#718096>(Claimed)</color>") 
                 : $"<color=#55EFC4><b>+{mail.rewardShards:N0} Linh Hồn</b></color>";
             sTmp.text = $"{sender} • {statusStr}";
             sTmp.fontSize = 20f;
@@ -1334,7 +1380,7 @@ public class MailboxUI : MonoBehaviour
         if (mailDetailPanel != null) mailDetailPanel.SetActive(true);
         if (mailEmptyStateObj != null) mailEmptyStateObj.SetActive(false);
 
-        if (detailTitleText != null) detailTitleText.text = isVi ? mail.titleVi : mail.titleEn;
+        if (detailTitleText != null) detailTitleText.text = SanitizeBrackets(isVi ? mail.titleVi : mail.titleEn);
         if (detailSenderText != null)
         {
             string sender = isVi ? mail.senderVi : mail.senderEn;
@@ -1342,7 +1388,7 @@ public class MailboxUI : MonoBehaviour
                 ? $"Người gửi: <b>{sender}</b> | Ngày: {mail.date} | Hạn lưu: 30 ngày"
                 : $"From: <b>{sender}</b> | Date: {mail.date} | Expires: 30 days";
         }
-        if (detailBodyText != null) detailBodyText.text = isVi ? mail.contentVi : mail.contentEn;
+        if (detailBodyText != null) detailBodyText.text = SanitizeBrackets(isVi ? mail.contentVi : mail.contentEn);
 
         bool hasReward = mail.rewardShards > 0;
         bool isClaimed = hasReward && PlayerPrefs.GetInt("Mail_Claimed_" + mail.id, 0) == 1;
@@ -1662,10 +1708,85 @@ public class MailboxUI : MonoBehaviour
 
         nbScroll.content = nbcRt;
         nbScroll.viewport = nbsRt;
+
+        // Bottom Actions Container for Friend Requests (Accept / Decline)
+        noticeActionContainer = new GameObject("NoticeActionContainer", typeof(RectTransform));
+        noticeActionContainer.transform.SetParent(rightCol.transform, false);
+        RectTransform nacRt = noticeActionContainer.GetComponent<RectTransform>();
+        nacRt.anchorMin = new Vector2(0f, 0f);
+        nacRt.anchorMax = new Vector2(1f, 0f);
+        nacRt.pivot = new Vector2(0.5f, 0f);
+        nacRt.anchoredPosition = new Vector2(0f, 20f);
+        nacRt.sizeDelta = new Vector2(0f, 65f);
+
+        // Nút Chấp Nhận Kết Bạn
+        GameObject accBtnObj = new GameObject("Btn_AcceptFriend", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        accBtnObj.transform.SetParent(noticeActionContainer.transform, false);
+        RectTransform accRt = accBtnObj.GetComponent<RectTransform>();
+        accRt.anchorMin = new Vector2(0.5f, 0.5f);
+        accRt.anchorMax = new Vector2(0.5f, 0.5f);
+        accRt.pivot = new Vector2(0.5f, 0.5f);
+        accRt.anchoredPosition = new Vector2(-120f, 0f);
+        accRt.sizeDelta = new Vector2(210f, 54f);
+
+        Image accImg = accBtnObj.GetComponent<Image>();
+        accImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        accImg.type = Image.Type.Sliced;
+        accImg.color = new Color(0.18f, 0.65f, 0.28f, 1f);
+        var accOut = accBtnObj.AddComponent<Outline>();
+        accOut.effectColor = new Color(0.5f, 1f, 0.6f, 0.8f);
+
+        GameObject accTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        accTxtObj.transform.SetParent(accBtnObj.transform, false);
+        RectTransform accTxtRt = accTxtObj.GetComponent<RectTransform>();
+        accTxtRt.anchorMin = Vector2.zero;
+        accTxtRt.anchorMax = Vector2.one;
+        accTxtRt.sizeDelta = Vector2.zero;
+        var accTmp = accTxtObj.AddComponent<TextMeshProUGUI>();
+        accTmp.text = isVi ? "CHẤP NHẬN" : "ACCEPT";
+        accTmp.fontSize = 22f;
+        accTmp.fontStyle = FontStyles.Bold;
+        accTmp.alignment = TextAlignmentOptions.Center;
+        accTmp.color = Color.white;
+        noticeAcceptBtn = accBtnObj.GetComponent<Button>();
+
+        // Nút Từ Chối Kết Bạn
+        GameObject decBtnObj = new GameObject("Btn_DeclineFriend", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        decBtnObj.transform.SetParent(noticeActionContainer.transform, false);
+        RectTransform decRt = decBtnObj.GetComponent<RectTransform>();
+        decRt.anchorMin = new Vector2(0.5f, 0.5f);
+        decRt.anchorMax = new Vector2(0.5f, 0.5f);
+        decRt.pivot = new Vector2(0.5f, 0.5f);
+        decRt.anchoredPosition = new Vector2(120f, 0f);
+        decRt.sizeDelta = new Vector2(180f, 54f);
+
+        Image decImg = decBtnObj.GetComponent<Image>();
+        decImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
+        decImg.type = Image.Type.Sliced;
+        decImg.color = new Color(0.65f, 0.20f, 0.22f, 1f);
+        var decOut = decBtnObj.AddComponent<Outline>();
+        decOut.effectColor = new Color(1f, 0.4f, 0.4f, 0.8f);
+
+        GameObject decTxtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+        decTxtObj.transform.SetParent(decBtnObj.transform, false);
+        RectTransform decTxtRt = decTxtObj.GetComponent<RectTransform>();
+        decTxtRt.anchorMin = Vector2.zero;
+        decTxtRt.anchorMax = Vector2.one;
+        decTxtRt.sizeDelta = Vector2.zero;
+        var decTmp = decTxtObj.AddComponent<TextMeshProUGUI>();
+        decTmp.text = isVi ? "TỪ CHỐI" : "DECLINE";
+        decTmp.fontSize = 22f;
+        decTmp.fontStyle = FontStyles.Bold;
+        decTmp.alignment = TextAlignmentOptions.Center;
+        decTmp.color = Color.white;
+        noticeDeclineBtn = decBtnObj.GetComponent<Button>();
+
+        noticeActionContainer.SetActive(false);
     }
 
     private void RefreshNoticeList()
     {
+        SyncPendingFriendRequestsToNotices();
         if (noticeListContent == null) return;
 
         for (int i = noticeListContent.childCount - 1; i >= 0; i--)
@@ -1742,7 +1863,7 @@ public class MailboxUI : MonoBehaviour
             tRt.offsetMax = new Vector2(-14f, -10f);
 
             var tTmp = titleObj.AddComponent<TextMeshProUGUI>();
-            tTmp.text = isVi ? notice.titleVi : notice.titleEn;
+            tTmp.text = SanitizeBrackets(isVi ? notice.titleVi : notice.titleEn);
             tTmp.fontSize = 26f;
             tTmp.fontStyle = FontStyles.Bold;
             tTmp.color = isSelected ? new Color(1f, 0.90f, 0.50f) : new Color(0.85f, 0.90f, 0.96f);
@@ -1789,7 +1910,7 @@ public class MailboxUI : MonoBehaviour
         selectedNotice = notice;
         bool isVi = LocalizationManager.IsVietnamese;
 
-        if (noticeDetailTitleText != null) noticeDetailTitleText.text = isVi ? notice.titleVi : notice.titleEn;
+        if (noticeDetailTitleText != null) noticeDetailTitleText.text = SanitizeBrackets(isVi ? notice.titleVi : notice.titleEn);
         if (noticeDetailMetaText != null)
         {
             string sender = isVi ? notice.senderVi : notice.senderEn;
@@ -1797,7 +1918,56 @@ public class MailboxUI : MonoBehaviour
                 ? $"Đăng bởi: <b>{sender}</b> | Ngày phát hành: {notice.date}" 
                 : $"Posted by: <b>{sender}</b> | Release date: {notice.date}";
         }
-        if (noticeDetailBodyText != null) noticeDetailBodyText.text = isVi ? notice.contentVi : notice.contentEn;
+        if (noticeDetailBodyText != null) noticeDetailBodyText.text = SanitizeBrackets(isVi ? notice.contentVi : notice.contentEn);
+
+        // Xử lý nút Chấp Nhận / Từ Chối nếu là thông báo lời mời kết bạn
+        bool isFriendReq = notice != null && notice.id != null && notice.id.StartsWith("FRIEND_REQ_");
+        if (noticeActionContainer != null)
+        {
+            noticeActionContainer.SetActive(isFriendReq);
+        }
+
+        if (isFriendReq)
+        {
+            string friendSender = notice.senderVi;
+            if (noticeAcceptBtn != null)
+            {
+                noticeAcceptBtn.onClick.RemoveAllListeners();
+                noticeAcceptBtn.onClick.AddListener(() =>
+                {
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                    FriendManager.EnsureInstance().AcceptFriendRequest(friendSender);
+                    SyncPendingFriendRequestsToNotices();
+                    RefreshNoticeList();
+                    SelectFirstAvailableNotice();
+                    MainMenuManager mm = FindAnyObjectByType<MainMenuManager>();
+                    if (mm != null)
+                    {
+                        mm.UpdateMailboxBadge();
+                        mm.UpdateFriendsBadge();
+                    }
+                });
+            }
+
+            if (noticeDeclineBtn != null)
+            {
+                noticeDeclineBtn.onClick.RemoveAllListeners();
+                noticeDeclineBtn.onClick.AddListener(() =>
+                {
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                    FriendManager.EnsureInstance().DeclineFriendRequest(friendSender);
+                    SyncPendingFriendRequestsToNotices();
+                    RefreshNoticeList();
+                    SelectFirstAvailableNotice();
+                    MainMenuManager mm = FindAnyObjectByType<MainMenuManager>();
+                    if (mm != null)
+                    {
+                        mm.UpdateMailboxBadge();
+                        mm.UpdateFriendsBadge();
+                    }
+                });
+            }
+        }
 
         RefreshNoticeList();
     }
@@ -1882,7 +2052,7 @@ public class MailboxUI : MonoBehaviour
         ibOut.effectColor = new Color(0.85f, 0.70f, 0.30f, 0.65f);
         ibOut.effectDistance = new Vector2(1.5f, -1.5f);
 
-        // Input Field Component (Rộng 720px, Cao 68px, chữ 30pt Bold)
+        // Input Field Component (Rộng 920px, Cao 68px, chữ 30pt Bold)
         GameObject ifObj = new GameObject("InputField", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(TMP_InputField));
         ifObj.transform.SetParent(inputBar.transform, false);
         RectTransform ifRt = ifObj.GetComponent<RectTransform>();
@@ -1890,7 +2060,7 @@ public class MailboxUI : MonoBehaviour
         ifRt.anchorMax = new Vector2(0f, 0.5f);
         ifRt.pivot = new Vector2(0f, 0.5f);
         ifRt.anchoredPosition = new Vector2(18f, 0f);
-        ifRt.sizeDelta = new Vector2(720f, 68f);
+        ifRt.sizeDelta = new Vector2(920f, 68f);
 
         Image ifBg = ifObj.GetComponent<Image>();
         ifBg.color = new Color(0.04f, 0.06f, 0.09f, 0.95f);
@@ -1946,18 +2116,17 @@ public class MailboxUI : MonoBehaviour
         giftcodeInput.onSelect.AddListener((s) => OpenMobileKeyboard());
         giftcodeInput.onValueChanged.AddListener((s) => {
             AdjustInputFontSize(s);
-            UpdateKeyboardPreview();
         });
 
-        // Button DÁN MÃ (Paste) - Rộng 160px, cao 68px, chữ 24pt Bold
+        // Button DÁN MÃ (Paste) - Rộng 180px, cao 68px, chữ 24pt Bold
         GameObject pasteBtnObj = new GameObject("Btn_Paste", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         pasteBtnObj.transform.SetParent(inputBar.transform, false);
         RectTransform pRt = pasteBtnObj.GetComponent<RectTransform>();
         pRt.anchorMin = new Vector2(0f, 0.5f);
         pRt.anchorMax = new Vector2(0f, 0.5f);
         pRt.pivot = new Vector2(0f, 0.5f);
-        pRt.anchoredPosition = new Vector2(755f, 0f);
-        pRt.sizeDelta = new Vector2(160f, 68f);
+        pRt.anchoredPosition = new Vector2(955f, 0f);
+        pRt.sizeDelta = new Vector2(180f, 68f);
 
         Image pImg = pasteBtnObj.GetComponent<Image>();
         pImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
@@ -1980,38 +2149,6 @@ public class MailboxUI : MonoBehaviour
         Button pasteBtn = pasteBtnObj.GetComponent<Button>();
         pasteBtn.targetGraphic = pImg;
         pasteBtn.onClick.AddListener(OnPasteFromClipboard);
-
-        // Button BÀN PHÍM ẢO (Virtual Keyboard) - Rộng 180px, cao 68px, chữ 24pt Bold
-        GameObject kbdBtnObj = new GameObject("Btn_ToggleKeyboard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-        kbdBtnObj.transform.SetParent(inputBar.transform, false);
-        RectTransform kbRt = kbdBtnObj.GetComponent<RectTransform>();
-        kbRt.anchorMin = new Vector2(0f, 0.5f);
-        kbRt.anchorMax = new Vector2(0f, 0.5f);
-        kbRt.pivot = new Vector2(0f, 0.5f);
-        kbRt.anchoredPosition = new Vector2(930f, 0f);
-        kbRt.sizeDelta = new Vector2(180f, 68f);
-
-        Image kbImg = kbdBtnObj.GetComponent<Image>();
-        kbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
-        kbImg.type = Image.Type.Sliced;
-        kbImg.color = new Color(0.25f, 0.22f, 0.38f, 0.95f);
-
-        GameObject kbtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        kbtObj.transform.SetParent(kbdBtnObj.transform, false);
-        RectTransform kbtRt = kbtObj.GetComponent<RectTransform>();
-        kbtRt.anchorMin = Vector2.zero;
-        kbtRt.anchorMax = Vector2.one;
-        kbtRt.sizeDelta = Vector2.zero;
-        var kbtTmp = kbtObj.AddComponent<TextMeshProUGUI>();
-        kbtTmp.text = isVi ? "<b>BÀN PHÍM</b>" : "<b>KEYBOARD</b>";
-        kbtTmp.fontSize = 24f;
-        kbtTmp.fontStyle = FontStyles.Bold;
-        kbtTmp.alignment = TextAlignmentOptions.Center;
-        kbtTmp.color = new Color(0.9f, 0.85f, 1f);
-
-        Button kbdBtn = kbdBtnObj.GetComponent<Button>();
-        kbdBtn.targetGraphic = kbImg;
-        kbdBtn.onClick.AddListener(ToggleVirtualKeyboard);
 
         // Button ĐỔI QUÀ NGAY (Redeem Now) - Rộng 340px, cao 68px, chữ 28pt Bold
         GameObject rdBtnObj = new GameObject("Btn_Redeem", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -2360,73 +2497,24 @@ public class MailboxUI : MonoBehaviour
 
     public void OpenMobileKeyboard()
     {
-        if (virtualKeyboardObj != null)
-        {
-            virtualKeyboardObj.SetActive(true);
-            UpdateKeyboardPreview();
-        }
-
-        if (modalWindowRect != null)
-        {
-            modalWindowRect.anchoredPosition = new Vector2(0f, 135f);
-        }
-
         if (giftcodeInput != null)
         {
             giftcodeInput.Select();
             giftcodeInput.ActivateInputField();
         }
-
-#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
-        if (TouchScreenKeyboard.isSupported)
-        {
-            try
-            {
-                bool isVi = LocalizationManager.IsVietnamese;
-                string promptTitle = isVi ? "Nhập mã quà tặng (VD: HUNGNE123, VIP888...)" : "Enter Giftcode";
-
-                mobileKeyboard = TouchScreenKeyboard.Open(
-                    giftcodeInput != null ? giftcodeInput.text : "",
-                    TouchScreenKeyboardType.Default,
-                    false,
-                    false,
-                    false,
-                    false,
-                    promptTitle
-                );
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning("[MailboxUI] TouchScreenKeyboard warning: " + e.Message);
-                mobileKeyboard = null;
-            }
-        }
-#endif
     }
 
     public void CloseVirtualKeyboard()
     {
-        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        if (virtualKeyboardObj != null)
+        if (giftcodeInput != null)
         {
-            virtualKeyboardObj.SetActive(false);
-        }
-        if (modalWindowRect != null)
-        {
-            modalWindowRect.anchoredPosition = Vector2.zero;
+            giftcodeInput.DeactivateInputField();
         }
     }
 
     public void ToggleVirtualKeyboard()
     {
-        if (virtualKeyboardObj != null && virtualKeyboardObj.activeSelf)
-        {
-            CloseVirtualKeyboard();
-        }
-        else
-        {
-            OpenMobileKeyboard();
-        }
+        OpenMobileKeyboard();
     }
 
     private void AdjustInputFontSize(string s)
@@ -2435,394 +2523,45 @@ public class MailboxUI : MonoBehaviour
         int len = string.IsNullOrEmpty(s) ? 0 : s.Length;
         if (len >= 18)
         {
-            giftcodeInput.textComponent.fontSize = 9f;
+            giftcodeInput.textComponent.fontSize = 20f;
         }
         else if (len >= 14)
         {
-            giftcodeInput.textComponent.fontSize = 11f;
+            giftcodeInput.textComponent.fontSize = 24f;
         }
         else
         {
-            giftcodeInput.textComponent.fontSize = 14f;
+            giftcodeInput.textComponent.fontSize = 30f;
         }
     }
 
     private void OnVirtualKeyPress(char c)
     {
-        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         if (giftcodeInput == null) return;
         if (giftcodeInput.text.Length >= giftcodeInput.characterLimit) return;
-
         giftcodeInput.text += char.ToUpperInvariant(c);
         AdjustInputFontSize(giftcodeInput.text);
-        UpdateKeyboardPreview();
     }
 
     private void OnVirtualKeyBackspace()
     {
-        if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         if (giftcodeInput == null) return;
         if (!string.IsNullOrEmpty(giftcodeInput.text))
         {
             giftcodeInput.text = giftcodeInput.text.Substring(0, giftcodeInput.text.Length - 1);
             AdjustInputFontSize(giftcodeInput.text);
-            UpdateKeyboardPreview();
         }
     }
 
     private void UpdateKeyboardPreview()
     {
-        if (keyboardPreviewText == null) return;
-        bool isVi = LocalizationManager.IsVietnamese;
-        string current = giftcodeInput != null ? giftcodeInput.text : "";
-        string label = isVi ? "MÃ:" : "CODE:";
-        if (string.IsNullOrEmpty(current))
-        {
-            keyboardPreviewText.text = $"<b>{label}</b> <color=#718096><i>{(isVi ? "Chạm các phím bên dưới để nhập..." : "Tap keys below to type...")}</i></color>";
-        }
-        else
-        {
-            keyboardPreviewText.text = $"<b>{label}</b> <color=#FFE066><b>{current}</b></color><color=#74B9FF>_</color>";
-        }
     }
 
     private void BuildVirtualKeyboard(Transform parent)
     {
-        bool isVi = LocalizationManager.IsVietnamese;
-
-        virtualKeyboardObj = new GameObject("VirtualKeyboard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        virtualKeyboardObj.layer = 5;
-        virtualKeyboardObj.transform.SetParent(parent, false);
-
-        RectTransform vkRt = virtualKeyboardObj.GetComponent<RectTransform>();
-        vkRt.anchorMin = new Vector2(0.5f, 0f);
-        vkRt.anchorMax = new Vector2(0.5f, 0f);
-        vkRt.pivot = new Vector2(0.5f, 0f);
-        vkRt.anchoredPosition = new Vector2(0f, 10f);
-        vkRt.sizeDelta = new Vector2(960f, 320f);
-
-        Image vkImg = virtualKeyboardObj.GetComponent<Image>();
-        vkImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
-        vkImg.type = Image.Type.Sliced;
-        vkImg.color = new Color(0.04f, 0.06f, 0.10f, 0.98f);
-
-        var vkOut = virtualKeyboardObj.AddComponent<Outline>();
-        vkOut.effectColor = new Color(0.35f, 0.60f, 0.85f, 0.80f);
-        vkOut.effectDistance = new Vector2(2f, -2f);
-
-        // Header / Display Bar (Height 40px)
-        GameObject dispBar = new GameObject("DisplayBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        dispBar.transform.SetParent(virtualKeyboardObj.transform, false);
-        RectTransform dbRt = dispBar.GetComponent<RectTransform>();
-        dbRt.anchorMin = new Vector2(0f, 1f);
-        dbRt.anchorMax = new Vector2(1f, 1f);
-        dbRt.pivot = new Vector2(0.5f, 1f);
-        dbRt.anchoredPosition = new Vector2(0f, -8f);
-        dbRt.sizeDelta = new Vector2(-16f, 40f);
-
-        Image dbImg = dispBar.GetComponent<Image>();
-        dbImg.sprite = SoulslikeHUDStyler.GetDarkFantasyPanelBg();
-        dbImg.type = Image.Type.Sliced;
-        dbImg.color = new Color(0.02f, 0.03f, 0.06f, 0.95f);
-
-        GameObject titObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer));
-        titObj.transform.SetParent(dispBar.transform, false);
-        RectTransform titRt = titObj.GetComponent<RectTransform>();
-        titRt.anchorMin = new Vector2(0f, 0.5f);
-        titRt.anchorMax = new Vector2(0f, 0.5f);
-        titRt.pivot = new Vector2(0f, 0.5f);
-        titRt.anchoredPosition = new Vector2(14f, 0f);
-        titRt.sizeDelta = new Vector2(150f, 32f);
-
-        var titTmp = titObj.AddComponent<TextMeshProUGUI>();
-        titTmp.text = isVi ? "<b>BÀN PHÍM</b>" : "<b>KEYBOARD</b>";
-        titTmp.fontSize = 13f;
-        titTmp.color = new Color(1f, 0.88f, 0.45f);
-        titTmp.alignment = TextAlignmentOptions.MidlineLeft;
-
-        GameObject prevObj = new GameObject("PreviewText", typeof(RectTransform), typeof(RectMask2D));
-        prevObj.transform.SetParent(dispBar.transform, false);
-        RectTransform prevRt = prevObj.GetComponent<RectTransform>();
-        prevRt.anchorMin = new Vector2(0f, 0.5f);
-        prevRt.anchorMax = new Vector2(1f, 0.5f);
-        prevRt.offsetMin = new Vector2(140f, -16f);
-        prevRt.offsetMax = new Vector2(-160f, 16f);
-
-        keyboardPreviewText = prevObj.AddComponent<TextMeshProUGUI>();
-        keyboardPreviewText.fontSize = 13.5f;
-        keyboardPreviewText.enableAutoSizing = true;
-        keyboardPreviewText.fontSizeMin = 8.5f;
-        keyboardPreviewText.fontSizeMax = 13.5f;
-        keyboardPreviewText.overflowMode = TextOverflowModes.Ellipsis;
-        keyboardPreviewText.alignment = TextAlignmentOptions.MidlineLeft;
-        keyboardPreviewText.color = Color.white;
-
-        GameObject hideBtnObj = new GameObject("Btn_HideKeyboard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-        hideBtnObj.transform.SetParent(dispBar.transform, false);
-        RectTransform hbRt = hideBtnObj.GetComponent<RectTransform>();
-        hbRt.anchorMin = new Vector2(1f, 0.5f);
-        hbRt.anchorMax = new Vector2(1f, 0.5f);
-        hbRt.pivot = new Vector2(1f, 0.5f);
-        hbRt.anchoredPosition = new Vector2(-8f, 0f);
-        hbRt.sizeDelta = new Vector2(105f, 32f);
-
-        Image hbImg = hideBtnObj.GetComponent<Image>();
-        hbImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
-        hbImg.type = Image.Type.Sliced;
-        hbImg.color = new Color(0.38f, 0.16f, 0.18f, 0.95f);
-
-        GameObject hbtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        hbtObj.transform.SetParent(hideBtnObj.transform, false);
-        RectTransform hbtRt = hbtObj.GetComponent<RectTransform>();
-        hbtRt.anchorMin = Vector2.zero;
-        hbtRt.anchorMax = Vector2.one;
-        hbtRt.sizeDelta = Vector2.zero;
-        var hbtTmp = hbtObj.AddComponent<TextMeshProUGUI>();
-        hbtTmp.text = isVi ? "<b>THU GỌN</b>" : "<b>HIDE</b>";
-        hbtTmp.fontSize = 12f;
-        hbtTmp.alignment = TextAlignmentOptions.Center;
-        hbtTmp.color = Color.white;
-
-        Button hideBtn = hideBtnObj.GetComponent<Button>();
-        hideBtn.targetGraphic = hbImg;
-        hideBtn.onClick.AddListener(CloseVirtualKeyboard);
-
-        // Row 1: Numbers
-        string[] row1 = new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
-        CreateKeyRow(virtualKeyboardObj.transform, row1, -54f, 86f, 42f, 7f);
-
-        // Row 2: QWERTY
-        string[] row2 = new string[] { "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P" };
-        CreateKeyRow(virtualKeyboardObj.transform, row2, -102f, 86f, 42f, 7f);
-
-        // Row 3: ASDF
-        string[] row3 = new string[] { "A", "S", "D", "F", "G", "H", "J", "K", "L" };
-        CreateKeyRow(virtualKeyboardObj.transform, row3, -150f, 94f, 42f, 8f);
-
-        // Row 4: ZXCV + Backspace
-        CreateRow4WithBackspace(virtualKeyboardObj.transform, -198f);
-
-        // Row 5: Action Row
-        CreateActionRow(virtualKeyboardObj.transform, -248f, isVi);
-
-        virtualKeyboardObj.SetActive(false);
+        // Đã xóa bỏ hoàn toàn bàn phím ảo tự chế trong game theo yêu cầu của người chơi
+        virtualKeyboardObj = null;
     }
-
-    private void CreateKeyRow(Transform parent, string[] keys, float yPos, float keyWidth, float keyHeight, float gap)
-    {
-        int count = keys.Length;
-        float totalWidth = count * keyWidth + (count - 1) * gap;
-        float startX = -totalWidth * 0.5f + keyWidth * 0.5f;
-
-        for (int i = 0; i < count; i++)
-        {
-            string keyChar = keys[i];
-            float xPos = startX + i * (keyWidth + gap);
-
-            GameObject keyObj = new GameObject("Key_" + keyChar, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            keyObj.transform.SetParent(parent, false);
-
-            RectTransform kRt = keyObj.GetComponent<RectTransform>();
-            kRt.anchorMin = new Vector2(0.5f, 1f);
-            kRt.anchorMax = new Vector2(0.5f, 1f);
-            kRt.pivot = new Vector2(0.5f, 0.5f);
-            kRt.anchoredPosition = new Vector2(xPos, yPos - keyHeight * 0.5f);
-            kRt.sizeDelta = new Vector2(keyWidth, keyHeight);
-
-            Image kImg = keyObj.GetComponent<Image>();
-            kImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
-            kImg.type = Image.Type.Sliced;
-            kImg.color = new Color(0.16f, 0.22f, 0.32f, 0.96f);
-
-            var kOut = keyObj.AddComponent<Outline>();
-            kOut.effectColor = new Color(0.35f, 0.55f, 0.80f, 0.50f);
-            kOut.effectDistance = new Vector2(1f, -1f);
-
-            GameObject tObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-            tObj.transform.SetParent(keyObj.transform, false);
-            RectTransform tRt = tObj.GetComponent<RectTransform>();
-            tRt.anchorMin = Vector2.zero;
-            tRt.anchorMax = Vector2.one;
-            tRt.sizeDelta = Vector2.zero;
-
-            var tmp = tObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = $"<b>{keyChar}</b>";
-            tmp.fontSize = 19f;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = new Color(0.92f, 0.95f, 1f);
-
-            Button btn = keyObj.GetComponent<Button>();
-            btn.targetGraphic = kImg;
-            char c = keyChar[0];
-            btn.onClick.AddListener(() => OnVirtualKeyPress(c));
-        }
-    }
-
-    private void CreateRow4WithBackspace(Transform parent, float yPos)
-    {
-        string[] letters = new string[] { "Z", "X", "C", "V", "B", "N", "M" };
-        float keyWidth = 92f;
-        float keyHeight = 42f;
-        float gap = 8f;
-        float backspaceWidth = 170f;
-
-        float totalWidth = 7 * keyWidth + 6 * gap + gap + backspaceWidth;
-        float startX = -totalWidth * 0.5f + keyWidth * 0.5f;
-
-        for (int i = 0; i < 7; i++)
-        {
-            string keyChar = letters[i];
-            float xPos = startX + i * (keyWidth + gap);
-
-            GameObject keyObj = new GameObject("Key_" + keyChar, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            keyObj.transform.SetParent(parent, false);
-
-            RectTransform kRt = keyObj.GetComponent<RectTransform>();
-            kRt.anchorMin = new Vector2(0.5f, 1f);
-            kRt.anchorMax = new Vector2(0.5f, 1f);
-            kRt.pivot = new Vector2(0.5f, 0.5f);
-            kRt.anchoredPosition = new Vector2(xPos, yPos - keyHeight * 0.5f);
-            kRt.sizeDelta = new Vector2(keyWidth, keyHeight);
-
-            Image kImg = keyObj.GetComponent<Image>();
-            kImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
-            kImg.type = Image.Type.Sliced;
-            kImg.color = new Color(0.16f, 0.22f, 0.32f, 0.96f);
-
-            var kOut = keyObj.AddComponent<Outline>();
-            kOut.effectColor = new Color(0.35f, 0.55f, 0.80f, 0.50f);
-            kOut.effectDistance = new Vector2(1f, -1f);
-
-            GameObject tObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-            tObj.transform.SetParent(keyObj.transform, false);
-            RectTransform tRt = tObj.GetComponent<RectTransform>();
-            tRt.anchorMin = Vector2.zero;
-            tRt.anchorMax = Vector2.one;
-            tRt.sizeDelta = Vector2.zero;
-
-            var tmp = tObj.AddComponent<TextMeshProUGUI>();
-            tmp.text = $"<b>{keyChar}</b>";
-            tmp.fontSize = 19f;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = new Color(0.92f, 0.95f, 1f);
-
-            Button btn = keyObj.GetComponent<Button>();
-            btn.targetGraphic = kImg;
-            char c = keyChar[0];
-            btn.onClick.AddListener(() => OnVirtualKeyPress(c));
-        }
-
-        // Backspace
-        float bsX = startX + 6 * (keyWidth + gap) + keyWidth * 0.5f + gap + backspaceWidth * 0.5f;
-        GameObject bsObj = new GameObject("Key_Backspace", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-        bsObj.transform.SetParent(parent, false);
-
-        RectTransform bsRt = bsObj.GetComponent<RectTransform>();
-        bsRt.anchorMin = new Vector2(0.5f, 1f);
-        bsRt.anchorMax = new Vector2(0.5f, 1f);
-        bsRt.pivot = new Vector2(0.5f, 0.5f);
-        bsRt.anchoredPosition = new Vector2(bsX, yPos - keyHeight * 0.5f);
-        bsRt.sizeDelta = new Vector2(backspaceWidth, keyHeight);
-
-        Image bsImg = bsObj.GetComponent<Image>();
-        bsImg.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
-        bsImg.type = Image.Type.Sliced;
-        bsImg.color = new Color(0.38f, 0.18f, 0.20f, 0.96f);
-
-        var bsOut = bsObj.AddComponent<Outline>();
-        bsOut.effectColor = new Color(0.85f, 0.40f, 0.40f, 0.65f);
-        bsOut.effectDistance = new Vector2(1f, -1f);
-
-        GameObject bstObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        bstObj.transform.SetParent(bsObj.transform, false);
-        RectTransform bstRt = bstObj.GetComponent<RectTransform>();
-        bstRt.anchorMin = Vector2.zero;
-        bstRt.anchorMax = Vector2.one;
-        bstRt.sizeDelta = Vector2.zero;
-
-        var bstTmp = bstObj.AddComponent<TextMeshProUGUI>();
-        bstTmp.text = LocalizationManager.IsVietnamese ? "<b>XÓA</b>" : "<b>BACK</b>";
-        bstTmp.fontSize = 14f;
-        bstTmp.alignment = TextAlignmentOptions.Center;
-        bstTmp.color = Color.white;
-
-        Button bsBtn = bsObj.GetComponent<Button>();
-        bsBtn.targetGraphic = bsImg;
-        bsBtn.onClick.AddListener(OnVirtualKeyBackspace);
-    }
-
-    private void CreateActionRow(Transform parent, float yPos, bool isVi)
-    {
-        float keyHeight = 44f;
-        float gap = 12f;
-        float w1 = 180f; // Paste
-        float w2 = 220f; // Space
-        float w3 = 240f; // Redeem
-
-        float totalWidth = w1 + w2 + w3 + 2 * gap;
-        float startX = -totalWidth * 0.5f;
-
-        // 1. Paste Button
-        float x1 = startX + w1 * 0.5f;
-        CreateSingleActionButton(parent, "Btn_VkPaste", isVi ? "<b>DÁN MÃ</b>" : "<b>PASTE</b>",
-            new Vector2(x1, yPos - keyHeight * 0.5f), new Vector2(w1, keyHeight),
-            new Color(0.20f, 0.26f, 0.38f, 0.96f), new Color(0.4f, 0.7f, 1f, 0.6f),
-            OnPasteFromClipboard);
-
-        // 2. Space Bar
-        float x2 = startX + w1 + gap + w2 * 0.5f;
-        CreateSingleActionButton(parent, "Btn_VkSpace", isVi ? "<b>DẤU CÁCH</b>" : "<b>SPACE</b>",
-            new Vector2(x2, yPos - keyHeight * 0.5f), new Vector2(w2, keyHeight),
-            new Color(0.18f, 0.23f, 0.30f, 0.96f), new Color(0.4f, 0.55f, 0.75f, 0.5f),
-            () => OnVirtualKeyPress(' '));
-
-        // 3. Redeem Button
-        float x3 = startX + w1 + gap + w2 + gap + w3 * 0.5f;
-        CreateSingleActionButton(parent, "Btn_VkRedeem", isVi ? "<b>ĐỔI QUÀ NGAY</b>" : "<b>REDEEM NOW</b>",
-            new Vector2(x3, yPos - keyHeight * 0.5f), new Vector2(w3, keyHeight),
-            new Color(0.10f, 0.46f, 0.24f, 0.98f), new Color(0.35f, 1f, 0.65f, 0.75f),
-            OnRedeemGiftcode);
-    }
-
-    private void CreateSingleActionButton(Transform parent, string name, string label, Vector2 pos, Vector2 size, Color bgColor, Color outColor, UnityEngine.Events.UnityAction action)
-    {
-        GameObject obj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-        obj.transform.SetParent(parent, false);
-
-        RectTransform rt = obj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 1f);
-        rt.anchorMax = new Vector2(0.5f, 1f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = pos;
-        rt.sizeDelta = size;
-
-        Image img = obj.GetComponent<Image>();
-        img.sprite = SoulslikeHUDStyler.GetStoneButtonSprite();
-        img.type = Image.Type.Sliced;
-        img.color = bgColor;
-
-        var outComp = obj.AddComponent<Outline>();
-        outComp.effectColor = outColor;
-        outComp.effectDistance = new Vector2(1.2f, -1.2f);
-
-        GameObject tObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        tObj.transform.SetParent(obj.transform, false);
-        RectTransform tRt = tObj.GetComponent<RectTransform>();
-        tRt.anchorMin = Vector2.zero;
-        tRt.anchorMax = Vector2.one;
-        tRt.sizeDelta = Vector2.zero;
-
-        var tmp = tObj.AddComponent<TextMeshProUGUI>();
-        tmp.text = label;
-        tmp.fontSize = 13f;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
-
-        Button btn = obj.GetComponent<Button>();
-        btn.targetGraphic = img;
-        btn.onClick.AddListener(action);
-    }
-
     void Update()
     {
 #if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)

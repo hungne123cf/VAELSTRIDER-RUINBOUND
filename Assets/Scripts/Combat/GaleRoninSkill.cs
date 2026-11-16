@@ -696,6 +696,7 @@ public class GaleRoninSkill : MonoBehaviour
 
     private IEnumerator HitStopRoutine(float duration)
     {
+        if (PvPMatchManager.IsPvPModeActive) yield break; // Không làm chậm timeScale trong PvP trực tuyến!
         Time.timeScale = 0.15f;
         yield return new WaitForSecondsRealtime(Mathf.Min(duration, 0.04f));
         Time.timeScale = 1.0f;

@@ -67,7 +67,10 @@ public class SweepTheWeakSkill : MonoBehaviour
             // ====================================================
             // GIAI DOAN 1: HOAT ANH ZOOM-IN DIEN ANH & CAU THOAI NGAU
             // ====================================================
-            Time.timeScale = 0.05f; // Slow-motion cinematic zoom
+            if (!PvPMatchManager.IsPvPModeActive)
+            {
+                Time.timeScale = 0.05f; // Slow-motion cinematic zoom (Chi chay PvE, PvP luon giu 1.0f de dong ho mang khong bi tre)
+            }
 
             // Camera zoom can canh vao nhan vat Maid
             if (cam != null) cam.SetCinematicZoom(2.6f);

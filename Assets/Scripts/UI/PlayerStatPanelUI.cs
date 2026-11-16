@@ -36,6 +36,7 @@ public class PlayerStatPanelUI : MonoBehaviour
 
     private static void OnSceneLoaded(Scene s, LoadSceneMode m)
     {
+        if (PvPMatchManager.IsPvPModeActive) return;
         // Chỉ tạo trong scene gameplay (có người chơi)
         if (Object.FindAnyObjectByType<PlayerHealth>() == null) return;
         EnsureInstance();
@@ -374,7 +375,9 @@ public class PlayerStatPanelUI : MonoBehaviour
             atkTxt.text  = cCombat.TotalPhysicalDamage.ToString("N0");
             magTxt.text  = cCombat.TotalMagicDamage.ToString("N0");
 
-            aspdTxt.text = cCombat.AttackSpeedMultiplier.ToString("0.00") + "x";
+            float aspdVal = cCombat.AttackSpeedMultiplier;
+            aspdTxt.text = aspdVal.ToString("0.00") + "x";
+            aspdTxt.color = aspdVal > 1.01f ? new Color(0.35f, 0.95f, 0.75f) : new Color(0.98f, 0.95f, 0.88f);
             critTxt.text = Mathf.RoundToInt(cCombat.TotalCritChance * 100f) + "%";
             lsTxt.text   = FormatPercent(cCombat.PhysLifestealPercent);
             // Hiển thị % Giảm Hồi Chiêu (CDR): Bắt đầu từ 0%, nhặt lõi cộng dồn lên 10%, 20%, 30%...

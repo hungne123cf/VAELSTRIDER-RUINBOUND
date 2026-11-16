@@ -1288,6 +1288,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         yield return new WaitForSecondsRealtime(1.0f);
 
         // 4. Hien thi man hinh YOU DIED sau khi da hoan tat toan bo animation
+        if (PvPMatchManager.IsPvPModeActive)
+        {
+            yield break;
+        }
         Debug.Log("<color=red>[GAMEOVER]</color> Hoat anh chet hoan tat. Goi GameOverUI.Show()...");
         GameOverUI.Show();
     }

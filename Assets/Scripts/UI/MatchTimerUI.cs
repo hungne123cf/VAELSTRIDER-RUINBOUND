@@ -118,6 +118,20 @@ public class MatchTimerUI : MonoBehaviour
         }
     }
 
+    public static void SyncFromHost(float hostTime)
+    {
+        if (hostTime <= 0f) return;
+        if (Mathf.Abs(totalRunElapsedTime - hostTime) > 0.5f)
+        {
+            totalRunElapsedTime = hostTime;
+        }
+        else
+        {
+            totalRunElapsedTime = Mathf.Lerp(totalRunElapsedTime, hostTime, Time.deltaTime * 8f);
+        }
+        isTimerRunning = true;
+    }
+
     void Update()
     {
         if (!isTimerRunning) return;

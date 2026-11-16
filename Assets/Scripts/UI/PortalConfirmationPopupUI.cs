@@ -444,7 +444,9 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             canvasGroup.blocksRaycasts = true;
         }
 
-        Time.timeScale = 0f; // Tạm dừng trận chiến để chọn an toàn
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        if (!isMultiplayer) Time.timeScale = 0f; // Chỉ pause trong Story
+        else Time.timeScale = 1.0f; // Trong Co-op: Realtime combat
         SoundManager.EnsureInstance()?.PlayButtonClick();
 
         if (portalPulseCoroutine != null) StopCoroutine(portalPulseCoroutine);
@@ -541,7 +543,9 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             canvasGroup.blocksRaycasts = true;
         }
 
-        Time.timeScale = 0f;
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        if (!isMulti) Time.timeScale = 0f;
+        else Time.timeScale = 1.0f;
         SoundManager.EnsureInstance()?.PlayButtonClick();
 
         if (portalPulseCoroutine != null) StopCoroutine(portalPulseCoroutine);

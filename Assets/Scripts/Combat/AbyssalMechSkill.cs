@@ -140,7 +140,7 @@ public class AbyssalMechSkill : MonoBehaviour
 
     public static void EnsureAllSpritesLoaded()
     {
-        if (idleFrames != null && idleFrames.Length > 0 && sharkTsunamiFrames != null && sharkTsunamiFrames.Length > 0)
+        if (idleFrames != null && idleFrames.Length > 0 && sharkTsunamiFrames != null && sharkTsunamiFrames.Length > 0 && waterBallStartupFrames != null && waterBallStartupFrames.Length > 0)
             return;
 
         // 1. Nạp 70 frames từ goldfish_mech_atlas (10x7 grid = 1280x896, chuẩn Zero-Bug Android < 2048px)
@@ -383,6 +383,66 @@ public class AbyssalMechSkill : MonoBehaviour
     {
         EnsureAllSpritesLoaded();
         return deathFrames;
+    }
+
+    public static Sprite[] GetAllFrames()
+    {
+        EnsureAllSpritesLoaded();
+        return allFrames;
+    }
+
+    public static Sprite[] GetWalkFrames()
+    {
+        EnsureAllSpritesLoaded();
+        return walkFrames;
+    }
+
+    public static Sprite[] GetSharkTsunamiFrames()
+    {
+        EnsureAllSpritesLoaded();
+        return sharkTsunamiFrames;
+    }
+
+    public static Sprite[] GetWhirlpoolFrames()
+    {
+        EnsureAllSpritesLoaded();
+        return whirlpoolFrames;
+    }
+
+    public static Sprite[] GetWaterBallStartupFrames()
+    {
+        EnsureAllSpritesLoaded();
+        return waterBallStartupFrames;
+    }
+
+    public static Sprite[] GetWaterBallImpactFrames()
+    {
+        EnsureAllSpritesLoaded();
+        return waterBallImpactFrames;
+    }
+
+    public static Sprite[] GetAtk1Frames()
+    {
+        EnsureAllSpritesLoaded();
+        return atk1Frames;
+    }
+
+    public static Sprite[] GetAtk2Frames()
+    {
+        EnsureAllSpritesLoaded();
+        return atk2Frames;
+    }
+
+    public static Sprite[] GetAtk3Frames()
+    {
+        EnsureAllSpritesLoaded();
+        return atk3Frames;
+    }
+
+    public static Sprite[] GetUltiFrames()
+    {
+        EnsureAllSpritesLoaded();
+        return ultiFrames;
     }
 
     public static Sprite GetActionIcon(MobileActionButton.ButtonType btnType)
@@ -846,7 +906,8 @@ public class AbyssalMechSkill : MonoBehaviour
 
         var sr = ball.AddComponent<SpriteRenderer>();
         sr.sortingOrder = (spriteRenderer != null ? spriteRenderer.sortingOrder : 10) + 6;
-        sr.flipY = dir.x < 0f; // tránh đạn bị lộn ngược khi bắn sang trái
+        sr.flipX = false;
+        sr.flipY = false; // Đạn xoay chuẩn theo góc rotZ (Atan2), không lật Y tránh drift lệch 45 độ
         bool hasFrames = waterBallStartupFrames != null && waterBallStartupFrames.Length > 0;
         if (hasFrames) sr.sprite = waterBallStartupFrames[0];
 

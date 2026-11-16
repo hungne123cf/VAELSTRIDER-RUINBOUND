@@ -15,6 +15,10 @@ public class GameAutoBootstrap : MonoBehaviour
         Screen.autorotateToPortraitUpsideDown = false;
         Screen.autorotateToLandscapeLeft = true;
         Screen.autorotateToLandscapeRight = true;
+
+        // Đảm bảo kết nối mạng không bị ngắt quãng khi app bị mất focus hoặc chạy nền
+        Application.runInBackground = true;
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -77,6 +81,7 @@ public class GameAutoBootstrap : MonoBehaviour
             InGameInventoryUI.EnsureUIExists();
             PlayerAvatarUI.EnsureUIExists();
             PlayerEnergyUI.EnsureUIExists();
+            CoopPartyListHUD.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ChestLootPopupUI.EnsureUIExists();
             PortalConfirmationPopupUI.EnsureUIExists();
@@ -128,6 +133,7 @@ public class GameAutoBootstrap : MonoBehaviour
             InGameInventoryUI.EnsureUIExists();
             PlayerAvatarUI.EnsureUIExists();
             PlayerEnergyUI.EnsureUIExists();
+            CoopPartyListHUD.EnsureUIExists();
             PlayerUpgradeManager.EnsureInstance();
             ChestLootPopupUI.EnsureUIExists();
             PortalConfirmationPopupUI.EnsureUIExists();
@@ -160,6 +166,24 @@ public class GameAutoBootstrap : MonoBehaviour
         // 0. Kiến tạo Bản Đồ Đa Phòng chỉ riêng cho Map 1 (Map1_Thestart)
         if (currentScene == "SampleScene" || currentScene == "Map1_Thestart")
         {
+            if (PvPMatchManager.IsPvPModeActive)
+            {
+                DungeonMapBuilder.BuildPvPColosseumArena();
+                AdaptiveCameraAspect.EnsureCameraAdaptive();
+                EnsureSpecialSkillButton();
+                SettingsUI.EnsureSettingsButtonExists();
+                EnsureDungeonLighting();
+                ApplySelectedCharacterToPlayer();
+                PvPMatchManager.EnsureArenaInitialized();
+
+                GameFontManager.EnsureInitialized();
+                var allCanvasesPvP = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                foreach (var c in allCanvasesPvP) if (c != null) GameFontManager.ApplyFontsGlobally(c.gameObject);
+                WarmupGameplayAssets();
+                Debug.Log("<color=cyan>[VAELSTRIDER PVP]</color> Đã khởi tạo Bản Đồ Đấu Trường Cổ Đại PvP 1v1 thành công!");
+                return;
+            }
+
             if (!CorruptedCycleManager.IsCorruptedActive && PlayerInventory.GetCurrentRunShards() <= 0)
             {
                 // Đầu mỗi trận mới thường: xóa sạch số linh hồn tạm tích từ trận cũ
@@ -189,6 +213,7 @@ public class GameAutoBootstrap : MonoBehaviour
         InGameInventoryUI.EnsureUIExists();
         PlayerAvatarUI.EnsureUIExists();
         PlayerEnergyUI.EnsureUIExists();
+        CoopPartyListHUD.EnsureUIExists();
         ChestLootPopupUI.EnsureUIExists();
         PortalConfirmationPopupUI.EnsureUIExists();
 
@@ -221,6 +246,14 @@ public class GameAutoBootstrap : MonoBehaviour
 
         // 10. Ap dung Nhan Vat da chon (Vaelstrider / Maid) va Tuyet Ky Quet Tan Ke Yeu
         ApplySelectedCharacterToPlayer();
+
+        // 10b. Đồng bộ phòng đấu Multiplayer Co-op / PvP và sinh thực thể Đồng đội
+        if (PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning))
+        {
+            var matchMgr = PvPMatchManager.EnsureArenaInitialized();
+            if (matchMgr != null) matchMgr.InitializeCoopMatch();
+            Debug.Log("<color=cyan>[VAELSTRIDER CO-OP]</color> Đã khởi tạo PvPMatchManager và đồng đội Co-op thành công!");
+        }
         CorruptedAtmosphereManager.EnsureAtmosphere();
         MagmaCalamityHazardManager.EnsureManager();
         AcidDownpourHazardManager.EnsureManager();
@@ -298,25 +331,35 @@ public class GameAutoBootstrap : MonoBehaviour
             if (t != null && t.gameObject != null) t.gameObject.SetActive(visible);
         }
 
+        bool isPvP = PvPMatchManager.IsPvPModeActive;
+        if (isPvP && PvPMatchManager.Instance != null)
+        {
+            PvPMatchManager.Instance.SetHudVisible(visible);
+        }
+
         // 4. Potion & Energy
         if (PotionQuickSlotUI.Instance != null && PotionQuickSlotUI.Instance.gameObject != null)
-            PotionQuickSlotUI.Instance.gameObject.SetActive(PotionQuickSlotUI.EnablePotionQuickSlot && visible);
+            PotionQuickSlotUI.Instance.gameObject.SetActive(!isPvP && PotionQuickSlotUI.EnablePotionQuickSlot && visible);
 
         if (PlayerEnergyUI.Instance != null && PlayerEnergyUI.Instance.gameObject != null)
-            PlayerEnergyUI.Instance.gameObject.SetActive(visible);
+            PlayerEnergyUI.Instance.gameObject.SetActive(!isPvP && visible);
 
         if (PlayerExpBarUI.Instance != null && PlayerExpBarUI.Instance.gameObject != null)
-            PlayerExpBarUI.Instance.SetVisible(visible);
+            PlayerExpBarUI.Instance.SetVisible(!isPvP && visible);
 
         if (AugmentHUDBar.Instance != null && AugmentHUDBar.Instance.gameObject != null)
-            AugmentHUDBar.Instance.gameObject.SetActive(visible);
+            AugmentHUDBar.Instance.gameObject.SetActive(!isPvP && visible);
+
+        if (PlayerStatPanelUI.Instance != null && PlayerStatPanelUI.Instance.gameObject != null)
+            PlayerStatPanelUI.Instance.gameObject.SetActive(!isPvP && visible);
 
         // 5. Hide / Show all specific HUD objects across ALL Canvases
         string[] hudNames = new string[]
         {
             "Btn_Attack", "Btn_Dash", "Btn_Special", "Btn_Potion",
             "Btn_InGameBag", "Btn_CharacterStats", "Btn_SettingsGear", "Btn_InGameSettings", "Btn_InGameInfo",
-            "PlayerAvatarHUD", "PlayerHealthBar", "PlayerHealthUI", "PlayerExpBarHUD", "ExpBarHUD", "ShardsCounter", "WaveBanner", "MatchTimerPanel", "RuinRadarCompass",
+            "PlayerAvatarHUD", "PlayerHealthBar", "HealthBar", "PlayerHealthUI", "Player_Energy_Bars_HUD",
+            "PlayerExpBarHUD", "ExpBarHUD", "ShardsCounter", "PlayerStatPanel", "AugmentHUDBar", "WaveBanner", "MatchTimerPanel", "RuinRadarCompass",
             "Minimap_Compass_HUD", "RadarDisc", "CompassNeedle", "RuinPortalDistanceText"
         };
 
@@ -335,14 +378,23 @@ public class GameAutoBootstrap : MonoBehaviour
     private static void HideChildrenByName(Transform parent, string[] targetNames, bool visible)
     {
         if (parent == null) return;
+        bool isPvP = PvPMatchManager.IsPvPModeActive;
         for (int i = 0; i < targetNames.Length; i++)
         {
             if (parent.name == targetNames[i])
             {
                 bool targetActive = visible;
-                if (parent.name == "Btn_Potion" && !PotionQuickSlotUI.EnablePotionQuickSlot) targetActive = false;
-                else if (parent.name == "Btn_InGameBag" && !InGameInventoryUI.EnableInGameInventory) targetActive = false;
-                else if ((parent.name == "Minimap_Compass_HUD" || parent.name == "RadarDisc" || parent.name == "CompassNeedle" || parent.name == "RuinPortalDistanceText") && !MinimapHUD.EnableMinimapHUD) targetActive = false;
+                if (parent.name == "Btn_Potion" && (!PotionQuickSlotUI.EnablePotionQuickSlot || isPvP)) targetActive = false;
+                else if (parent.name == "Btn_InGameBag" && (!InGameInventoryUI.EnableInGameInventory || isPvP)) targetActive = false;
+                else if ((parent.name == "Minimap_Compass_HUD" || parent.name == "RadarDisc" || parent.name == "CompassNeedle" || parent.name == "RuinPortalDistanceText") && (!MinimapHUD.EnableMinimapHUD || isPvP)) targetActive = false;
+                else if (isPvP && (parent.name == "PlayerAvatarHUD" || parent.name == "PlayerHealthBar" || parent.name == "HealthBar" ||
+                                   parent.name == "PlayerHealthUI" || parent.name == "Player_Energy_Bars_HUD" || parent.name == "PlayerExpBarHUD" ||
+                                   parent.name == "ExpBarHUD" || parent.name == "ShardsCounter" || parent.name == "PlayerStatPanel" ||
+                                   parent.name == "AugmentHUDBar" || parent.name == "Btn_CharacterStats" || parent.name == "WaveBanner" ||
+                                   parent.name == "MatchTimerPanel"))
+                {
+                    targetActive = false;
+                }
 
                 parent.gameObject.SetActive(targetActive);
                 return;
@@ -676,7 +728,7 @@ public class GameAutoBootstrap : MonoBehaviour
             {
                 sr.enabled = true;
                 sr.color = Color.white;
-                sr.material = new Material(Shader.Find("Sprites/Default"));
+                { Shader sh = Shader.Find("Sprites/Default"); if (sh != null) sr.material = new Material(sh); }
                 var idleObjs = Resources.LoadAll<Sprite>("Player4/Sprites/Hammer_Idle");
                 if (idleObjs != null && idleObjs.Length > 0)
                 {
@@ -790,7 +842,7 @@ public class GameAutoBootstrap : MonoBehaviour
             var sr = player.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                sr.material = new Material(Shader.Find("Sprites/Default"));
+                { Shader sh = Shader.Find("Sprites/Default"); if (sh != null) sr.material = new Material(sh); }
                 var idleObjs = Resources.LoadAll<Sprite>("Player3/Sprites/Sword_Idle");
                 if (idleObjs != null && idleObjs.Length > 0)
                 {
@@ -876,7 +928,7 @@ public class GameAutoBootstrap : MonoBehaviour
             var sr = player.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                sr.material = new Material(Shader.Find("Sprites/Default"));
+                { Shader sh = Shader.Find("Sprites/Default"); if (sh != null) sr.material = new Material(sh); }
                 var idleObjs = Resources.LoadAll<Sprite>("Player2/Sprites/_down idle");
                 if (idleObjs != null && idleObjs.Length > 0)
                 {
@@ -962,7 +1014,7 @@ public class GameAutoBootstrap : MonoBehaviour
             var sr = player.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                sr.material = new Material(Shader.Find("Sprites/Default"));
+                { Shader sh = Shader.Find("Sprites/Default"); if (sh != null) sr.material = new Material(sh); }
                 var idles = Resources.LoadAll<Sprite>("Player5/Sprites/idle");
                 if (idles != null && idles.Length > 0)
                 {
@@ -1037,7 +1089,7 @@ public class GameAutoBootstrap : MonoBehaviour
             var sr = player.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                sr.material = new Material(Shader.Find("Sprites/Default"));
+                { Shader sh = Shader.Find("Sprites/Default"); if (sh != null) sr.material = new Material(sh); }
                 var mSprites = Resources.LoadAll<Sprite>("Player6/Sprites/idle");
                 if (mSprites != null && mSprites.Length > 0) sr.sprite = mSprites[0];
             }
@@ -1095,7 +1147,7 @@ public class GameAutoBootstrap : MonoBehaviour
             var sr = player.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                sr.material = new Material(Shader.Find("Sprites/Default"));
+                { Shader sh = Shader.Find("Sprites/Default"); if (sh != null) sr.material = new Material(sh); }
                 var mechFrames = AbyssalMechSkill.GetIdleFrames();
                 if (mechFrames != null && mechFrames.Length > 0) sr.sprite = mechFrames[0];
             }

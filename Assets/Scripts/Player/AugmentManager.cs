@@ -901,6 +901,11 @@ public class AugmentManager : MonoBehaviour
                 FlushStatsToCombat();
                 break;
 
+            case AugmentDatabase.AugmentType.BonusAttackSpeed:
+                augBonusAttackSpeed += augment.value * 0.01f;
+                FlushStatsToCombat();
+                break;
+
             case AugmentDatabase.AugmentType.BonusHealth:
                 augBonusHp += Mathf.RoundToInt(augment.value);
                 FlushStatsToHealth();
@@ -1064,7 +1069,7 @@ public class AugmentManager : MonoBehaviour
             case AugmentDatabase.AugmentType.RelentlessAssault:
                 augBonusAtk += 10;
                 augBonusSpeed += 0.05f;
-                augBonusAttackSpeed += 0.15f; // +15% Tốc Độ Đánh
+                augBonusAttackSpeed += Mathf.Max(0.15f, augment.value * 0.01f); // +Tốc Độ Đánh
                 FlushStatsToCombat();
                 FlushStatsToController();
                 break;

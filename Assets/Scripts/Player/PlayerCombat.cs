@@ -533,31 +533,50 @@ public class PlayerCombat : MonoBehaviour
     private bool isAttackHolding = false;
     private float attackHoldDuration = 0f;
 
+    private bool _isCancellingAttackHold = false;
     public void CancelAttackHold()
+    {
+        if (_isCancellingAttackHold) return;
+        _isCancellingAttackHold = true;
+        try
+        {
+            isAttackHolding = false;
+            attackHoldDuration = 0f;
+
+            var titan = GetComponent<TitanBerserkerSkill>();
+            if (titan != null && titan.IsChargingEarthshaker) titan.CancelEarthshakerCharge();
+
+            var azure = GetComponent<AzureBladeSkill>();
+            if (azure != null) azure.CancelAim();
+
+            var ronin = GetComponent<GaleRoninSkill>();
+            if (ronin != null) ronin.CancelIaidoCharge();
+
+            var dune = GetComponent<DuneAssassinSkill>();
+            if (dune != null && (dune.IsDefending || dune.IsAimingTornado)) dune.CancelTornadoAim();
+
+            var mage = GetComponent<CelestialMageSkill>();
+            if (mage != null && mage.IsChargingBarrier) mage.ReleaseBarrierCharge(Vector2.zero, 0);
+
+            var mech = GetComponent<AbyssalMechSkill>();
+            if (mech != null && mech.IsChargingVortex) mech.CancelVortexCharge();
+
+            if (isParrying) CancelParryStance();
+            if (SkillAimIndicator.Instance != null) SkillAimIndicator.Instance.Hide();
+        }
+        finally
+        {
+            _isCancellingAttackHold = false;
+        }
+    }
+
+    /// <summary>
+    /// Kết thúc chu kỳ tụ lực sau khi đã tung chiêu gồng (Release) an toàn mà không hủy đòn gồng
+    /// </summary>
+    public void FinishAttackHold()
     {
         isAttackHolding = false;
         attackHoldDuration = 0f;
-
-        var titan = GetComponent<TitanBerserkerSkill>();
-        if (titan != null && titan.IsChargingEarthshaker) titan.CancelEarthshakerCharge();
-
-        var azure = GetComponent<AzureBladeSkill>();
-        if (azure != null) azure.CancelAim();
-
-        var ronin = GetComponent<GaleRoninSkill>();
-        if (ronin != null) ronin.CancelIaidoCharge();
-
-        var dune = GetComponent<DuneAssassinSkill>();
-        if (dune != null && (dune.IsDefending || dune.IsAimingTornado)) dune.CancelTornadoAim();
-
-        var mage = GetComponent<CelestialMageSkill>();
-        if (mage != null && mage.IsChargingBarrier) mage.ReleaseBarrierCharge(Vector2.zero, 0);
-
-        var mech = GetComponent<AbyssalMechSkill>();
-        if (mech != null && mech.IsChargingVortex) mech.CancelVortexCharge();
-
-        if (isParrying) CancelParryStance();
-        if (SkillAimIndicator.Instance != null) SkillAimIndicator.Instance.Hide();
     }
 
     void Update()
@@ -923,6 +942,7 @@ public class PlayerCombat : MonoBehaviour
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
             ronin.PerformAttack(facing, bonusAttackDamage);
+            BroadcastPvPSkillAction("ATK");
             return;
         }
 
@@ -937,6 +957,7 @@ public class PlayerCombat : MonoBehaviour
             lastAttackTime = Time.time;
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
             titan.OnPerformAttack(facing, bonusAttackDamage);
+            BroadcastPvPSkillAction("ATK");
             return;
         }
 
@@ -963,6 +984,7 @@ public class PlayerCombat : MonoBehaviour
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
             azureBlade.OnPerformAttack(facing, bonusAttackDamage);
+            BroadcastPvPSkillAction("ATK");
             return;
         }
 
@@ -976,6 +998,7 @@ public class PlayerCombat : MonoBehaviour
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
             dune.PerformAttack(facing, bonusAttackDamage);
+            BroadcastPvPSkillAction("ATK");
             return;
         }
 
@@ -989,6 +1012,7 @@ public class PlayerCombat : MonoBehaviour
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.down;
             mage.PerformAttack(facing, bonusAttackDamage);
+            BroadcastPvPSkillAction("ATK");
             return;
         }
 
@@ -1002,6 +1026,7 @@ public class PlayerCombat : MonoBehaviour
 
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.right;
             mech.TryExecuteAnchorAttack(facing);
+            BroadcastPvPSkillAction("ATK");
             return;
         }
 
@@ -1057,6 +1082,7 @@ public class PlayerCombat : MonoBehaviour
         foreach (var col in allHits)
         {
             if (col == null || col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
+            if (PvPMatchManager.IsCoopModeActive && (col.GetComponent<PvPRemoteOpponent>() != null || col.GetComponentInParent<PvPRemoteOpponent>() != null)) continue;
 
             var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
             if (damageable != null && !(damageable is PlayerHealth) && !damagedSet.Contains(damageable))
@@ -1164,6 +1190,20 @@ public class PlayerCombat : MonoBehaviour
         }
 
         Debug.Log($"<color=cyan>[ATTACK]</color> Vung kiếm (Combo {comboStep})! Đánh trúng: {damagedSet.Count} mục tiêu ({enemyCount} quái vật).");
+        BroadcastPvPSkillAction("ATK");
+    }
+
+    public void BroadcastPvPSkillAction(string actionType = "ULTI")
+    {
+        if (PvPMatchManager.Instance != null)
+        {
+            PvPMatchManager.Instance.BroadcastLocalSkillAction(actionType);
+        }
+        else if (PvPNetworkManager.Instance != null && !PvPNetworkManager.Instance.IsBotPracticeMode)
+        {
+            Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : Vector2.right;
+            PvPNetworkManager.Instance.SendActionVfxPacket(actionType, facing, transform.position);
+        }
     }
 
     public bool PerformSpecialSkill()
@@ -1179,7 +1219,13 @@ public class PlayerCombat : MonoBehaviour
             var ronin = GetComponent<GaleRoninSkill>();
             if (ronin == null) ronin = gameObject.AddComponent<GaleRoninSkill>();
             ronin.enabled = true;
-            bool rRes = ronin.TriggerSpecialSkill(); if (rRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return rRes;
+            bool rRes = ronin.TriggerSpecialSkill();
+            if (rRes)
+            {
+                AugmentManager.Instance?.OnSkillCasted(transform.position);
+                BroadcastPvPSkillAction("ULTI");
+            }
+            return rRes;
         }
 
         // Kích hoạt Tuyệt kỹ Azure Blade (Player 3)
@@ -1188,7 +1234,13 @@ public class PlayerCombat : MonoBehaviour
             var azureBlade = GetComponent<AzureBladeSkill>();
             if (azureBlade == null) azureBlade = gameObject.AddComponent<AzureBladeSkill>();
             azureBlade.enabled = true;
-            bool aRes = azureBlade.TriggerSpecialSkill(); if (aRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return aRes;
+            bool aRes = azureBlade.TriggerSpecialSkill();
+            if (aRes)
+            {
+                AugmentManager.Instance?.OnSkillCasted(transform.position);
+                BroadcastPvPSkillAction("ULTI");
+            }
+            return aRes;
         }
 
         // Kích hoạt Tuyệt kỹ Titan Berserker (Player 4)
@@ -1197,7 +1249,13 @@ public class PlayerCombat : MonoBehaviour
             var titan = GetComponent<TitanBerserkerSkill>();
             if (titan == null) titan = gameObject.AddComponent<TitanBerserkerSkill>();
             titan.enabled = true;
-            bool tRes = titan.TriggerSpecialSkill(); if (tRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return tRes;
+            bool tRes = titan.TriggerSpecialSkill();
+            if (tRes)
+            {
+                AugmentManager.Instance?.OnSkillCasted(transform.position);
+                BroadcastPvPSkillAction("ULTI");
+            }
+            return tRes;
         }
 
         // Kích hoạt Tuyệt kỹ Dune Assassin (Player 5)
@@ -1206,7 +1264,13 @@ public class PlayerCombat : MonoBehaviour
             var dune = GetComponent<DuneAssassinSkill>();
             if (dune == null) dune = gameObject.AddComponent<DuneAssassinSkill>();
             dune.enabled = true;
-            bool dRes = dune.TriggerSpecialSkill(); if (dRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return dRes;
+            bool dRes = dune.TriggerSpecialSkill();
+            if (dRes)
+            {
+                AugmentManager.Instance?.OnSkillCasted(transform.position);
+                BroadcastPvPSkillAction("ULTI");
+            }
+            return dRes;
         }
 
         // Kích hoạt Tuyệt kỹ Celestial Mage (Player 6)
@@ -1215,7 +1279,13 @@ public class PlayerCombat : MonoBehaviour
             var mage = GetComponent<CelestialMageSkill>();
             if (mage == null) mage = gameObject.AddComponent<CelestialMageSkill>();
             mage.enabled = true;
-            bool mRes = mage.TriggerSpecialSkill(); if (mRes) AugmentManager.Instance?.OnSkillCasted(transform.position); return mRes;
+            bool mRes = mage.TriggerSpecialSkill();
+            if (mRes)
+            {
+                AugmentManager.Instance?.OnSkillCasted(transform.position);
+                BroadcastPvPSkillAction("ULTI");
+            }
+            return mRes;
         }
 
         // Kích hoạt Tuyệt kỹ Đại Hồng Thủy Cá Mập của Hải Thần Cơ Giáp (Player 7)
@@ -1226,7 +1296,11 @@ public class PlayerCombat : MonoBehaviour
             mech.enabled = true;
             Vector2 facing = (playerController != null) ? playerController.GetFacingDirection() : mech.GetFacingDirection();
             bool amRes = mech.TryExecuteSharkTsunami(facing);
-            if (amRes) AugmentManager.Instance?.OnSkillCasted(transform.position);
+            if (amRes)
+            {
+                AugmentManager.Instance?.OnSkillCasted(transform.position);
+                BroadcastPvPSkillAction("ULTI");
+            }
             return amRes;
         }
 
@@ -1238,6 +1312,7 @@ public class PlayerCombat : MonoBehaviour
             if (energySysMaid != null && !energySysMaid.TryConsumeEnergy(50f)) return false;
             StartCoroutine(sweepSkill.ExecuteSkillRoutine());
             AugmentManager.Instance?.OnSkillCasted(transform.position);
+            BroadcastPvPSkillAction("ULTI");
             return true;
         }
 
@@ -1256,6 +1331,7 @@ public class PlayerCombat : MonoBehaviour
 
         StartCoroutine(CinematicSpecialSkillRoutine());
         AugmentManager.Instance?.OnSkillCasted(transform.position);
+        BroadcastPvPSkillAction("ULTI");
         return true;
     }
 
@@ -1272,10 +1348,13 @@ public class PlayerCombat : MonoBehaviour
             // ====================================================
             // GIAI ĐOẠN 1: CUTSCENE ZOOM-IN & NGƯNG ĐỌNG THỜI GIAN
             // ====================================================
-            Time.timeScale = 0.05f; // Ngưng đọng thời gian (Hit-stop / Cinematic slow-mo)
+            if (!PvPMatchManager.IsPvPModeActive)
+            {
+                Time.timeScale = 0.05f; // Ngưng đọng thời gian (Hit-stop / Cinematic slow-mo) - CHỈ TRONG PVE!
+            }
 
             // Camera zoom cận cảnh vào người chơi
-            if (cam != null) cam.SetCinematicZoom(2.8f);
+            if (cam != null && !PvPMatchManager.IsPvPModeActive) cam.SetCinematicZoom(2.8f);
 
             // Phát âm thanh thức tỉnh sức mạnh thần bí
             SoundManager.EnsureInstance()?.PlayPortalSpawn();
@@ -1302,7 +1381,10 @@ public class PlayerCombat : MonoBehaviour
             // ====================================================
             // GIAI ĐOẠN 2: THỜI GIAN TRỞ LẠI & BÙNG NỔ BÃO LỐC
             // ====================================================
-            Time.timeScale = 1.0f; // Luôn đảm bảo khôi phục thời gian bình thường!
+            if (!PvPMatchManager.IsPvPModeActive)
+            {
+                Time.timeScale = 1.0f; // Luôn đảm bảo khôi phục thời gian bình thường!
+            }
             if (cam != null)
             {
                 cam.ResetZoom();
@@ -1361,6 +1443,7 @@ public class PlayerCombat : MonoBehaviour
         foreach (Collider2D enemy in hitEnemies)
         {
             if (enemy == null || enemy.gameObject == gameObject || enemy.transform.IsChildOf(transform)) continue;
+            if (PvPMatchManager.IsCoopModeActive && (enemy.GetComponent<PvPRemoteOpponent>() != null || enemy.GetComponentInParent<PvPRemoteOpponent>() != null)) continue;
 
             var damageable = enemy.GetComponent<IDamageable>() ?? enemy.GetComponentInParent<IDamageable>();
             if (damageable != null && !(damageable is PlayerHealth))
@@ -1825,7 +1908,6 @@ public class PlayerCombat : MonoBehaviour
     public void CancelParryStance()
     {
         if (!isParrying) return;
-        CancelAttackHold();
         isParrying = false;
         wasParryTriggered = false;
         parryHoldDuration = 0f;
@@ -1836,7 +1918,8 @@ public class PlayerCombat : MonoBehaviour
 
     public void ReleaseParryStance(Vector2 aimDir, int bonusAtk)
     {
-        CancelAttackHold();
+        isAttackHolding = false;
+        attackHoldDuration = 0f;
         if (playerHealth != null && playerHealth.IsDead)
         {
             CancelParryStance();
@@ -1915,6 +1998,7 @@ public class PlayerCombat : MonoBehaviour
         foreach (var col in hits)
         {
             if (col == null || col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
+            if (PvPMatchManager.IsCoopModeActive && (col.GetComponent<PvPRemoteOpponent>() != null || col.GetComponentInParent<PvPRemoteOpponent>() != null)) continue;
             var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
             if (damageable != null && !(damageable is PlayerHealth))
             {
@@ -2134,6 +2218,7 @@ public class PlayerCombat : MonoBehaviour
         foreach (var col in hits)
         {
             if (col == null || col.gameObject == gameObject || col.transform.IsChildOf(transform)) continue;
+            if (PvPMatchManager.IsCoopModeActive && (col.GetComponent<PvPRemoteOpponent>() != null || col.GetComponentInParent<PvPRemoteOpponent>() != null)) continue;
             var damageable = col.GetComponent<IDamageable>() ?? col.GetComponentInParent<IDamageable>();
             if (damageable != null && !(damageable is PlayerHealth))
             {

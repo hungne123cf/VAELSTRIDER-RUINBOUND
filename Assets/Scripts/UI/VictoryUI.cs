@@ -195,6 +195,11 @@ public class VictoryUI : MonoBehaviour
             AccountDatabase.AddItemToActiveUser("core_abyssal_soul", 1, "GachaArtifact", "Đại Thắng Map 3");
             AccountDatabase.AddItemToActiveUser("scroll_summon_mythic", 3, "GachaArtifact", "Đại Thắng Map 3");
         }
+
+        // Tích lũy EXP Tướng khi Vượt Ải Cốt Truyện Thành Công
+        string currentHero = CharacterManager.EnsureInstance()?.GetSelectedCharacterId() ?? CharacterManager.CHAR_VAELSTRIDER;
+        AccountDatabase.AddHeroExp(currentHero, 600, out int newHeroLv, out bool heroLvlUp);
+
         PlayerPrefs.Save();
         AccountDatabase.SaveActiveSessionToDatabase();
 

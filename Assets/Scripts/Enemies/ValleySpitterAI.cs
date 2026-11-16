@@ -380,13 +380,14 @@ public class ValleyThornProjectile : MonoBehaviour
         if (sr != null) sr.color = mainCol;
 
         var trail = gameObject.AddComponent<TrailRenderer>();
-        trail.material = new Material(Shader.Find("Sprites/Default"));
+        Shader trailShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") ?? Shader.Find("Sprites/Default");
+        if (trailShader != null) trail.material = new Material(trailShader);
         trail.startColor = trailStart;
         trail.endColor = trailEnd;
         trail.startWidth = 0.28f;
         trail.endWidth = 0.02f;
         trail.time = 0.22f;
-        trail.sortingOrder = 5190;
+        trail.sortingOrder = 5500;
     }
 
     void Update()
@@ -410,8 +411,10 @@ public class ValleyThornProjectile : MonoBehaviour
         GameObject p = new GameObject("Thorn_Trail_FX");
         p.transform.position = transform.position;
         var pSr = p.AddComponent<SpriteRenderer>();
+        Shader partShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") ?? Shader.Find("Sprites/Default");
+        if (partShader != null) pSr.material = new Material(partShader);
         pSr.sprite = MagmaCalamityHazardManager.GetSoftCircleSprite();
-        pSr.sortingOrder = 5180;
+        pSr.sortingOrder = 5520;
 
         switch (realm)
         {

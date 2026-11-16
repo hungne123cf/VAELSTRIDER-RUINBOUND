@@ -367,7 +367,8 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         lr.startWidth = 0.12f;
         lr.endWidth = 0.12f;
         lr.positionCount = 2;
-        lr.material = new Material(Shader.Find("Sprites/Default"));
+        Shader unlitShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") ?? Shader.Find("Sprites/Default");
+        if (unlitShader != null) lr.material = new Material(unlitShader);
         lr.startColor = new Color(1f, 1f, 1f, 0.85f);
         lr.endColor = new Color(0.85f, 0.9f, 1f, 0.15f);
         lr.SetPosition(0, origin);
@@ -557,7 +558,8 @@ public class SkeletonKingBossAI : MonoBehaviour, IDamageable, IEnemyHealth
         lr.startWidth = 0.08f;
         lr.endWidth = 0.08f;
         lr.positionCount = 36;
-        lr.material = new Material(Shader.Find("Sprites/Default"));
+        Shader unlitShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") ?? Shader.Find("Sprites/Default");
+        if (unlitShader != null) lr.material = new Material(unlitShader);
         lr.startColor = new Color(1f, 0.2f, 0.2f, 0.7f);
         lr.endColor = new Color(1f, 0.2f, 0.2f, 0.7f);
 

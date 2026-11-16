@@ -302,7 +302,9 @@ public class ChestLootPopupUI : MonoBehaviour
             canvasGroup.blocksRaycasts = true;
         }
 
-        Time.timeScale = 0f;
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        if (!isMulti) Time.timeScale = 0f;
+        else Time.timeScale = 1.0f;
         GameAutoBootstrap.SetGameplayHUDVisible(false);
         SoundManager.EnsureInstance()?.PlayChestOpen();
 

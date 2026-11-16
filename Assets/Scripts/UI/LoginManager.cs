@@ -65,6 +65,7 @@ public class LoginManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        Application.runInBackground = true;
         Screen.orientation = ScreenOrientation.LandscapeLeft;
         Screen.autorotateToPortrait = false;
         Screen.autorotateToPortraitUpsideDown = false;
@@ -98,7 +99,19 @@ public class LoginManager : MonoBehaviour
         if (tapToStartPanel != null) tapToStartPanel.SetActive(true);
         if (switchAccountBtn != null) switchAccountBtn.gameObject.SetActive(false); // Ẩn nút đổi tài khoản vì là game offline
 
-        // Đảm bảo Tiêu Đề Game "VAELSTRIDER: RUINBOUND" luôn hiển thị tráng lệ ở nửa trên màn hình
+        // Đảm bảo Tiêu Đề Game "VAELSTRIDER: RUINBOUND" luôn hiển thị 1 lớp duy nhất ở phía trên màn hình (Không bao giờ đè 2 lớp chữ)
+        if (titleText != null)
+        {
+            titleText.gameObject.SetActive(false);
+            if (titleText.transform.parent != null && titleText.transform.parent.name == "Header")
+            {
+                titleText.transform.parent.gameObject.SetActive(false);
+            }
+        }
+        if (subtitleText != null) subtitleText.gameObject.SetActive(false);
+        var oldHeader = GameObject.Find("Header");
+        if (oldHeader != null) oldHeader.SetActive(false);
+
         if (tapToStartPanel != null)
         {
             Transform existingTitle = tapToStartPanel.transform.Find("TapTitleHeader");
@@ -107,17 +120,18 @@ public class LoginManager : MonoBehaviour
             {
                 existingTitle.gameObject.SetActive(true);
                 headerTmp = existingTitle.GetComponent<TextMeshProUGUI>();
+                existingTitle.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 265f);
             }
             else
             {
                 GameObject tObj = new GameObject("TapTitleHeader", typeof(RectTransform), typeof(CanvasRenderer));
                 tObj.transform.SetParent(tapToStartPanel.transform, false);
-                tObj.transform.SetAsFirstSibling(); // Đặt sau Background nhưng trước nút chạm
+                tObj.transform.SetAsFirstSibling();
                 RectTransform tRt = tObj.GetComponent<RectTransform>();
                 tRt.anchorMin = new Vector2(0.5f, 0.5f);
                 tRt.anchorMax = new Vector2(0.5f, 0.5f);
                 tRt.pivot = new Vector2(0.5f, 0.5f);
-                tRt.anchoredPosition = new Vector2(0f, 180f);
+                tRt.anchoredPosition = new Vector2(0f, 265f);
                 tRt.sizeDelta = new Vector2(1400f, 220f);
 
                 headerTmp = tObj.AddComponent<TextMeshProUGUI>();
@@ -127,45 +141,16 @@ public class LoginManager : MonoBehaviour
 
             if (headerTmp != null)
             {
-                headerTmp.text = "<size=90><color=#FFD700><b>VAELSTRIDER</b></color></size>\n<size=44><color=#FFAA33><b>— RUINBOUND —</b></color></size>";
+                headerTmp.text = "<size=84><color=#FFD700><b>VAELSTRIDER</b></color></size>\n<size=40><color=#FFAA33><b>— RUINBOUND —</b></color></size>";
                 headerTmp.alignment = TextAlignmentOptions.Center;
                 headerTmp.overflowMode = TextOverflowModes.Overflow;
                 SoulslikeHUDStyler.SetSafeOutline(headerTmp, 0.35f, Color.black);
             }
         }
 
-        if (titleText != null)
-        {
-            titleText.gameObject.SetActive(true);
-            if (titleText.transform.parent != null)
-            {
-                titleText.transform.parent.gameObject.SetActive(true);
-                titleText.transform.parent.SetAsLastSibling();
-            }
-        }
-        else
-        {
-            var header = GameObject.Find("Header");
-            if (header != null)
-            {
-                header.SetActive(true);
-                header.transform.SetAsLastSibling();
-            }
-        }
-
         // Đảm bảo LoadingProgressPanel (chứa thanh slider trắng thừa) bị ẩn hoàn toàn khi ở màn hình Tap To Start
         var lpp = GameObject.Find("LoadingProgressPanel");
         if (lpp != null) lpp.SetActive(false);
-
-        if (welcomeUserBannerText != null)
-        {
-            if (welcomeUserBannerText.transform.parent != null && 
-                (welcomeUserBannerText.transform.parent.name.Contains("Banner") || welcomeUserBannerText.transform.parent.name.Contains("User")))
-            {
-                welcomeUserBannerText.transform.parent.gameObject.SetActive(false);
-            }
-            welcomeUserBannerText.gameObject.SetActive(false);
-        }
 
         if (introLoadingController == null)
         {
@@ -181,6 +166,176 @@ public class LoginManager : MonoBehaviour
                 img.gameObject.SetActive(false);
             }
         }
+
+        // CHUẨN LIÊN QUÂN MOBILE:
+        // Phần Đăng Nhập / Đăng Ký xuất hiện TRƯỚC phần "BẮT ĐẦU TRÒ CHƠI"!
+        // Khi nào đăng nhập & đặt tên hiển thị xong hết mới hiện màn hình "BẮT ĐẦU TRÒ CHƠI" kèm Tên hiển thị!
+        var pf = PlayFabClientService.EnsureInstance();
+        if (!pf.IsLoggedIn)
+        {
+            SetTapToStartReadyState(false);
+            Canvas rootCanvas = GetComponentInParent<Canvas>() ?? Object.FindAnyObjectByType<Canvas>();
+            PlayFabAuthLoginUI.OpenWizardForStartGame(OnAuthAndNicknameCompleted, rootCanvas != null ? rootCanvas.transform : null);
+        }
+        else
+        {
+            OnAuthAndNicknameCompleted();
+        }
+    }
+
+    private TextMeshProUGUI _loggedInPlayerBadgeText;
+    private GameObject _loggedInSwitchBtnObj;
+
+    private void SetTapToStartReadyState(bool readyToStart)
+    {
+        if (tapToStartText != null) tapToStartText.gameObject.SetActive(readyToStart);
+        if (fullScreenTapButton != null) fullScreenTapButton.interactable = readyToStart;
+        if (_loggedInPlayerBadgeText != null && _loggedInPlayerBadgeText.transform.parent != null)
+            _loggedInPlayerBadgeText.transform.parent.gameObject.SetActive(readyToStart);
+        if (_loggedInSwitchBtnObj != null)
+            _loggedInSwitchBtnObj.SetActive(readyToStart);
+    }
+
+    private void OnAuthAndNicknameCompleted()
+    {
+        EnsureLoggedInStartScreenBanner();
+        SetTapToStartReadyState(true);
+    }
+
+    private void EnsureLoggedInStartScreenBanner()
+    {
+        if (tapToStartPanel == null) return;
+
+        Transform existingBanner = tapToStartPanel.transform.Find("LoggedInAccountBanner");
+        if (existingBanner == null)
+        {
+            GameObject bannerObj = new GameObject("LoggedInAccountBanner", typeof(RectTransform), typeof(Image));
+            bannerObj.transform.SetParent(tapToStartPanel.transform, false);
+            RectTransform bRt = bannerObj.GetComponent<RectTransform>();
+            bRt.anchorMin = new Vector2(0.5f, 0.5f);
+            bRt.anchorMax = new Vector2(0.5f, 0.5f);
+            bRt.pivot = new Vector2(0.5f, 0.5f);
+            bRt.anchoredPosition = new Vector2(0f, -85f);
+            bRt.sizeDelta = new Vector2(760f, 58f);
+            bannerObj.GetComponent<Image>().color = new Color(0.06f, 0.09f, 0.16f, 0.92f);
+
+            GameObject txtObj = new GameObject("BannerText", typeof(RectTransform));
+            txtObj.transform.SetParent(bannerObj.transform, false);
+            RectTransform tRt = txtObj.GetComponent<RectTransform>();
+            tRt.anchorMin = Vector2.zero;
+            tRt.anchorMax = Vector2.one;
+            tRt.offsetMin = new Vector2(16f, 4f);
+            tRt.offsetMax = new Vector2(-16f, -4f);
+
+            _loggedInPlayerBadgeText = txtObj.AddComponent<TextMeshProUGUI>();
+            _loggedInPlayerBadgeText.fontSize = 21f;
+            _loggedInPlayerBadgeText.fontStyle = FontStyles.Bold;
+            _loggedInPlayerBadgeText.alignment = TextAlignmentOptions.Center;
+            _loggedInPlayerBadgeText.raycastTarget = false;
+            SoulslikeHUDStyler.SetSafeOutline(_loggedInPlayerBadgeText, 0.28f, Color.black);
+            GameFontManager.ApplyFontToText(_loggedInPlayerBadgeText, true);
+        }
+
+        Transform existingSwitch = tapToStartPanel.transform.Find("Btn_TopRightSwitchAccount");
+        if (existingSwitch == null)
+        {
+            _loggedInSwitchBtnObj = new GameObject("Btn_TopRightSwitchAccount", typeof(RectTransform), typeof(Image), typeof(Button));
+            _loggedInSwitchBtnObj.transform.SetParent(tapToStartPanel.transform, false);
+            RectTransform sRt = _loggedInSwitchBtnObj.GetComponent<RectTransform>();
+            sRt.anchorMin = new Vector2(1f, 1f);
+            sRt.anchorMax = new Vector2(1f, 1f);
+            sRt.pivot = new Vector2(1f, 1f);
+            sRt.anchoredPosition = new Vector2(-32f, -28f);
+            sRt.sizeDelta = new Vector2(230f, 54f);
+            _loggedInSwitchBtnObj.GetComponent<Image>().color = new Color(0.16f, 0.22f, 0.36f, 0.95f);
+
+            GameObject stObj = new GameObject("SwitchTxt", typeof(RectTransform));
+            stObj.transform.SetParent(_loggedInSwitchBtnObj.transform, false);
+            RectTransform stRt = stObj.GetComponent<RectTransform>();
+            stRt.anchorMin = Vector2.zero;
+            stRt.anchorMax = Vector2.one;
+            stRt.offsetMin = Vector2.zero;
+            stRt.offsetMax = Vector2.zero;
+
+            var stTmp = stObj.AddComponent<TextMeshProUGUI>();
+            stTmp.text = LocalizationManager.T("ĐĂNG NHẬP / ĐỔI TK", "LOGIN / SWITCH");
+            stTmp.fontSize = 18f;
+            stTmp.fontStyle = FontStyles.Bold;
+            stTmp.color = new Color(1f, 0.90f, 0.45f);
+            stTmp.alignment = TextAlignmentOptions.Center;
+            stTmp.raycastTarget = false;
+            SoulslikeHUDStyler.SetSafeOutline(stTmp, 0.25f, Color.black);
+            GameFontManager.ApplyFontToText(stTmp, true);
+
+            _loggedInSwitchBtnObj.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                PlayFabClientService.EnsureInstance().LogoutSession();
+                SetTapToStartReadyState(false);
+                Canvas rootCanvas = GetComponentInParent<Canvas>() ?? Object.FindAnyObjectByType<Canvas>();
+                PlayFabAuthLoginUI.OpenWizardForStartGame(OnAuthAndNicknameCompleted, rootCanvas != null ? rootCanvas.transform : null);
+            });
+        }
+
+        Transform existingOfflineBtn = tapToStartPanel.transform.Find("Btn_TopLeftOffline");
+        if (existingOfflineBtn == null)
+        {
+            GameObject offBtnObj = new GameObject("Btn_TopLeftOffline", typeof(RectTransform), typeof(Image), typeof(Button));
+            offBtnObj.transform.SetParent(tapToStartPanel.transform, false);
+            RectTransform oRt = offBtnObj.GetComponent<RectTransform>();
+            oRt.anchorMin = new Vector2(0f, 1f);
+            oRt.anchorMax = new Vector2(0f, 1f);
+            oRt.pivot = new Vector2(0f, 1f);
+            oRt.anchoredPosition = new Vector2(32f, -28f);
+            oRt.sizeDelta = new Vector2(230f, 54f);
+            offBtnObj.GetComponent<Image>().color = new Color(0.18f, 0.58f, 0.42f, 0.95f);
+
+            GameObject otObj = new GameObject("OfflineTxt", typeof(RectTransform));
+            otObj.transform.SetParent(offBtnObj.transform, false);
+            RectTransform otRt = otObj.GetComponent<RectTransform>();
+            otRt.anchorMin = Vector2.zero;
+            otRt.anchorMax = Vector2.one;
+            otRt.offsetMin = Vector2.zero;
+            otRt.offsetMax = Vector2.zero;
+
+            var otTmp = otObj.AddComponent<TextMeshProUGUI>();
+            otTmp.text = LocalizationManager.T("CHƠI OFFLINE", "PLAY OFFLINE");
+            otTmp.fontSize = 18f;
+            otTmp.fontStyle = FontStyles.Bold;
+            otTmp.color = Color.white;
+            otTmp.alignment = TextAlignmentOptions.Center;
+            otTmp.raycastTarget = false;
+            SoulslikeHUDStyler.SetSafeOutline(otTmp, 0.25f, Color.black);
+            GameFontManager.ApplyFontToText(otTmp, true);
+
+            offBtnObj.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                PlayFabAuthLoginUI.EnsureInstance()?.StartOfflineMode();
+            });
+        }
+
+        if (_loggedInPlayerBadgeText != null)
+        {
+            var acc = AccountDatabase.GetActiveAccount();
+            var pf = PlayFabClientService.EnsureInstance();
+            bool isOff = PlayFabClientService.IsOfflineMode;
+            string dispName = acc != null && !string.IsNullOrEmpty(acc.displayName) ? acc.displayName : "Chiến Binh";
+            if (dispName == "Player" || dispName == "Wanderer")
+            {
+                string savedName = PlayerPrefs.GetString("Player_Name", "");
+                if (!string.IsNullOrEmpty(savedName) && savedName != "Player" && savedName != "Wanderer")
+                    dispName = savedName;
+                else
+                    dispName = isOff ? "Hiệp Sĩ Offline" : "Chiến Binh";
+            }
+            string accUser = acc != null ? acc.username : (isOff ? "Offline" : pf.PlayFabId);
+            string prov = isOff ? "Chế độ Offline" : (pf.IsLoggedIn ? pf.LoggedInProvider : "PlayFab");
+
+            _loggedInPlayerBadgeText.text = LocalizationManager.T(
+                $"CHIẾN BINH: <color=#FFE066>{dispName}</color>   |   TÀI KHOẢN: <color=#66DDFF>{accUser}</color> ({prov})",
+                $"FIGHTER: <color=#FFE066>{dispName}</color>   |   ACCOUNT: <color=#66DDFF>{accUser}</color> ({prov})");
+        }
     }
 
     private void ApplySoulslikeTheme()
@@ -190,61 +345,14 @@ public class LoginManager : MonoBehaviour
             SoulslikeHUDStyler.StyleModalWindow(loginCardPanel.transform);
         }
 
+        // Tắt tiêu đề cũ bị trùng lặp để chỉ giữ 1 tiêu đề TapTitleHeader duy nhất
         if (titleText != null)
         {
-            titleText.gameObject.SetActive(true);
-            if (titleText.transform.parent != null) titleText.transform.parent.gameObject.SetActive(true);
-
-            SoulslikeHUDStyler.StyleHeader(titleText, subtitleText);
-            titleText.fontSize = 86f;
-            titleText.color = new Color(0.98f, 0.88f, 0.50f, 1f);
-            titleText.overflowMode = TextOverflowModes.Overflow;
-            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.35f, Color.black);
-            RectTransform titleRt = titleText.GetComponent<RectTransform>();
-            if (titleRt != null)
-            {
-                if (titleText.transform.parent != null && titleText.transform.parent.name == "Header")
-                {
-                    RectTransform headerRt = titleText.transform.parent.GetComponent<RectTransform>();
-                    if (headerRt != null)
-                    {
-                        headerRt.anchorMin = new Vector2(0.5f, 0.5f);
-                        headerRt.anchorMax = new Vector2(0.5f, 0.5f);
-                        headerRt.pivot = new Vector2(0.5f, 0.5f);
-                        headerRt.anchoredPosition = new Vector2(0f, 220f);
-                        headerRt.sizeDelta = new Vector2(1400f, 220f);
-                    }
-                    titleRt.anchoredPosition = new Vector2(0f, 35f);
-                    titleRt.sizeDelta = new Vector2(1400f, 110f);
-                }
-                else
-                {
-                    titleRt.anchorMin = new Vector2(0.5f, 0.5f);
-                    titleRt.anchorMax = new Vector2(0.5f, 0.5f);
-                    titleRt.pivot = new Vector2(0.5f, 0.5f);
-                    titleRt.anchoredPosition = new Vector2(0f, 220f);
-                    titleRt.sizeDelta = new Vector2(1400f, 110f);
-                }
-            }
-
-            if (subtitleText != null)
-            {
-                subtitleText.gameObject.SetActive(true);
-                subtitleText.fontSize = 32f;
-                subtitleText.color = new Color(0.94f, 0.92f, 0.88f, 0.95f);
-                subtitleText.overflowMode = TextOverflowModes.Overflow;
-                SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.25f, Color.black);
-                RectTransform subRt = subtitleText.GetComponent<RectTransform>();
-                if (subRt != null)
-                {
-                    subRt.anchorMin = new Vector2(0.5f, 0.5f);
-                    subRt.anchorMax = new Vector2(0.5f, 0.5f);
-                    subRt.pivot = new Vector2(0.5f, 0.5f);
-                    subRt.anchoredPosition = new Vector2(0f, -45f);
-                    subRt.sizeDelta = new Vector2(1200f, 50f);
-                }
-            }
+            titleText.gameObject.SetActive(false);
+            if (titleText.transform.parent != null && titleText.transform.parent.name == "Header")
+                titleText.transform.parent.gameObject.SetActive(false);
         }
+        if (subtitleText != null) subtitleText.gameObject.SetActive(false);
 
         if (actionSubmitButton != null)
         {
@@ -294,6 +402,9 @@ public class LoginManager : MonoBehaviour
 
     private void Update()
     {
+        // Không nhận phím tắt chạm màn hình nếu bảng Đăng Nhập / Đăng Ký 5 bước PlayFab đang mở
+        if (PlayFabAuthLoginUI.IsModalOpen) return;
+
         // Hiệu ứng nhịp thở cho chữ TAP TO START - Giữ độ sáng từ 0.85 đến 1.0 với viền đen sắc nét để luôn nổi bật
         if (tapToStartPanel != null && tapToStartPanel.activeSelf && tapToStartText != null && !isStartingGame)
         {
@@ -302,8 +413,8 @@ public class LoginManager : MonoBehaviour
             Color c = new Color(1f, 0.95f, 0.55f, alpha);
             tapToStartText.color = c;
 
-            // Hỗ trợ nhấn phím bất kỳ (Space, Enter, Gamepad, click chuột) để bắt đầu game
-            if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Escape))
+            // Hỗ trợ nhấn phím Space hoặc Enter để bắt đầu
+            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
             {
                 OnTapToStartClicked();
             }
@@ -506,59 +617,11 @@ public class LoginManager : MonoBehaviour
     {
         if (titleText != null)
         {
-            titleText.gameObject.SetActive(true);
-            if (titleText.transform.parent != null) titleText.transform.parent.gameObject.SetActive(true);
-
-            titleText.text = LocalizationManager.Get("APP_TITLE");
-            titleText.fontSize = 86f;
-            titleText.fontStyle = FontStyles.Bold;
-            titleText.characterSpacing = 4f;
-            titleText.overflowMode = TextOverflowModes.Overflow;
-            GameFontManager.ApplyFontToText(titleText, true);
-            SoulslikeHUDStyler.SetSafeOutline(titleText, 0.35f, Color.black);
-            RectTransform titleRt = titleText.GetComponent<RectTransform>();
-            if (titleRt != null)
-            {
-                if (titleText.transform.parent != null && titleText.transform.parent.name == "Header")
-                {
-                    RectTransform headerRt = titleText.transform.parent.GetComponent<RectTransform>();
-                    if (headerRt != null)
-                    {
-                        headerRt.anchorMin = new Vector2(0.5f, 0.5f);
-                        headerRt.anchorMax = new Vector2(0.5f, 0.5f);
-                        headerRt.pivot = new Vector2(0.5f, 0.5f);
-                        headerRt.anchoredPosition = new Vector2(0f, 220f);
-                        headerRt.sizeDelta = new Vector2(1400f, 220f);
-                    }
-                    titleRt.anchoredPosition = new Vector2(0f, 35f);
-                    titleRt.sizeDelta = new Vector2(1400f, 110f);
-                }
-                else
-                {
-                    titleRt.anchorMin = new Vector2(0.5f, 0.5f);
-                    titleRt.anchorMax = new Vector2(0.5f, 0.5f);
-                    titleRt.pivot = new Vector2(0.5f, 0.5f);
-                    titleRt.anchoredPosition = new Vector2(0f, 220f);
-                    titleRt.sizeDelta = new Vector2(1400f, 110f);
-                }
-            }
+            titleText.gameObject.SetActive(false);
+            if (titleText.transform.parent != null && titleText.transform.parent.name == "Header")
+                titleText.transform.parent.gameObject.SetActive(false);
         }
-        if (subtitleText != null)
-        {
-            subtitleText.gameObject.SetActive(true);
-            subtitleText.text = LocalizationManager.Get("LOGIN_SUBTITLE");
-            subtitleText.fontSize = 32f;
-            subtitleText.fontStyle = FontStyles.Bold;
-            subtitleText.overflowMode = TextOverflowModes.Overflow;
-            GameFontManager.ApplyFontToText(subtitleText);
-            SoulslikeHUDStyler.SetSafeOutline(subtitleText, 0.25f, Color.black);
-            RectTransform subRt = subtitleText.GetComponent<RectTransform>();
-            if (subRt != null)
-            {
-                subRt.anchoredPosition = new Vector2(0f, -45f);
-                subRt.sizeDelta = new Vector2(1200f, 50f);
-            }
-        }
+        if (subtitleText != null) subtitleText.gameObject.SetActive(false);
         if (tapToStartText != null)
         {
             tapToStartText.fontSize = 52f;
@@ -790,18 +853,33 @@ public class LoginManager : MonoBehaviour
     public void ShowLoginPanel()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-        if (loginCardPanel != null) loginCardPanel.SetActive(true);
-        if (tapToStartPanel != null) tapToStartPanel.SetActive(false);
-        if (statusFeedbackText != null) statusFeedbackText.text = "";
+        Canvas rootCanvas = GetComponentInParent<Canvas>() ?? Object.FindAnyObjectByType<Canvas>();
+        PlayFabAuthLoginUI.OpenWizardForStartGame(ProceedToEnterMainMenuScene, rootCanvas != null ? rootCanvas.transform : null);
     }
 
     public void OnTapToStartClicked()
     {
-        if (isStartingGame) return;
-        isStartingGame = true;
+        if (isStartingGame || PlayFabAuthLoginUI.IsModalOpen) return;
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
 
+        // QUY TRÌNH 5 BƯỚC CHUẨN GAME ONLINE THƯƠNG MẠI:
+        // Bước 1 (Mở Game -> Bấm Bắt Đầu) -> Nếu chưa xác thực PlayFab Cloud trong phiên này, mở Bước 2 (Chọn Đăng Nhập / Đăng Ký / Guest / Google / FB / Zalo)
+        var pf = PlayFabClientService.EnsureInstance();
+        if (!pf.IsLoggedIn && !PlayFabClientService.IsOfflineMode)
+        {
+            Canvas rootCanvas = GetComponentInParent<Canvas>() ?? Object.FindAnyObjectByType<Canvas>();
+            PlayFabAuthLoginUI.OpenWizardForStartGame(ProceedToEnterMainMenuScene, rootCanvas != null ? rootCanvas.transform : null);
+            return;
+        }
+
+        ProceedToEnterMainMenuScene();
+    }
+
+    public void ProceedToEnterMainMenuScene()
+    {
+        if (isStartingGame) return;
+        isStartingGame = true;
         StartCoroutine(StartGameTransitionRoutine());
     }
 

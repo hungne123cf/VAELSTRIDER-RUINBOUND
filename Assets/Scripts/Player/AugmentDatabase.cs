@@ -25,6 +25,7 @@ public static class AugmentDatabase
         BonusSpellVamp,
         BonusCooldownReduction,
         BonusDefense,
+        BonusAttackSpeed,    // Cuồng Phong Trảm Kích (+Tốc Độ Đánh)
         BonusMaxEnergy,
 
         // ─── Cơ chế độc đáo & Tạm thời ───
@@ -160,7 +161,7 @@ public static class AugmentDatabase
             cardColor = new Color(0.75f, 0.45f, 1f), rarity = AugmentData.Rarity.Common
         },
         new AugmentData {
-            type = AugmentType.BonusAttack,
+            type = AugmentType.LaceratingEdge,
             nameVN = "Lưỡi Dao Xé Rách",      nameEN = "Lacerating Edge",
             descVN = "Tăng <color=#FFEAA7><b>+{v} Sát Thương Vật Lý</b></color> và nhận thêm <color=#55EFC4><b>+8% Tốc Độ Đánh</b></color>.",
             descEN = "Gain <color=#FFEAA7><b>+{v} Physical Attack</b></color> and <color=#55EFC4><b>+8% Attack Speed</b></color>.",
@@ -168,6 +169,16 @@ public static class AugmentDatabase
             flavorEN = "\"Jagged rusted steel tearing through sinew.\"",
             emoji = "🗡️", value = 14f, duration = -1f,
             cardColor = new Color(0.9f, 0.35f, 0.25f), rarity = AugmentData.Rarity.Common
+        },
+        new AugmentData {
+            type = AugmentType.BonusAttackSpeed,
+            nameVN = "Cuồng Phong Trảm Kích",  nameEN = "Swift Strikes",
+            descVN = "Tăng <color=#55EFC4><b>+{v}% Tốc Độ Đánh</b></color> vĩnh viễn cho toàn bộ đòn đánh thường.",
+            descEN = "Gain <color=#55EFC4><b>+{v}% Attack Speed</b></color> permanently for all basic strikes.",
+            flavorVN = "\"Lưỡi kiếm vung nhanh như tia chớp xé rách không gian.\"",
+            flavorEN = "\"A blade flashing like lightning cleaving the void.\"",
+            emoji = "⚡", value = 18f, duration = -1f,
+            cardColor = new Color(0.95f, 0.75f, 0.25f), rarity = AugmentData.Rarity.Common
         },
         new AugmentData {
             type = AugmentType.AbundantVitality,

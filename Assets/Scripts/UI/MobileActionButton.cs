@@ -140,8 +140,37 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
 
     private const float HOLD_AIM_THRESHOLD = 0.45f;
 
+    public static void ResetAllButtonStates()
+    {
+        var allBtns = FindObjectsByType<MobileActionButton>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var b in allBtns)
+        {
+            if (b != null)
+            {
+                b.isPointerDown = false;
+                b.isCooldownTooltipPress = false;
+                b.wasTooltipShown = false;
+                b.currentDragAimDir = Vector2.zero;
+                b.transform.localScale = b.originalScale;
+            }
+        }
+        var pc = FindAnyObjectByType<PlayerCombat>();
+        if (pc != null) pc.CancelAttackHold();
+    }
+
     void Update()
     {
+        if (LevelUpChoiceUI.IsShowing || Time.timeScale <= 0.001f)
+        {
+            if (isPointerDown)
+            {
+                isPointerDown = false;
+                transform.localScale = originalScale;
+                if (playerCombat != null) playerCombat.CancelAttackHold();
+            }
+            return;
+        }
+
         EnsureTargets();
         if (playerHealth != null && playerHealth.IsDead)
         {
@@ -2047,7 +2076,6 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
         }
 
         EnsureTargets();
-        if (playerCombat != null) playerCombat.CancelAttackHold();
         float holdDur = Time.time - pointerDownTime;
         Vector2 aimDir = (currentDragAimDir.sqrMagnitude > 0.01f) 
             ? currentDragAimDir 
@@ -2162,6 +2190,10 @@ public class MobileActionButton : MonoBehaviour, IPointerDownHandler, IPointerUp
                 }
             }
 
+            if (playerCombat != null)
+            {
+                playerCombat.FinishAttackHold();
+            }
             if (playerController != null) playerController.RefreshMoveInput();
         }
         else if (buttonType == ButtonType.Dash)

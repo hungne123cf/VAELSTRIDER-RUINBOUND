@@ -24,6 +24,12 @@ public class DungeonRoomManager : MonoBehaviour
 
     void Start()
     {
+        if (PvPMatchManager.IsPvPModeActive)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         waveSpawner = FindAnyObjectByType<WaveSpawner>();
         RoomWaypointUI.EnsureUIExists();
 
@@ -37,6 +43,11 @@ public class DungeonRoomManager : MonoBehaviour
 
     public void OnPlayerEnterRoom(DungeonRoom room)
     {
+        if (PvPMatchManager.IsPvPModeActive || !isActiveAndEnabled || !gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
         currentRoom = room;
         Debug.Log($"<color=cyan>[ROOM]</color> Người chơi bước vào {room.GetLocalizedTitle()}!");
 

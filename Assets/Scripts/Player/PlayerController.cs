@@ -668,6 +668,7 @@ public class PlayerController : MonoBehaviour
                 // Nhịp 2: Bấm lại là lập tức Teleport quay ngược về vị trí chiếc bóng ban đầu (miễn phí năng lượng!)
                 ronin.RecallToShadowClone();
                 TriggerDashCooldown();
+                PvPMatchManager.Instance?.BroadcastLocalSkillAction("DASH");
                 return;
             }
             else
@@ -678,6 +679,7 @@ public class PlayerController : MonoBehaviour
                 if (energySys != null && !energySys.TryConsumeEnergy(15f)) return;
 
                 ronin.PerformTeleportDash(lastFacingDirection);
+                PvPMatchManager.Instance?.BroadcastLocalSkillAction("DASH");
                 return;
             }
         }
@@ -692,6 +694,7 @@ public class PlayerController : MonoBehaviour
 
             mage.OnPerformBlink(lastFacingDirection);
             TriggerDashCooldown();
+            PvPMatchManager.Instance?.BroadcastLocalSkillAction("DASH");
             return;
         }
 
@@ -716,6 +719,7 @@ public class PlayerController : MonoBehaviour
             isDashing = true;
             SoundManager.EnsureInstance()?.PlayDash();
             AugmentManager.Instance?.OnPlayerDash(transform.position);
+            PvPMatchManager.Instance?.BroadcastLocalSkillAction("DASH");
             var titan = GetComponent<TitanBerserkerSkill>();
             dashTimer = (titan != null && titan.enabled) ? 0.38f : dashDuration;
 
