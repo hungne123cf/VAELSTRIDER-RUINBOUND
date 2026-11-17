@@ -50,6 +50,10 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
     private List<GameObject> activeMarkers = new List<GameObject>();
     private Queue<GameObject> markerPool = new Queue<GameObject>();
 
+    // Teammate Markers Pool
+    private List<GameObject> activeTeammateMarkers = new List<GameObject>();
+    private Queue<GameObject> teammateMarkerPool = new Queue<GameObject>();
+
     // Room Visuals Cache
     private List<GameObject> roomVisuals = new List<GameObject>();
 
@@ -451,6 +455,13 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         }
         activeMarkers.Clear();
 
+        for (int i = 0; i < activeTeammateMarkers.Count; i++)
+        {
+            activeTeammateMarkers[i].SetActive(false);
+            teammateMarkerPool.Enqueue(activeTeammateMarkers[i]);
+        }
+        activeTeammateMarkers.Clear();
+
         if (playerTransform == null) FindPlayer();
 
         // 1. Cập nhật vị trí và hướng nhìn Player
@@ -463,6 +474,21 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
             if (playerMarkerImg != null && playerMarkerImg.sprite == null)
             {
                 playerMarkerImg.sprite = MinimapHUD.GetPlayerAvatarSprite();
+            }
+        }
+
+        // 1b. Quét Đồng Đội Co-op trên Bản Đồ Toàn Cảnh (Avatar, Viền Ngọc Bích và Tên Hiển Thị)
+        bool isCoopMatch = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+        if (isCoopMatch)
+        {
+            var teammates = Object.FindObjectsByType<PvPRemoteOpponent>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var tm in teammates)
+            {
+                if (tm == null || !tm.gameObject.activeInHierarchy) continue;
+                Vector2 tmWorldPos = new Vector2(tm.transform.position.x, tm.transform.position.y);
+                Sprite tmSprite = MinimapHUD.GetAvatarSpriteForHero(tm.OpponentHeroId) ?? MinimapHUD.GetPlayerAvatarSprite();
+                string tmLabel = string.IsNullOrEmpty(tm.OpponentName) ? "ĐỒNG ĐỘI" : tm.OpponentName;
+                SpawnTeammateMarker(tmWorldPos, tmSprite, tm.transform.localScale.x >= 0 ? 1f : -1f, tmLabel);
             }
         }
 
@@ -598,6 +624,66 @@ public class FullscreenMapUI : MonoBehaviour, IDragHandler, IBeginDragHandler
         }
 
         activeMarkers.Add(mObj);
+    }
+
+    private void SpawnTeammateMarker(Vector2 worldPos, Sprite spr, float facingX, string label)
+    {
+        if (markersContainerRt == null) return;
+
+        GameObject mObj;
+        if (teammateMarkerPool.Count > 0)
+        {
+            mObj = teammateMarkerPool.Dequeue();
+            mObj.SetActive(true);
+        }
+        else
+        {
+            mObj = new GameObject("TeammateMarker", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            mObj.layer = 5;
+            mObj.transform.SetParent(markersContainerRt, false);
+
+            var outline = mObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0.20f, 0.95f, 1f, 0.95f);
+            outline.effectDistance = new Vector2(2f, 2f);
+
+            GameObject txtObj = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer));
+            txtObj.layer = 5;
+            txtObj.transform.SetParent(mObj.transform, false);
+            RectTransform tRt = txtObj.GetComponent<RectTransform>();
+            tRt.anchorMin = new Vector2(0.5f, 0f);
+            tRt.anchorMax = new Vector2(0.5f, 0f);
+            tRt.pivot = new Vector2(0.5f, 1f);
+            tRt.anchoredPosition = new Vector2(0f, -2f);
+            tRt.sizeDelta = new Vector2(160f, 20f);
+
+            var tmp = txtObj.AddComponent<TextMeshProUGUI>();
+            tmp.fontSize = 11f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = new Color(0.40f, 0.95f, 1f, 1f);
+            tmp.raycastTarget = false;
+            SoulslikeHUDStyler.SetSafeOutline(tmp, 0.35f, Color.black);
+        }
+
+        RectTransform rt = mObj.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(32f, 32f);
+        rt.anchoredPosition = worldPos * MAP_SCALE;
+        rt.localScale = new Vector3(facingX, 1f, 1f);
+
+        Image img = mObj.GetComponent<Image>();
+        img.sprite = spr;
+        img.color = Color.white;
+        img.preserveAspect = true;
+        img.raycastTarget = false;
+
+        var labelTmp = mObj.GetComponentInChildren<TextMeshProUGUI>();
+        if (labelTmp != null)
+        {
+            labelTmp.transform.localScale = new Vector3(facingX, 1f, 1f);
+            labelTmp.text = $"◆ {label.ToUpper()} ◆";
+        }
+
+        activeTeammateMarkers.Add(mObj);
     }
 
     private void UpdateStatsAndHints()

@@ -54,6 +54,18 @@ public class MinimapHUD : MonoBehaviour
     private List<Image> activeBlips = new List<Image>();
     private Queue<Image> blipPool = new Queue<Image>();
 
+    // Teammate markers on Minimap
+    private class TeammateBlipItem
+    {
+        public GameObject root;
+        public RectTransform rt;
+        public Image iconImg;
+        public Outline outline;
+        public TextMeshProUGUI nameTmp;
+    }
+    private readonly List<TeammateBlipItem> _activeTeammateBlips = new List<TeammateBlipItem>();
+    private readonly Queue<TeammateBlipItem> _teammateBlipPool = new Queue<TeammateBlipItem>();
+
     private float updateTimer = 0f;
     private float compassSearchTimer = 0f;
     private Transform cachedPriorityTarget = null;
@@ -333,9 +345,8 @@ public class MinimapHUD : MonoBehaviour
         return null;
     }
 
-    public static Sprite GetPlayerAvatarSprite()
+    public static Sprite GetAvatarSpriteForHero(string heroId)
     {
-        string heroId = PlayerPrefs.GetString("SelectedHero", "vael");
         if (string.IsNullOrEmpty(heroId)) heroId = "vael";
         heroId = heroId.ToLower();
 
@@ -349,8 +360,16 @@ public class MinimapHUD : MonoBehaviour
             else if (heroId.Contains("ronin")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_GaleRonin") ?? Resources.Load<Sprite>("UI/Avatars/avatar_ronin");
             else if (heroId.Contains("dune")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_DuneAssassin") ?? Resources.Load<Sprite>("UI/Avatars/avatar_dune");
             else if (heroId.Contains("mage")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_CelestialMage") ?? Resources.Load<Sprite>("UI/Avatars/avatar_mage");
+            else if (heroId.Contains("mech")) av = Resources.Load<Sprite>("UI/Avatars/Avatar_AbyssalMech") ?? Resources.Load<Sprite>("UI/Avatars/avatar_mech");
             else av = Resources.Load<Sprite>("UI/Avatars/Avatar_Vaelstrider") ?? Resources.Load<Sprite>("UI/Avatars/avatar_vael");
         }
+        return av;
+    }
+
+    public static Sprite GetPlayerAvatarSprite()
+    {
+        string heroId = PlayerPrefs.GetString("SelectedHero", "vael");
+        Sprite av = GetAvatarSpriteForHero(heroId);
         if (av != null) return av;
 
         // 2. Fallback: Lấy SpriteRenderer từ Player trong scene
@@ -590,7 +609,36 @@ public class MinimapHUD : MonoBehaviour
         }
         activeBlips.Clear();
 
+        for (int i = 0; i < _activeTeammateBlips.Count; i++)
+        {
+            _activeTeammateBlips[i].root.SetActive(false);
+            _teammateBlipPool.Enqueue(_activeTeammateBlips[i]);
+        }
+        _activeTeammateBlips.Clear();
+
         Vector3 playerPos = playerTransform.position;
+
+        // 0. Quét Đồng Đội Co-op (Avatar Chân Dung, Viền Ngọc Bích, Hướng Quay Mặt & Tên Đồng Minh)
+        bool isCoopMatch = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+        if (isCoopMatch)
+        {
+            var teammates = Object.FindObjectsByType<PvPRemoteOpponent>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var tm in teammates)
+            {
+                if (tm == null || !tm.gameObject.activeInHierarchy) continue;
+                Vector2 offset = (Vector2)(tm.transform.position - playerPos);
+                float dist = offset.magnitude;
+                Vector2 uiPos = (offset / radarRadius) * mapUiRadius;
+                if (dist > radarRadius)
+                {
+                    uiPos = offset.normalized * mapUiRadius;
+                }
+
+                float facing = tm.transform.localScale.x >= 0 ? 1f : -1f;
+                Sprite tmSpr = GetAvatarSpriteForHero(tm.OpponentHeroId) ?? GetPlayerAvatarSprite();
+                SpawnTeammateBlip(uiPos, tmSpr, facing, tm.OpponentName);
+            }
+        }
 
         // 1. Quét Kẻ Thù Toàn Diện (Red Circle / Diamond Blips)
         var enemyObjects = GetAllEnemies();
@@ -676,6 +724,68 @@ public class MinimapHUD : MonoBehaviour
         blipImg.color = color;
 
         activeBlips.Add(blipImg);
+    }
+
+    private void SpawnTeammateBlip(Vector2 localPos, Sprite spr, float facingX, string tmName)
+    {
+        TeammateBlipItem item;
+        if (_teammateBlipPool.Count > 0)
+        {
+            item = _teammateBlipPool.Dequeue();
+            item.root.SetActive(true);
+        }
+        else
+        {
+            GameObject go = new GameObject("TeammateBlip", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.layer = 5;
+            go.transform.SetParent(blipContainer, false);
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(24f, 24f);
+
+            var img = go.GetComponent<Image>();
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = new Color(0.20f, 0.95f, 1f, 0.95f); // Viền ngọc bích phát sáng
+            outline.effectDistance = new Vector2(1.5f, 1.5f);
+
+            GameObject txtObj = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            txtObj.layer = 5;
+            txtObj.transform.SetParent(go.transform, false);
+            var tRt = txtObj.GetComponent<RectTransform>();
+            tRt.anchoredPosition = new Vector2(0f, 16f);
+            tRt.sizeDelta = new Vector2(80f, 14f);
+
+            var tmp = txtObj.GetComponent<TextMeshProUGUI>();
+            tmp.fontSize = 9f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = new Color(0.40f, 0.95f, 1f, 1f);
+            tmp.raycastTarget = false;
+            SoulslikeHUDStyler.SetSafeOutline(tmp, 0.25f, Color.black);
+
+            item = new TeammateBlipItem
+            {
+                root = go,
+                rt = rt,
+                iconImg = img,
+                outline = outline,
+                nameTmp = tmp
+            };
+        }
+
+        item.rt.anchoredPosition = localPos;
+        item.rt.localScale = new Vector3(facingX, 1f, 1f);
+        if (item.nameTmp != null)
+        {
+            item.nameTmp.transform.localScale = new Vector3(facingX, 1f, 1f); // Giữ chữ không bị lật
+            item.nameTmp.text = !string.IsNullOrEmpty(tmName) ? tmName : "ĐỒNG ĐỘI";
+        }
+        item.iconImg.sprite = spr;
+        item.iconImg.color = Color.white;
+
+        _activeTeammateBlips.Add(item);
     }
 
     private static void EnsureProceduralSprites()

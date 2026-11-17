@@ -38,6 +38,17 @@ public class PlayFabClientService : MonoBehaviour
     public string LoggedInProvider { get; private set; } = "Offline";
     public bool IsLoggedIn => !string.IsNullOrEmpty(SessionTicket) && !string.IsNullOrEmpty(PlayFabId);
 
+    // Quản lý độc quyền phiên online (Chống 1 tài khoản đăng nhập trên 2 thiết bị cùng lúc)
+    public const string KEY_ACTIVE_DEVICE = "ActiveOnlineDeviceId";
+    public const string KEY_ACTIVE_HEARTBEAT = "ActiveOnlineHeartbeat";
+    public const string KEY_ACTIVE_SESSION = "ActiveOnlineSessionId";
+
+    private Coroutine _heartbeatCoroutine = null;
+    private string _currentSessionId = "";
+    private Coroutine _pendingUploadCoroutine = null;
+    private float _lastUploadTime = -999f;
+    private const float CLOUD_SYNC_MIN_INTERVAL = 2.0f;
+
     public static bool IsOfflineMode
     {
         get => PlayerPrefs.GetInt("IsOfflineMode", 0) == 1;
@@ -297,7 +308,7 @@ public class PlayFabClientService : MonoBehaviour
                 LoggedInProvider = isEmail ? "Email" : "PlayFab Account";
 
                 // Tải dữ liệu Cloud từ PlayFab về máy hiện tại
-                FetchAndApplyCloudAccountData(cleanInput, cleanPass, callback);
+                FetchAndApplyCloudAccountData(cleanInput, cleanPass, cleanInput, callback);
             },
             onError: (err) =>
             {
@@ -369,7 +380,7 @@ public class PlayFabClientService : MonoBehaviour
                 PlayFabId = ExtractJsonString(json, "PlayFabId");
                 SessionTicket = ExtractJsonString(json, "SessionTicket");
                 LoggedInProvider = providerLabel;
-                FetchAndApplyCloudAccountData(displayName, password, callback);
+                FetchAndApplyCloudAccountData(username, password, displayName, callback);
             },
             onError: (_) => { loginSucceeded = false; });
 
@@ -392,7 +403,7 @@ public class PlayFabClientService : MonoBehaviour
                 PlayFabId = ExtractJsonString(json, "PlayFabId");
                 SessionTicket = ExtractJsonString(json, "SessionTicket");
                 LoggedInProvider = providerLabel;
-                FetchAndApplyCloudAccountData(displayName, password, callback);
+                FetchAndApplyCloudAccountData(username, password, displayName, callback);
             },
             onError: (err) =>
             {
@@ -477,7 +488,7 @@ public class PlayFabClientService : MonoBehaviour
                 PlayFabId = ExtractJsonString(json, "PlayFabId");
                 SessionTicket = ExtractJsonString(json, "SessionTicket");
                 LoggedInProvider = "Google";
-                FetchAndApplyCloudAccountData("GG_" + PlayFabId, "google_oauth", callback);
+                FetchAndApplyCloudAccountData("GG_" + PlayFabId, "google_oauth", "GooglePlayer", callback);
             },
             onError: (err) =>
             {
@@ -519,7 +530,7 @@ public class PlayFabClientService : MonoBehaviour
                 PlayFabId = ExtractJsonString(json, "PlayFabId");
                 SessionTicket = ExtractJsonString(json, "SessionTicket");
                 LoggedInProvider = "Facebook";
-                FetchAndApplyCloudAccountData("FB_" + PlayFabId, "fb_oauth", callback);
+                FetchAndApplyCloudAccountData("FB_" + PlayFabId, "fb_oauth", "FacebookPlayer", callback);
             },
             onError: (err) =>
             {
@@ -622,11 +633,45 @@ public class PlayFabClientService : MonoBehaviour
     }
 
     // =========================================================================
-    // 6. ĐỒNG BỘ DỮ LIỆU ĐÁM MÂY 2 CHIỀU (USER DATA CLOUD SAVE)
+    // 6. ĐỒNG BỘ DỮ LIỆU ĐÁM MÂY 2 CHIỀU (USER DATA CLOUD SAVE) & QUẢN LÝ PHIÊN ONLINE ĐỘC QUYỀN
     // =========================================================================
-    public void UploadAccountDataToPlayFab(AccountDatabase.AccountData acc)
+    public void UploadAccountDataToPlayFab(AccountDatabase.AccountData acc, bool forceImmediate = false)
     {
         if (!IsLoggedIn || acc == null) return;
+
+        if (forceImmediate)
+        {
+            if (_pendingUploadCoroutine != null)
+            {
+                StopCoroutine(_pendingUploadCoroutine);
+                _pendingUploadCoroutine = null;
+            }
+            DoUploadAccountData(acc);
+            return;
+        }
+
+        // Debounce: Nếu vừa upload cách đây chưa đầy 2s, hoãn lại 2s rồi mới đẩy để tránh lỗi 429
+        if (Time.unscaledTime - _lastUploadTime < CLOUD_SYNC_MIN_INTERVAL)
+        {
+            if (_pendingUploadCoroutine != null) StopCoroutine(_pendingUploadCoroutine);
+            _pendingUploadCoroutine = StartCoroutine(DebouncedUploadRoutine(acc, CLOUD_SYNC_MIN_INTERVAL));
+            return;
+        }
+
+        DoUploadAccountData(acc);
+    }
+
+    private IEnumerator DebouncedUploadRoutine(AccountDatabase.AccountData acc, float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+        _pendingUploadCoroutine = null;
+        DoUploadAccountData(acc);
+    }
+
+    private void DoUploadAccountData(AccountDatabase.AccountData acc)
+    {
+        if (!IsLoggedIn || acc == null) return;
+        _lastUploadTime = Time.unscaledTime;
         string rawJson = JsonUtility.ToJson(acc);
         string escapedJson = EscapeJsonString(rawJson);
         string payload = $"{{\"Data\":{{\"{USER_DATA_SAVE_KEY}\":\"{escapedJson}\"}},\"Permission\":\"Public\"}}";
@@ -634,7 +679,7 @@ public class PlayFabClientService : MonoBehaviour
         StartCoroutine(SendPlayFabPost("/Client/UpdateUserData", payload, useAuthHeader: true,
             onSuccess: (_) =>
             {
-                Debug.Log($"<color=#55FF88>[PLAYFAB CLOUD]</color> Đã đồng bộ hồ sơ '{acc.username}' (Linh hồn: {acc.aethelShards:N0}) lên Microsoft PlayFab!");
+                Debug.Log($"<color=#55FF88>[PLAYFAB CLOUD]</color> Đã đồng bộ hồ sơ '{acc.username}' ({acc.displayName} • Linh hồn: {acc.aethelShards:N0}) lên Microsoft PlayFab!");
             },
             onError: (err) =>
             {
@@ -642,12 +687,92 @@ public class PlayFabClientService : MonoBehaviour
             }));
     }
 
-    private void FetchAndApplyCloudAccountData(string fallbackUsername, string fallbackPass, Action<bool, string> callback)
+    private void ClaimActiveDeviceSession(string myDevId, string sessionId)
     {
-        string payload = $"{{\"Keys\":[\"{USER_DATA_SAVE_KEY}\"]}}";
+        if (!IsLoggedIn) return;
+        long nowTicks = DateTime.UtcNow.Ticks;
+        string payload = $"{{\"Data\":{{\"{KEY_ACTIVE_DEVICE}\":\"{myDevId}\",\"{KEY_ACTIVE_HEARTBEAT}\":\"{nowTicks}\",\"{KEY_ACTIVE_SESSION}\":\"{sessionId}\"}},\"Permission\":\"Public\"}}";
+        StartCoroutine(SendPlayFabPost("/Client/UpdateUserData", payload, useAuthHeader: true, null, null));
+
+        if (_heartbeatCoroutine != null) StopCoroutine(_heartbeatCoroutine);
+        _heartbeatCoroutine = StartCoroutine(OnlineHeartbeatRoutine(myDevId, sessionId));
+    }
+
+    private IEnumerator OnlineHeartbeatRoutine(string myDevId, string sessionId)
+    {
+        var wait = new WaitForSecondsRealtime(15f);
+        while (IsLoggedIn && _currentSessionId == sessionId)
+        {
+            yield return wait;
+            if (!IsLoggedIn || _currentSessionId != sessionId) yield break;
+
+            // 1. Kiểm tra phiên trên server: nếu thiết bị khác đã chiếm phiên -> đá thiết bị này ra
+            bool kicked = false;
+            string checkPayload = $"{{\"PlayFabId\":\"{PlayFabId}\",\"Keys\":[\"{KEY_ACTIVE_SESSION}\"]}}";
+            yield return SendPlayFabPost("/Client/GetUserData", checkPayload, useAuthHeader: true,
+                onSuccess: (json) =>
+                {
+                    string serverSession = ExtractNestedUserDataValue(json, KEY_ACTIVE_SESSION);
+                    if (!string.IsNullOrEmpty(serverSession) && serverSession != sessionId) kicked = true;
+                }, null);
+
+            if (!IsLoggedIn || _currentSessionId != sessionId) yield break;
+            if (kicked)
+            {
+                HandleSessionTakenOver();
+                yield break;
+            }
+
+            // 2. Vẫn là chủ phiên -> cập nhật heartbeat
+            long nowTicks = DateTime.UtcNow.Ticks;
+            string payload = $"{{\"Data\":{{\"{KEY_ACTIVE_HEARTBEAT}\":\"{nowTicks}\"}},\"Permission\":\"Public\"}}";
+            yield return SendPlayFabPost("/Client/UpdateUserData", payload, useAuthHeader: true, null, null);
+        }
+    }
+
+    /// <summary>Bắn ra khi tài khoản bị đăng nhập trên thiết bị khác và thiết bị này bị đá.</summary>
+    public event Action OnSessionKicked;
+
+    private void HandleSessionTakenOver()
+    {
+        Debug.LogWarning("[PLAYFAB] Tài khoản đã đăng nhập trên thiết bị khác -> đăng xuất thiết bị này.");
+
+        // Rời phòng Co-op / PvP nếu đang ở trong
+        try { if (PvPNetworkManager.Instance != null) PvPNetworkManager.Instance.ShutdownRunnerOnly(); }
+        catch (Exception ex) { Debug.LogWarning("[PLAYFAB] Shutdown runner warning: " + ex.Message); }
+
+        // Đăng xuất cục bộ, KHÔNG xóa phiên trên server (phiên đó là của thiết bị mới)
+        LogoutSession(clearServerSession: false);
+        EmitStatus(LocalizationManager.T(
+            "TÀI KHOẢN ĐÃ ĐĂNG NHẬP TRÊN THIẾT BỊ KHÁC. BẠN ĐÃ BỊ ĐĂNG XUẤT!",
+            "YOUR ACCOUNT WAS LOGGED IN ON ANOTHER DEVICE. YOU HAVE BEEN LOGGED OUT!"));
+        PlayerPrefs.SetInt("VR_SessionKickedNotice", 1);
+        PlayerPrefs.Save();
+
+        OnSessionKicked?.Invoke();
+
+        // Quay về màn hình đăng nhập
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "LoginScene")
+            UnityEngine.SceneManagement.SceneManager.LoadScene("LoginScene");
+    }
+
+    private void FetchAndApplyCloudAccountData(string fallbackUsername, string fallbackPass, string suggestedDisplayName, Action<bool, string> callback)
+    {
+        string payload = $"{{\"Keys\":[\"{USER_DATA_SAVE_KEY}\",\"{KEY_ACTIVE_DEVICE}\",\"{KEY_ACTIVE_HEARTBEAT}\",\"{KEY_ACTIVE_SESSION}\"]}}";
         StartCoroutine(SendPlayFabPost("/Client/GetUserData", payload, useAuthHeader: true,
             onSuccess: (json) =>
             {
+                // 1. KIỂM TRA & CHIẾM PHIÊN HOẠT ĐỘNG CHO THIẾT BỊ HIỆN TẠI
+                // Lưu ý: Khi người chơi đăng nhập trên điện thoại mới (hoặc vừa đóng game trên PC),
+                // luôn ưu tiên cấp quyền đăng nhập cho thiết bị hiện tại thay vì khóa tài khoản 40s.
+                string myDevId = SystemInfo.deviceUniqueIdentifier;
+                if (string.IsNullOrEmpty(myDevId)) myDevId = "Device_" + System.Guid.NewGuid().ToString("N").Substring(0, 8);
+
+                // 2. CHIẾM PHIÊN HOẠT ĐỘNG VÀ BẬT VÒNG LẶP HEARTBEAT CHO THIẾT BỊ HIỆN TẠI
+                _currentSessionId = System.Guid.NewGuid().ToString("N");
+                ClaimActiveDeviceSession(myDevId, _currentSessionId);
+
+                // 3. TẢI VÀ NẠP DỮ LIỆU CLOUD CHUẨN XÁC
                 string embeddedAccJson = ExtractNestedUserDataValue(json, USER_DATA_SAVE_KEY);
                 if (!string.IsNullOrEmpty(embeddedAccJson))
                 {
@@ -668,6 +793,15 @@ public class PlayFabClientService : MonoBehaviour
                                 PlayerPrefs.SetString("Player_Name", cloudAcc.displayName);
                                 PlayerPrefs.SetInt("HasSetNickname_" + cloudAcc.username, 1);
                             }
+                            else if (!string.IsNullOrEmpty(suggestedDisplayName) &&
+                                     suggestedDisplayName != "Player" &&
+                                     suggestedDisplayName != "Wanderer" &&
+                                     suggestedDisplayName != "Chiến Binh")
+                            {
+                                cloudAcc.displayName = suggestedDisplayName;
+                                PlayerPrefs.SetString("Player_Name", suggestedDisplayName);
+                                PlayerPrefs.SetInt("HasSetNickname_" + cloudAcc.username, 1);
+                            }
                             else if (!string.IsNullOrEmpty(localSavedName) &&
                                      localSavedName != "Player" &&
                                      localSavedName != "Wanderer" &&
@@ -677,8 +811,13 @@ public class PlayFabClientService : MonoBehaviour
                                 PlayerPrefs.SetInt("HasSetNickname_" + cloudAcc.username, 1);
                             }
 
+                            // Lưu vào database và áp dụng đè sạch vào Game Session (không lưu prefs cũ của máy này đè lên cloudAcc!)
                             AccountDatabase.SaveOrUpdateCloudAccount(cloudAcc);
                             PlayerPrefs.Save();
+
+                            // Cập nhật lại giao diện MainMenu nếu đang mở
+                            MainMenuManager.Instance?.RefreshTopLeftPlayerProfileBadge();
+                            MainMenuManager.Instance?.RefreshCurrencies();
 
                             string msg = LocalizationManager.T(
                                 $"ĐĂNG NHẬP & ĐỒNG BỘ PLAYFAB THÀNH CÔNG! ({cloudAcc.displayName} • {cloudAcc.aethelShards:N0} LINH HỒN)",
@@ -701,17 +840,13 @@ public class PlayFabClientService : MonoBehaviour
                 if (localAcc != null)
                 {
                     localAcc.username = fallbackUsername;
-                    string localSavedName = PlayerPrefs.GetString("Player_Name", "").Trim();
-                    if (!string.IsNullOrEmpty(localSavedName) && localSavedName != "Player" && localSavedName != "Wanderer" && localSavedName != "Chiến Binh")
-                    {
-                        localAcc.displayName = localSavedName;
-                    }
-                    else
-                    {
-                        localAcc.displayName = fallbackUsername;
-                    }
+                    string nameToUse = !string.IsNullOrEmpty(suggestedDisplayName) && suggestedDisplayName != "Player" ? suggestedDisplayName : fallbackUsername;
+                    localAcc.displayName = nameToUse;
+                    PlayerPrefs.SetString("Player_Name", nameToUse);
+                    PlayerPrefs.Save();
+
                     AccountDatabase.SaveOrUpdateCloudAccount(localAcc);
-                    UploadAccountDataToPlayFab(localAcc);
+                    UploadAccountDataToPlayFab(localAcc, forceImmediate: true);
                     SubmitPvPScoreToLeaderboard(localAcc.pvpRating, localAcc.pvpWins);
                 }
 
@@ -839,21 +974,8 @@ public class PlayFabClientService : MonoBehaviour
     /// </summary>
     public void LoginWithOneClickSocialOAuth(string provider, Action<bool, string> callback)
     {
-        // Nếu đã có Email Google lưu trước đó trên máy, tự động đồng bộ ngay vào tài khoản Cloud này
-        string savedEmail = PlayerPrefs.GetString("OAuth_LastGoogleEmail", "").Trim();
-        if (!string.IsNullOrEmpty(savedEmail) && savedEmail.Contains("@"))
-        {
-            EmitStatus(LocalizationManager.T($"ĐANG ĐỒNG BỘ TÀI KHOẢN CLOUD: {savedEmail}...", $"SYNCING CLOUD ACCOUNT: {savedEmail}..."));
-            string suggested = savedEmail.Split('@')[0];
-            LoginWithDirectSocialAccount(provider, savedEmail, suggested, callback);
-            return;
-        }
-
-        if (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer)
-        {
-            callback?.Invoke(false, LocalizationManager.T("Vui lòng nhập Email Google để đồng bộ tài khoản trên nhiều thiết bị!", "Please enter Google Email to sync across devices!"));
-            return;
-        }
+        // Lưu ý: Không tự động bypass bằng OAuth_LastGoogleEmail để người dùng luôn được quyền 
+        // chọn tài khoản Google mong muốn (hoặc đổi tài khoản khác) qua cửa sổ OAuth / Native Picker.
 
         EmitStatus(LocalizationManager.T(
             $"Đang liên kết tới {provider} để chọn tài khoản...",
@@ -869,7 +991,11 @@ public class PlayFabClientService : MonoBehaviour
                     PlayerPrefs.SetString("OAuth_LastGoogleEmail", profile.email);
                     PlayerPrefs.Save();
                 }
-                LoginWithDirectSocialAccount(provider, emailOrId, suggestedName, callback);
+                LoginWithDirectSocialAccount(provider, emailOrId, suggestedName, (ok, m) =>
+                {
+                    if (ok && provider == "Google") SyncGoogleAvatar(profile.pictureUrl);
+                    callback?.Invoke(ok, m);
+                });
             },
             onFailed: (err) =>
             {
@@ -895,13 +1021,46 @@ public class PlayFabClientService : MonoBehaviour
         StartCoroutine(LoginOrAutoRegisterPlayFabAccount(pfUsername, pfEmail, pfPassword, disp, provider, callback));
     }
 
-    public void LogoutSession()
+    public void LogoutSession() => LogoutSession(true);
+
+    public void LogoutSession(bool clearServerSession)
     {
+        if (_heartbeatCoroutine != null)
+        {
+            StopCoroutine(_heartbeatCoroutine);
+            _heartbeatCoroutine = null;
+        }
+        if (_pendingUploadCoroutine != null)
+        {
+            StopCoroutine(_pendingUploadCoroutine);
+            _pendingUploadCoroutine = null;
+        }
+
+        if (IsLoggedIn && clearServerSession)
+        {
+            // Xóa phiên hoạt động online trên PlayFab để thiết bị khác có thể đăng nhập ngay tức khắc
+            string payload = $"{{\"Data\":{{\"{KEY_ACTIVE_HEARTBEAT}\":\"0\",\"{KEY_ACTIVE_DEVICE}\":\"\"}},\"Permission\":\"Public\"}}";
+            StartCoroutine(SendPlayFabPost("/Client/UpdateUserData", payload, useAuthHeader: true, null, null));
+        }
+
+        _currentSessionId = "";
         PlayFabId = "";
         SessionTicket = "";
         LoggedInProvider = "None";
         IsOfflineMode = true;
         EmitStatus(LocalizationManager.T("ĐÃ ĐĂNG XUẤT TÀI KHOẢN.", "LOGGED OUT."));
+    }
+
+    private void OnApplicationQuit()
+    {
+        if (IsLoggedIn)
+        {
+            var acc = AccountDatabase.GetActiveAccount();
+            if (acc != null)
+            {
+                DoUploadAccountData(acc);
+            }
+        }
     }
 
     // =========================================================================
@@ -910,6 +1069,58 @@ public class PlayFabClientService : MonoBehaviour
     private const string GLOBAL_BOARD_USER = "vaelglobalboard";
     private const string GLOBAL_BOARD_PASS = "VaelBoard#2026";
     private const string GLOBAL_BOARD_DATA_KEY = "GlobalPvPLeaderboardV1";
+
+    private string _cachedBoardTicket = "";
+    private DateTime _cachedBoardTicketTime = DateTime.MinValue;
+    private bool _isFetchingBoardTicket = false;
+
+    private IEnumerator EnsureGlobalBoardTicketRoutine(Action<string> onTicketReady)
+    {
+        if (!string.IsNullOrEmpty(_cachedBoardTicket) && (DateTime.UtcNow - _cachedBoardTicketTime).TotalHours < 12)
+        {
+            onTicketReady?.Invoke(_cachedBoardTicket);
+            yield break;
+        }
+
+        while (_isFetchingBoardTicket)
+        {
+            yield return new WaitForSeconds(0.1f);
+            if (!string.IsNullOrEmpty(_cachedBoardTicket) && (DateTime.UtcNow - _cachedBoardTicketTime).TotalHours < 12)
+            {
+                onTicketReady?.Invoke(_cachedBoardTicket);
+                yield break;
+            }
+        }
+
+        _isFetchingBoardTicket = true;
+        var loginReq = new LoginUsernameRequest
+        {
+            TitleId = GetActiveTitleId(),
+            Username = GLOBAL_BOARD_USER,
+            Password = GLOBAL_BOARD_PASS
+        };
+
+        yield return SendPlayFabPostWithCustomTicket("/Client/LoginWithPlayFab", JsonUtility.ToJson(loginReq), null,
+            onSuccess: (json) =>
+            {
+                _cachedBoardTicket = ExtractJsonString(json, "SessionTicket");
+                _cachedBoardTicketTime = DateTime.UtcNow;
+                _isFetchingBoardTicket = false;
+                onTicketReady?.Invoke(_cachedBoardTicket);
+            },
+            onError: (err) =>
+            {
+                _isFetchingBoardTicket = false;
+                Debug.LogWarning("[PlayFabClientService] EnsureGlobalBoardTicket warning: " + err);
+                onTicketReady?.Invoke(null);
+            });
+    }
+
+    public void InvalidateBoardTicket()
+    {
+        _cachedBoardTicket = "";
+        _cachedBoardTicketTime = DateTime.MinValue;
+    }
 
     public void SubmitPvPScoreToLeaderboard(int pvpRating, int pvpWins)
     {
@@ -931,25 +1142,15 @@ public class PlayFabClientService : MonoBehaviour
         myName = myName.Replace("|", "").Replace(";", "").Replace("\"", "");
         string myPfId = string.IsNullOrEmpty(PlayFabId) ? "LOCAL" : PlayFabId;
 
-        var loginReq = new LoginUsernameRequest
-        {
-            TitleId = GetActiveTitleId(),
-            Username = GLOBAL_BOARD_USER,
-            Password = GLOBAL_BOARD_PASS
-        };
-
         string boardTicket = "";
-        yield return SendPlayFabPostWithCustomTicket("/Client/LoginWithPlayFab", JsonUtility.ToJson(loginReq), null,
-            onSuccess: (json) => { boardTicket = ExtractJsonString(json, "SessionTicket"); },
-            onError: null);
-
+        yield return EnsureGlobalBoardTicketRoutine((t) => boardTicket = t);
         if (string.IsNullOrEmpty(boardTicket)) yield break;
 
         string currentBoardRaw = "";
         string getPayload = $"{{\"Keys\":[\"{GLOBAL_BOARD_DATA_KEY}\"]}}";
         yield return SendPlayFabPostWithCustomTicket("/Client/GetUserData", getPayload, boardTicket,
             onSuccess: (json) => { currentBoardRaw = ExtractNestedUserDataValue(json, GLOBAL_BOARD_DATA_KEY); },
-            onError: null);
+            onError: (err) => { if (err.Contains("401") || err.Contains("403")) InvalidateBoardTicket(); });
 
         var dict = new Dictionary<string, LeaderboardEntry>();
         if (!string.IsNullOrEmpty(currentBoardRaw))
@@ -1002,17 +1203,9 @@ public class PlayFabClientService : MonoBehaviour
     {
         EmitStatus(LocalizationManager.T("ĐANG TẢI BẢNG XẾP HẠNG ĐẤU TRƯỜNG TỪ PLAYFAB (1BE56D)...", "LOADING GLOBAL PVP LEADERBOARD FROM PLAYFAB (1BE56D)..."));
 
-        var loginReq = new LoginUsernameRequest
-        {
-            TitleId = GetActiveTitleId(),
-            Username = GLOBAL_BOARD_USER,
-            Password = GLOBAL_BOARD_PASS
-        };
-
         string boardTicket = "";
-        yield return SendPlayFabPostWithCustomTicket("/Client/LoginWithPlayFab", JsonUtility.ToJson(loginReq), null,
-            onSuccess: (json) => { boardTicket = ExtractJsonString(json, "SessionTicket"); },
-            onError: null);
+        yield return EnsureGlobalBoardTicketRoutine((t) => boardTicket = t);
+        if (string.IsNullOrEmpty(boardTicket)) yield break;
 
         var list = new List<LeaderboardEntry>();
         if (!string.IsNullOrEmpty(boardTicket))
@@ -1021,7 +1214,7 @@ public class PlayFabClientService : MonoBehaviour
             string getPayload = $"{{\"Keys\":[\"{GLOBAL_BOARD_DATA_KEY}\"]}}";
             yield return SendPlayFabPostWithCustomTicket("/Client/GetUserData", getPayload, boardTicket,
                 onSuccess: (json) => { raw = ExtractNestedUserDataValue(json, GLOBAL_BOARD_DATA_KEY); },
-                onError: null);
+                onError: (err) => { if (err.Contains("401") || err.Contains("403")) InvalidateBoardTicket(); });
 
             if (!string.IsNullOrEmpty(raw))
             {
@@ -1063,6 +1256,44 @@ public class PlayFabClientService : MonoBehaviour
     }
 
     // =========================================================================
+    // ĐỒNG BỘ AVATAR GOOGLE QUA PLAYFAB PROFILE (AvatarUrl)
+    // =========================================================================
+    /// <summary>Đẩy URL avatar lên PlayFab (khi thiết bị lấy được ảnh Google, vd PC).</summary>
+    public void UploadAvatarUrl(string avatarUrl)
+    {
+        if (!IsLoggedIn || string.IsNullOrEmpty(avatarUrl)) return;
+        string payload = $"{{\"ImageUrl\":\"{EscapeJsonString(avatarUrl.Trim())}\"}}";
+        StartCoroutine(SendPlayFabPost("/Client/UpdateAvatarUrl", payload, useAuthHeader: true,
+            onSuccess: (_) => Debug.Log("[PLAYFAB] Đã đồng bộ AvatarUrl lên PlayFab."),
+            onError: (err) => Debug.LogWarning("[PLAYFAB] UpdateAvatarUrl lỗi: " + err)));
+    }
+
+    /// <summary>Lấy URL avatar đã lưu trên PlayFab (khi thiết bị không lấy được ảnh Google, vd Android AccountManager).</summary>
+    public void FetchAvatarUrl(Action<string> onResult)
+    {
+        if (!IsLoggedIn) { onResult?.Invoke(""); return; }
+        string payload = $"{{\"PlayFabId\":\"{PlayFabId}\",\"ProfileConstraints\":{{\"ShowAvatarUrl\":true}}}}";
+        StartCoroutine(SendPlayFabPost("/Client/GetPlayerProfile", payload, useAuthHeader: true,
+            onSuccess: (json) => onResult?.Invoke(ExtractJsonString(json, "AvatarUrl") ?? ""),
+            onError: (err) => { Debug.LogWarning("[PLAYFAB] GetPlayerProfile lỗi: " + err); onResult?.Invoke(""); }));
+    }
+
+    /// <summary>Có ảnh -> đẩy lên PlayFab. Không có ảnh -> tải ảnh đã lưu từ PlayFab về.</summary>
+    public void SyncGoogleAvatar(string localPhotoUrl, Action<Sprite> onAvatarReady = null)
+    {
+        if (!string.IsNullOrEmpty(localPhotoUrl))
+        {
+            UploadAvatarUrl(localPhotoUrl);
+            return;
+        }
+        FetchAvatarUrl((url) =>
+        {
+            if (!string.IsNullOrEmpty(url))
+                OAuthAuthenticator.SaveAndDownloadAvatar(url, onAvatarReady);
+        });
+    }
+
+    // =========================================================================
     // HỆ THỐNG LỜI MỜI PHÒNG CO-OP CLOUD & CROSS-DEVICE
     // =========================================================================
     private const string GLOBAL_INVITES_DATA_KEY = "GlobalCoopRoomInvites_v1";
@@ -1071,7 +1302,8 @@ public class PlayFabClientService : MonoBehaviour
     {
         if (string.IsNullOrEmpty(targetFriend) || string.IsNullOrEmpty(roomPin)) return;
         // 1. Lưu Local Shared (hỗ trợ test cùng thiết bị hoặc cùng mạng)
-        string localKey = "VR_LOCAL_ROOM_INVITE_" + targetFriend.Trim().ToUpperInvariant();
+        string cleanTarget = targetFriend.Trim().ToUpperInvariant();
+        string localKey = "VR_LOCAL_ROOM_INVITE_" + cleanTarget;
         PlayerPrefs.SetString(localKey, $"{senderName}|{roomPin}|{DateTime.UtcNow.Ticks}");
         PlayerPrefs.Save();
 
@@ -1081,28 +1313,18 @@ public class PlayFabClientService : MonoBehaviour
 
     private IEnumerator SendRoomInviteCloudRoutine(string targetFriend, string senderName, string roomPin)
     {
-        var loginReq = new LoginUsernameRequest
-        {
-            TitleId = GetActiveTitleId(),
-            Username = GLOBAL_BOARD_USER,
-            Password = GLOBAL_BOARD_PASS
-        };
-
         string boardTicket = "";
-        yield return SendPlayFabPostWithCustomTicket("/Client/LoginWithPlayFab", JsonUtility.ToJson(loginReq), null,
-            onSuccess: (json) => { boardTicket = ExtractJsonString(json, "SessionTicket"); },
-            onError: null);
-
+        yield return EnsureGlobalBoardTicketRoutine((t) => boardTicket = t);
         if (string.IsNullOrEmpty(boardTicket)) yield break;
 
         string currentRaw = "";
         string getPayload = $"{{\"Keys\":[\"{GLOBAL_INVITES_DATA_KEY}\"]}}";
         yield return SendPlayFabPostWithCustomTicket("/Client/GetUserData", getPayload, boardTicket,
             onSuccess: (json) => { currentRaw = ExtractNestedUserDataValue(json, GLOBAL_INVITES_DATA_KEY); },
-            onError: null);
+            onError: (err) => { if (err.Contains("401") || err.Contains("403")) InvalidateBoardTicket(); });
 
         long nowTicks = DateTime.UtcNow.Ticks;
-        long expireTicks = TimeSpan.FromSeconds(60).Ticks;
+        long expireTicks = TimeSpan.FromSeconds(120).Ticks; // Giữ lời mời trong 120s
 
         List<string> validEntries = new List<string>();
         if (!string.IsNullOrEmpty(currentRaw))
@@ -1134,9 +1356,22 @@ public class PlayFabClientService : MonoBehaviour
     {
         if (string.IsNullOrEmpty(myDisplayName)) return;
 
-        // 1. Kiểm tra Local Storage trước
-        string localKey = "VR_LOCAL_ROOM_INVITE_" + myDisplayName.Trim().ToUpperInvariant();
+        // 1. Kiểm tra Local Storage trước (kiểm tra cả displayName và username)
+        string cleanName = myDisplayName.Trim().ToUpperInvariant();
+        string localKey = "VR_LOCAL_ROOM_INVITE_" + cleanName;
         string localVal = PlayerPrefs.GetString(localKey, "");
+
+        var acc = AccountDatabase.GetActiveAccount();
+        if (string.IsNullOrEmpty(localVal) && acc != null && !string.IsNullOrEmpty(acc.username))
+        {
+            string userKey = "VR_LOCAL_ROOM_INVITE_" + acc.username.Trim().ToUpperInvariant();
+            localVal = PlayerPrefs.GetString(userKey, "");
+            if (!string.IsNullOrEmpty(localVal))
+            {
+                PlayerPrefs.DeleteKey(userKey);
+            }
+        }
+
         if (!string.IsNullOrEmpty(localVal))
         {
             PlayerPrefs.DeleteKey(localKey);
@@ -1155,35 +1390,28 @@ public class PlayFabClientService : MonoBehaviour
 
     private IEnumerator CheckIncomingRoomInvitesRoutine(string myDisplayName, Action<string, string> onInviteFound)
     {
-        var loginReq = new LoginUsernameRequest
-        {
-            TitleId = GetActiveTitleId(),
-            Username = GLOBAL_BOARD_USER,
-            Password = GLOBAL_BOARD_PASS
-        };
-
         string boardTicket = "";
-        yield return SendPlayFabPostWithCustomTicket("/Client/LoginWithPlayFab", JsonUtility.ToJson(loginReq), null,
-            onSuccess: (json) => { boardTicket = ExtractJsonString(json, "SessionTicket"); },
-            onError: null);
-
+        yield return EnsureGlobalBoardTicketRoutine((t) => boardTicket = t);
         if (string.IsNullOrEmpty(boardTicket)) yield break;
 
         string currentRaw = "";
         string getPayload = $"{{\"Keys\":[\"{GLOBAL_INVITES_DATA_KEY}\"]}}";
         yield return SendPlayFabPostWithCustomTicket("/Client/GetUserData", getPayload, boardTicket,
             onSuccess: (json) => { currentRaw = ExtractNestedUserDataValue(json, GLOBAL_INVITES_DATA_KEY); },
-            onError: null);
+            onError: (err) => { if (err.Contains("401") || err.Contains("403")) InvalidateBoardTicket(); });
 
         if (string.IsNullOrEmpty(currentRaw)) yield break;
 
         long nowTicks = DateTime.UtcNow.Ticks;
-        long expireTicks = TimeSpan.FromSeconds(60).Ticks;
+        long expireTicks = TimeSpan.FromSeconds(120).Ticks;
 
         string[] items = currentRaw.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
         List<string> remaining = new List<string>();
         string foundSender = null;
         string foundPin = null;
+
+        var activeAcc = AccountDatabase.GetActiveAccount();
+        string myUsername = activeAcc != null ? (activeAcc.username ?? "") : "";
 
         foreach (var item in items)
         {
@@ -1192,7 +1420,10 @@ public class PlayFabClientService : MonoBehaviour
             {
                 if (nowTicks - t < expireTicks)
                 {
-                    if (foundSender == null && string.Equals(p[0], myDisplayName, StringComparison.OrdinalIgnoreCase))
+                    bool isForMe = string.Equals(p[0], myDisplayName, StringComparison.OrdinalIgnoreCase) ||
+                                   (!string.IsNullOrEmpty(myUsername) && string.Equals(p[0], myUsername, StringComparison.OrdinalIgnoreCase));
+
+                    if (foundSender == null && isForMe)
                     {
                         foundSender = p[1];
                         foundPin = p[2];
@@ -1284,7 +1515,21 @@ public class PlayFabClientService : MonoBehaviour
             else
             {
                 string errMsg = ExtractJsonString(responseText, "errorMessage");
-                if (string.IsNullOrEmpty(errMsg)) errMsg = req.error;
+                if (string.IsNullOrEmpty(errMsg))
+                {
+                    if (req.responseCode == 403 || req.responseCode == 429)
+                    {
+                        errMsg = LocalizationManager.T("Máy chủ PlayFab tạm thời giới hạn tần suất truy cập. Vui lòng thử lại sau vài giây!", "PlayFab API rate limit reached. Please retry in a few seconds!");
+                    }
+                    else if (req.responseCode == 401)
+                    {
+                        errMsg = LocalizationManager.T("Tên tài khoản hoặc mật khẩu không chính xác!", "Invalid username or password!");
+                    }
+                    else
+                    {
+                        errMsg = req.error;
+                    }
+                }
                 onError?.Invoke(LocalizationManager.T($"Lỗi PlayFab: {errMsg}", $"PlayFab Error: {errMsg}"));
             }
         }

@@ -21,6 +21,11 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
     public int MaxHealth => _maxHealth;
     public bool IsBoss => true;
 
+    public void SetHealth(int hp)
+    {
+        _currentHealth = Mathf.Clamp(hp, 0, _maxHealth);
+    }
+
     private SpriteRenderer _sr;
     private Animator _animator;
     private Rigidbody2D _rb;
@@ -413,30 +418,24 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         _targetSpriteName = spriteName;
         _timeSinceLastNetworkState = 0f;
 
-        // Bù độ trễ mạng thực tế (RTT) có giới hạn ngưỡng chống nhiễu
-        float rawRtt = (PvPNetworkManager.Instance != null) ? PvPNetworkManager.Instance.GetEstimatedLatencySeconds() : 0.04f;
-        float rtt = Mathf.Clamp(rawRtt, 0.015f, 0.080f);
-        Vector2 targetProjected = ClampPositionIfPvP(pos + vel * rtt);
-
         if (!_hasReceivedFirstState)
         {
             _hasReceivedFirstState = true;
-            _predictedPos = targetProjected;
-            transform.position = new Vector3(_predictedPos.x, _predictedPos.y, 0f);
+            _predictedPos = pos;
+            transform.position = new Vector3(pos.x, pos.y, 0f);
         }
         else
         {
-            float err = Vector2.Distance(_predictedPos, targetProjected);
-            if (err > 2.5f)
+            float dist = Vector2.Distance(transform.position, pos);
+            if (dist > 4.5f)
             {
-                // Lệch quá xa (Tốc biến / Hồi sinh / Lag spike lớn) -> Snap ngay lập tức
-                _predictedPos = targetProjected;
-                transform.position = new Vector3(_predictedPos.x, _predictedPos.y, 0f);
+                // Chỉ snap khi khoảng cách quá lớn (Tốc biến / Hồi sinh / Chuyển phòng)
+                _predictedPos = pos;
+                transform.position = new Vector3(pos.x, pos.y, 0f);
             }
             else
             {
-                // Triệt tiêu micro-jerk lùi lại: nội suy mượt vị trí đích tới điểm dự đoán mới
-                _predictedPos = Vector2.Lerp(_predictedPos, targetProjected, 0.70f);
+                _predictedPos = pos;
             }
         }
     }
@@ -459,15 +458,12 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         }
 
         _timeSinceLastNetworkState += Time.deltaTime;
-        if (_timeSinceLastNetworkState > 0.18f)
+        if (_timeSinceLastNetworkState > 0.20f)
         {
-            // Quá 180ms không có gói tin (rớt gói hoặc đứng yên) -> Giảm dần vận tốc về 0 mượt mà (Damping), chống trượt xuyên tường
-            _targetVel = Vector2.MoveTowards(_targetVel, Vector2.zero, Time.deltaTime * 24f);
+            _targetVel = Vector2.MoveTowards(_targetVel, Vector2.zero, Time.deltaTime * 20f);
         }
 
-        // THUẬT TOÁN DEAD RECKONING 60 FPS:
-        // Tích phân vận tốc liên tục từng khung hình để nhân vật di chuyển mượt mà,
-        // triệt tiêu 100% cảm giác giật cục, trễ nhịp hoặc đứng hình chờ gói tin!
+        // Tích phân vận tốc mượt mà
         if (_targetVel.sqrMagnitude > 0.01f)
         {
             _predictedPos += _targetVel * Time.deltaTime;
@@ -475,15 +471,15 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         }
 
         float dist = Vector2.Distance(transform.position, _predictedPos);
-        if (dist > 2.5f)
+        if (dist > 4.5f)
         {
-            // Lệch vị trí quá xa (Tốc biến / Lag spike) -> Snap ngay lập tức
+            // Lệch vị trí quá xa do chuyển cảnh/teleport -> Snap
             transform.position = new Vector3(_predictedPos.x, _predictedPos.y, 0f);
         }
-        else
+        else if (dist > 0.005f)
         {
-            float lerpSpeed = (_targetVel.sqrMagnitude > 0.01f) ? 32f : 45f;
-            if (dist > 0.75f) lerpSpeed *= (1f + (dist - 0.75f) * 1.5f);
+            // Nội suy liên tục ở 60 FPS, tốc độ tăng dần theo khoảng cách để luôn bám sát không trễ
+            float lerpSpeed = dist > 1.5f ? 35f : 20f;
             Vector2 smoothPos = Vector2.Lerp(transform.position, _predictedPos, Time.deltaTime * lerpSpeed);
             transform.position = new Vector3(smoothPos.x, smoothPos.y, 0f);
         }
@@ -720,7 +716,7 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
 
         if (dist <= hitRange && inDirection)
         {
-            SoundManager.EnsureInstance()?.PlayHitImpact();
+            if (!PvPMatchManager.IsCoopModeActive) SoundManager.EnsureInstance()?.PlayHitImpact();
             localHealth.TakeDamage(damage);
             Vector2 chestPos = (Vector2)localPlayer.transform.position + Vector2.up * 0.55f;
             DamagePopup.Create(chestPos, damage, isUlti ? DamageType.Magic : DamageType.Physical, isCritical: isUlti);
@@ -858,7 +854,7 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         else if (actionType == "ULTI")
         {
             _botAttackLockTimer = 0.85f; // Khóa giữ hoạt ảnh và cấm đè sprite đứng im trong lúc tung chiêu!
-            SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
+            if (!PvPMatchManager.IsCoopModeActive) SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
 
             // 1. Kích hoạt hoạt ảnh (Animation / Sprite Frames)
             if (_animator != null && _animator.enabled && _animator.runtimeAnimatorController != null)
@@ -931,7 +927,7 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         else if (actionType == "DASH")
         {
             _botAttackLockTimer = 0.25f;
-            SoundManager.EnsureInstance()?.PlayHitImpact();
+            if (!PvPMatchManager.IsCoopModeActive) SoundManager.EnsureInstance()?.PlayHitImpact();
             if (OpponentHeroId == CharacterManager.CHAR_CELESTIAL_MAGE)
             {
                 transform.position = ClampPositionIfPvP(transform.position + (Vector3)(dir * 2.4f));
@@ -986,7 +982,7 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
                         {
                             d.TakeDamage(80);
                             DamagePopup.Create(h.transform.position, 80, DamageType.Magic, isCritical: true);
-                            SoundManager.EnsureInstance()?.PlayHitImpact();
+                            if (!PvPMatchManager.IsCoopModeActive) SoundManager.EnsureInstance()?.PlayHitImpact();
                         }
                     }
                 }
@@ -1001,7 +997,7 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
                     {
                         pHealth.TakeDamage(80);
                         DamagePopup.Create(targetChest, 80, DamageType.Magic, isCritical: true);
-                        SoundManager.EnsureInstance()?.PlayHitImpact();
+                        if (!PvPMatchManager.IsCoopModeActive) SoundManager.EnsureInstance()?.PlayHitImpact();
                     }
                 }
             }
@@ -1104,7 +1100,7 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         {
             if (impactFrames != null && impactFrames.Length > 0)
             {
-                SoundManager.EnsureInstance()?.PlayHitImpact();
+                if (!PvPMatchManager.IsCoopModeActive) SoundManager.EnsureInstance()?.PlayHitImpact();
                 ball.transform.rotation = Quaternion.identity;
                 ball.transform.localScale = new Vector3(scale * 1.35f, scale * 1.35f, 1f);
                 for (int i = 0; i < impactFrames.Length && ball != null; i++)
@@ -1301,7 +1297,7 @@ public class PvPRemoteOpponent : MonoBehaviour, IDamageable, IEnemyHealth
         {
             if (hitFrames != null && hitFrames.Length > 0)
             {
-                SoundManager.EnsureInstance()?.PlayHitImpact();
+                if (!PvPMatchManager.IsCoopModeActive) SoundManager.EnsureInstance()?.PlayHitImpact();
                 orb.transform.rotation = Quaternion.identity;
                 orb.transform.localScale = new Vector3(scale * 1.8f, scale * 1.8f, 1f);
                 for (int i = 0; i < Mathf.Min(12, hitFrames.Length) && orb != null; i++)

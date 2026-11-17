@@ -146,6 +146,16 @@ public class LowHealthVignetteFX : MonoBehaviour
         }
     }
 
+    public void TriggerPulse(float duration = 1.5f)
+    {
+        currentAlpha = 0.85f;
+        if (vignetteImage != null)
+        {
+            vignetteImage.enabled = true;
+            vignetteImage.color = new Color(0.92f, 0.02f, 0.04f, currentAlpha);
+        }
+    }
+
     private void FadeOutDirect()
     {
         currentAlpha = Mathf.MoveTowards(currentAlpha, 0f, Time.deltaTime * 4.0f);

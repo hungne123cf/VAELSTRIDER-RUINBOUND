@@ -74,14 +74,25 @@ public class OAuthAuthenticator : MonoBehaviour
     {
         if (string.IsNullOrEmpty(photoUrl)) return;
         LastGooglePhotoUrl = photoUrl;
-        PlayerPrefs.SetString("OAuth_LastGooglePhotoUrl", photoUrl);
-        PlayerPrefs.Save();
 
-        var instance = EnsureInstance();
-        if (instance != null)
+        RunOnMainThread(() =>
         {
-            instance.StartCoroutine(instance.DownloadAvatarRoutine(photoUrl, onComplete));
-        }
+            try
+            {
+                PlayerPrefs.SetString("OAuth_LastGooglePhotoUrl", photoUrl);
+                PlayerPrefs.Save();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning("[OAuthAuthenticator] Save avatar pref warning: " + ex.Message);
+            }
+
+            var instance = EnsureInstance();
+            if (instance != null)
+            {
+                instance.StartCoroutine(instance.DownloadAvatarRoutine(photoUrl, onComplete));
+            }
+        });
     }
 
     private IEnumerator DownloadAvatarRoutine(string photoUrl, Action<Sprite> onComplete)
@@ -134,7 +145,7 @@ public class OAuthAuthenticator : MonoBehaviour
     private Action<string> onAuthFailedCallback;
     private Action<string> onStatusUpdateCallback;
 
-    private readonly Queue<Action> mainThreadActions = new Queue<Action>();
+    private static readonly Queue<Action> mainThreadActions = new Queue<Action>();
 
     private void Awake()
     {
@@ -153,7 +164,8 @@ public class OAuthAuthenticator : MonoBehaviour
 
     public void LoadSavedOAuthAppIds()
     {
-        // 1. Thử nạp từ file cấu hình ngoài (không commit lên Git)
+#if UNITY_EDITOR || UNITY_STANDALONE
+        // 1. Thử nạp từ file cấu hình ngoài trên PC (không chạy trên Android vì Application.dataPath nằm trong APK)
         try
         {
             string cfgPath = Path.Combine(Application.dataPath, "..", "oauth_config.json");
@@ -172,6 +184,7 @@ public class OAuthAuthenticator : MonoBehaviour
             }
         }
         catch { }
+#endif
 
         // 2. Thử nạp từ PlayerPrefs
         string savedId = PlayerPrefs.GetString("OAuth_GoogleClientId", "").Trim();
@@ -221,8 +234,10 @@ public class OAuthAuthenticator : MonoBehaviour
         }
     }
 
-    public void RunOnMainThread(Action action)
+    public static void RunOnMainThread(Action action)
     {
+        if (action == null) return;
+        // Không gọi EnsureInstance() ở đây vì hàm này được gọi từ Android UI Thread / Background Thread
         lock (mainThreadActions)
         {
             mainThreadActions.Enqueue(action);
@@ -392,13 +407,13 @@ public class OAuthAuthenticator : MonoBehaviour
                             await output.WriteAsync(buffer, 0, buffer.Length);
                         }
 
-                        LastGoogleUserName = profile.name;
-                        if (!string.IsNullOrEmpty(profile.pictureUrl))
-                        {
-                            SaveAndDownloadAvatar(profile.pictureUrl);
-                        }
                         RunOnMainThread(() =>
                         {
+                            LastGoogleUserName = profile.name;
+                            if (!string.IsNullOrEmpty(profile.pictureUrl))
+                            {
+                                SaveAndDownloadAvatar(profile.pictureUrl);
+                            }
                             onStatusUpdateCallback?.Invoke($"Đăng nhập Google thành công: {profile.name} ({profile.email})");
                             onAuthSuccessCallback?.Invoke(profile);
                         });

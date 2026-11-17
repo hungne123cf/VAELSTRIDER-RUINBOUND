@@ -22,6 +22,11 @@ public class WaveSpawner : MonoBehaviour
     private bool allWavesCleared = false;
     private System.Action currentRoomClearedCallback;
 
+    private static int _nextNetworkEnemyId = 1000;
+    private float _enemySyncTimer = 0f;
+
+    public static WaveSpawner Instance { get; private set; }
+
     // Events
     public static event System.Action<int, int, string> OnWaveStarted;
     public static event System.Action<string> OnWaveMessage;
@@ -30,6 +35,7 @@ public class WaveSpawner : MonoBehaviour
 
     void Awake()
     {
+        if (Instance == null) Instance = this;
         totalWaves = 10;
 
         if (enemyPrefab == null)
@@ -50,6 +56,7 @@ public class WaveSpawner : MonoBehaviour
         ValleyBeastAI.OnEnemyDied += HandleValleyBeastDied;
         ValleySpitterAI.OnEnemyDied += HandleValleySpitterDied;
         ValleyGolemBossAI.OnEnemyDied += HandleValleyBossDied;
+        PvPNetworkManager.OnNetworkWaveStarted += HandleNetworkWaveStarted;
     }
 
     void OnDisable()
@@ -59,6 +66,36 @@ public class WaveSpawner : MonoBehaviour
         ValleyBeastAI.OnEnemyDied -= HandleValleyBeastDied;
         ValleySpitterAI.OnEnemyDied -= HandleValleySpitterDied;
         ValleyGolemBossAI.OnEnemyDied -= HandleValleyBossDied;
+        PvPNetworkManager.OnNetworkWaveStarted -= HandleNetworkWaveStarted;
+    }
+
+    private void HandleNetworkWaveStarted(int waveNum, int totalW, string title)
+    {
+        OnWaveStarted?.Invoke(waveNum, totalW, title);
+    }
+
+    public void ClearLivingRoomEnemies()
+    {
+        isSpawningWave = false;
+        waveInProgress = false;
+        StopAllCoroutines();
+
+        foreach (var enemy in currentWaveEnemies)
+        {
+            if (enemy != null)
+            {
+                Destroy(enemy);
+            }
+        }
+        currentWaveEnemies.Clear();
+        aliveEnemies = 0;
+
+        if (currentRoomClearedCallback != null)
+        {
+            var cb = currentRoomClearedCallback;
+            currentRoomClearedCallback = null;
+            cb.Invoke();
+        }
     }
 
     private void HandleValleyBeastDied(ValleyBeastAI e) { HandleAnyEnemyDied(e != null ? e.gameObject : null); }
@@ -86,10 +123,27 @@ public class WaveSpawner : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        // HOST-AUTHORITATIVE: Host phát sóng vị trí & máu quái vật 10 lần/giây (100ms) cho Client
+        bool isCoop = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+        if (isCoop && PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsHost)
+        {
+            _enemySyncTimer -= Time.deltaTime;
+            if (_enemySyncTimer <= 0f)
+            {
+                _enemySyncTimer = 0.10f; // 10Hz
+                NetworkEnemySync.BroadcastHostEnemyStates();
+            }
+        }
+    }
+
     private IEnumerator StartFirstWaveRoutine()
     {
         yield return new WaitForSeconds(1.5f);
         if (PvPMatchManager.IsPvPModeActive || !isActiveAndEnabled || !gameObject.activeInHierarchy) yield break;
+        bool isCoop = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+        if (isCoop && PvPNetworkManager.Instance != null && !PvPNetworkManager.Instance.IsHost) yield break; // Client không tự chạy đợt
         StartNextWave();
     }
 
@@ -97,6 +151,13 @@ public class WaveSpawner : MonoBehaviour
     {
         if (PvPMatchManager.IsPvPModeActive || !isActiveAndEnabled || !gameObject.activeInHierarchy)
         {
+            return;
+        }
+
+        bool isCoop = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+        if (isCoop && PvPNetworkManager.Instance != null && !PvPNetworkManager.Instance.IsHost)
+        {
+            // Client trong Co-op KHÔNG được tự ý spawn quái, chỉ nhận quái Puppet từ Host
             return;
         }
 
@@ -109,6 +170,12 @@ public class WaveSpawner : MonoBehaviour
         isSpawningWave = true;
 
         OnWaveStarted?.Invoke(currentWave, totalWaves, waveTitle);
+
+        if (PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning))
+        {
+            PvPNetworkManager.Instance?.SendWaveStartPacket(currentWave, totalWaves, waveTitle);
+        }
+
         StartCoroutine(SpawnRoomEnemiesRoutine(spawnPositions, isBoss));
     }
 
@@ -164,6 +231,18 @@ public class WaveSpawner : MonoBehaviour
                         ai.SetupBoss(1.85f, 3, 2);
                     }
                 }
+
+                bool isCoop = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+                if (isCoop && PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsHost)
+                {
+                    int netId = ++_nextNetworkEnemyId;
+                    var sync = newEnemy.AddComponent<NetworkEnemySync>();
+                    sync.Setup(netId, isPuppet: false, enemyType: 0);
+
+                    int maxHp = EnemyHealthHelper.GetMaxHealth(newEnemy);
+                    int curHp = EnemyHealthHelper.GetCurrentHealth(newEnemy);
+                    PvPNetworkManager.Instance.SendEnemySpawnPacket(netId, spawnPos.x, spawnPos.y, isBoss, maxHp, curHp, 0);
+                }
             }
 
             yield return new WaitForSeconds(0.25f);
@@ -177,6 +256,59 @@ public class WaveSpawner : MonoBehaviour
         {
             CompleteCurrentWave();
         }
+    }
+
+    public void SpawnPuppetEnemy(int netId, int enemyType, Vector3 pos, bool isBoss, int maxHp, int curHp)
+    {
+        if (enemyPrefab == null) return;
+        GameObject puppet = Instantiate(enemyPrefab, pos, Quaternion.identity);
+        puppet.SetActive(true);
+        currentWaveEnemies.Add(puppet);
+        aliveEnemies = currentWaveEnemies.Count;
+
+        IgnorePlayerCollision(puppet);
+
+        var sync = puppet.AddComponent<NetworkEnemySync>();
+        sync.Setup(netId, isPuppet: true, enemyType: enemyType);
+
+        if (isBoss)
+        {
+            var ai = puppet.GetComponent<BotWheelAI>();
+            if (ai != null) ai.SetupBoss(1.85f, 3, 2);
+        }
+
+        var bot = puppet.GetComponent<BotWheelAI>();
+        if (bot != null)
+        {
+            bot.maxHealth = maxHp;
+            bot.currentHealth = curHp;
+            if (!isBoss) EnemyFloatingHealthBar.ReportHealth(puppet, curHp, maxHp);
+        }
+    }
+
+    public void OnClientReceiveWaveClear(int waveNum, int totalW)
+    {
+        currentWave = waveNum;
+        totalWaves = totalW;
+        currentWaveEnemies.Clear();
+        aliveEnemies = 0;
+        waveInProgress = false;
+
+        GameOverUI.AutoReviveOnWaveClear();
+        var ph = UnityEngine.Object.FindAnyObjectByType<PlayerHealth>();
+        if (ph != null && ph.IsDead) ph.Revive();
+
+        OnWaveMessage?.Invoke(LocalizationManager.T($"HOÀN THÀNH ĐỢT {currentWave} / {totalWaves}!\n+8 Mảnh Linh Hồn. Chuẩn bị cho đợt tiếp theo...", $"WAVE {currentWave} / {totalWaves} CLEARED!\n+8 Shards. Prepare for next wave..."));
+        AethelShard.SpawnShards(transform.position, 8);
+    }
+
+    public void OnClientReceiveAllWavesCleared()
+    {
+        allWavesCleared = true;
+        OnWaveMessage?.Invoke(LocalizationManager.T("CHIẾN THẮNG!\nTÀN TÍCH ĐÃ ĐƯỢC THANH TẨY!", "VICTORY!\nRUINS PURIFIED!"));
+        OnAllWavesCleared?.Invoke();
+        AethelShard.SpawnShards(transform.position, 25);
+        StartCoroutine(SpawnVictoryPortalRoutine());
     }
 
     private void HandleBloodMonsterDied(BloodMonsterAI enemy)
@@ -199,6 +331,13 @@ public class WaveSpawner : MonoBehaviour
                 Debug.Log($"<color=yellow>[SPAWNER]</color> Bỏ qua quái chết ngoại lai (không thuộc phòng hiện tại): {enemyObj.name}");
                 return;
             }
+
+            var sync = enemyObj.GetComponent<NetworkEnemySync>();
+            if (sync != null && !sync.IsPuppet && PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsHost)
+            {
+                PvPNetworkManager.Instance.SendEnemyDiePacket(sync.NetworkId);
+            }
+
             currentWaveEnemies.Remove(enemyObj);
             aliveEnemies = currentWaveEnemies.Count;
         }
@@ -221,6 +360,16 @@ public class WaveSpawner : MonoBehaviour
         aliveEnemies = 0;
         waveInProgress = false;
 
+        bool isCoop = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+        if (isCoop && PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsHost)
+        {
+            PvPNetworkManager.Instance.SendWaveClearPacket(currentWave, totalWaves);
+            if (currentWave >= totalWaves)
+            {
+                PvPNetworkManager.Instance.SendAllWavesClearedPacket();
+            }
+        }
+
         if (currentRoomClearedCallback != null)
         {
             var cb = currentRoomClearedCallback;
@@ -235,6 +384,18 @@ public class WaveSpawner : MonoBehaviour
 
     private IEnumerator WaveCompletedRoutine()
     {
+        // Trong Co-op: Tự động hồi sinh người chơi nếu đang tử trận khi quét sạch đợt quái
+        if (PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive))
+        {
+            GameOverUI.AutoReviveOnWaveClear();
+            var ph = Object.FindAnyObjectByType<PlayerHealth>();
+            if (ph != null && ph.IsDead)
+            {
+                ph.Revive();
+            }
+            PvPNetworkManager.Instance?.SendCoopClearRevivePacket();
+        }
+
         if (currentWave < totalWaves)
         {
             OnWaveMessage?.Invoke(LocalizationManager.T($"HOÀN THÀNH ĐỢT {currentWave} / {totalWaves}!\n+8 Mảnh Linh Hồn. Chuẩn bị cho đợt tiếp theo...", $"WAVE {currentWave} / {totalWaves} CLEARED!\n+8 Shards. Prepare for next wave..."));
@@ -333,18 +494,27 @@ public class WaveSpawner : MonoBehaviour
 
         if (isMap2)
         {
+            int coopMult = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
             if (isBossWave)
             {
-                aliveEnemies = 1;
+                int bossGuardCount = (coopMult > 1) ? (coopMult - 1) * 2 : 0;
+                aliveEnemies = 1 + bossGuardCount;
                 Vector3 spawnPos = GetSpawnPosition(0);
                 var bm = BloodMonsterAI.Spawn(spawnPos, isBoss: true, index: 1);
                 if (bm != null) currentWaveEnemies.Add(bm.gameObject);
+
+                for (int g = 0; g < bossGuardCount; g++)
+                {
+                    Vector3 guardPos = GetSpawnPosition(g + 1);
+                    var guard = BloodMonsterAI.Spawn(guardPos, isBoss: false, index: g + 2);
+                    if (guard != null) currentWaveEnemies.Add(guard.gameObject);
+                }
             }
             else
             {
-                int bloodCount = Mathf.Clamp(2 + (wave / 2), 3, 7);
-                int spitterCount = (wave >= 3) ? (wave >= 6 ? 2 : 1) : 0;
-                int beastCount = (wave >= 4) ? (wave >= 7 ? 2 : 1) : 0;
+                int bloodCount = Mathf.Clamp(2 + (wave / 2), 3, 7) * coopMult;
+                int spitterCount = ((wave >= 3) ? (wave >= 6 ? 2 : 1) : 0) * coopMult;
+                int beastCount = ((wave >= 4) ? (wave >= 7 ? 2 : 1) : 0) * coopMult;
                 int totalEnemies = bloodCount + spitterCount + beastCount;
                 aliveEnemies = totalEnemies;
 
@@ -380,7 +550,8 @@ public class WaveSpawner : MonoBehaviour
         else
         {
             // Map 1 hoặc Map khác
-            int countToSpawn = isBossWave ? 1 : Mathf.Clamp(2 + wave, 3, 9);
+            int coopMult = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
+            int countToSpawn = isBossWave ? (1 + (coopMult > 1 ? (coopMult - 1) * 2 : 0)) : (Mathf.Clamp(2 + wave, 3, 9) * coopMult);
             aliveEnemies = countToSpawn;
 
             for (int i = 0; i < countToSpawn; i++)
@@ -399,6 +570,18 @@ public class WaveSpawner : MonoBehaviour
                     {
                         var ai = newEnemy.GetComponent<BotWheelAI>();
                         if (ai != null) ai.SetupBoss(1.85f, 3, 2);
+                    }
+
+                    bool isCoop = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+                    if (isCoop && PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsHost)
+                    {
+                        int netId = ++_nextNetworkEnemyId;
+                        var sync = newEnemy.AddComponent<NetworkEnemySync>();
+                        sync.Setup(netId, isPuppet: false, enemyType: 0);
+
+                        int maxHp = EnemyHealthHelper.GetMaxHealth(newEnemy);
+                        int curHp = EnemyHealthHelper.GetCurrentHealth(newEnemy);
+                        PvPNetworkManager.Instance.SendEnemySpawnPacket(netId, spawnPos.x, spawnPos.y, isBossWave, maxHp, curHp, 0);
                     }
                 }
                 yield return new WaitForSeconds(0.25f);

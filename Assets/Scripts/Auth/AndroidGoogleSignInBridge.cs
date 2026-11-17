@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Bridge C# giao tiếp 2 chiều với Android Native Google Account Picker (Bottom Sheet One-Tap của Google Play Services)
+/// Bridge C# giao tiếp 2 chiều với Android Native Google Account Picker (AccountManager & Google Play Services)
 /// Nhận Email, Display Name và URL Avatar của tài khoản Google.
 /// </summary>
 public static class AndroidGoogleSignInBridge
@@ -29,6 +29,10 @@ public static class AndroidGoogleSignInBridge
 
     public static void LaunchAccountPicker(Action<GoogleAccountProfile> onSuccess, Action<string> onCanceled, Action<string> onError)
     {
+        // Khởi tạo sẵn OAuthAuthenticator trên Unity Main Thread trước khi sang Android UI Thread
+        // để đảm bảo hàng đợi RunOnMainThread luôn hoạt động và không bao giờ gọi FindAnyObjectByType từ thread phụ.
+        OAuthAuthenticator.EnsureInstance();
+
 #if UNITY_ANDROID && !UNITY_EDITOR
         try
         {
@@ -69,7 +73,7 @@ public static class AndroidGoogleSignInBridge
         );
     }
 
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID
     private class GooglePickerListenerProxy : AndroidJavaProxy
     {
         private readonly Action<GoogleAccountProfile> _onSuccessProfile;
@@ -87,15 +91,8 @@ public static class AndroidGoogleSignInBridge
         private static void DispatchToMain(Action action)
         {
             if (action == null) return;
-            var oauth = OAuthAuthenticator.EnsureInstance();
-            if (oauth != null)
-            {
-                oauth.RunOnMainThread(action);
-            }
-            else
-            {
-                action();
-            }
+            // Chỉ đẩy vào hàng đợi thread-safe, tuyệt đối không gọi EnsureInstance() từ Android UI Thread!
+            OAuthAuthenticator.RunOnMainThread(action);
         }
 
         public void onSuccess(string email, string displayName, string photoUrl)

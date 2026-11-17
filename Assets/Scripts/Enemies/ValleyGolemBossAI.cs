@@ -580,9 +580,8 @@ public class ValleyGolemBossAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     private IEnumerator BossDeathRoutine()
     {
-        Time.timeScale = 0.25f;
-        yield return new WaitForSecondsRealtime(0.8f);
         Time.timeScale = 1.0f;
+        yield return new WaitForSeconds(0.35f);
 
         // Hieu ung tan vo
         BreakableDebrisFX.SpawnPotShatter(transform.position);

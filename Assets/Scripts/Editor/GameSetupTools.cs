@@ -518,6 +518,8 @@ public static class GameSetupTools
         AssetDatabase.SaveAssets();
     }
 
+
+
     [MenuItem("Vaelstrider/RESTORE EVERYTHING (Chest, Waves, Boss, Potions, Portal, UI)", false, 0)]
     
     [MenuItem("Vaelstrider/UI/Setup Special Skill Button")]

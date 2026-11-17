@@ -1054,13 +1054,12 @@ public class DuneAssassinSkill : MonoBehaviour
         if (playerController != null) playerController.SetCanMove(false);
 
         var cam = Object.FindAnyObjectByType<CameraFollow>();
-        if (!PvPMatchManager.IsPvPModeActive)
+        if (!PvPMatchManager.IsPvPModeActive && cam != null)
         {
-            if (cam != null) cam.SetCinematicZoom(6.8f); // Zoom out bao quát toàn bộ đấu trường bão cát
-            Time.timeScale = 0.15f; // Slow-mo cinematic (Chỉ trong PvE)
-            yield return new WaitForSecondsRealtime(0.25f);
-            Time.timeScale = 1.0f;
+            cam.SetCinematicZoom(6.8f); // Zoom out bao quát toàn bộ đấu trường bão cát
         }
+        Time.timeScale = 1.0f; // Luôn giữ 1.0f, không dừng thời gian
+        yield return new WaitForSeconds(0.15f);
 
         // 1. HÚT QUÁI VẬT VÀO TÂM CƠN BÃO CÁT (Sand Vortex Pull)
         Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, ultimateRadius);

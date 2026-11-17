@@ -430,15 +430,14 @@ public static class AccountDatabase
             SaveActiveSessionToDatabase();
         }
 
-        // 2. Chỉ xóa sạch các key gameplay cũ trong PlayerPrefs NẾU THỰC SỰ ĐỔI SANG USER KHÁC
-        // Nếu là cùng 1 user (load lại session hoặc mở game), KHÔNG XÓA để tránh làm mất Shards/Potions vừa nhận
-        if (isDifferentUser)
+        // 2. Chỉ xóa sạch các key gameplay cũ trong PlayerPrefs NẾU THỰC SỰ ĐỔI SANG USER KHÁC HOẶC NẠP TỪ CLOUD
+        if (isDifferentUser || !savePrevious)
         {
             ClearTransientGameplayPlayerPrefs();
         }
         else
         {
-            // Cùng một user: Bảo toàn số Shards và Potions lớn nhất giữa PlayerPrefs và Database
+            // Cùng một user và không phải nạp từ Cloud: Bảo toàn số Shards và Potions lớn nhất giữa PlayerPrefs và Database
             long currentInPrefs = GetAethelShards();
             if (currentInPrefs > acc.aethelShards)
             {
@@ -641,6 +640,7 @@ public static class AccountDatabase
         }
 
         PlayerPrefs.Save();
+        FriendManager.Instance?.ReloadForCurrentAccount();
         Debug.Log($"<color=green>[SaveSystem]</color> Đã nạp thành công dữ liệu Offline (Shards={acc.aethelShards}, Potions={acc.healthPotions}, AtkLv={acc.upgradeAttack}, Map1={acc.map1Completed})");
     }
 
@@ -805,6 +805,7 @@ public static class AccountDatabase
         if (delta <= 0) return;
         long current = GetAethelShards();
         SetAethelShards(current + delta);
+        SaveActiveSessionToDatabase();
     }
 
     public static bool SpendAethelShards(long cost)
@@ -814,6 +815,7 @@ public static class AccountDatabase
         if (current >= cost)
         {
             SetAethelShards(current - cost);
+            SaveActiveSessionToDatabase();
             return true;
         }
         return false;
@@ -864,6 +866,7 @@ public static class AccountDatabase
         SaveActiveSessionToDatabase();
         PlayerPrefs.DeleteKey(PREF_CURRENT_USER);
         PlayerPrefs.Save();
+        FriendManager.Instance?.ReloadForCurrentAccount();
         Debug.Log("<color=yellow>[AccountDB]</color> Đã lưu tiến trình và đăng xuất session người chơi.");
     }
 
@@ -1058,7 +1061,7 @@ public static class AccountDatabase
         }
         SaveDatabase();
 
-        ApplyAccountToGameSession(cloudAcc);
+        ApplyAccountToGameSession(cloudAcc, savePrevious: false);
     }
 
     /// <summary>

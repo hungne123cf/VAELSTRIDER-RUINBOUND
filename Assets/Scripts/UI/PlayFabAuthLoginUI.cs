@@ -710,7 +710,18 @@ public class PlayFabAuthLoginUI : MonoBehaviour
             }
         }
         if (_wizStep2RegisterForm != null) _wizStep2RegisterForm.SetActive(step == LoginStep.Step2_AccountRegisterForm);
-        if (_wizStep2GooglePrompt != null) _wizStep2GooglePrompt.SetActive(step == LoginStep.Step2_GoogleEmailPrompt);
+        if (_wizStep2GooglePrompt != null)
+        {
+            _wizStep2GooglePrompt.SetActive(step == LoginStep.Step2_GoogleEmailPrompt);
+            if (step == LoginStep.Step2_GoogleEmailPrompt && _googleEmailInput != null && string.IsNullOrEmpty(_googleEmailInput.text))
+            {
+                string lastEmail = PlayerPrefs.GetString("OAuth_LastGoogleEmail", "");
+                if (!string.IsNullOrEmpty(lastEmail))
+                {
+                    _googleEmailInput.text = lastEmail;
+                }
+            }
+        }
         if (_wizStep3NicknameForm != null) _wizStep3NicknameForm.SetActive(step == LoginStep.Step3_SetIngameNickname);
     }
 
@@ -841,16 +852,14 @@ public class PlayFabAuthLoginUI : MonoBehaviour
             return;
         }
 
-        string savedEmail = PlayerPrefs.GetString("OAuth_LastGoogleEmail", "").Trim();
-        if (_googleEmailInput != null && !string.IsNullOrEmpty(savedEmail))
-        {
-            _googleEmailInput.text = savedEmail;
-        }
-        ShowLoginStep(LoginStep.Step2_GoogleEmailPrompt);
+        // Trên PC / Editor: Mở thẳng Google OAuth 2.0 trên trình duyệt,
+        // bỏ qua hoàn toàn màn hình trung gian đồng bộ Cloud theo đúng yêu cầu
+        TriggerOneClickSocialLogin("Google");
     }
 
     private void LaunchNativeGoogleAccountPicker()
     {
+        OAuthAuthenticator.EnsureInstance();
         HandleStatusChanged(LocalizationManager.T(
             "Đang mở popup chọn tài khoản Google của máy...",
             "Opening device Google account selector..."));
@@ -866,22 +875,27 @@ public class PlayFabAuthLoginUI : MonoBehaviour
     {
         if (profile == null || string.IsNullOrEmpty(profile.email))
         {
-            OnNativeGooglePickerCanceled("Empty email");
+            OnNativeGooglePickerFailed(LocalizationManager.T("Không lấy được địa chỉ Email từ tài khoản đã chọn.", "Could not retrieve email from selected account."));
             return;
         }
 
-        string chosenEmail = profile.email;
-        string displayName = profile.displayName;
-        string photoUrl = profile.photoUrl;
+        string chosenEmail = profile.email.Trim();
+        string displayName = profile.displayName != null ? profile.displayName.Trim() : "";
+        string photoUrl = profile.photoUrl != null ? profile.photoUrl.Trim() : "";
+
+        string suggested = !string.IsNullOrEmpty(displayName) ? displayName : chosenEmail.Split('@')[0];
+
+        // TỰ ĐỘNG BÙ ĐẮP AVATAR: Nếu thiết bị Android không cấp photoUrl trực tiếp (do cơ chế bảo mật AccountManager),
+        // tự động tạo Avatar Hiệp Sĩ màu dạ quang xanh cực đẹp theo tên người chơi (UI-Avatars HD 256x256)
+        if (string.IsNullOrEmpty(photoUrl))
+        {
+            string cleanName = Uri.EscapeDataString(suggested);
+            photoUrl = $"https://ui-avatars.com/api/?name={cleanName}&background=0f172a&color=38bdf8&size=256&bold=true&format=png";
+        }
 
         HandleStatusChanged(LocalizationManager.T(
-            $"Đã chọn tài khoản: {chosenEmail}. Đang đăng nhập...",
-            $"Selected account: {chosenEmail}. Logging in..."));
-
-        if (_googleEmailInput != null)
-        {
-            _googleEmailInput.text = chosenEmail;
-        }
+            $"Đã chọn tài khoản: {chosenEmail}. Đang kết nối máy chủ PlayFab...",
+            $"Selected account: {chosenEmail}. Connecting to PlayFab server..."));
 
         PlayerPrefs.SetString("OAuth_LastGoogleEmail", chosenEmail);
         if (!string.IsNullOrEmpty(displayName))
@@ -895,17 +909,20 @@ public class PlayFabAuthLoginUI : MonoBehaviour
             OAuthAuthenticator.SaveAndDownloadAvatar(photoUrl);
         }
         PlayerPrefs.Save();
-
-        string suggested = !string.IsNullOrEmpty(displayName) ? displayName : chosenEmail.Split('@')[0];
         PlayFabClientService.EnsureInstance().LoginWithDirectSocialAccount("Google", chosenEmail, suggested, (ok, msg) =>
         {
             if (ok)
             {
+                // Đồng bộ avatar: có ảnh -> lưu lên PlayFab; không có (AccountManager) -> lấy ảnh từ PlayFab
+                PlayFabClientService.EnsureInstance().SyncGoogleAvatar(photoUrl);
                 OnAuthenticationSuccessProceedToNickname();
             }
             else
             {
-                HandleStatusChanged(msg);
+                string errReason = !string.IsNullOrEmpty(msg)
+                    ? msg
+                    : LocalizationManager.T("Không thể kết nối tới máy chủ PlayFab. Vui lòng kiểm tra mạng Internet!", "Could not connect to PlayFab server. Please check your Internet connection!");
+                HandleStatusChanged($"<color=#FF5555>{errReason}</color>");
                 ShowLoginStep(LoginStep.Step2_GoogleEmailPrompt);
             }
         });
@@ -941,29 +958,27 @@ public class PlayFabAuthLoginUI : MonoBehaviour
     public void OnNativeGooglePickerCanceled(string reason)
     {
         HandleStatusChanged(LocalizationManager.T(
-            "Đã đóng popup chọn tài khoản. Bạn có thể nhập email bên dưới:",
-            "Closed account picker. You can enter email below:"));
-
-        string savedEmail = PlayerPrefs.GetString("OAuth_LastGoogleEmail", "").Trim();
-        if (_googleEmailInput != null && !string.IsNullOrEmpty(savedEmail))
-        {
-            _googleEmailInput.text = savedEmail;
-        }
+            "<color=#FFD766>Đã đóng bảng chọn Google. Bạn có thể bấm 'Chọn Tài Khoản Trên Máy' hoặc nhập trực tiếp Email Google bên dưới:</color>",
+            "<color=#FFD766>Closed Google selector. You can tap 'Choose Device Account' or enter your Google Email below:</color>"));
         ShowLoginStep(LoginStep.Step2_GoogleEmailPrompt);
     }
 
     public void OnNativeGooglePickerFailed(string err)
     {
-        HandleStatusChanged(LocalizationManager.T(
-            $"Không mở được popup Google: {err}. Vui lòng nhập email:",
-            $"Could not open Google popup: {err}. Please enter email:"));
-
-        string savedEmail = PlayerPrefs.GetString("OAuth_LastGoogleEmail", "").Trim();
-        if (_googleEmailInput != null && !string.IsNullOrEmpty(savedEmail))
+        if (AndroidGoogleSignInBridge.IsSupported)
         {
-            _googleEmailInput.text = savedEmail;
+            string cleanReason = string.IsNullOrEmpty(err) ? "Không phản hồi" : err;
+            HandleStatusChanged(LocalizationManager.T(
+                $"<color=#FF6666>Không mở được danh sách Google trên máy ({cleanReason}). Vui lòng nhập Email Google bên dưới:</color>",
+                $"<color=#FF6666>Could not open device Google picker ({cleanReason}). Please enter your Google Email below:</color>"));
+            ShowLoginStep(LoginStep.Step2_GoogleEmailPrompt);
+            return;
         }
-        ShowLoginStep(LoginStep.Step2_GoogleEmailPrompt);
+
+        HandleStatusChanged(LocalizationManager.T(
+            $"Không mở được popup Google: {err}. Đang chuyển sang trình duyệt web...",
+            $"Could not open Google popup: {err}. Switching to browser..."));
+        TriggerOneClickSocialLogin("Google");
     }
 
     private void OnConfirmGoogleEmailClicked()
@@ -985,6 +1000,8 @@ public class PlayFabAuthLoginUI : MonoBehaviour
         {
             if (ok)
             {
+                // Đồng bộ avatar: có ảnh -> lưu lên PlayFab; không có (AccountManager) -> lấy ảnh từ PlayFab
+                PlayFabClientService.EnsureInstance().SyncGoogleAvatar("");
                 OnAuthenticationSuccessProceedToNickname();
             }
             else
@@ -1102,6 +1119,25 @@ public class PlayFabAuthLoginUI : MonoBehaviour
 
         string accountId = acc != null ? acc.username : pf.PlayFabId;
         string provider = pf.LoggedInProvider;
+
+        // Nếu là tài khoản Google (hoặc đăng nhập qua Google OAuth): Tự động lấy tên hiển thị và vào thẳng màn hình Bắt Đầu Trò Chơi!
+        if (provider == "Google" || !string.IsNullOrEmpty(OAuthAuthenticator.LastGoogleUserName))
+        {
+            string gName = !string.IsNullOrEmpty(OAuthAuthenticator.LastGoogleUserName)
+                ? OAuthAuthenticator.LastGoogleUserName
+                : (!string.IsNullOrEmpty(acc?.displayName) ? acc.displayName : (!string.IsNullOrEmpty(accountId) ? accountId : "Hiệp Sĩ"));
+            if (acc != null)
+            {
+                acc.displayName = gName;
+                AccountDatabase.SaveOrUpdateCloudAccount(acc);
+            }
+            PlayerPrefs.SetString("Player_Name", gName);
+            PlayerPrefs.SetInt("HasSetNickname_" + accountId, 1);
+            PlayerPrefs.Save();
+
+            FinishLoginAndEnterGame();
+            return;
+        }
 
         string localSavedName = PlayerPrefs.GetString("Player_Name", "").Trim();
         bool hasSetNicknameFlag = PlayerPrefs.GetInt("HasSetNickname_" + accountId, 0) == 1 ||

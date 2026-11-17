@@ -96,8 +96,22 @@ public class FriendManager : MonoBehaviour
 {
     public static FriendManager Instance { get; private set; }
 
-    private const string PREF_KEY_FRIENDS = "VR_FRIENDS_DATA_JSON";
-    private const string PREF_KEY_REQUESTS = "VR_FRIEND_REQUESTS_JSON";
+    public static string GetCurrentAccountKey()
+    {
+        var acc = AccountDatabase.GetActiveAccount();
+        if (acc != null && !string.IsNullOrEmpty(acc.username))
+        {
+            return acc.username.Trim().ToLowerInvariant();
+        }
+        string activeUser = PlayerPrefs.GetString(AccountDatabase.PREF_CURRENT_USER, "");
+        if (!string.IsNullOrEmpty(activeUser)) return activeUser.Trim().ToLowerInvariant();
+        string name = PlayerPrefs.GetString("Player_Name", "default");
+        return string.IsNullOrEmpty(name) ? "default" : name.Trim().ToLowerInvariant();
+    }
+
+    private string GetFriendsPrefKey() => $"VR_FRIENDS_{GetCurrentAccountKey()}_JSON";
+    private string GetRequestsPrefKey() => $"VR_FRIEND_REQ_{GetCurrentAccountKey()}_JSON";
+
     private readonly List<FriendEntry> _friendList = new List<FriendEntry>();
     private readonly List<FriendRequestEntry> _pendingRequests = new List<FriendRequestEntry>();
     private readonly List<RoomInviteEntry> _pendingRoomInvites = new List<RoomInviteEntry>();
@@ -106,6 +120,13 @@ public class FriendManager : MonoBehaviour
     public event Action OnFriendRequestsUpdated;
     public event Action OnRoomInvitesUpdated;
     public event Action<string, string> OnRoomInviteReceived; // senderName, roomPin
+
+    public void ReloadForCurrentAccount()
+    {
+        LoadFriends();
+        OnFriendsUpdated?.Invoke();
+        OnFriendRequestsUpdated?.Invoke();
+    }
 
     public static FriendManager EnsureInstance()
     {
@@ -371,7 +392,7 @@ public class FriendManager : MonoBehaviour
         {
             var container = new FriendRequestListContainer { requests = _pendingRequests };
             string json = JsonUtility.ToJson(container);
-            PlayerPrefs.SetString(PREF_KEY_REQUESTS, json);
+            PlayerPrefs.SetString(GetRequestsPrefKey(), json);
             PlayerPrefs.Save();
         }
         catch (Exception ex)
@@ -383,7 +404,8 @@ public class FriendManager : MonoBehaviour
     public void LoadFriendRequests()
     {
         _pendingRequests.Clear();
-        string json = PlayerPrefs.GetString(PREF_KEY_REQUESTS, "");
+        string key = GetRequestsPrefKey();
+        string json = PlayerPrefs.GetString(key, "");
         if (!string.IsNullOrEmpty(json))
         {
             try
@@ -404,7 +426,7 @@ public class FriendManager : MonoBehaviour
         {
             var container = new FriendListContainer { friends = _friendList };
             string json = JsonUtility.ToJson(container);
-            PlayerPrefs.SetString(PREF_KEY_FRIENDS, json);
+            PlayerPrefs.SetString(GetFriendsPrefKey(), json);
             PlayerPrefs.Save();
         }
         catch (Exception ex)
@@ -416,7 +438,8 @@ public class FriendManager : MonoBehaviour
     public void LoadFriends()
     {
         _friendList.Clear();
-        string json = PlayerPrefs.GetString(PREF_KEY_FRIENDS, "");
+        string key = GetFriendsPrefKey();
+        string json = PlayerPrefs.GetString(key, "");
 
         if (!string.IsNullOrEmpty(json))
         {

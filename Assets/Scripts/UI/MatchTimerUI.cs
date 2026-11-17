@@ -169,6 +169,14 @@ public class MatchTimerUI : MonoBehaviour
     /// </summary>
     public static void ResetRunTimer()
     {
+        // Trong chế độ Co-op: Tuyệt đối không bao giờ reset đồng hồ trận đấu khi hồi sinh!
+        if (PvPMatchManager.IsCoopModeActive)
+        {
+            isTimerRunning = true;
+            if (Instance != null) Instance.UpdateTimerText();
+            return;
+        }
+
         totalRunElapsedTime = 0f;
         lastFinalTime = 0f;
         map1ClearTime = 0f;
@@ -185,6 +193,9 @@ public class MatchTimerUI : MonoBehaviour
 
     public void StopTimer()
     {
+        // Trong Co-op: Trận đấu diễn ra theo thời gian thực liên tục, không tạm dừng đồng hồ
+        if (PvPMatchManager.IsCoopModeActive) return;
+
         if (isTimerRunning)
         {
             isTimerRunning = false;
@@ -194,6 +205,8 @@ public class MatchTimerUI : MonoBehaviour
 
     public static void PauseRunTimer()
     {
+        if (PvPMatchManager.IsCoopModeActive) return;
+
         if (isTimerRunning)
         {
             isTimerRunning = false;

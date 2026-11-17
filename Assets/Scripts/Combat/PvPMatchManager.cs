@@ -15,6 +15,21 @@ public class PvPMatchManager : MonoBehaviour
     public static bool IsPvPModeActive = false;
     public static bool IsCoopModeActive = false;
 
+    /// <summary>
+    /// Số lượng người chơi tham chiến trong chế độ Co-op (1 đến tối đa 4 người).
+    /// Dùng làm hệ số nhân độ khó (HP) và số lượng quái vật theo cấp số nhân.
+    /// </summary>
+    public static int GetCurrentCoopPlayerMultiplier()
+    {
+        if (!IsCoopModeActive) return 1;
+        int count = 1;
+        if (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning)
+        {
+            count = PvPNetworkManager.Instance.GetConnectedPlayerCount();
+        }
+        return Mathf.Clamp(count, 1, 4);
+    }
+
     public const float ARENA_HALF_WIDTH = 10.6f;
     public const float ARENA_HALF_HEIGHT = 5.2f;
     public const float ARENA_OCTAGON_SUM = 14.4f;
@@ -25,7 +40,7 @@ public class PvPMatchManager : MonoBehaviour
 
     private float _matchTimer = MATCH_DURATION_SECONDS;
     private float _networkSyncTimer = 0f;
-    private const float NETWORK_SYNC_INTERVAL = 0.030f; // ~33 Hz thời gian thực nhị phân siêu nhẹ (30ms/gói) triệt tiêu độ trễ mạng tối đa
+    private const float NETWORK_SYNC_INTERVAL = 0.040f; // ~25 Hz đồng bộ siêu mượt thời gian thực, triệt tiêu độ trễ di chuyển và hành động
     private Vector2 _lastSentPos = Vector2.zero;
     private int _lastSentHp = -1;
     private string _lastSentSpr = "";

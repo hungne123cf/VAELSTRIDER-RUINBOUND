@@ -68,12 +68,27 @@ public static class EnemyHealthHelper
     }
 
     /// <summary>
-    /// Kích hoạt khi quái mới xuất hiện trong trận đấu (Áp dụng bùa hại CursedMight nếu người chơi đã chọn)
+    /// Kích hoạt khi quái mới xuất hiện trong trận đấu:
+    /// - Tự động nhân cấp số máu (HP) và độ khó theo số lượng người chơi Co-op (tối đa gấp 4 lần cho 4 người)
+    /// - Áp dụng bùa hại CursedMight nếu người chơi đã chọn
+    /// - Áp dụng hiệu ứng làm chậm Thời Không nếu đang kích hoạt
     /// </summary>
     public static void OnEnemySpawned(GameObject enemy)
     {
         if (enemy == null) return;
         DynamicSpriteColliderSync.EnsureAttached(enemy);
+
+        // ĐỘ KHÓ CO-OP: Tăng lượng máu theo cấp số nhân theo số lượng người chơi trong trận (1 người = 1x, 2 người = 2x, 3 người = 3x, 4 người = 4x)
+        int coopMult = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
+        if (coopMult > 1)
+        {
+            var eh = enemy.GetComponent<IEnemyHealth>() ?? enemy.GetComponentInParent<IEnemyHealth>();
+            if (eh != null)
+            {
+                eh.MultiplyHealth((float)coopMult);
+            }
+        }
+
         if (AugmentManager.Instance != null && AugmentManager.Instance.HasAugment(AugmentDatabase.AugmentType.CursedMight))
         {
             var eh = enemy.GetComponent<IEnemyHealth>() ?? enemy.GetComponentInParent<IEnemyHealth>();

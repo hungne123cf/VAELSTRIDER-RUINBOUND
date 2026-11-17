@@ -34,6 +34,7 @@ public class GameOverUI : MonoBehaviour
 
     private bool isShown = false;
     public bool IsShown() => isShown || (canvasGroup != null && canvasGroup.alpha > 0.05f);
+    public static bool IsTeamWipe = false;
 
     // Cache sprites
     private static Sprite _frameSprite;
@@ -93,9 +94,22 @@ public class GameOverUI : MonoBehaviour
         }
     }
 
+    public static void ShowTeamWipe()
+    {
+        IsTeamWipe = true;
+        Show();
+    }
+
     public void TriggerShow()
     {
-        if (MatchTimerUI.Instance != null) MatchTimerUI.Instance.StopTimer();
+        if (!PvPMatchManager.IsCoopModeActive && MatchTimerUI.Instance != null)
+        {
+            MatchTimerUI.Instance.StopTimer();
+        }
+        else if (MatchTimerUI.Instance != null)
+        {
+            MatchTimerUI.Instance.ResumeTimer();
+        }
         gameObject.SetActive(true);
         transform.SetAsLastSibling();
         UpdateButtonsAndTexts();
@@ -107,16 +121,25 @@ public class GameOverUI : MonoBehaviour
     public void UpdateButtonsAndTexts()
     {
         bool isVi = LocalizationManager.CurrentLanguage == LocalizationManager.Language.Vietnamese;
+        bool isCoop = PvPMatchManager.IsCoopModeActive;
 
         if (titleText != null) 
         {
             titleText.font = GameFontManager.HeaderFont;
-            titleText.text = isVi ? "NGƯƠI ĐÃ TỬ TRẬN" : "YOU DIED";
+            if (isCoop && IsTeamWipe)
+            {
+                titleText.text = isVi ? "TOÀN ĐỘI ĐÃ THẤT THỦ" : "TEAM WIPED OUT";
+                titleText.color = new Color(0.95f, 0.18f, 0.18f);
+            }
+            else
+            {
+                titleText.text = isCoop ? (isVi ? "BẠN ĐÃ GỤC NGÃ" : "YOU HAVE FALLEN") : (isVi ? "NGƯƠI ĐÃ TỬ TRẬN" : "YOU DIED");
+                titleText.color = isCoop ? new Color(1f, 0.45f, 0.25f) : new Color(0.85f, 0.15f, 0.15f); // Deep blood ruby Soulslike
+            }
             titleText.enableWordWrapping = false;
             titleText.enableAutoSizing = true;
             titleText.fontSizeMin = 28f;
             titleText.fontSizeMax = 44f;
-            titleText.color = new Color(0.85f, 0.15f, 0.15f); // Deep blood ruby Soulslike
             var rt = titleText.rectTransform;
             if (rt != null)
             {
@@ -149,7 +172,18 @@ public class GameOverUI : MonoBehaviour
         if (subtitleText != null) 
         {
             subtitleText.font = GameFontManager.BodyFont;
-            subtitleText.text = isVi ? "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này." : "Your journey ends here. Battle levels and augments only exist within this run.";
+            if (isCoop && IsTeamWipe)
+            {
+                subtitleText.text = isVi 
+                    ? "Tất cả chiến binh đều đã tử trận trong hầm ngục. Chuyến hành trình tạm thời kết thúc!" 
+                    : "All heroes have fallen in battle. Your journey ends here.";
+            }
+            else
+            {
+                subtitleText.text = isCoop 
+                    ? (isVi ? "Đồng đội đang giao tranh trong hầm ngục! Hãy hồi sinh để tiếp ứng chiến đấu." : "Your teammate is still fighting in the dungeon! Revive to support them.")
+                    : (isVi ? "Sinh mệnh đã cạn. Mọi kinh nghiệm và lõi ấn chỉ lưu giữ trong chuyến đi này." : "Your journey ends here. Battle levels and augments only exist within this run.");
+            }
             subtitleText.fontSize = 14f;
             subtitleText.enableAutoSizing = true;
             subtitleText.fontSizeMin = 10f;
@@ -168,10 +202,34 @@ public class GameOverUI : MonoBehaviour
         if (mainMenuBtnText != null) mainMenuBtnText.font = GameFontManager.BodyFont;
         if (respawnStatusText != null) respawnStatusText.font = GameFontManager.HeaderFont;
 
-        // Game 1 mạng: Ẩn nút Respawn hồi sinh tại chỗ
+        // 1. Phân bổ và bố cục các nút bấm tùy theo chế độ Co-op hoặc Solo
+        bool canRespawnSolo = !isCoop && (RespawnsUsedInCurrentMap < MAX_RESPAWNS_PER_MAP);
+        bool showRespawnBtn = isCoop || canRespawnSolo;
+
         if (respawnButton != null)
         {
-            respawnButton.gameObject.SetActive(false);
+            respawnButton.gameObject.SetActive(showRespawnBtn);
+            if (showRespawnBtn)
+            {
+                respawnButton.onClick.RemoveAllListeners();
+                respawnButton.onClick.AddListener(OnRespawnClicked);
+
+                var rRt = respawnButton.GetComponent<RectTransform>();
+                if (rRt != null)
+                {
+                    rRt.anchoredPosition = isCoop ? new Vector2(0f, -102f) : new Vector2(0f, -78f);
+                    rRt.sizeDelta = isCoop ? new Vector2(720f, 80f) : new Vector2(720f, 66f);
+                }
+
+                if (respawnBtnText != null)
+                {
+                    respawnBtnText.text = isCoop 
+                        ? (isVi ? "HỒI SINH TIẾP TỤC CHIẾN ĐẤU" : "REVIVE & CONTINUE") 
+                        : (isVi ? "HỒI SINH TẠI CHỖ (CÒN 1 LẦN)" : "REVIVE IN PLACE (1 LEFT)");
+                    WhiteIconLoader.SetButtonIconAndText(respawnButton, "Check", respawnBtnText.text, new Color(0.35f, 1f, 0.55f), Color.white, true);
+                    respawnButton.transform.Find("FrameBorder")?.SetAsLastSibling();
+                }
+            }
         }
 
         // Run Summary: Chỉ hiển thị linh hồn thu thập được trong trận đấu hiện tại
@@ -198,15 +256,26 @@ public class GameOverUI : MonoBehaviour
             }
         }
 
-        // 1. Nút Chơi lại run mới từ đầu
+        // 2. Nút Chơi lại run mới từ đầu (chỉ bật ở Solo; Co-op cấm tuyệt đối nút này để tránh làm mất map của đồng đội)
         if (restartButton != null)
         {
-            restartButton.onClick.RemoveAllListeners();
-            restartButton.onClick.AddListener(OnRestartMapClicked);
+            restartButton.gameObject.SetActive(!isCoop);
+            if (!isCoop)
+            {
+                restartButton.onClick.RemoveAllListeners();
+                restartButton.onClick.AddListener(OnRestartMapClicked);
+
+                var rstRt = restartButton.GetComponent<RectTransform>();
+                if (rstRt != null)
+                {
+                    rstRt.anchoredPosition = canRespawnSolo ? new Vector2(0f, -154f) : new Vector2(0f, -102f);
+                    rstRt.sizeDelta = canRespawnSolo ? new Vector2(720f, 66f) : new Vector2(720f, 80f);
+                }
+            }
         }
         if (restartBtnText != null)
         {
-            restartBtnText.text = isVi ? "HỒI SINH & CHƠI LẠI RUN MỚI" : "REVIVE & START NEW RUN";
+            restartBtnText.text = isVi ? "CHƠI LẠI RUN MỚI TỪ ĐẦU" : "RESTART NEW RUN FROM START";
             if (restartButton != null)
             {
                 WhiteIconLoader.SetButtonIconAndText(restartButton, "Repeat-Right", restartBtnText.text, new Color(1f, 0.85f, 0.35f), Color.white, true);
@@ -214,11 +283,18 @@ public class GameOverUI : MonoBehaviour
             }
         }
 
-        // 2. Nút Về Main Menu (Sảnh Sanctuary)
+        // 3. Nút Về Main Menu (Sảnh Sanctuary)
         if (mainMenuButton != null)
         {
             mainMenuButton.onClick.RemoveAllListeners();
             mainMenuButton.onClick.AddListener(OnReturnToMainMenuClicked);
+
+            var mmRt = mainMenuButton.GetComponent<RectTransform>();
+            if (mmRt != null)
+            {
+                mmRt.anchoredPosition = (!isCoop && canRespawnSolo) ? new Vector2(0f, -230f) : new Vector2(0f, -200f);
+                mmRt.sizeDelta = (!isCoop && canRespawnSolo) ? new Vector2(720f, 66f) : new Vector2(720f, 80f);
+            }
         }
         if (mainMenuBtnText != null)
         {
@@ -278,24 +354,42 @@ public class GameOverUI : MonoBehaviour
         onComplete?.Invoke();
     }
 
+    public static void AutoReviveOnWaveClear()
+    {
+        if (Instance != null && Instance.gameObject.activeSelf)
+        {
+            Instance.StartCoroutine(Instance.FadeOutRoutine(() =>
+            {
+                var ph = UnityEngine.Object.FindAnyObjectByType<PlayerHealth>();
+                if (ph != null && ph.IsDead)
+                {
+                    ph.Revive();
+                }
+            }));
+        }
+    }
+
     /// <summary>
-    /// Hoi sinh nhan vat tai cho (chi duoc dung 1 lan moi map)
+    /// Hoi sinh nhan vat tai cho: Trong Co-op luon cho phep hoi sinh va tiep tuc dem thoi gian tran dau
     /// </summary>
     public void OnRespawnClicked()
     {
-        if (RespawnsUsedInCurrentMap >= MAX_RESPAWNS_PER_MAP)
+        IsTeamWipe = false;
+        bool isCoop = PvPMatchManager.IsCoopModeActive;
+        if (!isCoop && RespawnsUsedInCurrentMap >= MAX_RESPAWNS_PER_MAP)
         {
             Debug.LogWarning("<color=red>[RESPAWN]</color> Da het luot hoi sinh trong map nay!");
             return;
         }
 
-        RespawnsUsedInCurrentMap++;
-        Debug.Log($"<color=green>[RESPAWN]</color> Da su dung luot hoi sinh duy nhat ({RespawnsUsedInCurrentMap}/{MAX_RESPAWNS_PER_MAP})!");
+        if (!isCoop) RespawnsUsedInCurrentMap++;
+        Debug.Log($"<color=green>[RESPAWN]</color> Hoi sinh chien binh thanh cong! Tiep tuc dong ho tran dau.");
 
         StartCoroutine(FadeOutRoutine(() =>
         {
             Time.timeScale = 1f;
             GameAutoBootstrap.SetGameplayHUDVisible(true);
+            if (MatchTimerUI.Instance != null) MatchTimerUI.Instance.ResumeTimer();
             var playerHealth = UnityEngine.Object.FindAnyObjectByType<PlayerHealth>();
             if (playerHealth != null)
             {
@@ -647,10 +741,13 @@ public class GameOverUI : MonoBehaviour
         // Section Divider before buttons
         CreateOrnamentDivider(boxObj.transform, "SectionDivider", new Vector2(0, -38), new Vector2(740, 10), ColorDividerLine);
 
-        // ─── 6. Button: START NEW RUN (LEVEL 1) ────────────────────────────────
-        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "HỒI SINH & CHƠI LẠI RUN MỚI", new Vector2(0, -102), new Vector2(720, 80), ColorBtnRestartBg, ColorBtnFrame, 26, out Instance.restartBtnText);
+        // ─── 6. Button: RESPAWN / REVIVE IN PLACE ──────────────────────────────
+        Instance.respawnButton = CreateFramedButton(boxObj.transform, "Btn_Respawn", "HỒI SINH TIẾP TỤC CHIẾN ĐẤU", new Vector2(0, -102), new Vector2(720, 80), new Color(0.12f, 0.22f, 0.16f, 1f), new Color(0.35f, 1f, 0.55f, 0.9f), 26, out Instance.respawnBtnText);
 
-        // ─── 7. Button: RETURN TO SANCTUARY ────────────────────────────────────
+        // ─── 7. Button: START NEW RUN (LEVEL 1) ────────────────────────────────
+        Instance.restartButton = CreateFramedButton(boxObj.transform, "Btn_RestartMap", "CHƠI LẠI RUN MỚI TỪ ĐẦU", new Vector2(0, -102), new Vector2(720, 80), ColorBtnRestartBg, ColorBtnFrame, 26, out Instance.restartBtnText);
+
+        // ─── 8. Button: RETURN TO SANCTUARY ────────────────────────────────────
         Instance.mainMenuButton = CreateFramedButton(boxObj.transform, "Btn_MainMenu", "VỀ SẢNH CHÍNH", new Vector2(0, -200), new Vector2(720, 80), ColorBtnMainMenuBg, ColorBtnFrame, 26, out Instance.mainMenuBtnText);
 
         // Đảm bảo khung ngoài của CenterBox nếu có luôn hiển thị trên cùng

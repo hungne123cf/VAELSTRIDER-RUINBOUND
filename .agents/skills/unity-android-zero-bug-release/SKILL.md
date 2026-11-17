@@ -277,6 +277,16 @@ Khi phát triển chế độ **Online PvP Đối Kháng (Photon Fusion 2 / Mult
      * **Góc trên bên phải (`Btn_PlayFabCloud` - `RANK / BXH`):** Bấm vào mở **Bảng Xếp Hạng Rank (`OpenRankModal`)** hoàn toàn độc lập.
   5. **Cấm dùng ký tự ngoặc vuông `[` `]` trong Text UI:** Font chữ nghệ thuật của game ánh xạ ký tự `[` thành chữ `Z`, do đó mọi chuỗi UI phải dùng ngoặc tròn `(` `)` hoặc trình bày sạch không ngoặc vuông.
 
+### 9.9. Chuẩn Hóa Đăng Nhập Google Native Trên Điện Thoại Android (`GoogleAccountPickerFragment.java` & `AndroidGoogleSignInBridge.cs`)
+* **Hiện tượng lỗi:** Bấm `ĐĂNG NHẬP BẰNG GOOGLE` trên điện thoại Android, hiện popup chọn tài khoản Google nhưng khi bấm chọn tài khoản xong thì tự đóng lại, **không đăng nhập được và cũng không hiển thị bất kỳ lý do lỗi nào**.
+* **Nguyên nhân gốc rễ:**
+  1. Khi gọi `GoogleSignIn` (`com.google.android.gms.auth.api.signin`) trên bản APK chưa đăng ký mã băm `SHA-1` của Keystore trên Google Cloud Console, `SignInHubActivity` từ chối với mã lỗi `DEVELOPER_ERROR (10)` nhưng lại trả về `resultCode == Activity.RESULT_CANCELED (0)`. Nếu code Java kiểm tra `if (resultCode == Activity.RESULT_CANCELED)` trước thì sẽ hiểu nhầm là người chơi tự đóng bảng chọn (`User canceled`), nuốt mất lỗi thật và không bao giờ chạy tới nhánh fallback `AccountManager`.
+  2. Callback từ `AndroidJavaProxy` chạy trên **Android UI Thread** (khác với **Unity Main Thread**). Nếu gọi `OAuthAuthenticator.EnsureInstance()` (`FindAnyObjectByType` / `new GameObject`) từ Android UI Thread khi `Instance == null`, Unity IL2CPP sẽ ném `UnityException` ngầm làm đứt toàn bộ luồng callback đăng nhập.
+* **Quy tắc bắt buộc:**
+  1. Trong `GoogleAccountPickerFragment.java`, **luôn ưu tiên gọi `AccountManager.newChooseAccountIntent` (`REQ_CHOOSE_ACCOUNT`) làm phương thức số 1** để mở bảng chọn tài khoản Google hệ thống của Android (hoạt động 100% trên mọi bản APK Debug/Release ngay ở lần chạm đầu tiên mà không phụ thuộc SHA-1 trên Google Cloud).
+  2. Khởi tạo sẵn `OAuthAuthenticator.EnsureInstance()` trên **Unity Main Thread** trước khi mở `LaunchAccountPicker`, và trong `RunOnMainThread` chỉ đẩy `Action` vào `Queue` thread-safe (`lock (mainThreadActions)`), tuyệt đối không gọi `EnsureInstance()` từ thread phụ.
+  3. Khi người chơi đóng bảng chọn hoặc thiết bị không hỗ trợ Google Play Services, phải hiển thị rõ thông báo lý do trên thanh trạng thái và mở bước `Step2_GoogleEmailPrompt` (hỗ trợ cả nút mở lại bảng chọn thiết bị lẫn ô nhập trực tiếp Email Google đồng bộ PlayFab Cloud).
+
 ---
 
 ## 10. CHECKLIST 12 BƯỚC "ZERO-BUG" TRƯỚC KHI BẤM BUILD APK

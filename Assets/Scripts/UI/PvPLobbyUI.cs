@@ -727,23 +727,24 @@ public class PvPLobbyUI : MonoBehaviour
 
     public void ShowLobbyToast(string message, Color textColor)
     {
-        if (this == null || !gameObject.activeInHierarchy || !isActiveAndEnabled || _modalRoot == null || !_modalRoot.activeInHierarchy) return;
+        if (this == null || !gameObject.activeInHierarchy || !isActiveAndEnabled) return;
+        Transform targetParent = (_friendsModalObj != null && _friendsModalObj.activeInHierarchy) ? _friendsModalObj.transform : (_modalRoot != null ? _modalRoot.transform : transform);
+
         if (_lobbyToastObj == null)
         {
             _lobbyToastObj = new GameObject("LobbyToast", typeof(RectTransform), typeof(CanvasRenderer), typeof(CanvasGroup), typeof(Image));
             _lobbyToastObj.layer = 5;
-            _lobbyToastObj.transform.SetParent(_modalRoot.transform, false);
-            _lobbyToastObj.transform.SetAsLastSibling();
+            _lobbyToastObj.transform.SetParent(targetParent, false);
 
             RectTransform rt = _lobbyToastObj.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(0f, 300f);
-            rt.sizeDelta = new Vector2(720f, 85f);
+            rt.anchoredPosition = new Vector2(0f, 320f);
+            rt.sizeDelta = new Vector2(760f, 85f);
 
             Image bg = _lobbyToastObj.GetComponent<Image>();
-            bg.color = new Color(0.08f, 0.04f, 0.05f, 0.96f);
+            bg.color = new Color(0.08f, 0.04f, 0.05f, 0.98f);
             bg.raycastTarget = false; // Tuyệt đối không chặn touch / raycast tới các nút bấm phía dưới
 
             CanvasGroup toastCg = _lobbyToastObj.GetComponent<CanvasGroup>();
@@ -754,7 +755,7 @@ public class PvPLobbyUI : MonoBehaviour
             }
 
             var outline = _lobbyToastObj.AddComponent<Outline>();
-            outline.effectColor = new Color(0.95f, 0.35f, 0.25f, 0.95f);
+            outline.effectColor = new Color(0.95f, 0.75f, 0.25f, 0.95f);
             outline.effectDistance = new Vector2(3f, -3f);
 
             GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -774,6 +775,7 @@ public class PvPLobbyUI : MonoBehaviour
 
         if (_lobbyToastObj != null)
         {
+            _lobbyToastObj.transform.SetParent(targetParent, false);
             _lobbyToastObj.SetActive(true);
             _lobbyToastObj.transform.SetAsLastSibling();
             if (_lobbyToastText != null)
@@ -2586,11 +2588,7 @@ public class PvPLobbyUI : MonoBehaviour
 
     public static void ShowRoomInviteDialog(string senderName, string roomPin)
     {
-        var lobby = EnsureInstance();
-        if (lobby != null)
-        {
-            lobby.OpenRoomInvitePopup(senderName, roomPin);
-        }
+        RoomInviteGlobalPopup.Show(senderName, roomPin);
     }
 
     /// <summary>

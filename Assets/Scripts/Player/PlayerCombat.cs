@@ -1346,12 +1346,9 @@ public class PlayerCombat : MonoBehaviour
         try
         {
             // ====================================================
-            // GIAI ĐOẠN 1: CUTSCENE ZOOM-IN & NGƯNG ĐỌNG THỜI GIAN
+            // GIAI ĐOẠN 1: KHỞI ĐỘNG TUYỆT KỸ (KHÔNG DỪNG TIME / KHÔNG SLOW-MO)
             // ====================================================
-            if (!PvPMatchManager.IsPvPModeActive)
-            {
-                Time.timeScale = 0.05f; // Ngưng đọng thời gian (Hit-stop / Cinematic slow-mo) - CHỈ TRONG PVE!
-            }
+            Time.timeScale = 1.0f; // Luôn giữ chuẩn 1.0f để game không bị trễ/lệch đồng bộ
 
             // Camera zoom cận cảnh vào người chơi
             if (cam != null && !PvPMatchManager.IsPvPModeActive) cam.SetCinematicZoom(2.8f);
@@ -1362,29 +1359,26 @@ public class PlayerCombat : MonoBehaviour
             // Bật Hiệu Ứng Ánh Mắt Rực Lửa (Eye Flare VFX) trên mặt nhân vật
             var eyeFlare = GetComponent<EyeFlareFX>();
             if (eyeFlare == null) eyeFlare = gameObject.AddComponent<EyeFlareFX>();
-            eyeFlare.TriggerEyeFlare(1.0f, isMaid: false);
+            eyeFlare.TriggerEyeFlare(0.4f, isMaid: false);
 
             // Bật Cutscene UI: 2 vệt đen điện ảnh + Dải ánh mắt anime + Câu thoại ngầu lòi
             var cutsceneUI = UltiCinematicUI.EnsureInstance();
-            if (cutsceneUI != null) cutsceneUI.ShowCutscene(1.0f, isMaid: false);
+            if (cutsceneUI != null) cutsceneUI.ShowCutscene(0.4f, isMaid: false);
         }
         catch (System.Exception ex)
         {
             Debug.LogError("[ULTI] Error in cinematic phase: " + ex);
         }
 
-        // Chờ 1.0 giây thời gian thực (Realtime)
-        yield return new WaitForSecondsRealtime(1.0f);
+        // Chờ 0.35s chuyển nhịp mượt mà (không đóng băng thời gian)
+        yield return new WaitForSeconds(0.35f);
 
         try
         {
             // ====================================================
-            // GIAI ĐOẠN 2: THỜI GIAN TRỞ LẠI & BÙNG NỔ BÃO LỐC
+            // GIAI ĐOẠN 2: BÙNG NỔ BÃO LỐC TÀN TÍCH
             // ====================================================
-            if (!PvPMatchManager.IsPvPModeActive)
-            {
-                Time.timeScale = 1.0f; // Luôn đảm bảo khôi phục thời gian bình thường!
-            }
+            Time.timeScale = 1.0f;
             if (cam != null)
             {
                 cam.ResetZoom();
@@ -1397,28 +1391,28 @@ public class PlayerCombat : MonoBehaviour
             if (animator != null) animator.Play("Player_Ulti", 0, 0f);
             SoundManager.EnsureInstance()?.PlaySwordSlash();
             ExecuteCleaveWave(center, damage: 30 + Mathf.RoundToInt(bonusAttackDamage * 0.5f), isFinal: false, pullInward: true);
-            yield return new WaitForSecondsRealtime(0.28f);
+            yield return new WaitForSeconds(0.25f);
 
-            // ĐỢT 2 (t = 0.28s): Bão kiếm cuộn xoay liên kích 2 & Gom quái chặt hơn
+            // ĐỢT 2 (t = 0.25s): Bão kiếm cuộn xoay liên kích 2 & Gom quái chặt hơn
             if (animator != null) animator.Play("Player_Ulti", 0, 0.15f);
             SoundManager.EnsureInstance()?.PlaySwordSlash();
             if (cam != null) cam.Shake(0.15f, 0.2f);
             ExecuteCleaveWave(center, damage: 45 + Mathf.RoundToInt(bonusAttackDamage * 0.6f), isFinal: false, pullInward: true);
-            yield return new WaitForSecondsRealtime(0.28f);
+            yield return new WaitForSeconds(0.25f);
 
-            // ĐỢT 3 (t = 0.56s): Bão kiếm cuộn xoay liên kích 3
+            // ĐỢT 3 (t = 0.50s): Bão kiếm cuộn xoay liên kích 3
             if (animator != null) animator.Play("Player_Ulti", 0, 0.3f);
             SoundManager.EnsureInstance()?.PlaySwordSlash();
             ExecuteCleaveWave(center, damage: 60 + Mathf.RoundToInt(bonusAttackDamage * 0.8f), isFinal: false, pullInward: false);
-            yield return new WaitForSecondsRealtime(0.28f);
+            yield return new WaitForSeconds(0.25f);
 
-            // ĐỢT 4 - ĐÒN KẾT LIỄU CỰC ĐẠI (t = 0.84s): NỔ TUNG HẤT VĂNG TOÀN BỘ QUÁI
+            // ĐỢT 4 - ĐÒN KẾT LIỄU CỰC ĐẠI (t = 0.75s): NỔ TUNG HẤT VĂNG TOÀN BỘ QUÁI
             if (animator != null) animator.Play("Player_Ulti", 0, 0.45f);
             SoundManager.EnsureInstance()?.PlaySwordSlash();
             SoundManager.EnsureInstance()?.PlayHitImpact();
             if (cam != null) cam.Shake(0.4f, 0.5f);
             ExecuteCleaveWave(center, damage: 120 + bonusUltiDamage + bonusAttackDamage * 2, isFinal: true, pullInward: false);
-            yield return new WaitForSecondsRealtime(0.30f);
+            yield return new WaitForSeconds(0.25f);
         }
         finally
         {

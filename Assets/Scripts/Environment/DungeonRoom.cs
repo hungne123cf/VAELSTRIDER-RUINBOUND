@@ -52,6 +52,13 @@ public class DungeonRoom : MonoBehaviour
     {
         if (isEntered || isCleared) return;
 
+        // BẢO VỆ TUYỆT ĐỐI CO-OP: Nếu phòng đã được đồng đội quét sạch, lập tức mở cửa và bỏ qua vĩnh viễn!
+        if (DungeonRoomManager.Instance != null && DungeonRoomManager.Instance.IsRoomCleared(roomIndex))
+        {
+            ApplyNetworkClear();
+            return;
+        }
+
         var player = GetCachedPlayer();
         if (player != null)
         {
@@ -59,7 +66,7 @@ public class DungeonRoom : MonoBehaviour
             if (IsPlayerDeepInside(pos))
             {
                 isEntered = true;
-                DungeonRoomManager.Instance?.OnPlayerEnterRoom(this);
+                DungeonRoomManager.Instance?.OnPlayerEnterRoom(this, isFromNetwork: false);
             }
         }
     }
@@ -116,13 +123,26 @@ public class DungeonRoom : MonoBehaviour
         return true;
     }
 
-    public void OnRoomCleared()
+    public void ApplyNetworkEnter()
     {
+        if (isEntered || isCleared) return;
+        isEntered = true;
+        DungeonRoomManager.Instance?.OnPlayerEnterRoom(this, isFromNetwork: true);
+    }
+
+    public void ApplyNetworkClear()
+    {
+        isEntered = true;
         isCleared = true;
         if (entranceBarrier != null) entranceBarrier.Unlock();
         if (exitBarrier != null) exitBarrier.Unlock();
         if (nextEntranceBarrier != null) nextEntranceBarrier.Unlock();
         if (rewardObject != null) rewardObject.SetActive(true);
+    }
+
+    public void OnRoomCleared()
+    {
+        ApplyNetworkClear();
     }
 
     public string GetLocalizedTitle()

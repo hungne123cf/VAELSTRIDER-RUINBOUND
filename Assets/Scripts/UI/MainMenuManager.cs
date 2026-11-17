@@ -672,10 +672,10 @@ public class MainMenuManager : MonoBehaviour
             _txtModeStory.fontSize = 32f;
         }
 
-        // 2. TỔ ĐỘI CO-OP (1-4 NGƯỜI) - Nút dưới (Phóng to bằng kích cỡ Chơi Đơn)
+        // 2. TỔ ĐỘI CO-OP (TẠM KHÓA ĐỂ TẬP TRUNG CHƠI ĐƠN HOÀN THIỆN)
         _btnModeQuickMatch = EnsureNavButton(modeParent, _btnModeQuickMatch, "Btn_Mode_QuickMatch",
-            LocalizationManager.T("TỔ ĐỘI CO-OP", "CO-OP SQUAD"),
-            new Vector2(modeLeftX, -60f), new Vector2(380f, 100f), new Color(0.92f, 0.48f, 0.12f, 1f), out _txtModeQuickMatch);
+            LocalizationManager.T("TỔ ĐỘI CO-OP (SẮP MỞ)", "CO-OP (COMING SOON)"),
+            new Vector2(modeLeftX, -60f), new Vector2(380f, 100f), new Color(0.38f, 0.40f, 0.48f, 0.85f), out _txtModeQuickMatch);
         if (_btnModeQuickMatch != null)
         {
             _btnModeQuickMatch.transform.SetParent(modeParent, false);
@@ -694,13 +694,15 @@ public class MainMenuManager : MonoBehaviour
             _btnModeQuickMatch.onClick.AddListener(() =>
             {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
-                PvPLobbyUI.OpenCoopLobbyFromMainMenu();
+                ShowCarouselToast(LocalizationManager.T(
+                    "CHẾ ĐỘ CO-OP ĐANG ĐƯỢC NÂNG CẤP HOÀN THIỆN! HÃY TRẢI NGHIỆM CHIẾN DỊCH CHƠI ĐƠN!",
+                    "CO-OP MODE IS UNDER UPGRADE! PLEASE ENJOY SOLO STORY CAMPAIGN!"), new Color(1f, 0.85f, 0.35f, 1f));
             });
         }
         if (_txtModeQuickMatch != null)
         {
-            _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP", "CO-OP SQUAD");
-            _txtModeQuickMatch.fontSize = 32f;
+            _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP\n<size=20><color=#FFD54F>(SẮP RA MẮT)</color></size>", "CO-OP SQUAD\n<size=20><color=#FFD54F>(COMING SOON)</color></size>");
+            _txtModeQuickMatch.fontSize = 28f;
         }
 
         // Ẩn Tạo Phòng & Tìm Phòng PIN riêng lẻ trên Main Menu (Đã tích hợp trọn vẹn vào 1 Trang Sảnh Chờ Co-op duy nhất)
@@ -4979,6 +4981,7 @@ public class MainMenuManager : MonoBehaviour
     {
         _returnToPvPLobbyAfterHeroSelect = false;
         PvPMatchManager.IsPvPModeActive = false;
+        PvPMatchManager.IsCoopModeActive = false;
         if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
         OpenHeroSelectModal();
     }
@@ -6713,7 +6716,12 @@ public class MainMenuManager : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(2.5f);
+            yield return new WaitForSeconds(2.0f); // Kiểm tra lời mời 2s/lần để hiển thị siêu tốc ngay tại Sảnh Chính
+
+            if (PlayFabClientService.IsOfflineMode)
+            {
+                continue;
+            }
 
             var acc = AccountDatabase.GetActiveAccount();
             string myName = acc != null
@@ -6725,13 +6733,10 @@ public class MainMenuManager : MonoBehaviour
                 PlayFabClientService.Instance?.CheckAndConsumeIncomingRoomInvites(myName, (sender, roomPin) =>
                 {
                     FriendManager.EnsureInstance()?.AddPendingRoomInvite(sender, roomPin);
-                    InGameTeamChatUI.ShowInteractiveInviteToast(sender, roomPin);
                     UpdateFriendsBadge();
 
-                    if (PvPLobbyUI.Instance != null && PvPLobbyUI.Instance.gameObject.activeInHierarchy)
-                    {
-                        PvPLobbyUI.ShowRoomInviteDialog(sender, roomPin);
-                    }
+                    // Hiển thị DUY NHẤT 1 popup toàn cục ngay tại Sảnh Chính
+                    RoomInviteGlobalPopup.Show(sender, roomPin);
                 });
             }
 

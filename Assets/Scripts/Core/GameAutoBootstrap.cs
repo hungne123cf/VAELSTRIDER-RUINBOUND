@@ -334,11 +334,15 @@ public class GameAutoBootstrap : MonoBehaviour
             if (m != null && m.gameObject != null) m.gameObject.SetActive(MinimapHUD.EnableMinimapHUD && visible);
         }
 
-        // 3. Match Timer
+        // 3. Match Timer (Trong Co-op: Đồng hồ thi đấu luôn chạy liên tục, tuyệt đối không bị ngắt)
         var timers = Object.FindObjectsByType<MatchTimerUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var t in timers)
         {
-            if (t != null && t.gameObject != null) t.gameObject.SetActive(visible);
+            if (t != null && t.gameObject != null)
+            {
+                bool isCoop = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+                t.gameObject.SetActive(visible || isCoop);
+            }
         }
 
         bool isPvP = PvPMatchManager.IsPvPModeActive;

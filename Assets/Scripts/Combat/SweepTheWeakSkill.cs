@@ -65,15 +65,12 @@ public class SweepTheWeakSkill : MonoBehaviour
             if (playerController != null) playerController.SetCanMove(false);
 
             // ====================================================
-            // GIAI DOAN 1: HOAT ANH ZOOM-IN DIEN ANH & CAU THOAI NGAU
+            // GIAI DOAN 1: HOAT ANH ZOOM-IN DIEN ANH (KHONG DUNG TIME)
             // ====================================================
-            if (!PvPMatchManager.IsPvPModeActive)
-            {
-                Time.timeScale = 0.05f; // Slow-motion cinematic zoom (Chi chay PvE, PvP luon giu 1.0f de dong ho mang khong bi tre)
-            }
+            Time.timeScale = 1.0f; // Luon giu 1.0f chuan tat ca che do
 
             // Camera zoom can canh vao nhan vat Maid
-            if (cam != null) cam.SetCinematicZoom(2.6f);
+            if (cam != null && !PvPMatchManager.IsPvPModeActive) cam.SetCinematicZoom(2.6f);
 
             // Phat am thanh thuc tinh nang luong & voice cau thoai
             SoundManager.EnsureInstance()?.PlayPortalSpawn();
@@ -81,7 +78,7 @@ public class SweepTheWeakSkill : MonoBehaviour
             // Bat Hieu Ung Anh Mat Ruc Lua (Eye Flare VFX) tren mat nhan vat
             var eyeFlare = GetComponent<EyeFlareFX>();
             if (eyeFlare == null) eyeFlare = gameObject.AddComponent<EyeFlareFX>();
-            eyeFlare.TriggerEyeFlare(0.85f, isMaid: true);
+            eyeFlare.TriggerEyeFlare(0.4f, isMaid: true);
 
             // Hien thi Letterbox den dien anh & Banner cau thoai chat cua Maid
             var cutsceneUI = UltiCinematicUI.EnsureInstance();
@@ -93,11 +90,11 @@ public class SweepTheWeakSkill : MonoBehaviour
                 string quote = quotes[quoteIdx % quotes.Length];
                 quoteIdx++;
 
-                cutsceneUI.ShowCutscene(0.85f, speaker, quote, isMaid: true);
+                cutsceneUI.ShowCutscene(0.4f, speaker, quote, isMaid: true);
             }
 
-            // Cho 0.85s thoi gian thuc de nguoi choi thuong thuc hoat anh dien anh
-            yield return new WaitForSecondsRealtime(0.85f);
+            // Chờ 0.35s chuyển nhịp mượt mà
+            yield return new WaitForSeconds(0.35f);
         }
         finally
         {

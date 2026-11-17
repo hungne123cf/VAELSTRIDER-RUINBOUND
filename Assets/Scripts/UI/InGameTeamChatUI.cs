@@ -271,11 +271,8 @@ public class InGameTeamChatUI : MonoBehaviour
 
     public static void ShowInteractiveInviteToast(string sender, string roomPin)
     {
-        if (Instance == null) AutoInit();
-        if (Instance != null)
-        {
-            Instance.TriggerInviteToast(sender, roomPin);
-        }
+        // Điều phối sang popup duy nhất toàn cục, không để nhân đôi 2 popup
+        RoomInviteGlobalPopup.Show(sender, roomPin);
     }
 
     public void TriggerInviteToast(string sender, string roomPin)

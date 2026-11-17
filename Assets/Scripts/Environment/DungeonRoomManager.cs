@@ -11,6 +11,9 @@ public class DungeonRoomManager : MonoBehaviour
     public DungeonRoom currentRoom;
 
     private WaveSpawner waveSpawner;
+    private readonly HashSet<int> _clearedRoomIndices = new HashSet<int>();
+    public bool IsRoomCleared(int roomIdx) => _clearedRoomIndices.Contains(roomIdx);
+    private Coroutine _activeRoomRoutine = null;
 
     void Awake()
     {
@@ -20,6 +23,89 @@ public class DungeonRoomManager : MonoBehaviour
             return;
         }
         Instance = this;
+    }
+
+    void OnEnable()
+    {
+        PvPNetworkManager.OnNetworkRoomEntered += HandleNetworkRoomEntered;
+        PvPNetworkManager.OnNetworkRoomCleared += HandleNetworkRoomCleared;
+        PvPNetworkManager.OnNetworkRoomSync += HandleNetworkRoomSync;
+        PvPNetworkManager.OnPlayerConnectedInGame += HandlePlayerConnectedInGame;
+    }
+
+    void OnDisable()
+    {
+        PvPNetworkManager.OnNetworkRoomEntered -= HandleNetworkRoomEntered;
+        PvPNetworkManager.OnNetworkRoomCleared -= HandleNetworkRoomCleared;
+        PvPNetworkManager.OnNetworkRoomSync -= HandleNetworkRoomSync;
+        PvPNetworkManager.OnPlayerConnectedInGame -= HandlePlayerConnectedInGame;
+    }
+
+    private void HandleNetworkRoomEntered(int roomIndex)
+    {
+        if (_clearedRoomIndices.Contains(roomIndex)) return;
+        var r = rooms.Find(x => x != null && x.roomIndex == roomIndex);
+        if (r != null && !r.isEntered && !r.isCleared)
+        {
+            r.isEntered = true;
+            OnPlayerEnterRoom(r, isFromNetwork: true);
+        }
+    }
+
+    private void HandleNetworkRoomCleared(int roomIndex)
+    {
+        _clearedRoomIndices.Add(roomIndex);
+        var r = rooms.Find(x => x != null && x.roomIndex == roomIndex);
+        if (r != null)
+        {
+            r.ApplyNetworkClear();
+        }
+
+        // Nếu phòng hiện tại của client này cũng là phòng vừa được mạng clear
+        if (currentRoom != null && currentRoom.roomIndex == roomIndex)
+        {
+            if (_activeRoomRoutine != null)
+            {
+                StopCoroutine(_activeRoomRoutine);
+                _activeRoomRoutine = null;
+            }
+            if (waveSpawner == null) waveSpawner = FindAnyObjectByType<WaveSpawner>();
+            if (waveSpawner != null)
+            {
+                waveSpawner.ClearLivingRoomEnemies();
+            }
+        }
+    }
+
+    private void HandleNetworkRoomSync(string clearedRoomsStr)
+    {
+        if (string.IsNullOrEmpty(clearedRoomsStr)) return;
+        string[] parts = clearedRoomsStr.Split(',');
+        foreach (var p in parts)
+        {
+            if (int.TryParse(p.Trim(), out int idx))
+            {
+                _clearedRoomIndices.Add(idx);
+                var r = rooms.Find(x => x != null && x.roomIndex == idx);
+                if (r != null)
+                {
+                    r.ApplyNetworkClear();
+                }
+            }
+        }
+    }
+
+    private void HandlePlayerConnectedInGame()
+    {
+        // Khi là Host và có người chơi mới kết nối/reconnect, gửi toàn bộ phòng đã Cleared
+        if (PvPMatchManager.IsCoopModeActive && PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsHost)
+        {
+            if (_clearedRoomIndices.Count > 0)
+            {
+                string syncData = string.Join(",", _clearedRoomIndices);
+                PvPNetworkManager.Instance.SendRoomSyncPacket(syncData);
+            }
+        }
     }
 
     void Start()
@@ -43,20 +129,54 @@ public class DungeonRoomManager : MonoBehaviour
 
     public void OnPlayerEnterRoom(DungeonRoom room)
     {
+        OnPlayerEnterRoom(room, false);
+    }
+
+    public void OnPlayerEnterRoom(DungeonRoom room, bool isFromNetwork)
+    {
         if (PvPMatchManager.IsPvPModeActive || !isActiveAndEnabled || !gameObject.activeInHierarchy)
         {
             return;
         }
 
+        if (room == null || room.isCleared || _clearedRoomIndices.Contains(room.roomIndex))
+        {
+            // BẢO VỆ TUYỆT ĐỐI CO-OP: Phòng đã dọn sạch từ trước, chỉ mở cổng và bỏ qua hoàn toàn!
+            if (room != null) room.ApplyNetworkClear();
+            return;
+        }
+
         currentRoom = room;
-        Debug.Log($"<color=cyan>[ROOM]</color> Người chơi bước vào {room.GetLocalizedTitle()}!");
+        Debug.Log($"<color=cyan>[ROOM]</color> Người chơi bước vào {room.GetLocalizedTitle()}! (Từ mạng: {isFromNetwork})");
 
         AnnounceRoom(room);
+
+        // ĐỒNG BỘ MẠNG CO-OP: Phát tín hiệu cho các máy đồng đội cùng tham chiến
+        if (!isFromNetwork && (PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning)))
+        {
+            PvPNetworkManager.Instance?.SendRoomEnterPacket(room.roomIndex);
+        }
 
         if (room.customEnterHandler != null)
         {
             room.customEnterHandler.Invoke(room);
             return;
+        }
+
+        // CHUẨN CO-OP HOST-AUTHORITATIVE:
+        // Client chỉ đóng cửa phòng chiến đấu và đợi Host điều phối các đợt quái.
+        bool isCoop = PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning && !PvPMatchManager.IsPvPModeActive);
+        if (isCoop && PvPNetworkManager.Instance != null && !PvPNetworkManager.Instance.IsHost)
+        {
+            StartCoroutine(LockBarrierWhenSafeRoutine(room.entranceBarrier, room));
+            if (room.exitBarrier != null) room.exitBarrier.Lock();
+            return;
+        }
+
+        if (_activeRoomRoutine != null)
+        {
+            StopCoroutine(_activeRoomRoutine);
+            _activeRoomRoutine = null;
         }
 
         switch (room.roomType)
@@ -67,17 +187,17 @@ public class DungeonRoomManager : MonoBehaviour
 
             case DungeonRoom.RoomType.SunkenHall:
                 // Sảnh 2: Điều phối Đợt 1 đến Đợt 4 / 10
-                StartCoroutine(RunRoom2WavesRoutine(room));
+                _activeRoomRoutine = StartCoroutine(RunRoom2WavesRoutine(room));
                 break;
 
             case DungeonRoom.RoomType.CursedCrypt:
                 // Hầm Mộ 3: Điều phối Đợt 5 đến Đợt 9 / 10
-                StartCoroutine(RunRoom3WavesRoutine(room));
+                _activeRoomRoutine = StartCoroutine(RunRoom3WavesRoutine(room));
                 break;
 
             case DungeonRoom.RoomType.TitanSanctum:
                 // Đại Điện 4: Đợt 10 / 10 - Đại Chiến Boss Titan Wheel!
-                StartCoroutine(RunRoom4BossRoutine(room));
+                _activeRoomRoutine = StartCoroutine(RunRoom4BossRoutine(room));
                 break;
         }
     }
@@ -126,10 +246,12 @@ public class DungeonRoomManager : MonoBehaviour
         if (waveSpawner == null) waveSpawner = FindAnyObjectByType<WaveSpawner>();
         var waveUI = FindAnyObjectByType<WaveUI>();
 
-        // Phòng 2: Điều phối 4 Đợt quái (Đợt 1 đến Đợt 4 / 10)
+        // Phòng 2: Điều phối 4 Đợt quái (Đợt 1 đến Đợt 4 / 10) - Nhân số lượng quái theo số người chơi Co-op (tối đa x4)
+        int coopMult2 = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
         for (int w = 1; w <= 4; w++)
         {
-            int count = 2 + w; // Đợt 1: 3, Đợt 2: 4, Đợt 3: 5, Đợt 4: 6
+            int baseCount = 2 + w; // Đợt 1: 3, Đợt 2: 4, Đợt 3: 5, Đợt 4: 6
+            int count = baseCount * coopMult2;
             List<Vector3> spawns = GenerateRoomSpawns(room, count);
 
             string wavePrefix = LocalizationManager.Get("HUD_WAVE");
@@ -170,10 +292,12 @@ public class DungeonRoomManager : MonoBehaviour
         if (waveSpawner == null) waveSpawner = FindAnyObjectByType<WaveSpawner>();
         var waveUI = FindAnyObjectByType<WaveUI>();
 
-        // Phòng 3: Điều phối 5 Đợt quái (Đợt 5 đến Đợt 9 / 10)
+        // Phòng 3: Điều phối 5 Đợt quái (Đợt 5 đến Đợt 9 / 10) - Nhân số lượng quái theo số người chơi Co-op (tối đa x4)
+        int coopMult3 = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
         for (int w = 5; w <= 9; w++)
         {
-            int count = Mathf.Clamp(4 + (w - 4), 5, 8); // Đợt 5: 5, Đợt 6: 6, Đợt 7: 7, Đợt 8: 8, Đợt 9: 8
+            int baseCount = Mathf.Clamp(4 + (w - 4), 5, 8); // Đợt 5: 5, Đợt 6: 6, Đợt 7: 7, Đợt 8: 8, Đợt 9: 8
+            int count = baseCount * coopMult3;
             List<Vector3> spawns = GenerateRoomSpawns(room, count);
 
             string wavePrefix = LocalizationManager.Get("HUD_WAVE");
@@ -221,7 +345,15 @@ public class DungeonRoomManager : MonoBehaviour
         string wavePrefix = LocalizationManager.Get("HUD_WAVE");
         string title = LocalizationManager.T($"CẢNH BÁO: TRÙM TITAN WHEEL! ({wavePrefix} 10 / 10)", $"BOSS INCOMING: TITAN WHEEL! ({wavePrefix} 10 / 10)");
 
+        int coopMult4 = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
         List<Vector3> spawns = new List<Vector3> { room.roomCenter };
+        if (coopMult4 > 1)
+        {
+            // Thêm hộ vệ bảo vệ Boss tỉ lệ theo số lượng người chơi (2 người: +2, 3 người: +4, 4 người: +6)
+            int minionCount = (coopMult4 - 1) * 2;
+            spawns.AddRange(GenerateRoomSpawns(room, minionCount));
+        }
+
         waveSpawner.SpawnRoomWave(10, 10, title, spawns, true, () =>
         {
             OnRoomCombatFinished(room);
@@ -271,7 +403,14 @@ public class DungeonRoomManager : MonoBehaviour
         }
 
         Debug.Log($"<color=yellow>[ROOM CLEARED]</color> {room.roomTitle} đã được quét sạch!");
+        _clearedRoomIndices.Add(room.roomIndex);
         room.OnRoomCleared();
+
+        // ĐỒNG BỘ MẠNG CO-OP: Phát tín hiệu cho toàn bộ đồng đội rằng phòng đã xong!
+        if (PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning))
+        {
+            PvPNetworkManager.Instance?.SendRoomClearPacket(room.roomIndex);
+        }
 
         var waveUI = FindAnyObjectByType<WaveUI>();
         if (room.roomType == DungeonRoom.RoomType.TitanSanctum)

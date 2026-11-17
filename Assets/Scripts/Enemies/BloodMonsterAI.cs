@@ -223,6 +223,11 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
     {
         if (isDead) return;
 
+        // ĐỒNG BỘ CO-OP (PUPPET TRÊN MÁY CLIENT):
+        // Không chạy AI di chuyển và vật lý cục bộ, để NetworkEnemySync nội suy vị trí mượt mà
+        var netSync = GetComponent<NetworkEnemySync>();
+        if (netSync != null && netSync.IsPuppet) return;
+
         // Đóng băng hoàn toàn AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
         if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive)
         {
@@ -333,12 +338,16 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     void FixedUpdate()
     {
+        var netSync = GetComponent<NetworkEnemySync>();
+        if (netSync != null && netSync.IsPuppet) return;
         if (isDead || LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
         ClampInsideRoomBounds();
     }
 
     void LateUpdate()
     {
+        var netSync = GetComponent<NetworkEnemySync>();
+        if (netSync != null && netSync.IsPuppet) return;
         if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
         ClampInsideRoomBounds();
     }
@@ -777,7 +786,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
     }
 
     // ===== ĐÒN ĐÁNH THƯỜNG / MELEE =====
-    private void SetMoving(bool moving)
+    public void SetMoving(bool moving)
     {
         if (animator != null && animator.runtimeAnimatorController != null) animator.SetBool(IsMovingHash, moving);
     }
@@ -884,6 +893,21 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
     public void TakeDamage(int damage)
     {
         if (isDead || isTransitioningPhase) return;
+
+        // ĐỒNG BỘ CO-OP (PUPPET TRÊN MÁY CLIENT): Báo sát thương lên Host tính toán thẩm quyền
+        var netSync = GetComponent<NetworkEnemySync>();
+        if (netSync != null && netSync.IsPuppet)
+        {
+            netSync.ReportLocalHit(damage);
+            currentHealth = Mathf.Max(1, currentHealth - damage);
+            if (!isBoss) EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
+            if (animator != null && animator.runtimeAnimatorController != null) animator.SetTrigger(HurtHash);
+            if (spriteRenderer != null) StartCoroutine(FlashRedRoutine());
+            var c = FindAnyObjectByType<CameraFollow>();
+            if (c != null) c.Shake(0.1f, 0.18f);
+            return;
+        }
+
         currentHealth -= damage;
         if (!isBoss)
         {

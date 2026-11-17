@@ -91,6 +91,13 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     // Hệ thống Chat Đội (Lobby & In-Game)
     public event Action<string, string> OnChatMessageReceived;
 
+    // Hệ thống Đồng Bộ Co-op 4 Người Chơi Thời Gian Thực (Real-Time 4-Player Co-op Room & Wave Sync)
+    public static event Action<int> OnNetworkRoomEntered;
+    public static event Action<int> OnNetworkRoomCleared;
+    public static event Action<string> OnNetworkRoomSync;
+    public static event Action<int, int, string> OnNetworkWaveStarted;
+    public static event Action OnPlayerConnectedInGame;
+
     public void SendFriendRequestPacket(string targetPlayerName)
     {
         var acc = AccountDatabase.GetActiveAccount();
@@ -478,7 +485,9 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 PlayerCount = 4, // Hỗ trợ tối đa 4 người chơi cùng vượt ải
                 CustomPhotonAppSettings = customAppSettings,
                 SceneManager = sceneManager,
-                ObjectProvider = objectProvider
+                ObjectProvider = objectProvider,
+                // Gửi PlayFabId làm token để Host chặn cùng 1 tài khoản vào phòng 2 lần
+                ConnectionToken = BuildAccountConnectionToken()
             };
 
             var currentRunner = _runner;
@@ -735,8 +744,9 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         try
         {
-            // Kênh 2 (State di chuyển): Xoay vòng 1024 slot chống nghẽn hàng đợi ReliableData trên Android/PC
-            int subKey = (channelId == 2) ? (int)((++_packetSeq) & 0x3FF) : (int)((++_packetSeq) & 0x7FFFFFFF);
+            // Kênh 2 (State di chuyển): Luân phiên 32 slot (0..31) để Fusion truyền mượt mà,
+            // chống đụng độ ReliableKey in-flight khi RTT cao và triệt tiêu 100% tình trạng tích tụ dồn ứ trễ trên Android/PC
+            int subKey = (channelId == 2) ? (int)((++_packetSeq) & 0x1F) : (int)((++_packetSeq) & 0x7FFFFFFF);
             ReliableKey key = ReliableKey.FromInts(channelId, subKey, 0, 0);
 
             if (_runner.IsServer)
@@ -776,7 +786,7 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    private void SendRawPacket(string payload, int channelId = 1)
+    public void SendRawPacket(string payload, int channelId = 1)
     {
         if (IsBotPracticeMode || _runner == null || !_runner.IsRunning) return;
         try
@@ -1028,6 +1038,89 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         SendRawPacket("R|" + subType, 6);
     }
 
+    public void SendRoomEnterPacket(int roomIndex)
+    {
+        SendRawPacket($"RM_ENTER|{roomIndex}", 7);
+    }
+
+    public void SendRoomClearPacket(int roomIndex)
+    {
+        SendRawPacket($"RM_CLEAR|{roomIndex}", 7);
+    }
+
+    public void SendRoomSyncPacket(string clearedRooms)
+    {
+        SendRawPacket($"RM_SYNC|{clearedRooms}", 7);
+    }
+
+    public void SendWaveStartPacket(int waveNumber, int totalWaves, string title)
+    {
+        string safeTitle = string.IsNullOrEmpty(title) ? "" : title.Replace("|", "/");
+        SendRawPacket($"WV_START|{waveNumber}|{totalWaves}|{safeTitle}", 7);
+    }
+
+    public void SendCoopClearRevivePacket()
+    {
+        SendRawPacket("COOP_CLEAR_REVIVE", 7);
+    }
+
+    public void SendEnemySpawnPacket(int netId, float x, float y, bool isBoss, int maxHp, int curHp, int enemyType = 0)
+    {
+        string p = string.Format(CultureInfo.InvariantCulture, "EN_SPAWN|{0}|{1:F2}|{2:F2}|{3}|{4}|{5}|{6}",
+            netId, x, y, isBoss ? "1" : "0", maxHp, curHp, enemyType);
+        SendRawPacket(p, 7);
+    }
+
+    public void SendEnemyHitPacket(int netId, int damage)
+    {
+        SendRawPacket($"EN_HIT|{netId}|{damage}", 7);
+    }
+
+    public void SendEnemyDiePacket(int netId)
+    {
+        SendRawPacket($"EN_DIE|{netId}", 7);
+    }
+
+    public void SendWaveClearPacket(int waveNumber, int totalWaves)
+    {
+        SendRawPacket($"WV_CLEAR|{waveNumber}|{totalWaves}", 7);
+    }
+
+    public void SendAllWavesClearedPacket()
+    {
+        SendRawPacket("WV_ALL_CLEAR", 7);
+    }
+
+    public void BroadcastRawPacket(string payload, int channelId = 7)
+    {
+        if (_runner == null || !_runner.IsRunning) return;
+        try
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(payload);
+            int subKey = (int)((++_packetSeq) & 0x7FFFFFFF);
+            ReliableKey key = ReliableKey.FromInts(channelId, subKey, 0, 0);
+
+            if (_runner.IsServer)
+            {
+                foreach (var p in _runner.ActivePlayers)
+                {
+                    if (p != _runner.LocalPlayer)
+                    {
+                        try { _runner.SendReliableDataToPlayer(p, key, bytes); } catch {}
+                    }
+                }
+            }
+            else
+            {
+                try { _runner.SendReliableDataToServer(key, bytes); } catch {}
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning("[PVP NETWORK] BroadcastRawPacket error: " + ex.Message);
+        }
+    }
+
     private void ParseIncomingPacket(string raw)
     {
         if (string.IsNullOrEmpty(raw)) return;
@@ -1250,10 +1343,10 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             string myName = (acc != null && !string.IsNullOrEmpty(acc.displayName)) ? acc.displayName :
                             (acc != null && !string.IsNullOrEmpty(acc.username)) ? acc.username : "Hiệp Sĩ";
 
-            bool isForMe = (target == "*") ||
-                           string.Equals(target, myName, StringComparison.OrdinalIgnoreCase) ||
-                           (acc != null && !string.IsNullOrEmpty(acc.username) && string.Equals(target, acc.username, StringComparison.OrdinalIgnoreCase)) ||
-                           (!string.IsNullOrEmpty(sender) && !string.Equals(sender, myName, StringComparison.OrdinalIgnoreCase));
+            bool isForMe = !string.Equals(sender, myName, StringComparison.OrdinalIgnoreCase) &&
+                           ((target == "*") ||
+                            string.Equals(target, myName, StringComparison.OrdinalIgnoreCase) ||
+                            (acc != null && !string.IsNullOrEmpty(acc.username) && string.Equals(target, acc.username, StringComparison.OrdinalIgnoreCase)));
 
             if (isForMe)
             {
@@ -1283,10 +1376,10 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             string myName = (acc != null && !string.IsNullOrEmpty(acc.displayName)) ? acc.displayName :
                             (acc != null && !string.IsNullOrEmpty(acc.username)) ? acc.username : "Hiệp Sĩ";
 
-            bool isForMe = (target == "*") ||
-                           string.Equals(target, myName, StringComparison.OrdinalIgnoreCase) ||
-                           (acc != null && !string.IsNullOrEmpty(acc.username) && string.Equals(target, acc.username, StringComparison.OrdinalIgnoreCase)) ||
-                           (!string.IsNullOrEmpty(sender) && !string.Equals(sender, myName, StringComparison.OrdinalIgnoreCase));
+            bool isForMe = !string.Equals(sender, myName, StringComparison.OrdinalIgnoreCase) &&
+                           ((target == "*") ||
+                            string.Equals(target, myName, StringComparison.OrdinalIgnoreCase) ||
+                            (acc != null && !string.IsNullOrEmpty(acc.username) && string.Equals(target, acc.username, StringComparison.OrdinalIgnoreCase)));
 
             if (isForMe)
             {
@@ -1318,8 +1411,7 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             if (target == "*" || string.Equals(target, myName, StringComparison.OrdinalIgnoreCase))
             {
                 FriendManager.EnsureInstance().ReceiveRoomInvite(sender, pin);
-                PvPLobbyUI.ShowRoomInviteDialog(sender, pin);
-                InGameTeamChatUI.ShowInteractiveInviteToast(sender, pin);
+                RoomInviteGlobalPopup.Show(sender, pin);
                 MainMenuManager mm = UnityEngine.Object.FindAnyObjectByType<MainMenuManager>();
                 if (mm != null)
                 {
@@ -1399,6 +1491,128 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 MatchTimerUI.SyncFromHost(remoteTime);
             }
         }
+        else if (type == "RM_ENTER" && parts.Length >= 2)
+        {
+            if (int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int rIdx))
+            {
+                Debug.Log($"<color=cyan>[CO-OP SYNC]</color> Đồng đội bước vào Phòng {rIdx}!");
+                OnNetworkRoomEntered?.Invoke(rIdx);
+                if (_runner != null && _runner.IsServer)
+                {
+                    BroadcastRawPacket(raw, 7);
+                }
+            }
+        }
+        else if (type == "RM_CLEAR" && parts.Length >= 2)
+        {
+            if (int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int rIdx))
+            {
+                Debug.Log($"<color=green>[CO-OP SYNC]</color> Phòng {rIdx} đã hoàn thành sạch quái!");
+                OnNetworkRoomCleared?.Invoke(rIdx);
+                if (_runner != null && _runner.IsServer)
+                {
+                    BroadcastRawPacket(raw, 7);
+                }
+            }
+        }
+        else if (type == "RM_SYNC" && parts.Length >= 2)
+        {
+            Debug.Log($"<color=yellow>[CO-OP SYNC]</color> Nhận danh sách phòng đã Clear: {parts[1]}");
+            OnNetworkRoomSync?.Invoke(parts[1]);
+        }
+        else if (type == "WV_START" && parts.Length >= 4)
+        {
+            int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int wIdx);
+            int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int tot);
+            string title = parts.Length >= 4 ? parts[3] : "";
+            OnNetworkWaveStarted?.Invoke(wIdx, tot, title);
+            if (_runner != null && _runner.IsServer)
+            {
+                BroadcastRawPacket(raw, 7);
+            }
+        }
+        else if (type == "COOP_CLEAR_REVIVE")
+        {
+            GameOverUI.AutoReviveOnWaveClear();
+            var ph = UnityEngine.Object.FindAnyObjectByType<PlayerHealth>();
+            if (ph != null && ph.IsDead) ph.Revive();
+            if (_runner != null && _runner.IsServer) BroadcastRawPacket(raw, 7);
+        }
+        else if (type == "EN_SPAWN" && parts.Length >= 7)
+        {
+            if (int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int netId))
+            {
+                float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float x);
+                float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float y);
+                bool isBoss = parts[4] == "1";
+                int.TryParse(parts[5], NumberStyles.Integer, CultureInfo.InvariantCulture, out int maxHp);
+                int.TryParse(parts[6], NumberStyles.Integer, CultureInfo.InvariantCulture, out int curHp);
+                int enemyType = 0;
+                if (parts.Length >= 8) int.TryParse(parts[7], NumberStyles.Integer, CultureInfo.InvariantCulture, out enemyType);
+
+                WaveSpawner.Instance?.SpawnPuppetEnemy(netId, enemyType, new Vector3(x, y, 0), isBoss, maxHp, curHp);
+            }
+        }
+        else if (type == "ES" && parts.Length >= 2)
+        {
+            string allData = parts[1];
+            string[] enemies = allData.Split(';');
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                string[] data = enemies[i].Split(',');
+                if (data.Length >= 5)
+                {
+                    if (int.TryParse(data[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int netId))
+                    {
+                        var sync = NetworkEnemySync.Get(netId);
+                        if (sync != null && sync.IsPuppet)
+                        {
+                            float.TryParse(data[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float x);
+                            float.TryParse(data[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float y);
+                            bool flip = data[3] == "1";
+                            int.TryParse(data[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out int hp);
+                            sync.UpdateState(x, y, flip, hp);
+                        }
+                    }
+                }
+            }
+        }
+        else if (type == "EN_HIT" && parts.Length >= 3)
+        {
+            if (IsHost)
+            {
+                if (int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int netId) &&
+                    int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int dmg))
+                {
+                    var sync = NetworkEnemySync.Get(netId);
+                    if (sync != null && !sync.IsPuppet)
+                    {
+                        sync.ApplyNetworkDamage(dmg);
+                    }
+                }
+            }
+        }
+        else if (type == "EN_DIE" && parts.Length >= 2)
+        {
+            if (int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int netId))
+            {
+                var sync = NetworkEnemySync.Get(netId);
+                if (sync != null && sync.IsPuppet)
+                {
+                    sync.ForceNetworkKill();
+                }
+            }
+        }
+        else if (type == "WV_CLEAR" && parts.Length >= 3)
+        {
+            int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int wIdx);
+            int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int tot);
+            WaveSpawner.Instance?.OnClientReceiveWaveClear(wIdx, tot);
+        }
+        else if (type == "WV_ALL_CLEAR")
+        {
+            WaveSpawner.Instance?.OnClientReceiveAllWavesCleared();
+        }
     }
 
     // =========================================================================
@@ -1436,6 +1650,7 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             {
                 InGameTeamChatUI.Instance.HandleInGameChatMessage("HỆ THỐNG", reconMsg);
             }
+            OnPlayerConnectedInGame?.Invoke();
         }
 
         OnOpponentReadyChanged?.Invoke();
@@ -1523,16 +1738,13 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                            | (buffer[offset + 4] << 16) 
                            | (buffer[offset + 5] << 24));
 
-            // CHỐNG TRIỆT ĐỂ DÂY CAO SU (RUBBERBANDING):
-            // Luôn drop bỏ gói tin đến muộn / cũ hơn gói tin mới nhất đã nhận
+            // CHỐNG TRIỆT ĐỂ DÂY CAO SU & ĐỘ TRỄ DỒN Ứ (RUBBERBANDING & QUEUE ACCUMULATION):
+            // Luôn drop bỏ toàn bộ gói tin đến muộn / cũ hơn gói tin mới nhất đã nhận
             if (_lastReceivedStateSeq > 0)
             {
-                if (seq <= _lastReceivedStateSeq)
+                if (seq <= _lastReceivedStateSeq && (_lastReceivedStateSeq - seq) < 0x7FFFFFFF)
                 {
-                    if (_lastReceivedStateSeq - seq < 500)
-                    {
-                        return; // Gói tin cũ -> bỏ qua ngay lập tức!
-                    }
+                    return; // Gói tin cũ -> lập tức bỏ qua, không bao giờ xử lý lại
                 }
             }
             _lastReceivedStateSeq = seq;
@@ -1623,10 +1835,56 @@ public class PvPNetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
     {
+        string incomingId = TokenToAccountId(token);
+        if (!string.IsNullOrEmpty(incomingId))
+        {
+            // Trùng với chính Host? (Chỉ chặn trong Release build, cho phép test 2 instance trong Editor/Test)
+#if !UNITY_EDITOR
+            if (incomingId == TokenToAccountId(BuildAccountConnectionToken()))
+            {
+                Debug.LogWarning($"[CO-OP] Từ chối kết nối: tài khoản {incomingId} đã là Chủ phòng.");
+                request.Refuse();
+                return;
+            }
+#endif
+            // Trùng với người chơi đã vào phòng?
+            foreach (var p in runner.ActivePlayers)
+            {
+                if (p == runner.LocalPlayer) continue;
+                byte[] existing = null;
+                try { existing = runner.GetPlayerConnectionToken(p); } catch { }
+                if (TokenToAccountId(existing) == incomingId)
+                {
+                    Debug.LogWarning($"[CO-OP] Từ chối kết nối: tài khoản {incomingId} đã có trong phòng.");
+                    request.Refuse();
+                    return;
+                }
+            }
+        }
         request.Accept();
+    }
+
+    private static byte[] BuildAccountConnectionToken()
+    {
+        var pf = PlayFabClientService.Instance;
+        string id = (pf != null && pf.IsLoggedIn) ? pf.PlayFabId : "";
+        if (string.IsNullOrEmpty(id)) return null; // Offline/Guest không có ID -> không kiểm tra
+        return System.Text.Encoding.UTF8.GetBytes("PF:" + id);
+    }
+
+    private static string TokenToAccountId(byte[] token)
+    {
+        if (token == null || token.Length == 0) return "";
+        string s = System.Text.Encoding.UTF8.GetString(token);
+        return s.StartsWith("PF:") ? s.Substring(3) : "";
     }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
     {
+        if (reason == NetConnectFailedReason.ServerRefused)
+        {
+            SetStatus(LocalizationManager.T("TÀI KHOẢN NÀY ĐÃ CÓ TRONG PHÒNG (ĐĂNG NHẬP TRÊN THIẾT BỊ KHÁC)!", "THIS ACCOUNT IS ALREADY IN THE ROOM (LOGGED IN ON ANOTHER DEVICE)!"));
+            return;
+        }
         SetStatus(LocalizationManager.T($"KHÔNG THỂ KẾT NỐI: {reason}", $"CONNECT FAILED: {reason}"));
     }
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }

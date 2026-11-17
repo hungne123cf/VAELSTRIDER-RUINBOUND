@@ -1292,6 +1292,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         {
             yield break;
         }
+
         Debug.Log("<color=red>[GAMEOVER]</color> Hoat anh chet hoan tat. Goi GameOverUI.Show()...");
         GameOverUI.Show();
     }
@@ -1299,13 +1300,15 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public int GetCurrentHealth() => currentHealth;
     public int GetMaxHealth() => maxHealth;
 
-    public void Revive()
+    public void Revive(float healthPercent = 1.0f)
     {
         isDead = false;
-        currentHealth = maxHealth;
+        currentHealth = Mathf.Clamp(Mathf.RoundToInt(maxHealth * healthPercent), 1, maxHealth);
         ResetRunPreservedHealth();
         PlayerPrefs.SetInt("Saved_CurrentHealth", currentHealth);
         PlayerPrefs.Save();
+
+        if (MatchTimerUI.Instance != null) MatchTimerUI.Instance.ResumeTimer();
 
         // 1. Bat lai dieu khien & tan cong
         var pc = GetComponent<PlayerController>();

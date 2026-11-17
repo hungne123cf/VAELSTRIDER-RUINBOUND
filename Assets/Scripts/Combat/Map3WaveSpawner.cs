@@ -57,6 +57,7 @@ public class Map3WaveSpawner : MonoBehaviour
 
         var waveUI = FindAnyObjectByType<WaveUI>();
         string wavePrefix = LocalizationManager.Get("HUD_WAVE");
+        int coopMult = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
 
         if (waveIndex == 1)
         {
@@ -71,7 +72,7 @@ public class Map3WaveSpawner : MonoBehaviour
             SpawnSlime(new Vector3(-3f, 4f, 0f));
             SpawnSlime(new Vector3(3f, 4f, 0f));
 
-            livingEnemies = 6;
+            livingEnemies = 6 * coopMult;
         }
         else if (waveIndex == 2)
         {
@@ -88,7 +89,7 @@ public class Map3WaveSpawner : MonoBehaviour
             SpawnSlime(new Vector3(-1f, -4f, 0f));
             SpawnSlime(new Vector3(1f, -4f, 0f));
 
-            livingEnemies = 8;
+            livingEnemies = 8 * coopMult;
         }
         else if (waveIndex == 3)
         {
@@ -105,7 +106,7 @@ public class Map3WaveSpawner : MonoBehaviour
             SpawnSlime(new Vector3(-2f, -4f, 0f));
             SpawnSlime(new Vector3(2f, -4f, 0f));
 
-            livingEnemies = 8;
+            livingEnemies = 8 * coopMult;
         }
         else if (waveIndex == 4)
         {
@@ -123,7 +124,7 @@ public class Map3WaveSpawner : MonoBehaviour
             SpawnGoblin(new Vector3(-2f, -2f, 0f));
             SpawnGoblin(new Vector3(2f, -2f, 0f));
 
-            livingEnemies = 9;
+            livingEnemies = 9 * coopMult;
         }
         else if (waveIndex == 5)
         {
@@ -142,7 +143,7 @@ public class Map3WaveSpawner : MonoBehaviour
             SpawnSlime(new Vector3(-2f, -2f, 0f));
             SpawnSlime(new Vector3(2f, -2f, 0f));
 
-            livingEnemies = 10;
+            livingEnemies = 10 * coopMult;
         }
         else if (waveIndex == 6)
         {
@@ -161,7 +162,7 @@ public class Map3WaveSpawner : MonoBehaviour
             SpawnSkeleton(new Vector3(-2f, -3f, 0f));
             SpawnSkeleton(new Vector3(2f, -3f, 0f));
 
-            livingEnemies = 10;
+            livingEnemies = 10 * coopMult;
         }
         else if (waveIndex == 7)
         {
@@ -181,7 +182,7 @@ public class Map3WaveSpawner : MonoBehaviour
             SpawnSlime(new Vector3(0f, 2f, 0f));
             SpawnSlime(new Vector3(0f, -3f, 0f));
 
-            livingEnemies = 11;
+            livingEnemies = 11 * coopMult;
         }
         else if (waveIndex == 8)
         {
@@ -200,7 +201,7 @@ public class Map3WaveSpawner : MonoBehaviour
                 SpawnGoblin(new Vector3(Mathf.Cos(ang) * 4.5f, Mathf.Sin(ang) * 3f, 0f));
             }
 
-            livingEnemies = 12;
+            livingEnemies = 12 * coopMult;
         }
         else if (waveIndex == 9)
         {
@@ -221,7 +222,7 @@ public class Map3WaveSpawner : MonoBehaviour
             SpawnSlime(new Vector3(-2f, 0f, 0f));
             SpawnSlime(new Vector3(2f, 0f, 0f));
 
-            livingEnemies = 14;
+            livingEnemies = 14 * coopMult;
         }
         else if (waveIndex == 10)
         {
@@ -271,7 +272,15 @@ public class Map3WaveSpawner : MonoBehaviour
         DamagePopup.CreateText(pos + Vector3.up * 2.5f, LocalizationManager.T("CHÚA TỂ NHỆN THỨC TỈNH!", "SPIDER LORD AWAKENS!"), Color.red);
         SpawnSkeletonKing(pos);
         bossSpawned = true;
-        livingEnemies = 1;
+
+        int coop = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
+        int guards = (coop > 1) ? (coop - 1) * 2 : 0;
+        for (int i = 0; i < guards; i++)
+        {
+            float ang = (i / (float)guards) * 360f * Mathf.Deg2Rad;
+            SpawnSkeletonStatic(pos + new Vector3(Mathf.Cos(ang) * 4.5f, Mathf.Sin(ang) * 3.5f, 0f));
+        }
+        livingEnemies = 1 + guards;
     }
 
     private void HandleEnemyDied(object enemy)
@@ -383,7 +392,16 @@ public class Map3WaveSpawner : MonoBehaviour
         return g;
     }
 
-    private void SpawnGoblin(Vector3 pos) => SpawnGoblinStatic(pos);
+    private void SpawnGoblin(Vector3 pos)
+    {
+        SpawnGoblinStatic(pos);
+        int coop = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
+        for (int i = 1; i < coop; i++)
+        {
+            float ang = (i / (float)coop) * 360f * Mathf.Deg2Rad;
+            SpawnGoblinStatic(pos + new Vector3(Mathf.Cos(ang) * 1.35f, Mathf.Sin(ang) * 1.10f, 0f));
+        }
+    }
 
     public static GameObject SpawnSkeletonStatic(Vector3 pos)
     {
@@ -413,7 +431,16 @@ public class Map3WaveSpawner : MonoBehaviour
         return s;
     }
 
-    private void SpawnSkeleton(Vector3 pos) => SpawnSkeletonStatic(pos);
+    private void SpawnSkeleton(Vector3 pos)
+    {
+        SpawnSkeletonStatic(pos);
+        int coop = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
+        for (int i = 1; i < coop; i++)
+        {
+            float ang = (i / (float)coop) * 360f * Mathf.Deg2Rad;
+            SpawnSkeletonStatic(pos + new Vector3(Mathf.Cos(ang) * 1.35f, Mathf.Sin(ang) * 1.10f, 0f));
+        }
+    }
 
     public static GameObject SpawnSlimeStatic(Vector3 pos)
     {
@@ -443,7 +470,16 @@ public class Map3WaveSpawner : MonoBehaviour
         return sl;
     }
 
-    private void SpawnSlime(Vector3 pos) => SpawnSlimeStatic(pos);
+    private void SpawnSlime(Vector3 pos)
+    {
+        SpawnSlimeStatic(pos);
+        int coop = PvPMatchManager.GetCurrentCoopPlayerMultiplier();
+        for (int i = 1; i < coop; i++)
+        {
+            float ang = (i / (float)coop) * 360f * Mathf.Deg2Rad;
+            SpawnSlimeStatic(pos + new Vector3(Mathf.Cos(ang) * 1.35f, Mathf.Sin(ang) * 1.10f, 0f));
+        }
+    }
 
     public static SkeletonKingBossAI SpawnSkeletonKingStatic(Vector3 pos)
     {

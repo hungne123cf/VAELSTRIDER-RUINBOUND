@@ -12,7 +12,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     public bool IsBoss => isBoss;
 
     [Header("Enemy Stats")]
-    [SerializeField] private int maxHealth = 110; // Quai thuong can bang (110 HP)
+    [SerializeField] public int maxHealth = 110; // Quai thuong can bang (110 HP)
     [SerializeField] private float moveSpeed = 3.0f;
     [SerializeField] private int attackDamage = 11;
     [SerializeField] public float attackCooldown = 2.0f;
@@ -43,7 +43,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     [SerializeField] private float projectileSpeed = 7.5f;
     [SerializeField] private Sprite runtimeBulletSprite;
 
-    private int currentHealth;
+    public int currentHealth;
     private float attackCooldownTimer = 0f;
     private bool isDead = false;
     public bool IsDead => isDead;
@@ -166,6 +166,11 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
     {
         if (isDead) return;
 
+        // ĐỒNG BỘ CO-OP (PUPPET TRÊN MÁY CLIENT):
+        // Không chạy AI di chuyển và vật lý cục bộ, để NetworkEnemySync nội suy vị trí mượt mà
+        var netSync = GetComponent<NetworkEnemySync>();
+        if (netSync != null && netSync.IsPuppet) return;
+
         // Đóng băng hoàn toàn AI khi đang hiển thị màn hình chọn Lõi Nâng Cấp
         if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive)
         {
@@ -259,12 +264,16 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     void FixedUpdate()
     {
+        var netSync = GetComponent<NetworkEnemySync>();
+        if (netSync != null && netSync.IsPuppet) return;
         if (isDead || LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
         if (isBoss) ClampInsideRoomBounds();
     }
 
     void LateUpdate()
     {
+        var netSync = GetComponent<NetworkEnemySync>();
+        if (netSync != null && netSync.IsPuppet) return;
         if (LevelUpChoiceUI.IsShowing || BossIntroCutsceneUI.IsCutsceneActive) return;
         ClampInsideRoomBounds();
     }
@@ -287,7 +296,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
         }
     }
 
-    private void SetMoving(bool moving)
+    public void SetMoving(bool moving)
     {
         if (animator != null && animator.runtimeAnimatorController != null)
         {
@@ -395,6 +404,20 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
 
             // Chuyển toàn bộ sát thương sang thanh máu của Trùm chính
             mainBoss.TakeDamage(damage);
+            return;
+        }
+
+        // ĐỒNG BỘ CO-OP (PUPPET TRÊN MÁY CLIENT): Báo sát thương lên Host tính toán thẩm quyền
+        var netSync = GetComponent<NetworkEnemySync>();
+        if (netSync != null && netSync.IsPuppet)
+        {
+            netSync.ReportLocalHit(damage);
+            currentHealth = Mathf.Max(1, currentHealth - damage);
+            if (!isBoss) EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
+            if (animator != null && animator.runtimeAnimatorController != null) animator.SetTrigger(HurtHash);
+            if (spriteRenderer != null) StartCoroutine(FlashRedRoutine());
+            var c = FindAnyObjectByType<CameraFollow>();
+            if (c != null) c.Shake(0.12f, 0.2f);
             return;
         }
 
