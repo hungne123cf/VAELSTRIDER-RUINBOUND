@@ -238,6 +238,8 @@ public class AncientShrine : MonoBehaviour
 
     public static bool IsAnyOtherUIOpen()
     {
+        if (LevelUpChoiceUI.IsShowing) return true;
+        if (WanderingShopUI.Instance != null && WanderingShopUI.Instance.IsOpen()) return true;
         if (SettingsUI.Instance != null && SettingsUI.Instance.IsOpen()) return true;
         if (InGameInventoryUI.Instance != null && InGameInventoryUI.Instance.IsOpen()) return true;
         if (CharacterStatsUI.Instance != null && CharacterStatsUI.Instance.IsOpen()) return true;

@@ -95,6 +95,7 @@ public class GameAutoBootstrap : MonoBehaviour
             GuardianShieldHUDTracker.EnsureTrackerExists();
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
+            PlayerSkyEntranceFX.TriggerEntrance();
             EnsureBreakables();
             MapSpiritSparksManager.EnsureInstance();
             CorruptedAtmosphereManager.EnsureAtmosphere();
@@ -149,6 +150,7 @@ public class GameAutoBootstrap : MonoBehaviour
             GuardianShieldHUDTracker.EnsureTrackerExists();
             LostShardsGrave.EnsureSpawnGrave();
             ApplySelectedCharacterToPlayer();
+            PlayerSkyEntranceFX.TriggerEntrance();
             EnsureBreakables();
             CorruptedAtmosphereManager.EnsureAtmosphere();
             MagmaCalamityHazardManager.EnsureManager();
@@ -254,6 +256,7 @@ public class GameAutoBootstrap : MonoBehaviour
 
         // 10. Ap dung Nhan Vat da chon (Vaelstrider / Maid) va Tuyet Ky Quet Tan Ke Yeu
         ApplySelectedCharacterToPlayer();
+        PlayerSkyEntranceFX.TriggerEntrance();
 
         // 10b. Đồng bộ phòng đấu Multiplayer Co-op / PvP và sinh thực thể Đồng đội
         if (PvPMatchManager.IsCoopModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning))

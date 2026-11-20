@@ -2346,6 +2346,28 @@ public class WanderingShopUI : MonoBehaviour
             canvasGroup.blocksRaycasts = true;
         }
 
+        // TẠM DỪNG THỜI GIAN GAME TRONG CHẾ ĐỘ CHƠI ĐƠN KHI MỞ TIỆM CỔ VẬT
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 0f;
+        }
+
+        // KÍCH HOẠT BẤT TỬ TUYỆT ĐỐI CHO NGƯỜI CHƠI TRONG LÚC XEM / MUA VẬT PHẨM TẠI SHOP
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = true;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(false);
+
+        MobileActionButton.ResetAllButtonStates();
+        var playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null)
+        {
+            var pCombat = playerObj.GetComponent<PlayerCombat>();
+            if (pCombat != null) pCombat.CancelAttackHold();
+        }
+
         string curScene = SceneManager.GetActiveScene().name;
         if (activeChoices.Count == 0 || cardObjects.Count == 0 || lastRolledSceneName != curScene)
         {
@@ -2392,6 +2414,20 @@ public class WanderingShopUI : MonoBehaviour
         }
         gameObject.SetActive(false);
         GameAutoBootstrap.SetGameplayHUDVisible(true);
+
+        // KHÔI PHỤC THỜI GIAN VÀ TRẠNG THÁI NHÂN VẬT KHI ĐÓNG TIỆM CỔ VẬT
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 1.0f;
+        }
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = false;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(true);
+
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }
 

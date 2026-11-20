@@ -412,6 +412,10 @@ public static class SoulslikeHUDStyler
             RectTransform fRt = frame.GetComponent<RectTransform>();
             if (fRt != null)
             {
+                fRt.anchorMin = new Vector2(0.5f, 1f);
+                fRt.anchorMax = new Vector2(0.5f, 1f);
+                fRt.pivot = new Vector2(0.5f, 1f);
+                fRt.anchoredPosition = new Vector2(0f, -2f);
                 fRt.sizeDelta = new Vector2(880f, 36f);
             }
 
@@ -463,19 +467,41 @@ public static class SoulslikeHUDStyler
             if (phaseInd != null) phaseInd.gameObject.SetActive(false);
         }
 
-        // Boss Name Text
+        // Boss Name Text (Nằm DƯỚI thanh HP Boss theo đúng yêu cầu người dùng)
         var nameTmp = bossPanel.Find("BossNameText")?.GetComponent<TextMeshProUGUI>();
         if (nameTmp != null)
         {
-            nameTmp.fontSize = 32;
+            RectTransform nRt = nameTmp.GetComponent<RectTransform>();
+            if (nRt != null)
+            {
+                nRt.anchorMin = new Vector2(0.5f, 1f);
+                nRt.anchorMax = new Vector2(0.5f, 1f);
+                nRt.pivot = new Vector2(0.5f, 1f);
+                nRt.anchoredPosition = new Vector2(0f, -44f);
+                nRt.sizeDelta = new Vector2(840f, 32f);
+            }
+            nameTmp.fontSize = 26;
             nameTmp.fontStyle = FontStyles.Bold;
             nameTmp.color = new Color(0.96f, 0.88f, 0.58f); // Antique gold
-            SetSafeOutline(nameTmp, 0.0f, Color.black);
+            nameTmp.alignment = TextAlignmentOptions.Center;
+            SetSafeOutline(nameTmp, 0.35f, Color.black);
         }
 
-        // Ensure Gothic Filigree Divider
+        // Ensure Gothic Filigree Divider (Nằm giữa Thanh HP và Tên Boss)
         Transform div = bossPanel.Find("BossDivider");
-        if (div == null)
+        if (div != null)
+        {
+            RectTransform divRt = div.GetComponent<RectTransform>();
+            if (divRt != null)
+            {
+                divRt.anchorMin = new Vector2(0.5f, 1f);
+                divRt.anchorMax = new Vector2(0.5f, 1f);
+                divRt.pivot = new Vector2(0.5f, 1f);
+                divRt.anchoredPosition = new Vector2(0f, -38f);
+                divRt.sizeDelta = new Vector2(380f, 8f);
+            }
+        }
+        else
         {
             GameObject divObj = new GameObject("BossDivider");
             divObj.transform.SetParent(bossPanel, false);
@@ -485,8 +511,8 @@ public static class SoulslikeHUDStyler
             divRt.anchorMin = new Vector2(0.5f, 1f);
             divRt.anchorMax = new Vector2(0.5f, 1f);
             divRt.pivot = new Vector2(0.5f, 1f);
-            divRt.anchoredPosition = new Vector2(0f, -28f);
-            divRt.sizeDelta = new Vector2(380f, 10f);
+            divRt.anchoredPosition = new Vector2(0f, -38f);
+            divRt.sizeDelta = new Vector2(380f, 8f);
 
             Image divImg = divObj.AddComponent<Image>();
             divImg.sprite = GetGothicDividerSprite();

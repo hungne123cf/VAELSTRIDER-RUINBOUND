@@ -74,6 +74,7 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip bossWarningClip;
     [SerializeField] private AudioClip dungeonAmbienceClip;
     [SerializeField] private AudioClip coastalAmbienceClip;
+    [SerializeField] private AudioClip ominousAscensionClip;
     [SerializeField] private AudioClip runePillarHumClip;
     [SerializeField] private AudioClip uiStoneClickClip;
 
@@ -224,10 +225,14 @@ public class SoundManager : MonoBehaviour
         float vol = MusicVolume * 0.45f;
         float pitch = 1.0f;
 
-        // Nếu đang trong Chu Kỳ Tha Hóa / Ác Mộng (Calamity Mode)
-        if (CorruptedCycleManager.IsCorruptedActive)
+        // Uu tien phat ban nhac Boss Dark Fantasy hoanh trang moi cho moi map gameplay va scene test
+        if (ominousAscensionClip != null)
         {
-            // Thay thế hoàn toàn tiếng đàn ghita lạc quẻ bằng âm hưởng rền rĩ u tối của Cõi Hư Không
+            targetClip = ominousAscensionClip;
+            vol = (sceneName == "MainMenuScene" || sceneName == "LoginScene") ? MusicVolume * 0.45f : MusicVolume * 0.55f;
+        }
+        else if (CorruptedCycleManager.IsCorruptedActive)
+        {
             targetClip = (runePillarHumClip != null) ? runePillarHumClip : dungeonAmbienceClip;
             vol = MusicVolume * 0.50f;
             pitch = 0.75f;
@@ -236,11 +241,6 @@ public class SoundManager : MonoBehaviour
         {
             targetClip = coastalAmbienceClip != null ? coastalAmbienceClip : dungeonAmbienceClip;
             vol = MusicVolume * 0.55f;
-        }
-        else if (sceneName == "MainMenuScene" || sceneName == "LoginScene")
-        {
-            targetClip = dungeonAmbienceClip;
-            vol = MusicVolume * 0.35f;
         }
         else
         {
@@ -294,6 +294,7 @@ public class SoundManager : MonoBehaviour
 
         if (dungeonAmbienceClip == null) dungeonAmbienceClip = Resources.Load<AudioClip>("Audio/Music/dungeon_ambience");
         if (coastalAmbienceClip == null) coastalAmbienceClip = Resources.Load<AudioClip>("Audio/Music/coastal_forest_ambience");
+        if (ominousAscensionClip == null) ominousAscensionClip = Resources.Load<AudioClip>("Audio/Music/bgm_boss_ominous_ascension");
 
         if (ultiVoiceClip == null) ultiVoiceClip = Resources.Load<AudioClip>("Voice/ulti_voice");
 
@@ -326,6 +327,8 @@ public class SoundManager : MonoBehaviour
 
         if (dungeonAmbienceClip == null) dungeonAmbienceClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(musicPath + "dungeon_ambience.wav");
         if (coastalAmbienceClip == null) coastalAmbienceClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(musicPath + "coastal_forest_ambience.wav");
+        if (ominousAscensionClip == null) ominousAscensionClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(musicPath + "bgm_boss_ominous_ascension.wav");
+        if (ominousAscensionClip == null) ominousAscensionClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(musicPath + "bgm_boss_ominous_ascension.mp3");
 
         if (ultiVoiceClip == null) ultiVoiceClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(voicePath + "ulti_voice.mp3");
         if (ultiVoiceClip == null) ultiVoiceClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(voicePath + "ulti_voice.wav");
@@ -344,6 +347,7 @@ public class SoundManager : MonoBehaviour
         PreloadClipData(uiStoneClickClip);
         PreloadClipData(heavenlyAscensionClip);
         PreloadClipData(playerHurtClip);
+        PreloadClipData(ominousAscensionClip);
     }
 
     private void PreloadClipData(AudioClip clip)

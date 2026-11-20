@@ -103,6 +103,15 @@ public static class EnemyHealthHelper
         {
             EnemyChronoSlowEffect.Apply(enemy);
         }
+
+        // CƠ CHẾ QUÁI CHUI TỪ ĐẤT NHÔ LÊN THEO YÊU CẦU NGƯỜI DÙNG:
+        // Quái vật xuất hiện sẽ từ dưới lòng đất chui lên từ từ, đất đá văng tỏa.
+        // Trong lúc đang nhô lên, quái bất tử, người chơi không thể đánh được.
+        // Khi quái nhô lên hoàn toàn mới bắt đầu nhận sát thương và chiến đấu!
+        if (!IsBossOrElite(enemy) || enemy.name.Contains("Clone") || enemy.name.Contains("Minion"))
+        {
+            EnemyBurrowEntrance.Attach(enemy, Random.Range(0.85f, 1.15f));
+        }
     }
 }
 

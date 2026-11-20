@@ -32,7 +32,9 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
     {
         GameObject go = new GameObject("MiniSpider_Minion");
         go.transform.position = pos;
-        return go.AddComponent<MiniSpiderMinion>();
+        var minion = go.AddComponent<MiniSpiderMinion>();
+        EnemyHealthHelper.OnEnemySpawned(go);
+        return minion;
     }
 
     void OnEnable()
@@ -178,7 +180,11 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
 
     void Update()
     {
-        if (isDead) return;
+        if (isDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject))
+        {
+            if (rb != null) rb.linearVelocity = Vector2.zero;
+            return;
+        }
 
         if (PlayerHealth.IsPlayerDead)
         {
@@ -253,7 +259,7 @@ public class MiniSpiderMinion : MonoBehaviour, IDamageable, IEnemyHealth
 
     public void TakeDamage(int damage)
     {
-        if (isDead) return;
+        if (isDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject)) return;
 
         currentHealth -= damage;
         EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);

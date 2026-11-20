@@ -386,7 +386,7 @@ public class BotWheelAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     public void TakeDamage(int damage)
     {
-        if (isDead || isTransitioningPhase) return;
+        if (isDead || isTransitioningPhase || EnemyBurrowEntrance.IsEnemyEmerging(gameObject)) return;
 
         // KHI LÀ PHÂN THÂN: Sài chung 1 thanh máu duy nhất với Trùm chính!
         if (isClone && mainBoss != null)

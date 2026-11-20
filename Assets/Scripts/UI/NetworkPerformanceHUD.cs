@@ -25,6 +25,11 @@ public class NetworkPerformanceHUD : MonoBehaviour
     private TextMeshProUGUI _pingText;
     private TextMeshProUGUI _netTypeText;
     private readonly Image[] _signalBars = new Image[4];
+    private GameObject _pingObj;
+    private GameObject _barsObj;
+    private GameObject _netTypeObj;
+    private GameObject _sep1;
+    private GameObject _sep2;
 
     // FPS Measurement
     private float _accumFps = 0f;
@@ -86,10 +91,10 @@ public class NetworkPerformanceHUD : MonoBehaviour
         _rootBadgeObj.transform.SetParent(canvasGo.transform, false);
         _rootRt = _rootBadgeObj.GetComponent<RectTransform>();
 
-        _rootRt.anchorMin = new Vector2(0.5f, 1f);
-        _rootRt.anchorMax = new Vector2(0.5f, 1f);
-        _rootRt.pivot = new Vector2(0.5f, 1f);
-        _rootRt.anchoredPosition = new Vector2(0f, -66f);
+        _rootRt.anchorMin = new Vector2(0.5f, 0f);
+        _rootRt.anchorMax = new Vector2(0.5f, 0f);
+        _rootRt.pivot = new Vector2(0.5f, 0f);
+        _rootRt.anchoredPosition = new Vector2(0f, 12f);
         _rootRt.sizeDelta = new Vector2(265f, 28f);
 
         Image bgImg = _rootBadgeObj.GetComponent<Image>();
@@ -123,11 +128,12 @@ public class NetworkPerformanceHUD : MonoBehaviour
         _fpsText.text = "60 FPS";
 
         // Dải phân cách 1
-        CreateSeparator(_rootBadgeObj.transform);
+        _sep1 = CreateSeparator(_rootBadgeObj.transform);
 
         // 2.2. Text Ping
         GameObject pingObj = new GameObject("PingText", typeof(RectTransform), typeof(TextMeshProUGUI));
         pingObj.transform.SetParent(_rootBadgeObj.transform, false);
+        _pingObj = pingObj;
         RectTransform pingRt = pingObj.GetComponent<RectTransform>();
         pingRt.sizeDelta = new Vector2(50f, 22f);
         _pingText = pingObj.GetComponent<TextMeshProUGUI>();
@@ -138,11 +144,12 @@ public class NetworkPerformanceHUD : MonoBehaviour
         _pingText.text = "35 ms";
 
         // Dải phân cách 2
-        CreateSeparator(_rootBadgeObj.transform);
+        _sep2 = CreateSeparator(_rootBadgeObj.transform);
 
         // 2.3. Cụm 4 Vạch Sóng (Signal Bars)
         GameObject barsObj = new GameObject("SignalBarsGroup", typeof(RectTransform), typeof(HorizontalLayoutGroup));
         barsObj.transform.SetParent(_rootBadgeObj.transform, false);
+        _barsObj = barsObj;
         RectTransform barsRt = barsObj.GetComponent<RectTransform>();
         barsRt.sizeDelta = new Vector2(20f, 18f);
 
@@ -168,6 +175,7 @@ public class NetworkPerformanceHUD : MonoBehaviour
         // 2.4. Text Loại Mạng (WIFI / 5G / 4G) - Tắt word wrap để không bị cắt chữ WIFI
         GameObject netTypeObj = new GameObject("NetTypeText", typeof(RectTransform), typeof(TextMeshProUGUI));
         netTypeObj.transform.SetParent(_rootBadgeObj.transform, false);
+        _netTypeObj = netTypeObj;
         RectTransform ntRt = netTypeObj.GetComponent<RectTransform>();
         ntRt.sizeDelta = new Vector2(56f, 22f);
         _netTypeText = netTypeObj.GetComponent<TextMeshProUGUI>();
@@ -180,7 +188,7 @@ public class NetworkPerformanceHUD : MonoBehaviour
         _netTypeText.text = "5G";
     }
 
-    private void CreateSeparator(Transform parent)
+    private GameObject CreateSeparator(Transform parent)
     {
         GameObject sep = new GameObject("Sep", typeof(RectTransform), typeof(Image));
         sep.transform.SetParent(parent, false);
@@ -189,6 +197,7 @@ public class NetworkPerformanceHUD : MonoBehaviour
         Image img = sep.GetComponent<Image>();
         img.sprite = GetWhitePixelSprite();
         img.color = new Color(0.35f, 0.40f, 0.55f, 0.45f);
+        return sep;
     }
 
     private void Update()
@@ -206,6 +215,33 @@ public class NetworkPerformanceHUD : MonoBehaviour
             if (_rootBadgeObj != null && !_rootBadgeObj.activeSelf) _rootBadgeObj.SetActive(true);
         }
 
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        bool isStoryMode = !isMultiplayer && (curScene.Contains("Map") || curScene.Contains("Valley") || curScene.Contains("Forgotten") || curScene == "SampleScene");
+
+        // Ẩn Ping & Wifi trong Chế Độ Story theo yêu cầu người dùng
+        if (isStoryMode)
+        {
+            if (_pingObj != null && _pingObj.activeSelf) _pingObj.SetActive(false);
+            if (_barsObj != null && _barsObj.activeSelf) _barsObj.SetActive(false);
+            if (_netTypeObj != null && _netTypeObj.activeSelf) _netTypeObj.SetActive(false);
+            if (_sep1 != null && _sep1.activeSelf) _sep1.SetActive(false);
+            if (_sep2 != null && _sep2.activeSelf) _sep2.SetActive(false);
+
+            _rootRt.sizeDelta = new Vector2(68f, 24f);
+            if (_fpsText != null) _fpsText.alignment = TextAlignmentOptions.Center;
+        }
+        else
+        {
+            if (_pingObj != null && !_pingObj.activeSelf) _pingObj.SetActive(true);
+            if (_barsObj != null && !_barsObj.activeSelf) _barsObj.SetActive(true);
+            if (_netTypeObj != null && !_netTypeObj.activeSelf) _netTypeObj.SetActive(true);
+            if (_sep1 != null && !_sep1.activeSelf) _sep1.SetActive(true);
+            if (_sep2 != null && !_sep2.activeSelf) _sep2.SetActive(true);
+
+            _rootRt.sizeDelta = new Vector2(265f, 28f);
+            if (_fpsText != null) _fpsText.alignment = TextAlignmentOptions.MidlineLeft;
+        }
+
         if (curScene == "MainMenuScene" || curScene == "LoginScene")
         {
             // Ngoài Sảnh MainMenu: Đặt ở Góc dưới bên trái màn hình (Bottom-Left), tuyệt đối không đè lên thanh Linh Hồn
@@ -216,12 +252,12 @@ public class NetworkPerformanceHUD : MonoBehaviour
         }
         else
         {
-            // Trong Trận: Đặt ngay BÊN DƯỚI Đồng Hồ trận đấu (Top-Center y = -66f)
-            // Tuyệt đối không đè lên Đồng Hồ (y: -8 -> -60), không đè lên thanh HP Player (Top-Left) hay Bảng Tổ Đội (Top-Right)
-            _rootRt.anchorMin = new Vector2(0.5f, 1f);
-            _rootRt.anchorMax = new Vector2(0.5f, 1f);
-            _rootRt.pivot = new Vector2(0.5f, 1f);
-            _rootRt.anchoredPosition = new Vector2(0f, -66f);
+            // Trong Trận Gameplay: Đặt ở CHÍNH GIỮA ĐÁY MÀN HÌNH (Bottom-Center y = 12f)
+            // Tuyệt đối không đè lên Thanh máu Boss (Top-Center), Tên Boss, Đồng Hồ hay Cụm kỹ năng
+            _rootRt.anchorMin = new Vector2(0.5f, 0f);
+            _rootRt.anchorMax = new Vector2(0.5f, 0f);
+            _rootRt.pivot = new Vector2(0.5f, 0f);
+            _rootRt.anchoredPosition = new Vector2(0f, 12f);
         }
 
         // 1. Tính toán FPS Real-time
@@ -240,12 +276,15 @@ public class NetworkPerformanceHUD : MonoBehaviour
             UpdateFpsDisplay();
         }
 
-        // 2. Cập nhật Ping RTT
-        _pingMeasureTimer -= dt;
-        if (_pingMeasureTimer <= 0f)
+        // 2. Cập nhật Ping RTT (Chỉ đo trong Multiplayer/Lobby, tuyệt đối KHÔNG đo trong Story Mode để tiết kiệm hiệu năng)
+        if (!isStoryMode)
         {
-            _pingMeasureTimer = 1.25f; // Đo định kỳ 1.25s / lần
-            UpdatePingAndNetworkState();
+            _pingMeasureTimer -= dt;
+            if (_pingMeasureTimer <= 0f)
+            {
+                _pingMeasureTimer = 1.25f; // Đo định kỳ 1.25s / lần
+                UpdatePingAndNetworkState();
+            }
         }
     }
 

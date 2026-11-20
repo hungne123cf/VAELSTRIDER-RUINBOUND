@@ -69,6 +69,19 @@ public class AethelShard : MonoBehaviour
     public static int ActiveShardCount { get; private set; } = 0;
     private static Transform cachedPlayer;
     private static PlayerInventory cachedInventory;
+    private static float lastAudioTime = 0f;
+    private static float cachedBonusPct = -1f;
+    private static float lastBonusCheckTime = -10f;
+
+    public static float GetCachedShardBonus()
+    {
+        if (Time.unscaledTime - lastBonusCheckTime > 2.0f || cachedBonusPct < 0f)
+        {
+            lastBonusCheckTime = Time.unscaledTime;
+            EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out _, out _, out cachedBonusPct, out _);
+        }
+        return cachedBonusPct;
+    }
 
     public static void EnsurePlayerCached()
     {
@@ -89,16 +102,16 @@ public class AethelShard : MonoBehaviour
         EnsurePlayerCached();
         Sprite sprite = GetShardSprite();
 
-        // Tối ưu hóa: Nếu trên màn hình đã có quá nhiều mảnh rơi (> 30), gom cụm lại thành 1-2 viên giá trị cao
+        // Tối ưu hóa: Nếu trên màn hình đã có nhiều mảnh rơi (> 20), gom cụm lại thành 1 viên giá trị cao
         int spawnCount = count;
         int valuePerShard = 1;
 
-        if (ActiveShardCount > 30)
+        if (ActiveShardCount > 20)
         {
             spawnCount = 1;
             valuePerShard = count;
         }
-        else if (count > 4)
+        else if (count > 3)
         {
             spawnCount = 2;
             valuePerShard = Mathf.CeilToInt(count / 2f);
@@ -185,7 +198,7 @@ public class AethelShard : MonoBehaviour
 
             if (distance <= 0.45f)
             {
-                EquipmentSocketManager.GetActiveEquippedSocketBonus(out _, out _, out _, out _, out _, out float shardBonusPct, out _);
+                float shardBonusPct = GetCachedShardBonus();
                 int finalShards = shardValue;
                 if (shardBonusPct > 0f)
                 {
@@ -193,7 +206,14 @@ public class AethelShard : MonoBehaviour
                 }
 
                 playerInventory?.AddShards(finalShards);
-                SoundManager.EnsureInstance()?.PlayShardPickup();
+
+                // Chống nghẽn Audio Thread khi hút cùng lúc hàng chục mảnh shard
+                if (Time.unscaledTime - lastAudioTime > 0.035f)
+                {
+                    lastAudioTime = Time.unscaledTime;
+                    SoundManager.EnsureInstance()?.PlayShardPickup();
+                }
+
                 Destroy(gameObject);
             }
         }

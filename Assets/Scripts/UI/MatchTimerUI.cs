@@ -23,25 +23,42 @@ public class MatchTimerUI : MonoBehaviour
     private static float map1ClearTime = 0f;
     private static float map2ClearTime = 0f;
     private static float map3ClearTime = 0f;
+    private static float calamityClearTime = 0f;
+    private static string calamityRealmName = "";
+    private static int calamityCycleNumber = 1;
 
     public static float Map1ClearTime => map1ClearTime;
     public static float Map2ClearTime => map2ClearTime;
     public static float Map3ClearTime => map3ClearTime;
+    public static float CalamityClearTime => calamityClearTime;
+    public static string CalamityRealmName => calamityRealmName;
+    public static int CalamityCycleNumber => calamityCycleNumber;
 
     public static void RecordMapClearTime(string mapSceneName)
     {
         float current = totalRunElapsedTime;
+
+        // Nếu người chơi đang trong Cõi Thảm Họa Thời Tiết (Mưa Axit, Bão Tuyết, Nham Thạch, Hư Không)
+        if (CorruptedCycleManager.IsCorruptedActive)
+        {
+            calamityRealmName = CorruptedCycleManager.GetRealmName(CorruptedCycleManager.CurrentRealm);
+            calamityCycleNumber = CorruptedCycleManager.CurrentCycle;
+            float prevTotal = map1ClearTime + map2ClearTime + map3ClearTime;
+            calamityClearTime = Mathf.Max(0.1f, current - prevTotal);
+            return;
+        }
+
         if (mapSceneName.Contains("Map1") || mapSceneName == "SampleScene")
         {
-            map1ClearTime = current;
+            map1ClearTime = Mathf.Max(0.1f, current);
         }
         else if (mapSceneName.Contains("Map2") || mapSceneName.Contains("Valley"))
         {
-            map2ClearTime = Mathf.Max(0f, current - map1ClearTime);
+            map2ClearTime = Mathf.Max(0.1f, current - map1ClearTime);
         }
         else if (mapSceneName.Contains("Map3") || mapSceneName.Contains("Forgotten"))
         {
-            map3ClearTime = Mathf.Max(0f, current - (map1ClearTime + map2ClearTime));
+            map3ClearTime = Mathf.Max(0.1f, current - (map1ClearTime + map2ClearTime));
         }
     }
 
@@ -182,6 +199,9 @@ public class MatchTimerUI : MonoBehaviour
         map1ClearTime = 0f;
         map2ClearTime = 0f;
         map3ClearTime = 0f;
+        calamityClearTime = 0f;
+        calamityRealmName = "";
+        calamityCycleNumber = 1;
         isTimerRunning = true;
         if (Instance != null) Instance.UpdateTimerText();
     }

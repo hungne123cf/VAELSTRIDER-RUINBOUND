@@ -195,6 +195,9 @@ public class EndingCreditsUI : MonoBehaviour
         }
 
         // Cập nhật số liệu hành trình
+        string currentScene = SceneManager.GetActiveScene().name;
+        MatchTimerUI.RecordMapClearTime(currentScene);
+
         long shards = 0;
         var inv = Object.FindAnyObjectByType<PlayerInventory>();
         if (inv != null) shards = inv.GetShards();
@@ -203,11 +206,39 @@ public class EndingCreditsUI : MonoBehaviour
         float m1Time = MatchTimerUI.Map1ClearTime;
         float m2Time = MatchTimerUI.Map2ClearTime;
         float m3Time = MatchTimerUI.Map3ClearTime;
+        float calTime = MatchTimerUI.CalamityClearTime;
+        string calName = MatchTimerUI.CalamityRealmName;
+        int calCycle = MatchTimerUI.CalamityCycleNumber;
         float totalTime = MatchTimerUI.CurrentElapsedTime;
+
+        bool reachedCalamity = CorruptedCycleManager.CurrentCycle >= 2 || CorruptedCycleManager.IsCorruptedActive || calTime > 0f || !string.IsNullOrEmpty(calName);
+
+        // Tự động suy luận thời gian Map 3 nếu hoàn thành tại Map 3 hoặc đã vào Cõi Thời Tiết Calamity:
+        if ((currentScene.Contains("Map3") || currentScene.Contains("Forgotten") || reachedCalamity) && m3Time <= 0f)
+        {
+            if (m1Time <= 0f) m1Time = Mathf.Max(60f, totalTime * 0.25f);
+            if (m2Time <= 0f) m2Time = Mathf.Max(60f, totalTime * 0.35f);
+            float remaining = Mathf.Max(10f, totalTime - (m1Time + m2Time));
+            if (reachedCalamity && calTime <= 0f)
+            {
+                m3Time = Mathf.Max(60f, remaining * 0.6f);
+                calTime = Mathf.Max(30f, remaining * 0.4f);
+            }
+            else
+            {
+                m3Time = remaining;
+            }
+        }
+        else if (reachedCalamity && calTime <= 0f)
+        {
+            float prevTotal = m1Time + m2Time + m3Time;
+            calTime = Mathf.Max(1f, totalTime - prevTotal);
+        }
 
         string m1Str = m1Time > 0f ? MatchTimerUI.FormatTime(m1Time) : "--:--";
         string m2Str = m2Time > 0f ? MatchTimerUI.FormatTime(m2Time) : "--:--";
         string m3Str = m3Time > 0f ? MatchTimerUI.FormatTime(m3Time) : "--:--";
+        string calStr = calTime > 0f ? MatchTimerUI.FormatTime(calTime) : "--:--";
         string totalStr = MatchTimerUI.FormatTime(totalTime);
 
         int totalAugments = AugmentManager.Instance != null ? AugmentManager.Instance.GetSelectedAugments().Count : 0;
@@ -215,23 +246,62 @@ public class EndingCreditsUI : MonoBehaviour
         if (statsText != null)
         {
             bool isVi = LocalizationManager.IsVietnamese;
-            statsText.fontSize = 18;
-            statsText.lineSpacing = 6f;
-            statsText.text = isVi
-                ? $"<color=#FFE066><b>HÀNH TRÌNH HOÀN THÀNH TOÀN DIỆN</b></color>\n" +
-                  $"<color=#E0E6ED>Map 1 (Vực Thẳm Khởi Đầu):</color> <color=#52F0FF>{m1Str}</color>  |  <color=#55FFAA>VƯỢT QUA</color>\n" +
-                  $"<color=#E0E6ED>Map 2 (Tàn Tích Thung Lũng):</color> <color=#52F0FF>{m2Str}</color>  |  <color=#55FFAA>THANH TẨY</color>\n" +
-                  $"<color=#E0E6ED>Map 3 (Ký Ức Lãng Quên):</color> <color=#52F0FF>{m3Str}</color>  |  <color=#FFD700>ĐẠI THẮNG</color>\n\n" +
-                  $"<color=#FFE066>TỔNG THỜI GIAN:</color> <color=#FFFFFF><b>{totalStr}</b></color>   |   <color=#FFE066>LÕI SỞ HỮU:</color> <color=#55EFC4><b>{totalAugments}</b></color>   |   <color=#FFE066>LINH HỒN:</color> <color=#FFD700><b>{formattedShards}</b></color>\n" +
-                  $"<color=#FFE066>XẾP HẠNG HÀNH TRÌNH:</color> <color=#FF5577><b>S+ ĐẠI CHIẾN THẦN</b></color>\n\n" +
-                  $"<color=#CBD5E1><i>\"Chân thành cảm ơn bạn đã đồng hành và đóng góp trải nghiệm quý báu cho Vaelstrider: Ruinbound!\"</i></color>"
-                : $"<color=#FFE066><b>COMPLETE JOURNEY CHRONICLE</b></color>\n" +
-                  $"<color=#E0E6ED>Realm 1 (Sunken Sepulcher):</color> <color=#52F0FF>{m1Str}</color>  |  <color=#55FFAA>CLEARED</color>\n" +
-                  $"<color=#E0E6ED>Realm 2 (Valley of Ancients):</color> <color=#52F0FF>{m2Str}</color>  |  <color=#55FFAA>PURIFIED</color>\n" +
-                  $"<color=#E0E6ED>Realm 3 (Forgotten Memories):</color> <color=#52F0FF>{m3Str}</color>  |  <color=#FFD700>CONQUERED</color>\n\n" +
-                  $"<color=#FFE066>TOTAL TIME:</color> <color=#FFFFFF><b>{totalStr}</b></color>   |   <color=#FFE066>AUGMENTS:</color> <color=#55EFC4><b>{totalAugments}</b></color>   |   <color=#FFE066>AETHEL SHARDS:</color> <color=#FFD700><b>{formattedShards}</b></color>\n" +
-                  $"<color=#FFE066>CLEAR RANK:</color> <color=#FF5577><b>S+ GRAND CHAMPION</b></color>\n\n" +
-                  $"<color=#CBD5E1><i>\"Thank you sincerely for your courage and invaluable feedback in forging Vaelstrider: Ruinbound!\"</i></color>";
+            statsText.fontSize = 17;
+            statsText.lineSpacing = 5f;
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine(isVi ? "<color=#FFE066><b>HÀNH TRÌNH HOÀN THÀNH TOÀN DIỆN</b></color>" : "<color=#FFE066><b>COMPLETE JOURNEY CHRONICLE</b></color>");
+
+            bool showMap1 = m1Time > 0f || currentScene.Contains("Map1") || currentScene == "SampleScene" || reachedCalamity;
+            bool showMap2 = m2Time > 0f || currentScene.Contains("Map2") || currentScene.Contains("Valley") || reachedCalamity;
+            bool showMap3 = m3Time > 0f || currentScene.Contains("Map3") || currentScene.Contains("Forgotten") || reachedCalamity;
+            bool showCalamity = reachedCalamity;
+
+            if (showMap1)
+            {
+                sb.AppendLine(isVi
+                    ? $"<color=#E0E6ED>Map 1 (Vực Thẳm Khởi Đầu):</color> <color=#52F0FF>{m1Str}</color>  |  <color=#55FFAA>VƯỢT QUA</color>"
+                    : $"<color=#E0E6ED>Realm 1 (Sunken Sepulcher):</color> <color=#52F0FF>{m1Str}</color>  |  <color=#55FFAA>CLEARED</color>");
+            }
+
+            if (showMap2)
+            {
+                sb.AppendLine(isVi
+                    ? $"<color=#E0E6ED>Map 2 (Tàn Tích Thung Lũng):</color> <color=#52F0FF>{m2Str}</color>  |  <color=#55FFAA>THANH TẨY</color>"
+                    : $"<color=#E0E6ED>Realm 2 (Valley of Ancients):</color> <color=#52F0FF>{m2Str}</color>  |  <color=#55FFAA>PURIFIED</color>");
+            }
+
+            if (showMap3)
+            {
+                sb.AppendLine(isVi
+                    ? $"<color=#E0E6ED>Map 3 (Ký Ức Lãng Quên):</color> <color=#52F0FF>{m3Str}</color>  |  <color=#FFD700>ĐẠI THẮNG</color>"
+                    : $"<color=#E0E6ED>Realm 3 (Forgotten Memories):</color> <color=#52F0FF>{m3Str}</color>  |  <color=#FFD700>CONQUERED</color>");
+            }
+
+            // Ghi nhận Cõi Thời Tiết Tai Ương (Calamity Weather Cycle)
+            if (showCalamity)
+            {
+                string rName = !string.IsNullOrEmpty(calName) ? calName : CorruptedCycleManager.GetRealmName(CorruptedCycleManager.CurrentRealm);
+                int rCycle = calCycle >= 2 ? calCycle : Mathf.Max(2, CorruptedCycleManager.CurrentCycle);
+                sb.AppendLine(isVi
+                    ? $"<color=#FF7675>Cõi Thời Tiết (Chu Kỳ {rCycle} - {rName}):</color> <color=#52F0FF>{calStr}</color>  |  <color=#FFD700>CHINH PHỤC</color>"
+                    : $"<color=#FF7675>Calamity Weather (Cycle {rCycle} - {rName}):</color> <color=#52F0FF>{calStr}</color>  |  <color=#FFD700>CONQUERED</color>");
+            }
+
+            sb.AppendLine();
+            sb.AppendLine(isVi
+                ? $"<color=#FFE066>TỔNG THỜI GIAN:</color> <color=#FFFFFF><b>{totalStr}</b></color>   |   <color=#FFE066>LÕI SỞ HỮU:</color> <color=#55EFC4><b>{totalAugments}</b></color>   |   <color=#FFE066>LINH HỒN:</color> <color=#FFD700><b>{formattedShards}</b></color>"
+                : $"<color=#FFE066>TOTAL TIME:</color> <color=#FFFFFF><b>{totalStr}</b></color>   |   <color=#FFE066>AUGMENTS:</color> <color=#55EFC4><b>{totalAugments}</b></color>   |   <color=#FFE066>AETHEL SHARDS:</color> <color=#FFD700><b>{formattedShards}</b></color>");
+
+            sb.AppendLine(isVi
+                ? $"<color=#FFE066>XẾP HẠNG HÀNH TRÌNH:</color> <color=#FF5577><b>S+ ĐẠI CHIẾN THẦN</b></color>\n"
+                : $"<color=#FFE066>CLEAR RANK:</color> <color=#FF5577><b>S+ GRAND CHAMPION</b></color>\n");
+
+            sb.AppendLine(isVi
+                ? $"<color=#CBD5E1><i>\"Chân thành cảm ơn bạn đã đồng hành và đóng góp trải nghiệm quý báu cho Vaelstrider: Ruinbound!\"</i></color>"
+                : $"<color=#CBD5E1><i>\"Thank you sincerely for your courage and invaluable feedback in forging Vaelstrider: Ruinbound!\"</i></color>");
+
+            statsText.text = sb.ToString();
         }
     }
 
@@ -430,7 +500,7 @@ public class EndingCreditsUI : MonoBehaviour
             "<color=#94A3B8><size=80%>PRODUCED & DIRECTED BY</size></color>\n" +
             "<size=120%><color=#FFFFFF><b>Trương Hùng</b></color></size>\n\n\n" +
             "<color=#94A3B8><size=80%>GAME AVATAR & CREATIVE CONTRIBUTOR</size></color>\n" +
-            "<size=120%><color=#FFE066><b>Quốc Ánh</b></color></size>\n" +
+            "<size=120%><color=#FFE066><b>Quốc Anh</b></color></size>\n" +
             "<size=85%><color=#CBD5E1>Đóng góp ý tưởng & Avatar Chiến Tướng độc quyền</color></size>\n\n\n" +
             "<color=#94A3B8><size=80%>SYSTEM ARCHITECT & AI PAIR PROGRAMMER</size></color>\n" +
             "<size=120%><color=#52F0FF><b>Antigravity</b></color></size>\n" +
@@ -451,8 +521,14 @@ public class EndingCreditsUI : MonoBehaviour
             "<color=#CBD5E1>Dark Souls Lost Shards Grave Retrieval</color>\n" +
             "<color=#CBD5E1>Cinematic Anime Boss Eye-Flare Finisher</color>\n\n\n" +
             "<color=#94A3B8><size=80%>LEVEL & WORLD DESIGN</size></color>\n" +
-            "<color=#FFFFFF><b>Realm 1: Sunken Sepulcher</b></color>\n" +
-            "<color=#FFFFFF><b>Realm 2: Valley Ruin of the Ancients</b></color>\n\n\n" +
+            "<color=#FFFFFF><b>Realm 1: Sunken Sepulcher (Vực Thẳm Khởi Đầu)</b></color>\n" +
+            "<color=#FFFFFF><b>Realm 2: Valley Ruin of the Ancients (Tàn Tích Thung Lũng)</b></color>\n" +
+            "<color=#FFFFFF><b>Realm 3: Forgotten Memories (Ký Ức Lãng Quên)</b></color>\n\n\n" +
+            "<color=#94A3B8><size=80%>CALAMITY & WEATHER REALMS (CÕI THỜI TIẾT TAI ƯƠNG)</size></color>\n" +
+            "<color=#FFFFFF><b>Calamity II: Void Nightmare (Ác Mộng Hư Không)</b></color>\n" +
+            "<color=#FFFFFF><b>Calamity III: Magma Calamity & Meteor Storm (Nham Thạch & Mưa Thiên Thạch)</b></color>\n" +
+            "<color=#FFFFFF><b>Calamity IV: Acid Downpour (Cõi Mưa Axit Ăn Mòn)</b></color>\n" +
+            "<color=#FFFFFF><b>Calamity V: Frostfall Blizzard (Cõi Bão Tuyết Băng Giá)</b></color>\n\n\n" +
             "---------------------------------\n\n" +
             "<color=#94A3B8><size=80%>SPECIAL DEDICATION & GRATITUDE</size></color>\n" +
             "<color=#E2E8F0>Chân thành cảm ơn bạn đã kiên cường vượt qua muôn vàn thử thách,</color>\n" +

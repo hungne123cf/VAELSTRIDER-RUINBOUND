@@ -67,6 +67,29 @@ public class ShrineUpgradeUI : MonoBehaviour
             canvasGroup.interactable = true;
             canvasGroup.blocksRaycasts = true;
         }
+
+        // TẠM DỪNG THỜI GIAN GAME TRONG CHẾ ĐỘ CHƠI ĐƠN KHI MỞ ĐÀI THẦN BÍ
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 0f;
+        }
+
+        // KÍCH HOẠT BẤT TỬ TUYỆT ĐỐI CHO NGƯỜI CHƠI TRONG LÚC NÂNG CẤP TẠI ĐÀI THẦN BÍ
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = true;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(false);
+
+        MobileActionButton.ResetAllButtonStates();
+        var playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null)
+        {
+            var pCombat = playerObj.GetComponent<PlayerCombat>();
+            if (pCombat != null) pCombat.CancelAttackHold();
+        }
+
         RefreshUI();
         SoundManager.EnsureInstance()?.PlayMenuHover();
         GameFontManager.ApplyFontsGlobally(gameObject);
@@ -83,6 +106,20 @@ public class ShrineUpgradeUI : MonoBehaviour
         }
         gameObject.SetActive(false);
         GameAutoBootstrap.SetGameplayHUDVisible(true);
+
+        // KHÔI PHỤC THỜI GIAN VÀ TRẠNG THÁI NHÂN VẬT KHI ĐÓNG ĐÀI THẦN BÍ
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 1.0f;
+        }
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = false;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(true);
+
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }
 

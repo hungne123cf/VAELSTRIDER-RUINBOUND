@@ -18,11 +18,13 @@ public class LevelUpChoiceUI : MonoBehaviour
 {
     // ─── Singleton ─────────────────────────────────────────────────────────────
     private static LevelUpChoiceUI _instance;
+    public static LevelUpChoiceUI Instance => _instance;
 
     // ─── Runtime ───────────────────────────────────────────────────────────────
     private GameObject _root;
     private bool _isShowing = false;
     private bool _isPicking = false;
+    private static bool _isPostponed = false;
     public static bool IsShowing => _instance != null && _instance._isShowing;
     private List<AugmentDatabase.AugmentData> _currentChoices;
 
@@ -139,8 +141,24 @@ public class LevelUpChoiceUI : MonoBehaviour
         // Phát âm thanh lên cấp nhẹ nhàng
         SoundManager.EnsureInstance()?.PlayUpgradeSuccess();
 
-        // Không tự động đóng băng màn hình, hiện nút chọn lõi chủ động trên HUD
-        _instance.UpdatePendingBadgeUI();
+        // 2 Option: Tự động mở (Bị động, value = 1) hoặc Bấm nút chọn (Chủ động, value = 0)
+        bool isAuto = PlayerPrefs.GetInt("Setting_AugmentChoiceMode", 0) == 1;
+        if (isAuto)
+        {
+            if (!_instance._isShowing)
+            {
+                OpenNextPendingChoice();
+            }
+            else
+            {
+                _instance.UpdatePendingBadgeUI();
+            }
+        }
+        else
+        {
+            // Không tự động đóng băng màn hình, hiện nút chọn lõi chủ động trên HUD
+            _instance.UpdatePendingBadgeUI();
+        }
     }
 
     /// <summary>
@@ -157,6 +175,15 @@ public class LevelUpChoiceUI : MonoBehaviour
 
     public void UpdatePendingBadgeUI()
     {
+        // Khi ở chế độ Bị Động (Tự động mở bảng khi lên cấp, Setting_AugmentChoiceMode == 1):
+        // Ẩn hoàn toàn nút [CHỌN LÕI] trên HUD theo đúng yêu cầu người dùng!
+        bool isAuto = PlayerPrefs.GetInt("Setting_AugmentChoiceMode", 0) == 1;
+        if (isAuto)
+        {
+            if (_pendingBadgeObj != null) _pendingBadgeObj.SetActive(false);
+            return;
+        }
+
         int count = _pendingLevelUps.Count;
         if (count <= 0)
         {
@@ -182,7 +209,7 @@ public class LevelUpChoiceUI : MonoBehaviour
             _pendingBadgeRt.anchorMin = new Vector2(1f, 1f);
             _pendingBadgeRt.anchorMax = new Vector2(1f, 1f);
             _pendingBadgeRt.pivot = new Vector2(1f, 1f);
-            _pendingBadgeRt.anchoredPosition = new Vector2(-20f, -365f); // Neo bên phải, dưới chân Minimap, không đè lên bất kỳ UI nào
+            _pendingBadgeRt.anchoredPosition = new Vector2(-16f, -256f); // Neo bên phải, dưới chân Minimap (Minimap y = -126..-242), không đè lên bất kỳ UI nào
             _pendingBadgeRt.sizeDelta = new Vector2(165f, 42f);
 
             Image bg = _pendingBadgeObj.GetComponent<Image>();
@@ -273,7 +300,12 @@ public class LevelUpChoiceUI : MonoBehaviour
     {
         _isShowing = true;
         _isPicking = false;
+        _isPostponed = false;
         _currentLevel = level;
+
+        SkillAimIndicator.Instance?.Hide();
+        RangedAimIndicator.Instance?.Hide();
+        MobileActionButton.ResetAllButtonStates();
 
         // Kích hoạt trạng thái Miễn Sát Thương tuyệt đối cho Người chơi trong lúc chọn Lõi Nâng Cấp
         var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
@@ -300,7 +332,7 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         // Pause game time (Chỉ pause trong chế độ Chơi Đơn / Story, trong Co-op luôn giữ 1.0f realtime)
         float prevTimeScale = Time.timeScale;
-        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
         if (!isMultiplayer)
         {
             Time.timeScale = 0f;
@@ -336,10 +368,25 @@ public class LevelUpChoiceUI : MonoBehaviour
         // Chờ 1 frame để tất cả enemy AI Update() nhận được IsShowing=false đúng thứ tự
         yield return new WaitForEndOfFrame();
 
-        // Khôi phục thời gian và trạng thái nhân vật
-        Time.timeScale = (prevTimeScale > 0f) ? prevTimeScale : 1.0f;
-        if (ph != null) ph.isInvulnerable = prevInvul;
-        if (pc != null) pc.SetCanMove(true);
+        // Khôi phục thời gian và trạng thái nhân vật khi:
+        // 1. Không còn lượt chọn kế tiếp (_pendingLevelUps.Count == 0)
+        // 2. Hoặc người chơi chủ động bấm nút "ĐỂ SAU" (_isPostponed == true)
+        if (_pendingLevelUps.Count == 0 || _isPostponed)
+        {
+            Time.timeScale = (prevTimeScale > 0f) ? prevTimeScale : 1.0f;
+            if (ph != null) ph.isInvulnerable = prevInvul;
+            if (pc != null) pc.SetCanMove(true);
+            SkillAimIndicator.Instance?.Hide();
+            RangedAimIndicator.Instance?.Hide();
+            MobileActionButton.ResetAllButtonStates();
+        }
+        else
+        {
+            // Vẫn còn lượt chọn liên tục tiếp theo do vừa chọn xong 1 lõi: Giữ nguyên timeScale = 0f và trạng thái bất tử
+            if (!isMultiplayer) Time.timeScale = 0f;
+            if (ph != null) ph.isInvulnerable = true;
+            if (pc != null) pc.SetCanMove(false);
+        }
 
         // Khôi phục Gameplay HUD ngay khi bảng chọn đóng lại
         GameAutoBootstrap.SetGameplayHUDVisible(true);
@@ -892,6 +939,11 @@ public class LevelUpChoiceUI : MonoBehaviour
 
     private void BuildPostponeButton(Transform parent, bool isVN, int currentLvl)
     {
+        // Khi ở chế độ Bị Động (Tự động mở bảng khi lên cấp, Setting_AugmentChoiceMode == 1):
+        // Tuyệt đối TẮT/KHÔNG hiển thị nút "ĐỂ SAU" theo đúng yêu cầu người dùng!
+        bool isAuto = PlayerPrefs.GetInt("Setting_AugmentChoiceMode", 0) == 1;
+        if (isAuto) return;
+
         var btnObj = new GameObject("Btn_PostponeChoice", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         btnObj.transform.SetParent(parent, false);
         var rt = btnObj.GetComponent<RectTransform>();
@@ -914,6 +966,7 @@ public class LevelUpChoiceUI : MonoBehaviour
         btn.onClick.AddListener(() =>
         {
             SoundManager.EnsureInstance()?.PlayMenuHover();
+            _isPostponed = true;
             _pendingLevelUps.Enqueue(currentLvl);
             _isShowing = false;
             _isPicking = false;
@@ -927,6 +980,9 @@ public class LevelUpChoiceUI : MonoBehaviour
             if (ph != null) ph.isInvulnerable = false;
             var pc = FindAnyObjectByType<PlayerController>();
             if (pc != null) pc.SetCanMove(true);
+            SkillAimIndicator.Instance?.Hide();
+            RangedAimIndicator.Instance?.Hide();
+            MobileActionButton.ResetAllButtonStates();
             GameAutoBootstrap.SetGameplayHUDVisible(true);
             UpdatePendingBadgeUI();
         });
@@ -2488,6 +2544,19 @@ public class LevelUpChoiceUI : MonoBehaviour
 
         GameAutoBootstrap.SetGameplayHUDVisible(true);
         UpdatePendingBadgeUI();
+
+        // ĐẶC BIỆT: Sau khi chọn xong 1 lõi, nếu vẫn còn lượt chọn trong hàng đợi (_pendingLevelUps.Count > 0):
+        // Cho hiện tiếp liên tục để chọn hết lượt luôn mới đã!
+        if (_pendingLevelUps.Count > 0)
+        {
+            _instance.StartCoroutine(_instance.OpenNextConsecutiveChoiceRoutine());
+        }
+    }
+
+    private IEnumerator OpenNextConsecutiveChoiceRoutine()
+    {
+        yield return null; // Chờ 1 frame dọn sạch modal cũ
+        OpenNextPendingChoice();
     }
 
     // ─── Visual Helpers ────────────────────────────────────────────────────────

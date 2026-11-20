@@ -87,7 +87,7 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable, IEnemyHealth
     {
         if (isDead) return;
 
-        if (PlayerHealth.IsPlayerDead)
+        if (PlayerHealth.IsPlayerDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject))
         {
             rb.linearVelocity = Vector2.zero;
             isMoving = false;
@@ -211,7 +211,7 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     public void TakeDamage(int damage)
     {
-        if (isDead) return;
+        if (isDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject)) return;
 
         currentHealth -= damage;
         EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);
@@ -346,6 +346,7 @@ public class ValleyBeastAI : MonoBehaviour, IDamageable, IEnemyHealth
         GameObject go = new GameObject($"ValleyBeast_{index}");
         go.transform.position = pos;
         var ai = go.AddComponent<ValleyBeastAI>();
+        EnemyHealthHelper.OnEnemySpawned(go);
         return ai;
     }
 

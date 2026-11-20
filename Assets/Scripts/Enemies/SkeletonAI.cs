@@ -75,7 +75,7 @@ public class SkeletonAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     void Update()
     {
-        if (isDead) return;
+        if (isDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject)) return;
 
         if (PlayerHealth.IsPlayerDead)
         {
@@ -166,7 +166,7 @@ public class SkeletonAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     public void TakeDamage(int damage)
     {
-        if (isDead) return;
+        if (isDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject)) return;
 
         currentHealth -= damage;
         EnemyFloatingHealthBar.ReportHealth(gameObject, currentHealth, maxHealth);

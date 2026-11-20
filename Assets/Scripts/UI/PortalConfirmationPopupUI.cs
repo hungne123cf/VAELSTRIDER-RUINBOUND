@@ -444,7 +444,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             canvasGroup.blocksRaycasts = true;
         }
 
-        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
         if (!isMultiplayer) Time.timeScale = 0f; // Chỉ pause trong Story
         else Time.timeScale = 1.0f; // Trong Co-op: Realtime combat
         SoundManager.EnsureInstance()?.PlayButtonClick();
@@ -543,7 +543,7 @@ public class PortalConfirmationPopupUI : MonoBehaviour
             canvasGroup.blocksRaycasts = true;
         }
 
-        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
         if (!isMulti) Time.timeScale = 0f;
         else Time.timeScale = 1.0f;
         SoundManager.EnsureInstance()?.PlayButtonClick();

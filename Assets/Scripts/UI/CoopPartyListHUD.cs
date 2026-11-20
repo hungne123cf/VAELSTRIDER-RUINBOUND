@@ -66,11 +66,22 @@ public class CoopPartyListHUD : MonoBehaviour
             return;
         }
         _instance = this;
+
+        if (!PvPMatchManager.IsCoopModeActive)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
     }
 
     void Start()
     {
         BuildUI();
+        if (!PvPMatchManager.IsCoopModeActive)
+        {
+            if (_rootPanel != null) _rootPanel.SetActive(false);
+            return;
+        }
         RefreshPartyList();
     }
 
@@ -90,12 +101,18 @@ public class CoopPartyListHUD : MonoBehaviour
         if (sceneName == "MainMenuScene" || sceneName == "LoginScene")
         {
             if (_rootPanel != null) _rootPanel.SetActive(false);
+            return;
         }
-        else
+
+        // Tuyệt đối không hiển thị bảng Tổ Đội Co-op khi đang chơi chế độ đơn / cốt truyện offline
+        if (!PvPMatchManager.IsCoopModeActive)
         {
-            if (_rootPanel != null) _rootPanel.SetActive(true);
-            RefreshPartyList();
+            if (_rootPanel != null) _rootPanel.SetActive(false);
+            return;
         }
+
+        if (_rootPanel != null) _rootPanel.SetActive(true);
+        RefreshPartyList();
     }
 
     void Update()
@@ -107,7 +124,14 @@ public class CoopPartyListHUD : MonoBehaviour
             return;
         }
 
-        // Chỉ hiển thị khi đang trong trận đấu Gameplay
+        // Tuyệt đối không hiển thị bảng Tổ Đội Co-op khi đang chơi chế độ đơn / cốt truyện offline
+        if (!PvPMatchManager.IsCoopModeActive)
+        {
+            if (_rootPanel != null && _rootPanel.activeSelf) _rootPanel.SetActive(false);
+            return;
+        }
+
+        // Chỉ hiển thị khi đang trong trận đấu Gameplay Co-op thực sự
         if (_rootPanel != null && !_rootPanel.activeSelf)
         {
             _rootPanel.SetActive(true);
@@ -137,6 +161,14 @@ public class CoopPartyListHUD : MonoBehaviour
     /// </summary>
     public static CoopPartyListHUD EnsureUIExists(Canvas targetCanvas = null)
     {
+        if (!PvPMatchManager.IsCoopModeActive)
+        {
+            if (_instance != null && _instance.gameObject != null) _instance.gameObject.SetActive(false);
+            var existingComp = FindAnyObjectByType<CoopPartyListHUD>();
+            if (existingComp != null) existingComp.gameObject.SetActive(false);
+            return null;
+        }
+
         if (_instance != null) return _instance;
 
         var existing = FindAnyObjectByType<CoopPartyListHUD>();

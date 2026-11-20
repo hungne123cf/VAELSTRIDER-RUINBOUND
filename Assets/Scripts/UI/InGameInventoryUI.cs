@@ -132,8 +132,28 @@ public class InGameInventoryUI : MonoBehaviour
             modalPanel.SetActive(true);
             modalPanel.transform.SetAsLastSibling();
         }
-        // Giữ nguyên thời gian trôi tự nhiên trong trận, không đóng băng (timeScale = 1)
-        Time.timeScale = 1f;
+
+        // TẠM DỪNG THỜI GIAN GAME TRONG CHẾ ĐỘ CHƠI ĐƠN KHI MỞ TÚI ĐỒ TRONG TRẬN
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 0f;
+        }
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = true;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(false);
+
+        MobileActionButton.ResetAllButtonStates();
+        var playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null)
+        {
+            var pCombat = playerObj.GetComponent<PlayerCombat>();
+            if (pCombat != null) pCombat.CancelAttackHold();
+        }
+
         RefreshModal();
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }
@@ -146,7 +166,19 @@ public class InGameInventoryUI : MonoBehaviour
             modalPanel.SetActive(false);
         }
         GameAutoBootstrap.SetGameplayHUDVisible(true);
-        Time.timeScale = 1f;
+
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 1f;
+        }
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = false;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(true);
+
         NotifyPlayerCombatStatsChanged();
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }

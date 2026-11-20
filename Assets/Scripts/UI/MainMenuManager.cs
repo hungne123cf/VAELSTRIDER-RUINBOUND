@@ -695,13 +695,13 @@ public class MainMenuManager : MonoBehaviour
             {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
                 ShowCarouselToast(LocalizationManager.T(
-                    "CHẾ ĐỘ CO-OP ĐANG ĐƯỢC NÂNG CẤP HOÀN THIỆN! HÃY TRẢI NGHIỆM CHIẾN DỊCH CHƠI ĐƠN!",
-                    "CO-OP MODE IS UNDER UPGRADE! PLEASE ENJOY SOLO STORY CAMPAIGN!"), new Color(1f, 0.85f, 0.35f, 1f));
+                    "CHẾ ĐỘ CO-OP: COMING SOON!\n(Tính năng Co-op đang được hoàn thiện, sắp ra mắt!)",
+                    "CO-OP MODE: COMING SOON!\n(Co-op multiplayer is currently under development!)"), new Color(1f, 0.85f, 0.35f, 1f));
             });
         }
         if (_txtModeQuickMatch != null)
         {
-            _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP\n<size=20><color=#FFD54F>(SẮP RA MẮT)</color></size>", "CO-OP SQUAD\n<size=20><color=#FFD54F>(COMING SOON)</color></size>");
+            _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP\n<size=20><color=#FFD54F>(COMING SOON)</color></size>", "CO-OP SQUAD\n<size=20><color=#FFD54F>(COMING SOON)</color></size>");
             _txtModeQuickMatch.fontSize = 28f;
         }
 
@@ -4826,21 +4826,22 @@ public class MainMenuManager : MonoBehaviour
             _txtModeStory.fontSize = 28f;
         }
 
-        // 2. TỔ ĐỘI CO-OP (1-4 NGƯỜI) - Khóa khi offline
+        // 2. TỔ ĐỘI CO-OP (TẠM KHÓA COMING SOON THEO YÊU CẦU NGƯỜI DÙNG)
         if (_btnModeQuickMatch != null && _txtModeQuickMatch != null)
         {
             Image img = _btnModeQuickMatch.GetComponent<Image>();
-            if (isOffline)
+            if (img != null) img.color = new Color(0.32f, 0.35f, 0.44f, 0.92f);
+            _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP\n<size=18><color=#FFD54F>(COMING SOON)</color></size>", "CO-OP SQUAD\n<size=18><color=#FFD54F>(COMING SOON)</color></size>");
+            _txtModeQuickMatch.fontSize = 28f;
+
+            _btnModeQuickMatch.onClick.RemoveAllListeners();
+            _btnModeQuickMatch.onClick.AddListener(() =>
             {
-                if (img != null) img.color = new Color(0.24f, 0.26f, 0.32f, 0.92f);
-                _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP\n<size=12><color=#FF6666>(KHÓA ONLINE)</color></size>", "CO-OP SQUAD\n<size=12><color=#FF6666>(ONLINE LOCKED)</color></size>");
-            }
-            else
-            {
-                if (img != null) img.color = new Color(0.92f, 0.48f, 0.12f, 1f);
-                _txtModeQuickMatch.text = LocalizationManager.T("TỔ ĐỘI CO-OP", "CO-OP SQUAD");
-            }
-            _txtModeQuickMatch.fontSize = 32f;
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                ShowCarouselToast(LocalizationManager.T(
+                    "CHẾ ĐỘ CO-OP: COMING SOON!\n(Tính năng Co-op đang được hoàn thiện, sắp ra mắt!)",
+                    "CO-OP MODE: COMING SOON!\n(Co-op multiplayer is currently under development!)"), new Color(1f, 0.85f, 0.35f, 1f));
+            });
         }
 
         // Ẩn 2 nút Tạo Phòng & Tìm Phòng PIN riêng lẻ trên Main Menu

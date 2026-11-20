@@ -225,6 +225,7 @@ public class CorruptedVoidPortal : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.3f);
+        MatchTimerUI.RecordMapClearTime(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         CorruptedCycleManager.StartCorruptedCycle();
     }
 

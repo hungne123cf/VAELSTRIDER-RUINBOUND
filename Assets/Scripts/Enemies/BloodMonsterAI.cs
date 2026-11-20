@@ -239,7 +239,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
             return;
         }
 
-        if (PlayerHealth.IsPlayerDead)
+        if (PlayerHealth.IsPlayerDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject))
         {
             rb.linearVelocity = Vector2.zero;
             SetMoving(false);
@@ -892,7 +892,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
     // ===== DAMAGE / PHASE / DEATH =====
     public void TakeDamage(int damage)
     {
-        if (isDead || isTransitioningPhase) return;
+        if (isDead || isTransitioningPhase || EnemyBurrowEntrance.IsEnemyEmerging(gameObject)) return;
 
         // ĐỒNG BỘ CO-OP (PUPPET TRÊN MÁY CLIENT): Báo sát thương lên Host tính toán thẩm quyền
         var netSync = GetComponent<NetworkEnemySync>();
@@ -1122,6 +1122,7 @@ public class BloodMonsterAI : MonoBehaviour, IDamageable, IEnemyHealth
             ai.moveSpeed = 3.6f;
         }
 
+        EnemyHealthHelper.OnEnemySpawned(go);
         return ai;
     }
 

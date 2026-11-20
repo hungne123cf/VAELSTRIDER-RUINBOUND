@@ -1445,6 +1445,28 @@ public class ArmorShopUI : MonoBehaviour
             canvasGroup.interactable = true;
         }
 
+        // TẠM DỪNG THỜI GIAN GAME TRONG CHẾ ĐỘ CHƠI ĐƠN KHI MỞ CỬA HÀNG TRANG BỊ
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 0f;
+        }
+
+        // KÍCH HOẠT BẤT TỬ TUYỆT ĐỐI CHO NGƯỜI CHƠI TRONG LÚC MUA SẮM
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = true;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(false);
+
+        MobileActionButton.ResetAllButtonStates();
+        var playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null)
+        {
+            var pCombat = playerObj.GetComponent<PlayerCombat>();
+            if (pCombat != null) pCombat.CancelAttackHold();
+        }
+
         if (dialogBox == null)
         {
             Canvas parentCanvas = GetComponentInParent<Canvas>() ?? Object.FindAnyObjectByType<Canvas>();
@@ -1468,5 +1490,18 @@ public class ArmorShopUI : MonoBehaviour
             canvasGroup.interactable = false;
         }
         gameObject.SetActive(false);
+
+        // KHÔI PHỤC THỜI GIAN VÀ TRẠNG THÁI NHÂN VẬT KHI ĐÓNG CỬA HÀNG
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMultiplayer)
+        {
+            Time.timeScale = 1.0f;
+        }
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = false;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(true);
     }
 }

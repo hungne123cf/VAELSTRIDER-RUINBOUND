@@ -1450,27 +1450,50 @@ public class PlayFabClientService : MonoBehaviour
         string url = BuildEndpoint(path);
         byte[] bodyBytes = Encoding.UTF8.GetBytes(jsonBody);
 
-        using (UnityWebRequest req = new UnityWebRequest(url, "POST"))
+        int maxRetries = 2;
+        int currentAttempt = 0;
+
+        while (currentAttempt <= maxRetries)
         {
-            req.uploadHandler = new UploadHandlerRaw(bodyBytes);
-            req.downloadHandler = new DownloadHandlerBuffer();
-            req.SetRequestHeader("Content-Type", "application/json");
-            if (!string.IsNullOrEmpty(customTicket))
+            currentAttempt++;
+            using (UnityWebRequest req = new UnityWebRequest(url, "POST"))
             {
-                req.SetRequestHeader("X-Authorization", customTicket);
-            }
-            req.timeout = 12;
+                req.uploadHandler = new UploadHandlerRaw(bodyBytes);
+                req.downloadHandler = new DownloadHandlerBuffer();
+                req.disposeUploadHandlerOnDispose = true;
+                req.disposeDownloadHandlerOnDispose = true;
+                req.SetRequestHeader("Content-Type", "application/json");
+                if (!string.IsNullOrEmpty(customTicket))
+                {
+                    req.SetRequestHeader("X-Authorization", customTicket);
+                }
+                req.timeout = 10;
 
-            yield return req.SendWebRequest();
+                yield return req.SendWebRequest();
 
-            string responseText = req.downloadHandler != null ? req.downloadHandler.text : "";
-            if (req.result == UnityWebRequest.Result.Success && req.responseCode >= 200 && req.responseCode < 300)
-            {
-                onSuccess?.Invoke(responseText);
-            }
-            else
-            {
-                onError?.Invoke(req.error);
+                string responseText = req.downloadHandler != null ? req.downloadHandler.text : "";
+                if (req.result == UnityWebRequest.Result.Success && req.responseCode >= 200 && req.responseCode < 300)
+                {
+                    onSuccess?.Invoke(responseText);
+                    yield break;
+                }
+                else
+                {
+                    bool isTlsOrSocketError = req.result == UnityWebRequest.Result.ConnectionError ||
+                                              (!string.IsNullOrEmpty(req.error) && (req.error.Contains("Curl error 55") || req.error.Contains("unitytls") || req.error.Contains("Connection reset") || req.error.Contains("Broken pipe")));
+
+                    if (isTlsOrSocketError && currentAttempt <= maxRetries)
+                    {
+                        yield return new WaitForSecondsRealtime(0.5f);
+                        continue;
+                    }
+
+                    string err = isTlsOrSocketError
+                        ? LocalizationManager.T("Kết nối mạng không ổn định hoặc ngắt kết nối TLS.", "Unstable network or TLS connection reset.")
+                        : req.error;
+                    onError?.Invoke(err);
+                    yield break;
+                }
             }
         }
     }
@@ -1494,43 +1517,67 @@ public class PlayFabClientService : MonoBehaviour
         string url = BuildEndpoint(path);
         byte[] bodyBytes = Encoding.UTF8.GetBytes(jsonBody);
 
-        using (UnityWebRequest req = new UnityWebRequest(url, "POST"))
+        int maxRetries = 2;
+        int currentAttempt = 0;
+
+        while (currentAttempt <= maxRetries)
         {
-            req.uploadHandler = new UploadHandlerRaw(bodyBytes);
-            req.downloadHandler = new DownloadHandlerBuffer();
-            req.SetRequestHeader("Content-Type", "application/json");
-            if (useAuthHeader && !string.IsNullOrEmpty(SessionTicket))
+            currentAttempt++;
+            using (UnityWebRequest req = new UnityWebRequest(url, "POST"))
             {
-                req.SetRequestHeader("X-Authorization", SessionTicket);
-            }
-            req.timeout = 12;
-
-            yield return req.SendWebRequest();
-
-            string responseText = req.downloadHandler != null ? req.downloadHandler.text : "";
-            if (req.result == UnityWebRequest.Result.Success && req.responseCode >= 200 && req.responseCode < 300)
-            {
-                onSuccess?.Invoke(responseText);
-            }
-            else
-            {
-                string errMsg = ExtractJsonString(responseText, "errorMessage");
-                if (string.IsNullOrEmpty(errMsg))
+                req.uploadHandler = new UploadHandlerRaw(bodyBytes);
+                req.downloadHandler = new DownloadHandlerBuffer();
+                req.disposeUploadHandlerOnDispose = true;
+                req.disposeDownloadHandlerOnDispose = true;
+                req.SetRequestHeader("Content-Type", "application/json");
+                if (useAuthHeader && !string.IsNullOrEmpty(SessionTicket))
                 {
-                    if (req.responseCode == 403 || req.responseCode == 429)
-                    {
-                        errMsg = LocalizationManager.T("Máy chủ PlayFab tạm thời giới hạn tần suất truy cập. Vui lòng thử lại sau vài giây!", "PlayFab API rate limit reached. Please retry in a few seconds!");
-                    }
-                    else if (req.responseCode == 401)
-                    {
-                        errMsg = LocalizationManager.T("Tên tài khoản hoặc mật khẩu không chính xác!", "Invalid username or password!");
-                    }
-                    else
-                    {
-                        errMsg = req.error;
-                    }
+                    req.SetRequestHeader("X-Authorization", SessionTicket);
                 }
-                onError?.Invoke(LocalizationManager.T($"Lỗi PlayFab: {errMsg}", $"PlayFab Error: {errMsg}"));
+                req.timeout = 10;
+
+                yield return req.SendWebRequest();
+
+                string responseText = req.downloadHandler != null ? req.downloadHandler.text : "";
+                if (req.result == UnityWebRequest.Result.Success && req.responseCode >= 200 && req.responseCode < 300)
+                {
+                    onSuccess?.Invoke(responseText);
+                    yield break;
+                }
+                else
+                {
+                    bool isTlsOrSocketError = req.result == UnityWebRequest.Result.ConnectionError ||
+                                              (!string.IsNullOrEmpty(req.error) && (req.error.Contains("Curl error 55") || req.error.Contains("unitytls") || req.error.Contains("Connection reset") || req.error.Contains("Broken pipe")));
+
+                    if (isTlsOrSocketError && currentAttempt <= maxRetries)
+                    {
+                        yield return new WaitForSecondsRealtime(0.5f);
+                        continue;
+                    }
+
+                    string errMsg = ExtractJsonString(responseText, "errorMessage");
+                    if (string.IsNullOrEmpty(errMsg))
+                    {
+                        if (req.responseCode == 403 || req.responseCode == 429)
+                        {
+                            errMsg = LocalizationManager.T("Máy chủ PlayFab tạm thời giới hạn tần suất truy cập. Vui lòng thử lại sau vài giây!", "PlayFab API rate limit reached. Please retry in a few seconds!");
+                        }
+                        else if (req.responseCode == 401)
+                        {
+                            errMsg = LocalizationManager.T("Tên tài khoản hoặc mật khẩu không chính xác!", "Invalid username or password!");
+                        }
+                        else if (isTlsOrSocketError)
+                        {
+                            errMsg = LocalizationManager.T("Mất kết nối mạng hoặc phiên bảo mật TLS bị ngắt. Đang tiếp tục ở chế độ ngoại tuyến.", "Network interrupted or TLS reset. Continuing in offline mode.");
+                        }
+                        else
+                        {
+                            errMsg = req.error;
+                        }
+                    }
+                    onError?.Invoke(LocalizationManager.T($"Lỗi PlayFab: {errMsg}", $"PlayFab Error: {errMsg}"));
+                    yield break;
+                }
             }
         }
     }

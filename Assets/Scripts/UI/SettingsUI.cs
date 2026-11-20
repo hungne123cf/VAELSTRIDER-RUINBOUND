@@ -11,7 +11,8 @@ public class SettingsUI : MonoBehaviour
     {
         AudioLang = 0,
         Controls = 1,
-        GameData = 2
+        Gameplay = 2,
+        GameData = 3
     }
 
     private SettingsTab currentTab = SettingsTab.AudioLang;
@@ -32,6 +33,8 @@ public class SettingsUI : MonoBehaviour
     private TextMeshProUGUI tabAudioText;
     private Button tabControlsBtn;
     private TextMeshProUGUI tabControlsText;
+    private Button tabGameplayBtn;
+    private TextMeshProUGUI tabGameplayText;
     private Button tabDataBtn;
     private TextMeshProUGUI tabDataText;
 
@@ -39,6 +42,7 @@ public class SettingsUI : MonoBehaviour
     private GameObject contentPanel;
     private GameObject pageAudioLang;
     private GameObject pageControls;
+    private GameObject pageGameplay;
     private GameObject pageGameData;
 
     [Header("Page Titles & Descriptions")]
@@ -46,8 +50,17 @@ public class SettingsUI : MonoBehaviour
     private TextMeshProUGUI pageAudioSub;
     private TextMeshProUGUI pageControlsHeader;
     private TextMeshProUGUI pageControlsSub;
+    private TextMeshProUGUI pageGameplayHeader;
+    private TextMeshProUGUI pageGameplaySub;
     private TextMeshProUGUI pageDataHeader;
     private TextMeshProUGUI pageDataSub;
+
+    [Header("Gameplay Settings")]
+    private TextMeshProUGUI augmentModeLabel;
+    private Button augmentModeToggleBtn;
+    private TextMeshProUGUI augmentModeToggleText;
+    private TextMeshProUGUI augmentModeDescText;
+    private TextMeshProUGUI augmentModeTipText;
 
     [Header("Volume Controls")]
     private TextMeshProUGUI bgmLabel;
@@ -401,13 +414,15 @@ public class SettingsUI : MonoBehaviour
 
         SoulslikeHUDStyler.AddFiligreeDivider(categorySidebar.transform, new Vector2(0f, -55f), new Vector2(290f, 8f));
 
-        // Category Tab Buttons
-        tabAudioBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Audio", new Vector2(18f, -75f), new Vector2(300f, 80f), new Color(0.08f, 0.10f, 0.15f), out tabAudioText);
-        tabAudioText.fontSize = 22f;
-        tabControlsBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Controls", new Vector2(18f, -170f), new Vector2(300f, 80f), new Color(0.08f, 0.10f, 0.15f), out tabControlsText);
-        tabControlsText.fontSize = 22f;
-        tabDataBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Data", new Vector2(18f, -265f), new Vector2(300f, 80f), new Color(0.08f, 0.10f, 0.15f), out tabDataText);
-        tabDataText.fontSize = 22f;
+        // Category Tab Buttons (4 Tabs: Audio, Controls, Gameplay, GameData)
+        tabAudioBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Audio", new Vector2(18f, -70f), new Vector2(300f, 72f), new Color(0.08f, 0.10f, 0.15f), out tabAudioText);
+        tabAudioText.fontSize = 20f;
+        tabControlsBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Controls", new Vector2(18f, -150f), new Vector2(300f, 72f), new Color(0.08f, 0.10f, 0.15f), out tabControlsText);
+        tabControlsText.fontSize = 20f;
+        tabGameplayBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Gameplay", new Vector2(18f, -230f), new Vector2(300f, 72f), new Color(0.08f, 0.10f, 0.15f), out tabGameplayText);
+        tabGameplayText.fontSize = 20f;
+        tabDataBtn = CreateStyledButton(categorySidebar.transform, "Btn_Tab_Data", new Vector2(18f, -310f), new Vector2(300f, 72f), new Color(0.08f, 0.10f, 0.15f), out tabDataText);
+        tabDataText.fontSize = 20f;
 
         // 4. RIGHT CONTENT PANEL
         contentPanel = new GameObject("ContentPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -494,9 +509,44 @@ public class SettingsUI : MonoBehaviour
         controlsCardTip = CreateLabel(controlsCard.transform, "CardTip", "<i><color=#88A0C0>* Trận đấu sẽ tự động tạm dừng an toàn trong lúc bạn căn chỉnh vị trí các nút.</color></i>", new Vector2(35f, -345f), new Vector2(1280f, 44f));
         controlsCardTip.fontSize = 20f;
 
-        // --- PAGE 3: GAME DATA & SYSTEM ---
+        // --- PAGE 3: GAMEPLAY (LỐI CHƠI) ---
+        pageGameplay = CreatePage(contentPanel.transform, "Page_Gameplay");
+        pageGameplayHeader = CreateLabel(pageGameplay.transform, "Header", "<b><color=#55EFC4>3. LỐI CHƠI (GAMEPLAY)</color></b>", new Vector2(35f, -25f), new Vector2(1300f, 44f));
+        pageGameplayHeader.fontSize = 26f;
+        pageGameplaySub = CreateLabel(pageGameplay.transform, "Sub", "Tùy chỉnh cơ chế mở Lõi Nâng Cấp khi lên cấp và nhịp độ chiến đấu", new Vector2(35f, -75f), new Vector2(1300f, 32f));
+        pageGameplaySub.fontSize = 18f;
+        pageGameplaySub.color = new Color(0.75f, 0.82f, 0.92f, 0.85f);
+        SoulslikeHUDStyler.AddFiligreeDivider(pageGameplay.transform, new Vector2(0f, -118f), new Vector2(1400f, 8f));
+
+        augmentModeLabel = CreateLabel(pageGameplay.transform, "AugmentModeLabel", "Cơ chế mở Lõi Nâng Cấp khi lên cấp:", new Vector2(35f, -145f), new Vector2(1100f, 34f));
+        augmentModeLabel.fontSize = 22f;
+
+        augmentModeToggleBtn = CreateStyledButton(pageGameplay.transform, "Btn_AugmentModeToggle", new Vector2(35f, -195f), new Vector2(1150f, 72f), new Color(0.14f, 0.20f, 0.32f), out augmentModeToggleText);
+        augmentModeToggleText.fontSize = 22f;
+
+        // Container Card mô tả
+        var augCard = new GameObject("AugmentModeCard", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        augCard.transform.SetParent(pageGameplay.transform, false);
+        RectTransform augCardRt = augCard.GetComponent<RectTransform>();
+        augCardRt.anchorMin = new Vector2(0f, 1f);
+        augCardRt.anchorMax = new Vector2(1f, 1f);
+        augCardRt.pivot = new Vector2(0.5f, 1f);
+        augCardRt.anchoredPosition = new Vector2(0f, -285f);
+        augCardRt.sizeDelta = new Vector2(-70f, 160f);
+
+        Image acImg = augCard.GetComponent<Image>();
+        acImg.color = new Color(0.04f, 0.06f, 0.10f, 0.85f);
+        WhiteIconLoader.ApplyGothicFrame(augCard, new Color(0.35f, 0.50f, 0.70f, 0.50f), 0.40f);
+
+        augmentModeDescText = CreateLabel(augCard.transform, "Desc", "", new Vector2(25f, -18f), new Vector2(1100f, 65f));
+        augmentModeDescText.fontSize = 19f;
+
+        augmentModeTipText = CreateLabel(augCard.transform, "Tip", "", new Vector2(25f, -90f), new Vector2(1100f, 55f));
+        augmentModeTipText.fontSize = 16.5f;
+
+        // --- PAGE 4: GAME DATA & SYSTEM ---
         pageGameData = CreatePage(contentPanel.transform, "Page_GameData");
-        pageDataHeader = CreateLabel(pageGameData.transform, "Header", "<b><color=#FFA502>3. DỮ LIỆU TRÒ CHƠI & HỆ THỐNG</color></b>", new Vector2(35f, -25f), new Vector2(1300f, 44f));
+        pageDataHeader = CreateLabel(pageGameData.transform, "Header", "<b><color=#FFA502>4. DỮ LIỆU TRÒ CHƠI & HỆ THỐNG</color></b>", new Vector2(35f, -25f), new Vector2(1300f, 44f));
         pageDataHeader.fontSize = 26f;
         pageDataSub = CreateLabel(pageGameData.transform, "Sub", "Quản lý tiến trình trò chơi ngoại tuyến và thao tác thoát trận", new Vector2(35f, -75f), new Vector2(1300f, 32f));
         pageDataSub.fontSize = 18f;
@@ -553,6 +603,7 @@ public class SettingsUI : MonoBehaviour
         currentTab = tab;
         if (pageAudioLang != null) pageAudioLang.SetActive(currentTab == SettingsTab.AudioLang);
         if (pageControls != null) pageControls.SetActive(currentTab == SettingsTab.Controls);
+        if (pageGameplay != null) pageGameplay.SetActive(currentTab == SettingsTab.Gameplay);
         if (pageGameData != null) pageGameData.SetActive(currentTab == SettingsTab.GameData);
         UpdateTabVisuals();
     }
@@ -577,10 +628,13 @@ public class SettingsUI : MonoBehaviour
         SetTabStyle(tabAudioBtn, tabAudioText, isVi ? "ÂM THANH" : "AUDIO & LANG", "Sound-Three", t1 ? activeBg : inactiveBg, t1 ? activeBorder : inactiveBorder, t1 ? activeTxt : inactiveTxt, t1 ? activeIcon : inactiveIcon, t1);
 
         bool t2 = (currentTab == SettingsTab.Controls);
-        SetTabStyle(tabControlsBtn, tabControlsText, isVi ? "ĐIỀU KHIỂN" : "CONTROLS", "Star", t2 ? activeBg : inactiveBg, t2 ? activeBorder : inactiveBorder, t2 ? activeTxt : inactiveTxt, t2 ? activeIcon : inactiveIcon, t2);
+        SetTabStyle(tabControlsBtn, tabControlsText, isVi ? "ĐIỀU KHIỂN" : "CONTROLS", "Levels", t2 ? activeBg : inactiveBg, t2 ? activeBorder : inactiveBorder, t2 ? activeTxt : inactiveTxt, t2 ? activeIcon : inactiveIcon, t2);
 
-        bool t3 = (currentTab == SettingsTab.GameData);
-        SetTabStyle(tabDataBtn, tabDataText, isVi ? "DỮ LIỆU" : "GAME DATA", "Exclamation", t3 ? activeBg : inactiveBg, t3 ? activeBorder : inactiveBorder, t3 ? activeTxt : inactiveTxt, t3 ? activeIcon : inactiveIcon, t3);
+        bool t3 = (currentTab == SettingsTab.Gameplay);
+        SetTabStyle(tabGameplayBtn, tabGameplayText, isVi ? "LỐI CHƠI" : "GAMEPLAY", "Star", t3 ? activeBg : inactiveBg, t3 ? activeBorder : inactiveBorder, t3 ? activeTxt : inactiveTxt, t3 ? activeIcon : inactiveIcon, t3);
+
+        bool t4 = (currentTab == SettingsTab.GameData);
+        SetTabStyle(tabDataBtn, tabDataText, isVi ? "DỮ LIỆU" : "GAME DATA", "Exclamation", t4 ? activeBg : inactiveBg, t4 ? activeBorder : inactiveBorder, t4 ? activeTxt : inactiveTxt, t4 ? activeIcon : inactiveIcon, t4);
     }
 
     private void SetTabStyle(Button btn, TextMeshProUGUI textRef, string label, string icon, Color bg, Color border, Color txtColor, Color iconColor, bool isActive)
@@ -856,12 +910,41 @@ public class SettingsUI : MonoBehaviour
                 SwitchTab(SettingsTab.Controls);
             });
         }
+        if (tabGameplayBtn != null)
+        {
+            tabGameplayBtn.onClick.RemoveAllListeners();
+            tabGameplayBtn.onClick.AddListener(() => {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                SwitchTab(SettingsTab.Gameplay);
+            });
+        }
         if (tabDataBtn != null)
         {
             tabDataBtn.onClick.RemoveAllListeners();
             tabDataBtn.onClick.AddListener(() => {
                 if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
                 SwitchTab(SettingsTab.GameData);
+            });
+        }
+
+        if (augmentModeToggleBtn != null)
+        {
+            augmentModeToggleBtn.onClick.RemoveAllListeners();
+            augmentModeToggleBtn.onClick.AddListener(() => {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlayButtonClick();
+                int currentMode = PlayerPrefs.GetInt("Setting_AugmentChoiceMode", 0);
+                int nextMode = (currentMode == 0) ? 1 : 0;
+                PlayerPrefs.SetInt("Setting_AugmentChoiceMode", nextMode);
+                PlayerPrefs.Save();
+                UpdateLocalizedTexts();
+                if (LevelUpChoiceUI.Instance != null)
+                {
+                    LevelUpChoiceUI.Instance.UpdatePendingBadgeUI();
+                    if (nextMode == 1 && LevelUpChoiceUI.PendingLevelUpsCount > 0 && !LevelUpChoiceUI.IsShowing)
+                    {
+                        LevelUpChoiceUI.OpenNextPendingChoice();
+                    }
+                }
             });
         }
 
@@ -1074,8 +1157,53 @@ public class SettingsUI : MonoBehaviour
                 : "<i><color=#88A0C0>* The match pauses safely while you arrange button positions on screen.</color></i>";
         }
 
-        // Page 3
-        if (pageDataHeader != null) pageDataHeader.text = isVi ? "<b><color=#FFA502>3. DỮ LIỆU TRÒ CHƠI & HỆ THỐNG</color></b>" : "<b><color=#FFA502>3. GAME DATA & SYSTEM</color></b>";
+        // Page 3: Gameplay
+        if (pageGameplayHeader != null) pageGameplayHeader.text = isVi ? "<b><color=#55EFC4>3. LỐI CHƠI (GAMEPLAY)</color></b>" : "<b><color=#55EFC4>3. GAMEPLAY SETTINGS</color></b>";
+        if (pageGameplaySub != null) pageGameplaySub.text = isVi ? "Tùy chỉnh cơ chế mở Lõi Nâng Cấp khi lên cấp và nhịp độ chiến đấu" : "Customize core upgrade selection and combat pacing";
+        if (augmentModeLabel != null) augmentModeLabel.text = isVi ? "Cơ chế mở Lõi Nâng Cấp khi lên cấp:" : "Core Upgrade selection on Level Up:";
+
+        int augMode = PlayerPrefs.GetInt("Setting_AugmentChoiceMode", 0);
+        if (augMode == 0) // Chủ động (On-Demand)
+        {
+            if (augmentModeToggleText != null) augmentModeToggleText.text = isVi ? "CHẾ ĐỘ: BẤM ĐỂ CHỌN (CHỦ ĐỘNG)" : "MODE: ON-DEMAND (ACTIVE)";
+            if (augmentModeToggleBtn != null) WhiteIconLoader.SetButtonIconAndText(augmentModeToggleBtn, "Star", augmentModeToggleText.text, new Color(0.35f, 0.95f, 0.85f), Color.white, true);
+
+            if (augmentModeDescText != null)
+            {
+                augmentModeDescText.text = isVi
+                    ? "<color=#55EFC4><b>CHẾ ĐỘ CHỦ ĐỘNG:</b></color> Khi lên cấp, game sẽ <b>KHÔNG</b> tự động nhảy popup ngắt quãng trận đấu. Biểu tượng <b>[CHỌN LÕI]</b> sẽ xuất hiện trên màn hình để bạn chủ động bấm vào chọn khi an toàn."
+                    : "<color=#55EFC4><b>ON-DEMAND MODE:</b></color> Leveling up does not interrupt combat. An upgrade badge appears on HUD so you can choose when safe.";
+            }
+
+            if (augmentModeTipText != null)
+            {
+                augmentModeTipText.text = isVi
+                    ? "<i><color=#FFEAA7>★ ĐẶC BIỆT: Khi mở bảng chọn, sau khi chọn xong 1 lõi, hệ thống sẽ tự động hiện tiếp lượt kế tiếp để bạn chọn liên tục cho đã!</color></i>"
+                    : "<i><color=#FFEAA7>★ NOTE: Consecutive upgrade choices will pop up back-to-back until all pending choices are picked!</color></i>";
+            }
+        }
+        else // Tự động (Auto / Bị động)
+        {
+            if (augmentModeToggleText != null) augmentModeToggleText.text = isVi ? "CHẾ ĐỘ: TỰ ĐỘNG MỞ (BỊ ĐỘNG)" : "MODE: AUTO-OPEN (PASSIVE)";
+            if (augmentModeToggleBtn != null) WhiteIconLoader.SetButtonIconAndText(augmentModeToggleBtn, "Play", augmentModeToggleText.text, new Color(1f, 0.85f, 0.35f), Color.white, true);
+
+            if (augmentModeDescText != null)
+            {
+                augmentModeDescText.text = isVi
+                    ? "<color=#FFEAA7><b>CHẾ ĐỘ TỰ ĐỘNG:</b></color> Mỗi khi lên cấp, bảng chọn 3 Lõi Nâng Cấp sẽ <b>tự động nhảy lên ngay lập tức</b> như trước, tạm dừng trận đấu để bạn chọn ngay."
+                    : "<color=#FFEAA7><b>AUTO MODE:</b></color> Upon leveling up, the 3-core augment modal immediately appears and pauses the game.";
+            }
+
+            if (augmentModeTipText != null)
+            {
+                augmentModeTipText.text = isVi
+                    ? "<i><color=#88A0C0>* Thích hợp cho người chơi muốn nhận ngay sức mạnh mới ngay lập tức mỗi khi thăng cấp.</color></i>"
+                    : "<i><color=#88A0C0>* Ideal for players who want power-ups instantly upon leveling up.</color></i>";
+            }
+        }
+
+        // Page 4: Game Data
+        if (pageDataHeader != null) pageDataHeader.text = isVi ? "<b><color=#FFA502>4. DỮ LIỆU TRÒ CHƠI & HỆ THỐNG</color></b>" : "<b><color=#FFA502>4. GAME DATA & SYSTEM</color></b>";
         if (pageDataSub != null) pageDataSub.text = isVi ? "Quản lý tiến trình trò chơi ngoại tuyến và thao tác thoát trận" : "Manage offline save progress and match exit options";
         if (resetDataDesc != null) resetDataDesc.text = isVi ? "Xóa toàn bộ dữ liệu lưu trữ để bắt đầu một hành trình mới:" : "Reset all saved progress to start a fresh adventure:";
         if (resetDataBtnText != null)
@@ -1155,7 +1283,7 @@ public class SettingsUI : MonoBehaviour
 
         if (resetConfirmModal != null) resetConfirmModal.SetActive(false);
 
-        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        bool isMultiplayer = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
         if (!isMultiplayer)
         {
             Time.timeScale = 0f;

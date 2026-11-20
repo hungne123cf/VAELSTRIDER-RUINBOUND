@@ -13,6 +13,8 @@ public class PlayerInventory : MonoBehaviour
     public event Action<int> OnPotionsChanged;
 
     private static long currentRunShards = 0;
+    private float pendingSaveCooldown = 0f;
+    private bool hasPendingSave = false;
 
     public static bool IsBattleScene()
     {
@@ -62,6 +64,19 @@ public class PlayerInventory : MonoBehaviour
         PotionQuickSlotUI.EnsureUIExists();
     }
 
+    void Update()
+    {
+        if (hasPendingSave)
+        {
+            pendingSaveCooldown -= Time.unscaledDeltaTime;
+            if (pendingSaveCooldown <= 0f)
+            {
+                hasPendingSave = false;
+                AccountDatabase.SaveActiveSessionToDatabase();
+            }
+        }
+    }
+
     void OnDisable()
     {
         SaveData();
@@ -87,17 +102,19 @@ public class PlayerInventory : MonoBehaviour
             currentRunShards += amount;
             aethelShards = currentRunShards;
             AccountDatabase.AddAethelShards(amount);
-            AccountDatabase.SaveActiveSessionToDatabase();
         }
         else
         {
             aethelShards += amount;
             AccountDatabase.SetAethelShards(aethelShards);
-            AccountDatabase.SaveActiveSessionToDatabase();
         }
 
-        SavePotionsData();
-        Debug.Log($"<color=cyan>[INVENTORY]</color> Nhặt được +{amount} Aethel Shards! Trong trận: {currentRunShards} | Tổng tài khoản: {AccountDatabase.GetAethelShards()}");
+        // TỐI ƯU HÓA: Debounce lưu ổ cứng & Cloud.
+        // Tuyệt đối không ghi file JSON / PlayerPrefs liên tục mỗi khi lụm 1 mảnh (gây giật lag).
+        // Gom cụm lại sau 1.5s người chơi gom hết linh hồn mới lưu đĩa 1 lần!
+        hasPendingSave = true;
+        pendingSaveCooldown = 1.5f;
+
         OnShardsChanged?.Invoke(aethelShards);
     }
 
@@ -173,6 +190,12 @@ public class PlayerInventory : MonoBehaviour
 
     public void SaveData()
     {
+        if (hasPendingSave)
+        {
+            hasPendingSave = false;
+            AccountDatabase.SaveActiveSessionToDatabase();
+        }
+
         // Chỉ ghi đè Aethel Shards tổng của tài khoản khi đang ở menu
         if (!IsBattleScene())
         {

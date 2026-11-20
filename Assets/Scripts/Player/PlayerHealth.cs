@@ -582,10 +582,24 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public float GetVirtualHealthDuration() => virtualHealthDuration;
     public bool IsVirtualHealthExpiringSoon() => isVirtualHealthActive && !float.IsPositiveInfinity(virtualHealthTimer) && virtualHealthTimer <= 3.5f;
 
+    public static bool IsAnyShopOrModalOpen()
+    {
+        if (LevelUpChoiceUI.IsShowing) return true;
+        if (WanderingShopUI.Instance != null && WanderingShopUI.Instance.IsOpen()) return true;
+        if (ArmorShopUI.Instance != null && ArmorShopUI.Instance.IsOpen()) return true;
+        if (ShrineUpgradeUI.Instance != null && ShrineUpgradeUI.Instance.IsOpen()) return true;
+        if (InGameInventoryUI.Instance != null && InGameInventoryUI.Instance.IsOpen()) return true;
+        if (CharacterStatsUI.Instance != null && CharacterStatsUI.Instance.IsOpen()) return true;
+        if (ChestLootPopupUI.Instance != null && ChestLootPopupUI.Instance.IsOpen) return true;
+        if (PortalConfirmationPopupUI.Instance != null && PortalConfirmationPopupUI.Instance.IsOpen) return true;
+        if (SettingsUI.Instance != null && SettingsUI.Instance.IsOpen()) return true;
+        return false;
+    }
+
     void Update()
     {
         // 0. Invulnerable Safety Watchdog: Tránh kẹt trạng thái bất tử nếu coroutine bị ngắt hoặc load scene
-        if (isInvulnerable && !BossIntroCutsceneUI.IsCutsceneActive && !LevelUpChoiceUI.IsShowing && Time.timeScale > 0f)
+        if (isInvulnerable && !BossIntroCutsceneUI.IsCutsceneActive && !LevelUpChoiceUI.IsShowing && !IsAnyShopOrModalOpen() && Time.timeScale > 0f)
         {
             invulSafetyTimer += Time.deltaTime;
             if (invulSafetyTimer >= 2.0f)
@@ -627,8 +641,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (isDead || isInvulnerable || BossIntroCutsceneUI.IsCutsceneActive) return;
 
-        // Tuyệt đối miễn nhiễm mọi sát thương khi đang chọn Lõi Nâng Cấp hoặc khi trò chơi đang Tạm dừng
-        if (LevelUpChoiceUI.IsShowing || Time.timeScale <= 0f) return;
+        // Tuyệt đối miễn nhiễm mọi sát thương khi đang chọn Lõi Nâng Cấp, mở Shop NPC hoặc khi trò chơi đang Tạm dừng
+        if (LevelUpChoiceUI.IsShowing || Time.timeScale <= 0f || IsAnyShopOrModalOpen()) return;
 
         // Kiểm tra Thánh Thuẫn Phản Đòn khi Dash của Hiệp Sĩ Vaelstrider
         var playerCombat = GetComponent<PlayerCombat>();

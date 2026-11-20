@@ -368,6 +368,9 @@ public class RuinPortal : MonoBehaviour
             yield return null;
         }
 
+        string currentScene = SceneManager.GetActiveScene().name;
+        MatchTimerUI.RecordMapClearTime(currentScene);
+
         if (isFinalRealm)
         {
             SoundManager.EnsureInstance()?.PlayHeavenlyAscension();
@@ -384,8 +387,6 @@ public class RuinPortal : MonoBehaviour
             {
                 PlayerHealth.RunPreservedCurrentHealth = ph.CurrentHealth;
             }
-
-            string currentScene = SceneManager.GetActiveScene().name;
 
             if (currentScene == "SampleScene" || currentScene.Contains("Map1"))
             {

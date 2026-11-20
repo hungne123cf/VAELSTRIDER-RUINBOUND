@@ -134,15 +134,28 @@ public class BossHealthBarUI : MonoBehaviour
         ui.canvasGroup = cg;
         ui.panelRt = rootRt;
 
-        // 1. Boss Name Text
+        // 1. Health Bar Background Frame (Nằm TRÊN theo đúng yêu cầu người dùng)
+        GameObject frameObj = new GameObject("FrameBg");
+        frameObj.transform.SetParent(root.transform, false);
+        RectTransform frameRt = frameObj.AddComponent<RectTransform>();
+        frameRt.anchorMin = new Vector2(0.5f, 1f);
+        frameRt.anchorMax = new Vector2(0.5f, 1f);
+        frameRt.pivot = new Vector2(0.5f, 1f);
+        frameRt.anchoredPosition = new Vector2(0f, -2f);
+        frameRt.sizeDelta = new Vector2(880f, 36f);
+
+        Image frameImg = frameObj.AddComponent<Image>();
+        frameImg.color = new Color(0.06f, 0.07f, 0.10f, 0.95f);
+
+        // 2. Boss Name Text (Nằm DƯỚI thanh HP Boss)
         GameObject nameObj = new GameObject("BossNameText");
         nameObj.transform.SetParent(root.transform, false);
         RectTransform nameRt = nameObj.AddComponent<RectTransform>();
         nameRt.anchorMin = new Vector2(0.5f, 1f);
         nameRt.anchorMax = new Vector2(0.5f, 1f);
         nameRt.pivot = new Vector2(0.5f, 1f);
-        nameRt.anchoredPosition = new Vector2(0f, 0f);
-        nameRt.sizeDelta = new Vector2(840f, 34f);
+        nameRt.anchoredPosition = new Vector2(0f, -44f);
+        nameRt.sizeDelta = new Vector2(840f, 32f);
 
         var nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
         nameTmp.font = GameFontManager.HeaderFont;
@@ -152,19 +165,6 @@ public class BossHealthBarUI : MonoBehaviour
         nameTmp.color = new Color(1f, 0.88f, 0.45f);
         nameTmp.alignment = TextAlignmentOptions.Center;
         ui.bossNameText = nameTmp;
-
-        // 2. Health Bar Background Frame
-        GameObject frameObj = new GameObject("FrameBg");
-        frameObj.transform.SetParent(root.transform, false);
-        RectTransform frameRt = frameObj.AddComponent<RectTransform>();
-        frameRt.anchorMin = new Vector2(0.5f, 0f);
-        frameRt.anchorMax = new Vector2(0.5f, 0f);
-        frameRt.pivot = new Vector2(0.5f, 0f);
-        frameRt.anchoredPosition = new Vector2(0f, 26f);
-        frameRt.sizeDelta = new Vector2(880f, 36f);
-
-        Image frameImg = frameObj.AddComponent<Image>();
-        frameImg.color = new Color(0.06f, 0.07f, 0.10f, 0.95f);
 
         // 3. Ghost Slider
         GameObject ghostObj = new GameObject("GhostSlider");

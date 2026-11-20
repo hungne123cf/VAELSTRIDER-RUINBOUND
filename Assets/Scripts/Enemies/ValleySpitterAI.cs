@@ -111,7 +111,7 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable, IEnemyHealth
             return;
         }
 
-        if (PlayerHealth.IsPlayerDead) return;
+        if (PlayerHealth.IsPlayerDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject)) return;
 
         if (player == null)
         {
@@ -237,7 +237,7 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable, IEnemyHealth
 
     public void TakeDamage(int damage)
     {
-        if (isDead) return;
+        if (isDead || EnemyBurrowEntrance.IsEnemyEmerging(gameObject)) return;
 
         currentHealth -= damage;
         // Hien thanh mau noi ngay tren dau cuc da voi toa do chuan
@@ -300,6 +300,7 @@ public class ValleySpitterAI : MonoBehaviour, IDamageable, IEnemyHealth
         GameObject go = new GameObject($"ValleySpitter_{index}");
         go.transform.position = pos;
         var ai = go.AddComponent<ValleySpitterAI>();
+        EnemyHealthHelper.OnEnemySpawned(go);
         return ai;
     }
 

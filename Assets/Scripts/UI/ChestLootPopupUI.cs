@@ -302,9 +302,13 @@ public class ChestLootPopupUI : MonoBehaviour
             canvasGroup.blocksRaycasts = true;
         }
 
-        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
         if (!isMulti) Time.timeScale = 0f;
         else Time.timeScale = 1.0f;
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = true;
+
         GameAutoBootstrap.SetGameplayHUDVisible(false);
         SoundManager.EnsureInstance()?.PlayChestOpen();
 
@@ -317,7 +321,12 @@ public class ChestLootPopupUI : MonoBehaviour
         if (!isOpen) return;
         isOpen = false;
 
-        Time.timeScale = 1f;
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMulti) Time.timeScale = 1f;
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = false;
+
         GameAutoBootstrap.SetGameplayHUDVisible(true);
 
         if (canvasGroup != null)

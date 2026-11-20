@@ -105,9 +105,16 @@ public class CharacterStatsUI : MonoBehaviour
         transform.SetAsLastSibling();
 
         RefreshData();
-        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive || (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning);
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
         if (!isMulti) Time.timeScale = 0f;
         else Time.timeScale = 1.0f;
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = true;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(false);
+
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }
 
@@ -115,7 +122,15 @@ public class CharacterStatsUI : MonoBehaviour
     {
         gameObject.SetActive(false);
         GameAutoBootstrap.SetGameplayHUDVisible(true);
-        Time.timeScale = 1f;
+        bool isMulti = PvPMatchManager.IsCoopModeActive || PvPMatchManager.IsPvPModeActive;
+        if (!isMulti) Time.timeScale = 1f;
+
+        var ph = PlayerHealth.Instance ?? FindAnyObjectByType<PlayerHealth>();
+        if (ph != null) ph.isInvulnerable = false;
+
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) pc.SetCanMove(true);
+
         SoundManager.EnsureInstance()?.PlayMenuHover();
     }
 

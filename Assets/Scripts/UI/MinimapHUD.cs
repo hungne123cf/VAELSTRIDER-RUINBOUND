@@ -25,7 +25,7 @@ public class MinimapHUD : MonoBehaviour
 
     [Header("Minimap Settings")]
     [SerializeField] private float radarRadius = 35f; // Bán kính quét thực tế trong game (35m)
-    [SerializeField] private float mapUiRadius = 56f;  // Bán kính hiển thị trên Minimap UI (pixel)
+    [SerializeField] private float mapUiRadius = 50f;  // Bán kính hiển thị trên Minimap UI rõ nét (pixel)
 
     [Header("UI References")]
     private RectTransform radarPanelRt;
@@ -84,6 +84,61 @@ public class MinimapHUD : MonoBehaviour
         if (cg == null) gameObject.AddComponent<CanvasGroup>();
 
         EnsureProceduralSprites();
+        ApplyCompactLayout();
+    }
+
+    public void ApplyCompactLayout()
+    {
+        var rootRt = GetComponent<RectTransform>();
+        if (rootRt != null)
+        {
+            rootRt.anchorMin = new Vector2(1f, 1f);
+            rootRt.anchorMax = new Vector2(1f, 1f);
+            rootRt.pivot = new Vector2(1f, 1f);
+            rootRt.sizeDelta = new Vector2(116f, 116f);
+            // Đặt Minimap ngay dưới nút Cài Đặt Bánh Răng (Nút Gear ở y = -20..-112), cách mép phải 16px, không bị khuất
+            rootRt.anchoredPosition = new Vector2(-16f, -126f);
+        }
+
+        var oldRealm = transform.Find("RealmTitleBadge");
+        if (oldRealm != null) Destroy(oldRealm.gameObject);
+
+        var oldDist = transform.Find("DistanceBadge");
+        if (oldDist != null) Destroy(oldDist.gameObject);
+
+        if (radarPanelRt != null)
+        {
+            radarPanelRt.anchoredPosition = Vector2.zero;
+            radarPanelRt.sizeDelta = new Vector2(116f, 116f);
+        }
+
+        if (terrainMapRt != null)
+        {
+            terrainMapRt.sizeDelta = new Vector2(116f, 116f);
+        }
+
+        if (playerIconRt != null)
+        {
+            playerIconRt.sizeDelta = new Vector2(22f, 22f);
+        }
+
+        var ring = transform.Find("CompassRingOverlay");
+        if (ring != null)
+        {
+            var ringRt = ring.GetComponent<RectTransform>();
+            if (ringRt != null)
+            {
+                ringRt.anchoredPosition = Vector2.zero;
+                ringRt.sizeDelta = new Vector2(116f, 116f);
+            }
+        }
+
+        if (compassNeedleRt != null)
+        {
+            compassNeedleRt.sizeDelta = new Vector2(20f, 20f);
+        }
+
+        mapUiRadius = 50f;
     }
 
     void OnDestroy()
@@ -792,7 +847,8 @@ public class MinimapHUD : MonoBehaviour
     {
         if (circleDiscSprite != null) return;
 
-        // 1. Gilded Runic Compass Disc (256x256) - Dark Fantasy Astrolabe với viền vàng Rune và kính hắc diện thạch
+        // 1. Tối giản hóa Radar Disc: BỎ HOÀN TOÀN KHUNG VIỀN VÀNG DÀY (Border/Frame) theo yêu cầu.
+        // Tạo mặt kính tròn đen mờ tối giản, viền chống răng cưa siêu mượt (Clean Borderless Dark Glass)
         int size = 256;
         Texture2D texDisc = new Texture2D(size, size, TextureFormat.RGBA32, false);
         texDisc.wrapMode = TextureWrapMode.Clamp;
@@ -800,16 +856,7 @@ public class MinimapHUD : MonoBehaviour
 
         Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
         float rOuter = 125f;
-        float rBevel = 114f;
-        float rInner = 108f;
-        float rRing1 = 70f;
-        float rRing2 = 36f;
-
-        Color goldRim = new Color(0.92f, 0.78f, 0.35f, 1.0f);
-        Color goldHighlight = new Color(1.0f, 0.94f, 0.65f, 1.0f);
-        Color darkGold = new Color(0.48f, 0.36f, 0.12f, 1.0f);
-        Color obsidianGlass = new Color(0.04f, 0.06f, 0.10f, 0.90f);
-        Color gridLineColor = new Color(0.18f, 0.32f, 0.48f, 0.35f);
+        Color obsidianGlass = new Color(0.03f, 0.05f, 0.08f, 0.78f);
 
         for (int y = 0; y < size; y++)
         {
@@ -822,64 +869,17 @@ public class MinimapHUD : MonoBehaviour
                     continue;
                 }
 
-                // Viền ngoài chống răng cưa
-                float edgeAlpha = Mathf.Clamp01((rOuter - dist) * 2.5f);
+                // Viền ngoài bo tròn chống răng cưa mượt mà (không còn khung viền kim loại vàng)
+                float edgeAlpha = Mathf.Clamp01((rOuter - dist) * 2.0f);
+                Color c = new Color(obsidianGlass.r, obsidianGlass.g, obsidianGlass.b, obsidianGlass.a * edgeAlpha);
 
-                // 1. Viền vàng kim loại Bevel chạm khắc hoa văn cổ đại
-                if (dist >= rInner)
+                // Đường chỉ tâm mờ nhẹ
+                if ((Mathf.Abs(x - center.x) < 0.6f || Mathf.Abs(y - center.y) < 0.6f) && dist > 8f && dist < rOuter - 6f)
                 {
-                    float angleDeg = Mathf.Atan2(y - center.y, x - center.x) * Mathf.Rad2Deg;
-                    if (angleDeg < 0) angleDeg += 360f;
-
-                    // 4 Vạch hướng chính: Bắc (90 độ), Đông (0 độ), Nam (270 độ), Tây (180 độ)
-                    bool isCardinal = (Mathf.Abs(angleDeg - 90f) < 2.0f ||
-                                       Mathf.Abs(angleDeg - 0f) < 2.0f || Mathf.Abs(angleDeg - 360f) < 2.0f ||
-                                       Mathf.Abs(angleDeg - 270f) < 2.0f ||
-                                       Mathf.Abs(angleDeg - 180f) < 2.0f);
-
-                    // Điểm Bắc (N) có nốt ngọc Rune vàng rực rỡ
-                    bool isNorthMarker = (Mathf.Abs(angleDeg - 90f) < 3.5f && dist >= rBevel);
-
-                    if (isNorthMarker)
-                    {
-                        texDisc.SetPixel(x, y, new Color(1f, 0.95f, 0.4f, edgeAlpha));
-                    }
-                    else if (isCardinal)
-                    {
-                        texDisc.SetPixel(x, y, new Color(1f, 0.88f, 0.3f, edgeAlpha));
-                    }
-                    else if (dist >= rBevel)
-                    {
-                        // Mặt ngoài bevel sáng ánh vàng
-                        texDisc.SetPixel(x, y, Color.Lerp(darkGold, goldHighlight, (dist - rBevel) / (rOuter - rBevel)) * new Color(1, 1, 1, edgeAlpha));
-                    }
-                    else
-                    {
-                        // Rãnh khắc sâu sẫm màu
-                        texDisc.SetPixel(x, y, Color.Lerp(darkGold, goldRim, (dist - rInner) / (rBevel - rInner)) * new Color(1, 1, 1, edgeAlpha));
-                    }
+                    c = Color.Lerp(c, new Color(0.28f, 0.42f, 0.60f, 0.30f), 0.35f);
                 }
-                // 2. Mặt kính obsidian bên trong cùng các vòng tròn trắc địa ma pháp
-                else
-                {
-                    // Vòng trắc địa ngoại vi
-                    if (Mathf.Abs(dist - rRing1) < 0.9f || Mathf.Abs(dist - rRing2) < 0.9f)
-                    {
-                        texDisc.SetPixel(x, y, gridLineColor);
-                    }
-                    // Chữ thập tâm la bàn mờ nhạt
-                    else if ((Mathf.Abs(x - center.x) < 0.8f || Mathf.Abs(y - center.y) < 0.8f) && dist > 10f)
-                    {
-                        texDisc.SetPixel(x, y, new Color(0.22f, 0.38f, 0.55f, 0.22f));
-                    }
-                    else
-                    {
-                        // Kính hắc diện mờ sẫm Dark Fantasy
-                        float centerVignette = Mathf.Clamp01(dist / rInner);
-                        Color c = Color.Lerp(new Color(0.02f, 0.04f, 0.07f, 0.88f), obsidianGlass, centerVignette);
-                        texDisc.SetPixel(x, y, c);
-                    }
-                }
+
+                texDisc.SetPixel(x, y, c);
             }
         }
         texDisc.Apply();
@@ -1029,6 +1029,7 @@ public class MinimapHUD : MonoBehaviour
         if (Instance != null)
         {
             Instance.gameObject.SetActive(true);
+            Instance.ApplyCompactLayout();
             return Instance;
         }
 
@@ -1039,10 +1040,17 @@ public class MinimapHUD : MonoBehaviour
         Transform existing = canvas.transform.Find("Minimap_Compass_HUD");
         if (existing != null)
         {
+            var oldRealm = existing.Find("RealmTitleBadge");
+            if (oldRealm != null) Object.Destroy(oldRealm.gameObject);
+
+            var oldDist = existing.Find("DistanceBadge");
+            if (oldDist != null) Object.Destroy(oldDist.gameObject);
+
             Instance = existing.GetComponent<MinimapHUD>();
             if (Instance != null)
             {
                 Instance.gameObject.SetActive(true);
+                Instance.ApplyCompactLayout();
                 return Instance;
             }
         }
@@ -1056,45 +1064,19 @@ public class MinimapHUD : MonoBehaviour
         rootRt.anchorMin = new Vector2(1f, 1f);
         rootRt.anchorMax = new Vector2(1f, 1f);
         rootRt.pivot = new Vector2(1f, 1f);
-        rootRt.anchoredPosition = new Vector2(-15f, -95f); // Cách lề phải 15px, dưới nút gear 95px
-        rootRt.sizeDelta = new Vector2(190f, 210f);
+        rootRt.anchoredPosition = new Vector2(-16f, -126f); // Dưới nút Gear bánh răng (y = -20..-112), cách mép phải 16px, tuyệt đối không bị khuất
+        rootRt.sizeDelta = new Vector2(116f, 116f);
 
-        // 1.1 Badge Tên Vùng Đất (Realm Title Header - Nằm cách xa phía trên vòng tròn la bàn)
-        GameObject realmObj = new GameObject("RealmTitleBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        realmObj.layer = 5;
-        realmObj.transform.SetParent(rootObj.transform, false);
-        RectTransform realmRt = realmObj.GetComponent<RectTransform>();
-        realmRt.anchoredPosition = new Vector2(0f, 24f);
-        realmRt.sizeDelta = new Vector2(180f, 24f);
-        Image realmBg = realmObj.GetComponent<Image>();
-        realmBg.color = new Color(0.04f, 0.06f, 0.10f, 0.88f);
-        var realmOutline = realmObj.AddComponent<Outline>();
-        realmOutline.effectColor = new Color(0.85f, 0.70f, 0.25f, 0.75f);
-        realmOutline.effectDistance = new Vector2(1f, -1f);
+        // BỎ 1.1 Badge Tên Vùng Đất ("VỰC THẲM KHỞI ĐẦU") theo yêu cầu người dùng
 
-        GameObject realmTxtObj = new GameObject("RealmText", typeof(RectTransform), typeof(CanvasRenderer));
-        realmTxtObj.layer = 5;
-        realmTxtObj.transform.SetParent(realmObj.transform, false);
-        RectTransform realmTxtRt = realmTxtObj.GetComponent<RectTransform>();
-        realmTxtRt.anchorMin = Vector2.zero;
-        realmTxtRt.anchorMax = Vector2.one;
-        realmTxtRt.offsetMin = new Vector2(8f, 0f);
-        realmTxtRt.offsetMax = new Vector2(-8f, 0f);
-        var realmTmp = realmTxtObj.AddComponent<TextMeshProUGUI>();
-        realmTmp.text = "<color=#FFD700>THUNG LŨNG TÀN TÍCH</color>";
-        realmTmp.fontSize = 12.5f;
-        realmTmp.fontStyle = FontStyles.Bold;
-        realmTmp.alignment = TextAlignmentOptions.Center;
-        realmTmp.enableWordWrapping = false;
-
-        // 2. Radar Background Disc (120x120 px viền vàng Rune, hỗ trợ Mask cắt địa hình và click mở Bản đồ Lớn)
+        // 2. Radar Background Disc (Kích thước rõ nét 116x116 px, BỎ KHUNG VIỀN VÀNG theo yêu cầu người dùng)
         GameObject radarBg = new GameObject("RadarDisc", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Mask), typeof(Button));
         radarBg.layer = 5;
         radarBg.transform.SetParent(rootObj.transform, false);
 
         RectTransform rRt = radarBg.GetComponent<RectTransform>();
-        rRt.anchoredPosition = new Vector2(0f, -48f);
-        rRt.sizeDelta = new Vector2(120f, 120f);
+        rRt.anchoredPosition = Vector2.zero;
+        rRt.sizeDelta = new Vector2(116f, 116f);
 
         Image rImg = radarBg.GetComponent<Image>();
         rImg.sprite = circleDiscSprite;
@@ -1124,7 +1106,7 @@ public class MinimapHUD : MonoBehaviour
         tRt.anchorMax = new Vector2(0.5f, 0.5f);
         tRt.pivot = Vector2.zero; // Pivot gốc (0, 0) để trượt địa hình chuẩn xác 1000%
         tRt.anchoredPosition = Vector2.zero;
-        tRt.sizeDelta = new Vector2(120f, 120f);
+        tRt.sizeDelta = new Vector2(116f, 116f);
         Image tImg = terrObj.GetComponent<Image>();
         tImg.raycastTarget = false;
 
@@ -1137,12 +1119,12 @@ public class MinimapHUD : MonoBehaviour
         bRt.anchorMax = Vector2.one;
         bRt.sizeDelta = Vector2.zero;
 
-        // 2.3 Player Center Icon: AVATAR CHÂN DUNG PLAYER THAY CHO TAM GIÁC XANH
+        // 2.3 Player Center Icon: AVATAR CHÂN DUNG PLAYER (22x22 px rõ ràng)
         GameObject pIconObj = new GameObject("PlayerIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         pIconObj.layer = 5;
         pIconObj.transform.SetParent(radarBg.transform, false);
         RectTransform pRt = pIconObj.GetComponent<RectTransform>();
-        pRt.sizeDelta = new Vector2(24f, 24f);
+        pRt.sizeDelta = new Vector2(22f, 22f);
         pRt.anchoredPosition = Vector2.zero;
 
         var pImg = pIconObj.GetComponent<Image>();
@@ -1154,22 +1136,22 @@ public class MinimapHUD : MonoBehaviour
         // Viền vàng kim hào quang bao quanh Avatar Player
         var pOutline = pIconObj.AddComponent<Outline>();
         pOutline.effectColor = new Color(1f, 0.85f, 0.35f, 0.95f);
-        pOutline.effectDistance = new Vector2(1.5f, 1.5f);
+        pOutline.effectDistance = new Vector2(1f, 1f);
 
         // 2.4 Compass Ring Overlay (Nằm ngoài Mask của radarBg để kim la bàn không bao giờ bị cắt xén)
         GameObject compassRingObj = new GameObject("CompassRingOverlay", typeof(RectTransform));
         compassRingObj.layer = 5;
         compassRingObj.transform.SetParent(rootObj.transform, false);
         RectTransform crRt = compassRingObj.GetComponent<RectTransform>();
-        crRt.anchoredPosition = new Vector2(0f, -48f); // Cùng tâm với radarBg
-        crRt.sizeDelta = new Vector2(120f, 120f);
+        crRt.anchoredPosition = Vector2.zero;
+        crRt.sizeDelta = new Vector2(116f, 116f);
 
-        // La Bàn Dẫn Đường: Needle Pointer chạy quanh viền hình tròn với độ sắc nét tối đa
+        // La Bàn Dẫn Đường: Needle Pointer chạy quanh viền hình tròn
         GameObject needleObj = new GameObject("CompassNeedle", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         needleObj.layer = 5;
         needleObj.transform.SetParent(compassRingObj.transform, false);
         RectTransform nRt = needleObj.GetComponent<RectTransform>();
-        nRt.sizeDelta = new Vector2(24f, 24f);
+        nRt.sizeDelta = new Vector2(20f, 20f);
         nRt.anchoredPosition = Vector2.zero;
 
         var nImg = needleObj.GetComponent<Image>();
@@ -1177,40 +1159,7 @@ public class MinimapHUD : MonoBehaviour
         nImg.color = Color.white;
         nImg.raycastTarget = false;
 
-        // 3. Label Khoảng Cách Mục Tiêu Dưới Radar (Bấm vào cũng mở bản đồ)
-        GameObject distObj = new GameObject("DistanceBadge", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-        distObj.layer = 5;
-        distObj.transform.SetParent(rootObj.transform, false);
-        RectTransform dRt = distObj.GetComponent<RectTransform>();
-        dRt.anchoredPosition = new Vector2(0f, -125f);
-        dRt.sizeDelta = new Vector2(170f, 24f);
-
-        Image dImg = distObj.GetComponent<Image>();
-        dImg.color = new Color(0.06f, 0.08f, 0.14f, 0.92f);
-
-        var dOutline = distObj.AddComponent<Outline>();
-        dOutline.effectColor = new Color(0.85f, 0.70f, 0.25f, 0.65f);
-        dOutline.effectDistance = new Vector2(1f, -1f);
-
-        Button dBtn = distObj.GetComponent<Button>();
-        dBtn.onClick.AddListener(() =>
-        {
-            FullscreenMapUI.EnsureUIExists()?.ToggleMap();
-        });
-
-        GameObject txtObj = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        txtObj.layer = 5;
-        txtObj.transform.SetParent(distObj.transform, false);
-        RectTransform txtRt = txtObj.GetComponent<RectTransform>();
-        txtRt.anchorMin = Vector2.zero;
-        txtRt.anchorMax = Vector2.one;
-        txtRt.sizeDelta = Vector2.zero;
-
-        var dTmp = txtObj.AddComponent<TextMeshProUGUI>();
-        dTmp.text = "<b>--</b>";
-        dTmp.fontSize = 11.5f;
-        dTmp.color = Color.white;
-        dTmp.alignment = TextAlignmentOptions.Center;
+        // BỎ 3. Label Khoảng Cách Mục Tiêu Dưới Radar ("CỔNG TÀN TÍCH 9M") theo yêu cầu người dùng
 
         // Khởi tạo Component
         var comp = rootObj.AddComponent<MinimapHUD>();
@@ -1219,8 +1168,8 @@ public class MinimapHUD : MonoBehaviour
         comp.playerIconImg = pImg;
         comp.compassNeedleRt = nRt;
         comp.compassNeedleImg = nImg;
-        comp.compassDistanceText = dTmp;
-        comp.realmTitleText = realmTmp;
+        comp.compassDistanceText = null;
+        comp.realmTitleText = null;
         comp.blipContainer = bRt;
         comp.terrainMapRt = tRt;
         comp.terrainMapImg = tImg;
