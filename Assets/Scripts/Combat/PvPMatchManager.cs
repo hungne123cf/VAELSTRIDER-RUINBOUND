@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Quản lý toàn bộ vòng đời trận đấu Đấu Trường PvP 1v1 (Online Photon Fusion 2 & AI Rival Practice).
+/// Quản lý toàn bộ vòng đời trận đấu Đấu Trường PvP 1v1 (AI Rival Practice & Offline).
 /// - Xây dựng Bản Đồ Đấu Trường Cổ Đại (Grand Colosseum Arena) độc lập hoàn toàn.
 /// - Chuẩn hóa chỉ số máu PvP (x8 Base HP) để trận chiến kéo dài kịch tính 30-60 giây.
 /// - Hiển thị Thanh Máu + Năng Lượng Đối Kháng Đôi (Top Versus HUD), tự động ẩn khi mở Settings.

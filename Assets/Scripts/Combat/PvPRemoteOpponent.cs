@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Đại diện cho Đối Thủ trong Đấu Trường PvP 1v1 (Hỗ trợ cả Online Photon Fusion 2 & AI Bot Practice).
+/// Đại diện cho Đối Thủ trong Đấu Trường PvP 1v1 (AI Bot Practice & Offline).
 /// - Triển khai IDamageable & IEnemyHealth (trên Layer "Enemy") để 100% chiêu thức, đạn, sóng thần, thiên thạch
 ///   của cả 7 tướng đều va chạm và gây sát thương chuẩn xác như đánh Boss.
 /// - Nạp 100% Sprite và RuntimeAnimatorController từ Resources/ (Chuẩn Android Zero-Bug Release).

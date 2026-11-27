@@ -1096,8 +1096,8 @@ public class PvPLobbyUI : MonoBehaviour
                     : LocalizationManager.T("Chạm 2 Thắng (Bo3 - Tối đa 3 hiệp)", "Best of 3 (Bo3 - Up to 3 rounds)"));
 
             _step4PreviewInfoText.text = LocalizationManager.T(
-                $"• Máy chủ: Photon Cloud (Asia)\n• Thể thức: {fmtDesc}\n• Thời gian: 90 Giây / Hiệp  •  Tự động đồng bộ PC & Android",
-                $"• Server: Photon Cloud (Asia)\n• Format: {fmtDesc}\n• Time: 90s / Round  •  Cross-play PC & Android");
+                $"• Chế độ: Ngoại tuyến (Offline)\n• Thể thức: {fmtDesc}\n• Thời gian: 90 Giây / Hiệp",
+                $"• Mode: Offline\n• Format: {fmtDesc}\n• Time: 90s / Round");
         }
     }
 
@@ -1124,7 +1124,7 @@ public class PvPLobbyUI : MonoBehaviour
         BuildNumericKeypad(centerBox.transform, new Vector2(0f, -45f));
 
         _joinPinStatusText = CreateText(centerBox.transform,
-            LocalizationManager.T("MÁY CHỦ PHOTON ASIA - SẴN SÀNG KẾT NỐI", "PHOTON ASIA SERVER - READY"),
+            LocalizationManager.T("CHẾ ĐỘ OFFLINE", "OFFLINE MODE"),
             19f, new Vector2(0f, -255f), new Vector2(700f, 36f), new Color(0.45f, 0.92f, 1f));
     }
 
@@ -2961,7 +2961,7 @@ public class PvPLobbyUI : MonoBehaviour
             22f, new Vector2(0f, -155f), new Vector2(740f, 36f), new Color(1f, 0.86f, 0.35f));
 
         _searchStatusSubText = CreateText(radarBox.transform,
-            LocalizationManager.T("MÁY CHỦ PHOTON ASIA - ĐANG QUÉT PHÒNG...", "PHOTON ASIA SERVER - SCANNING..."),
+            LocalizationManager.T("CHẾ ĐỘ NGOẠI TUYẾN - ĐANG KHỞI TẠO...", "OFFLINE MODE - INITIALIZING..."),
             18f, new Vector2(0f, -195f), new Vector2(760f, 32f), new Color(0.45f, 0.92f, 1f));
 
         // Nút Hủy Tìm Trận (Căn giữa rộng rãi, rõ ràng)

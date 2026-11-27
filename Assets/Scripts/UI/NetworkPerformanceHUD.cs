@@ -333,7 +333,7 @@ public class NetworkPerformanceHUD : MonoBehaviour
                 : new Color(0.70f, 0.85f, 1f, 1f);
         }
 
-        // Đo Ping thật từ Photon Fusion RTT nếu đang trong phiên kết nối
+        // Đo Ping từ NetworkManager nếu đang trong phiên kết nối
         if (PvPNetworkManager.Instance != null && PvPNetworkManager.Instance.IsRunning)
         {
             int fusionPing = PvPNetworkManager.Instance.GetPingMilliseconds();
